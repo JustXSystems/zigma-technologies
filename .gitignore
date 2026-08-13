@@ -31,7 +31,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+#.env*
 
 # vercel
 .vercel
@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# visitor / form uploads (not committed)
+/public/assets/uploads/resumes/*
+!/public/assets/uploads/resumes/.gitkeep
+/public/assets/uploads/documents/*
+!/public/assets/uploads/documents/.gitkeep
+
+# legacy flat uploads (pre-assets migration)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# legacy private storage (pre-assets migration)
+/storage/resumes/*
+!/storage/resumes/.gitkeep
