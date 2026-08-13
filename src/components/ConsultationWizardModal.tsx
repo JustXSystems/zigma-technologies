@@ -1,0 +1,429 @@
+'use client';
+
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
+import HoneypotField from '@/components/HoneypotField';
+import TurnstileField from '@/components/TurnstileField';
+import { HONEYPOT_FIELD } from '@/lib/form-guard';
+import { trackEvent } from '@/lib/analytics';
+import type { FormField } from '@/lib/types';
+
+type Props = {
+  preselectedSubject?: string | null;
+  onClose: () => void;
+};
+
+type InterestOption = {
+  title: string;
+  subtitle: string;
+  subject: string;
+};
+
+const INTEREST_OPTIONS: InterestOption[] = [
+  { title: 'Solar EPC', subtitle: 'Design, supply, and commissioning', subject: 'Solar Solution' },
+  { title: 'UPS Solutions', subtitle: 'Power backup & protection planning', subject: 'UPS Solution' },
+  { title: 'BESS- Battery System', subtitle: 'Peak shaving, EMS, and hybrid setups', subject: 'BESS- Battery System' },
+  { title: 'AMC & Service Request', subtitle: 'O&M, upgrades, and support', subject: 'AMC & Service Request' },
+  { title: 'EV Charging', subtitle: 'Infrastructure and smart charging', subject: 'EV Charging Solution' },
+  { title: 'Request a Quote', subtitle: 'Pricing, timelines, and next steps', subject: 'Request a Quote' },
+  { title: 'General Enquiry', subtitle: 'Talk to our team for the right fit', subject: 'General Enquiry' },
+];
+
+const CAPACITY_OPTIONS = ['< 50 kW / kVA', '50–200 kW / kVA', '200–500 kW / kVA', '500 kW+ / utility-scale', 'Not sure yet'];
+const URGENCY_OPTIONS = ['Exploring', 'This quarter', 'Urgent / this month', 'Emergency support'];
+
+function fieldTypeToInputType(fieldType: string) {
+  if (fieldType === 'number') return 'number';
+  if (fieldType === 'email') return 'email';
+  if (fieldType === 'tel') return 'tel';
+  return 'text';
+}
+
+export default function ConsultationWizardModal({ preselectedSubject, onClose }: Props) {
+  const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  const [mounted, setMounted] = useState(false);
+  const [step, setStep] = useState<0 | 1 | 2>(0);
+
+  const [formId, setFormId] = useState<number | null>(null);
+  const [fields, setFields] = useState<FormField[]>([]);
+  const [payload, setPayload] = useState<Record<string, string>>({});
+  const [capacity, setCapacity] = useState('');
+  const [siteLocation, setSiteLocation] = useState('');
+  const [urgency, setUrgency] = useState('');
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMsg, setSubmitMsg] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+
+  const subjectField = useMemo(() => fields.find((f) => f.field_name === 'subject') || null, [fields]);
+  const selectedInterest = useMemo(() => {
+    if (!preselectedSubject) return null;
+    return INTEREST_OPTIONS.find((o) => o.subject === preselectedSubject) || null;
+  }, [preselectedSubject]);
+
+  const isQuotePath =
+    (payload.subject || preselectedSubject || '') === 'Request a Quote' ||
+    Boolean(capacity || siteLocation || urgency);
+
+  useEffect(() => {
+    setMounted(true);
+    trackEvent('consultation_open', { subject: preselectedSubject || '' });
+    void fetch('/api/public/forms/enquiry')
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) return;
+        setFormId(data.form.id);
+        setFields(data.form.fields || []);
+      })
+      .catch(() => undefined);
+  }, [preselectedSubject]);
+
+  useEffect(() => {
+    if (!fields.length) return;
+    if (!preselectedSubject) return;
+    if (!subjectField) return;
+
+    setPayload((prev) => ({ ...prev, subject: String(preselectedSubject) }));
+    setStep(preselectedSubject === 'Request a Quote' ? 1 : 2);
+  }, [fields.length, preselectedSubject, subjectField]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+      if (e.key !== 'Tab' || !panelRef.current) return;
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  useEffect(() => {
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+    return () => {
+      document.body.style.overflow = prev;
+      previouslyFocused.current?.focus?.();
+    };
+  }, []);
+
+  function renderField(field: FormField) {
+    const disabled = subjectField?.id === field.id;
+    if (field.field_type === 'textarea') {
+      return (
+        <div key={field.id} className="consult-field">
+          <label htmlFor={`consult-${field.field_name}`}>
+            {field.label}
+            {field.required ? ' *' : ''}
+          </label>
+          <textarea
+            id={`consult-${field.field_name}`}
+            value={payload[field.field_name] || ''}
+            disabled={disabled}
+            required={!!field.required}
+            rows={5}
+            onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
+            placeholder={field.placeholder || ''}
+          />
+        </div>
+      );
+    }
+
+    if (field.field_type === 'select') {
+      return (
+        <div key={field.id} className="consult-field">
+          <label htmlFor={`consult-${field.field_name}`}>
+            {field.label}
+            {field.required ? ' *' : ''}
+          </label>
+          <select
+            id={`consult-${field.field_name}`}
+            value={payload[field.field_name] || ''}
+            disabled={disabled}
+            required={!!field.required}
+            onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
+          >
+            <option value="">{field.placeholder || 'Select…'}</option>
+            {(field.options_json || []).map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+
+    const isCheckbox = field.field_type === 'checkbox';
+    return (
+      <div key={field.id} className="consult-field">
+        <label htmlFor={`consult-${field.field_name}`}>
+          {field.label}
+          {field.required ? ' *' : ''}
+        </label>
+        {isCheckbox ? (
+          <input
+            id={`consult-${field.field_name}`}
+            type="checkbox"
+            checked={payload[field.field_name] === '1'}
+            onChange={(e) =>
+              setPayload({ ...payload, [field.field_name]: e.target.checked ? '1' : '0' })
+            }
+            disabled={disabled}
+          />
+        ) : (
+          <input
+            id={`consult-${field.field_name}`}
+            type={fieldTypeToInputType(field.field_type)}
+            value={payload[field.field_name] || ''}
+            disabled={disabled}
+            required={!!field.required}
+            onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
+            placeholder={field.placeholder || ''}
+          />
+        )}
+      </div>
+    );
+  }
+
+  async function submitEnquiry(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitMsg('');
+    try {
+      const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
+      if (!formId) throw new Error('Form not configured');
+
+      const quoteBits = [
+        capacity ? `Capacity: ${capacity}` : '',
+        siteLocation ? `Location: ${siteLocation}` : '',
+        urgency ? `Urgency: ${urgency}` : '',
+      ].filter(Boolean);
+      const messageExtra = quoteBits.length ? `\n\n— Quote details —\n${quoteBits.join('\n')}` : '';
+      const nextPayload = {
+        ...payload,
+        capacity: capacity || undefined,
+        site_location: siteLocation || undefined,
+        urgency: urgency || undefined,
+        message: `${payload.message || ''}${messageExtra}`.trim(),
+      };
+
+      const res = await fetch('/api/public/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form_id: formId,
+          item_id: null,
+          item_type: null,
+          payload: nextPayload,
+          _hp: typeof hp === 'string' ? hp : '',
+          turnstileToken: turnstileToken || undefined,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Submit failed');
+
+      trackEvent('enquiry_submit', { source: 'consultation', subject: payload.subject || '' });
+      onClose();
+      router.push('/thank-you?intent=enquiry');
+      setSuccess(true);
+      setSubmitMsg('Thank you — our engineering team will contact you shortly.');
+    } catch (err) {
+      setSubmitMsg(err instanceof Error ? err.message : 'Submit failed');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const content = (
+    <div className="consult-modal-backdrop" onClick={onClose} role="presentation">
+      <div
+        ref={panelRef}
+        className="consult-modal-panel"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Request consultation"
+      >
+        <div className="consult-modal-head">
+          <div className="consult-modal-title">
+            <span className="consult-badge">Premium intake</span>
+            <h2>Request a Consultation</h2>
+            <p>
+              {step === 0
+                ? 'Pick what you need. Then share capacity and contact details.'
+                : step === 1
+                  ? 'Tell us capacity, location, and urgency for a faster quote.'
+                  : 'Submit your details — we respond with a clear next step.'}
+            </p>
+          </div>
+          <button
+            ref={closeButtonRef}
+            type="button"
+            className="consult-close"
+            onClick={onClose}
+            aria-label="Close consultation wizard"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {step === 0 ? (
+          <div className="consult-modal-body">
+            <div className="consult-proof-strip">
+              <div className="consult-proof-item">
+                <span className="consult-proof-dot consult-proof-dot--orange" />
+                <span>Fast feasibility response</span>
+              </div>
+              <div className="consult-proof-item">
+                <span className="consult-proof-dot consult-proof-dot--cyan" />
+                <span>Aligned to certified process</span>
+              </div>
+              <div className="consult-proof-item">
+                <span className="consult-proof-dot" />
+                <span>Commercial clarity upfront</span>
+              </div>
+            </div>
+
+            <div className="consult-options">
+              {INTEREST_OPTIONS.map((opt) => {
+                const checked = payload.subject === opt.subject || selectedInterest?.subject === opt.subject;
+                return (
+                  <button
+                    key={opt.subject}
+                    type="button"
+                    className={`consult-option${checked ? ' is-selected' : ''}`}
+                    onClick={() => {
+                      setPayload((prev) => ({ ...prev, subject: opt.subject }));
+                      setStep(opt.subject === 'Request a Quote' || opt.title.includes('Quote') ? 1 : 1);
+                    }}
+                  >
+                    <div className="consult-option-title">{opt.title}</div>
+                    <div className="consult-option-subtitle">{opt.subtitle}</div>
+                    <div className="consult-option-cta">Continue →</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 1 ? (
+          <div className="consult-modal-body">
+            <div className="consult-form-head">
+              <button type="button" className="consult-back" onClick={() => setStep(0)}>
+                ← Back
+              </button>
+              <div className="consult-form-head-right">
+                <span className="consult-step-label">Step 2 of 3 · Quote details</span>
+              </div>
+            </div>
+            <div className="consult-form">
+              <div className="consult-field">
+                <label htmlFor="consult-capacity">Approximate capacity / load *</label>
+                <select
+                  id="consult-capacity"
+                  value={capacity}
+                  required
+                  onChange={(e) => setCapacity(e.target.value)}
+                >
+                  <option value="">Select…</option>
+                  {CAPACITY_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="consult-field">
+                <label htmlFor="consult-location">Site / city</label>
+                <input
+                  id="consult-location"
+                  value={siteLocation}
+                  onChange={(e) => setSiteLocation(e.target.value)}
+                  placeholder="e.g. Bangalore, Karnataka"
+                />
+              </div>
+              <div className="consult-field">
+                <label htmlFor="consult-urgency">Timeline</label>
+                <select id="consult-urgency" value={urgency} onChange={(e) => setUrgency(e.target.value)}>
+                  <option value="">Select…</option>
+                  {URGENCY_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary consult-submit"
+                disabled={!capacity}
+                onClick={() => setStep(2)}
+              >
+                Continue to contact details →
+              </button>
+              {!isQuotePath ? (
+                <button type="button" className="consult-back" style={{ marginTop: '0.75rem' }} onClick={() => setStep(2)}>
+                  Skip quote details
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 2 ? (
+          <div className="consult-modal-body">
+            <div className="consult-form-head">
+              <button type="button" className="consult-back" onClick={() => setStep(1)}>
+                ← Back
+              </button>
+              <div className="consult-form-head-right">
+                <span className="consult-step-label">Step 3 of 3</span>
+              </div>
+            </div>
+
+            <form className="consult-form" onSubmit={submitEnquiry}>
+              <HoneypotField />
+              <TurnstileField onToken={setTurnstileToken} />
+              {fields.length ? fields.map((f) => renderField(f)) : <p className="consult-loading">Loading form…</p>}
+
+              <button type="submit" className="btn btn-primary consult-submit" disabled={submitting || !fields.length}>
+                {submitting ? 'Submitting…' : 'Submit consultation request →'}
+              </button>
+
+              {submitMsg ? (
+                <p className={`consult-msg${success ? ' consult-msg--ok' : ''}`}>{submitMsg}</p>
+              ) : null}
+            </form>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  if (!mounted) return null;
+  return createPortal(content, document.body);
+}

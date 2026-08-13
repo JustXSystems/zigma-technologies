@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/abb-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/abb-channel-partner-certificate.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/abb.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/aditya-birla-group.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/aerial-view-of-dense-commercial-rooftop-.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/amara-raja.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/aster-hospital.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/avetta-consortium-membership-certificate.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/bangalore-international-exhibition-centr.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/bharat-electronics.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/blue-electric-vehicle-charging-at-a-mode.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/certifications-img-0.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/city-skyline-with-solar-panels-and-indus.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/coca-cola.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/eaton.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/emudhra.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/engineers-in-hard-hats-reviewing-a-digit.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/engineers-inspecting-switchgear-panels-i.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/engineers-reviewing-electrical-design-dr.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/exide.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/fincare-small-finance-bank.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/hitachi.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/indigo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/jana-small-finance-bank.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/kempegowda-international-airport-bengalu.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/kirloskar-solar-technologies-authorizati.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/kirloskar-solar.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/kotak-mahindra-bank.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/landmark-group.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/leoch-battery.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/lifestyle.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/luminous.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/max.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/numeric.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/ocv-iso-9001-2015-certificate-of-registr.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/schneider-electric-certificate-of-author.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/schneider-electric.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/shadowfax.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/solar-farm-with-wind-turbines-at-sunset-.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/somerset-therapeutics.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/tke.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/vertiv.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/vi.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/zigma-technologies-engineers-collaborati.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/zigma-technologies-engineers-monitoring-.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/zigma-technologies-help-desk-team-assist.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/zigma-technologies-logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/zigma.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/components/site-footer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/components/site-header.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/pages/careers.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/pages/certifications.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/pages/contact.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/js/pages/home.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/uploads/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/uploads/careers.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/uploads/certifications.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/uploads/contact.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/uploads/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/ind-icons.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/stat-icons.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseLocalColorSettings">
+    <colors>
+      <entry key="a4ec1007-5a2b-45d9-9f6f-e5a2dc0aad13" value="" />
+    </colors>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.000000000930038" />
+      <entry key="S2" value="1.006373732635856" />
+      <entry key="S5" value="1.3376433700425512" />
+      <entry key="S10" value="2.941312574553648" />
+      <entry key="S30" value="9.310452328925926" />
+      <entry key="S60" value="17.093910359542424" />
+      <entry key="M2" value="35.574273773558566" />
+      <entry key="M5" value="100.87096745026885" />
+      <entry key="M10" value="187.83899239002045" />
+      <entry key="M15" value="256.20982210722684" />
+      <entry key="M30" value="442.29445654309586" />
+      <entry key="H1" value="715.8286442593039" />
+      <entry key="H2" value="1037.8723105094741" />
+      <entry key="H4" value="1626.8797661445572" />
+      <entry key="D1" value="4220.888060584337" />
+      <entry key="W1" value="5365.3600437194755" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="3.176692893761481E-256" />
+      <entry key="M5" value="6.321062618406745E-103" />
+      <entry key="M10" value="7.950511064332364E-52" />
+      <entry key="M15" value="8.582161789760223E-35" />
+      <entry key="M30" value="9.263995784627906E-18" />
+      <entry key="H1" value="3.0436812882803797E-9" />
+      <entry key="H2" value="5.5169568498224624E-5" />
+      <entry key="H4" value="0.007427621994838977" />
+      <entry key="D1" value="0.4417144759436967" />
+      <entry key="W1" value="0.889827754134289" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9138314502294005" />
+      <entry key="MS500" value="0.9821395960156828" />
+      <entry key="S2" value="1.0015770789892835" />
+      <entry key="S5" value="1.3318790773873688" />
+      <entry key="S10" value="2.932236780626645" />
+      <entry key="S30" value="9.300366464603767" />
+      <entry key="S60" value="17.085847258053768" />
+      <entry key="M2" value="35.56834932804144" />
+      <entry key="M5" value="100.8667146629079" />
+      <entry key="M10" value="187.83567986687942" />
+      <entry key="M15" value="256.2069799296481" />
+      <entry key="M30" value="442.2921761658324" />
+      <entry key="H1" value="715.8269034135025" />
+      <entry key="H2" value="1037.8711763440324" />
+      <entry key="H4" value="1626.886341429071" />
+      <entry key="D1" value="4221.32939250163" />
+      <entry key="W1" value="5366.2497971376415" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3HlcIfqKD4chkrzlbZshL0Y2QGC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/public&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.AcpAgentsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public\assets\uploads" />
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public\assets" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="zigma-technologies" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="zigma-technologies" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-63390994e64e-intellij.indexing.shared.core-IU-262.8665.337" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.8665.337" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="" />
+      <created>1786446020428</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1786446020428</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Main.java</url>
+          <line>11</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
