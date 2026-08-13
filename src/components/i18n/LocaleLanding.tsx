@@ -1,32 +1,13 @@
 import Link from 'next/link';
+import type { LocaleCopy } from '@/lib/site-copy';
 
-const COPY = {
-  hi: {
-    langName: 'हिन्दी',
-    title: 'ज़िग्मा टेक्नोलॉजीज़ — सोलर, UPS और पावर समाधान',
-    lead: 'भारत भर में सोलर EPC, औद्योगिक UPS, BESS और EV चार्जिंग के लिए इंजीनियरिंग सहायता।',
-    ups: 'UPS और पावर निरंतरता',
-    solar: 'सोलर EPC और O&M',
-    calc: 'UPS कैलकुलेटर',
-    locations: 'शहर और सेवाएँ',
-    sla: 'सेवा स्तर',
-    cta: 'परामर्श का अनुरोध करें',
-  },
-  kn: {
-    langName: 'ಕನ್ನಡ',
-    title: 'ಝಿಗ್ಮಾ ಟೆಕ್ನಾಲಜೀಸ್ — ಸೋಲಾರ್, UPS ಮತ್ತು ಪವರ್ ಪರಿಹಾರಗಳು',
-    lead: 'ಭಾರತದಾದ್ಯಂತ ಸೋಲಾರ್ EPC, ಕೈಗಾರಿಕಾ UPS, BESS ಮತ್ತು EV ಚಾರ್ಜಿಂಗ್‌ಗೆ ಎಂಜಿನಿಯರಿಂಗ್ ಬೆಂಬಲ.',
-    ups: 'UPS ಮತ್ತು ವಿದ್ಯುತ್ ನಿರಂತರತೆ',
-    solar: 'ಸೋಲಾರ್ EPC ಮತ್ತು O&M',
-    calc: 'UPS ಕ್ಯಾಲ್ಕುಲೇಟರ್',
-    locations: 'ನಗರಗಳು ಮತ್ತು ಸೇವೆಗಳು',
-    sla: 'ಸೇವಾ ಮಟ್ಟ',
-    cta: 'ಸಮಾಲೋಚನೆ ವಿನಂತಿಸಿ',
-  },
-} as const;
+type Props = {
+  locale: 'hi' | 'kn';
+  copy: LocaleCopy;
+  toolsEnabled: boolean;
+};
 
-export default function LocaleLanding({ locale }: { locale: 'hi' | 'kn' }) {
-  const copy = COPY[locale];
+export default function LocaleLanding({ locale, copy, toolsEnabled }: Props) {
   return (
     <main id="main-content">
       <section className="page-hero" style={{ minHeight: '70vh', padding: '10rem 0 4rem' }}>
@@ -47,16 +28,18 @@ export default function LocaleLanding({ locale }: { locale: 'hi' | 'kn' }) {
             <Link href="/projects?category=solar-epc" className="btn btn-ghost-dark">
               {copy.solar}
             </Link>
-            <Link href="/tools/ups-calculator" className="btn btn-ghost-dark">
-              {copy.calc}
-            </Link>
+            {toolsEnabled ? (
+              <Link href="/tools/ups-calculator" className="btn btn-ghost-dark">
+                {copy.calc}
+              </Link>
+            ) : null}
             <Link href="/contact?consult=1&consult_subject=Request%20a%20Quote" className="btn btn-primary">
               {copy.cta} →
             </Link>
           </div>
           <p style={{ marginTop: '1.5rem' }}>
             <Link href="/" className="link">
-              English site →
+              {copy.englishSite}
             </Link>
             {' · '}
             <Link href="/locations" className="link">
@@ -68,7 +51,7 @@ export default function LocaleLanding({ locale }: { locale: 'hi' | 'kn' }) {
             </Link>
             {' · '}
             <Link href={locale === 'hi' ? '/kn' : '/hi'} className="link">
-              {locale === 'hi' ? 'ಕನ್ನಡ' : 'हिन्दी'}
+              {copy.altLocaleLabel}
             </Link>
           </p>
         </div>

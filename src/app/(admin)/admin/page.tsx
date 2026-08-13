@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
                 padding: '0.65rem 0.8rem',
                 borderRadius: 8,
                 border: '1px solid var(--admin-border, #e5e7eb)',
-                background: item.done ? 'rgba(18,183,106,0.08)' : 'transparent',
+                background: item.done ? 'var(--admin-success-soft)' : 'var(--admin-panel-2)',
               }}
             >
               <div>
@@ -173,6 +173,9 @@ export default function AdminDashboardPage() {
           </Link>
           <Link className="admin-btn admin-btn-secondary" href="/admin/nav">
             Navigation
+          </Link>
+          <Link className="admin-btn admin-btn-secondary" href="/admin/guide">
+            Admin guide
           </Link>
           <Link className="admin-btn admin-btn-secondary" href="/admin/theme">
             Theme & CSS

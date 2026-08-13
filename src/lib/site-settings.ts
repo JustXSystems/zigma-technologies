@@ -20,6 +20,8 @@ export type SiteSettings = {
   enquiryNotifyEnabled: string;
   visitorAutoReplyEnabled: string;
   logoUrl: string;
+  /** Alt text for the logo image (header, footer, ecosystem mark) */
+  logoAlt: string;
   facebookUrl: string;
   linkedinUrl: string;
   privacyUrl: string;
@@ -68,6 +70,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   enquiryNotifyEnabled: 'true',
   visitorAutoReplyEnabled: 'true',
   logoUrl: '/assets/images/zigma-technologies-logo.png',
+  logoAlt: 'Zigma Technologies logo',
   facebookUrl: '',
   linkedinUrl: '',
   privacyUrl: '/privacy',
@@ -112,6 +115,20 @@ export function mergeSiteSettings(raw: unknown): SiteSettings {
 
 export function telHref(phone: string) {
   return `tel:${phone.replace(/[^\d+]/g, '')}`;
+}
+
+export function logoAltText(settings: SiteSettings) {
+  const alt = settings.logoAlt?.trim();
+  if (alt) return alt;
+  const name = settings.companyName?.trim();
+  return name ? `${name} logo` : DEFAULT_SITE_SETTINGS.logoAlt;
+}
+
+export const DEFAULT_FAVICON = '/assets/images/zigma.png';
+
+/** Browser tab / PWA icon — always the square white-Z mark (readable at 16–32px). */
+export function faviconSrc(_settings?: Pick<SiteSettings, 'logoUrl'>) {
+  return DEFAULT_FAVICON;
 }
 
 /** Deterministic-ish A/B pick from session storage. */

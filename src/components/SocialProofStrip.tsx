@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getSiteCopy } from '@/lib/site-content';
 
 const DEFAULT_LOGOS = [
   { src: '/assets/images/abb.png', alt: 'ABB' },
@@ -14,26 +15,36 @@ type Props = {
   showCertLink?: boolean;
 };
 
-export default function SocialProofStrip({
-  title = 'Trusted by industry leaders across India',
-  showCertLink = true,
-}: Props) {
+export default async function SocialProofStrip({ title, showCertLink = true }: Props) {
+  const copy = await getSiteCopy();
+  const heading = title || copy.socialProof.title;
+
   return (
     <section className="social-proof-strip" aria-label="Trusted partners">
       <div className="container">
-        <div className="social-proof-head">
-          <p>{title}</p>
-          {showCertLink ? (
-            <Link href="/certifications" className="link">
-              View certifications →
-            </Link>
-          ) : null}
-        </div>
-        <div className="social-proof-logos">
-          {DEFAULT_LOGOS.map((logo) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={logo.src} src={logo.src} alt={logo.alt} loading="lazy" />
-          ))}
+        <div className="social-proof-inner">
+          <div className="social-proof-head">
+            <div className="social-proof-copy">
+              <div className="eyebrow eyebrow-cyan">TRUSTED PARTNERS</div>
+              <h2 className="social-proof-title">{heading}</h2>
+              {copy.socialProof.subtitle ? (
+                <p className="social-proof-subtitle">{copy.socialProof.subtitle}</p>
+              ) : null}
+            </div>
+            {showCertLink ? (
+              <Link href="/certifications" className="btn-certs social-proof-cert-link">
+                {copy.a11y.viewCertifications} →
+              </Link>
+            ) : null}
+          </div>
+          <div className="social-proof-logos">
+            {DEFAULT_LOGOS.map((logo) => (
+              <div key={logo.src} className="social-proof-logo-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logo.src} alt={logo.alt} loading="lazy" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

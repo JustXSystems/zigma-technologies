@@ -7,31 +7,13 @@ import HoneypotField from '@/components/HoneypotField';
 import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
+import { useSiteCopy } from '@/lib/use-site-copy';
 import type { FormField } from '@/lib/types';
 
 type Props = {
   preselectedSubject?: string | null;
   onClose: () => void;
 };
-
-type InterestOption = {
-  title: string;
-  subtitle: string;
-  subject: string;
-};
-
-const INTEREST_OPTIONS: InterestOption[] = [
-  { title: 'Solar EPC', subtitle: 'Design, supply, and commissioning', subject: 'Solar Solution' },
-  { title: 'UPS Solutions', subtitle: 'Power backup & protection planning', subject: 'UPS Solution' },
-  { title: 'BESS- Battery System', subtitle: 'Peak shaving, EMS, and hybrid setups', subject: 'BESS- Battery System' },
-  { title: 'AMC & Service Request', subtitle: 'O&M, upgrades, and support', subject: 'AMC & Service Request' },
-  { title: 'EV Charging', subtitle: 'Infrastructure and smart charging', subject: 'EV Charging Solution' },
-  { title: 'Request a Quote', subtitle: 'Pricing, timelines, and next steps', subject: 'Request a Quote' },
-  { title: 'General Enquiry', subtitle: 'Talk to our team for the right fit', subject: 'General Enquiry' },
-];
-
-const CAPACITY_OPTIONS = ['< 50 kW / kVA', '50–200 kW / kVA', '200–500 kW / kVA', '500 kW+ / utility-scale', 'Not sure yet'];
-const URGENCY_OPTIONS = ['Exploring', 'This quarter', 'Urgent / this month', 'Emergency support'];
 
 function fieldTypeToInputType(fieldType: string) {
   if (fieldType === 'number') return 'number';
@@ -42,6 +24,8 @@ function fieldTypeToInputType(fieldType: string) {
 
 export default function ConsultationWizardModal({ preselectedSubject, onClose }: Props) {
   const router = useRouter();
+  const copy = useSiteCopy();
+  const c = copy.consultation;
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
@@ -64,8 +48,8 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
   const subjectField = useMemo(() => fields.find((f) => f.field_name === 'subject') || null, [fields]);
   const selectedInterest = useMemo(() => {
     if (!preselectedSubject) return null;
-    return INTEREST_OPTIONS.find((o) => o.subject === preselectedSubject) || null;
-  }, [preselectedSubject]);
+    return c.interestOptions.find((o) => o.subject === preselectedSubject) || null;
+  }, [preselectedSubject, c.interestOptions]);
 
   const isQuotePath =
     (payload.subject || preselectedSubject || '') === 'Request a Quote' ||
@@ -247,7 +231,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
       onClose();
       router.push('/thank-you?intent=enquiry');
       setSuccess(true);
-      setSubmitMsg('Thank you — our engineering team will contact you shortly.');
+      setSubmitMsg(c.successMsg);
     } catch (err) {
       setSubmitMsg(err instanceof Error ? err.message : 'Submit failed');
     } finally {
@@ -263,18 +247,14 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Request consultation"
+        aria-label={c.ariaLabel}
       >
         <div className="consult-modal-head">
           <div className="consult-modal-title">
-            <span className="consult-badge">Premium intake</span>
-            <h2>Request a Consultation</h2>
+            <span className="consult-badge">{c.badge}</span>
+            <h2>{c.title}</h2>
             <p>
-              {step === 0
-                ? 'Pick what you need. Then share capacity and contact details.'
-                : step === 1
-                  ? 'Tell us capacity, location, and urgency for a faster quote.'
-                  : 'Submit your details — we respond with a clear next step.'}
+              {step === 0 ? c.step0Lead : step === 1 ? c.step1Lead : c.step2Lead}
             </p>
           </div>
           <button
@@ -282,7 +262,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
             type="button"
             className="consult-close"
             onClick={onClose}
-            aria-label="Close consultation wizard"
+            aria-label={copy.a11y.closeConsultation}
           >
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -293,22 +273,16 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
         {step === 0 ? (
           <div className="consult-modal-body">
             <div className="consult-proof-strip">
-              <div className="consult-proof-item">
-                <span className="consult-proof-dot consult-proof-dot--orange" />
-                <span>Fast feasibility response</span>
-              </div>
-              <div className="consult-proof-item">
-                <span className="consult-proof-dot consult-proof-dot--cyan" />
-                <span>Aligned to certified process</span>
-              </div>
-              <div className="consult-proof-item">
-                <span className="consult-proof-dot" />
-                <span>Commercial clarity upfront</span>
-              </div>
+              {c.proofStrip.map((line) => (
+                <div key={line} className="consult-proof-item">
+                  <span className="consult-proof-dot consult-proof-dot--orange" />
+                  <span>{line}</span>
+                </div>
+              ))}
             </div>
 
             <div className="consult-options">
-              {INTEREST_OPTIONS.map((opt) => {
+              {c.interestOptions.map((opt) => {
                 const checked = payload.subject === opt.subject || selectedInterest?.subject === opt.subject;
                 return (
                   <button
@@ -334,15 +308,15 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <div className="consult-modal-body">
             <div className="consult-form-head">
               <button type="button" className="consult-back" onClick={() => setStep(0)}>
-                ← Back
+                {c.backLabel}
               </button>
               <div className="consult-form-head-right">
-                <span className="consult-step-label">Step 2 of 3 · Quote details</span>
+                <span className="consult-step-label">{c.step2Label}</span>
               </div>
             </div>
             <div className="consult-form">
               <div className="consult-field">
-                <label htmlFor="consult-capacity">Approximate capacity / load *</label>
+                <label htmlFor="consult-capacity">{c.capacityLabel}</label>
                 <select
                   id="consult-capacity"
                   value={capacity}
@@ -350,7 +324,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
                   onChange={(e) => setCapacity(e.target.value)}
                 >
                   <option value="">Select…</option>
-                  {CAPACITY_OPTIONS.map((opt) => (
+                  {c.capacityOptions.map((opt) => (
                     <option key={opt} value={opt}>
                       {opt}
                     </option>
@@ -358,19 +332,19 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
                 </select>
               </div>
               <div className="consult-field">
-                <label htmlFor="consult-location">Site / city</label>
+                <label htmlFor="consult-location">{c.locationLabel}</label>
                 <input
                   id="consult-location"
                   value={siteLocation}
                   onChange={(e) => setSiteLocation(e.target.value)}
-                  placeholder="e.g. Bangalore, Karnataka"
+                  placeholder={c.locationPlaceholder}
                 />
               </div>
               <div className="consult-field">
-                <label htmlFor="consult-urgency">Timeline</label>
+                <label htmlFor="consult-urgency">{c.urgencyLabel}</label>
                 <select id="consult-urgency" value={urgency} onChange={(e) => setUrgency(e.target.value)}>
                   <option value="">Select…</option>
-                  {URGENCY_OPTIONS.map((opt) => (
+                  {c.urgencyOptions.map((opt) => (
                     <option key={opt} value={opt}>
                       {opt}
                     </option>
@@ -383,11 +357,11 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
                 disabled={!capacity}
                 onClick={() => setStep(2)}
               >
-                Continue to contact details →
+                {c.continueQuote}
               </button>
               {!isQuotePath ? (
                 <button type="button" className="consult-back" style={{ marginTop: '0.75rem' }} onClick={() => setStep(2)}>
-                  Skip quote details
+                  {c.skipQuote}
                 </button>
               ) : null}
             </div>
@@ -398,20 +372,20 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <div className="consult-modal-body">
             <div className="consult-form-head">
               <button type="button" className="consult-back" onClick={() => setStep(1)}>
-                ← Back
+                {c.backLabel}
               </button>
               <div className="consult-form-head-right">
-                <span className="consult-step-label">Step 3 of 3</span>
+                <span className="consult-step-label">{c.step3Label}</span>
               </div>
             </div>
 
             <form className="consult-form" onSubmit={submitEnquiry}>
               <HoneypotField />
               <TurnstileField onToken={setTurnstileToken} />
-              {fields.length ? fields.map((f) => renderField(f)) : <p className="consult-loading">Loading form…</p>}
+              {fields.length ? fields.map((f) => renderField(f)) : <p className="consult-loading">{c.loadingForm}</p>}
 
               <button type="submit" className="btn btn-primary consult-submit" disabled={submitting || !fields.length}>
-                {submitting ? 'Submitting…' : 'Submit consultation request →'}
+                {submitting ? c.submittingLabel : c.submitLabel}
               </button>
 
               {submitMsg ? (

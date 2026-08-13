@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:webpack": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "db:export": "node scripts/db-export.mjs",
+    "db:import": "node scripts/db-import.mjs",
     "lighthouse:home": "npx lighthouse http://localhost:3000 --only-categories=performance,accessibility --budget-path=scripts/lighthouse-budget.json --chrome-flags=\"--headless=new\" --quiet"
   },
   "dependencies": {

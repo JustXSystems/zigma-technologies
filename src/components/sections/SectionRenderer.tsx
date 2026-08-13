@@ -59,7 +59,13 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
           <div key={i} className={`slide ${slide.theme} ${i === current ? 'active' : ''}`} data-index={i}>
             <div className="slide-bg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="slide-img" src={slide.image} alt="" loading={i === 0 ? 'eager' : 'lazy'} />
+              <img
+                className="slide-img"
+                src={slide.image}
+                alt=""
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchPriority={i === 0 ? 'high' : undefined}
+              />
               <div className="slide-scrim"></div>
               <div className="grid-overlay"></div>
               <div className="tint"></div>
@@ -501,7 +507,7 @@ function ProjectsTeaserSection({
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
           <h2>{String(content.title || 'Featured projects')}</h2>
         </div>
-        <div className="proj-grid">
+        <div className="proj-grid projects-teaser-grid">
           {items.map((item) => {
             const cs = item.case_study_json;
             const caseKicker =
@@ -513,21 +519,21 @@ function ProjectsTeaserSection({
             const caseScopeLine = source === 'case_studies' ? scopePreview(cs?.scope) : null;
             const caseSolutionLine = source === 'case_studies' ? scopePreview(cs?.solution) : null;
             const highlight = source === 'case_studies' ? caseOutcome1 : projectHighlight(item);
+            const eyebrow = caseKicker || item.category_name || 'PROJECT';
             return (
               <a
                 key={item.id}
                 href={`/projects/${encodeURIComponent(item.slug)}`}
-                className={`proj-card projects-teaser-card ${source === 'case_studies' ? 'projects-teaser-card--case' : ''}`}
+                className={`hub-card projects-teaser-card ${source === 'case_studies' ? 'projects-teaser-card--case' : ''}`}
               >
-                <div className="proj-media">
+                <div className="hub-card-media">
                   {item.primary_image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.primary_image} alt={item.title} loading="lazy" />
                   ) : null}
-                  <span className="tag">{item.category_name || 'PROJECT'}</span>
                 </div>
-                <div className="proj-body">
-                  {caseKicker ? <div className="projects-teaser-case-kicker">{caseKicker}</div> : null}
+                <div className="hub-card-body">
+                  <div className="eyebrow">{eyebrow}</div>
                   <h5>{item.title}</h5>
                   {caseScopeLine ? <div className="projects-teaser-scope">{caseScopeLine}</div> : null}
                   {source === 'case_studies' && (caseOutcome1 || caseOutcome2) ? (
@@ -539,13 +545,11 @@ function ProjectsTeaserSection({
                     <div className="proj-stat">{highlight}</div>
                   ) : null}
                   {source === 'case_studies' ? (
-                    <p className="projects-teaser-solution">
-                      {caseSolutionLine || item.summary}
-                    </p>
+                    <p className="projects-teaser-solution">{caseSolutionLine || item.summary}</p>
                   ) : (
                     <p>{item.summary}</p>
                   )}
-                  <span className="link">View case study →</span>
+                  <span className="hub-card-link">View case study →</span>
                 </div>
               </a>
             );

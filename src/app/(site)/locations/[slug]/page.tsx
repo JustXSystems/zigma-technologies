@@ -2,17 +2,22 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import LocationLandingView from '@/components/locations/LocationLandingView';
 import { listCatalogItems } from '@/lib/catalog';
-import { getLocationByKey } from '@/lib/locations';
+import { getThemeSettings } from '@/lib/cms';
+import { getLocationByKeyFromList } from '@/lib/locations';
+import { getLocationDefsCms } from '@/lib/site-content';
+import { mergeSiteSettings } from '@/lib/site-settings';
 import type { CatalogItem } from '@/lib/types';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const location = getLocationByKey(slug);
+  const [defs, theme] = await Promise.all([getLocationDefsCms(), getThemeSettings().catch(() => ({}))]);
+  const location = getLocationByKeyFromList(defs, slug);
+  const site = mergeSiteSettings((theme as { site?: unknown }).site);
   if (!location) return { title: 'Location not found' };
   return {
-    title: `${location.name} Power & Energy Solutions | Zigma Technologies`,
+    title: `${location.name} Power & Energy Solutions | ${site.companyName}`,
     description: location.lead,
     alternates: {
       languages: {
@@ -26,7 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LocationDetailPage({ params }: Props) {
   const { slug } = await params;
-  const location = getLocationByKey(slug);
+  const [defs] = await Promise.all([getLocationDefsCms()]);
+  const location = getLocationByKeyFromList(defs, slug);
   if (!location) notFound();
 
   const collected: CatalogItem[] = [];

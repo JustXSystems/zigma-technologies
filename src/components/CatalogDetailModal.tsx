@@ -8,6 +8,7 @@ import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
+import { useSiteCopy } from '@/lib/use-site-copy';
 
 const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
 
@@ -42,6 +43,7 @@ type Props = {
 
 export default function CatalogDetailModal({ item, itemType, modalFields, onClose }: Props) {
   const titleId = useId();
+  const copy = useSiteCopy();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -162,7 +164,7 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
             <span className="catalog-detail-ref">Ref · {item.slug}</span>
           </div>
           <div className="catalog-detail-header-actions">
-            <button type="button" className="catalog-detail-icon-btn" onClick={copyLink} aria-label="Copy link">
+            <button type="button" className="catalog-detail-icon-btn" onClick={copyLink} aria-label={copy.a11y.copyLink}>
               {copied ? (
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 6L9 17l-5-5" />
@@ -179,7 +181,7 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
               type="button"
               className="catalog-detail-close"
               onClick={handleClose}
-              aria-label="Close details"
+              aria-label={copy.a11y.close}
             >
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6L6 18M6 6l12 12" />
@@ -303,7 +305,7 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
                   type="button"
                   className="catalog-detail-icon-btn catalog-detail-icon-btn--dark"
                   onClick={() => setEnquiryOpen(false)}
-                  aria-label="Close enquiry form"
+                  aria-label={copy.a11y.closeEnquiry}
                 >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 6L6 18M6 6l12 12" />

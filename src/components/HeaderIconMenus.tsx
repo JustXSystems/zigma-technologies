@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { DEFAULT_SITE_SETTINGS, telHref, type SiteSettings } from '@/lib/site-settings';
+import { useSiteCopy } from '@/lib/use-site-copy';
 import { whatsappHref } from '@/lib/whatsapp';
 import { trackEvent } from '@/lib/analytics';
 
@@ -139,11 +140,12 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fineHover = useFineHover();
+  const copy = useSiteCopy();
 
   const phone = site.phone || DEFAULT_SITE_SETTINGS.phone;
   const emergency = site.emergencyPhone || DEFAULT_SITE_SETTINGS.emergencyPhone;
   const wa = site.whatsapp || DEFAULT_SITE_SETTINGS.whatsapp;
-  const waUrl = whatsappHref(wa, 'Hi Zigma — I would like to speak with a power & energy engineer.');
+  const waUrl = whatsappHref(wa, copy.talk.whatsappPrefill);
 
   function clearCloseTimer() {
     if (closeTimer.current) {
@@ -194,8 +196,8 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
           className="header-talk-btn"
           aria-expanded={open}
           aria-haspopup="true"
-          aria-label="Talk to us"
-          title="Talk to us"
+          aria-label={copy.talk.buttonLabel}
+          title={copy.talk.buttonLabel}
           onClick={() => {
             if (fineHover) return;
             setOpen((v) => !v);
@@ -204,9 +206,11 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
             if (fineHover) openMenu();
           }}
         >
-          <span className="pulse-dot" aria-hidden />
-          <IconSupport />
-          <span className="header-talk-btn-label">Talk to us</span>
+          <span className="header-talk-btn-icon">
+            <span className="pulse-dot" aria-hidden />
+            <IconSupport />
+          </span>
+          <span className="header-talk-btn-label">{copy.talk.buttonLabel}</span>
         </button>
         <div
           className="header-icon-panel header-icon-panel--chips"
@@ -220,9 +224,9 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
             <MenuChip
               className="header-menu-chip--call"
               href={telHref(phone)}
-              title="Call now"
+              title={copy.talk.call}
               icon={<IconCall />}
-              label="Call now"
+              label={copy.talk.call}
               onClick={() => {
                 trackEvent('cta_click', { channel: 'call', placement: 'header_support' });
                 setOpen(false);
@@ -231,9 +235,9 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
             <MenuChip
               className="header-menu-chip--wa"
               href={waUrl}
-              title="WhatsApp"
+              title={copy.talk.whatsapp}
               icon={<IconWa />}
-              label="WhatsApp"
+              label={copy.talk.whatsapp}
               external
               onClick={() => {
                 trackEvent('cta_click', { channel: 'whatsapp', placement: 'header_support' });
@@ -243,33 +247,35 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
             <MenuChip
               className="header-menu-chip--callback"
               asButton
-              title="Request callback"
+              title={copy.talk.callback}
               icon={<IconCallback />}
-              label="Callback"
+              label={copy.talk.callback}
               onClick={() => {
                 trackEvent('callback_open', { placement: 'header_support' });
                 setOpen(false);
                 onRequestCallback();
               }}
             />
-            <MenuChip
-              className="header-menu-chip--tool"
-              href="/tools/solution-finder"
-              title="Solution finder"
-              icon={<IconFinder />}
-              label="Solution finder"
-              onClick={() => {
-                trackEvent('cta_click', { channel: 'configurator', placement: 'header_support' });
-                setOpen(false);
-              }}
-            />
+            {copy.features.toolsEnabled ? (
+              <MenuChip
+                className="header-menu-chip--tool"
+                href="/tools/solution-finder"
+                title={copy.talk.solutionFinder}
+                icon={<IconFinder />}
+                label={copy.talk.solutionFinder}
+                onClick={() => {
+                  trackEvent('cta_click', { channel: 'configurator', placement: 'header_support' });
+                  setOpen(false);
+                }}
+              />
+            ) : null}
             {emergency ? (
               <MenuChip
                 className="header-menu-chip--emergency"
                 href={telHref(emergency)}
-                title={`Emergency ${emergency}`}
+                title={`${copy.talk.emergency} ${emergency}`}
                 icon={<IconEmergency />}
-                label="Emergency"
+                label={copy.talk.emergency}
                 onClick={() => setOpen(false)}
               />
             ) : null}

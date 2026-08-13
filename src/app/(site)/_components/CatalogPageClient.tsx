@@ -201,9 +201,17 @@ function CatalogLoadingSkeleton({
       style={layout === 'list' ? { display: 'grid', gap: '1rem' } : { gridTemplateColumns: `repeat(${columns}, 1fr)` }}
     >
       {Array.from({ length: layout === 'list' ? 4 : Math.max(columns, 3) }).map((_, index) => (
-        <div key={index} className={cx('proj-card catalog-skeleton-card', layout === 'list' && 'catalog-skeleton-card--list')}>
-          <div className="proj-media catalog-skeleton-media" />
-          <div className="proj-body">
+        <div
+          key={index}
+          className={cx(
+            'catalog-card',
+            layout === 'list' ? 'catalog-card--list' : 'catalog-card--tile',
+            'catalog-skeleton-card',
+            layout === 'list' && 'catalog-skeleton-card--list'
+          )}
+        >
+          <div className="catalog-card-media catalog-skeleton-media" />
+          <div className="catalog-card-body">
             <div className="catalog-skeleton-line catalog-skeleton-line--short" />
             <div className="catalog-skeleton-line catalog-skeleton-line--mid" />
             <div className="catalog-skeleton-line" />
@@ -273,7 +281,11 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
     [pathname, router, searchParams]
   );
 
-  useScrollReveal(revealEnabled ? `${itemType}-${layout}-${items.length}-${stylePreset}` : `disabled-${itemType}`);
+  useScrollReveal(
+    revealEnabled
+      ? `${itemType}-${layout}-${items.length}-${stylePreset}-${sort}-${category}-${tag}-${q}-${loading}`
+      : `disabled-${itemType}`
+  );
 
   useEffect(() => {
     setSearchDraft(q);
@@ -381,99 +393,104 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
         onOpenItem={(item) => void openItem(item)}
       />
 
-      <section className="section section-light">
+      <section className="section section-light catalog-listing">
         <div className="container">
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'center' }}>
-            <input
-              className="admin-input"
-              style={{ background: '#fff', color: '#1e2530', border: '1px solid #e7ebf1', minWidth: 240 }}
-              placeholder="Search…"
-              value={searchDraft}
-              onChange={(e) => setSearchDraft(e.target.value)}
-            />
-            {filters.includes('category') || categories.length > 0 ? (
+          <div className="catalog-toolbar">
+            <div className="catalog-toolbar-controls">
+              <label className="catalog-toolbar-search">
+                <span className="sr-only">Search {itemType}s</span>
+                <input
+                  className="catalog-toolbar-input"
+                  placeholder="Search catalogue…"
+                  value={searchDraft}
+                  onChange={(e) => setSearchDraft(e.target.value)}
+                />
+              </label>
+              {filters.includes('category') || categories.length > 0 ? (
+                <select
+                  className="catalog-toolbar-select"
+                  value={category}
+                  onChange={(e) => setFilterParam('category', e.target.value)}
+                  aria-label="Filter by category"
+                >
+                  <option value="">All categories</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+              {filters.includes('tags') || tags.length > 0 ? (
+                <select
+                  className="catalog-toolbar-select"
+                  value={tag}
+                  onChange={(e) => setFilterParam('tag', e.target.value)}
+                  aria-label="Filter by tag"
+                >
+                  <option value="">All tags</option>
+                  {tags.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
               <select
-                className="admin-select"
-                style={{ background: '#fff', color: '#1e2530', border: '1px solid #e7ebf1' }}
-                value={category}
-                onChange={(e) => setFilterParam('category', e.target.value)}
+                className="catalog-toolbar-select"
+                value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
+                onChange={(e) => setFilterParam('sort', e.target.value)}
+                aria-label="Sort catalog"
               >
-                <option value="">All categories</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    {c.name}
-                  </option>
-                ))}
+                <option value="featured">Sort: Featured</option>
+                <option value="newest">Sort: Newest</option>
+                <option value="title">Sort: Title A–Z</option>
               </select>
-            ) : null}
-            {filters.includes('tags') || tags.length > 0 ? (
-              <select
-                className="admin-select"
-                style={{ background: '#fff', color: '#1e2530', border: '1px solid #e7ebf1' }}
-                value={tag}
-                onChange={(e) => setFilterParam('tag', e.target.value)}
-              >
-                <option value="">All tags</option>
-                {tags.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            ) : null}
-            <select
-              className="admin-select"
-              style={{ background: '#fff', color: '#1e2530', border: '1px solid #e7ebf1' }}
-              value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
-              onChange={(e) => setFilterParam('sort', e.target.value)}
-              aria-label="Sort catalog"
-            >
-              <option value="featured">Sort: Featured</option>
-              <option value="newest">Sort: Newest</option>
-              <option value="title">Sort: Title A–Z</option>
-            </select>
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => {
-                  setSearchDraft('');
-                  router.replace(pathname, { scroll: false });
-                }}
-              >
-                Clear filters
-              </button>
-            ) : null}
+              {hasActiveFilters ? (
+                <button
+                  type="button"
+                  className="catalog-toolbar-clear"
+                  onClick={() => {
+                    setSearchDraft('');
+                    router.replace(pathname, { scroll: false });
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+              <p className="catalog-toolbar-meta">
+                <span className="catalog-toolbar-kicker">Showing</span>
+                {hasActiveFilters ? (
+                  <span className="catalog-toolbar-scope">
+                    {activeCategoryName ? <strong>{activeCategoryName}</strong> : null}
+                    {tag ? (
+                      <>
+                        {activeCategoryName ? ' · ' : null}
+                        tagged <strong>{tag}</strong>
+                      </>
+                    ) : null}
+                    {q ? (
+                      <>
+                        {activeCategoryName || tag ? ' · ' : null}
+                        matching <strong>&ldquo;{q}&rdquo;</strong>
+                      </>
+                    ) : null}
+                  </span>
+                ) : (
+                  <span className="catalog-toolbar-scope">all {itemType}s</span>
+                )}
+                <span className="catalog-toolbar-count">
+                  {loading ? '…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
+                </span>
+              </p>
+            </div>
           </div>
 
-          {hasActiveFilters ? (
-            <p style={{ margin: '0 0 1.5rem', color: 'var(--graphite-500)', fontSize: '0.92rem' }}>
-              Showing
-              {activeCategoryName ? (
-                <>
-                  {' '}
-                  <strong>{activeCategoryName}</strong>
-                </>
-              ) : null}
-              {tag ? (
-                <>
-                  {' '}
-                  tagged <strong>{tag}</strong>
-                </>
-              ) : null}
-              {q ? (
-                <>
-                  {' '}
-                  matching <strong>&ldquo;{q}&rdquo;</strong>
-                </>
-              ) : null}{' '}
-              · {loading ? '…' : `${items.length} item${items.length === 1 ? '' : 's'}`}
-            </p>
-          ) : null}
-
           {error ? <p style={{ color: '#c9540f' }}>{error}</p> : null}
-          {loading && showSkeleton ? <CatalogLoadingSkeleton layout={layout} columns={Math.min(gridColumns, 3)} /> : null}
-          {loading && !showSkeleton ? <p>Loading…</p> : null}
+          {loading && !items.length && showSkeleton ? (
+            <CatalogLoadingSkeleton layout={layout} columns={Math.min(gridColumns, 3)} />
+          ) : null}
+          {loading && !items.length && !showSkeleton ? <p>Loading…</p> : null}
 
           {!loading && items.length === 0 ? (
             <div className="catalog-empty">
@@ -492,7 +509,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
             </div>
           ) : null}
 
-          {!loading ? (
+          {items.length > 0 ? (
             <div
               className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
               style={
@@ -505,23 +522,18 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                 <button
                   key={item.id}
                   type="button"
-                  className={cx('proj-card', revealEnabled && 'reveal')}
+                  className={cx(
+                    'catalog-card',
+                    layout === 'list' ? 'catalog-card--list' : 'catalog-card--tile',
+                    revealEnabled && 'reveal'
+                  )}
                   onClick={() => openItem(item)}
                   style={{
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    width: '100%',
-                    background: 'transparent',
-                    padding: 0,
-                    display: layout === 'list' ? 'grid' : undefined,
-                    gridTemplateColumns: layout === 'list' ? '220px 1fr' : undefined,
-                    gap: layout === 'list' ? '1rem' : undefined,
-                    alignItems: layout === 'list' ? 'stretch' : undefined,
                     transitionDelay: revealEnabled ? `${index * 60}ms` : undefined,
                   }}
                 >
                   {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? (
-                    <div className="proj-media" style={layout === 'list' ? { minHeight: 140 } : undefined}>
+                    <div className="catalog-card-media">
                       {item.primary_image ? (
                         <SmartImage
                           src={item.primary_image}
@@ -531,25 +543,24 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                           style={{ objectFit: 'cover' }}
                         />
                       ) : null}
-                      {hasField(cardFields, 'category', DEFAULT_CARD) ? (
-                        <span className="tag">{item.category_name || item.item_type.toUpperCase()}</span>
-                      ) : null}
                     </div>
                   ) : null}
-                  <div className="proj-body">
+                  <div className="catalog-card-body">
+                    {hasField(cardFields, 'category', DEFAULT_CARD) ? (
+                      <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
+                    ) : null}
                     {hasField(cardFields, 'title', DEFAULT_CARD) ? <h5>{item.title}</h5> : null}
                     {hasField(cardFields, 'price_label', DEFAULT_CARD) && item.price_label ? (
-                      <div className="proj-stat">{item.price_label}</div>
+                      <div className="catalog-card-stat">{item.price_label}</div>
                     ) : null}
                     {hasField(cardFields, 'summary', DEFAULT_CARD) ? <p>{item.summary}</p> : null}
                     {hasField(cardFields, 'tags', DEFAULT_CARD) && item.tags_json?.length ? (
-                      <p style={{ fontSize: '0.78rem', color: 'var(--graphite-500)' }}>{item.tags_json.join(' · ')}</p>
+                      <p className="catalog-card-tags">{item.tags_json.join(' · ')}</p>
                     ) : null}
-                    <span className="link">Quick view →</span>
+                    <span className="catalog-card-link">Quick view →</span>
                     <Link
                       href={catalogPublicPath(itemType, item.slug)}
-                      className="link"
-                      style={{ display: 'inline-block', marginTop: '0.45rem', fontSize: '0.82rem' }}
+                      className="catalog-card-page-link"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {caseStudyLabel(itemType)} page →

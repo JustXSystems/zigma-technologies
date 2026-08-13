@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/site-settings';
+import { useSiteShell } from '@/components/SiteProviders';
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
   if (!content) return;
@@ -36,22 +36,18 @@ export function applyDocumentSeo(input: {
   upsertMeta('name', 'twitter:card', 'summary_large_image');
 }
 
-/** Applies global site SEO defaults once on public pages. */
+/** Applies global site SEO defaults once — data comes from server shell (no client fetch). */
 export default function SiteSeo() {
+  const { settings } = useSiteShell();
+
   useEffect(() => {
-    fetch('/api/public/site-settings')
-      .then(async (r) => {
-        const data = await r.json();
-        const settings = (data.settings || DEFAULT_SITE_SETTINGS) as SiteSettings;
-        applyDocumentSeo({
-          title: document.title || settings.companyName,
-          description: settings.defaultMetaDescription,
-          image: settings.ogImage,
-          siteName: settings.companyName,
-        });
-      })
-      .catch(() => undefined);
-  }, []);
+    applyDocumentSeo({
+      title: document.title || settings.companyName,
+      description: settings.defaultMetaDescription,
+      image: settings.ogImage,
+      siteName: settings.companyName,
+    });
+  }, [settings]);
 
   return null;
 }

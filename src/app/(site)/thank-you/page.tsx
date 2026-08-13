@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import InnerPageHero from '@/components/InnerPageHero';
 import { trackEvent } from '@/lib/analytics';
 import { DEFAULT_SITE_SETTINGS, telHref, type SiteSettings } from '@/lib/site-settings';
+import { useSiteCopy } from '@/lib/use-site-copy';
 import { whatsappHref } from '@/lib/whatsapp';
 
 function ThankYouInner() {
@@ -13,6 +14,7 @@ function ThankYouInner() {
   const intent = params.get('intent') || 'enquiry';
   const city = params.get('city') || '';
   const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const copy = useSiteCopy();
 
   useEffect(() => {
     trackEvent('thank_you_view', { intent, city });
@@ -27,46 +29,53 @@ function ThankYouInner() {
   const booking = site.bookingUrl?.trim();
   const title =
     intent === 'callback'
-      ? 'Callback requested'
+      ? copy.thankYou.titleCallback
       : intent === 'brochure'
-        ? 'Brochure unlocked'
+        ? copy.thankYou.titleBrochure
         : intent === 'careers'
-          ? 'Application received'
-          : 'Thank you — we have your enquiry';
+          ? copy.thankYou.titleCareers
+          : copy.thankYou.titleEnquiry;
+
+  const leadStart = city
+    ? copy.thankYou.leadCityPrefix.replace('{city}', city)
+    : copy.thankYou.leadPrefix;
 
   return (
     <main id="main-content" className="thank-you-page hub-page">
       <InnerPageHero
         accent="cyan"
-        eyebrow="Next steps"
+        eyebrow={copy.thankYou.eyebrow}
         title={title}
         lead={
           <>
-            {city ? `Our ${city} desk ` : 'Our engineering team '}
-            will review your note and respond with a clear feasibility path
+            {leadStart}
+            {copy.thankYou.leadSuffix}
             {site.responseSla ? ` — typically ${site.responseSla}` : ' — typically within 1 business day'}.
           </>
         }
         image="/assets/images/zigma-technologies-engineers-collaborati.jpg"
       >
-        <div className="proof-rail">
-          <span>Engineer-owned follow-up</span>
-          <span>Clear options, not a sales script</span>
-        </div>
+        {copy.thankYou.proofRail.length ? (
+          <div className="proof-rail">
+            {copy.thankYou.proofRail.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        ) : null}
       </InnerPageHero>
 
       <section className="hub-section hub-section--soft">
         <div className="container thank-you-grid">
           <article className="thank-you-card">
-            <h2>What happens next</h2>
+            <h2>{copy.thankYou.nextTitle}</h2>
             <ol>
-              <li>We confirm scope, site constraints, and urgency.</li>
-              <li>An engineer proposes options (product / EPC / AMC) with rough timelines.</li>
-              <li>You choose a site visit, quote package, or remote review.</li>
+              {copy.thankYou.nextSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
             </ol>
           </article>
           <article className="thank-you-card">
-            <h2>Talk sooner</h2>
+            <h2>{copy.thankYou.talkTitle}</h2>
             <div className="thank-you-actions">
               <a
                 href={telHref(site.phone)}
@@ -76,33 +85,25 @@ function ThankYouInner() {
                 Call {site.phone}
               </a>
               <a
-                href={whatsappHref(site.whatsapp, 'Hi Zigma — following up on my enquiry.')}
+                href={whatsappHref(site.whatsapp, copy.thankYou.whatsappPrefill)}
                 className="btn btn-ghost-dark"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackEvent('cta_click', { channel: 'whatsapp', placement: 'thank_you' })}
               >
-                WhatsApp an engineer
+                WhatsApp
               </a>
               {booking ? (
-                <a
-                  href={booking}
-                  className="btn btn-ghost-dark"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackEvent('cta_click', { channel: 'booking', placement: 'thank_you' })}
-                >
-                  Book a consultation slot →
+                <a href={booking} className="btn btn-ghost-dark" target="_blank" rel="noopener noreferrer">
+                  Book a slot
                 </a>
               ) : null}
             </div>
-            {site.officeHours ? <p className="contact-sla">Office hours: {site.officeHours}</p> : null}
+            <p className="thank-you-meta">
+              {site.officeHours ? <>Hours: {site.officeHours}. </> : null}
+              <Link href="/">Back to home</Link>
+            </p>
           </article>
-        </div>
-        <div className="container" style={{ marginTop: '1.75rem' }}>
-          <Link href="/tools/solution-finder" className="link">
-            Not sure what you need? Try the solution finder →
-          </Link>
         </div>
       </section>
     </main>
@@ -111,15 +112,7 @@ function ThankYouInner() {
 
 export default function ThankYouPage() {
   return (
-    <Suspense
-      fallback={
-        <main id="main-content">
-          <div className="container" style={{ padding: '6rem 0' }}>
-            Loading…
-          </div>
-        </main>
-      }
-    >
+    <Suspense fallback={<main id="main-content" className="hub-page" />}>
       <ThankYouInner />
     </Suspense>
   );

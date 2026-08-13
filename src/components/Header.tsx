@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { buildNavTree, isMegaLearnMoreLink, type FlatNavRow } from '@/lib/nav-tree';
+import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
-import { DEFAULT_SITE_SETTINGS, ctaLabelForVariant, pickCtaVariant, type SiteSettings } from '@/lib/site-settings';
+import { ctaLabelForVariant, pickCtaVariant, logoAltText } from '@/lib/site-settings';
 import SiteSearchForm from '@/components/SiteSearchForm';
 import HeaderIconMenus from '@/components/HeaderIconMenus';
 import { trackEvent } from '@/lib/analytics';
 import CallbackRequestModal from '@/components/CallbackRequestModal';
+import { useSiteCopy } from '@/lib/use-site-copy';
+import { useSiteShell } from '@/components/SiteProviders';
 
 const DEFAULT_NAV: NavItem[] = [
   {
@@ -120,13 +122,14 @@ const DEFAULT_NAV: NavItem[] = [
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const { settings: site, headerNav: shellNav } = useSiteShell();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<string | null>(null);
-  const [navItems, setNavItems] = useState<NavItem[]>(DEFAULT_NAV);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-  const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>('A');
+  const [navItems, setNavItems] = useState<NavItem[]>(shellNav || DEFAULT_NAV);
+  const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>(() => pickCtaVariant(site));
   const [callbackOpen, setCallbackOpen] = useState(false);
+  const copy = useSiteCopy();
 
   const current =
     pathname === '/contact'
@@ -144,27 +147,10 @@ export default function Header() {
                 : 'home';
 
   useEffect(() => {
-    fetch('/api/public/nav?location=header')
-      .then(async (r) => {
-        const data = await r.json();
-        if (!r.ok || !data.items?.length) return;
-        const tree = buildNavTree(data.items as FlatNavRow[]);
-        if (tree.length) setNavItems(tree);
-      })
-      .catch(() => undefined);
-
-    fetch('/api/public/site-settings')
-      .then(async (r) => {
-        const data = await r.json();
-        if (r.ok && data.settings) {
-          setSite(data.settings);
-          const variant = pickCtaVariant(data.settings);
-          setCtaVariant(variant);
-          trackEvent('cta_variant_shown', { variant, placement: 'header' });
-        }
-      })
-      .catch(() => undefined);
-  }, []);
+    if (shellNav?.length) setNavItems(shellNav);
+    setCtaVariant(pickCtaVariant(site));
+    trackEvent('cta_variant_shown', { variant: pickCtaVariant(site), placement: 'header' });
+  }, [shellNav, site]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -215,7 +201,7 @@ export default function Header() {
           <a href={current === 'home' ? '#home' : '/'} className="logo">
             <span className="logo-chip">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={site.logoUrl || '/assets/images/zigma-technologies-logo.png'} alt={`${site.companyName} logo`} />
+              <img src={site.logoUrl || '/assets/images/zigma-technologies-logo.png'} alt={logoAltText(site)} />
             </span>
             <span className="logo-word">
               {site.companyName}
@@ -289,7 +275,7 @@ export default function Header() {
             </button>
             <button
               className={`menu-toggle ${mobileOpen ? 'is-active' : ''}`}
-              aria-label="Toggle menu"
+              aria-label={mobileOpen ? copy.a11y.close : copy.a11y.menuToggle}
               aria-expanded={mobileOpen}
               onClick={toggleMobile}
             >

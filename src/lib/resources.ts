@@ -214,8 +214,15 @@ const RESOURCE_SEEDS: Array<{
     meta_title: 'UPS Sizing Guide | Zigma Technologies',
     meta_description: 'Practical UPS sizing checklist for industrial plants, server rooms, and commercial facilities in India.',
     body_html: `<p>Correct UPS sizing protects critical loads without overspending on oversized hardware. Start with measured load (kW), apply a power-factor conversion to kVA, then add headroom for growth and inrush.</p>
-<p><strong>Checklist:</strong> list critical vs non-critical loads; note single-phase vs three-phase; decide autonomy (minutes); choose N or N+1 redundancy; plan battery chemistry and service access.</p>
-<p>Zigma engineers can validate your BOM against site conditions, harmonic content, and generator compatibility before procurement.</p>`,
+<h2>Sizing checklist</h2>
+<ul>
+<li>List critical vs non-critical loads with measured kW</li>
+<li>Note single-phase vs three-phase distribution</li>
+<li>Decide autonomy target in minutes</li>
+<li>Choose N or N+1 redundancy for mission-critical sites</li>
+<li>Plan battery chemistry, enclosure, and service access</li>
+</ul>
+<blockquote><p>Zigma engineers can validate your BOM against site conditions, harmonic content, and generator compatibility before procurement.</p></blockquote>`,
   },
   {
     slug: 'solar-om-checklist',
@@ -226,9 +233,21 @@ const RESOURCE_SEEDS: Array<{
     meta_title: 'Solar O&M Checklist | Zigma Technologies',
     meta_description: 'Monthly and quarterly solar O&M checklist covering cleaning, IV curves, string health, and inverter alarms.',
     body_html: `<p>Commercial solar underperforms quietly when soiling, loose terminations, or inverter faults go unnoticed. A disciplined O&amp;M rhythm protects yield and warranty compliance.</p>
-<p><strong>Monthly:</strong> visual inspection, string current spot-checks, inverter alarm review, vegetation/soiling notes.</p>
-<p><strong>Quarterly:</strong> torque checks on critical joints, thermal imaging hotspots, IV curve sampling, earthing verification.</p>
-<p>Zigma Solar AMC teams deliver scheduled O&amp;M with clear reporting so facility managers see production vs expectation.</p>`,
+<h2>Monthly inspection rhythm</h2>
+<ul>
+<li>Visual inspection of modules, mounting, and cable routing</li>
+<li>String current spot-checks against baseline</li>
+<li>Inverter alarm and event log review</li>
+<li>Vegetation, soiling, and drainage notes</li>
+</ul>
+<h2>Quarterly engineering checks</h2>
+<ul>
+<li>Torque verification on critical joints</li>
+<li>Thermal imaging for hotspot detection</li>
+<li>IV curve sampling on representative strings</li>
+<li>Earthing and SPD verification</li>
+</ul>
+<blockquote><p>Zigma Solar AMC teams deliver scheduled O&amp;M with clear reporting so facility managers see production vs expectation.</p></blockquote>`,
   },
   {
     slug: 'bess-peak-shaving',
@@ -239,8 +258,13 @@ const RESOURCE_SEEDS: Array<{
     meta_title: 'BESS Peak Shaving Guide | Zigma Technologies',
     meta_description: 'Learn when battery energy storage systems reduce demand charges and improve solar self-consumption.',
     body_html: `<p>Peak shaving uses stored energy during short high-demand windows that drive tariff spikes. Pairing BESS with an energy management system (EMS) automates charge/discharge against your load profile.</p>
-<p>Good candidates: factories with sharp process peaks, campuses with EV charging growth, and solar sites exporting little while paying high demand charges.</p>
-<p>Zigma designs BESS packages with PCS, EMS, and commissioning so dispatch matches your commercial goals—not just nameplate kWh.</p>`,
+<h2>When BESS pays back</h2>
+<ul>
+<li>Factories with sharp process peaks and high demand charges</li>
+<li>Campuses adding EV charging without upgrading transformer capacity</li>
+<li>Solar sites exporting little while paying high demand tariffs</li>
+</ul>
+<blockquote><p>Zigma designs BESS packages with PCS, EMS, and commissioning so dispatch matches your commercial goals—not just nameplate kWh.</p></blockquote>`,
   },
 ];
 

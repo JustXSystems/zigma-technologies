@@ -1,12 +1,20 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import LocaleLanding from '@/components/i18n/LocaleLanding';
+import { getSiteCopy } from '@/lib/site-content';
 
-export const metadata: Metadata = {
-  title: 'ज़िग्मा टेक्नोलॉजीज़ — सोलर, UPS और पावर समाधान',
-  description: 'भारत भर में सोलर EPC, औद्योगिक UPS, BESS और EV चार्जिंग के लिए इंजीनियरिंग सहायता।',
-  alternates: { languages: { en: '/', hi: '/hi', kn: '/kn' } },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const copy = await getSiteCopy();
+  const locale = copy.locales.hi;
+  return {
+    title: locale.title,
+    description: locale.lead,
+    alternates: { languages: { en: '/', hi: '/hi', kn: '/kn' } },
+  };
+}
 
-export default function HindiHomePage() {
-  return <LocaleLanding locale="hi" />;
+export default async function HindiHomePage() {
+  const copy = await getSiteCopy();
+  if (!copy.features.localesEnabled) redirect('/');
+  return <LocaleLanding locale="hi" copy={copy.locales.hi} toolsEnabled={copy.features.toolsEnabled} />;
 }

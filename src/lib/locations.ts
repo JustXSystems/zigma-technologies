@@ -78,3 +78,50 @@ export const LOCATION_DEFS: LocationDef[] = [
 export function getLocationByKey(key: string) {
   return LOCATION_DEFS.find((l) => l.key === key) || null;
 }
+
+/** Merge CMS JSON overrides (theme_settings.locations) onto code defaults by key. */
+export function mergeLocationDefs(raw: unknown): LocationDef[] {
+  if (!Array.isArray(raw) || raw.length === 0) return LOCATION_DEFS;
+  const byKey = new Map(LOCATION_DEFS.map((d) => [d.key, { ...d }]));
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Partial<LocationDef> & { key?: string };
+    if (!row.key || typeof row.key !== 'string') continue;
+    const prev = byKey.get(row.key) || {
+      key: row.key,
+      name: row.key,
+      state: '',
+      eyebrow: '',
+      lead: '',
+      subject: '',
+      highlights: [],
+      serviceTags: [],
+    };
+    byKey.set(row.key, {
+      ...prev,
+      ...row,
+      key: row.key,
+      highlights: Array.isArray(row.highlights) ? row.highlights : prev.highlights,
+      serviceTags: Array.isArray(row.serviceTags) ? row.serviceTags : prev.serviceTags,
+    });
+  }
+  const ordered: LocationDef[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    const key = (item as { key?: string })?.key;
+    if (!key || seen.has(key)) continue;
+    const def = byKey.get(key);
+    if (def) {
+      ordered.push(def);
+      seen.add(key);
+    }
+  }
+  for (const d of LOCATION_DEFS) {
+    if (!seen.has(d.key)) ordered.push(d);
+  }
+  return ordered;
+}
+
+export function getLocationByKeyFromList(defs: LocationDef[], key: string) {
+  return defs.find((l) => l.key === key) || null;
+}

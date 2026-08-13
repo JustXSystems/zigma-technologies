@@ -1,12 +1,9 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import CmsPageClient from '@/components/CmsPageClient';
-import { getPageBySlug } from '@/lib/cms';
+import CmsPageShell from '@/components/CmsPageShell';
 import { buildCmsMetadata } from '@/lib/cms-seo';
 import { isReservedSiteSlug } from '@/lib/reserved-slugs';
 import { verifyPreviewToken } from '@/lib/preview';
-
-const SEED_FALLBACK_SLUGS = new Set(['privacy', 'terms']);
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -29,8 +26,5 @@ export default async function DynamicCmsPage({ params, searchParams }: Props) {
   const token = Array.isArray(tokenRaw) ? tokenRaw[0] : tokenRaw;
   const allowPreview = Boolean(previewFlag && verifyPreviewToken(slug, token || null));
 
-  const page = await getPageBySlug(slug, allowPreview);
-  if (!page && !SEED_FALLBACK_SLUGS.has(slug)) notFound();
-
-  return <CmsPageClient slug={slug} />;
+  return <CmsPageShell slug={slug} allowPreview={allowPreview} />;
 }

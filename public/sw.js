@@ -1,9 +1,16 @@
 /* Offline contact card + network-first for HTML. */
 const CACHE = 'zigma-offline-v1';
-const OFFLINE_URLS = ['/offline.html', '/manifest.webmanifest', '/assets/images/zigma-technologies-logo.png'];
+const OFFLINE_URLS = ['/offline.html', '/manifest.webmanifest', '/assets/images/zigma.png'];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(OFFLINE_URLS)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) =>
+        Promise.allSettled(OFFLINE_URLS.map((url) => cache.add(url))).then(() => undefined)
+      )
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {

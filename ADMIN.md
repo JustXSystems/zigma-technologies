@@ -1,40 +1,97 @@
-## Original requirements checklist
+# Zigma Technologies — Admin Control Plane
 
-| Request | Status |
-|---------|--------|
-| Homepage styling parity with static CSS | Done — `src/app/globals.css` synced from `public/assets/css/globals.css`; hero icons + eco diagram restored |
-| Independent `/admin` portal in same Next.js repo | Done — `(admin)` route group |
-| MySQL (`mysql2`) | Done |
-| Auth gate via `src/proxy.ts` | Done |
-| Inventory (projects/products/services) | Done |
-| Page CMS + seeds + preview | Done |
-| Theme / CSS overrides | Done |
-| Forms & enquiries | Done |
-| Media library | Done |
-| Navigation CMS → Header/Footer | Done |
-| Site settings / highly configurable | Done |
-
-Legacy `public/*.html` files redirect to App Router routes (`/index.html` → `/`, etc.).
+Independent control portal at **`/admin`** for the public marketing site. This document is the operator reference; the **in-app guide** at **`/admin/guide`** mirrors it with premium navigation, architecture diagrams, and module-by-module why/when/how cards.
 
 ---
 
-Independent control plane for Zigma Technologies (`/admin`).
+## Quick links
+
+| Resource | Location |
+|----------|----------|
+| **In-app guide** | [/admin/guide](/admin/guide) — architecture, flows, 21 module references, playbooks |
+| **Dashboard** | `/admin` — stats, setup checklist, bootstrap |
+| **Public site** | `/` |
+| **Guide source** | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts` |
+
+---
+
+## Architecture overview
+
+### Stack
+
+| Layer | Technology |
+|-------|------------|
+| App | Next.js App Router — `(admin)` + `(site)` route groups |
+| Database | MySQL via `mysql2` |
+| Auth | JWT in httpOnly cookie `zigma_admin_session` (7 days) |
+| Edge | `src/proxy.ts` — admin gate, redirects, upload URL block |
+| Config store | `theme_settings` key-value JSON + `css_overrides` |
+
+### Route groups
+
+```
+src/app/(admin)/admin/*     → Control portal (sidebar, no public chrome)
+src/app/(site)/*            → Public site (Header, Footer, SEO, consent)
+src/app/api/admin/*         → Protected CRUD + seeds (cookie required)
+src/app/api/public/*        → Read APIs + form submit (honeypot, rate limit)
+src/app/api/partner/*       → Dealer portal (separate JWT cookie)
+```
+
+### Auth flow (`src/proxy.ts`)
+
+1. Request to `/admin/*` or `/api/admin/*` (except login + seed)
+2. Read `zigma_admin_session` cookie → verify JWT
+3. Missing/invalid → redirect to `/admin/login` or 401 JSON
+4. Editor role → UI hides admin-only nav; redirect if hitting admin-only route
+
+### Data model split
+
+**Relational tables** (content that has many rows):
+
+| Domain | Tables |
+|--------|--------|
+| CMS | `pages`, `page_sections` |
+| Catalog | `catalog_items`, `catalog_media`, `catalog_categories`, `catalog_page_settings` |
+| Navigation | `nav_items` |
+| Leads | `enquiries`, `form_definitions`, `form_fields`, `newsletter_subscribers` |
+| Editorial | `resource_posts`, `press_posts`, `site_testimonials` |
+| Platform | `admin_users`, `redirects`, `media_assets`, `css_overrides`, `partner_users`, `partner_documents` |
+
+**Key-value config** (`theme_settings.setting_key`):
+
+| Key | Admin module | Purpose |
+|-----|--------------|---------|
+| `site` | Site Settings | Company identity, contact, analytics, CRM, SLA, enquiry notify |
+| `site_copy` | Site Copy | Marketing strings, feature flags, modal/hub copy |
+| `industries` | Site Copy | `/industries/*` JSON content |
+| `locations` | Site Copy | `/locations/*` JSON content |
+| `tokens` | Theme Studio | Design tokens → `/api/public/theme.css` |
+
+### Core data flows
+
+**Enquiry:** Visitor form → `POST /api/public/enquiries` (or careers/callback) → `enquiries` row → optional SMTP notify + CRM webhook → admin triage at `/admin/enquiries`.
+
+**CMS page:** Editor saves `pages` + `page_sections` → public `GET /api/public/pages/[slug]` → `SectionRenderer` → HTML. Preview: signed `?preview=1&token=…` (12h).
+
+**Catalog:** Editor publishes `catalog_items` → listing via `GET /api/public/catalog/[type]` + `catalog_page_settings` → case study at `/{type}/{slug}` using `case_study_json` + gallery.
+
+---
 
 ## Setup
 
-1. Apply CMS tables:
+### 1. Apply CMS tables
 
 ```bash
 mysql -u zigmatech -p zigmatech < scripts/schema.sql
 ```
 
-On **PowerShell** (Windows), use:
+PowerShell:
 
 ```powershell
 Get-Content scripts/schema.sql -Raw | mysql -u zigmatech -p zigmatech
 ```
 
-If upgrading an existing DB:
+**Upgrading an existing DB** — run migrations:
 
 ```bash
 mysql -u zigmatech -p zigmatech < scripts/migrate-enquiry-notes.sql
@@ -50,179 +107,431 @@ mysql -u zigmatech -p zigmatech < scripts/migrate-testimonials.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-wave3.sql
 ```
 
-PowerShell equivalents:
+### 2. Environment variables
 
-```powershell
-Get-Content scripts/migrate-enquiry-notes.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-newsletter.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-redirects.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-enquiry-subject.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-catalog-hero.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-catalog-appearance.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-catalog-case-study.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-catalog-categories.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-resource-posts.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-testimonials.sql -Raw | mysql -u zigmatech -p zigmatech
-Get-Content scripts/migrate-wave3.sql -Raw | mysql -u zigmatech -p zigmatech
+**Required:**
+
+| Variable | Purpose |
+|----------|---------|
+| `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL connection |
+| `AUTH_SECRET` | JWT signing |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | First admin seed |
+
+**Recommended:**
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SITE_URL` | Sitemap, canonical URLs, OG |
+| `PREVIEW_SECRET` | Draft preview tokens (falls back to `AUTH_SECRET`) |
+| `SMTP_HOST`, `SMTP_FROM`, … | Enquiry email notifications |
+
+**Optional:** Turnstile keys, `MEDIA_BASE_URL`, CRM webhook (also configurable in Site Settings).
+
+### 3. First login
+
+1. `npm run dev` → `/admin/login`
+2. **Seed default admin** → sign in
+3. **Dashboard** → **Bootstrap missing seeds** (admin) or seed individually
+4. **Site Settings** → real company details
+5. **Navigation** → seed header/footer
+6. Verify public site + test enquiry
+
+### 4. Clone to UAT / prod
+
+**Export (source):**
+
+```bash
+npm run db:export
+npm run db:export -- --with-cms-media
+npm run db:export -- --no-uploads
 ```
 
-2. Ensure `.env` includes `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`. Optional: `PREVIEW_SECRET`, `NEXT_PUBLIC_SITE_URL` (used by sitemap/robots), and `SMTP_*` for enquiry email alerts. Optional Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`.
+**Import (target):**
 
-3. `npm run dev` → `/admin/login` → **Seed default admin** → sign in.
+```bash
+npm run db:import -- storage/exports/zigma-YYYYMMDD-HHMMSS --force
+npm run db:import -- path/to/database.sql --force --skip-media
+```
 
-4. **Pages** → **Seed homepage** (and optionally contact / careers / certifications / privacy / terms)
+Change admin passwords after import from shared environments.
 
-5. **Navigation** → **Seed header tree** / **Seed footer tree**
+---
 
-6. Optional: **Site Settings**, **Inventory → Seed sample …**
+## Roles & access
 
-## Modules
+| Role | Scope |
+|------|-------|
+| **Editor** | Pages, inventory, catalog settings, resources, press, testimonials, enquiries, forms, nav, site settings, media, account |
+| **Admin** | Everything + Site Copy (write), Theme Studio (publish), New Client, newsletter, redirects, partners, users, dashboard bootstrap |
 
-| Area | Path |
-|------|------|
-| Pages & sections | `/admin/pages` |
-| Inventory | `/admin/inventory` |
-| Catalog settings / categories | `/admin/catalog-settings` |
-| Enquiries | `/admin/enquiries` |
-| Enquiry forms | `/admin/forms` |
-| Navigation (mega + footer) | `/admin/nav` |
-| Site settings | `/admin/site-settings` |
-| Media | `/admin/media` |
-| Resources / Blog | `/admin/resources` |
-| Press / newsroom | `/admin/press` |
-| Partners (dealer portal) | `/admin/partners` |
-| Testimonials | `/admin/testimonials` |
-| Newsletter | `/admin/newsletter` |
-| Redirects | `/admin/redirects` |
-| Theme & CSS | `/admin/theme` |
-| Users | `/admin/users` |
-| Account | `/admin/account` |
+Last admin cannot be deleted or demoted. Editors hitting admin-only routes are redirected to dashboard.
 
-### Preview mode
-From **Pages**, click **Preview** to open a signed `?preview=1&token=…` link (12h). Draft pages and disabled sections are visible with an orange banner. Uses `PREVIEW_SECRET` or falls back to `AUTH_SECRET`.
+---
 
-### Dynamic CMS pages
-Published pages with custom slugs (e.g. `/about`, `/privacy`) render via `/(site)/[slug]`. Reserved routes (`projects`, `products`, `services`, `admin`, …) cannot be used as custom page slugs. Sitemap includes published custom pages. Seed **privacy** / **terms** from Pages to populate legal content (footer links default to `/privacy` and `/terms`).
+## Module reference
 
-### Catalog listings
-**Catalog Settings** controls public `/projects`, `/products`, `/services`: visual style preset (`classic`, `premium`, `glass`, `minimal`, `bold-corporate`), hero variant (`standard` / `spotlight`), curated appearance toggles (skeleton loading, reveal animation, premium borders), hero spotlight (enable/disable, eyebrow/title/lead, rotation timer, selected items), layout (grid/list), columns, filters (category/tags), search fields, card fields, and modal sections. If no hero items are selected, the public hero falls back to featured items automatically. Changes apply on the next public page load.
+Each module: **Why** (business purpose), **When** (trigger), **How** (steps), **Public impact**, **Database**.
 
-### Media library
-Upload, browse, search, edit alt/tags, copy public URL, and delete CMS assets. Admin uploads are stored by type under `/public/assets/images`, `/public/assets/svg`, or `/public/assets/video` (public URLs `/assets/images/…`, etc.). The library **scans those folders on disk** and merges with `media_assets` DB rows — seeded static images appear automatically without re-uploading. Section editors can **Browse media** when picking images. Set `MEDIA_BASE_URL` in `.env` if you later point uploads at a CDN (default `/assets`).
+### Dashboard — `/admin`
 
-**Visitor uploads** (careers resumes, future form attachments) live under `/public/assets/uploads/{category}` — e.g. `/assets/uploads/resumes`. These paths are **not** directly URL-accessible; download is via the admin Enquiries resume API only.
+| | |
+|---|---|
+| **Why** | Single health view and first-run checklist |
+| **When** | First login; weekly checks; before go-live handoff |
+| **How** | Review stat tiles → work checklist → Bootstrap missing seeds (admin) |
+| **Public** | Indirect — seeds populate public content |
+| **DB** | Reads counts across pages, catalog, enquiries, media, theme_settings |
+| **Seed** | `POST /api/admin/setup/bootstrap` |
 
-### Site settings
-Global company name, logo URL, phones, emails, header CTA, WhatsApp, footer blurb, copyright, social/legal links, and enquiry notify emails — wired into Header/Footer / notifications.
+### Pages — `/admin/pages`
 
-### Enquiry email notifications
-When `SMTP_HOST` + `SMTP_FROM` are set and **Site Settings → enquiry notify** is enabled (`true`), each public enquiry submission emails the configured addresses (comma-separated). Failures are logged and never block the visitor response.
+| | |
+|---|---|
+| **Why** | Marketing/legal content without code deploys |
+| **When** | Homepage edits; contact/careers/legal; custom landings; preview drafts |
+| **How** | Edit SEO/slug/status → add/reorder sections → media picker → Preview → Publish |
+| **Public** | `/`, `/contact`, `/careers`, `/certifications`, `/privacy`, `/terms`, `/{slug}` |
+| **DB** | `pages`, `page_sections` |
+| **Seed** | Seed homepage; Seed inner pages; Seed industries |
 
-When **Visitor auto-reply** is enabled (`true`, default), submitters receive a confirmation email on enquiry and careers applications (requires SMTP).
+**Preview:** Signed link 12h. Draft/disabled sections visible with orange banner.
 
-### Public form protection
-Contact, catalog enquiry, careers apply, and newsletter endpoints include a hidden honeypot field and per-IP rate limiting (8 submissions per 15 minutes). Bots that fill the trap receive a fake success response; legitimate visitors see a rate-limit message if they exceed the cap.
+**Reserved slugs:** `projects`, `products`, `services`, `admin`, etc. — see `src/lib/reserved-slugs.ts`.
 
-### SEO metadata
-CMS pages emit server `generateMetadata` (title/description/OG/canonical) from page SEO fields + site settings. Client `SiteSeo` still refreshes after load for SPA-style updates.
-Site settings provide default meta description + OG image. Public `/sitemap.xml` and `/robots.txt` are generated automatically (`NEXT_PUBLIC_SITE_URL`).
-Organization JSON-LD is emitted on public pages from site settings (name, logo, phone, email, social links).
-Branded `/not-found` page for missing routes. Security headers (`X-Frame-Options`, `X-Content-Type-Options`, etc.) are set via `next.config.ts`.
+### Inventory — `/admin/inventory`
 
-### Resources / Blog
-Manage guides at `/admin/resources` (seed sample UPS/Solar/BESS guides). Public listing `/resources` and detail `/resources/{slug}` with Article JSON-LD. Run `scripts/migrate-resource-posts.sql` once.
+| | |
+|---|---|
+| **Why** | Commercial core — listings, case studies, search, enquiry context |
+| **When** | New product/project/service; case study; featured items; brochure/video |
+| **How** | Tab → create/seed → case study block → Media modal (★ thumbnail) → Published |
+| **Public** | `/projects`, `/products`, `/services` + `/{type}/{slug}` |
+| **DB** | `catalog_items`, `catalog_media`, `catalog_categories` |
+| **Seed** | Seed {type}s; Delete all {type}s before re-seed |
 
-### Industries
-Public landings at `/industries` and `/industries/{slug}` (healthcare, data-centres, manufacturing, banking, education, airports) with FAQ JSON-LD and related catalog pulls. Seed CMS stubs via `POST /api/admin/pages/seed-industries`. Homepage industry chips link into these pages.
+**Case study fields:** client, sector, location, challenge, solution, scope, outcomes, technologies, testimonial, before/after, video, brochure PDF, availability, lead time.
+
+### Catalog Settings — `/admin/catalog-settings`
+
+| | |
+|---|---|
+| **Why** | Presentation layer for listings without re-entering items |
+| **When** | After inventory seed; rebrand preset; hero spotlight tuning |
+| **How** | Select type → style preset → hero → layout/filters/appearance toggles → Save |
+| **Public** | Listing chrome at `/projects`, `/products`, `/services` |
+| **DB** | `catalog_page_settings` |
+
+Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls back to featured items if none selected.
+
+### Resources — `/admin/resources`
+
+| | |
+|---|---|
+| **Why** | SEO guides and engineering credibility |
+| **When** | Publish technical checklists; tag-filtered hub |
+| **How** | Create/seed → HTML body (h2, lists) → cover, tags, meta → Publish |
+| **Public** | `/resources`, `/resources/{slug}` + Article JSON-LD |
+| **DB** | `resource_posts` |
+
+### Press — `/admin/press`
+
+| | |
+|---|---|
+| **Why** | Newsroom separate from long-form guides |
+| **When** | Announcements, milestones |
+| **How** | Create post → excerpt, body, source URL → Publish |
+| **Public** | `/press`, `/press/{slug}` |
+| **DB** | `press_posts` (wave3 migration) |
+
+### Testimonials — `/admin/testimonials`
+
+| | |
+|---|---|
+| **Why** | Social proof + AggregateRating JSON-LD |
+| **When** | Post-project quotes; contact strip |
+| **How** | Author, role, company, rating, quote → Publish/featured |
+| **Public** | Contact strip; `GET /api/public/testimonials` |
+| **DB** | `site_testimonials` |
+
+### Site Settings — `/admin/site-settings`
+
+| | |
+|---|---|
+| **Why** | Single source for identity, notifications, analytics, CRM |
+| **When** | Launch; rebrand; enable email/CRM/analytics |
+| **How** | Company, logo, phones, emails, WhatsApp, footer, social, notify emails, GA4, CRM webhook, SLA JSON |
+| **Public** | Header, Footer, JSON-LD, mail, `/thank-you`, `/sla` |
+| **DB** | `theme_settings.site` |
+
+**Enquiry email:** Requires `SMTP_*` + notify enabled. Visitor auto-reply optional.
+
+### Site Copy — `/admin/site-copy` *(admin write)*
+
+| | |
+|---|---|
+| **Why** | White-label marketing strings without code changes |
+| **When** | New client; toggle tools/locales/partners; edit wizard/calculator copy |
+| **How** | Tabs: Chrome, Hubs, Consultation, Tools, Catalog, Locales, Features |
+| **Public** | All chrome; `GET /api/public/site-copy` |
+| **DB** | `site_copy`, `industries`, `locations` |
+
+**Feature flags:**
+
+| Flag | Effect |
+|------|--------|
+| `toolsEnabled` | `/tools/*`; Talk menu links |
+| `localesEnabled` | `/hi`, `/kn` |
+| `partnersEnabled` | Partner portal |
+
+### Navigation — `/admin/nav`
+
+| | |
+|---|---|
+| **Why** | Editable mega-menu and footer |
+| **When** | Launch; new hub; rebrand; reset corrupted nav |
+| **How** | Seed header/footer → nested columns/links → ↑↓ reorder → Clear+Seed to reset |
+| **Public** | Header/Footer; `GET /api/public/nav` |
+| **DB** | `nav_items` |
+
+### Theme Studio — `/admin/theme` *(admin publish)*
+
+| | |
+|---|---|
+| **Why** | Brand theming without editing globals.css |
+| **When** | Rebrand; client CSS overrides |
+| **How** | Tokens → Save; CSS draft → Publish; optional sync to disk |
+| **Public** | `/api/public/theme.css` |
+| **DB** | `tokens`, `css_overrides` |
+
+### New Client — `/admin/new-client` *(admin)*
+
+| | |
+|---|---|
+| **Why** | Fast white-label onboarding on cloned snapshot |
+| **When** | After `db:import` on new environment |
+| **How** | Brand wizard → reset Site Copy/tokens → optional demo seed → Theme + Site Copy |
+| **DB** | `theme_settings`; optionally all seeded tables |
+
+### Enquiries — `/admin/enquiries`
+
+| | |
+|---|---|
+| **Why** | Unified lead inbox |
+| **When** | Daily triage; resume download; CSV export |
+| **How** | Filter status → notes → closed; careers resume via secure admin API |
+| **Public** | Fed by contact, careers, catalog, callback APIs |
+| **DB** | `enquiries` |
+
+### Enquiry Forms — `/admin/forms`
+
+| | |
+|---|---|
+| **Why** | Configurable form fields |
+| **When** | Subject options; reorder; disable field |
+| **How** | Edit `enquiry_default` → fields ↑↓, labels, required |
+| **Public** | `GET /api/public/forms/enquiry` |
+| **DB** | `form_definitions`, `form_fields` |
+
+### Newsletter — `/admin/newsletter` *(admin)*
+
+| | |
+|---|---|
+| **Why** | Footer subscribe list |
+| **When** | Export for campaigns |
+| **Public** | `POST /api/public/newsletter` |
+| **DB** | `newsletter_subscribers` |
+
+### Media — `/admin/media`
+
+| | |
+|---|---|
+| **Why** | Upload once, reuse everywhere |
+| **When** | Brand assets; section/inventory image pick |
+| **How** | Upload → alt/tags → copy URL → Browse in editors |
+| **Public** | `/assets/images/…`, `/assets/svg/…`, `/assets/video/…` |
+| **DB** | `media_assets` + disk scan |
+
+Visitor uploads (resumes) under `/assets/uploads/` — **not** in library; blocked from direct URLs.
+
+### Redirects — `/admin/redirects` *(admin)*
+
+| | |
+|---|---|
+| **Why** | SEO preservation on migration |
+| **When** | Legacy HTML; slug changes |
+| **How** | from_path → to_path, status, enabled |
+| **Public** | Applied in `proxy.ts` (~30s cache) |
+| **DB** | `redirects` |
+
+### Partners — `/admin/partners` *(admin)*
+
+| | |
+|---|---|
+| **Why** | Dealer document portal |
+| **When** | Onboard distributor |
+| **Public** | `/partner/login`, `/partner` |
+| **DB** | `partner_users`, `partner_documents` |
+
+### Users — `/admin/users` *(admin)*
+
+| | |
+|---|---|
+| **Why** | Delegate editing without full admin access |
+| **When** | Add team; rotate credentials |
+| **DB** | `admin_users` |
+
+### Account — `/admin/account`
+
+| | |
+|---|---|
+| **Why** | Self-service password change |
+| **When** | After seed login or db:import |
+
+---
+
+## Playbooks
+
+### First-time go-live
+
+1. schema.sql + migrations
+2. Seed admin → sign in
+3. Dashboard bootstrap
+4. Site Settings (real details + notify emails)
+5. Navigation seed
+6. Inventory seed → publish → Catalog Settings
+7. Test enquiry + SMTP
+
+### Edit homepage
+
+Pages → Home → sections → Preview → Publish.
+
+### Publish case study
+
+Inventory → case study + gallery → Published → verify `/{type}/{slug}`.
+
+### Handle lead
+
+Enquiries → New → notes → Closed → export CSV.
+
+### White-label client
+
+`db:export` → `db:import` → New Client → Theme → Site Copy → replace assets.
+
+### Re-seed safely
+
+**Always delete first:** Clear sections / Clear nav / Delete all {type}s → Seed.
+
+---
+
+## Public features (admin-adjacent)
+
+These public routes are configured from admin modules:
+
+| Feature | Admin config | Public route |
+|---------|--------------|--------------|
+| Calculators | Site Copy + `toolsEnabled` | `/tools/ups-calculator`, `/tools/solar-roi`, `/tools/solution-finder` |
+| Locales | Site Copy + `localesEnabled` | `/hi`, `/kn` |
+| Industries | Site Copy JSON + Pages seed | `/industries`, `/industries/{slug}` |
+| Locations | Site Copy JSON | `/locations`, `/locations/{slug}`, city×service matrix |
+| SLA dashboard | Site Settings `slaMetricsJson` | `/sla` |
+| Search | — | `/search` |
+| Cookie policy | Site Copy | `/cookies` |
+| Careers | Pages seed + Forms | `/careers` (resume upload → enquiries) |
 
 ### Analytics & consent
-Site Settings: `ga4MeasurementId`, `plausibleDomain`, `analyticsConsentRequired`. Cookie banner loads scripts only after Accept (when required). Events: enquiry, careers, newsletter, CTA, catalog open, brochure download, search.
 
-### Lead paths
-Consultation wizard includes capacity / location / urgency. Case study pages support WhatsApp deep-links and gated brochure download (Inventory → Brochure / PDF URL). Site-wide search at `/search`.
-Enquiry success redirects to `/thank-you` (booking URL + SLA from Site Settings). Header **Callback** opens a callback request modal (`/api/public/callback`). Solution finder at `/tools/solution-finder`.
+Site Settings: GA4, Plausible, `analyticsConsentRequired`. Cookie banner gates scripts.
 
-### Locations
-Public city pages at `/locations` and `/locations/{slug}` (Bengaluru, Chennai, Hyderabad, Mumbai, Pune, Delhi NCR). Hindi/Kannada locale homes at `/hi` and `/kn` with hreflang; sample city pages under `/hi/locations/...` and `/kn/locations/...`.
+### Form protection
 
-### Testimonials
-Manage reviews at `/admin/testimonials` (seed samples). Public strip + AggregateRating JSON-LD on contact. Run `scripts/migrate-testimonials.sql` once.
+Honeypot + **6 submissions / 15 min / IP**. Optional Turnstile.
 
-### Cookie policy & CSP
-`/cookies` documents necessary / analytics / marketing categories. Consent banner supports category toggles. `Content-Security-Policy` is set in `next.config.ts`.
+### SEO
 
-### A/B header CTA
-Site Settings `headerCtaLabelB` + `ctaVariantBPercent` assign a session variant and emit `cta_variant_shown` / `cta_click` with `variant`.
+Per-page SEO fields; site-wide defaults; `/sitemap.xml`, `/robots.txt`; Organization JSON-LD.
 
-### Wave 3 growth modules
-- **CRM webhook:** Site Settings `crmWebhookUrl` (+ optional `crmWebhookSecret`) receives enquiry/callback leads with a simple lead score.
-- **Calculators:** `/tools/ups-calculator` and `/tools/solar-roi` (print/PDF + quote handoff).
-- **Partner portal:** `/partner/login` + `/partner` (JWT cookie). Manage users/docs at `/admin/partners` (admin-only). Run `scripts/migrate-wave3.sql`.
-- **Availability / lead time:** Inventory fields shown on case study pages (requires wave3 migration).
-- **City × service SEO:** `/locations/{city}/{service}` matrix (UPS AMC, Solar EPC, UPS, BESS, EV, Field) in sitemap.
-- **Press/newsroom:** `/press` + `/admin/press` (seed samples).
-- **Video case studies:** Inventory → video URL/title → player + `VideoObject` JSON-LD.
-- **SLA dashboard:** `/sla` metrics from Site Settings `slaMetricsJson`.
-- **Personalization / support / trust:** Header keeps **Search + Talk to us + Request consultation** only. Trust proof lives under **Who We Are → Standards & proof** (and footer). Tailor (“I’m looking for…”) sits on `/industries` and `/locations`, not the global header. Re-seed header/footer nav to pick up Standards & proof links.
-- **PWA:** `manifest.webmanifest` + `/sw.js` offline contact card (`/offline.html`).
-- **Turnstile:** optional captcha on public enquiry/callback when env keys are set; CSP allows Cloudflare challenges.
-- **CWV budgets:** `scripts/lighthouse-budget.json` for Lighthouse `--budget-path`.
-- **Form rate limit:** tightened to 6 submissions / 15 minutes per IP scope.
-- **Header search:** compact icon expands on hover/click.
+### Wave 3 modules
 
-### Newsletter
-Footer subscribe posts to `/api/public/newsletter`. Manage/export at `/admin/newsletter`.
+CRM webhook, partner portal, video case studies, availability/lead time, press/newsroom, PWA, A/B header CTA, city×service SEO pages.
 
-### Redirects
-Manage 301/302 (etc.) from `/admin/redirects`. Applied in `src/proxy.ts` for public paths (cached ~30s).
+---
 
-### Users
-Admins can create/delete editors and additional admins, reset passwords, and change roles at `/admin/users`. Editors can manage content (pages, inventory, enquiries, nav, media, site settings) but cannot access Users, Theme, Redirects, Newsletter, or Bootstrap. The last admin cannot be demoted or deleted. Change your own password at `/admin/account`.
+## API quick reference
 
-### Navigation
-Nested tree: mega parents → columns → links (header), or columns → links (footer). Use ↑/↓ to reorder siblings. Deleting a parent cascades to children. **Clear** then **Seed** to reset. Header/Footer fall back to built-in defaults until CMS rows exist.
+### Admin (cookie auth)
 
-### Page manager
-Edit SEO (meta title/description), slug, duplicate sections, **Clear sections** (for re-seed), delete pages, and open preview from the section screen.
+| Path | Purpose |
+|------|---------|
+| `/api/admin/dashboard` | Stat counts |
+| `/api/admin/setup`, `/setup/bootstrap` | Checklist + seeds |
+| `/api/admin/pages`, `/pages/[id]/sections` | CMS |
+| `/api/admin/catalog`, `/catalog/seed` | Inventory |
+| `/api/admin/catalog-settings` | Listing config |
+| `/api/admin/nav`, `/nav/seed` | Navigation |
+| `/api/admin/site-settings` | Site identity |
+| `/api/admin/site-copy` | Marketing copy (PUT admin) |
+| `/api/admin/theme` | Tokens + CSS |
+| `/api/admin/enquiries` | Lead inbox |
+| `/api/admin/media` | Asset library |
+| `/api/admin/resources`, `/press`, `/testimonials` | Editorial |
+| `/api/admin/redirects`, `/newsletter`, `/partners`, `/users` | Platform (admin) |
 
-### Featured projects
-Homepage projects teaser prefers `featured` catalog items (`?featured=1`), with fallback to latest.
+### Public (no auth)
 
-### Inventory
-Seed projects/products/services from the live Zigma catalog (products hubs, project portfolio posts, and service pages). Images are stored under `/public/assets/images/seed-*` and attached as primary media on seed. Use **Delete all {type}s** to clear the current tab in one step, then **Seed {type}s** to reload. Duplicate items, reorder, attach additional media, publish/draft. Each item supports **multiple images/videos/SVG** via the **Media** modal: upload many files, attach from the media library, reorder (↑↓), and set a **card thumbnail** (★). Videos show in the public detail gallery but are not used as list thumbnails. Duplicating an item copies its media gallery. Run `scripts/migrate-catalog-categories.sql` once if categories are outdated.
+| Path | Purpose |
+|------|---------|
+| `GET /api/public/pages/[slug]` | CMS content |
+| `GET /api/public/catalog/[type]`, `[type]/[slug]` | Catalog |
+| `GET /api/public/nav`, `/site-settings`, `/site-copy` | Chrome |
+| `GET /api/public/theme.css` | Theme |
+| `POST /api/public/enquiries`, `/careers/apply`, `/callback`, `/newsletter` | Forms |
 
-**Case study pages:** Inventory editor includes a **Case study / profile** block (client, sector, location, challenge, solution, scope, outcomes, technologies, testimonial, before/after, OEM badges, PDF, video). Published items render at `/projects/{slug}`, `/products/{slug}`, and `/services/{slug}` with premium layout, gallery, related items, enquiry form, and SEO metadata. Catalog cards and the quick-view modal link through to the full page. Set **Availability** and **Lead time** for product readiness signals.
+---
 
-### Enquiries
-Filter by status, search payload, admin notes, delete, and **Export CSV**.
+## Seed sections reference
 
-### Enquiry forms
-Reorder fields, edit label/placeholder/options/required, enable/disable.
+| Page | Sections included |
+|------|-------------------|
+| **Home** | hero, eco, stats, why, capability bands, experts, timeline, projects teaser, industries, testimonials, partners, cert teaser, CTA |
+| **Contact** | hero, quick contact, how-we-help, locations, enquiry form |
+| **Careers** | hero, culture, life-at-zigma, why, jobs, internship, benefits, apply form |
+| **Certifications** | hero, OEM marquee, CTA |
+| **Privacy / Terms** | hero, rich text, CTA |
 
-### Section editing
-Typed form editors for most section types, plus JSON mode. Supports `style_json` (extra class + scoped CSS) and media picker for image fields.
+---
 
-### Seed sections
-- **Home:** hero, eco, stats, why, generate/protect/bess/maintain/ev/engineering, experts, timeline, projects teaser, industries, testimonials, partners, cert teaser, CTA
-- **Contact:** page hero, quick contact, how-we-help cards, locations + map, enquiry form (with subject)
-- **Careers:** page hero, culture stats, life-at-zigma, why cards, job list, internship, benefits, apply form (resume upload)
-- **Certifications:** cert hero (+ `.sub`), OEM/certificate marquee (images + lightbox), cert CTA
-- **Privacy / Terms:** page hero, rich text, CTA
+## File reference
 
-### Careers applications
-Public `/careers` apply form posts multipart data to `/api/public/careers/apply` (PDF/DOC/DOCX ≤5MB). Resumes are stored under `public/assets/uploads/resumes/` (blocked from direct public URLs; download via **Enquiries** admin resume endpoint only). Creates an enquiry with `source: careers_apply`. Role values accept any CMS-configured option (not a hardcoded whitelist). Job and internship **Apply** buttons scroll to `#apply` and prefill the role. On `/careers`, the sticky mobile CTA shows **Apply Now**.
+| Concern | Path |
+|---------|------|
+| Auth proxy | `src/proxy.ts` |
+| Admin shell | `src/app/(admin)/admin/layout.tsx` |
+| In-app guide | `src/app/(admin)/admin/guide/page.tsx` |
+| Guide data | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts` |
+| CMS | `src/lib/cms.ts`, `src/lib/cms-types.ts` |
+| Catalog | `src/lib/catalog.ts`, `src/lib/catalog-case-study.ts` |
+| Site settings | `src/lib/site-settings.ts` |
+| Site copy | `src/lib/site-copy.ts` |
+| Schema | `scripts/schema.sql` |
+| DB transfer | `scripts/db-export.mjs`, `scripts/db-import.mjs` |
 
-### Theme
-CSS variables + versioned globals overrides via `/api/public/theme.css`.
+---
 
-### Account
-Change admin password at `/admin/account`. Manage team accounts at `/admin/users`.
+## Original requirements checklist
 
-### Dashboard setup
-Checklist shows whether pages, nav, catalog, site settings, and the enquiry **subject** field are seeded. Use **Bootstrap missing seeds** or per-row **Seed** (including **Seed** on the subject row, which applies the same change as `scripts/migrate-enquiry-subject.sql`).
+| Request | Status |
+|---------|--------|
+| Homepage styling parity with static CSS | Done |
+| Independent `/admin` portal | Done |
+| MySQL (`mysql2`) | Done |
+| Auth gate via `src/proxy.ts` | Done |
+| Inventory (projects/products/services) | Done |
+| Page CMS + seeds + preview | Done |
+| Theme / CSS overrides | Done |
+| Forms & enquiries | Done |
+| Media library | Done |
+| Navigation CMS → Header/Footer | Done |
+| Site settings / highly configurable | Done |
+| In-app admin guide | Done — `/admin/guide` |
 
-### Inventory media
-Open **Media** on an item to attach library URLs, upload files, and remove attachments.
-
-## Re-seed a page, nav, or catalog
-Delete existing rows (sections / nav items / catalog items) first, then click the matching **Seed** button again. For inventory, use **Delete all {type}s** on the Inventory screen, then **Seed {type}s**.
+Legacy `public/*.html` redirect to App Router routes via `proxy.ts` and Redirects admin.

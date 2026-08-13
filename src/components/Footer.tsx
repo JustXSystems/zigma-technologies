@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { buildFooterColumns, type FlatNavRow, type FooterColumn } from '@/lib/nav-tree';
-import { DEFAULT_SITE_SETTINGS, telHref, type SiteSettings } from '@/lib/site-settings';
+import type { FooterColumn } from '@/lib/nav-tree';
+import { telHref, logoAltText } from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { whatsappHref } from '@/lib/whatsapp';
 import { trackEvent } from '@/lib/analytics';
+import { useSiteCopy } from '@/lib/use-site-copy';
+import { useSiteShell } from '@/components/SiteProviders';
 
 const DEFAULT_COLUMNS: FooterColumn[] = [
   {
@@ -50,10 +52,11 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
 export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
+  const { settings: site, footerColumns: shellColumns } = useSiteShell();
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
-  const [columns, setColumns] = useState<FooterColumn[]>(DEFAULT_COLUMNS);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [columns, setColumns] = useState<FooterColumn[]>(shellColumns || DEFAULT_COLUMNS);
+  const copy = useSiteCopy();
 
   const current =
     pathname === '/contact'
@@ -65,22 +68,8 @@ export default function Footer() {
           : 'home';
 
   useEffect(() => {
-    fetch('/api/public/nav?location=footer')
-      .then(async (r) => {
-        const data = await r.json();
-        if (!r.ok || !data.items?.length) return;
-        const cols = buildFooterColumns(data.items as FlatNavRow[]);
-        if (cols.length) setColumns(cols);
-      })
-      .catch(() => undefined);
-
-    fetch('/api/public/site-settings')
-      .then(async (r) => {
-        const data = await r.json();
-        if (r.ok && data.settings) setSite(data.settings);
-      })
-      .catch(() => undefined);
-  }, []);
+    if (shellColumns?.length) setColumns(shellColumns);
+  }, [shellColumns]);
 
   const openConsultation = (subject: string) => {
     const url = new URL(window.location.href);
@@ -122,7 +111,7 @@ export default function Footer() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={site.logoUrl || '/assets/images/zigma-technologies-logo.png'}
-                    alt={site.companyName}
+                    alt={logoAltText(site)}
                   />
                 </span>
                 <span className="logo-word">
@@ -131,15 +120,21 @@ export default function Footer() {
                 </span>
               </a>
               <p className="footer-tagline">{site.footerBlurb}</p>
-              <div className="newsletter-label">Stay informed</div>
+              <div className="newsletter-label">{copy.footer.newsletterLabel}</div>
               {!subscribed ? (
                 <form className="newsletter-form" onSubmit={handleNewsletterSubmit} style={{ position: 'relative' }}>
                   <HoneypotField />
-                  <input type="email" name="email" placeholder="Your work email" aria-label="Email for newsletter" required />
-                  <button type="submit">Subscribe</button>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder={copy.footer.newsletterPlaceholder}
+                    aria-label={copy.footer.newsletterPlaceholder}
+                    required
+                  />
+                  <button type="submit">{copy.footer.subscribe}</button>
                 </form>
               ) : (
-                <span className="newsletter-success">Thanks — you&apos;re subscribed!</span>
+                <span className="newsletter-success">{copy.footer.subscribeSuccess}</span>
               )}
               {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
             </div>
@@ -168,14 +163,14 @@ export default function Footer() {
                     {site.facebookUrl || site.linkedinUrl ? (
                       <div className="social-links">
                         {site.facebookUrl ? (
-                          <a href={site.facebookUrl} className="sl-fb" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                          <a href={site.facebookUrl} className="sl-fb" aria-label={copy.a11y.facebook} target="_blank" rel="noopener noreferrer">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                               <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0022 12z" />
                             </svg>
                           </a>
                         ) : null}
                         {site.linkedinUrl ? (
-                          <a href={site.linkedinUrl} className="sl-li" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+                          <a href={site.linkedinUrl} className="sl-li" aria-label={copy.a11y.linkedin} target="_blank" rel="noopener noreferrer">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                               <path d="M4.98 3.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM3 9h4v12H3zM9 9h3.8v1.64h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.94-1.79-2.94-1.8 0-2.08 1.4-2.08 2.85V21H9z" />
                             </svg>
@@ -191,15 +186,19 @@ export default function Footer() {
           <div className="foot-bottom">
             <span>{site.copyright}</span>
             <span className="foot-powered">
-              Powered by{' '}
+              {copy.footer.poweredByPrefix}{' '}
               <a href="https://www.justxsystems.com/" target="_blank" rel="noopener noreferrer">
                 <strong>JustX Systems</strong>
               </a>
             </span>
             <span className="foot-legal">
-              {site.privacyUrl ? <a href={site.privacyUrl}>Privacy Policy</a> : null}
-              {site.cookiePolicyUrl ? <a href={site.cookiePolicyUrl}>Cookies</a> : <a href="/cookies">Cookies</a>}
-              {site.termsUrl ? <a href={site.termsUrl}>Terms</a> : null}
+              {site.privacyUrl ? <a href={site.privacyUrl}>{copy.footer.privacy}</a> : null}
+              {site.cookiePolicyUrl ? (
+                <a href={site.cookiePolicyUrl}>{copy.footer.cookies}</a>
+              ) : (
+                <a href="/cookies">{copy.footer.cookies}</a>
+              )}
+              {site.termsUrl ? <a href={site.termsUrl}>{copy.footer.terms}</a> : null}
             </span>
           </div>
         </div>
@@ -211,16 +210,16 @@ export default function Footer() {
           className="call"
           onClick={() => trackEvent('cta_click', { channel: 'call', placement: 'mobile_sticky' })}
         >
-          Call
+          {copy.footer.stickyCall}
         </a>
         <a
-          href={whatsappHref(site.whatsapp, 'Hi Zigma — I would like a quick quote.')}
+          href={whatsappHref(site.whatsapp, copy.talk.whatsappPrefill)}
           className="wa"
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackEvent('cta_click', { channel: 'whatsapp', placement: 'mobile_sticky' })}
         >
-          WhatsApp
+          {copy.footer.stickyWhatsapp}
         </a>
         {pathname === '/careers' ? (
           <a href="/careers#apply" className="quote">
@@ -235,7 +234,7 @@ export default function Footer() {
               openConsultation('Request a Quote');
             }}
           >
-            Quote
+            {copy.footer.stickyQuote}
           </button>
         )}
       </div>

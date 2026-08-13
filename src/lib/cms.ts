@@ -1,5 +1,6 @@
 import pool from '@/lib/db';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { cache } from 'react';
 import { parseJsonField, slugify } from '@/lib/types';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 
@@ -269,14 +270,14 @@ export async function reorderNavItems(location: 'header' | 'footer', orderedIds:
   }
 }
 
-export async function getThemeSettings() {
+export const getThemeSettings = cache(async () => {
   const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM theme_settings');
   const out: Record<string, unknown> = {};
   for (const row of rows) {
     out[row.setting_key] = parseJsonField(row.value_json, {});
   }
   return out;
-}
+});
 
 export async function upsertThemeSetting(key: string, value: unknown) {
   await pool.query(
@@ -349,8 +350,21 @@ export async function publishCssOverride(id: number) {
 
 export async function listCssOverrides(limit = 20) {
   const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id, version, status, notes, created_at, published_at FROM css_overrides ORDER BY id DESC LIMIT ?',
+    'SELECT id, version, status, notes, css_text, created_at, published_at FROM css_overrides ORDER BY id DESC LIMIT ?',
     [limit]
   );
   return rows;
+}
+
+export async function getCssOverrideById(id: number) {
+  const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM css_overrides WHERE id = ? LIMIT 1', [id]);
+  return rows[0]
+    ? {
+        id: rows[0].id as number,
+        version: rows[0].version as number,
+        css_text: rows[0].css_text as string,
+        status: rows[0].status as string,
+        notes: rows[0].notes as string | null,
+      }
+    : null;
 }

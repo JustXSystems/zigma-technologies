@@ -7,6 +7,7 @@ import {
   type AnalyticsConsent,
 } from '@/lib/analytics';
 import type { SiteSettings } from '@/lib/site-settings';
+import { useSiteCopy } from '@/lib/use-site-copy';
 
 type Props = {
   settings: SiteSettings;
@@ -45,6 +46,7 @@ export default function CookieConsent({ settings }: Props) {
   const [analyticsOn, setAnalyticsOn] = useState(true);
   const [marketingOn, setMarketingOn] = useState(false);
   const [ready, setReady] = useState(false);
+  const copy = useSiteCopy();
 
   const ga4 = settings.ga4MeasurementId?.trim() || '';
   const plausible = settings.plausibleDomain?.trim() || '';
@@ -100,32 +102,32 @@ export default function CookieConsent({ settings }: Props) {
     <div className="cookie-consent" role="dialog" aria-label="Cookie consent">
       <div>
         <p>
-          Necessary cookies keep the site working. Optional categories help us improve performance and campaigns. See our{' '}
+          {copy.cookies.bannerBody} See our{' '}
           <a href={settings.cookiePolicyUrl || '/cookies'}>Cookie Policy</a> and{' '}
           <a href={settings.privacyUrl || '/privacy'}>Privacy Policy</a>.
         </p>
         <div className="cookie-categories">
           <label>
-            <input type="checkbox" checked disabled /> Necessary (always on)
+            <input type="checkbox" checked disabled /> {copy.cookies.necessaryLabel}
           </label>
           <label>
-            <input type="checkbox" checked={analyticsOn} onChange={(e) => setAnalyticsOn(e.target.checked)} /> Analytics
-            (GA4 / Plausible)
+            <input type="checkbox" checked={analyticsOn} onChange={(e) => setAnalyticsOn(e.target.checked)} />{' '}
+            {copy.cookies.analyticsLabel}
           </label>
           {marketingEnabled ? (
             <label>
-              <input type="checkbox" checked={marketingOn} onChange={(e) => setMarketingOn(e.target.checked)} /> Marketing
-              (future pixels)
+              <input type="checkbox" checked={marketingOn} onChange={(e) => setMarketingOn(e.target.checked)} />{' '}
+              {copy.cookies.marketingLabel}
             </label>
           ) : null}
         </div>
       </div>
       <div className="cookie-consent-actions">
         <button type="button" className="btn btn-primary btn-sm" onClick={acceptSelected}>
-          Save choices
+          {copy.cookies.saveChoices}
         </button>
         <button type="button" className="btn btn-ghost-dark btn-sm" onClick={declineAll}>
-          Decline optional
+          {copy.cookies.declineOptional}
         </button>
       </div>
     </div>

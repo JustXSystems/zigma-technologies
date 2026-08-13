@@ -2,30 +2,38 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
+import { getThemeSettings } from '@/lib/cms';
 import { listPressPosts } from '@/lib/press';
+import { getSiteCopy } from '@/lib/site-content';
+import { mergeSiteSettings } from '@/lib/site-settings';
 
-export const metadata: Metadata = {
-  title: 'Press & newsroom',
-  description: 'Company announcements, partnership news, and project milestones from Zigma Technologies.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
+  const site = mergeSiteSettings((theme as { site?: unknown }).site);
+  return {
+    title: `${copy.hubs.press.title} | ${site.companyName}`,
+    description: copy.hubs.press.lead,
+  };
+}
 
 export default async function PressIndexPage() {
-  const posts = await listPressPosts();
+  const [copy, posts] = await Promise.all([getSiteCopy(), listPressPosts()]);
+  const hub = copy.hubs.press;
 
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
-        eyebrow="Newsroom"
-        title="Press & announcements"
-        lead="Partnership updates, EPC milestones, and company news from Zigma Technologies."
+        eyebrow={hub.eyebrow}
+        title={hub.title}
+        lead={hub.lead}
         image="/assets/images/zigma-technologies-engineers-collaborati.jpg"
         actions={
           <>
-            <Link href="/contact" className="btn btn-primary">
-              Media enquiry →
+            <Link href={hub.ctaPrimaryHref} className="btn btn-primary">
+              {hub.ctaPrimary}
             </Link>
-            <Link href="/resources" className="btn btn-ghost">
-              Technical guides
+            <Link href={hub.ctaSecondaryHref} className="btn btn-ghost">
+              {hub.ctaSecondary}
             </Link>
           </>
         }
@@ -55,12 +63,13 @@ export default async function PressIndexPage() {
       </section>
 
       <InnerCtaBand
-        title="Looking for project proof instead?"
-        lead="Browse published case studies and OEM-backed deployments across India."
-        primaryHref="/projects"
-        primaryLabel="View case studies →"
-        secondaryHref="/certifications"
-        secondaryLabel="Certifications"
+        eyebrow={hub.ctaBandEyebrow}
+        title={hub.ctaBandTitle}
+        lead={hub.ctaBandLead}
+        primaryHref={hub.ctaPrimaryHref}
+        primaryLabel={hub.ctaPrimary}
+        secondaryHref={hub.ctaSecondaryHref}
+        secondaryLabel={hub.ctaSecondary}
       />
     </main>
   );

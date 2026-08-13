@@ -4,50 +4,59 @@ import { useEffect, useState } from 'react';
 import SectionRenderer from '@/components/sections/SectionRenderer';
 import type { CmsSection } from '@/lib/cms-types';
 import { applyDocumentSeo } from '@/components/SiteSeo';
+import { useSiteShell } from '@/components/SiteProviders';
 
 type Props = {
   slug: string;
+  initialSections?: CmsSection[];
+  initialSource?: string;
+  initialPreview?: boolean;
 };
 
-export default function CmsPageClient({ slug }: Props) {
-  const [sections, setSections] = useState<CmsSection[] | null>(null);
+export default function CmsPageClient({
+  slug,
+  initialSections,
+  initialSource = '',
+  initialPreview = false,
+}: Props) {
+  const { settings } = useSiteShell();
+  const [sections, setSections] = useState<CmsSection[] | null>(initialSections ?? null);
   const [error, setError] = useState('');
-  const [preview, setPreview] = useState(false);
-  const [source, setSource] = useState('');
+  const [preview, setPreview] = useState(initialPreview);
+  const [source, setSource] = useState(initialSource);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const isPreview = params.get('preview') === '1';
     const token = params.get('token') || '';
-    setPreview(isPreview);
+
+    if (!isPreview && initialSections?.length) {
+      setPreview(initialPreview);
+      setSource(initialSource);
+      return;
+    }
 
     const qs = isPreview ? `?preview=1&token=${encodeURIComponent(token)}` : '';
 
-    Promise.all([
-      fetch(`/api/public/pages/${slug}${qs}`).then(async (r) => ({ r, data: await r.json() })),
-      fetch('/api/public/site-settings')
-        .then(async (r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    ])
-      .then(([pageRes, siteData]) => {
-        const { r, data } = pageRes;
+    fetch(`/api/public/pages/${slug}${qs}`)
+      .then(async (r) => ({ r, data: await r.json() }))
+      .then(({ r, data }) => {
         if (!r.ok) throw new Error(data.error || 'Failed to load page');
         setSections(data.page.sections || []);
         setSource(data.source || '');
         setPreview(!!data.preview);
 
-        const settings = siteData?.settings;
-        const title = data.page.meta_title || data.page.title || settings?.companyName;
-        const description = data.page.meta_description || settings?.defaultMetaDescription;
+        const title = data.page.meta_title || data.page.title || settings.companyName;
+        const description = data.page.meta_description || settings.defaultMetaDescription;
         applyDocumentSeo({
           title,
           description,
-          image: settings?.ogImage,
-          siteName: settings?.companyName,
+          image: settings.ogImage,
+          siteName: settings.companyName,
         });
       })
-      .catch((e) => setError(e.message));
-  }, [slug]);
+      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load page'));
+  }, [slug, initialSections, initialPreview, initialSource, settings]);
 
   useEffect(() => {
     if (!sections) return;

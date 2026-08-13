@@ -1,6 +1,23 @@
-/** Ecosystem diagram SVG from the static homepage (public/index.html). */
+'use client';
 
+import { useEffect, useState } from 'react';
+import { DEFAULT_SITE_SETTINGS, logoAltText, type SiteSettings } from '@/lib/site-settings';
+
+/** Ecosystem diagram SVG from the static homepage (public/index.html). */
 export default function EcoVisual() {
+  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+
+  useEffect(() => {
+    fetch('/api/public/site-settings')
+      .then(async (r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.settings) setSite(data.settings);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const hubLogoSrc = '/assets/images/zigma.png';
+
   return (
     <svg viewBox="0 0 500 500" width="100%" height="100%" aria-hidden="true">
       <path className="eco-flow" d="M250 250 L250 90" stroke="var(--green)" strokeWidth="1.6" />
@@ -17,7 +34,7 @@ export default function EcoVisual() {
       <foreignObject x="212" y="212" width="76" height="76">
         <div className="logo-chip-circle">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/images/zigma.png" className="img-cover-circle" alt="Zigma" />
+          <img src={hubLogoSrc} className="img-cover-circle" alt={logoAltText(site)} />
         </div>
       </foreignObject>
 

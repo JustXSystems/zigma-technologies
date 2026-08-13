@@ -53,3 +53,6 @@ next-env.d.ts
 # legacy private storage (pre-assets migration)
 /storage/resumes/*
 !/storage/resumes/.gitkeep
+
+# DB / media snapshots for UAT ↔ prod transfer (may contain PII)
+#/storage/exports/

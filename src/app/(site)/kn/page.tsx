@@ -1,12 +1,20 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import LocaleLanding from '@/components/i18n/LocaleLanding';
+import { getSiteCopy } from '@/lib/site-content';
 
-export const metadata: Metadata = {
-  title: 'ಝಿಗ್ಮಾ ಟೆಕ್ನಾಲಜೀಸ್ — ಸೋಲಾರ್, UPS ಮತ್ತು ಪವರ್ ಪರಿಹಾರಗಳು',
-  description: 'ಭಾರತದಾದ್ಯಂತ ಸೋಲಾರ್ EPC, ಕೈಗಾರಿಕಾ UPS, BESS ಮತ್ತು EV ಚಾರ್ಜಿಂಗ್‌ಗೆ ಎಂಜಿನಿಯರಿಂಗ್ ಬೆಂಬಲ.',
-  alternates: { languages: { en: '/', hi: '/hi', kn: '/kn' } },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const copy = await getSiteCopy();
+  const locale = copy.locales.kn;
+  return {
+    title: locale.title,
+    description: locale.lead,
+    alternates: { languages: { en: '/', hi: '/hi', kn: '/kn' } },
+  };
+}
 
-export default function KannadaHomePage() {
-  return <LocaleLanding locale="kn" />;
+export default async function KannadaHomePage() {
+  const copy = await getSiteCopy();
+  if (!copy.features.localesEnabled) redirect('/');
+  return <LocaleLanding locale="kn" copy={copy.locales.kn} toolsEnabled={copy.features.toolsEnabled} />;
 }

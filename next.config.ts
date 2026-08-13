@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
     unoptimized: false,
   },
+  async rewrites() {
+    return [{ source: '/favicon.ico', destination: '/assets/images/zigma.png' }];
+  },
   async headers() {
     return [
       {

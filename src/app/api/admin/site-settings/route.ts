@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { getThemeSettings, upsertThemeSetting } from '@/lib/cms';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '@/lib/site-settings';
+import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 
 export async function GET() {
   try {
@@ -15,29 +15,12 @@ export async function GET() {
   }
 }
 
-const schema = z.object({
-  companyName: z.string().min(1).optional(),
-  tagline: z.string().optional(),
-  footerBlurb: z.string().optional(),
-  phone: z.string().optional(),
-  emergencyPhone: z.string().optional(),
-  email: z.string().optional(),
-  supportEmail: z.string().optional(),
-  whatsapp: z.string().optional(),
-  headerCtaLabel: z.string().optional(),
-  headerCtaHref: z.string().optional(),
-  copyright: z.string().optional(),
-  defaultMetaDescription: z.string().optional(),
-  ogImage: z.string().optional(),
-  enquiryNotifyEmail: z.string().optional(),
-  enquiryNotifyEnabled: z.string().optional(),
-  visitorAutoReplyEnabled: z.string().optional(),
-  logoUrl: z.string().optional(),
-  facebookUrl: z.string().optional(),
-  linkedinUrl: z.string().optional(),
-  privacyUrl: z.string().optional(),
-  termsUrl: z.string().optional(),
-});
+const settingKeys = Object.keys(DEFAULT_SITE_SETTINGS) as Array<keyof SiteSettings>;
+const schema = z.object(
+  Object.fromEntries(
+    settingKeys.map((key) => [key, key === 'companyName' ? z.string().min(1).optional() : z.string().optional()])
+  )
+) as z.ZodType<Partial<SiteSettings>>;
 
 export async function PUT(request: Request) {
   try {

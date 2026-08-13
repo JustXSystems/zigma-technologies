@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import InnerPageHero from '@/components/InnerPageHero';
 import SiteSearchForm from '@/components/SiteSearchForm';
 import { trackEvent } from '@/lib/analytics';
+import { useSiteCopy } from '@/lib/use-site-copy';
 
 type Result = { type: string; title: string; href: string; excerpt?: string };
 
@@ -14,6 +15,8 @@ function SearchInner() {
   const q = searchParams.get('q') || '';
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
+  const copy = useSiteCopy();
+  const hub = copy.hubs.search;
 
   useEffect(() => {
     if (q.trim().length < 2) {
@@ -35,9 +38,9 @@ function SearchInner() {
     <main id="main-content" className="hub-page">
       <InnerPageHero
         accent="cyan"
-        eyebrow="Search"
-        title="Find products, projects, guides & pages"
-        lead="Search the live catalog, resources, and key site pages."
+        eyebrow={hub.eyebrow}
+        title={hub.title}
+        lead={hub.lead}
         image="/assets/images/engineers-reviewing-electrical-design-dr.jpg"
       >
         <div style={{ marginTop: '1.35rem', maxWidth: 480 }} className="page-hero-search">

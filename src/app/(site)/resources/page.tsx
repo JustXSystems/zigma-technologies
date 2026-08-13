@@ -2,21 +2,30 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
+import { getThemeSettings } from '@/lib/cms';
 import { listResourcePosts } from '@/lib/resources';
+import { getSiteCopy } from '@/lib/site-content';
+import { mergeSiteSettings } from '@/lib/site-settings';
 
 type Props = { searchParams: Promise<{ tag?: string }> };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { tag } = await searchParams;
+  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
+  const site = mergeSiteSettings((theme as { site?: unknown }).site);
   return {
-    title: tag ? `${tag} guides | Zigma Technologies` : 'Resources & Guides | Zigma Technologies',
-    description: 'Practical guides on UPS sizing, solar O&M, BESS peak shaving, and power infrastructure.',
+    title: tag ? `${tag} guides | ${site.companyName}` : `${copy.hubs.resources.title} | ${site.companyName}`,
+    description: copy.hubs.resources.lead,
   };
 }
 
 export default async function ResourcesIndexPage({ searchParams }: Props) {
   const { tag } = await searchParams;
-  const posts = await listResourcePosts({ tag: tag || undefined });
+  const [copy, posts] = await Promise.all([
+    getSiteCopy(),
+    listResourcePosts({ tag: tag || undefined }),
+  ]);
+  const hub = copy.hubs.resources;
   const all = tag ? await listResourcePosts() : posts;
   const tags = Array.from(new Set(all.flatMap((p) => p.tags_json || []))).sort();
 
@@ -24,17 +33,17 @@ export default async function ResourcesIndexPage({ searchParams }: Props) {
     <main id="main-content" className="hub-page">
       <InnerPageHero
         accent="cyan"
-        eyebrow="Knowledge"
-        title={tag ? `${tag} guides` : 'Resources & guides'}
-        lead="Engineering playbooks for UPS, solar O&M, BESS, and critical power decisions."
+        eyebrow={hub.eyebrow}
+        title={tag ? `${tag} guides` : hub.title}
+        lead={hub.lead}
         image="/assets/images/engineers-reviewing-electrical-design-dr.jpg"
         actions={
           <>
-            <Link href="/tools/ups-calculator" className="btn btn-primary">
-              UPS calculator →
+            <Link href={copy.features.toolsEnabled ? '/tools/ups-calculator' : hub.ctaPrimaryHref} className="btn btn-primary">
+              {copy.features.toolsEnabled ? 'UPS calculator →' : hub.ctaPrimary}
             </Link>
-            <Link href="/tools/solar-roi" className="btn btn-ghost">
-              Solar ROI
+            <Link href={hub.ctaSecondaryHref} className="btn btn-ghost">
+              {hub.ctaSecondary}
             </Link>
           </>
         }
@@ -88,12 +97,13 @@ export default async function ResourcesIndexPage({ searchParams }: Props) {
       </section>
 
       <InnerCtaBand
-        title="Prefer a guided recommendation?"
-        lead="Use the solution finder or jump straight into a consultation with an engineer."
-        primaryHref="/tools/solution-finder"
-        primaryLabel="Solution finder →"
-        secondaryHref="/contact?consult=1"
-        secondaryLabel="Request quote"
+        eyebrow={hub.ctaBandEyebrow}
+        title={hub.ctaBandTitle}
+        lead={hub.ctaBandLead}
+        primaryHref={copy.features.toolsEnabled ? '/tools/solution-finder' : hub.ctaPrimaryHref}
+        primaryLabel={copy.features.toolsEnabled ? 'Solution finder →' : hub.ctaPrimary}
+        secondaryHref={hub.ctaPrimaryHref}
+        secondaryLabel={hub.ctaPrimary}
       />
     </main>
   );

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ResourceDetailView from '@/components/resources/ResourceDetailView';
 import { getResourcePostBySlug, listResourcePosts } from '@/lib/resources';
+import { getSiteCopy } from '@/lib/site-content';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ResourceDetailPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getResourcePostBySlug(slug);
+  const [post, copy] = await Promise.all([getResourcePostBySlug(slug), getSiteCopy()]);
   if (!post) notFound();
 
   const related = (await listResourcePosts({ tag: post.tags_json?.[0], limit: 4 }))
@@ -41,69 +42,9 @@ export default async function ResourceDetailPage({ params }: Props) {
   };
 
   return (
-    <main id="main-content" className="resource-detail">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="page-hero" style={{ minHeight: 'auto', padding: '10rem 0 3rem' }}>
-        <div className="hero-bg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={post.cover_url || '/assets/images/engineers-reviewing-electrical-design-dr.jpg'} alt="" />
-          <div className="hero-overlay"></div>
-          <div className="grid-overlay"></div>
-        </div>
-        <div className="container">
-          <nav className="breadcrumb" aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <span className="sep">/</span>
-            <Link href="/resources">Resources</Link>
-            <span className="sep">/</span>
-            <span className="current">{post.title}</span>
-          </nav>
-          <div className="eyebrow eyebrow-cyan">Guide</div>
-          <h1>{post.title}</h1>
-          {post.excerpt ? <p className="lead">{post.excerpt}</p> : null}
-          <div className="case-study-tags" style={{ marginTop: '1rem' }}>
-            {(post.tags_json || []).map((tag) => (
-              <Link key={tag} href={`/resources?tag=${encodeURIComponent(tag)}`} className="case-study-tag">
-                {tag}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section className="section section-light">
-        <div className="container" style={{ maxWidth: 820 }}>
-          <article
-            className="resource-body"
-            dangerouslySetInnerHTML={{ __html: post.body_html || '<p>Content coming soon.</p>' }}
-          />
-          <p style={{ marginTop: '2rem' }}>
-            <Link href="/contact?consult=1&consult_subject=Request%20a%20Quote" className="btn btn-primary">
-              Talk to an engineer →
-            </Link>
-          </p>
-        </div>
-      </section>
-      {related.length ? (
-        <section className="section section-gray">
-          <div className="container">
-            <div className="section-head">
-              <div className="eyebrow">Related guides</div>
-              <h2>Keep learning</h2>
-            </div>
-            <div className="proj-grid">
-              {related.map((r) => (
-                <Link key={r.id} href={`/resources/${r.slug}`} className="proj-card">
-                  <div className="proj-body">
-                    <h5>{r.title}</h5>
-                    <p>{r.excerpt}</p>
-                    <span className="link">Read →</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-    </main>
+      <ResourceDetailView post={post} related={related} copy={copy} />
+    </>
   );
 }

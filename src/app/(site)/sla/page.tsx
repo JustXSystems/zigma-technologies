@@ -3,12 +3,17 @@ import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import { getThemeSettings } from '@/lib/cms';
+import { getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
 
-export const metadata: Metadata = {
-  title: 'Service levels & response commitments',
-  description: 'Published response SLAs for enquiries, emergency UPS support, AMC, and solar O&M.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
+  const site = mergeSiteSettings((theme as { site?: unknown }).site);
+  return {
+    title: `${copy.hubs.sla.title} | ${site.companyName}`,
+    description: copy.hubs.sla.lead,
+  };
+}
 
 type Metric = { label: string; value: string };
 
@@ -25,39 +30,41 @@ function parseMetrics(raw: string): Metric[] {
 }
 
 export default async function SlaPage() {
-  const theme = await getThemeSettings();
+  const [theme, copy] = await Promise.all([getThemeSettings(), getSiteCopy()]);
   const settings = mergeSiteSettings(theme.site);
   const metrics = parseMetrics(settings.slaMetricsJson);
+  const hub = copy.hubs.sla;
 
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
         accent="cyan"
-        eyebrow="Transparency"
-        title="Service level dashboard"
+        eyebrow={hub.eyebrow}
+        title={hub.title}
         lead={
           <>
-            How quickly we aim to respond — office hours {settings.officeHours}. Typical first reply:{' '}
-            {settings.responseSla}.
+            {hub.lead} Office hours {settings.officeHours}. Typical first reply: {settings.responseSla}.
           </>
         }
         image="/assets/images/zigma-technologies-help-desk-team-assist.jpg"
         actions={
           <>
-            <Link href="/contact?consult=1" className="btn btn-primary">
-              Talk to an engineer →
+            <Link href={hub.ctaPrimaryHref} className="btn btn-primary">
+              {hub.ctaPrimary}
             </Link>
-            <Link href="/contact" className="btn btn-ghost">
-              Contact desk
+            <Link href={hub.ctaSecondaryHref} className="btn btn-ghost">
+              {hub.ctaSecondary}
             </Link>
           </>
         }
       >
-        <div className="proof-rail">
-          <span>Published commitments</span>
-          <span>Emergency desk</span>
-          <span>Engineering-owned response</span>
-        </div>
+        {hub.proofRail.length ? (
+          <div className="proof-rail">
+            {hub.proofRail.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        ) : null}
       </InnerPageHero>
 
       <section className="hub-section hub-section--soft">
@@ -83,10 +90,11 @@ export default async function SlaPage() {
       </section>
 
       <InnerCtaBand
-        title="Need an emergency or AMC conversation now?"
-        lead="Use Talk to us in the header, or open a consultation with urgency noted."
-        primaryHref="/contact?consult=1"
-        primaryLabel="Open consultation →"
+        eyebrow={hub.ctaBandEyebrow}
+        title={hub.ctaBandTitle}
+        lead={hub.ctaBandLead}
+        primaryHref={hub.ctaPrimaryHref}
+        primaryLabel={hub.ctaPrimary}
         secondaryHref="/locations"
         secondaryLabel="Find your city"
       />

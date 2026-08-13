@@ -3,7 +3,11 @@ import { requireAdmin, requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import {
   DEFAULT_THEME_TOKENS,
-} from '@/lib/homepage-seed';
+  mergeTokens,
+  pickAllowedTokens,
+  sanitizeCssOverride,
+} from '@/lib/theme-tokens';
+import { tryWritePublishedSiteCss } from '@/lib/site-css';
 import {
   getLatestCssDraft,
   getPublishedCssOverride,
@@ -24,10 +28,12 @@ export async function GET() {
       listCssOverrides(),
     ]);
     return jsonOk({
-      tokens: (theme.tokens as Record<string, string>) || DEFAULT_THEME_TOKENS,
+      tokens: mergeTokens(theme.tokens),
+      defaults: DEFAULT_THEME_TOKENS,
       published,
       draft,
       history,
+      hasFullStylesheet: Boolean(published?.css_text && published.css_text.length > 8_000),
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
@@ -40,6 +46,8 @@ const putSchema = z.object({
   css_text: z.string().optional(),
   notes: z.string().optional(),
   publish_id: z.number().optional(),
+  /** When true after publish, also write globals.css on disk if FS is writable */
+  sync_files: z.boolean().optional(),
 });
 
 export async function PUT(request: Request) {
@@ -48,18 +56,32 @@ export async function PUT(request: Request) {
     const body = putSchema.parse(await readJson(request));
 
     if (body.tokens) {
-      await upsertThemeSetting('tokens', body.tokens);
+      const allowed = pickAllowedTokens(body.tokens);
+      await upsertThemeSetting('tokens', allowed);
     }
 
     let draftId: number | null = null;
     if (typeof body.css_text === 'string') {
-      draftId = await saveCssDraft(body.css_text, body.notes);
+      const sanitized = sanitizeCssOverride(body.css_text);
+      if (!sanitized.ok) return jsonError(sanitized.error, 400);
+      draftId = await saveCssDraft(sanitized.css, body.notes);
     }
 
+    let didPublish = false;
     if (body.publish_id) {
       await publishCssOverride(body.publish_id);
+      didPublish = true;
     } else if (draftId && body.notes === 'publish-now') {
       await publishCssOverride(draftId);
+      didPublish = true;
+    }
+
+    let fileSync: { wroteApp: boolean; wrotePublic: boolean } | null = null;
+    if (didPublish && body.sync_files !== false) {
+      const publishedNow = await getPublishedCssOverride();
+      if (publishedNow?.css_text) {
+        fileSync = tryWritePublishedSiteCss(publishedNow.css_text);
+      }
     }
 
     const [theme, published, draft, history] = await Promise.all([
@@ -70,11 +92,14 @@ export async function PUT(request: Request) {
     ]);
 
     return jsonOk({
-      tokens: (theme.tokens as Record<string, string>) || DEFAULT_THEME_TOKENS,
+      tokens: mergeTokens(theme.tokens),
+      defaults: DEFAULT_THEME_TOKENS,
       published,
       draft,
       history,
       draftId,
+      fileSync,
+      hasFullStylesheet: Boolean(published?.css_text && published.css_text.length > 8_000),
     });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);

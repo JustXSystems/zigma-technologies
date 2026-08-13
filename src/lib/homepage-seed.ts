@@ -449,14 +449,5 @@ export const HOMEPAGE_SEED_SECTIONS = [
   },
 ] as const;
 
-export const DEFAULT_THEME_TOKENS = {
-  '--navy-950': '#0A1628',
-  '--navy-900': '#0F1F3D',
-  '--orange': '#FF6B1A',
-  '--orange-dim': '#c9540f',
-  '--green': '#12B76A',
-  '--cyan': '#00D4FF',
-  '--graphite-800': '#1E2530',
-  '--graphite-500': '#5B6472',
-  '--section-pad': '9rem',
-};
+/** @deprecated Import from `@/lib/theme-tokens` instead */
+export { DEFAULT_THEME_TOKENS } from '@/lib/theme-tokens';

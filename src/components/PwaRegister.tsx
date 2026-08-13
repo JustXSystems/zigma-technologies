@@ -6,8 +6,16 @@ import { useEffect } from 'react';
 export default function PwaRegister() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
-    if (process.env.NODE_ENV !== 'production' && !window.location.hostname.includes('localhost')) return;
-    navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+
+    // Never run a service worker in dev — it caches navigations and breaks Turbopack HMR.
+    if (process.env.NODE_ENV !== 'production') {
+      void navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const reg of regs) void reg.unregister();
+      });
+      return;
+    }
+
+    void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   }, []);
   return null;
 }

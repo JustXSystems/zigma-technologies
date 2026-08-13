@@ -53,55 +53,76 @@ function LoginForm() {
 
   return (
     <div className="admin-login-wrap">
-      <form className="admin-login-card" onSubmit={onSubmit}>
-        <h1>Admin Portal</h1>
-        <p>Sign in to manage inventory, enquiries, and site content.</p>
-        {error ? <div className="admin-error">{error}</div> : null}
-        {seedMsg ? <div className="admin-success">{seedMsg}</div> : null}
-        <div className="admin-field" style={{ marginBottom: '0.9rem' }}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            className="admin-input"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%' }}
-          />
+      <div className="admin-login-brand">
+        <div className="admin-login-brand-mark" aria-hidden="true">
+          Z
         </div>
-        <div className="admin-field" style={{ marginBottom: '1.2rem' }}>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            className="admin-input"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%' }}
-          />
-        </div>
-        <button className="admin-btn admin-btn-primary" type="submit" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
-          {loading ? 'Signing in…' : 'Sign in'}
-        </button>
-        <button
-          type="button"
-          className="admin-btn admin-btn-secondary"
-          onClick={seedAdmin}
-          disabled={seeding}
-          style={{ width: '100%', justifyContent: 'center', marginTop: '0.7rem' }}
-        >
-          {seeding ? 'Seeding…' : 'Seed default admin'}
-        </button>
-      </form>
+        <h1>Zigma Control Portal</h1>
+        <p>
+          Enterprise CMS for marketing content, catalog inventory, lead management, and site configuration.
+        </p>
+        <ul>
+          <li>Manage pages, products, projects, and services</li>
+          <li>Track enquiries and configure public forms</li>
+          <li>Control navigation, theme, and brand settings</li>
+        </ul>
+      </div>
+      <div className="admin-login-panel">
+        <form className="admin-login-card" onSubmit={onSubmit}>
+          <h2>Sign in</h2>
+          <p className="admin-login-sub">Use your administrator or editor credentials.</p>
+          {error ? <div className="admin-error">{error}</div> : null}
+          {seedMsg ? <div className="admin-success">{seedMsg}</div> : null}
+          <div className="admin-field" style={{ marginBottom: '0.9rem' }}>
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              className="admin-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div className="admin-field" style={{ marginBottom: '1.2rem' }}>
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              className="admin-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{ width: '100%' }}
+            />
+          </div>
+          <button
+            className="admin-btn admin-btn-primary"
+            type="submit"
+            disabled={loading}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={seedAdmin}
+            disabled={seeding}
+            style={{ width: '100%', justifyContent: 'center', marginTop: '0.7rem' }}
+          >
+            {seeding ? 'Seeding…' : 'Seed default admin'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="admin-login-wrap">Loading…</div>}>
+    <Suspense fallback={<div className="admin-login-wrap admin-login-panel">Loading…</div>}>
       <LoginForm />
     </Suspense>
   );

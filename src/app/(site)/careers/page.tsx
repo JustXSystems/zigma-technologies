@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import CmsPageClient from '@/components/CmsPageClient';
+import CmsPageShell from '@/components/CmsPageShell';
 import { buildCmsMetadata } from '@/lib/cms-seo';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -7,5 +7,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Careers() {
-  return <CmsPageClient slug="careers" />;
+  return <CmsPageShell slug="careers" />;
 }

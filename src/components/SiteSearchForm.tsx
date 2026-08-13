@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { trackEvent } from '@/lib/analytics';
+import { useSiteCopy } from '@/lib/use-site-copy';
 
 export default function SiteSearchForm({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
@@ -10,6 +11,7 @@ export default function SiteSearchForm({ compact = false }: { compact?: boolean 
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLFormElement>(null);
+  const copy = useSiteCopy();
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -36,16 +38,16 @@ export default function SiteSearchForm({ compact = false }: { compact?: boolean 
     return (
       <form className="site-search" onSubmit={onSubmit} role="search">
         <label className="sr-only" htmlFor="site-search-page-q">
-          Search site
+          {copy.searchForm.ariaLabel}
         </label>
         <input
           id="site-search-page-q"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search projects, products, services…"
+          placeholder={copy.searchForm.placeholder}
           type="search"
         />
-        <button type="submit" aria-label="Search">
+        <button type="submit" aria-label={copy.searchForm.ariaLabel}>
           ⌕
         </button>
       </form>
@@ -65,11 +67,11 @@ export default function SiteSearchForm({ compact = false }: { compact?: boolean 
       onFocusCapture={() => setExpanded(true)}
     >
       <label className="sr-only" htmlFor="site-search-q">
-        Search site
+        {copy.searchForm.ariaLabel}
       </label>
       <button
         type="submit"
-        aria-label="Search"
+        aria-label={copy.searchForm.ariaLabel}
         onClick={(e) => {
           if (!expanded) {
             e.preventDefault();
@@ -85,7 +87,7 @@ export default function SiteSearchForm({ compact = false }: { compact?: boolean 
         id="site-search-q"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search…"
+        placeholder={copy.searchForm.placeholder}
         type="search"
         tabIndex={expanded ? 0 : -1}
         aria-hidden={!expanded}

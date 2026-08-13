@@ -3,8 +3,10 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
+import { useSiteCopy } from '@/lib/use-site-copy';
 
 export default function UpsCalculatorClient() {
+  const t = useSiteCopy().tools.upsCalculator;
   const [loadKw, setLoadKw] = useState(40);
   const [pf, setPf] = useState(0.8);
   const [redundancy, setRedundancy] = useState<'n' | 'n+1'>('n+1');
@@ -35,57 +37,55 @@ export default function UpsCalculatorClient() {
     <div className="calc-tool">
       <div className="calc-grid">
         <label>
-          Critical load (kW)
+          {t.loadKwLabel}
           <input type="number" min={1} value={loadKw} onChange={(e) => setLoadKw(Number(e.target.value) || 0)} />
         </label>
         <label>
-          Power factor
+          {t.pfLabel}
           <input type="number" min={0.5} max={1} step={0.05} value={pf} onChange={(e) => setPf(Number(e.target.value) || 0.8)} />
         </label>
         <label>
-          Growth headroom (%)
+          {t.growthLabel}
           <input type="number" min={0} max={100} value={growthPct} onChange={(e) => setGrowthPct(Number(e.target.value) || 0)} />
         </label>
         <label>
-          Battery runtime (min)
+          {t.runtimeLabel}
           <input type="number" min={5} max={120} value={runtimeMin} onChange={(e) => setRuntimeMin(Number(e.target.value) || 15)} />
         </label>
         <label>
-          Topology
+          {t.topologyLabel}
           <select value={redundancy} onChange={(e) => setRedundancy(e.target.value as 'n' | 'n+1')}>
-            <option value="n">N capacity</option>
-            <option value="n+1">N+1 modular</option>
+            <option value="n">{t.topologyN}</option>
+            <option value="n+1">{t.topologyNPlus1}</option>
           </select>
         </label>
       </div>
 
       <div className="calc-result" id="calc-print-area">
-        <h3>Indicative sizing</h3>
+        <h3>{t.resultTitle}</h3>
         <ul>
           <li>
-            Design load: <strong>{result.designKw} kW</strong>
+            {t.designLoad}: <strong>{result.designKw} kW</strong>
           </li>
           <li>
-            Recommended UPS: <strong>{result.kva} kVA</strong>
+            {t.recommendedUps}: <strong>{result.kva} kVA</strong>
           </li>
           <li>
-            Modular frames (100 kVA class): <strong>{result.modules}</strong>
+            {t.modularFrames}: <strong>{result.modules}</strong>
           </li>
           <li>
-            Approx. battery energy: <strong>{result.batteryKwh} kWh</strong> @ {runtimeMin} min
+            {t.batteryEnergy}: <strong>{result.batteryKwh} kWh</strong> @ {runtimeMin} min
           </li>
         </ul>
-        <p className="calc-note">
-          Engineering estimate only — site power quality, crest factor, and generator sizing require a site survey.
-        </p>
+        <p className="calc-note">{t.disclaimer}</p>
       </div>
 
       <div className="calc-actions">
         <button type="button" className="btn btn-ghost-dark" onClick={printQuote}>
-          Print / save PDF
+          {t.printLabel}
         </button>
         <Link href={quoteHref} className="btn btn-primary" onClick={() => trackEvent('calculator_quote', { tool: 'ups_kva' })}>
-          Request engineered quote →
+          {t.quoteLabel}
         </Link>
       </div>
     </div>

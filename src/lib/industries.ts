@@ -156,3 +156,50 @@ export function industryPageSlug(key: string) {
 export function industryPublicPath(key: string) {
   return `/industries/${key}`;
 }
+
+/** Merge CMS JSON overrides (theme_settings.industries) onto code defaults by key. */
+export function mergeIndustryDefs(raw: unknown): IndustryDef[] {
+  if (!Array.isArray(raw) || raw.length === 0) return INDUSTRY_DEFS;
+  const byKey = new Map(INDUSTRY_DEFS.map((d) => [d.key, { ...d }]));
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Partial<IndustryDef> & { key?: string };
+    if (!row.key || typeof row.key !== 'string') continue;
+    const prev = byKey.get(row.key) || {
+      key: row.key,
+      name: row.key,
+      eyebrow: '',
+      lead: '',
+      subject: '',
+      catalogHints: [],
+      faqs: [],
+    };
+    byKey.set(row.key, {
+      ...prev,
+      ...row,
+      key: row.key,
+      catalogHints: Array.isArray(row.catalogHints) ? row.catalogHints : prev.catalogHints,
+      faqs: Array.isArray(row.faqs) ? row.faqs : prev.faqs,
+    });
+  }
+  // Preserve CMS order when provided; append any defaults missing from CMS
+  const ordered: IndustryDef[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    const key = (item as { key?: string })?.key;
+    if (!key || seen.has(key)) continue;
+    const def = byKey.get(key);
+    if (def) {
+      ordered.push(def);
+      seen.add(key);
+    }
+  }
+  for (const d of INDUSTRY_DEFS) {
+    if (!seen.has(d.key)) ordered.push(d);
+  }
+  return ordered;
+}
+
+export function getIndustryByKeyFromList(defs: IndustryDef[], key: string) {
+  return defs.find((i) => i.key === key) || null;
+}

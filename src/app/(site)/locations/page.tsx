@@ -3,13 +3,18 @@ import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import VisitTailorBar from '@/components/VisitTailorBar';
-import { LOCATION_DEFS } from '@/lib/locations';
+import { getThemeSettings } from '@/lib/cms';
+import { getLocationDefsCms, getSiteCopy } from '@/lib/site-content';
+import { mergeSiteSettings } from '@/lib/site-settings';
 
-export const metadata: Metadata = {
-  title: 'Service Locations | Zigma Technologies',
-  description:
-    'Zigma Technologies power and energy engineering across Bengaluru, Chennai, Hyderabad, Mumbai, Pune, and Delhi NCR.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
+  const site = mergeSiteSettings((theme as { site?: unknown }).site);
+  return {
+    title: `${copy.hubs.locations.title} | ${site.companyName}`,
+    description: copy.hubs.locations.lead,
+  };
+}
 
 const LOCATION_IMAGE: Record<string, string> = {
   bengaluru: '/assets/images/kempegowda-international-airport-bengalu.png',
@@ -20,30 +25,35 @@ const LOCATION_IMAGE: Record<string, string> = {
   'delhi-ncr': '/assets/images/engineers-in-hard-hats-reviewing-a-digit.jpg',
 };
 
-export default function LocationsIndexPage() {
+export default async function LocationsIndexPage() {
+  const [copy, locations] = await Promise.all([getSiteCopy(), getLocationDefsCms()]);
+  const hub = copy.hubs.locations;
+
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
-        eyebrow="Locations"
-        title="Where we deliver across India"
-        lead="City pages with local proof, response SLAs, and a direct path to consultation."
+        eyebrow={hub.eyebrow}
+        title={hub.title}
+        lead={hub.lead}
         image="/assets/images/aerial-view-of-dense-commercial-rooftop-.jpg"
         actions={
           <>
-            <Link href="/contact?consult=1" className="btn btn-primary">
-              Request city consultation →
+            <Link href={hub.ctaPrimaryHref} className="btn btn-primary">
+              {hub.ctaPrimary}
             </Link>
-            <Link href="/sla" className="btn btn-ghost">
-              Service levels
+            <Link href={hub.ctaSecondaryHref} className="btn btn-ghost">
+              {hub.ctaSecondary}
             </Link>
           </>
         }
       >
-        <div className="proof-rail">
-          <span>Bengaluru HQ</span>
-          <span>24×7 emergency desk</span>
-          <span>Pan-India delivery</span>
-        </div>
+        {hub.proofRail.length ? (
+          <div className="proof-rail">
+            {hub.proofRail.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        ) : null}
       </InnerPageHero>
 
       <section className="hub-section hub-section--soft">
@@ -55,7 +65,7 @@ export default function LocationsIndexPage() {
             <p>Local strengths, service matrix pages, and relevant catalog proof for each market.</p>
           </div>
           <div className="hub-grid">
-            {LOCATION_DEFS.map((loc) => (
+            {locations.map((loc) => (
               <Link key={loc.key} href={`/locations/${loc.key}`} className="hub-card">
                 <div className="hub-card-media">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -77,12 +87,13 @@ export default function LocationsIndexPage() {
       </section>
 
       <InnerCtaBand
-        title="Planning a multi-site rollout?"
-        lead="We coordinate UPS, solar, BESS, and AMC across metros with a single engineering owner."
-        primaryHref="/contact?consult=1"
-        primaryLabel="Start a consultation →"
-        secondaryHref="/industries"
-        secondaryLabel="Browse industries"
+        eyebrow={hub.ctaBandEyebrow}
+        title={hub.ctaBandTitle}
+        lead={hub.ctaBandLead}
+        primaryHref={hub.ctaPrimaryHref}
+        primaryLabel={hub.ctaPrimary}
+        secondaryHref="/sla"
+        secondaryLabel="Service levels"
       />
     </main>
   );

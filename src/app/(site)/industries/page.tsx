@@ -3,13 +3,18 @@ import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import VisitTailorBar from '@/components/VisitTailorBar';
-import { INDUSTRY_DEFS } from '@/lib/industries';
+import { getIndustryDefsCms, getSiteCopy } from '@/lib/site-content';
+import { mergeSiteSettings } from '@/lib/site-settings';
+import { getThemeSettings } from '@/lib/cms';
 
-export const metadata: Metadata = {
-  title: 'Industries We Serve | Zigma Technologies',
-  description:
-    'Power and energy engineering for healthcare, data centres, manufacturing, banking, education, and airports across India.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
+  const site = mergeSiteSettings((theme as { site?: unknown }).site);
+  return {
+    title: `${copy.hubs.industries.title} | ${site.companyName}`,
+    description: copy.hubs.industries.lead,
+  };
+}
 
 const INDUSTRY_IMAGE: Record<string, string> = {
   healthcare: '/assets/images/zigma-technologies-engineers-monitoring-.jpg',
@@ -20,33 +25,35 @@ const INDUSTRY_IMAGE: Record<string, string> = {
   airports: '/assets/images/kempegowda-international-airport-bengalu.png',
 };
 
-export default function IndustriesIndexPage() {
+export default async function IndustriesIndexPage() {
+  const [copy, industries] = await Promise.all([getSiteCopy(), getIndustryDefsCms()]);
+  const hub = copy.hubs.industries;
+
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
-        eyebrow="Industries"
-        title="Engineering that understands your sector"
-        lead="Explore tailored UPS, solar, BESS, and service pathways for the environments you operate in."
+        eyebrow={hub.eyebrow}
+        title={hub.title}
+        lead={hub.lead}
         image="/assets/images/city-skyline-with-solar-panels-and-indus.jpg"
         actions={
           <>
-            <Link href="/contact?consult=1" className="btn btn-primary">
-              Request consultation →
+            <Link href={hub.ctaPrimaryHref} className="btn btn-primary">
+              {hub.ctaPrimary}
             </Link>
-            <Link href="/projects" className="btn btn-ghost">
-              View case studies
+            <Link href={hub.ctaSecondaryHref} className="btn btn-ghost">
+              {hub.ctaSecondary}
             </Link>
           </>
         }
       >
-        <div className="proof-rail">
-          <span>Healthcare</span>
-          <span>Data centres</span>
-          <span>Manufacturing</span>
-          <span>Banking</span>
-          <span>Education</span>
-          <span>Airports</span>
-        </div>
+        {hub.proofRail.length ? (
+          <div className="proof-rail">
+            {hub.proofRail.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        ) : null}
       </InnerPageHero>
 
       <section className="hub-section hub-section--soft">
@@ -58,7 +65,7 @@ export default function IndustriesIndexPage() {
             <p>Each landing maps catalog solutions, proof, and a direct consultation path.</p>
           </div>
           <div className="hub-grid">
-            {INDUSTRY_DEFS.map((ind) => (
+            {industries.map((ind) => (
               <Link key={ind.key} href={`/industries/${ind.key}`} className="hub-card">
                 <div className="hub-card-media">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -80,12 +87,13 @@ export default function IndustriesIndexPage() {
       </section>
 
       <InnerCtaBand
-        title="Need a sector-specific feasibility call?"
-        lead="Share load profile, uptime targets, and site constraints — we map UPS, solar, BESS, or AMC options."
-        primaryHref="/contact?consult=1"
-        primaryLabel="Talk to an engineer →"
-        secondaryHref="/tools/solution-finder"
-        secondaryLabel="Solution finder"
+        eyebrow={hub.ctaBandEyebrow}
+        title={hub.ctaBandTitle}
+        lead={hub.ctaBandLead}
+        primaryHref={hub.ctaPrimaryHref}
+        primaryLabel={hub.ctaPrimary}
+        secondaryHref={copy.features.toolsEnabled ? '/tools/solution-finder' : hub.ctaSecondaryHref}
+        secondaryLabel={copy.features.toolsEnabled ? copy.talk.solutionFinder : hub.ctaSecondary}
       />
     </main>
   );
