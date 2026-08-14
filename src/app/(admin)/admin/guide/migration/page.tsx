@@ -110,8 +110,8 @@ export default function AdminMigrationGuidePage() {
             <div className="admin-guide-callout admin-guide-callout--warn">
               Mail currently lives on the same UrbanVendo IP as the website (MX = the domain itself). Do not move 60–150
               mailboxes onto the Hostinger VPS. Complete{' '}
-              <Link href="/admin/guide/email">email server migration</Link> (Zoho/Google/Microsoft) on a different
-              weekend from the www A-record cutover.
+              <Link href="/admin/guide/email">email server migration</Link> (Google Workspace recommended; Zoho/Microsoft
+              alternatives) on a different weekend from the www A-record cutover.
             </div>
             <div className="admin-guide-diagram">
               <p className="admin-guide-diagram-caption">Traffic flow after migration</p>

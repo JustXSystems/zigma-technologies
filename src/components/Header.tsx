@@ -127,7 +127,9 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<string | null>(null);
   const [navItems, setNavItems] = useState<NavItem[]>(shellNav || DEFAULT_NAV);
-  const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>(() => pickCtaVariant(site));
+  // Always start with A so SSR and the first client paint match. pickCtaVariant()
+  // reads sessionStorage / Math.random() and must only run after mount.
+  const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>('A');
   const [callbackOpen, setCallbackOpen] = useState(false);
   const copy = useSiteCopy();
 

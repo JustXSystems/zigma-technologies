@@ -213,12 +213,12 @@ export default function AdminGuidePage() {
                 Leave UrbanVendo self-hosted mail (60+ IDs, scale to 150) before the September 2026 renewal. The current
                 provider is <strong>UrbanVendo / Exigo IT</strong> (Postfix + CWP); Roundcube is only the webmail UI.
                 Addresses stay the same; only MX, SPF, DKIM, and DMARC change. Recommended next host:{' '}
-                <strong>Zoho Mail Lite</strong> (or Google Workspace if deliverability is the priority).
+                <strong>Google Workspace Business Starter</strong> (Zoho remains a budget alternative).
               </p>
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
               <strong>Do not</strong> run 150 mailboxes on the Hostinger VPS. Migrate email first, website second.
-              Indicative year-1 cost at 150 Zoho Lite seats: ~₹1.25 lakh incl. GST.
+              Indicative year-1 cost at 150 Google Starter seats: ~₹5.73 lakh incl. GST.
             </div>
             <Link href="/admin/guide/email" className="admin-guide-module admin-guide-module--link">
               <div className="admin-guide-module-top">

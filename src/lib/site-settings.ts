@@ -131,7 +131,10 @@ export function faviconSrc(_settings?: Pick<SiteSettings, 'logoUrl'>) {
   return DEFAULT_FAVICON;
 }
 
-/** Deterministic-ish A/B pick from session storage. */
+/**
+ * A/B pick from session storage. Client-only — never call during SSR or in a
+ * useState initializer, or the header CTA label will hydrate-mismatch.
+ */
 export function pickCtaVariant(settings: SiteSettings): 'A' | 'B' {
   if (typeof window === 'undefined') return 'A';
   const pct = Math.min(100, Math.max(0, Number(settings.ctaVariantBPercent) || 0));

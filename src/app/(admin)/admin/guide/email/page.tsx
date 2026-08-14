@@ -54,7 +54,7 @@ export default function AdminEmailMigrationGuidePage() {
           <div className="admin-guide-hero-stats">
             <div className="admin-guide-stat">
               <span className="admin-guide-stat-label">Recommended</span>
-              <span className="admin-guide-stat-value">Zoho</span>
+              <span className="admin-guide-stat-value">Google</span>
             </div>
             <div className="admin-guide-stat">
               <span className="admin-guide-stat-label">Seats now</span>
@@ -118,7 +118,7 @@ export default function AdminEmailMigrationGuidePage() {
                 <div className="admin-guide-diagram-tier">
                   <div className="admin-guide-diagram-node">
                     <strong>info@ / name@zigma-technologies.com</strong>
-                    <p>MX at BigRock points to Zoho (or Google / Microsoft) — not 14.195.24.149</p>
+                    <p>MX at BigRock points to Google Workspace — not 14.195.24.149</p>
                   </div>
                 </div>
                 <div className="admin-guide-diagram-connector" aria-hidden="true" />
@@ -266,22 +266,22 @@ export default function AdminEmailMigrationGuidePage() {
             </div>
             <div className="admin-guide-ref-grid">
               <div className="admin-guide-ref-card admin-guide-ref-card--highlight">
-                <h4>Default — Zoho Mail</h4>
+                <h4>Recommended — Google Workspace</h4>
                 <p className="admin-guide-workflow-purpose">
                   <strong>{EMAIL_RECOMMENDATION.primary}</strong>
                 </p>
                 <ul>
-                  <li>India GST invoice, any team size, IMAP/POP on paid plans</li>
-                  <li>Dedicated migration agent when you have more than 50 users</li>
-                  <li>Start with ~70 seats; add up to 150 without changing addresses</li>
+                  {(EMAIL_RECOMMENDATION.primaryBullets || []).map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
                 </ul>
               </div>
               <div className="admin-guide-ref-card">
-                <h4>If reliability is #1</h4>
+                <h4>Budget alternative — Zoho</h4>
                 <p className="admin-guide-workflow-purpose">
-                  <strong>{EMAIL_RECOMMENDATION.reliabilityPick}</strong>
+                  <strong>{EMAIL_RECOMMENDATION.budgetAlt}</strong>
                 </p>
-                <p className="admin-guide-workflow-purpose">{EMAIL_RECOMMENDATION.reliabilityWhy}</p>
+                <p className="admin-guide-workflow-purpose">{EMAIL_RECOMMENDATION.budgetAltWhy}</p>
               </div>
               <div className="admin-guide-ref-card">
                 <h4>If the team is on Microsoft</h4>
@@ -322,7 +322,7 @@ export default function AdminEmailMigrationGuidePage() {
                 </thead>
                 <tbody>
                   {EMAIL_PROVIDER_COMPARISON.map((row) => (
-                    <tr key={row.provider} className={row.recommended ? 'admin-table-row--highlight' : undefined}>
+                    <tr key={`${row.provider}-${row.plan}`} className={row.recommended ? 'admin-table-row--highlight' : undefined}>
                       <td>
                         {row.provider}
                         {row.recommended ? (
@@ -344,12 +344,12 @@ export default function AdminEmailMigrationGuidePage() {
             </div>
             <p className="admin-guide-section-footnote">
               Official references:{' '}
-              <a href="https://www.zoho.com/en-in/mail/zohomail-pricing.html" target="_blank" rel="noopener noreferrer">
-                Zoho Mail pricing
-              </a>
-              {' · '}
               <a href="https://workspace.google.com/intl/en_in/business/" target="_blank" rel="noopener noreferrer">
                 Google Workspace India
+              </a>
+              {' · '}
+              <a href="https://www.zoho.com/en-in/mail/zohomail-pricing.html" target="_blank" rel="noopener noreferrer">
+                Zoho Mail pricing (alternative)
               </a>
               {' · '}
               <a
@@ -417,8 +417,8 @@ export default function AdminEmailMigrationGuidePage() {
           <section id="purchase" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Purchase</div>
-              <h3>How to buy (Zoho default)</h3>
-              <p>Google / Microsoft follow the same pattern: verify domain with TXT, buy seats, change MX last.</p>
+              <h3>How to buy (Google Workspace default)</h3>
+              <p>Zoho / Microsoft follow the same pattern: verify domain with TXT, buy seats, change MX last.</p>
             </div>
             <ol className="admin-guide-steps">
               {EMAIL_PURCHASE_STEPS.map((step, i) => (
@@ -491,8 +491,8 @@ export default function AdminEmailMigrationGuidePage() {
                   <tr>
                     <th>Type</th>
                     <th>Name</th>
-                    <th>Zoho</th>
-                    <th>Google</th>
+                    <th>Google (default)</th>
+                    <th>Zoho (alt)</th>
                     <th>Microsoft</th>
                     <th>Notes</th>
                   </tr>
@@ -506,8 +506,8 @@ export default function AdminEmailMigrationGuidePage() {
                       <td>
                         <code>{r.name}</code>
                       </td>
-                      <td className="admin-table-muted">{r.zoho}</td>
                       <td className="admin-table-muted">{r.google}</td>
+                      <td className="admin-table-muted">{r.zoho}</td>
                       <td className="admin-table-muted">{r.microsoft}</td>
                       <td>{r.notes}</td>
                     </tr>

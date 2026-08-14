@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { FooterColumn } from '@/lib/nav-tree';
 import { telHref, logoAltText } from '@/lib/site-settings';
@@ -58,27 +58,28 @@ export default function Footer() {
   const [columns, setColumns] = useState<FooterColumn[]>(shellColumns || DEFAULT_COLUMNS);
   const copy = useSiteCopy();
 
-  const current =
+  const current = useMemo(() =>
     pathname === '/contact'
       ? 'contact'
       : pathname === '/careers'
         ? 'careers'
         : pathname === '/certifications'
           ? 'certifications'
-          : 'home';
+          : 'home',
+  [pathname]);
 
   useEffect(() => {
     if (shellColumns?.length) setColumns(shellColumns);
   }, [shellColumns]);
 
-  const openConsultation = (subject: string) => {
+  const openConsultation = useCallback((subject: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set('consult', '1');
     url.searchParams.set('consult_subject', subject);
     router.replace(`${url.pathname}?${url.searchParams.toString()}`);
-  };
+  }, [router]);
 
-  const handleNewsletterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleNewsletterSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setNewsletterError('');
     const form = e.currentTarget;
@@ -98,7 +99,7 @@ export default function Footer() {
     } catch (err) {
       setNewsletterError(err instanceof Error ? err.message : 'Subscribe failed');
     }
-  };
+  }, []);
 
   return (
     <>
@@ -122,7 +123,7 @@ export default function Footer() {
               <p className="footer-tagline">{site.footerBlurb}</p>
               <div className="newsletter-label">{copy.footer.newsletterLabel}</div>
               {!subscribed ? (
-                <form className="newsletter-form" onSubmit={handleNewsletterSubmit} style={{ position: 'relative' }}>
+                <form className="newsletter-form newsletter-form-relative" onSubmit={handleNewsletterSubmit}>
                   <HoneypotField />
                   <input
                     type="email"
@@ -208,7 +209,7 @@ export default function Footer() {
         <a
           href={telHref(site.phone)}
           className="call"
-          onClick={() => trackEvent('cta_click', { channel: 'call', placement: 'mobile_sticky' })}
+          onClick={useCallback(() => trackEvent('cta_click', { channel: 'call', placement: 'mobile_sticky' }), [])}
         >
           {copy.footer.stickyCall}
         </a>
@@ -217,7 +218,7 @@ export default function Footer() {
           className="wa"
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackEvent('cta_click', { channel: 'whatsapp', placement: 'mobile_sticky' })}
+          onClick={useCallback(() => trackEvent('cta_click', { channel: 'whatsapp', placement: 'mobile_sticky' }), [])}
         >
           {copy.footer.stickyWhatsapp}
         </a>
@@ -229,10 +230,10 @@ export default function Footer() {
           <button
             type="button"
             className="quote"
-            onClick={() => {
+            onClick={useCallback(() => {
               trackEvent('cta_click', { channel: 'consultation', placement: 'mobile_sticky' });
               openConsultation('Request a Quote');
-            }}
+            }, [openConsultation])}
           >
             {copy.footer.stickyQuote}
           </button>

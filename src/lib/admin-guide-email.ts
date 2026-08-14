@@ -87,12 +87,18 @@ export const EMAIL_PROVIDER_LAYERS: Array<{ role: string; who: string; evidence:
 ];
 
 export const EMAIL_RECOMMENDATION = {
-  primary: 'Zoho Mail Lite (10 GB) + Mail Premium for heavy users',
+  primary: 'Google Workspace Business Starter',
   primaryWhy:
-    'Best balance of reliability, India GST billing, dedicated migration assistance (50+ users), and cost for 70–150 mailboxes. Addresses stay name@zigma-technologies.com. IMAP migration copies existing Roundcube/CWP mail before MX cutover.',
-  reliabilityPick: 'Google Workspace Business Starter',
-  reliabilityWhy:
-    'Choose this if deliverability and 99.9% SLA matter more than price. Gmail spam reputation is the strongest of the options. Roughly 3–4× Zoho Lite at 150 users.',
+    'Chosen for familiar Gmail/Meet/Drive UX, strong Google support channels, and best-in-class deliverability (99.9% SLA). Addresses stay name@zigma-technologies.com. IMAP Data Migration copies existing Roundcube/CWP mail before MX cutover. Costs more than Zoho, but support quality and staff familiarity outweigh the price difference for Zigma.',
+  primaryBullets: [
+    'Everyone already knows Gmail — lowest training friction after leaving Roundcube',
+    'Google Workspace support and partner ecosystem are stronger than Zoho for most Indian SMBs',
+    'Gmail reputation + SPF/DKIM/DMARC tooling reduces “mail landed in spam” risk',
+    'Start with ~70 seats; add toward 150 without changing addresses',
+  ],
+  budgetAlt: 'Zoho Mail Lite (10 GB) + Mail Premium for heavy users',
+  budgetAltWhy:
+    'Keep as a lower-cost alternative if budget is the only constraint. Roughly 4× cheaper than Google Starter at 150 seats, with IMAP migration tools. Stakeholder feedback flagged Zoho support as poor — treat Zoho as Plan B, not the default.',
   microsoftPick: 'Microsoft 365 Business Basic',
   microsoftWhy:
     'Choose this if the team already lives in Outlook / Teams / Excel. Exchange Online 50 GB mailboxes, web Outlook instead of Roundcube.',
@@ -106,29 +112,6 @@ export const EMAIL_RECOMMENDATION = {
 /** Indicative India list prices, annual commitment, exclusive of 18% GST. Confirm at checkout (Aug 2026). */
 export const EMAIL_PROVIDER_COMPARISON: EmailProviderRow[] = [
   {
-    provider: 'Zoho Mail',
-    plan: 'Mail Lite 10 GB',
-    mailbox: '10 GB · IMAP/POP · web + apps',
-    perUserYear: '~₹708 (₹59/mo)',
-    cost70: '~₹49,600 + GST',
-    cost150: '~₹1.06 lakh + GST',
-    reliability: 'High (cloud, India DC option)',
-    migrateEase: 'IMAP tool + dedicated agent (50+ users)',
-    recommended: true,
-    note: 'Best economy. Mix Premium (50 GB) for directors / shared inboxes.',
-  },
-  {
-    provider: 'Zoho Workplace',
-    plan: 'Standard',
-    mailbox: '30 GB mail + WorkDrive / Cliq / Writer',
-    perUserYear: '~₹1,188 (₹99/mo)',
-    cost70: '~₹83,200 + GST',
-    cost150: '~₹1.78 lakh + GST',
-    reliability: 'High',
-    migrateEase: 'Same as Zoho Mail + migration agent',
-    note: 'Choose if you also want chat, docs, and team files — still cheaper than Google.',
-  },
-  {
     provider: 'Google Workspace',
     plan: 'Business Starter',
     mailbox: 'Gmail · 30 GB pooled · Meet 100',
@@ -136,8 +119,42 @@ export const EMAIL_PROVIDER_COMPARISON: EmailProviderRow[] = [
     cost70: '~₹2.27 lakh + GST',
     cost150: '~₹4.86 lakh + GST',
     reliability: 'Highest (99.9% SLA, Gmail reputation)',
-    migrateEase: 'Data Migration / GWMME from IMAP',
-    note: 'Pay more for deliverability and familiar Gmail. Starter caps at 300 users.',
+    migrateEase: 'Admin Data Migration / GWMME from IMAP',
+    recommended: true,
+    note: 'Recommended. Familiar Gmail + strong support. Starter caps at 300 users.',
+  },
+  {
+    provider: 'Google Workspace',
+    plan: 'Business Standard',
+    mailbox: 'Gmail · 2 TB pooled · Meet recording · Shared Drives',
+    perUserYear: '~₹12,960 (₹1,080/mo)',
+    cost70: '~₹9.07 lakh + GST',
+    cost150: '~₹19.4 lakh + GST',
+    reliability: 'Highest',
+    migrateEase: 'Same as Starter',
+    note: 'Upgrade path if you need Shared Drives, Meet recording, and much more storage.',
+  },
+  {
+    provider: 'Zoho Mail',
+    plan: 'Mail Lite 10 GB (alternative)',
+    mailbox: '10 GB · IMAP/POP · web + apps',
+    perUserYear: '~₹708 (₹59/mo)',
+    cost70: '~₹49,600 + GST',
+    cost150: '~₹1.06 lakh + GST',
+    reliability: 'High (cloud) — support quality mixed',
+    migrateEase: 'IMAP tool + migration agent (50+ users)',
+    note: 'Budget alternative only. Cheaper, but support feedback is weak vs Google.',
+  },
+  {
+    provider: 'Zoho Workplace',
+    plan: 'Standard (alternative)',
+    mailbox: '30 GB mail + WorkDrive / Cliq / Writer',
+    perUserYear: '~₹1,188 (₹99/mo)',
+    cost70: '~₹83,200 + GST',
+    cost150: '~₹1.78 lakh + GST',
+    reliability: 'High',
+    migrateEase: 'Same as Zoho Mail + migration agent',
+    note: 'Budget suite alternative if you want chat/docs without Google pricing.',
   },
   {
     provider: 'Microsoft 365',
@@ -165,32 +182,39 @@ export const EMAIL_PROVIDER_COMPARISON: EmailProviderRow[] = [
 
 export const EMAIL_COST_SCENARIOS = [
   {
-    name: 'Recommended mix (grow to 150)',
-    detail: '120 × Zoho Mail Lite 10 GB + 30 × Mail Premium 50 GB',
-    annualExGst: '~₹1.57 lakh',
-    annualIncGst: '~₹1.85 lakh',
-    notes: 'Most staff on Lite; info@, sales@, directors, legal on Premium.',
+    name: 'Recommended — Google Starter 70 seats (start now)',
+    detail: '70 × Google Workspace Business Starter — cover current 60+ IDs with headroom',
+    annualExGst: '~₹2.27 lakh',
+    annualIncGst: '~₹2.68 lakh',
+    notes: 'Buy active seats + ~10% buffer. Add licences as people join toward 150.',
   },
   {
-    name: 'All Lite — 70 seats (start now)',
-    detail: '70 × Zoho Mail Lite 10 GB — cover current 60+ IDs with headroom',
-    annualExGst: '~₹49,600',
-    annualIncGst: '~₹58,500',
-    notes: 'Add licences as you approach 150. Do not buy 150 on day one unless hiring is certain.',
-  },
-  {
-    name: 'All Lite — 150 seats',
-    detail: '150 × Zoho Mail Lite 10 GB',
-    annualExGst: '~₹1.06 lakh',
-    annualIncGst: '~₹1.25 lakh',
-    notes: 'Lowest full-fleet cloud mail. Upgrade individuals who hit 10 GB.',
-  },
-  {
-    name: 'Reliability — Google Starter 150',
+    name: 'Recommended — Google Starter 150 seats',
     detail: '150 × Google Workspace Business Starter',
     annualExGst: '~₹4.86 lakh',
     annualIncGst: '~₹5.73 lakh',
-    notes: 'If spam/deliverability incidents are costing sales, this is the safer spend.',
+    notes: 'Full-fleet target. Gmail + Meet + Drive. Confirm live India list price at checkout.',
+  },
+  {
+    name: 'Upgrade path — Google Standard 70',
+    detail: '70 × Google Workspace Business Standard (2 TB, Shared Drives, Meet recording)',
+    annualExGst: '~₹9.07 lakh',
+    annualIncGst: '~₹10.7 lakh',
+    notes: 'Only if Starter storage/collaboration is not enough. Can mix later via Google admin.',
+  },
+  {
+    name: 'Budget alternative — Zoho Lite 70',
+    detail: '70 × Zoho Mail Lite 10 GB',
+    annualExGst: '~₹49,600',
+    annualIncGst: '~₹58,500',
+    notes: 'Plan B if finance blocks Google. Factor weaker support into the decision.',
+  },
+  {
+    name: 'Budget alternative — Zoho Lite 150',
+    detail: '150 × Zoho Mail Lite 10 GB',
+    annualExGst: '~₹1.06 lakh',
+    annualIncGst: '~₹1.25 lakh',
+    notes: 'Lowest full-fleet cloud mail. Not the preferred path after support feedback.',
   },
   {
     name: 'Microsoft path 150',
@@ -204,7 +228,7 @@ export const EMAIL_COST_SCENARIOS = [
 export const EMAIL_TIMELINE = {
   window: 'Complete before September 2026 renewal — target MX cutover 7–10 days before old plan expires',
   totalCalendar: '3 weeks (accelerated) or 4–5 weeks (comfortable)',
-  itEffort: '40–70 person-hours (IT/admin) + 15–20 minutes per staff member to reconfigure phone/Outlook',
+  itEffort: '35–60 person-hours (IT/admin) + 10–15 minutes per staff member (Gmail is familiar; phones/Outlook optional)',
   phases: [
     { week: 'Week 1', focus: 'Inventory, buy licences, verify domain (no MX change yet), create users & groups' },
     { week: 'Week 2', focus: 'IMAP copy of mailboxes in batches; dual-delivery / catch-all test; train power users' },
@@ -214,12 +238,12 @@ export const EMAIL_TIMELINE = {
 };
 
 export const EMAIL_PURCHASE_STEPS = [
-  'Decide provider (default: Zoho Mail). Open zoho.com/mail → Sign up with a personal/admin Gmail or existing Zoho ID — this becomes the super-admin, not a @zigma mailbox yet.',
-  'Add domain zigma-technologies.com. Zoho shows a TXT verification record — add it at BigRock / UrbanVendo DNS. Do not change MX yet.',
-  'Pick Mail Lite 10 GB as the default licence. Add Mail Premium only for users who already have large Roundcube folders (export size > 8 GB).',
-  'Buy seats for current active IDs + 10% buffer (e.g. 70 licences), not the full 150 until hiring is real. Annual billing, GST invoice via Zoho India.',
-  'Optional: request Zoho migration assistance (included for orgs with more than 50 users) — you get a dedicated technical agent.',
-  'If choosing Google instead: workspace.google.com → Business Starter annual → verify domain with TXT → skip MX until mail is copied.',
+  'Decide provider (default: Google Workspace Business Starter). Open workspace.google.com → Start free trial / Buy → create the organisation with a personal recovery Gmail for the super-admin (not a @zigma address yet).',
+  'Add domain zigma-technologies.com. Google shows a TXT verification record — add it at BigRock / UrbanVendo DNS. Do not change MX yet.',
+  'Choose Business Starter annual commitment (India list ~₹270/user/mo ex-GST). Prefer annual billing for the lower rate; confirm GST invoice via Google or an authorised reseller.',
+  'Buy seats for current active IDs + 10% buffer (e.g. 70 licences), not the full 150 until hiring is real. You can add users anytime in Admin console.',
+  'Optional: engage a Google Workspace partner in India for assisted IMAP migration and first-week support if IT bandwidth is thin.',
+  'If choosing Zoho instead (budget Plan B): zoho.com/mail → Mail Lite 10 GB → TXT verify domain → same MX-last rule. Expect weaker support than Google.',
   'If choosing Microsoft: admin.microsoft.com → Business Basic → add domain → TXT verify → same MX-last rule.',
 ];
 
@@ -238,7 +262,7 @@ export const EMAIL_PHASES: EmailPhase[] = [
       'Record IMAP settings used today: typically mail.zigma-technologies.com or the server hostname, port 993 SSL, username = full address.',
       'Ask staff to empty Trash/Spam and note any PST/Outlook local archives that are not on the server.',
       'Lower TTL on MX and SPF TXT to 300 seconds at least 24 hours before cutover.',
-      'Agree a Friday evening or Saturday morning MX window; announce “webmail URL will change; addresses stay the same”.',
+      'Agree a Friday evening or Saturday morning MX window; announce “webmail URL will change to Gmail; addresses stay the same”.',
     ],
     checklist: [
       'Spreadsheet of 60+ IDs with used GB and owner',
@@ -251,22 +275,22 @@ export const EMAIL_PHASES: EmailPhase[] = [
   {
     id: 'provision',
     phase: 'Phase 1',
-    title: 'Buy cloud mail & verify domain (MX unchanged)',
+    title: 'Buy Google Workspace & verify domain (MX unchanged)',
     summary: 'Licences and domain ownership proof only. Incoming mail still hits Roundcube.',
     days: '1 day',
     effort: '2–4 hours',
     steps: [
-      'Create Zoho org (or Google / Microsoft tenant) with a non-domain recovery email for the super-admin.',
+      'Create Google Workspace org (admin.google.com) with a non-domain recovery email for the super-admin.',
       'Add zigma-technologies.com → copy TXT verification → BigRock DNS Management → Save. Wait 5–60 minutes.',
-      'Confirm domain Verified in the admin console. Still do not publish MX / DKIM until Phase 3.',
-      'Purchase licences (70 to start, or 150 if budgeted). Assign Lite vs Premium per the inventory spreadsheet.',
-      'Create users in bulk (CSV import): email, display name, department. Temporary passwords go to managers, not email yet.',
-      'Create groups: info@, sales@, support@, careers@ as group addresses with members — this replaces many Roundcube forwarders.',
-      'Enable MFA for admins immediately.',
+      'Confirm domain Verified in Google Admin. Still do not publish MX / DKIM until Phase 3.',
+      'Purchase Business Starter licences (70 to start, or 150 if budgeted). Assign seats in Billing → Subscriptions.',
+      'Create users in bulk (CSV upload in Directory → Users): email, display name, department. Temporary passwords go to managers, not email yet.',
+      'Create Groups: info@, sales@, support@, careers@ as Google Groups with members — this replaces many Roundcube forwarders. Enable “Who can post” appropriately.',
+      'Enable 2-Step Verification (MFA) enforcement for admins immediately; plan org-wide MFA after cutover.',
     ],
     checklist: [
-      'Domain TXT verified',
-      'Licences purchased with GST invoice',
+      'Domain TXT verified in Google Admin',
+      'Business Starter licences purchased with GST invoice',
       'Users imported',
       'Groups for shared addresses',
       'Admin MFA on',
@@ -277,22 +301,22 @@ export const EMAIL_PHASES: EmailPhase[] = [
     id: 'copy',
     phase: 'Phase 2',
     title: 'Copy existing mail (IMAP) while Roundcube still receives',
-    summary: 'Server-side copy so history is in the new inbox before anyone changes MX.',
+    summary: 'Server-side copy so history is in Gmail before anyone changes MX.',
     days: '3–7 days (depends on mailbox size)',
     effort: '12–24 hours (mostly unattended sync)',
     steps: [
-      'Zoho Admin Console → Data Migration → IMAP. Server: mail.zigma-technologies.com (or UrbanVendo hostname), port 993, SSL.',
-      'Map each source address to the same destination address. Use mailbox passwords (or CWP IMAP login).',
+      'Google Admin console → Data migration (or Migration tool) → Email → IMAP. Server: mail.zigma-technologies.com (or UrbanVendo hostname), port 993, SSL.',
+      'Map each source address to the same destination Google user. Use mailbox passwords (or CWP IMAP login).',
       'Run in batches of 15–20 mailboxes. Start with a pilot: one director, one sales, one shared (info@).',
-      'Google path: Admin console → Data migration → IMAP. Microsoft path: Exchange admin → Migration → IMAP.',
-      'Verify folder counts (Inbox, Sent, custom folders). Large boxes may take overnight.',
+      'Zoho path (if Plan B): Zoho Admin → Data Migration → IMAP. Microsoft path: Exchange admin → Migration → IMAP.',
+      'Verify folder counts (Inbox, Sent, custom folders) in Gmail. Large boxes may take overnight.',
       'Leave Roundcube live — new mail still arrives there. Plan a second “delta” sync the morning of MX cutover.',
-      'Optional dual delivery: in CWP, forward a copy of incoming mail to the new Zoho address if the host allows an external forward during coexistence.',
+      'Optional dual delivery: in CWP, forward a copy of incoming mail to the new Google address if the host allows an external forward during coexistence.',
     ],
     checklist: [
-      'Pilot 3 mailboxes verified by owners',
+      'Pilot 3 mailboxes verified by owners in Gmail',
       'Batch sync for all active humans',
-      'Shared inboxes copied',
+      'Shared inboxes / Groups copied or recreated',
       'Delta-sync window booked for cutover morning',
     ],
     warning:
@@ -302,23 +326,23 @@ export const EMAIL_PHASES: EmailPhase[] = [
     id: 'cutover',
     phase: 'Phase 3',
     title: 'DNS cutover — MX, SPF, DKIM, DMARC',
-    summary: 'This is the moment new mail starts arriving at Zoho/Google/Microsoft. Addresses do not change.',
+    summary: 'This is the moment new mail starts arriving at Google Workspace. Addresses do not change.',
     days: '2–4 hours + 24–48h watch',
     effort: '4–8 hours',
     steps: [
-      'Publish DKIM TXT from the new provider (Zoho: mail.zoho.com selector; Google: google._domainkey; Microsoft: selector1/selector2 CNAME).',
-      'Replace SPF TXT. Zoho: v=spf1 include:zoho.in ~all (or include:zoho.com). Google: include:_spf.google.com. Microsoft: include:spf.protection.outlook.com. Remove +ip4:14.195.24.149 once mail has left UrbanVendo.',
-      'Add DMARC: v=DMARC1; p=quarantine; rua=mailto:dmarc@zigma-technologies.com (create that mailbox or alias first). Start with p=none for 1 week if you want a cautious rollout, then p=quarantine.',
-      'Change MX records to the provider values (remove MX pointing at zigma-technologies.com). Zoho typically: mx.zoho.in (10), mx2.zoho.in (20), mx3.zoho.in (50). Google: ASPMX.L.GOOGLE.COM etc. Microsoft: tenant.mail.protection.outlook.com.',
+      'In Google Admin → Domains → Authenticate email: publish DKIM (google._domainkey TXT) and enable signing.',
+      'Replace SPF TXT with: v=spf1 include:_spf.google.com ~all (remove +ip4:14.195.24.149 once mail has left UrbanVendo). Zoho alt: include:zoho.in. Microsoft: include:spf.protection.outlook.com.',
+      'Add DMARC: v=DMARC1; p=quarantine; rua=mailto:dmarc@zigma-technologies.com (create that user or Group first). Start with p=none for 1 week if you want a cautious rollout, then p=quarantine.',
+      'Change MX records to Google’s values (remove MX pointing at zigma-technologies.com): ASPMX.L.GOOGLE.COM (1), ALT1/ALT2/ALT3/ALT4.ASPMX.L.GOOGLE.COM. Exact priorities are shown in Google Admin.',
       'Do not delete old A records for www in this step — website DNS is a separate project.',
       'Run a delta IMAP sync so mail that arrived during copy is not missed.',
-      'Send test messages from Gmail, Outlook.com, and a phone to info@ and a personal ID. Confirm receipt in new webmail.',
-      'Update the website SMTP in Hostinger .env (SMTP_HOST to smtp.zoho.in / smtp.gmail.com / smtp.office365.com) so enquiry notifications keep sending after the old server is gone.',
+      'Send test messages from an external Gmail, Outlook.com, and a phone to info@ and a personal ID. Confirm receipt in Gmail.',
+      'Update the website SMTP in Hostinger .env (SMTP_HOST=smtp.gmail.com with an App Password on noreply@, or use Google SMTP relay) so enquiry notifications keep sending after the old server is gone.',
     ],
     checklist: [
-      'MX points to new provider (nslookup -type=MX)',
+      'MX points to Google (nslookup -type=MX)',
       'SPF updated; old IP removed',
-      'DKIM pass on mail-tester.com / mxtoolbox',
+      'DKIM enabled and pass on mail-tester.com / mxtoolbox',
       'DMARC published',
       'Test inbound + outbound',
       'Site SMTP_ env updated',
@@ -329,21 +353,21 @@ export const EMAIL_PHASES: EmailPhase[] = [
   {
     id: 'clients',
     phase: 'Phase 4',
-    title: 'Staff devices & Roundcube replacement',
-    summary: 'Everyone keeps the same address; they open a new webmail URL and/or update IMAP/SMTP in Outlook/phones.',
+    title: 'Staff devices & Roundcube → Gmail',
+    summary: 'Everyone keeps the same address; they open Gmail and/or update phone/Outlook.',
     days: '2–3 days (overlap with Phase 3)',
-    effort: '15–20 min per user; 8–16 hours IT helpdesk',
+    effort: '10–15 min per user (Gmail is familiar); 6–12 hours IT helpdesk',
     steps: [
-      'Circulate the new webmail URL: mail.zoho.com (or mail.google.com / outlook.office.com). Optional: CNAME mail → the provider so staff type mail.zigma-technologies.com.',
-      'Outlook / Apple Mail / Android: IMAP host imap.zoho.in (or imap.gmail.com / outlook.office365.com), SMTP smtp.zoho.in port 587 STARTTLS, username = full email.',
-      'Reset temporary passwords; require MFA for finance, HR, and directors.',
-      'Recreate signatures, calendars, and shared “Send as” on groups.',
-      'Train: Roundcube bookmarks will stop working after the old host is cancelled — pin the new URL.',
+      'Circulate webmail URL: https://mail.google.com (sign in with name@zigma-technologies.com). Optional: CNAME mail → ghs.googlehosted.com so staff type mail.zigma-technologies.com.',
+      'Most staff only need the browser or Gmail app. For Outlook / Apple Mail: use Google IMAP (imap.gmail.com) or better — Google Workspace Sync / “Sign in with Google” where available. SMTP smtp.gmail.com port 587.',
+      'Reset temporary passwords; require 2-Step Verification for finance, HR, and directors (then org-wide).',
+      'Recreate signatures in Gmail settings; share calendars; set Group “Send as” for info@ / sales@ where needed.',
+      'Train: Roundcube bookmarks will stop working after UrbanVendo is cancelled — pin mail.google.com and drive.google.com.',
       'Keep old Roundcube read-only for 7 days so anyone who missed a folder can log in once more.',
     ],
     checklist: [
-      'Helpdesk one-pager sent to all staff',
-      'Directors and sales on MFA',
+      'Helpdesk one-pager sent to all staff (Gmail login steps)',
+      'Directors and sales on 2SV / MFA',
       'Phones and Outlook updated for critical users',
       'Old Roundcube still reachable as fallback',
     ],
@@ -356,11 +380,11 @@ export const EMAIL_PHASES: EmailPhase[] = [
     days: '7–14 days after cutover',
     effort: '4 hours',
     steps: [
-      'Watch bounce reports and Zoho/Google admin alerts daily for one week.',
-      'Check that newsletters, printers, scanners, CCTV, and CRM “from” addresses still send (update SMTP there too).',
+      'Watch Google Admin alerts and bounce reports daily for one week.',
+      'Check that newsletters, printers, scanners, CCTV, and CRM “from” addresses still send (update SMTP there too — prefer smtp.gmail.com or Workspace SMTP relay).',
       'Confirm website contact forms still notify staff (Site Settings + SMTP_*).',
       'Export a final CWP/server backup (home directory + email) to cold storage, then cancel the UrbanVendo / Exigo hosting+email plan — do not renew in September.',
-      'Document super-admin, DNS logins, and licence count in the password manager.',
+      'Document super-admin, recovery email, DNS logins, and licence count in the password manager.',
       'Plan quarterly licence review — add seats toward 150 only when people join.',
     ],
     checklist: [
@@ -377,40 +401,40 @@ export const EMAIL_DNS_RECORDS = [
   {
     type: 'MX',
     name: '@',
+    google: 'ASPMX.L.GOOGLE.COM (1) + ALT1–ALT4.ASPMX.L.GOOGLE.COM',
     zoho: 'mx.zoho.in (10), mx2.zoho.in (20), mx3.zoho.in (50)',
-    google: 'ASPMX.L.GOOGLE.COM (1) + alt Google MX',
     microsoft: '<tenant>.mail.protection.outlook.com (0)',
-    notes: 'Replace current MX zigma-technologies.com',
+    notes: 'Replace current MX zigma-technologies.com — use Google values by default',
   },
   {
     type: 'TXT',
     name: '@',
-    zoho: 'v=spf1 include:zoho.in ~all',
     google: 'v=spf1 include:_spf.google.com ~all',
+    zoho: 'v=spf1 include:zoho.in ~all',
     microsoft: 'v=spf1 include:spf.protection.outlook.com ~all',
     notes: 'One SPF record only — merge if website sending stays elsewhere',
   },
   {
     type: 'TXT',
     name: 'DKIM selector',
+    google: 'google._domainkey (from Admin → Authenticate email)',
     zoho: 'Provider-generated (often zoho._domainkey)',
-    google: 'google._domainkey',
     microsoft: 'selector1/2 CNAME to Microsoft',
     notes: 'Copy exact value from admin console',
   },
   {
     type: 'TXT',
     name: '_dmarc',
-    zoho: 'v=DMARC1; p=quarantine; rua=mailto:dmarc@zigma-technologies.com',
-    google: 'Same pattern',
+    google: 'v=DMARC1; p=quarantine; rua=mailto:dmarc@zigma-technologies.com',
+    zoho: 'Same pattern',
     microsoft: 'Same pattern',
     notes: 'Start p=none for 7 days if you want a cautious policy',
   },
   {
     type: 'CNAME',
     name: 'mail',
+    google: 'Optional → ghs.googlehosted.com (Gmail custom URL)',
     zoho: 'Optional → business.zoho.in (check Zoho docs)',
-    google: 'Optional ghs.googlehosted.com for Gmail',
     microsoft: 'Optional autodiscover',
     notes: 'Convenience only — not required for mail delivery',
   },
@@ -418,25 +442,27 @@ export const EMAIL_DNS_RECORDS = [
 
 export const EMAIL_SMTP_SITE = `NODE_ENV=production
 NEXT_PUBLIC_SITE_URL=https://www.zigma-technologies.com
-# Enquiry notifications — use the NEW provider, not the old Roundcube host
-SMTP_HOST=smtp.zoho.in
+# Enquiry notifications — Google Workspace (App Password on noreply@ or SMTP relay)
+SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=noreply@zigma-technologies.com
-SMTP_PASS=<app-password>
-SMTP_FROM="Zigma Technologies <noreply@zigma-technologies.com>"`;
+SMTP_PASS=<google-app-password>
+SMTP_FROM="Zigma Technologies <noreply@zigma-technologies.com>"
+# Zoho alternative (Plan B only):
+# SMTP_HOST=smtp.zoho.in`;
 
 export const EMAIL_ROLLBACK = [
   'If inbound mail fails after MX change, restore the old MX (zigma-technologies.com / UrbanVendo) within minutes — TTL 300s makes this fast.',
   'Leave Roundcube accounts enabled for 7–14 days; IMAP copy is one-way so old mail is still on the old server until you delete it.',
   'Do not cancel the old subscription until tests pass and the September renewal date is still in the future.',
-  'SPF/DKIM mistakes cause outbound spam folders — revert SPF to include both old IP and new include: while debugging, then tighten.',
+  'SPF/DKIM mistakes cause outbound spam folders — revert SPF to include both old IP and include:_spf.google.com while debugging, then tighten.',
   'Website can stay on UrbanVendo or Hostinger independently; rolling back mail does not require rolling back the website.',
 ];
 
 export const EMAIL_FAQ = [
   {
     q: 'Will our email addresses change?',
-    a: 'No. Everyone keeps name@zigma-technologies.com. Only the server behind the address changes. Roundcube.com is not your domain — it is just the current webmail screen.',
+    a: 'No. Everyone keeps name@zigma-technologies.com. Only the server behind the address changes — from UrbanVendo Postfix to Google Workspace (Gmail). Roundcube.com is not your domain; it was only the old webmail screen.',
   },
   {
     q: 'If Roundcube is only a UI, who is the email provider?',
@@ -444,27 +470,27 @@ export const EMAIL_FAQ = [
   },
   {
     q: 'Is Roundcube a mail host we can “renew”?',
-    a: 'No. Roundcube is open-source webmail. UrbanVendo runs it on the same box as the website (CWP + Postfix). Availability problems come from that server — urbanvendo.com itself currently shows “Account Suspended”. Moving to Zoho/Google/Microsoft replaces the server and the webmail UI.',
+    a: 'No. Roundcube is open-source webmail. UrbanVendo runs it on the same box as the website (CWP + Postfix). Availability problems come from that server — urbanvendo.com itself currently shows “Account Suspended”. Moving to Google Workspace (or Zoho/Microsoft) replaces the server and the webmail UI.',
+  },
+  {
+    q: 'Why Google Workspace instead of Zoho?',
+    a: 'Stakeholder feedback flagged Zoho support as poor. Google Workspace wins on familiar Gmail UX, stronger support/partner ecosystem, and deliverability — at higher cost (~₹5.73 lakh/year incl. GST at 150 Starter seats vs ~₹1.25 lakh for Zoho Lite). Zoho remains documented as a budget alternative only.',
   },
   {
     q: 'Can we put mail on the new Hostinger VPS?',
-    a: 'Technically yes, practically no for 150 IDs. Mail on the same VPS as Next.js recreates today’s outages (disk, RAM, IP reputation). Keep mail on a specialist cloud provider; keep the website on Hostinger.',
-  },
-  {
-    q: 'Zoho vs Google — which should we pick?',
-    a: 'Default to Zoho Mail Lite for cost (about ₹1.25 lakh/year incl. GST at 150 Lite seats) plus a free migration agent above 50 users. Pick Google Workspace Starter if customers report mail in spam or you want Gmail/Meet as the daily suite (~₹5.7 lakh/year incl. GST at 150 seats).',
+    a: 'Technically yes, practically no for 150 IDs. Mail on the same VPS as Next.js recreates today’s outages (disk, RAM, IP reputation). Keep mail on Google Workspace; keep the website on Hostinger.',
   },
   {
     q: 'Do we buy 150 licences on day one?',
-    a: 'No. Licence the 60+ active IDs plus ~10% buffer (≈70). Add seats as people join. Cloud mail is billed per user; empty mailboxes waste budget.',
+    a: 'No. Licence the 60+ active IDs plus ~10% buffer (≈70 Google Workspace seats). Add seats as people join. Cloud mail is billed per user; empty mailboxes waste budget.',
   },
   {
     q: 'What about aliases vs real mailboxes?',
-    a: 'Use a real mailbox or a group for anything people send from (info@, sales@). Use aliases/forwards for name variants (s.kumar@ → sanjay@). Aliases are usually free and should not consume a paid seat.',
+    a: 'Use a Google user or Google Group for anything people send from (info@, sales@). Use aliases for name variants (s.kumar@ → sanjay@). Aliases do not consume an extra paid seat in Workspace.',
   },
   {
     q: 'Can website and email migrate on the same weekend?',
-    a: 'Avoid it. Migrate email first (MX only) while the site still on UrbanVendo, stabilize a week, then point www A records to Hostinger. Two DNS changes on one night makes rollback guesswork.',
+    a: 'Avoid it. Migrate email first (MX to Google) while the site still on UrbanVendo, stabilize a week, then point www A records to Hostinger. Two DNS changes on one night makes rollback guesswork.',
   },
 ];
 

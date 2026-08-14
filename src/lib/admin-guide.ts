@@ -295,13 +295,13 @@ export const GUIDE_WORKFLOWS: GuideWorkflow[] = [
   },
   {
     title: 'Migrate company email (keep @zigma-technologies.com)',
-    purpose: 'Leave Roundcube/UrbanVendo mail for Zoho (default) or Google/Microsoft before Sep 2026 renewal.',
+    purpose: 'Leave Roundcube/UrbanVendo mail for Google Workspace (default) or Zoho/Microsoft before Sep 2026 renewal.',
     steps: [
-      'Inventory 60+ IDs; licence ~70 seats now, grow to 150',
+      'Inventory 60+ IDs; licence ~70 Google Workspace Starter seats now, grow to 150',
       'Verify domain with TXT only — do not change MX yet',
-      'IMAP-copy mailboxes in batches while Roundcube still receives',
-      'Cut over MX + SPF/DKIM/DMARC; update site SMTP_*',
-      'Reconfigure Outlook/phones; cancel old mail plan after 7 stable days',
+      'IMAP-copy mailboxes into Gmail in batches while Roundcube still receives',
+      'Cut over MX + SPF/DKIM/DMARC to Google; update site SMTP_* (smtp.gmail.com)',
+      'Reconfigure phones/Outlook if needed; cancel UrbanVendo mail plan after 7 stable days',
     ],
     href: '/admin/guide/email',
   },
