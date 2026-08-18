@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "ZTools",
+    "slug": "ztools",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "ztools",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.zigmatech.ztools"
+    },
+    "android": {
+      "package": "com.zigmatech.ztools",
+      "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a1628",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-status-bar",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ff6b1a",
+          "defaultChannel": "ztools-default"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c8f4a2d1-7b3e-4f91-9c2d-1a5e8b9c0d2f"
+      }
+    }
+  }
+}

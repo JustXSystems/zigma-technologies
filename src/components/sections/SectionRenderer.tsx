@@ -12,6 +12,7 @@ import { indIconFor } from '@/lib/ind-icons';
 import { statIconFor } from '@/lib/stat-icons';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { focusApplyRole } from '@/lib/careers-apply';
+import { useSiteCopy } from '@/lib/use-site-copy';
 import type { CatalogItem } from '@/lib/types';
 
 type Slide = {
@@ -572,6 +573,8 @@ function IndustriesSection({
   content: Record<string, unknown>;
   sectionKey?: string | null;
 }) {
+  const copy = useSiteCopy();
+  const industriesEnabled = copy.features.industriesEnabled;
   const items = (content.items as string[]) || [];
   return (
     <section className="section section-gray" id={sectionKey || 'industries'}>
@@ -579,7 +582,7 @@ function IndustriesSection({
         <div className="section-head center">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
           <h2>{String(content.title || '')}</h2>
-          {content.linkLabel ? (
+          {content.linkLabel && industriesEnabled ? (
             <p>
               <a href={String(content.linkHref || '/industries')} className="link-orange-dim">
                 {String(content.linkLabel)}
@@ -589,7 +592,7 @@ function IndustriesSection({
         </div>
         <div className="ind-grid">
           {items.map((label) => {
-            const href = industryHrefForLabel(label);
+            const href = industriesEnabled ? industryHrefForLabel(label) : null;
             const inner = (
               <>
                 <svg

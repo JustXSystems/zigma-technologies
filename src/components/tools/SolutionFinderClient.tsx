@@ -157,12 +157,14 @@ export default function SolutionFinderClient() {
                   >
                     {t.requestQuote}
                   </Link>
-                  <Link href={result.secondary.href} className="action-link">
-                    <span>{result.secondary.label}</span>
-                    <span className="action-link-arrow" aria-hidden="true">
-                      →
-                    </span>
-                  </Link>
+                  {copy.features.industriesEnabled || !result.secondary.href.startsWith('/industries') ? (
+                    <Link href={result.secondary.href} className="action-link">
+                      <span>{result.secondary.label}</span>
+                      <span className="action-link-arrow" aria-hidden="true">
+                        →
+                      </span>
+                    </Link>
+                  ) : null}
                 </div>
               </article>
             ) : null}

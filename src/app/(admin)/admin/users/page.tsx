@@ -2,17 +2,27 @@
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 
+type AdminRole = {
+  id: number;
+  name: string;
+  slug: string;
+  is_system: boolean;
+};
+
 type AdminUser = {
   id: number;
   email: string;
   name: string;
   role: 'admin' | 'editor';
+  role_id: number | null;
+  role_name: string | null;
   last_login: string | null;
   created_at: string;
 };
 
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [roles, setRoles] = useState<AdminRole[]>([]);
   const [meId, setMeId] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -22,8 +32,11 @@ export default function UsersPage() {
     email: '',
     password: '',
     role: 'editor' as 'admin' | 'editor',
+    role_id: '' as string,
   });
   const [saving, setSaving] = useState(false);
+
+  const editorRoles = roles.filter((r) => r.slug !== 'admin');
 
   const load = useCallback(async () => {
     setError('');
@@ -40,6 +53,7 @@ export default function UsersPage() {
     const listData = await listRes.json();
     if (!listRes.ok) throw new Error(listData.error || 'Failed to load users');
     setUsers(listData.users || []);
+    setRoles(listData.roles || []);
   }, []);
 
   useEffect(() => {
@@ -55,12 +69,15 @@ export default function UsersPage() {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          role_id: form.role === 'editor' && form.role_id ? Number(form.role_id) : null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Create failed');
       setMessage(data.message || 'User created');
-      setForm({ name: '', email: '', password: '', role: 'editor' });
+      setForm({ name: '', email: '', password: '', role: 'editor', role_id: '' });
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Create failed');
@@ -69,20 +86,20 @@ export default function UsersPage() {
     }
   }
 
-  async function setRole(id: number, role: 'admin' | 'editor') {
+  async function setRole(id: number, role: 'admin' | 'editor', role_id: number | null) {
     setError('');
     setMessage('');
     const res = await fetch('/api/admin/users', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, role }),
+      body: JSON.stringify({ id, role, role_id }),
     });
     const data = await res.json();
     if (!res.ok) {
       setError(data.error || 'Update failed');
       return;
     }
-    setMessage('Role updated');
+    setMessage('User updated — they must sign in again for screen changes to apply.');
     await load();
   }
 
@@ -136,7 +153,8 @@ export default function UsersPage() {
       <div className="admin-card">
         <h2 style={{ marginTop: 0 }}>Admin users</h2>
         <p style={{ color: 'var(--admin-muted)' }}>
-          Create editors or additional admins. Editors can use the portal; only admins manage users.
+          Assign a role to control which admin screens each user can access. Full admins always see every screen.
+          Manage role definitions on the <a href="/admin/roles">Roles</a> page.
         </p>
         {error ? <div className="admin-error">{error}</div> : null}
         {message ? <div className="admin-success">{message}</div> : null}
@@ -146,7 +164,7 @@ export default function UsersPage() {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Role</th>
+                <th>Access</th>
                 <th>Last login</th>
                 <th />
               </tr>
@@ -160,16 +178,48 @@ export default function UsersPage() {
                   </td>
                   <td>{u.email}</td>
                   <td>
-                    <select
-                      className="admin-input"
-                      value={u.role}
-                      disabled={u.id === meId}
-                      onChange={(e) => setRole(u.id, e.target.value as 'admin' | 'editor')}
-                      style={{ width: 'auto', minWidth: 110 }}
-                    >
-                      <option value="admin">admin</option>
-                      <option value="editor">editor</option>
-                    </select>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                      <select
+                        className="admin-input"
+                        value={u.role}
+                        disabled={u.id === meId}
+                        onChange={(e) => {
+                          const role = e.target.value as 'admin' | 'editor';
+                          const role_id =
+                            role === 'admin'
+                              ? roles.find((r) => r.slug === 'admin')?.id ?? null
+                              : u.role_id;
+                          void setRole(u.id, role, role_id);
+                        }}
+                        style={{ width: 'auto', minWidth: 100 }}
+                      >
+                        <option value="admin">Full admin</option>
+                        <option value="editor">Role-based</option>
+                      </select>
+                      {u.role === 'editor' ? (
+                        <select
+                          className="admin-input"
+                          value={u.role_id ?? ''}
+                          disabled={u.id === meId}
+                          onChange={(e) => {
+                            const role_id = e.target.value ? Number(e.target.value) : null;
+                            void setRole(u.id, 'editor', role_id);
+                          }}
+                          style={{ width: 'auto', minWidth: 160 }}
+                        >
+                          <option value="">Select role…</option>
+                          {editorRoles.map((r) => (
+                            <option key={r.id} value={r.id}>
+                              {r.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.88rem', alignSelf: 'center' }}>
+                          All screens
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td>{u.last_login ? new Date(u.last_login).toLocaleString() : '—'}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>
@@ -205,16 +255,34 @@ export default function UsersPage() {
             />
           </div>
           <div className="admin-field">
-            <label>Role</label>
+            <label>Access level</label>
             <select
               className="admin-input"
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as 'admin' | 'editor' })}
+              onChange={(e) => setForm({ ...form, role: e.target.value as 'admin' | 'editor', role_id: '' })}
             >
-              <option value="editor">editor</option>
-              <option value="admin">admin</option>
+              <option value="editor">Role-based</option>
+              <option value="admin">Full admin</option>
             </select>
           </div>
+          {form.role === 'editor' ? (
+            <div className="admin-field full">
+              <label>Role</label>
+              <select
+                className="admin-input"
+                value={form.role_id}
+                onChange={(e) => setForm({ ...form, role_id: e.target.value })}
+                required
+              >
+                <option value="">Select role…</option>
+                {editorRoles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
           <div className="admin-field full">
             <label>Email</label>
             <input

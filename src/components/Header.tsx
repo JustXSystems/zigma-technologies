@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
@@ -11,6 +11,7 @@ import { trackEvent } from '@/lib/analytics';
 import CallbackRequestModal from '@/components/CallbackRequestModal';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
+import { filterNavForFeatures } from '@/lib/nav-features';
 
 const DEFAULT_NAV: NavItem[] = [
   {
@@ -111,11 +112,9 @@ const DEFAULT_NAV: NavItem[] = [
       },
     ],
   },
-  { label: 'Industries', href: '/industries' },
   { label: 'Projects', href: '/projects' },
   { label: 'Products', href: '/products' },
   { label: 'Services', href: '/services' },
-  { label: 'Resources', href: '/resources' },
   { label: 'Contact', href: '/contact#contact-form' },
 ];
 
@@ -126,12 +125,15 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<string | null>(null);
-  const [navItems, setNavItems] = useState<NavItem[]>(shellNav || DEFAULT_NAV);
   // Always start with A so SSR and the first client paint match. pickCtaVariant()
   // reads sessionStorage / Math.random() and must only run after mount.
   const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>('A');
   const [callbackOpen, setCallbackOpen] = useState(false);
   const copy = useSiteCopy();
+  const navItems = useMemo(
+    () => filterNavForFeatures(shellNav?.length ? shellNav : DEFAULT_NAV, copy.features),
+    [shellNav, copy.features]
+  );
 
   const current =
     pathname === '/contact'
@@ -149,10 +151,9 @@ export default function Header() {
                 : 'home';
 
   useEffect(() => {
-    if (shellNav?.length) setNavItems(shellNav);
     setCtaVariant(pickCtaVariant(site));
     trackEvent('cta_variant_shown', { variant: pickCtaVariant(site), placement: 'header' });
-  }, [shellNav, site]);
+  }, [site]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -253,9 +254,11 @@ export default function Header() {
             </ul>
           </nav>
           <div className="header-right">
-            <div className="header-search-slot">
-              <SiteSearchForm compact />
-            </div>
+            {copy.features.searchEnabled ? (
+              <div className="header-search-slot">
+                <SiteSearchForm compact />
+              </div>
+            ) : null}
             <HeaderIconMenus site={site} onRequestCallback={() => setCallbackOpen(true)} />
             <button
               type="button"

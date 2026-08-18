@@ -3,6 +3,7 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import type { LocationDef } from '@/lib/locations';
 import type { CatalogItem } from '@/lib/types';
+import { getSiteCopy } from '@/lib/site-content';
 
 type Props = {
   location: LocationDef;
@@ -18,7 +19,9 @@ const SERVICE_LINKS: [string, string][] = [
   ['field-services', 'Field Services'],
 ];
 
-export default function LocationLandingView({ location, items }: Props) {
+export default async function LocationLandingView({ location, items }: Props) {
+  const copy = await getSiteCopy();
+
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
@@ -127,8 +130,8 @@ export default function LocationLandingView({ location, items }: Props) {
         lead="Tell us capacity, timeline, and urgency — we return a clear next step with local ownership."
         primaryHref={`/contact?consult=1&consult_subject=${encodeURIComponent(location.subject)}`}
         primaryLabel="Request consultation →"
-        secondaryHref="/tools/solution-finder"
-        secondaryLabel="Solution finder"
+        secondaryHref={copy.features.solutionFinderEnabled ? '/tools/solution-finder' : undefined}
+        secondaryLabel={copy.features.solutionFinderEnabled ? 'Solution finder' : undefined}
       />
     </main>
   );

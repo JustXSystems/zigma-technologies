@@ -5,6 +5,7 @@ import { listResourcePosts } from '@/lib/resources';
 import { INDUSTRY_DEFS } from '@/lib/industries';
 import { isReservedSiteSlug } from '@/lib/reserved-slugs';
 import { catalogPublicPath } from '@/lib/catalog-case-study';
+import { getSiteCopy } from '@/lib/site-content';
 
 export async function GET(request: Request) {
   try {
@@ -12,9 +13,13 @@ export async function GET(request: Request) {
     const q = (searchParams.get('q') || '').trim();
     if (q.length < 2) return jsonOk({ results: [], q });
 
+    const copy = await getSiteCopy();
+    const resourcesEnabled = copy.features.resourcesEnabled;
+    const industriesEnabled = copy.features.industriesEnabled;
+
     const [pages, resources, projects, products, services] = await Promise.all([
       listPages(false),
-      listResourcePosts({ q, limit: 12 }),
+      resourcesEnabled ? listResourcePosts({ q, limit: 12 }) : Promise.resolve([]),
       listCatalogItems({ itemType: 'project', q, limit: 12 }),
       listCatalogItems({ itemType: 'product', q, limit: 12 }),
       listCatalogItems({ itemType: 'service', q, limit: 12 }),
@@ -23,9 +28,11 @@ export async function GET(request: Request) {
     const ql = q.toLowerCase();
     const results: Array<{ type: string; title: string; href: string; excerpt?: string }> = [];
 
-    for (const ind of INDUSTRY_DEFS) {
-      if (ind.name.toLowerCase().includes(ql) || ind.lead.toLowerCase().includes(ql)) {
-        results.push({ type: 'Industry', title: ind.name, href: `/industries/${ind.key}`, excerpt: ind.lead });
+    if (industriesEnabled) {
+      for (const ind of INDUSTRY_DEFS) {
+        if (ind.name.toLowerCase().includes(ql) || ind.lead.toLowerCase().includes(ql)) {
+          results.push({ type: 'Industry', title: ind.name, href: `/industries/${ind.key}`, excerpt: ind.lead });
+        }
       }
     }
 

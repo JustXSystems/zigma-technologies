@@ -234,13 +234,9 @@ Open:
 
 > **Port in use?** Next.js will offer port 3001 automatically. Update `NEXT_PUBLIC_SITE_URL` if you use a non-default port.
 
-### Step 7 — Verify database connectivity (optional)
+### Step 7 — Verify the site loads
 
-```bash
-curl http://localhost:3000/api/hello
-```
-
-You should see `"database": "Connected successfully"`. Use this only in local/dev — do not expose `/api/hello` publicly in production without review.
+Open http://localhost:3000 and confirm the homepage responds. If the CMS is empty, seed from `/admin` after logging in.
 
 ---
 
@@ -1117,7 +1113,6 @@ PORT=3001 npm run start
 - [ ] Visitor uploads (`resumes`, `documents`) not directly URL-accessible
 - [ ] Rate limiting active on public forms (built-in: 6 submissions / 15 min / IP)
 - [ ] Turnstile enabled on PROD public forms (recommended)
-- [ ] Remove or protect `/api/hello` in production if not needed
 - [ ] Keep Node.js and OS packages patched
 
 ---

@@ -79,7 +79,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
             <Link href="/contact?consult=1&consult_subject=Request%20a%20Quote" className="btn btn-primary">
               Talk to an engineer →
             </Link>
-            {copy.features.toolsEnabled ? (
+            {copy.features.solutionFinderEnabled ? (
               <Link href="/tools/solution-finder" className="btn btn-ghost">
                 Solution finder
               </Link>
@@ -164,19 +164,25 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
               </Link>
             </div>
 
-            {copy.features.toolsEnabled ? (
+            {copy.features.toolsEnabled || copy.features.solutionFinderEnabled ? (
               <div className="resource-sidebar-block">
                 <h3>Related tools</h3>
                 <ul className="resource-sidebar-links">
-                  <li>
-                    <Link href="/tools/solution-finder">Solution finder</Link>
-                  </li>
-                  <li>
-                    <Link href="/tools/solar-roi">Solar ROI calculator</Link>
-                  </li>
-                  <li>
-                    <Link href="/tools/ups-calculator">UPS sizing calculator</Link>
-                  </li>
+                  {copy.features.solutionFinderEnabled ? (
+                    <li>
+                      <Link href="/tools/solution-finder">Solution finder</Link>
+                    </li>
+                  ) : null}
+                  {copy.features.toolsEnabled ? (
+                    <>
+                      <li>
+                        <Link href="/tools/solar-roi">Solar ROI calculator</Link>
+                      </li>
+                      <li>
+                        <Link href="/tools/ups-calculator">UPS sizing calculator</Link>
+                      </li>
+                    </>
+                  ) : null}
                 </ul>
               </div>
             ) : null}
@@ -233,8 +239,8 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
         eyebrow={hub.ctaBandEyebrow}
         title={hub.ctaBandTitle}
         lead={hub.ctaBandLead}
-        primaryHref={copy.features.toolsEnabled ? '/tools/solution-finder' : hub.ctaPrimaryHref}
-        primaryLabel={copy.features.toolsEnabled ? 'Solution finder →' : hub.ctaPrimary}
+        primaryHref={copy.features.solutionFinderEnabled ? '/tools/solution-finder' : hub.ctaPrimaryHref}
+        primaryLabel={copy.features.solutionFinderEnabled ? 'Solution finder →' : hub.ctaPrimary}
         secondaryHref={hub.ctaPrimaryHref}
         secondaryLabel={hub.ctaPrimary}
       />

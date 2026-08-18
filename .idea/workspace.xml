@@ -3,184 +3,167 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="BackgroundAgentGlobalSettings">
+    <option name="selectedModelId" value="auto" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="ready to test">
-      <change afterPath="$PROJECT_DIR$/src/app/manifest.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/1786517781469-z51zy6.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/1786518180037-61q2dk.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/abb-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/abb-channel-partner-certificate.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/abb.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/aditya-birla-group.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/aerial-view-of-dense-commercial-rooftop-.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/amara-raja.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/aster-hospital.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/avetta-consortium-membership-certificate.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/bangalore-international-exhibition-centr.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/bharat-electronics.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/blue-electric-vehicle-charging-at-a-mode.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/certifications-img-0.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/city-skyline-with-solar-panels-and-indus.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/coca-cola.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/eaton.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/emudhra.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/engineers-in-hard-hats-reviewing-a-digit.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/engineers-inspecting-switchgear-panels-i.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/engineers-reviewing-electrical-design-dr.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/exide.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/fincare-small-finance-bank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/hitachi.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/indigo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/jana-small-finance-bank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/kempegowda-international-airport-bengalu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/kirloskar-solar-technologies-authorizati.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/kirloskar-solar.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/kotak-mahindra-bank.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/landmark-group.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/leoch-battery.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/lifestyle.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/luminous.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/max.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/numeric.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/ocv-iso-9001-2015-certificate-of-registr.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/schneider-electric-certificate-of-author.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/schneider-electric.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-abb-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-amaron-battery.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-apc-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-bms-apc.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-delta-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-eastman-battery.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-eastman-inverter.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-eaton-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-exide-battery.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-luminous-inverter.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-microtek-inverter.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-numeric-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-offgrid-inverter.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-ongrid-inverter.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-powerone-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-abb-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-amc-college.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-emudra.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-eshwari.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-karnataka-rice.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-mysore-drier.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-petroleum.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-rajalakshimi.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-project-shiva-stones.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-service-design.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-service-field.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-service-solar-om.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-service-ups-amc.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-service-ups-rental.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-service-ups-repair.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-solar-combo.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-solar-modules.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-stabilizer-optimus.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-studer-xth.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-studer-xtm.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-studer-xts.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/seed-vertiv-ups.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/shadowfax.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/solar-farm-with-wind-turbines-at-sunset-.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/somerset-therapeutics.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/tke.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/vertiv.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/vi.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/zigma-technologies-engineers-collaborati.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/zigma-technologies-engineers-monitoring-.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/zigma-technologies-help-desk-team-assist.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/zigma-technologies-logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/images/zigma.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/svg/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/cms-media/video/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/database.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/meta.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/careers.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/certifications.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/contact.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/documents/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/resumes/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260813-221424/uploads/resumes/1786509635889-damqsr2i.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="ready to test ztools">
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.claude/settings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/deviceManager.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/markdown.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.idea/ztools-mobile.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/.nvmrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/AGENTS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/App.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/CLAUDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/EMULATOR-SETUP.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/LICENSE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/app.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/android-icon-background.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/android-icon-foreground.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/android-icon-monochrome.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/brand-mark.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/favicon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/assets/notification-icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/eas.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/metro.config.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/adb-devices.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/android-env.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/check-android.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/check-node-version.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/diagnose-emulator.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/emulator-list.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/emulator-network.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/emulator-reset.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/emulator-start.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/emulator-wait.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/generate-icons.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/kill-metro.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/print-lan-ip.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/run-android-tunnel.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/run-android.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/run-expo-android.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/scripts/smoke-test.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/api/client.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/components/BrandHeader.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/components/ErrorBoundary.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/components/OfflineBanner.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/config.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/context/AuthContext.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/hooks/useNetworkStatus.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/lib/cache.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/navigation/types.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/screens/DashboardScreen.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/screens/LoginScreen.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/screens/ToolScreen.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/services/notifications.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/src/theme.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ztools-mobile/tsconfig.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/migrate-admin-roles.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/migrate-ztools-push.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/migrate-ztools.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(admin)/admin/roles/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(admin)/admin/ztools/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(site)/industries/layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(site)/resources/layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(site)/search/layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/app-bridge/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/dashboard/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/login/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/register/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/tools/[slug]/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/roles/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/ztools/tools/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/ztools/users/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/ztools/auth/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/ztools/mobile/bridge/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/ztools/mobile/push-token/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/ztools/register/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/ztools/tools/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/FloatingWhatsApp.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsMockTool.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsPortalBrand.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsShell.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsToolPageClient.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/admin-roles.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/admin-screens.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/nav-features.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/ztools-push.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/ztools.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/a4ec1007-5a2b-45d9-9f6f-e5a2dc0aad13.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/a4ec1007-5a2b-45d9-9f6f-e5a2dc0aad13.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ADMIN.md" beforeDir="false" afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/manifest.webmanifest" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/sw.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/sw.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup-database.sql" beforeDir="false" afterPath="$PROJECT_DIR$/setup-database.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/theme/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/theme/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/careers/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/careers/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/certifications/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/certifications/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/hi/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/hi/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/kn/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/kn/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/resources/[slug]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/resources/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/search/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/search/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/thank-you/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/thank-you/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/solar-roi/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/solar-roi/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/solution-finder/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/solution-finder/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/ups-calculator/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/ups-calculator/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/site-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/site-settings/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/auth/login/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/auth/login/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/auth/me/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/auth/me/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/newsletter/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/newsletter/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/partners/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/partners/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/redirects/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/redirects/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/site-copy/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/site-copy/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/theme/globals/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/theme/globals/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/theme/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/theme/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/pages/[slug]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/pages/[slug]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/theme.css/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/theme.css/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/users/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/users/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/hello/route.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/search/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/search/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CallbackRequestModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CallbackRequestModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CmsPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CmsPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CookieConsent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CookieConsent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/sitemap.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/sitemap.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/HeaderIconMenus.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/HeaderIconMenus.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/PwaRegister.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/PwaRegister.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SiteSearchForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SiteSearchForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SiteSeo.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SiteSeo.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SocialProofStrip.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SocialProofStrip.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/EcoVisual.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/EcoVisual.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ProofBlocks.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/VisitTailorBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/VisitTailorBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/locations/LocationLandingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/locations/LocationLandingView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/locations/LocationServiceLandingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/locations/LocationServiceLandingView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/tools/SolarRoiClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tools/SolarRoiClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/tools/UpsCalculatorClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tools/UpsCalculatorClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/homepage-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/homepage-seed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/industries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industries.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/locations.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/locations.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/resources.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/resources.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/tools/SolarRoiPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tools/SolarRoiPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/tools/SolutionFinderClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tools/SolutionFinderClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/tools/UpsCalculatorPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tools/UpsCalculatorPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/favicon-asset.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/nav-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-seed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="module" />
+      <option value="repository" />
+    </option>
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/iamsa/IdeaProjects/zigma-technologies" value="3HtI0pdvXkRjWLtzqFHDgj0oPRP" />
+    </persistenceIdMap>
   </component>
   <component name="DatabaseLocalColorSettings">
     <colors>
@@ -190,29 +173,41 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;9611244320&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JustXSystems/zigma-technologies.git&quot;,
+    &quot;accountId&quot;: &quot;d8ccfe0a-ea1f-4974-8912-9443a226f941&quot;
+  }
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4918645130658834" />
-      <entry key="MS500" value="3.295407451171035" />
-      <entry key="S2" value="6.320885786722026" />
-      <entry key="S5" value="10.208838098976681" />
-      <entry key="S10" value="16.48528167359935" />
-      <entry key="S30" value="29.074615376304937" />
-      <entry key="S60" value="35.50207262053862" />
-      <entry key="M2" value="39.75873530126559" />
-      <entry key="M5" value="43.04258385395482" />
-      <entry key="M10" value="50.99841213320972" />
-      <entry key="M15" value="70.50719722919372" />
-      <entry key="M30" value="165.62982546389108" />
-      <entry key="H1" value="368.21785758733404" />
-      <entry key="H2" value="758.2957833852079" />
-      <entry key="H4" value="1554.5920198317408" />
-      <entry key="D1" value="5770.79274520042" />
-      <entry key="W1" value="8338.530589099168" />
+      <entry key="MS100" value="1.0000000000000002" />
+      <entry key="MS500" value="1.0006848140872278" />
+      <entry key="S2" value="1.1617682068103568" />
+      <entry key="S5" value="1.482566609861641" />
+      <entry key="S10" value="1.6946701446453856" />
+      <entry key="S30" value="1.8856447341616638" />
+      <entry key="S60" value="1.941087393530549" />
+      <entry key="M2" value="1.9757996334151096" />
+      <entry key="M5" value="4.805159533287032" />
+      <entry key="M10" value="30.167776165445314" />
+      <entry key="M15" value="65.54714533838984" />
+      <entry key="M30" value="150.31676763209245" />
+      <entry key="H1" value="233.277842175762" />
+      <entry key="H2" value="301.16066841515186" />
+      <entry key="H4" value="366.26469964950235" />
+      <entry key="D1" value="1318.5883899083624" />
+      <entry key="W1" value="8183.551688610057" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -223,34 +218,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="1.7404477701137747E-146" />
-      <entry key="M10" value="1.3192603117330002E-73" />
-      <entry key="M15" value="2.591514630197296E-49" />
-      <entry key="M30" value="5.090692124060543E-25" />
-      <entry key="H1" value="7.134908635757597E-13" />
-      <entry key="H2" value="8.44683883814354E-7" />
-      <entry key="H4" value="9.190668549209067E-4" />
-      <entry key="D1" value="0.31181082190114867" />
-      <entry key="W1" value="0.8466399170591515" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="2.1850745952519786E-248" />
+      <entry key="M15" value="7.815873322173786E-166" />
+      <entry key="M30" value="2.7956883449651093E-83" />
+      <entry key="H1" value="5.287426921447922E-42" />
+      <entry key="H2" value="2.2994405670613555E-21" />
+      <entry key="H4" value="4.795248238684462E-11" />
+      <entry key="D1" value="0.019060539211587044" />
+      <entry key="W1" value="0.5679433595024083" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.441166996329084" />
-      <entry key="MS500" value="3.2729939923685545" />
-      <entry key="S2" value="6.309844438560788" />
-      <entry key="S5" value="10.201751469804753" />
-      <entry key="S10" value="16.479502902281812" />
-      <entry key="S30" value="29.07056699732319" />
-      <entry key="S60" value="35.499292406939" />
-      <entry key="M2" value="39.757059046921846" />
-      <entry key="M5" value="43.041822449876754" />
-      <entry key="M10" value="50.9979026914689" />
-      <entry key="M15" value="70.50656814461864" />
-      <entry key="M30" value="165.62876148134643" />
-      <entry key="H1" value="368.21664526818444" />
-      <entry key="H2" value="758.2946856721989" />
-      <entry key="H4" value="1554.591989695996" />
-      <entry key="D1" value="5771.104043998492" />
-      <entry key="W1" value="8339.377119551007" />
+      <entry key="MS100" value="1.258079232016275E-11" />
+      <entry key="MS500" value="0.007260224707259813" />
+      <entry key="S2" value="0.44502072153890043" />
+      <entry key="S5" value="1.0856966391929848" />
+      <entry key="S10" value="1.47111422768167" />
+      <entry key="S30" value="1.8047110022553277" />
+      <entry key="S60" value="1.8997601189831756" />
+      <entry key="M2" value="1.954915804402908" />
+      <entry key="M5" value="4.796678306621692" />
+      <entry key="M10" value="30.16322089532463" />
+      <entry key="M15" value="65.54383595974674" />
+      <entry key="M30" value="150.31480010531374" />
+      <entry key="H1" value="233.2767092744868" />
+      <entry key="H2" value="301.1600353380188" />
+      <entry key="H4" value="366.2643325080246" />
+      <entry key="D1" value="1318.6071908956624" />
+      <entry key="W1" value="8184.119462364162" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -258,39 +253,56 @@
   &quot;fromUser&quot;: false
 }</component>
   <component name="ProjectId" id="3HlcIfqKD4chkrzlbZshL0Y2QGC" />
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_id" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="BACKGROUND" />
+        <option name="worktreeMode" value="WORKSPACE" />
+      </template>
+    </option>
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/public",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/public&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.AcpAgentsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
@@ -350,7 +362,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="ready to test" />
-    <option name="LAST_COMMIT_MESSAGE" value="ready to test" />
+    <MESSAGE value="ready to test ztools" />
+    <option name="LAST_COMMIT_MESSAGE" value="ready to test ztools" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

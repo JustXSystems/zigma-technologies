@@ -1,11 +1,10 @@
-import { requireAdmin, requireSession } from '@/lib/auth';
+import { requireScreen } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/api';
 import { parseCssSections, readRepoSiteCss } from '@/lib/site-css';
 
 export async function GET() {
   try {
-    await requireSession();
-    await requireAdmin();
+    await requireScreen('theme');
     const css = readRepoSiteCss();
     const sections = parseCssSections(css);
     return jsonOk({

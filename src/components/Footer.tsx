@@ -8,8 +8,10 @@ import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { whatsappHref } from '@/lib/whatsapp';
 import { trackEvent } from '@/lib/analytics';
+import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
+import { filterFooterColumnsForFeatures } from '@/lib/nav-features';
 
 const DEFAULT_COLUMNS: FooterColumn[] = [
   {
@@ -20,9 +22,7 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
       { label: 'Careers', href: '/careers' },
       { label: 'Certifications', href: '/certifications' },
       { label: 'Case studies', href: '/projects' },
-      { label: 'Industries', href: '/industries' },
       { label: 'Locations', href: '/locations' },
-      { label: 'Resources', href: '/resources' },
       { label: 'Press', href: '/press' },
     ],
   },
@@ -36,7 +36,6 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
       { label: 'AMC & O&M Support', href: '/services?category=ups-amc' },
       { label: 'Design & Engineering', href: '/services?category=engineering-design' },
       { label: 'Service levels', href: '/sla' },
-      { label: 'Solution finder', href: '/tools/solution-finder' },
     ],
   },
   {
@@ -57,6 +56,10 @@ export default function Footer() {
   const [newsletterError, setNewsletterError] = useState('');
   const [columns, setColumns] = useState<FooterColumn[]>(shellColumns || DEFAULT_COLUMNS);
   const copy = useSiteCopy();
+  const footerColumns = useMemo(
+    () => filterFooterColumnsForFeatures(columns, copy.features),
+    [columns, copy.features]
+  );
 
   const current = useMemo(() =>
     pathname === '/contact'
@@ -139,7 +142,7 @@ export default function Footer() {
               )}
               {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
             </div>
-            {columns.map((col) => (
+            {footerColumns.map((col) => (
               <div key={col.heading} className="foot-col">
                 <h6>{col.heading}</h6>
                 {col.links.map((link) => (
@@ -204,6 +207,8 @@ export default function Footer() {
           </div>
         </div>
       </footer>
+
+      <FloatingWhatsApp />
 
       <div className="sticky-mobile-cta">
         <a

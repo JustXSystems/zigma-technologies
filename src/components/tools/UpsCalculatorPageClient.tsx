@@ -7,7 +7,11 @@ import UpsCalculatorClient from '@/components/tools/UpsCalculatorClient';
 import { useSiteCopy } from '@/lib/use-site-copy';
 
 export default function UpsCalculatorPageClient() {
-  const t = useSiteCopy().tools.upsCalculator;
+  const copy = useSiteCopy();
+  const t = copy.tools.upsCalculator;
+  const toolsBreadcrumbHref = copy.features.solutionFinderEnabled
+    ? '/tools/solution-finder'
+    : '/tools/ups-calculator';
 
   return (
     <main id="main-content" className="hub-page">
@@ -19,7 +23,7 @@ export default function UpsCalculatorPageClient() {
         image={t.image}
         breadcrumb={[
           { label: 'Home', href: '/' },
-          { label: t.breadcrumbTools, href: '/tools/solution-finder' },
+          { label: t.breadcrumbTools, href: toolsBreadcrumbHref },
           { label: t.breadcrumbSelf },
         ]}
         actions={

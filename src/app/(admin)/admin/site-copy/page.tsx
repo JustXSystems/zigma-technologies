@@ -275,7 +275,11 @@ export default function SiteCopyAdminPage() {
           <div className="admin-form-grid">
             {(
               [
-                ['toolsEnabled', 'Enable tools (/tools/*)'],
+                ['toolsEnabled', 'Enable tools (/tools/ups-calculator, /tools/solar-roi)'],
+                ['solutionFinderEnabled', 'Enable solution finder (/tools/solution-finder)'],
+                ['searchEnabled', 'Enable global search (header icon + /search)'],
+                ['resourcesEnabled', 'Enable resources hub (/resources)'],
+                ['industriesEnabled', 'Enable industries hub (/industries)'],
                 ['partnersEnabled', 'Enable partner portal'],
                 ['localesEnabled', 'Enable hi/kn locale landings'],
               ] as const

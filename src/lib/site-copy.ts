@@ -232,6 +232,10 @@ export type SiteCopy = {
   /** Feature flags for vertical product packaging */
   features: {
     toolsEnabled: boolean;
+    solutionFinderEnabled: boolean;
+    searchEnabled: boolean;
+    resourcesEnabled: boolean;
+    industriesEnabled: boolean;
     partnersEnabled: boolean;
     localesEnabled: boolean;
   };
@@ -584,6 +588,10 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
   },
   features: {
     toolsEnabled: true,
+    solutionFinderEnabled: false,
+    searchEnabled: false,
+    resourcesEnabled: false,
+    industriesEnabled: false,
     partnersEnabled: true,
     localesEnabled: true,
   },

@@ -100,8 +100,8 @@ export default async function ResourcesIndexPage({ searchParams }: Props) {
         eyebrow={hub.ctaBandEyebrow}
         title={hub.ctaBandTitle}
         lead={hub.ctaBandLead}
-        primaryHref={copy.features.toolsEnabled ? '/tools/solution-finder' : hub.ctaPrimaryHref}
-        primaryLabel={copy.features.toolsEnabled ? 'Solution finder →' : hub.ctaPrimary}
+        primaryHref={copy.features.solutionFinderEnabled ? '/tools/solution-finder' : hub.ctaPrimaryHref}
+        primaryLabel={copy.features.solutionFinderEnabled ? 'Solution finder →' : hub.ctaPrimary}
         secondaryHref={hub.ctaPrimaryHref}
         secondaryLabel={hub.ctaPrimary}
       />

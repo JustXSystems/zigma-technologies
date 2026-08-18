@@ -256,7 +256,7 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
                 onRequestCallback();
               }}
             />
-            {copy.features.toolsEnabled ? (
+            {copy.features.solutionFinderEnabled ? (
               <MenuChip
                 className="header-menu-chip--tool"
                 href="/tools/solution-finder"

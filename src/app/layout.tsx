@@ -1,28 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display-loaded",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  preload: true,
-});
-
-const inter = Inter({
-  variable: "--font-body-loaded",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-mono-loaded",
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  display: "swap",
-});
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
 const OG_IMAGE = `${SITE_URL}/assets/images/zigma-technologies-logo.png`;
@@ -87,9 +64,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+          rel="stylesheet"
+        />
         <link rel="stylesheet" href="/api/public/theme.css" />
       </head>
-      <body className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
+      <body>
         {children}
       </body>
     </html>

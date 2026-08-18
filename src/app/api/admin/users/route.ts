@@ -7,12 +7,13 @@ import {
   updateAdminUser,
 } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
+import { listAdminRoles } from '@/lib/admin-roles';
 
 export async function GET() {
   try {
     await requireAdmin();
-    const users = await listAdminUsers();
-    return jsonOk({ users });
+    const [users, roles] = await Promise.all([listAdminUsers(), listAdminRoles()]);
+    return jsonOk({ users, roles });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
     if (error instanceof Error && error.message === 'FORBIDDEN') return jsonError('Forbidden', 403);
@@ -25,6 +26,7 @@ const createSchema = z.object({
   name: z.string().min(1),
   password: z.string().min(10),
   role: z.enum(['admin', 'editor']).default('editor'),
+  role_id: z.number().int().positive().nullable().optional(),
 });
 
 export async function POST(request: Request) {
@@ -48,6 +50,7 @@ const patchSchema = z.object({
   id: z.number().int().positive(),
   name: z.string().min(1).optional(),
   role: z.enum(['admin', 'editor']).optional(),
+  role_id: z.number().int().positive().nullable().optional(),
   password: z.string().min(10).optional(),
 });
 

@@ -92,8 +92,8 @@ export default async function IndustriesIndexPage() {
         lead={hub.ctaBandLead}
         primaryHref={hub.ctaPrimaryHref}
         primaryLabel={hub.ctaPrimary}
-        secondaryHref={copy.features.toolsEnabled ? '/tools/solution-finder' : hub.ctaSecondaryHref}
-        secondaryLabel={copy.features.toolsEnabled ? copy.talk.solutionFinder : hub.ctaSecondary}
+        secondaryHref={copy.features.solutionFinderEnabled ? '/tools/solution-finder' : hub.ctaSecondaryHref}
+        secondaryLabel={copy.features.solutionFinderEnabled ? copy.talk.solutionFinder : hub.ctaSecondary}
       />
     </main>
   );

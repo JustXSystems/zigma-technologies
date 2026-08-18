@@ -123,11 +123,9 @@ export const HEADER_NAV_SEED: NavSeedNode[] = [
       },
     ],
   },
-  { label: 'Industries', href: '/industries' },
   { label: 'Projects', href: '/projects' },
   { label: 'Products', href: '/products' },
   { label: 'Services', href: '/services' },
-  { label: 'Resources', href: '/resources' },
   { label: 'Contact', href: '/contact#contact-form' },
 ];
 
@@ -141,9 +139,7 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
       { label: 'Careers', href: '/careers' },
       { label: 'Certifications', href: '/certifications' },
       { label: 'Case studies', href: '/projects' },
-      { label: 'Industries', href: '/industries' },
       { label: 'Locations', href: '/locations' },
-      { label: 'Resources', href: '/resources' },
       { label: 'Press', href: '/press' },
     ],
   },
@@ -158,7 +154,6 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
       { label: 'AMC & O&M Support', href: '/services?category=ups-amc' },
       { label: 'Design & Engineering', href: '/services?category=engineering-design' },
       { label: 'Service levels', href: '/sla' },
-      { label: 'Solution finder', href: '/tools/solution-finder' },
     ],
   },
   {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth';
+import { requireScreen } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import {
   createPartnerDocument,
@@ -14,7 +14,7 @@ import {
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requireScreen('partners');
     const [users, documents] = await Promise.all([listPartnerUsers(), listPartnerDocuments({ admin: true })]);
     return jsonOk({ users, documents });
   } catch (error) {
@@ -56,7 +56,7 @@ const updateDocSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('partners');
     const body = await readJson(request);
     const action = (body as { action?: string }).action;
 

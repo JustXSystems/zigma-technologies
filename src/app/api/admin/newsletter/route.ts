@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import type { RowDataPacket } from 'mysql2';
-import { requireAdmin } from '@/lib/auth';
+import { requireScreen } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/api';
 import pool from '@/lib/db';
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requireScreen('newsletter');
     const [rows] = await pool.query<RowDataPacket[]>(
       'SELECT id, email, source, created_at FROM newsletter_subscribers ORDER BY id DESC LIMIT 2000'
     );
@@ -22,7 +22,7 @@ const deleteSchema = z.object({ id: z.number().int().positive() });
 
 export async function DELETE(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('newsletter');
     const body = deleteSchema.parse(await request.json());
     await pool.query('DELETE FROM newsletter_subscribers WHERE id = ?', [body.id]);
     return jsonOk({ ok: true });

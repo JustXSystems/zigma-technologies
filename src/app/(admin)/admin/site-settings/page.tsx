@@ -11,7 +11,11 @@ const FIELDS: Array<{ key: keyof SiteSettings; label: string; hint?: string }> =
   { key: 'emergencyPhone', label: 'Emergency phone' },
   { key: 'email', label: 'Info email' },
   { key: 'supportEmail', label: 'Support email' },
-  { key: 'whatsapp', label: 'WhatsApp number (digits only)', hint: 'e.g. 919590137444' },
+  {
+    key: 'whatsapp',
+    label: 'WhatsApp number (digits only)',
+    hint: 'e.g. 919590137444 — powers header, floating button, and mobile sticky chat',
+  },
   { key: 'headerCtaLabel', label: 'Header CTA label (variant A)' },
   { key: 'headerCtaLabelB', label: 'Header CTA label (variant B)' },
   { key: 'ctaVariantBPercent', label: 'Variant B percent 0–100', hint: 'e.g. 50 shows B half the time' },

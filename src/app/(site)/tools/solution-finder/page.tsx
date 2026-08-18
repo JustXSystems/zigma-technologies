@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { getSiteCopy } from '@/lib/site-content';
 import SolutionFinderClient from '@/components/tools/SolutionFinderClient';
 
 export const metadata: Metadata = {
@@ -6,6 +8,9 @@ export const metadata: Metadata = {
   description: 'Compare UPS, solar, BESS, and service paths in under a minute.',
 };
 
-export default function SolutionFinderPage() {
+export default async function SolutionFinderPage() {
+  const copy = await getSiteCopy();
+  if (!copy.features.solutionFinderEnabled) redirect('/');
   return <SolutionFinderClient />;
 }
+

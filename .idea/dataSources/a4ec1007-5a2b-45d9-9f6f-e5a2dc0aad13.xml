@@ -935,11 +935,1584 @@ zigmatech|schema||zigmatech|localhost|UPDATE|G</Grants>
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Current>1</Current>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2026-08-12.00:41:15</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-08-14.11:37:59</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="291" parent="1" name="zigmatech">
       <Host>localhost</Host>
     </user>
+    <table id="292" parent="290" name="admin_roles">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="293" parent="290" name="admin_users">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="294" parent="290" name="catalog_categories">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="295" parent="290" name="catalog_items">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="296" parent="290" name="catalog_media">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="297" parent="290" name="catalog_page_settings">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="298" parent="290" name="css_overrides">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="299" parent="290" name="enquiries">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="300" parent="290" name="form_definitions">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="301" parent="290" name="form_fields">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="302" parent="290" name="media_assets">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="303" parent="290" name="nav_items">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="304" parent="290" name="page_sections">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="305" parent="290" name="pages">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="306" parent="290" name="partner_documents">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="307" parent="290" name="partner_users">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="308" parent="290" name="press_posts">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="309" parent="290" name="resource_posts">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="310" parent="290" name="site_testimonials">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="311" parent="290" name="theme_settings">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <column id="312" parent="292" name="id">
+      <AutoIncrement>4</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="313" parent="292" name="name">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="314" parent="292" name="slug">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(80)|0s</StoredType>
+    </column>
+    <column id="315" parent="292" name="description">
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="316" parent="292" name="screens">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="317" parent="292" name="is_system">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="318" parent="292" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>7</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="319" parent="292" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="320" parent="292" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="321" parent="292" name="slug">
+      <ColNames>slug</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="322" parent="292" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="323" parent="292" name="slug">
+      <UnderlyingIndexName>slug</UnderlyingIndexName>
+    </key>
+    <column id="324" parent="293" name="id">
+      <AutoIncrement>3</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="325" parent="293" name="email">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(190)|0s</StoredType>
+    </column>
+    <column id="326" parent="293" name="password_hash">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="327" parent="293" name="name">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="328" parent="293" name="role">
+      <DefaultExpression>&apos;admin&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>enum(&apos;admin&apos;, &apos;editor&apos;)|0e</StoredType>
+    </column>
+    <column id="329" parent="293" name="role_id">
+      <Position>6</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="330" parent="293" name="last_login">
+      <Position>7</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="331" parent="293" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="332" parent="293" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>9</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="333" parent="293" name="fk_admin_users_role">
+      <ColNames>role_id</ColNames>
+      <OnDelete>set-null</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>admin_roles</RefTableName>
+    </foreign-key>
+    <index id="334" parent="293" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="335" parent="293" name="email">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="336" parent="293" name="fk_admin_users_role">
+      <ColNames>role_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="337" parent="293" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="338" parent="293" name="email">
+      <UnderlyingIndexName>email</UnderlyingIndexName>
+    </key>
+    <column id="339" parent="294" name="id">
+      <AutoIncrement>61</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="340" parent="294" name="item_type">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>enum(&apos;project&apos;, &apos;product&apos;, &apos;service&apos;)|0e</StoredType>
+    </column>
+    <column id="341" parent="294" name="name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="342" parent="294" name="slug">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="343" parent="294" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="344" parent="294" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <index id="345" parent="294" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="346" parent="294" name="uq_cat_type_slug">
+      <ColNames>item_type
+slug</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="347" parent="294" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="348" parent="294" name="uq_cat_type_slug">
+      <UnderlyingIndexName>uq_cat_type_slug</UnderlyingIndexName>
+    </key>
+    <column id="349" parent="295" name="id">
+      <AutoIncrement>117</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="350" parent="295" name="item_type">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>enum(&apos;project&apos;, &apos;product&apos;, &apos;service&apos;)|0e</StoredType>
+    </column>
+    <column id="351" parent="295" name="slug">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="352" parent="295" name="title">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="353" parent="295" name="summary">
+      <Position>5</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="354" parent="295" name="description">
+      <Position>6</Position>
+      <StoredType>mediumtext|0s</StoredType>
+    </column>
+    <column id="355" parent="295" name="category_id">
+      <Position>7</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="356" parent="295" name="tags_json">
+      <Position>8</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="357" parent="295" name="specs_json">
+      <Position>9</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="358" parent="295" name="price_label">
+      <Position>10</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="359" parent="295" name="availability_label">
+      <Position>11</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="360" parent="295" name="lead_time_label">
+      <Position>12</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="361" parent="295" name="status">
+      <DefaultExpression>&apos;draft&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>13</Position>
+      <StoredType>enum(&apos;draft&apos;, &apos;published&apos;)|0e</StoredType>
+    </column>
+    <column id="362" parent="295" name="featured">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>14</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="363" parent="295" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>15</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="364" parent="295" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>16</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="365" parent="295" name="cta_config_json">
+      <Position>17</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="366" parent="295" name="case_study_json">
+      <Position>18</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="367" parent="295" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>19</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="368" parent="295" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>20</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="369" parent="295" name="fk_items_category">
+      <ColNames>category_id</ColNames>
+      <OnDelete>set-null</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>catalog_categories</RefTableName>
+    </foreign-key>
+    <index id="370" parent="295" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="371" parent="295" name="uq_item_type_slug">
+      <ColNames>item_type
+slug</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="372" parent="295" name="idx_items_type_enabled">
+      <ColNames>item_type
+enabled
+status</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="373" parent="295" name="fk_items_category">
+      <ColNames>category_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="374" parent="295" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="375" parent="295" name="uq_item_type_slug">
+      <UnderlyingIndexName>uq_item_type_slug</UnderlyingIndexName>
+    </key>
+    <column id="376" parent="296" name="id">
+      <AutoIncrement>120</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="377" parent="296" name="item_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="378" parent="296" name="kind">
+      <DefaultExpression>&apos;image&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>enum(&apos;image&apos;, &apos;video&apos;, &apos;svg&apos;)|0e</StoredType>
+    </column>
+    <column id="379" parent="296" name="url">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="380" parent="296" name="alt">
+      <Position>5</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="381" parent="296" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="382" parent="296" name="is_primary">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="383" parent="296" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="384" parent="296" name="fk_media_item">
+      <ColNames>item_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>catalog_items</RefTableName>
+    </foreign-key>
+    <index id="385" parent="296" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="386" parent="296" name="idx_media_item_sort">
+      <ColNames>item_id
+sort_order</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="387" parent="296" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="388" parent="297" name="id">
+      <AutoIncrement>4</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="389" parent="297" name="item_type">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>enum(&apos;project&apos;, &apos;product&apos;, &apos;service&apos;)|0e</StoredType>
+    </column>
+    <column id="390" parent="297" name="layout">
+      <DefaultExpression>&apos;grid&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>enum(&apos;grid&apos;, &apos;list&apos;)|0e</StoredType>
+    </column>
+    <column id="391" parent="297" name="grid_columns">
+      <DefaultExpression>&apos;3&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>tinyint unsigned|0s</StoredType>
+    </column>
+    <column id="392" parent="297" name="filters_json">
+      <Position>5</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="393" parent="297" name="search_fields_json">
+      <Position>6</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="394" parent="297" name="card_fields_json">
+      <Position>7</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="395" parent="297" name="modal_fields_json">
+      <Position>8</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="396" parent="297" name="hero_enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>9</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="397" parent="297" name="hero_autoplay_ms">
+      <DefaultExpression>&apos;6000&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="398" parent="297" name="hero_item_ids_json">
+      <Position>11</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="399" parent="297" name="hero_eyebrow">
+      <Position>12</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="400" parent="297" name="hero_title">
+      <Position>13</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="401" parent="297" name="hero_lead">
+      <Position>14</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="402" parent="297" name="visual_style">
+      <DefaultExpression>&apos;premium&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>15</Position>
+      <StoredType>enum(&apos;classic&apos;, &apos;premium&apos;, &apos;glass&apos;, &apos;minimal&apos;, &apos;bold-corporate&apos;)|0e</StoredType>
+    </column>
+    <column id="403" parent="297" name="hero_variant">
+      <DefaultExpression>&apos;spotlight&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>16</Position>
+      <StoredType>enum(&apos;standard&apos;, &apos;spotlight&apos;)|0e</StoredType>
+    </column>
+    <column id="404" parent="297" name="loading_skeleton_enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>17</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="405" parent="297" name="reveal_animation_enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>18</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="406" parent="297" name="premium_borders_enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>19</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="407" parent="297" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>20</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="408" parent="297" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="409" parent="297" name="item_type">
+      <ColNames>item_type</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="410" parent="297" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="411" parent="297" name="item_type">
+      <UnderlyingIndexName>item_type</UnderlyingIndexName>
+    </key>
+    <column id="412" parent="298" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="413" parent="298" name="version">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="414" parent="298" name="css_text">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>mediumtext|0s</StoredType>
+    </column>
+    <column id="415" parent="298" name="status">
+      <DefaultExpression>&apos;draft&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>enum(&apos;draft&apos;, &apos;published&apos;, &apos;archived&apos;)|0e</StoredType>
+    </column>
+    <column id="416" parent="298" name="notes">
+      <Position>5</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="417" parent="298" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>6</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="418" parent="298" name="published_at">
+      <Position>7</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <index id="419" parent="298" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="420" parent="298" name="idx_css_status_version">
+      <ColNames>status
+version</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="421" parent="298" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="422" parent="299" name="id">
+      <AutoIncrement>3</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="423" parent="299" name="form_id">
+      <Position>2</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="424" parent="299" name="item_id">
+      <Position>3</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="425" parent="299" name="item_type">
+      <Position>4</Position>
+      <StoredType>enum(&apos;project&apos;, &apos;product&apos;, &apos;service&apos;, &apos;general&apos;)|0e</StoredType>
+    </column>
+    <column id="426" parent="299" name="payload_json">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="427" parent="299" name="status">
+      <DefaultExpression>&apos;new&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>enum(&apos;new&apos;, &apos;in_progress&apos;, &apos;closed&apos;)|0e</StoredType>
+    </column>
+    <column id="428" parent="299" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>7</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="429" parent="299" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="430" parent="299" name="fk_enq_form">
+      <ColNames>form_id</ColNames>
+      <OnDelete>set-null</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>form_definitions</RefTableName>
+    </foreign-key>
+    <foreign-key id="431" parent="299" name="fk_enq_item">
+      <ColNames>item_id</ColNames>
+      <OnDelete>set-null</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>catalog_items</RefTableName>
+    </foreign-key>
+    <index id="432" parent="299" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="433" parent="299" name="fk_enq_form">
+      <ColNames>form_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="434" parent="299" name="fk_enq_item">
+      <ColNames>item_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="435" parent="299" name="idx_enq_status_created">
+      <ColNames>status
+created_at</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="436" parent="299" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="437" parent="300" name="id">
+      <AutoIncrement>2</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="438" parent="300" name="form_key">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(80)|0s</StoredType>
+    </column>
+    <column id="439" parent="300" name="name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="440" parent="300" name="item_type">
+      <Position>4</Position>
+      <StoredType>enum(&apos;project&apos;, &apos;product&apos;, &apos;service&apos;, &apos;general&apos;)|0e</StoredType>
+    </column>
+    <column id="441" parent="300" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="442" parent="300" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>6</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="443" parent="300" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>7</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="444" parent="300" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="445" parent="300" name="form_key">
+      <ColNames>form_key</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="446" parent="300" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="447" parent="300" name="form_key">
+      <UnderlyingIndexName>form_key</UnderlyingIndexName>
+    </key>
+    <column id="448" parent="301" name="id">
+      <AutoIncrement>7</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="449" parent="301" name="form_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="450" parent="301" name="field_name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(80)|0s</StoredType>
+    </column>
+    <column id="451" parent="301" name="label">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="452" parent="301" name="field_type">
+      <DefaultExpression>&apos;text&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>enum(&apos;text&apos;, &apos;email&apos;, &apos;tel&apos;, &apos;textarea&apos;, &apos;select&apos;, &apos;number&apos;, &apos;checkbox&apos;)|0e</StoredType>
+    </column>
+    <column id="453" parent="301" name="required">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="454" parent="301" name="options_json">
+      <Position>7</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="455" parent="301" name="placeholder">
+      <Position>8</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="456" parent="301" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>9</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="457" parent="301" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="458" parent="301" name="validation_json">
+      <Position>11</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <foreign-key id="459" parent="301" name="fk_fields_form">
+      <ColNames>form_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>form_definitions</RefTableName>
+    </foreign-key>
+    <index id="460" parent="301" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="461" parent="301" name="uq_form_field_name">
+      <ColNames>form_id
+field_name</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="462" parent="301" name="idx_fields_form_sort">
+      <ColNames>form_id
+sort_order</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="463" parent="301" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="464" parent="301" name="uq_form_field_name">
+      <UnderlyingIndexName>uq_form_field_name</UnderlyingIndexName>
+    </key>
+    <column id="465" parent="302" name="id">
+      <AutoIncrement>3</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="466" parent="302" name="path">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="467" parent="302" name="mime">
+      <Position>3</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="468" parent="302" name="width">
+      <Position>4</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="469" parent="302" name="height">
+      <Position>5</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="470" parent="302" name="alt">
+      <Position>6</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="471" parent="302" name="tags_json">
+      <Position>7</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="472" parent="302" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="473" parent="302" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="474" parent="302" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="475" parent="303" name="id">
+      <AutoIncrement>194</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="476" parent="303" name="location">
+      <DefaultExpression>&apos;header&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>enum(&apos;header&apos;, &apos;footer&apos;)|0e</StoredType>
+    </column>
+    <column id="477" parent="303" name="label">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="478" parent="303" name="href">
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="479" parent="303" name="parent_id">
+      <Position>5</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="480" parent="303" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="481" parent="303" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="482" parent="303" name="meta_json">
+      <Position>8</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="483" parent="303" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>9</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="484" parent="303" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>10</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="485" parent="303" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="486" parent="303" name="idx_nav_location_sort">
+      <ColNames>location
+sort_order</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="487" parent="303" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="488" parent="304" name="id">
+      <AutoIncrement>55</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="489" parent="304" name="page_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="490" parent="304" name="type">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(64)|0s</StoredType>
+    </column>
+    <column id="491" parent="304" name="section_key">
+      <Position>4</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="492" parent="304" name="title">
+      <Position>5</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="493" parent="304" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="494" parent="304" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="495" parent="304" name="content_json">
+      <Position>8</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="496" parent="304" name="style_json">
+      <Position>9</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="497" parent="304" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>10</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="498" parent="304" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>11</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="499" parent="304" name="fk_page_sections_page">
+      <ColNames>page_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>id</RefColNames>
+      <RefTableName>pages</RefTableName>
+    </foreign-key>
+    <index id="500" parent="304" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="501" parent="304" name="idx_page_sections_page_sort">
+      <ColNames>page_id
+sort_order</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="502" parent="304" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="503" parent="305" name="id">
+      <AutoIncrement>7</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="504" parent="305" name="slug">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(120)|0s</StoredType>
+    </column>
+    <column id="505" parent="305" name="title">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="506" parent="305" name="meta_title">
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="507" parent="305" name="meta_description">
+      <Position>5</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="508" parent="305" name="status">
+      <DefaultExpression>&apos;draft&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>enum(&apos;draft&apos;, &apos;published&apos;)|0e</StoredType>
+    </column>
+    <column id="509" parent="305" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="510" parent="305" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>8</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="511" parent="305" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>9</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="512" parent="305" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>10</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="513" parent="305" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="514" parent="305" name="slug">
+      <ColNames>slug</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="515" parent="305" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="516" parent="305" name="slug">
+      <UnderlyingIndexName>slug</UnderlyingIndexName>
+    </key>
+    <column id="517" parent="306" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="518" parent="306" name="title">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="519" parent="306" name="description">
+      <Position>3</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="520" parent="306" name="file_url">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="521" parent="306" name="doc_type">
+      <DefaultExpression>&apos;price_list&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>varchar(80)|0s</StoredType>
+    </column>
+    <column id="522" parent="306" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="523" parent="306" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="524" parent="306" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="525" parent="306" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>9</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="526" parent="306" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="527" parent="306" name="idx_partner_docs">
+      <ColNames>enabled
+sort_order</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="528" parent="306" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="529" parent="307" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="530" parent="307" name="email">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(190)|0s</StoredType>
+    </column>
+    <column id="531" parent="307" name="name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="532" parent="307" name="password_hash">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="533" parent="307" name="company">
+      <Position>5</Position>
+      <StoredType>varchar(190)|0s</StoredType>
+    </column>
+    <column id="534" parent="307" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="535" parent="307" name="last_login">
+      <Position>7</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="536" parent="307" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="537" parent="307" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>9</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="538" parent="307" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="539" parent="307" name="uq_partner_email">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="540" parent="307" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="541" parent="307" name="uq_partner_email">
+      <UnderlyingIndexName>uq_partner_email</UnderlyingIndexName>
+    </key>
+    <column id="542" parent="308" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="543" parent="308" name="slug">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="544" parent="308" name="title">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="545" parent="308" name="excerpt">
+      <Position>4</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="546" parent="308" name="body_html">
+      <Position>5</Position>
+      <StoredType>mediumtext|0s</StoredType>
+    </column>
+    <column id="547" parent="308" name="cover_url">
+      <Position>6</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="548" parent="308" name="source_name">
+      <Position>7</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="549" parent="308" name="source_url">
+      <Position>8</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="550" parent="308" name="published_at">
+      <Position>9</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="551" parent="308" name="status">
+      <DefaultExpression>&apos;draft&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>enum(&apos;draft&apos;, &apos;published&apos;)|0e</StoredType>
+    </column>
+    <column id="552" parent="308" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="553" parent="308" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>12</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="554" parent="308" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>13</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="555" parent="308" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>14</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="556" parent="308" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="557" parent="308" name="uq_press_slug">
+      <ColNames>slug</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="558" parent="308" name="idx_press_pub">
+      <ColNames>status
+enabled
+published_at</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="559" parent="308" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="560" parent="308" name="uq_press_slug">
+      <UnderlyingIndexName>uq_press_slug</UnderlyingIndexName>
+    </key>
+    <column id="561" parent="309" name="id">
+      <AutoIncrement>4</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="562" parent="309" name="slug">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="563" parent="309" name="title">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="564" parent="309" name="excerpt">
+      <Position>4</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="565" parent="309" name="body_html">
+      <Position>5</Position>
+      <StoredType>mediumtext|0s</StoredType>
+    </column>
+    <column id="566" parent="309" name="cover_url">
+      <Position>6</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="567" parent="309" name="tags_json">
+      <Position>7</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="568" parent="309" name="status">
+      <DefaultExpression>&apos;draft&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>8</Position>
+      <StoredType>enum(&apos;draft&apos;, &apos;published&apos;)|0e</StoredType>
+    </column>
+    <column id="569" parent="309" name="meta_title">
+      <Position>9</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="570" parent="309" name="meta_description">
+      <Position>10</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="571" parent="309" name="published_at">
+      <Position>11</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="572" parent="309" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>12</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="573" parent="309" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>13</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="574" parent="309" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>14</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="575" parent="309" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>15</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="576" parent="309" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="577" parent="309" name="uq_resource_slug">
+      <ColNames>slug</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="578" parent="309" name="idx_resource_pub">
+      <ColNames>status
+enabled
+published_at</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="579" parent="309" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="580" parent="309" name="uq_resource_slug">
+      <UnderlyingIndexName>uq_resource_slug</UnderlyingIndexName>
+    </key>
+    <column id="581" parent="310" name="id">
+      <AutoIncrement>4</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="582" parent="310" name="quote">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="583" parent="310" name="author_name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="584" parent="310" name="author_role">
+      <Position>4</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="585" parent="310" name="company">
+      <Position>5</Position>
+      <StoredType>varchar(160)|0s</StoredType>
+    </column>
+    <column id="586" parent="310" name="rating">
+      <Position>6</Position>
+      <StoredType>tinyint unsigned|0s</StoredType>
+    </column>
+    <column id="587" parent="310" name="locale">
+      <DefaultExpression>&apos;en&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>varchar(8)|0s</StoredType>
+    </column>
+    <column id="588" parent="310" name="status">
+      <DefaultExpression>&apos;draft&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>8</Position>
+      <StoredType>enum(&apos;draft&apos;, &apos;published&apos;)|0e</StoredType>
+    </column>
+    <column id="589" parent="310" name="featured">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>9</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="590" parent="310" name="sort_order">
+      <DefaultExpression>0</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="591" parent="310" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="592" parent="310" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>12</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="593" parent="310" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>13</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="594" parent="310" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="595" parent="310" name="idx_testimonial_pub">
+      <ColNames>status
+enabled
+featured
+sort_order</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="596" parent="310" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="597" parent="311" name="id">
+      <AutoIncrement>3</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int unsigned|0s</StoredType>
+    </column>
+    <column id="598" parent="311" name="setting_key">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(80)|0s</StoredType>
+    </column>
+    <column id="599" parent="311" name="value_json">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>json|0s</StoredType>
+    </column>
+    <column id="600" parent="311" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>4</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="601" parent="311" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="602" parent="311" name="setting_key">
+      <ColNames>setting_key</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="603" parent="311" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="604" parent="311" name="setting_key">
+      <UnderlyingIndexName>setting_key</UnderlyingIndexName>
+    </key>
   </database-model>
 </dataSource>

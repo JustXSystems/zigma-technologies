@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { requireAdmin, requireSession } from '@/lib/auth';
+import { requireScreen } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { DEFAULT_SITE_COPY, mergeSiteCopy } from '@/lib/site-copy';
 import {
@@ -15,7 +15,7 @@ import { LOCATION_DEFS } from '@/lib/locations';
 
 export async function GET() {
   try {
-    await requireSession();
+    await requireScreen('siteCopy');
     const [copy, industries, locations] = await Promise.all([
       getSiteCopy(),
       getIndustryDefsCms(),
@@ -43,7 +43,7 @@ const putSchema = z.object({
 
 export async function PUT(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('siteCopy');
     const body = putSchema.parse(await readJson(request));
 
     if (body.copy) {

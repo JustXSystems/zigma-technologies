@@ -7,7 +7,11 @@ import SolarRoiClient from '@/components/tools/SolarRoiClient';
 import { useSiteCopy } from '@/lib/use-site-copy';
 
 export default function SolarRoiPageClient() {
-  const t = useSiteCopy().tools.solarRoi;
+  const copy = useSiteCopy();
+  const t = copy.tools.solarRoi;
+  const toolsBreadcrumbHref = copy.features.solutionFinderEnabled
+    ? '/tools/solution-finder'
+    : '/tools/solar-roi';
 
   return (
     <main id="main-content" className="hub-page">
@@ -18,7 +22,7 @@ export default function SolarRoiPageClient() {
         image={t.image}
         breadcrumb={[
           { label: 'Home', href: '/' },
-          { label: t.breadcrumbTools, href: '/tools/solution-finder' },
+          { label: t.breadcrumbTools, href: toolsBreadcrumbHref },
           { label: t.breadcrumbSelf },
         ]}
         actions={

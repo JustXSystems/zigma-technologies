@@ -3,6 +3,9 @@ import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
+import type { AdminScreenKey } from '@/lib/admin-screens';
+import { hasScreenAccess } from '@/lib/admin-screens';
+import { ensureAdminRolesSchema, getScreensForUser } from '@/lib/admin-roles';
 
 const COOKIE_NAME = 'zigma_admin_session';
 const SESSION_DAYS = 7;
@@ -12,6 +15,9 @@ export type AdminSession = {
   email: string;
   name: string;
   role: 'admin' | 'editor';
+  roleId: number | null;
+  roleName: string | null;
+  screens: AdminScreenKey[] | '*';
 };
 
 function getSecret() {
@@ -35,6 +41,9 @@ export async function createSessionToken(payload: AdminSession) {
     email: payload.email,
     name: payload.name,
     role: payload.role,
+    roleId: payload.roleId,
+    roleName: payload.roleName,
+    screens: payload.screens,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(String(payload.sub))
@@ -43,16 +52,30 @@ export async function createSessionToken(payload: AdminSession) {
     .sign(getSecret());
 }
 
+function parseScreensClaim(raw: unknown): AdminScreenKey[] | '*' {
+  if (raw === '*') return '*';
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((k): k is AdminScreenKey => typeof k === 'string');
+}
+
 export async function verifySessionToken(token: string): Promise<AdminSession | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
     const sub = Number(payload.sub);
     if (!sub || !payload.email || !payload.name || !payload.role) return null;
+    const role = payload.role === 'editor' ? 'editor' : 'admin';
+    const roleId = payload.roleId != null ? Number(payload.roleId) : null;
+    const roleName = payload.roleName != null ? String(payload.roleName) : null;
+    let screens = parseScreensClaim(payload.screens);
+    if (role === 'admin') screens = '*';
     return {
       sub,
       email: String(payload.email),
       name: String(payload.name),
-      role: payload.role === 'editor' ? 'editor' : 'admin',
+      role,
+      roleId: Number.isFinite(roleId) ? roleId : null,
+      roleName,
+      screens,
     };
   } catch {
     return null;
@@ -79,7 +102,22 @@ export async function getSession(): Promise<AdminSession | null> {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return verifySessionToken(token);
+  const session = await verifySessionToken(token);
+  if (!session) return null;
+
+  if (session.role === 'editor' && session.screens !== '*' && session.screens.length === 0) {
+    const user = await findAdminById(session.sub);
+    if (!user) return null;
+    const screens = await getScreensForUser({ role: user.role, role_id: user.role_id });
+    return {
+      ...session,
+      roleId: user.role_id,
+      roleName: user.role_name,
+      screens,
+    };
+  }
+
+  return session;
 }
 
 export async function requireSession(): Promise<AdminSession> {
@@ -98,18 +136,52 @@ export async function requireAdmin(): Promise<AdminSession> {
   return session;
 }
 
+export async function requireScreen(screen: AdminScreenKey): Promise<AdminSession> {
+  const session = await requireSession();
+  if (!hasScreenAccess(session.screens, screen)) {
+    throw new Error('FORBIDDEN');
+  }
+  return session;
+}
+
 export type AdminUserRow = {
   id: number;
   email: string;
   name: string;
   role: 'admin' | 'editor';
+  role_id: number | null;
+  role_name: string | null;
   last_login: Date | string | null;
   created_at: Date | string;
 };
 
+export async function buildSessionForUser(user: {
+  id: number;
+  email: string;
+  name: string;
+  role: 'admin' | 'editor';
+  role_id: number | null;
+  role_name?: string | null;
+}): Promise<AdminSession> {
+  const screens = await getScreensForUser({ role: user.role, role_id: user.role_id });
+  return {
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    roleId: user.role_id,
+    roleName: user.role_name ?? null,
+    screens,
+  };
+}
+
 export async function listAdminUsers(): Promise<AdminUserRow[]> {
+  await ensureAdminRolesSchema();
   const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id, email, name, role, last_login, created_at FROM admin_users ORDER BY id ASC'
+    `SELECT u.id, u.email, u.name, u.role, u.role_id, r.name AS role_name, u.last_login, u.created_at
+     FROM admin_users u
+     LEFT JOIN admin_roles r ON r.id = u.role_id
+     ORDER BY u.id ASC`
   );
   return rows as AdminUserRow[];
 }
@@ -119,14 +191,30 @@ export async function createAdminUser(input: {
   name: string;
   password: string;
   role: 'admin' | 'editor';
+  role_id?: number | null;
 }) {
+  await ensureAdminRolesSchema();
   const email = input.email.toLowerCase().trim();
   const existing = await findAdminByEmail(email);
   if (existing) throw new Error('EMAIL_EXISTS');
   const password_hash = await hashPassword(input.password);
+
+  let role_id = input.role_id ?? null;
+  if (input.role === 'admin') {
+    const [adminRole] = await pool.query<RowDataPacket[]>(
+      "SELECT id FROM admin_roles WHERE slug = 'admin' LIMIT 1"
+    );
+    role_id = (adminRole[0]?.id as number) ?? role_id;
+  } else if (!role_id) {
+    const [editorRole] = await pool.query<RowDataPacket[]>(
+      "SELECT id FROM admin_roles WHERE slug = 'editor' LIMIT 1"
+    );
+    role_id = (editorRole[0]?.id as number) ?? null;
+  }
+
   const [result] = await pool.query(
-    'INSERT INTO admin_users (email, password_hash, name, role) VALUES (?, ?, ?, ?)',
-    [email, password_hash, input.name.trim(), input.role]
+    'INSERT INTO admin_users (email, password_hash, name, role, role_id) VALUES (?, ?, ?, ?, ?)',
+    [email, password_hash, input.name.trim(), input.role, role_id]
   );
   return (result as { insertId: number }).insertId;
 }
@@ -145,7 +233,7 @@ export async function deleteAdminUser(id: number, actorId: number) {
 
 export async function updateAdminUser(
   id: number,
-  input: { name?: string; role?: 'admin' | 'editor'; password?: string },
+  input: { name?: string; role?: 'admin' | 'editor'; role_id?: number | null; password?: string },
   actorId: number
 ) {
   const target = await findAdminById(id);
@@ -165,6 +253,17 @@ export async function updateAdminUser(
   }
   if (input.role != null) {
     await pool.query('UPDATE admin_users SET role = ? WHERE id = ?', [input.role, id]);
+    if (input.role === 'admin') {
+      const [adminRole] = await pool.query<RowDataPacket[]>(
+        "SELECT id FROM admin_roles WHERE slug = 'admin' LIMIT 1"
+      );
+      if (adminRole[0]?.id) {
+        await pool.query('UPDATE admin_users SET role_id = ? WHERE id = ?', [adminRole[0].id, id]);
+      }
+    }
+  }
+  if (input.role_id !== undefined) {
+    await pool.query('UPDATE admin_users SET role_id = ? WHERE id = ?', [input.role_id, id]);
   }
   if (input.password) {
     const password_hash = await hashPassword(input.password);
@@ -174,8 +273,12 @@ export async function updateAdminUser(
 }
 
 export async function findAdminByEmail(email: string) {
+  await ensureAdminRolesSchema();
   const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id, email, password_hash, name, role FROM admin_users WHERE email = ? LIMIT 1',
+    `SELECT u.id, u.email, u.password_hash, u.name, u.role, u.role_id, r.name AS role_name
+     FROM admin_users u
+     LEFT JOIN admin_roles r ON r.id = u.role_id
+     WHERE u.email = ? LIMIT 1`,
     [email.toLowerCase()]
   );
   return rows[0] as
@@ -185,6 +288,8 @@ export async function findAdminByEmail(email: string) {
         password_hash: string;
         name: string;
         role: 'admin' | 'editor';
+        role_id: number | null;
+        role_name: string | null;
       }
     | undefined;
 }
@@ -194,8 +299,12 @@ export async function touchLastLogin(userId: number) {
 }
 
 export async function findAdminById(id: number) {
+  await ensureAdminRolesSchema();
   const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id, email, password_hash, name, role FROM admin_users WHERE id = ? LIMIT 1',
+    `SELECT u.id, u.email, u.password_hash, u.name, u.role, u.role_id, r.name AS role_name
+     FROM admin_users u
+     LEFT JOIN admin_roles r ON r.id = u.role_id
+     WHERE u.id = ? LIMIT 1`,
     [id]
   );
   return rows[0] as
@@ -205,6 +314,8 @@ export async function findAdminById(id: number) {
         password_hash: string;
         name: string;
         role: 'admin' | 'editor';
+        role_id: number | null;
+        role_name: string | null;
       }
     | undefined;
 }
@@ -214,6 +325,7 @@ export async function updateAdminPassword(userId: number, passwordHash: string) 
 }
 
 export async function ensureSeedAdmin() {
+  await ensureAdminRolesSchema();
   const email = (process.env.ADMIN_EMAIL || 'admin@zigma-technologies.com').toLowerCase();
   const password = process.env.ADMIN_PASSWORD || 'ChangeMeNow!123';
   const name = process.env.ADMIN_NAME || 'Site Admin';
@@ -221,10 +333,15 @@ export async function ensureSeedAdmin() {
   const existing = await findAdminByEmail(email);
   if (existing) return { created: false, email };
 
+  const [adminRole] = await pool.query<RowDataPacket[]>(
+    "SELECT id FROM admin_roles WHERE slug = 'admin' LIMIT 1"
+  );
+  const role_id = adminRole[0]?.id ?? null;
+
   const password_hash = await hashPassword(password);
   await pool.query(
-    'INSERT INTO admin_users (email, password_hash, name, role) VALUES (?, ?, ?, ?)',
-    [email, password_hash, name, 'admin']
+    'INSERT INTO admin_users (email, password_hash, name, role, role_id) VALUES (?, ?, ?, ?, ?)',
+    [email, password_hash, name, 'admin', role_id]
   );
   return { created: true, email };
 }

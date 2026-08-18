@@ -8,6 +8,7 @@ import { INDUSTRY_DEFS } from '@/lib/industries';
 import { LOCATION_DEFS } from '@/lib/locations';
 import { allCityServicePairs } from '@/lib/location-services';
 import { listPressPosts } from '@/lib/press';
+import { getSiteCopy } from '@/lib/site-content';
 
 function siteOrigin() {
   return (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
@@ -15,6 +16,7 @@ function siteOrigin() {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const origin = siteOrigin();
+  const copy = await getSiteCopy();
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${origin}/hi`, changeFrequency: 'monthly', priority: 0.6 },
@@ -22,16 +24,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${origin}/projects`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/products`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/services`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${origin}/industries`, changeFrequency: 'monthly', priority: 0.8 },
+    ...(copy.features.industriesEnabled
+      ? [{ url: `${origin}/industries`, changeFrequency: 'monthly' as const, priority: 0.8 }]
+      : []),
     { url: `${origin}/locations`, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${origin}/resources`, changeFrequency: 'weekly', priority: 0.75 },
+    ...(copy.features.resourcesEnabled
+      ? [{ url: `${origin}/resources`, changeFrequency: 'weekly' as const, priority: 0.75 }]
+      : []),
     { url: `${origin}/press`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${origin}/sla`, changeFrequency: 'monthly', priority: 0.55 },
-    { url: `${origin}/tools/solution-finder`, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${origin}/tools/ups-calculator`, changeFrequency: 'monthly', priority: 0.65 },
-    { url: `${origin}/tools/solar-roi`, changeFrequency: 'monthly', priority: 0.65 },
+    ...(copy.features.solutionFinderEnabled
+      ? [{ url: `${origin}/tools/solution-finder`, changeFrequency: 'monthly' as const, priority: 0.7 }]
+      : []),
+    ...(copy.features.toolsEnabled
+      ? [
+          { url: `${origin}/tools/ups-calculator`, changeFrequency: 'monthly' as const, priority: 0.65 },
+          { url: `${origin}/tools/solar-roi`, changeFrequency: 'monthly' as const, priority: 0.65 },
+        ]
+      : []),
     { url: `${origin}/partner/login`, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${origin}/search`, changeFrequency: 'monthly', priority: 0.4 },
+    ...(copy.features.searchEnabled
+      ? [{ url: `${origin}/search`, changeFrequency: 'monthly' as const, priority: 0.4 }]
+      : []),
     { url: `${origin}/contact`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${origin}/thank-you`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${origin}/cookies`, changeFrequency: 'yearly', priority: 0.3 },
@@ -49,11 +63,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       }));
 
-    const industryEntries: MetadataRoute.Sitemap = INDUSTRY_DEFS.map((ind) => ({
-      url: `${origin}/industries/${ind.key}`,
-      changeFrequency: 'monthly' as const,
-      priority: 0.75,
-    }));
+    const industryEntries: MetadataRoute.Sitemap = copy.features.industriesEnabled
+      ? INDUSTRY_DEFS.map((ind) => ({
+          url: `${origin}/industries/${ind.key}`,
+          changeFrequency: 'monthly' as const,
+          priority: 0.75,
+        }))
+      : [];
 
     const locationEntries: MetadataRoute.Sitemap = LOCATION_DEFS.flatMap((loc) => [
       { url: `${origin}/locations/${loc.key}`, changeFrequency: 'monthly' as const, priority: 0.75 },
@@ -61,11 +77,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { url: `${origin}/kn/locations/${loc.key}`, changeFrequency: 'monthly' as const, priority: 0.55 },
     ]);
 
-    const resourceEntries: MetadataRoute.Sitemap = (await listResourcePosts()).map((post) => ({
-      url: `${origin}/resources/${post.slug}`,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    }));
+    const resourceEntries: MetadataRoute.Sitemap = copy.features.resourcesEnabled
+      ? (await listResourcePosts()).map((post) => ({
+          url: `${origin}/resources/${post.slug}`,
+          changeFrequency: 'monthly' as const,
+          priority: 0.7,
+        }))
+      : [];
 
     const locationServiceEntries: MetadataRoute.Sitemap = allCityServicePairs().map((pair) => ({
       url: `${origin}/locations/${pair.city}/${pair.service}`,

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  buildSessionForUser,
   createSessionToken,
   findAdminByEmail,
   setSessionCookie,
@@ -22,17 +23,28 @@ export async function POST(request: Request) {
     const ok = await verifyPassword(body.password, user.password_hash);
     if (!ok) return jsonError('Invalid email or password', 401);
 
-    const token = await createSessionToken({
-      sub: user.id,
+    const session = await buildSessionForUser({
+      id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
+      role_id: user.role_id,
+      role_name: user.role_name,
     });
+    const token = await createSessionToken(session);
     await setSessionCookie(token);
     await touchLastLogin(user.id);
 
     return jsonOk({
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        roleId: session.roleId,
+        roleName: session.roleName,
+        screens: session.screens,
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);

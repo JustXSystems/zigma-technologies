@@ -11,7 +11,21 @@
     "typecheck": "tsc --noEmit",
     "db:export": "node scripts/db-export.mjs",
     "db:import": "node scripts/db-import.mjs",
-    "lighthouse:home": "npx lighthouse http://localhost:3000 --only-categories=performance,accessibility --budget-path=scripts/lighthouse-budget.json --chrome-flags=\"--headless=new\" --quiet"
+    "lighthouse:home": "npx lighthouse http://localhost:3000 --only-categories=performance,accessibility --budget-path=scripts/lighthouse-budget.json --chrome-flags=\"--headless=new\" --quiet",
+    "ztools:android": "npm run android:emu --prefix apps/ztools-mobile",
+    "ztools:android:emu": "npm run android:emu --prefix apps/ztools-mobile",
+    "ztools:android:tunnel": "npm run android:emu:tunnel --prefix apps/ztools-mobile",
+    "ztools:go": "npm run android:emu --prefix apps/ztools-mobile",
+    "ztools:emulator:list": "npm run emulator:list --prefix apps/ztools-mobile",
+    "ztools:emulator:start": "npm run emulator:start --prefix apps/ztools-mobile",
+    "ztools:emulator:reset": "npm run emulator:reset --prefix apps/ztools-mobile",
+    "ztools:emulator:wait": "npm run emulator:wait --prefix apps/ztools-mobile",
+    "ztools:emulator:network": "npm run emulator:network --prefix apps/ztools-mobile",
+    "ztools:adb:devices": "npm run adb:devices --prefix apps/ztools-mobile",
+    "ztools:diagnose": "npm run diagnose --prefix apps/ztools-mobile",
+    "ztools:test:api": "npm run test:api --prefix apps/ztools-mobile",
+    "ztools:start": "npm run start --prefix apps/ztools-mobile",
+    "ztools:expo": "npm run expo:android --prefix apps/ztools-mobile"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

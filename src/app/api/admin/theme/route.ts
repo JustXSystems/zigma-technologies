@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { requireAdmin, requireSession } from '@/lib/auth';
+import { requireScreen } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import {
   DEFAULT_THEME_TOKENS,
@@ -20,7 +20,7 @@ import {
 
 export async function GET() {
   try {
-    await requireSession();
+    await requireScreen('theme');
     const [theme, published, draft, history] = await Promise.all([
       getThemeSettings(),
       getPublishedCssOverride(),
@@ -52,7 +52,7 @@ const putSchema = z.object({
 
 export async function PUT(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('theme');
     const body = putSchema.parse(await readJson(request));
 
     if (body.tokens) {

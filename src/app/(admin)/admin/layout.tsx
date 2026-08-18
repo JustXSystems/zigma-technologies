@@ -3,66 +3,28 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import {
+  hasScreenAccess,
+  navGroupsFromScreens,
+  screenKeyFromPath,
+  type AdminScreenKey,
+} from '@/lib/admin-screens';
 import './admin.css';
 
-type NavItem = { href: string; label: string; exact?: boolean; adminOnly?: boolean };
-
-const NAV_GROUPS: Array<{ label: string; items: NavItem[] }> = [
-  {
-    label: 'Overview',
-    items: [
-      { href: '/admin', label: 'Dashboard', exact: true },
-      { href: '/admin/guide', label: 'Guide' },
-    ],
-  },
-  {
-    label: 'Content',
-    items: [
-      { href: '/admin/pages', label: 'Pages' },
-      { href: '/admin/inventory', label: 'Inventory' },
-      { href: '/admin/catalog-settings', label: 'Catalog Settings' },
-      { href: '/admin/resources', label: 'Resources' },
-      { href: '/admin/press', label: 'Press' },
-      { href: '/admin/testimonials', label: 'Testimonials' },
-    ],
-  },
-  {
-    label: 'Leads',
-    items: [
-      { href: '/admin/enquiries', label: 'Enquiries' },
-      { href: '/admin/forms', label: 'Enquiry Forms' },
-      { href: '/admin/newsletter', label: 'Newsletter', adminOnly: true },
-    ],
-  },
-  {
-    label: 'Configuration',
-    items: [
-      { href: '/admin/nav', label: 'Navigation' },
-      { href: '/admin/site-settings', label: 'Site Settings' },
-      { href: '/admin/site-copy', label: 'Site Copy', adminOnly: true },
-      { href: '/admin/media', label: 'Media' },
-      { href: '/admin/theme', label: 'Theme Studio', adminOnly: true },
-      { href: '/admin/redirects', label: 'Redirects', adminOnly: true },
-    ],
-  },
-  {
-    label: 'Platform',
-    items: [
-      { href: '/admin/new-client', label: 'New Client', adminOnly: true },
-      { href: '/admin/partners', label: 'Partners', adminOnly: true },
-      { href: '/admin/users', label: 'Users', adminOnly: true },
-      { href: '/admin/account', label: 'Account' },
-    ],
-  },
-];
-
-const ALL_NAV = NAV_GROUPS.flatMap((g) => g.items);
+type AdminUser = {
+  name: string;
+  email: string;
+  role: 'admin' | 'editor';
+  roleId: number | null;
+  roleName: string | null;
+  screens: AdminScreenKey[] | '*';
+};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLogin = pathname === '/admin/login';
-  const [user, setUser] = useState<{ name: string; email: string; role: 'admin' | 'editor' } | null>(null);
+  const [user, setUser] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     if (isLogin) return;
@@ -78,20 +40,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [isLogin, router]);
 
   const navGroups = useMemo(() => {
-    const filterItems = (items: NavItem[]) => {
-      if (!user) return items.filter((n) => !n.adminOnly);
-      if (user.role === 'admin') return items;
-      return items.filter((n) => !n.adminOnly);
-    };
-    return NAV_GROUPS.map((g) => ({ ...g, items: filterItems(g.items) })).filter((g) => g.items.length > 0);
+    if (!user) return navGroupsFromScreens([]);
+    return navGroupsFromScreens(user.screens);
   }, [user]);
 
+  const allNavItems = useMemo(() => navGroups.flatMap((g) => g.items), [navGroups]);
+
   useEffect(() => {
-    if (!user || user.role === 'admin') return;
-    const hit = ALL_NAV.find(
-      (n) => n.adminOnly && (pathname === n.href || pathname.startsWith(`${n.href}/`))
-    );
-    if (hit) void router.replace('/admin');
+    if (!user || user.screens === '*') return;
+    const key = screenKeyFromPath(pathname);
+    if (!key) return;
+    if (!hasScreenAccess(user.screens, key)) {
+      void router.replace('/admin');
+    }
   }, [user, pathname, router]);
 
   async function logout() {
@@ -104,7 +65,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const title =
-    ALL_NAV.find((n) => (n.exact ? pathname === n.href : pathname.startsWith(n.href)))?.label || 'Admin';
+    allNavItems.find((n) => (n.exact ? pathname === n.href : pathname.startsWith(n.href)))?.label ||
+    'Admin';
+
+  const roleLabel =
+    user?.role === 'admin' ? 'Full admin' : user?.roleName || user?.role || 'editor';
 
   return (
     <div className="admin-body">
@@ -155,7 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="admin-topbar-actions">
               {user ? (
                 <span className={`admin-role-badge${user.role === 'editor' ? ' admin-role-badge--editor' : ''}`}>
-                  {user.role}
+                  {roleLabel}
                 </span>
               ) : null}
               <button type="button" className="admin-btn admin-btn-secondary" onClick={logout}>

@@ -5,6 +5,7 @@ import type { LocationDef } from '@/lib/locations';
 import type { ServiceSeoDef } from '@/lib/location-services';
 import type { CatalogItem } from '@/lib/types';
 import { SERVICE_SEO_DEFS } from '@/lib/location-services';
+import { getSiteCopy } from '@/lib/site-content';
 
 type Props = {
   location: LocationDef;
@@ -14,7 +15,9 @@ type Props = {
   lead: string;
 };
 
-export default function LocationServiceLandingView({ location, service, items, subject, lead }: Props) {
+export default async function LocationServiceLandingView({ location, service, items, subject, lead }: Props) {
+  const copy = await getSiteCopy();
+
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
@@ -40,9 +43,15 @@ export default function LocationServiceLandingView({ location, service, items, s
             >
               Request quote →
             </Link>
-            <Link href="/tools/solution-finder" className="btn btn-ghost">
-              Solution finder
-            </Link>
+            {copy.features.solutionFinderEnabled ? (
+              <Link href="/tools/solution-finder" className="btn btn-ghost">
+                Solution finder
+              </Link>
+            ) : (
+              <Link href="/sla" className="btn btn-ghost">
+                See response SLAs
+              </Link>
+            )}
           </>
         }
       />

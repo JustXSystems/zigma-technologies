@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { INDUSTRY_DEFS } from '@/lib/industries';
 import { LOCATION_DEFS } from '@/lib/locations';
 import { readPrefsFromDocument, writePrefsToDocument } from '@/lib/personalization';
+import { useSiteCopy } from '@/lib/use-site-copy';
 
 type Props = {
   /** Where this control sits — affects default “Go” destination. */
@@ -15,6 +16,8 @@ type Props = {
 /** Contextual “I’m looking for…” preference — not a global header utility. */
 export default function VisitTailorBar({ context = 'industries' }: Props) {
   const router = useRouter();
+  const copy = useSiteCopy();
+  const industriesEnabled = copy.features.industriesEnabled;
   const [industry, setIndustry] = useState('');
   const [city, setCity] = useState('');
   const [ready, setReady] = useState(false);
@@ -41,7 +44,7 @@ export default function VisitTailorBar({ context = 'industries' }: Props) {
       router.push(`/locations/${city}/ups-systems`);
       return;
     }
-    if (industry) {
+    if (industry && industriesEnabled) {
       router.push(`/industries/${industry}`);
       return;
     }
@@ -49,7 +52,7 @@ export default function VisitTailorBar({ context = 'industries' }: Props) {
       router.push(`/locations/${city}`);
       return;
     }
-    router.push(context === 'locations' ? '/locations' : '/industries');
+    router.push(context === 'locations' || !industriesEnabled ? '/locations' : '/industries');
   }
 
   return (
@@ -57,17 +60,19 @@ export default function VisitTailorBar({ context = 'industries' }: Props) {
       <div className="visit-tailor-inner">
         <p className="visit-tailor-title">I’m looking for…</p>
         <div className="visit-tailor-fields">
-          <label>
-            Industry
-            <select value={industry} onChange={(e) => setIndustry(e.target.value)}>
-              <option value="">Any</option>
-              {INDUSTRY_DEFS.map((i) => (
-                <option key={i.key} value={i.key}>
-                  {i.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          {industriesEnabled ? (
+            <label>
+              Industry
+              <select value={industry} onChange={(e) => setIndustry(e.target.value)}>
+                <option value="">Any</option>
+                {INDUSTRY_DEFS.map((i) => (
+                  <option key={i.key} value={i.key}>
+                    {i.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <label>
             City
             <select value={city} onChange={(e) => setCity(e.target.value)}>
@@ -85,8 +90,12 @@ export default function VisitTailorBar({ context = 'industries' }: Props) {
         </div>
         <p className="visit-tailor-hint">
           Or browse{' '}
-          <Link href="/industries">industries</Link>
-          {' · '}
+          {industriesEnabled ? (
+            <>
+              <Link href="/industries">industries</Link>
+              {' · '}
+            </>
+          ) : null}
           <Link href="/locations">locations</Link>
         </p>
       </div>

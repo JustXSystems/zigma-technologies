@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth';
+import { requireScreen } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createRedirect, deleteRedirect, listRedirects, updateRedirect } from '@/lib/redirects';
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requireScreen('redirects');
     const redirects = await listRedirects(true);
     return jsonOk({ redirects });
   } catch (error) {
@@ -24,7 +24,7 @@ const createSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('redirects');
     const body = createSchema.parse(await readJson(request));
     const id = await createRedirect(body);
     return jsonOk({ id }, { status: 201 });
@@ -47,7 +47,7 @@ const patchSchema = z.object({
 
 export async function PATCH(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('redirects');
     const body = patchSchema.parse(await readJson(request));
     await updateRedirect(body.id, body);
     return jsonOk({ ok: true });
@@ -63,7 +63,7 @@ const deleteSchema = z.object({ id: z.number().int().positive() });
 
 export async function DELETE(request: Request) {
   try {
-    await requireAdmin();
+    await requireScreen('redirects');
     const body = deleteSchema.parse(await readJson(request));
     await deleteRedirect(body.id);
     return jsonOk({ ok: true });
