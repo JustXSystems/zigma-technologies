@@ -6,6 +6,7 @@ import type { RowDataPacket } from 'mysql2';
 import type { AdminScreenKey } from '@/lib/admin-screens';
 import { hasScreenAccess } from '@/lib/admin-screens';
 import { ensureAdminRolesSchema, getScreensForUser } from '@/lib/admin-roles';
+import { cookiePath } from '@/lib/base-path';
 
 const COOKIE_NAME = 'zigma_admin_session';
 const SESSION_DAYS = 7;
@@ -88,14 +89,20 @@ export async function setSessionCookie(token: string) {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    path: '/',
+    path: cookiePath(),
     maxAge: SESSION_DAYS * 24 * 60 * 60,
   });
 }
 
 export async function clearSessionCookie() {
   const jar = await cookies();
-  jar.delete(COOKIE_NAME);
+  jar.set(COOKIE_NAME, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: cookiePath(),
+    maxAge: 0,
+  });
 }
 
 export async function getSession(): Promise<AdminSession | null> {

@@ -1123,6 +1123,9 @@ PORT=3001 npm run start
 |----------|----------|---------|
 | [`ADMIN.md`](./ADMIN.md) | Editors, admins, operators | Module reference, API summary, seeds |
 | `/admin/guide` | Admin users | In-app architecture & playbooks |
+| `/admin/guide/hostinger-prod` | DevOps | Hostinger KVM 2 + MySQL + GitHub production setup |
+| `/admin/guide/justxsystems` | DevOps | Staging at justxsystems.com/zigma-technologies (basePath) |
+| `/admin/guide/migration` | DevOps | UrbanVendo → Hostinger DNS cutover |
 | [`.env.example`](./.env.example) | Developers | Environment variable template |
 | `scripts/schema.sql` | DevOps | Database DDL |
 | Next.js docs | Developers | https://nextjs.org/docs |

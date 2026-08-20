@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import BasePathBootstrap from "@/components/BasePathBootstrap";
+import { withBasePath } from "@/lib/base-path";
 import "./globals.css";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
@@ -70,9 +72,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
           rel="stylesheet"
         />
-        <link rel="stylesheet" href="/api/public/theme.css" />
+        <link rel="stylesheet" href={withBasePath('/api/public/theme.css')} />
       </head>
       <body>
+        <BasePathBootstrap />
         {children}
       </body>
     </html>

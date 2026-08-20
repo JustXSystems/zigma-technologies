@@ -3,6 +3,7 @@ import pool from '@/lib/db';
 import { hashPassword, verifyPassword } from '@/lib/auth';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { cookiePath } from '@/lib/base-path';
 
 const PARTNER_COOKIE = 'zigma_partner_session';
 const SESSION_DAYS = 7;
@@ -140,14 +141,20 @@ export async function setPartnerSessionCookie(token: string) {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    path: '/',
+    path: cookiePath(),
     maxAge: SESSION_DAYS * 24 * 60 * 60,
   });
 }
 
 export async function clearPartnerSessionCookie() {
   const jar = await cookies();
-  jar.delete(PARTNER_COOKIE);
+  jar.set(PARTNER_COOKIE, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: cookiePath(),
+    maxAge: 0,
+  });
 }
 
 export async function getPartnerSession(): Promise<PartnerSession | null> {

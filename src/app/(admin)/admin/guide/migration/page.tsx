@@ -41,6 +41,9 @@ export default function AdminMigrationGuidePage() {
               <Link href="/admin/guide" className="admin-btn admin-btn-secondary">
                 ← Admin guide
               </Link>
+              <Link href="/admin/guide/hostinger-prod" className="admin-btn admin-btn-secondary">
+                KVM 2 production
+              </Link>
               <Link href="/admin/redirects" className="admin-btn admin-btn-primary">
                 Redirects module
               </Link>

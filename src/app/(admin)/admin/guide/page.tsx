@@ -14,6 +14,8 @@ import {
 } from '@/lib/admin-guide';
 
 const TOC = [
+  { id: 'justxsystems', label: 'justxsystems staging' },
+  { id: 'hostinger-prod', label: 'KVM 2 production setup' },
   { id: 'migration', label: 'Hostinger migration' },
   { id: 'email', label: 'Email migration' },
   { id: 'architecture', label: 'Architecture' },
@@ -121,8 +123,14 @@ export default function AdminGuidePage() {
               platform administrators.
             </p>
             <div className="admin-guide-hero-actions">
-              <Link href="/admin/guide/migration" className="admin-btn admin-btn-primary">
-                Hostinger migration →
+              <Link href="/admin/guide/justxsystems" className="admin-btn admin-btn-primary">
+                justxsystems staging →
+              </Link>
+              <Link href="/admin/guide/hostinger-prod" className="admin-btn admin-btn-secondary">
+                KVM 2 production →
+              </Link>
+              <Link href="/admin/guide/migration" className="admin-btn admin-btn-secondary">
+                DNS / migration →
               </Link>
               <Link href="/admin/guide/email" className="admin-btn admin-btn-secondary">
                 Email migration →
@@ -177,6 +185,63 @@ export default function AdminGuidePage() {
         </nav>
 
         <div className="admin-guide-main">
+          <section id="justxsystems" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Staging test</div>
+              <h3>justxsystems.com/zigma-technologies — Hostinger subdirectory deploy</h3>
+              <p>
+                Blind-follow playbook to bring this app up at{' '}
+                <strong>https://justxsystems.com/zigma-technologies/</strong> on Hostinger: MySQL database, GitHub clone,{' '}
+                <code>NEXT_PUBLIC_BASE_PATH=/zigma-technologies</code>, PM2 on port 3001, and an Nginx{' '}
+                <code>location</code> that does not disturb the existing JustX homepage.
+              </p>
+            </div>
+            <div className="admin-guide-callout admin-guide-callout--info">
+              <strong>Use this for deployment testing.</strong> Final production on{' '}
+              <code>www.zigma-technologies.com</code> (domain root) remains the{' '}
+              <Link href="/admin/guide/hostinger-prod">KVM 2 production guide</Link>.
+            </div>
+            <Link href="/admin/guide/justxsystems" className="admin-guide-module admin-guide-module--link">
+              <div className="admin-guide-module-top">
+                <h4>Open justxsystems staging guide</h4>
+                <span className="admin-guide-badge admin-guide-badge--admin">Admin / DevOps</span>
+              </div>
+              <p className="admin-guide-module-summary">
+                SSH · MySQL zigmatech_jx · .env with basePath · build · PM2 :3001 · Nginx location · smoke tests ·
+                git pull updates…
+              </p>
+              <span className="admin-guide-module-cta">Read staging guide →</span>
+            </Link>
+          </section>
+
+          <section id="hostinger-prod" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Production</div>
+              <h3>Hostinger KVM 2 — production setup from GitHub</h3>
+              <p>
+                End-to-end playbook for the recommended production stack: buy <strong>KVM 2</strong>, harden Ubuntu,
+                install MySQL 8 on the VPS, clone this repository from GitHub, configure <code>.env</code>, build with
+                Node 20, run under PM2, terminate SSL with Nginx + Certbot, then go-live checklist and repeatable{' '}
+                <code>git pull</code> updates.
+              </p>
+            </div>
+            <div className="admin-guide-callout admin-guide-callout--info">
+              <strong>Start here for greenfield PROD:</strong> KVM 2 (2 vCPU · 8 GB RAM · MySQL on localhost) is the
+              target. Use the migration guide only when cutting DNS over from UrbanVendo / BigRock.
+            </div>
+            <Link href="/admin/guide/hostinger-prod" className="admin-guide-module admin-guide-module--link">
+              <div className="admin-guide-module-top">
+                <h4>Open KVM 2 production guide</h4>
+                <span className="admin-guide-badge admin-guide-badge--admin">Admin / DevOps</span>
+              </div>
+              <p className="admin-guide-module-summary">
+                Purchase · Firewall · Node/Nginx/PM2 · MySQL · GitHub clone · .env · schema/import · SSL · DNS ·
+                backups · troubleshooting…
+              </p>
+              <span className="admin-guide-module-cta">Read production guide →</span>
+            </Link>
+          </section>
+
           <section id="migration" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">DevOps</div>
@@ -190,7 +255,8 @@ export default function AdminGuidePage() {
             <div className="admin-guide-callout admin-guide-callout--info">
               <strong>Recommended production plan:</strong> Hostinger <strong>KVM 2 VPS</strong> (2 vCPU, 8 GB RAM) —
               required for Next.js 16 + MySQL + PM2 + Nginx. Deploy UAT first at{' '}
-              <code>uat.zigma-technologies.com</code>, then cut over DNS.
+              <code>uat.zigma-technologies.com</code>, then cut over DNS. Full server install steps:{' '}
+              <Link href="/admin/guide/hostinger-prod">KVM 2 production guide</Link>.
             </div>
             <Link href="/admin/guide/migration" className="admin-guide-module admin-guide-module--link">
               <div className="admin-guide-module-top">

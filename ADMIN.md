@@ -9,9 +9,13 @@ Independent control portal at **`/admin`** for the public marketing site. This d
 | Resource | Location |
 |----------|----------|
 | **In-app guide** | [/admin/guide](/admin/guide) — architecture, flows, 21 module references, playbooks |
+| **KVM 2 production setup** | [/admin/guide/hostinger-prod](/admin/guide/hostinger-prod) — Hostinger VPS + MySQL + GitHub deploy |
+| **justxsystems staging (subdir)** | [/admin/guide/justxsystems](/admin/guide/justxsystems) — `https://justxsystems.com/zigma-technologies/` |
+| **Hostinger migration / DNS** | [/admin/guide/migration](/admin/guide/migration) |
+| **Email migration** | [/admin/guide/email](/admin/guide/email) |
 | **Dashboard** | `/admin` — stats, setup checklist, bootstrap |
 | **Public site** | `/` |
-| **Guide source** | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts` |
+| **Guide source** | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts`, `src/lib/admin-guide-hostinger-prod.ts` |
 
 ---
 
@@ -507,7 +511,9 @@ CRM webhook, partner portal, video case studies, availability/lead time, press/n
 | Auth proxy | `src/proxy.ts` |
 | Admin shell | `src/app/(admin)/admin/layout.tsx` |
 | In-app guide | `src/app/(admin)/admin/guide/page.tsx` |
-| Guide data | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts` |
+| KVM 2 production guide | `src/app/(admin)/admin/guide/hostinger-prod/page.tsx` |
+| justxsystems staging guide | `src/app/(admin)/admin/guide/justxsystems/page.tsx` |
+| Guide data | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts`, `src/lib/admin-guide-hostinger-prod.ts`, `src/lib/admin-guide-justxsystems.ts` |
 | CMS | `src/lib/cms.ts`, `src/lib/cms-types.ts` |
 | Catalog | `src/lib/catalog.ts`, `src/lib/catalog-case-study.ts` |
 | Site settings | `src/lib/site-settings.ts` |
@@ -533,5 +539,6 @@ CRM webhook, partner portal, video case studies, availability/lead time, press/n
 | Navigation CMS → Header/Footer | Done |
 | Site settings / highly configurable | Done |
 | In-app admin guide | Done — `/admin/guide` |
+| Hostinger KVM 2 production playbook | Done — `/admin/guide/hostinger-prod` |
 
 Legacy `public/*.html` redirect to App Router routes via `proxy.ts` and Redirects admin.

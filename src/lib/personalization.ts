@@ -2,6 +2,11 @@
 
 export const PREF_COOKIE = 'zigma_prefs';
 
+function clientCookiePath(): string {
+  const raw = (process.env.NEXT_PUBLIC_BASE_PATH || '').replace(/\/$/, '');
+  return raw && raw !== '/' ? raw : '/';
+}
+
 export type VisitorPrefs = {
   industry?: string;
   city?: string;
@@ -36,5 +41,5 @@ export function writePrefsToDocument(prefs: VisitorPrefs) {
   if (typeof document === 'undefined') return;
   const value = serializePrefs(prefs);
   const maxAge = 60 * 60 * 24 * 180;
-  document.cookie = `${PREF_COOKIE}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `${PREF_COOKIE}=${value}; path=${clientCookiePath()}; max-age=${maxAge}; SameSite=Lax`;
 }

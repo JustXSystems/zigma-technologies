@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import type { CSSProperties } from 'react';
+import { withBasePath } from '@/lib/base-path';
 
 type Props = {
   src: string;
@@ -32,6 +33,7 @@ export default function SmartImage({
   sizes,
 }: Props) {
   if (!src) return null;
+  const resolved = withBasePath(src);
   if (!isLocalAsset(src) && !src.startsWith('/')) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={src} alt={alt} className={className} style={style} loading={priority ? 'eager' : 'lazy'} />;
@@ -40,7 +42,7 @@ export default function SmartImage({
   if (fill) {
     return (
       <Image
-        src={src}
+        src={resolved}
         alt={alt}
         fill
         className={className}
@@ -53,7 +55,7 @@ export default function SmartImage({
 
   return (
     <Image
-      src={src}
+      src={resolved}
       alt={alt}
       width={width || 1200}
       height={height || 800}

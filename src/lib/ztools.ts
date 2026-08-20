@@ -4,6 +4,7 @@ import { notifyZtoolsAccessApproved, notifyZtoolsToolsAssigned } from '@/lib/zto
 import { hashPassword, verifyPassword } from '@/lib/auth';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { cookiePath } from '@/lib/base-path';
 
 const ZTOOLS_COOKIE = 'zigma_ztools_session';
 const SESSION_DAYS = 7;
@@ -529,14 +530,20 @@ export async function setZtoolsSessionCookie(token: string) {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    path: '/',
+    path: cookiePath(),
     maxAge: SESSION_DAYS * 24 * 60 * 60,
   });
 }
 
 export async function clearZtoolsSessionCookie() {
   const jar = await cookies();
-  jar.delete(ZTOOLS_COOKIE);
+  jar.set(ZTOOLS_COOKIE, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: cookiePath(),
+    maxAge: 0,
+  });
 }
 
 export async function getZtoolsSession(request?: Request): Promise<ZtoolsSession | null> {

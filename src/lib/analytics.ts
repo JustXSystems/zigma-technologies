@@ -3,6 +3,11 @@ export type AnalyticsConsent = 'unknown' | 'accepted' | 'declined';
 export const CONSENT_COOKIE = 'zt_analytics_consent';
 export const CONSENT_STORAGE_KEY = 'zt_analytics_consent';
 
+function clientCookiePath(): string {
+  const raw = (process.env.NEXT_PUBLIC_BASE_PATH || '').replace(/\/$/, '');
+  return raw && raw !== '/' ? raw : '/';
+}
+
 export type TrackEventName =
   | 'enquiry_submit'
   | 'careers_apply'
@@ -48,7 +53,7 @@ export function persistConsent(value: 'accepted' | 'declined') {
     /* ignore */
   }
   const maxAge = 60 * 60 * 24 * 180;
-  document.cookie = `${CONSENT_COOKIE}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+  document.cookie = `${CONSENT_COOKIE}=${value}; Path=${clientCookiePath()}; Max-Age=${maxAge}; SameSite=Lax`;
 }
 
 /** Fire a conversion / engagement event (GA4 + Plausible + dataLayer). Safe no-op server-side. */

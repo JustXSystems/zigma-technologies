@@ -14,7 +14,18 @@ const csp = [
   "form-action 'self'",
 ].join('; ');
 
+/** Subdirectory deploy (e.g. https://justxsystems.com/zigma-technologies). Must be set at build time. */
+function resolveBasePath(): string | undefined {
+  const raw = (process.env.NEXT_PUBLIC_BASE_PATH || '').trim();
+  if (!raw || raw === '/') return undefined;
+  const withSlash = raw.startsWith('/') ? raw : `/${raw}`;
+  return withSlash.replace(/\/$/, '') || undefined;
+}
+
+const basePath = resolveBasePath();
+
 const nextConfig: NextConfig = {
+  ...(basePath ? { basePath } : {}),
   images: {
     remotePatterns: [],
     unoptimized: false,
