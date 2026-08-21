@@ -369,6 +369,10 @@ pm2 logs ${JX_TARGET.appName} --lines 50`;
 
 export const JX_FAQ = [
   {
+    q: 'Links go to /projects instead of /zigma-technologies/projects',
+    a: 'Plain <a href="/projects"> tags do not get Next.js basePath automatically. Rebuild with NEXT_PUBLIC_BASE_PATH=/zigma-technologies after pulling the latest code (Header/Footer/sections + BasePathBootstrap fix). Confirm .env has the basePath BEFORE npm run build, then pm2 restart.',
+  },
+  {
     q: 'Why is NEXT_PUBLIC_BASE_PATH required?',
     a: 'Next.js serves the app under /zigma-technologies only when basePath is set at build time. Without it, links, /_next assets, and APIs resolve to justxsystems.com/ instead of /zigma-technologies/.',
   },

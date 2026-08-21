@@ -12,26 +12,50 @@ export function cookiePath(): string {
   return appBasePath() || '/';
 }
 
-/**
- * Prefix an app-absolute path with basePath.
- * Leaves http(s), protocol-relative, and already-prefixed paths unchanged.
- */
-export function withBasePath(path: string): string {
-  if (!path) return path;
-  if (
+function isExternalOrSpecial(path: string): boolean {
+  return (
+    path.startsWith('#') ||
+    path.startsWith('?') ||
+    path.startsWith('tel:') ||
+    path.startsWith('mailto:') ||
+    path.startsWith('sms:') ||
+    path.startsWith('javascript:') ||
     path.startsWith('http://') ||
     path.startsWith('https://') ||
     path.startsWith('//') ||
     path.startsWith('data:') ||
     path.startsWith('blob:')
-  ) {
-    return path;
-  }
+  );
+}
+
+/**
+ * Prefix an app-absolute path with basePath.
+ * Leaves hash-only, tel/mailto, http(s), and already-prefixed paths unchanged.
+ * Use for plain <a href> — next/link already applies basePath itself.
+ */
+export function withBasePath(path: string): string {
+  if (!path) return path;
+  if (isExternalOrSpecial(path)) return path;
+
   const base = appBasePath();
   if (!base) return path.startsWith('/') ? path : `/${path}`;
-  const normalized = path.startsWith('/') ? path : `/${path}`;
-  if (normalized === base || normalized.startsWith(`${base}/`)) return normalized;
-  return `${base}${normalized}`;
+
+  // Split query/hash so we only prefix the pathname segment
+  const match = path.match(/^([^?#]*)([?#].*)?$/);
+  const pathname = match?.[1] || path;
+  const suffix = match?.[2] || '';
+  const normalized = pathname.startsWith('/') ? pathname : `/${pathname}`;
+
+  if (normalized === base || normalized.startsWith(`${base}/`)) {
+    return `${normalized}${suffix}`;
+  }
+  return `${base}${normalized}${suffix}`;
+}
+
+/** Alias for templates — empty/undefined → "#". */
+export function appHref(href: string | undefined | null): string {
+  if (!href) return '#';
+  return withBasePath(href);
 }
 
 /** Strip basePath for disk / DB path comparisons that store root-relative /assets/… paths. */

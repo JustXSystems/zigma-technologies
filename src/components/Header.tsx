@@ -12,6 +12,7 @@ import CallbackRequestModal from '@/components/CallbackRequestModal';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
 import { filterNavForFeatures } from '@/lib/nav-features';
+import { appHref } from '@/lib/base-path';
 
 const DEFAULT_NAV: NavItem[] = [
   {
@@ -162,7 +163,7 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const resolveHref = (item: { href?: string }) => item.href || '#';
+  const resolveHref = (item: { href?: string }) => appHref(item.href);
 
   const isCurrentPage = (item: NavItem) => {
     if (!item.href) return false;
@@ -201,10 +202,10 @@ export default function Header() {
       </a>
       <header id="siteHeader" className={scrolled ? 'scrolled' : ''}>
         <div className="container nav-wrap">
-          <a href={current === 'home' ? '#home' : '/'} className="logo">
+          <a href={current === 'home' ? '#home' : appHref('/')} className="logo">
             <span className="logo-chip">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={site.logoUrl || '/assets/images/zigma-technologies-logo.png'} alt={logoAltText(site)} />
+              <img src={appHref(site.logoUrl || '/assets/images/zigma-technologies-logo.png')} alt={logoAltText(site)} />
             </span>
             <span className="logo-word">
               {site.companyName}
@@ -230,7 +231,7 @@ export default function Header() {
                           <div key={colIdx} className="mega-col">
                             {col.headingHref ? (
                               <h5>
-                                <a href={col.headingHref}>{col.heading}</a>
+                                <a href={appHref(col.headingHref)}>{col.heading}</a>
                               </h5>
                             ) : (
                               <h5>{col.heading}</h5>

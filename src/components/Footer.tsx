@@ -12,6 +12,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
 import { filterFooterColumnsForFeatures } from '@/lib/nav-features';
+import { appHref } from '@/lib/base-path';
 
 const DEFAULT_COLUMNS: FooterColumn[] = [
   {
@@ -110,11 +111,11 @@ export default function Footer() {
         <div className="container">
           <div className="foot-grid">
             <div className="foot-brand">
-              <a href={current === 'home' ? '#home' : '/'} className="logo footer-logo mb-1">
+              <a href={current === 'home' ? '#home' : appHref('/')} className="logo footer-logo mb-1">
                 <span className="logo-chip">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={site.logoUrl || '/assets/images/zigma-technologies-logo.png'}
+                    src={appHref(site.logoUrl || '/assets/images/zigma-technologies-logo.png')}
                     alt={logoAltText(site)}
                   />
                 </span>
@@ -146,7 +147,7 @@ export default function Footer() {
               <div key={col.heading} className="foot-col">
                 <h6>{col.heading}</h6>
                 {col.links.map((link) => (
-                  <a key={`${col.heading}-${link.label}`} href={link.href} className={link.className}>
+                  <a key={`${col.heading}-${link.label}`} href={appHref(link.href)} className={link.className}>
                     {link.label}
                   </a>
                 ))}
@@ -196,13 +197,13 @@ export default function Footer() {
               </a>
             </span>
             <span className="foot-legal">
-              {site.privacyUrl ? <a href={site.privacyUrl}>{copy.footer.privacy}</a> : null}
+              {site.privacyUrl ? <a href={appHref(site.privacyUrl)}>{copy.footer.privacy}</a> : null}
               {site.cookiePolicyUrl ? (
-                <a href={site.cookiePolicyUrl}>{copy.footer.cookies}</a>
+                <a href={appHref(site.cookiePolicyUrl)}>{copy.footer.cookies}</a>
               ) : (
-                <a href="/cookies">{copy.footer.cookies}</a>
+                <a href={appHref('/cookies')}>{copy.footer.cookies}</a>
               )}
-              {site.termsUrl ? <a href={site.termsUrl}>{copy.footer.terms}</a> : null}
+              {site.termsUrl ? <a href={appHref(site.termsUrl)}>{copy.footer.terms}</a> : null}
             </span>
           </div>
         </div>
@@ -228,7 +229,7 @@ export default function Footer() {
           {copy.footer.stickyWhatsapp}
         </a>
         {pathname === '/careers' ? (
-          <a href="/careers#apply" className="quote">
+          <a href={appHref('/careers#apply')} className="quote">
             Apply Now
           </a>
         ) : (

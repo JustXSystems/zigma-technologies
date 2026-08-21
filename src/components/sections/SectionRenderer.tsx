@@ -14,6 +14,12 @@ import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { focusApplyRole } from '@/lib/careers-apply';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import type { CatalogItem } from '@/lib/types';
+import { appHref } from '@/lib/base-path';
+
+/** CMS / section links must go through basePath on subdirectory deploys. */
+function hrefOf(value: unknown, fallback = '#'): string {
+  return appHref(String(value ?? fallback));
+}
 
 type Slide = {
   theme: string;
@@ -86,7 +92,7 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
                 <div className="eyebrow">{slide.eyebrow}</div>
                 <h1>{slide.title}</h1>
                 <p className="lead">{slide.lead}</p>
-                <a href={slide.ctaHref} className="slide-cta">
+                <a href={hrefOf(slide.ctaHref)} className="slide-cta">
                   {slide.cta}
                 </a>
               </div>
@@ -150,7 +156,7 @@ function EcoSection({ content }: { content: Record<string, unknown> }) {
                 <div className="lbl mt-04">Quality Certified</div>
               </div>
             </div>
-            <a href={String(content.ctaHref || '#why')} className="btn btn-primary">
+            <a href={hrefOf(content.ctaHref, '#why')} className="btn btn-primary">
               {String(content.cta || 'Learn more')}
             </a>
           </div>
@@ -418,7 +424,7 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
           ))}
         </div>
         {content.cta ? (
-          <a href={String(content.ctaHref || '#')} className="btn btn-ghost btn-sm mt-2">
+          <a href={hrefOf(content.ctaHref)} className="btn btn-ghost btn-sm mt-2">
             {String(content.cta)}
           </a>
         ) : null}
@@ -524,7 +530,7 @@ function ProjectsTeaserSection({
             return (
               <a
                 key={item.id}
-                href={`/projects/${encodeURIComponent(item.slug)}`}
+                href={hrefOf(`/projects/${encodeURIComponent(item.slug)}`)}
                 className={`hub-card projects-teaser-card ${source === 'case_studies' ? 'projects-teaser-card--case' : ''}`}
               >
                 <div className="hub-card-media">
@@ -557,7 +563,7 @@ function ProjectsTeaserSection({
           })}
         </div>
         <div className="text-center mt-26">
-          <a href={String(content.ctaHref || '/projects')} className="btn btn-ghost-dark btn-sm">
+          <a href={hrefOf(content.ctaHref, '/projects')} className="btn btn-ghost-dark btn-sm">
             {String(content.cta || 'View All Projects →')}
           </a>
         </div>
@@ -584,7 +590,7 @@ function IndustriesSection({
           <h2>{String(content.title || '')}</h2>
           {content.linkLabel && industriesEnabled ? (
             <p>
-              <a href={String(content.linkHref || '/industries')} className="link-orange-dim">
+              <a href={hrefOf(content.linkHref, '/industries')} className="link-orange-dim">
                 {String(content.linkLabel)}
               </a>
             </p>
@@ -607,7 +613,7 @@ function IndustriesSection({
               </>
             );
             return href ? (
-              <a className="ind-item" key={label} href={href}>
+              <a className="ind-item" key={label} href={hrefOf(href)}>
                 {inner}
               </a>
             ) : (
@@ -643,12 +649,12 @@ function CtaSection({ content, sectionKey }: { content: Record<string, unknown>;
         <p>{String(content.body || '')}</p>
         <div className="cta-actions">
           {content.primaryCta ? (
-            <a href={String(content.primaryHref || '#')} className="btn btn-primary">
+            <a href={hrefOf(content.primaryHref)} className="btn btn-primary">
               {String(content.primaryCta)}
             </a>
           ) : null}
           {content.secondaryCta ? (
-            <a href={String(content.secondaryHref || '#')} className="btn btn-ghost">
+            <a href={hrefOf(content.secondaryHref)} className="btn btn-ghost">
               {String(content.secondaryCta)}
             </a>
           ) : null}
@@ -684,7 +690,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
       <div className="grid-overlay"></div>
       <div className="container">
         <div className="breadcrumb">
-          <a href="/">Home</a>
+          <a href={hrefOf("/")}>Home</a>
           <span className="sep">/</span>
           <span className="current">{crumb}</span>
         </div>
@@ -737,7 +743,7 @@ function QuickContactSection({ content }: { content: Record<string, unknown> }) 
                     {item.value}
                   </button>
                 ) : item.href ? (
-                  <a href={item.href} className="qc-value">
+                  <a href={hrefOf(item.href)} className="qc-value">
                     {item.value}
                   </a>
                 ) : (
@@ -816,7 +822,7 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
         </div>
       ) : null}
       {content.cta ? (
-        <a href={String(content.ctaHref || '#')} className="btn btn-primary btn-sm btn-hover-lift">
+        <a href={hrefOf(content.ctaHref)} className="btn btn-primary btn-sm btn-hover-lift">
           {String(content.cta)}
         </a>
       ) : null}
@@ -923,7 +929,7 @@ function CertTeaserSection({ content }: { content: Record<string, unknown> }) {
         <h3>{String(content.title || '')}</h3>
         <p>{String(content.body || '')}</p>
         {content.cta ? (
-          <a href={String(content.ctaHref || '/certifications')} className="btn-certs">
+          <a href={hrefOf(content.ctaHref, '/certifications')} className="btn-certs">
             {String(content.cta)}
           </a>
         ) : null}
@@ -1051,7 +1057,7 @@ function FeatureGridSection({
                       {card.linkLabel}
                     </button>
                   ) : (
-                    <a href={card.linkHref || '#'} className="feat-link">
+                    <a href={hrefOf(card.linkHref)} className="feat-link">
                       {card.linkLabel}
                     </a>
                   )
@@ -1227,7 +1233,7 @@ function CertCtaSection({ content }: { content: Record<string, unknown> }) {
   return (
     <section className="cert-cta">
       <div className="container">
-        <a href={String(content.ctaHref || '/contact')} className="btn-home">
+        <a href={hrefOf(content.ctaHref, '/contact')} className="btn-home">
           {String(content.cta || 'Get in Touch')}
         </a>
       </div>
@@ -1327,7 +1333,7 @@ function ComparisonTableSection({
 
         {content.cta || content.ctaHref ? (
           <div className="comparison-cta">
-            <a href={String(content.ctaHref || '/contact')} className="btn btn-primary">
+            <a href={hrefOf(content.ctaHref, '/contact')} className="btn btn-primary">
               {String(content.cta || 'Get a tailored quote →')}
             </a>
             {content.ctaNote ? <p className="comparison-cta-note">{String(content.ctaNote)}</p> : null}
