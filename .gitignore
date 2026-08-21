@@ -30,8 +30,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-#.env*
+# env files — NEVER commit real secrets (.env.example is the only template in git)
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Hostinger VPS SSH keys (keep on your machine / password manager only)
+JustXSystems_hostinget_VPS_Ubantu
+JustXSystems_hostinget_VPS_Ubantu.pub
 
 # vercel
 .vercel
