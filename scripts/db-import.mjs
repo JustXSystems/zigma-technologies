@@ -19,8 +19,9 @@ import readline from 'readline';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
-function loadEnv(filePath) {
-  if (!fs.existsSync(filePath)) return;
+function parseEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return {};
+  const out = {};
   const text = fs.readFileSync(filePath, 'utf8');
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
@@ -35,6 +36,18 @@ function loadEnv(filePath) {
     ) {
       val = val.slice(1, -1);
     }
+    out[key] = val;
+  }
+  return out;
+}
+
+/** Load .env then .env.local (local wins). Existing process.env wins over both. */
+function loadProjectEnv() {
+  const merged = {
+    ...parseEnvFile(path.join(ROOT, '.env')),
+    ...parseEnvFile(path.join(ROOT, '.env.local')),
+  };
+  for (const [key, val] of Object.entries(merged)) {
     if (process.env[key] === undefined) process.env[key] = val;
   }
 }
@@ -104,7 +117,7 @@ function copyDirIfExists(src, dest) {
 }
 
 async function main() {
-  loadEnv(path.join(ROOT, '.env'));
+  loadProjectEnv();
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.target) {
     console.log(`Import Zigma CMS snapshot into the configured database.
@@ -113,7 +126,7 @@ Usage:
   node scripts/db-import.mjs <export-dir|database.sql> --force [--skip-media]
 
 Requires --force (or interactive yes) because existing tables are replaced.
-Target DB comes from DB_* in .env / environment.
+Target DB comes from DB_* in .env / .env.local / environment.
 `);
     process.exit(args.help ? 0 : 1);
   }
