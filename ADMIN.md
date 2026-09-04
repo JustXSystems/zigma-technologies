@@ -9,7 +9,7 @@ Independent control portal at **`/admin`** for the public marketing site. This d
 | Resource | Location |
 |----------|----------|
 | **In-app guide** | [/admin/guide](/admin/guide) — architecture, flows, 21 module references, playbooks |
-| **KVM 2 production setup** | [/admin/guide/hostinger-prod](/admin/guide/hostinger-prod) — Hostinger VPS + MySQL + GitHub deploy |
+| **KVM 2 production setup** | [/admin/guide/hostinger-prod](/admin/guide/hostinger-prod) — empty Ubuntu VPS → MySQL → PM2/Nginx → GitHub Actions (`deploy@` Hostinger) |
 | **justxsystems staging (subdir)** | [/admin/guide/justxsystems](/admin/guide/justxsystems) — `https://justxsystems.com/zigma-technologies/` |
 | **Hostinger migration / DNS** | [/admin/guide/migration](/admin/guide/migration) |
 | **Email migration** | [/admin/guide/email](/admin/guide/email) |

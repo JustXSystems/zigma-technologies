@@ -7,10 +7,14 @@ import {
   PROD_CHECKLIST,
   PROD_ENV_TEMPLATE,
   PROD_FAQ,
+  PROD_GHA_SECRETS,
+  PROD_GHA_STEPS,
   PROD_NGINX,
   PROD_PHASES,
   PROD_PREREQUISITES,
   PROD_PURCHASE_STEPS,
+  PROD_SERVER,
+  PROD_SERVER_FACTS,
   PROD_STACK,
   PROD_TOC,
   PROD_TROUBLESHOOT,
@@ -34,9 +38,13 @@ export default function AdminHostingerProdGuidePage() {
             <div className="admin-guide-eyebrow">DevOps · Production · Hostinger</div>
             <h2 className="admin-guide-title">Hostinger KVM 2 — production setup</h2>
             <p className="admin-guide-lead">
-              Complete operator playbook to provision <strong>{PROD_STACK.plan}</strong>, install MySQL, clone this
-              application from GitHub, and run Next.js behind Nginx + PM2 with HTTPS for{' '}
-              <strong>{PROD_STACK.domain}</strong>.
+              Blind-follow playbook for a <strong>brand-new empty</strong> {PROD_STACK.os} VPS (
+              <code>{PROD_SERVER.ipv4}</code>) through MySQL, clone of{' '}
+              <a href={PROD_SERVER.githubRepo} target="_blank" rel="noopener noreferrer">
+                JustXSystems/zigma-technologies
+              </a>
+              , Nginx + PM2, GitHub Actions auto-deploy as <code>{PROD_SERVER.sshDeploy}</code>, and HTTPS on{' '}
+              <strong>{PROD_SERVER.publicUrl}/</strong>.
             </p>
             <div className="admin-guide-hero-actions">
               <Link href="/admin/guide" className="admin-btn admin-btn-secondary">
@@ -104,8 +112,8 @@ export default function AdminHostingerProdGuidePage() {
               <h3>What you are building</h3>
               <p>
                 A single Hostinger VPS that runs the full stack: Nginx terminates HTTPS, PM2 keeps Next.js alive, and
-                MySQL stores CMS content, catalog, enquiries, and theme settings. Source code is deployed from GitHub
-                with <code>git pull</code> — not FTP of built files alone.
+                MySQL stores CMS content. Source code lives in GitHub; day-2+ deploys are automated by Actions SSHing as{' '}
+                <code>deploy</code> and running <code>scripts/deploy-prod.sh</code>.
               </p>
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
@@ -113,9 +121,9 @@ export default function AdminHostingerProdGuidePage() {
               {PROD_STACK.runtime} · {PROD_STACK.process} · {PROD_STACK.proxy} · {PROD_STACK.database}.
             </div>
             <div className="admin-guide-callout admin-guide-callout--warn">
-              Do <strong>not</strong> host 60–150 company mailboxes on this VPS. Keep website and mail separate — see the{' '}
-              <Link href="/admin/guide/email">email migration guide</Link>. For DNS cutover from the old UrbanVendo IP,
-              also use the <Link href="/admin/guide/migration">Hostinger migration guide</Link>.
+              Do <strong>not</strong> host company mailboxes on this VPS. Keep website and mail separate — see the{' '}
+              <Link href="/admin/guide/email">email migration guide</Link>. For DNS cutover from an old host, also use the{' '}
+              <Link href="/admin/guide/migration">Hostinger migration guide</Link>.
             </div>
             <div className="admin-guide-diagram">
               <p className="admin-guide-diagram-caption">Production topology</p>
@@ -163,7 +171,7 @@ export default function AdminHostingerProdGuidePage() {
                   <tr>
                     <th>Public URL</th>
                     <td>
-                      <code>https://{PROD_STACK.domain}</code>
+                      <code>{PROD_SERVER.publicUrl}/</code>
                     </td>
                   </tr>
                 </tbody>
@@ -171,11 +179,35 @@ export default function AdminHostingerProdGuidePage() {
             </div>
           </section>
 
+          <section id="server" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Inventory</div>
+              <h3>This production VPS (filled in)</h3>
+              <p>
+                Use these exact values in SSH, DNS, Nginx, and GitHub Secrets. Do not invent a different IP or hostname.
+              </p>
+            </div>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <tbody>
+                  {PROD_SERVER_FACTS.map((row) => (
+                    <tr key={row.label}>
+                      <th>{row.label}</th>
+                      <td>
+                        <code>{row.value}</code>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section id="prereqs" className="admin-guide-section">
             <div className="admin-guide-section-head">
-              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Before you start</div>
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Before you start</div>
               <h3>Prerequisites checklist</h3>
-              <p>Gather these before purchasing or SSHing into the VPS.</p>
+              <p>Gather these before SSHing into the empty server.</p>
             </div>
             <ul className="admin-guide-checklist">
               {PROD_PREREQUISITES.map((item) => (
@@ -186,9 +218,9 @@ export default function AdminHostingerProdGuidePage() {
 
           <section id="purchase" className="admin-guide-section">
             <div className="admin-guide-section-head">
-              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Purchase</div>
-              <h3>How to buy Hostinger KVM 2</h3>
-              <p>Follow this once. After payment, all ops happen in hPanel + SSH.</p>
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Access</div>
+              <h3>Confirm Hostinger KVM 2 in hPanel</h3>
+              <p>The VPS is already provisioned. Verify Active status, then all ops happen over SSH.</p>
             </div>
             <ol className="admin-guide-steps">
               {PROD_PURCHASE_STEPS.map((step, i) => (
@@ -205,21 +237,25 @@ export default function AdminHostingerProdGuidePage() {
               <a href="https://hpanel.hostinger.com" target="_blank" rel="noopener noreferrer">
                 hpanel.hostinger.com
               </a>
-              . Confirm live pricing at{' '}
-              <a href="https://www.hostinger.com/vps-hosting" target="_blank" rel="noopener noreferrer">
-                hostinger.com/vps-hosting
+              . Repository:{' '}
+              <a href={PROD_SERVER.githubRepo} target="_blank" rel="noopener noreferrer">
+                {PROD_SERVER.githubRepo}
               </a>
-              — budget for renewal, not only the intro rate.
+              . Actions:{' '}
+              <a href={PROD_SERVER.githubActions} target="_blank" rel="noopener noreferrer">
+                {PROD_SERVER.githubActions}
+              </a>
+              .
             </div>
           </section>
 
           <section id="phases" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Execution</div>
-              <h3>Production setup — step by step</h3>
+              <h3>Production setup — empty server to go-live</h3>
               <p>
-                Twelve steps from first SSH login through admin handoff. Complete them in order. Copy/paste commands
-                carefully and replace placeholders (<code>YOUR_VPS_IP</code>, org name, passwords).
+                {PROD_PHASES.length} steps from first SSH as <code>root@{PROD_SERVER.ipv4}</code> through GitHub Actions
+                and admin handoff. Complete them in order. Commands already use the live IP, hostname, and repo.
               </p>
             </div>
             <div className="admin-guide-detail-list">
@@ -266,12 +302,73 @@ export default function AdminHostingerProdGuidePage() {
             </div>
           </section>
 
+          <section id="gha" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">CI/CD</div>
+              <h3>GitHub Actions — auto deploy</h3>
+              <p>
+                After Step 12, pushes to <code>master</code> deploy via SSH to <code>{PROD_SERVER.sshDeploy}</code>.
+                Monitor runs at{' '}
+                <a href={PROD_SERVER.githubActions} target="_blank" rel="noopener noreferrer">
+                  {PROD_SERVER.githubActions}
+                </a>
+                .
+              </p>
+            </div>
+            <ol className="admin-guide-steps">
+              {PROD_GHA_STEPS.map((step, i) => (
+                <li key={step} className="admin-guide-step">
+                  <div className="admin-guide-step-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <p>{step}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Secret name</th>
+                    <th>Value</th>
+                    <th>Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROD_GHA_SECRETS.map((row) => (
+                    <tr key={row.name}>
+                      <td>
+                        <code>{row.name}</code>
+                      </td>
+                      <td>
+                        <code>{row.example}</code>
+                      </td>
+                      <td>{row.purpose}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="admin-guide-callout admin-guide-callout--info">
+              Workflow file: <code>.github/workflows/deploy-prod.yml</code> · Server script:{' '}
+              <code>scripts/deploy-prod.sh</code>. The workflow does <strong>not</strong> upload{' '}
+              <code>.env</code> — secrets stay on the VPS only.
+            </div>
+            <CodeBlock>{`# GitHub → Settings → Secrets and variables → Actions
+PROD_HOST=${PROD_SERVER.ipv4}
+PROD_SSH_USER=deploy
+PROD_SSH_KEY=<private key for Actions → deploy authorized_keys>
+
+# Verify manually before trusting Actions:
+ssh -i ./gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && ./scripts/deploy-prod.sh"`}</CodeBlock>
+          </section>
+
           <section id="env" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Secrets</div>
               <h3>Production .env template</h3>
               <p>
-                Create <code>/var/www/zigma-technologies/.env</code> from <code>.env.example</code>. Use{' '}
+                Create <code>{PROD_SERVER.appDir}/.env</code> from <code>.env.example</code>. Use{' '}
                 <code>AUTH_SECRET</code> (not legacy JWT keys). File mode <code>600</code>. Never commit this file.
               </p>
             </div>
@@ -287,31 +384,32 @@ export default function AdminHostingerProdGuidePage() {
               <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Proxy</div>
               <h3>Nginx site config</h3>
               <p>
-                Save as <code>/etc/nginx/sites-available/zigma</code>, enable the site, then run Certbot after DNS
-                points to the VPS.
+                Save as <code>/etc/nginx/sites-available/zigma</code>, enable the site, then run Certbot after DNS A
+                records point to <code>{PROD_SERVER.ipv4}</code>.
               </p>
             </div>
             <CodeBlock>{PROD_NGINX}</CodeBlock>
-            <CodeBlock>{`sudo ln -s /etc/nginx/sites-available/zigma /etc/nginx/sites-enabled/
+            <CodeBlock>{`sudo ln -sf /etc/nginx/sites-available/zigma /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d www.zigma-technologies.com -d zigma-technologies.com`}</CodeBlock>
+sudo certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com`}</CodeBlock>
           </section>
 
           <section id="updates" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Operations</div>
-              <h3>Deploy updates from GitHub (repeatable)</h3>
+              <h3>Deploy updates (Actions or manual)</h3>
               <p>
-                After the first go-live, every code release follows this path. Apply SQL migrations before restart when
-                schema changes.
+                Prefer merging to <code>master</code> and letting Actions run. Use the manual path only for emergencies
+                or first bootstrapping. Apply SQL migrations before restart when schema changes.
               </p>
             </div>
             <CodeBlock>{PROD_UPDATE_COMMANDS}</CodeBlock>
             <div className="admin-guide-ref-grid">
               <div className="admin-guide-ref-card">
-                <h4>Before pull</h4>
+                <h4>Before merge</h4>
                 <ul>
-                  <li>Merge to production branch on GitHub</li>
+                  <li>PR approved on GitHub</li>
                   <li>Quality gates green locally</li>
                   <li>
                     Optional: <code>npm run db:export</code> backup
@@ -319,13 +417,13 @@ sudo certbot --nginx -d www.zigma-technologies.com -d zigma-technologies.com`}</
                 </ul>
               </div>
               <div className="admin-guide-ref-card">
-                <h4>After restart</h4>
+                <h4>After deploy</h4>
                 <ul>
                   <li>Smoke-test homepage + /admin/login</li>
                   <li>
                     Watch <code>pm2 logs zigma</code>
                   </li>
-                  <li>Rollback with <code>git checkout &lt;good-sha&gt;</code> + rebuild if needed</li>
+                  <li>Check the Actions run is green</li>
                 </ul>
               </div>
             </div>

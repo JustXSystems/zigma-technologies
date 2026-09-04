@@ -217,17 +217,17 @@ export default function AdminGuidePage() {
           <section id="hostinger-prod" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Production</div>
-              <h3>Hostinger KVM 2 — production setup from GitHub</h3>
+              <h3>Hostinger KVM 2 — production setup from empty VPS</h3>
               <p>
-                End-to-end playbook for the recommended production stack: buy <strong>KVM 2</strong>, harden Ubuntu,
-                install MySQL 8 on the VPS, clone this repository from GitHub, configure <code>.env</code>, build with
-                Node 20, run under PM2, terminate SSL with Nginx + Certbot, then go-live checklist and repeatable{' '}
-                <code>git pull</code> updates.
+                Blind-follow playbook for the live KVM 2 in Mumbai (<code>200.234.45.106</code> / Ubuntu 26.04): harden
+                the empty OS, install MySQL 8, clone <code>JustXSystems/zigma-technologies</code>, configure{' '}
+                <code>.env</code>, run under PM2 + Nginx, point <code>zigma-technologies.com</code>, then wire GitHub
+                Actions auto-deploy as <code>deploy@200.234.45.106</code>.
               </p>
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
-              <strong>Start here for greenfield PROD:</strong> KVM 2 (2 vCPU · 8 GB RAM · MySQL on localhost) is the
-              target. Use the migration guide only when cutting DNS over from UrbanVendo / BigRock.
+              <strong>Start here for greenfield PROD:</strong> VPS is already provisioned (KVM 2 · 8 GB · Mumbai 2). Use
+              the migration guide only when cutting DNS over from an old host.
             </div>
             <Link href="/admin/guide/hostinger-prod" className="admin-guide-module admin-guide-module--link">
               <div className="admin-guide-module-top">
@@ -235,8 +235,8 @@ export default function AdminGuidePage() {
                 <span className="admin-guide-badge admin-guide-badge--admin">Admin / DevOps</span>
               </div>
               <p className="admin-guide-module-summary">
-                Purchase · Firewall · Node/Nginx/PM2 · MySQL · GitHub clone · .env · schema/import · SSL · DNS ·
-                backups · troubleshooting…
+                Empty Ubuntu → firewall · Node/Nginx/PM2 · MySQL · GitHub clone · .env · SSL · DNS · Actions secrets ·
+                deploy-prod.sh · go-live checklist…
               </p>
               <span className="admin-guide-module-cta">Read production guide →</span>
             </Link>

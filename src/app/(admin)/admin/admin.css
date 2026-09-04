@@ -327,6 +327,14 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.admin-select option,
+.admin-select optgroup,
+.admin-field select option,
+.admin-field select optgroup {
+  background-color: var(--admin-panel);
+  color: var(--admin-text);
+}
+
 .admin-input:focus,
 .admin-select:focus,
 .admin-textarea:focus {

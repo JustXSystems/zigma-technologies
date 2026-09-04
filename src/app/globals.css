@@ -53,6 +53,17 @@
   a{text-decoration:none;color:inherit;}
   ul{list-style:none;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  /* Native <select> popups inherit parent color; on dark panels that makes
+     white text on a white OS dropdown. Force options to match text fields. */
+  select{
+    color:var(--graphite-800);
+    background-color:var(--white);
+  }
+  select option,
+  select optgroup{
+    background-color:var(--white);
+    color:var(--graphite-800);
+  }
   h1,h2,h3,h4{
     font-family:var(--font-display);
     font-weight:700;
@@ -319,6 +330,11 @@
     padding:0.5rem 0.6rem;border-radius:8px;
     border:1px solid rgba(255,255,255,0.18);
     background:rgba(11,18,32,0.55);color:#e8eef7;
+  }
+  .header-icon-panel--tailor select option,
+  .header-icon-panel--tailor select optgroup{
+    background-color:var(--white);
+    color:var(--graphite-800);
   }
   .header-icon-links{display:grid;gap:0.3rem;margin-top:0.25rem;}
   .header-icon-links a{color:#7ee0d6;font-size:0.92rem;text-decoration:none;}
@@ -1378,6 +1394,11 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   width:100%;
   transition:border-color .2s ease, box-shadow .2s ease;
 }
+.catalog-toolbar-select option,
+.catalog-toolbar-select optgroup{
+  background-color:#fff;
+  color:var(--navy-950);
+}
 .catalog-toolbar-select{width:auto;min-width:9.25rem;flex:0 1 auto;cursor:pointer;}
 .catalog-toolbar-input:focus,
 .catalog-toolbar-select:focus{
@@ -1706,6 +1727,11 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .cf-field label{font-size:0.8rem;font-weight:600;color:var(--graphite-800);}
 .cf-field input,.cf-field select,.cf-field textarea{
   border:1.5px solid var(--gray-200);border-radius:6px;padding:0.75rem 0.9rem;font-family:inherit;font-size:0.92rem;color:var(--graphite-800);transition:border-color .2s;background:var(--white);width:100%;
+}
+.cf-field select option,
+.cf-field select optgroup{
+  background-color:var(--white);
+  color:var(--graphite-800);
 }
 .cf-field input[type="file"]{padding:0.6rem 0.9rem;font-size:0.85rem;}
 .cf-field input:focus,.cf-field select:focus,.cf-field textarea:focus{outline:none;border-color:var(--orange);}
@@ -2256,6 +2282,11 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   font:inherit;font-size:0.9rem;
   transition:border-color .15s, box-shadow .15s;
 }
+.consult-field select option,
+.consult-field select optgroup{
+  background-color:var(--white);
+  color:var(--graphite-800);
+}
 .consult-field input[type="checkbox"]{width:auto;margin-top:0.15rem;}
 .consult-field input:focus,
 .consult-field select:focus,
@@ -2646,6 +2677,12 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   font:inherit;font-weight:500;font-size:1rem;
   padding:0.65rem 0.8rem;border-radius:10px;
   border:1px solid rgba(15,23,36,0.14);background:#fff;
+  color:var(--graphite-800);
+}
+.visit-tailor-fields select option,
+.visit-tailor-fields select optgroup{
+  background-color:#fff;
+  color:var(--graphite-800);
 }
 .visit-tailor-hint{margin:0.85rem 0 0;font-size:0.95rem;color:var(--graphite-500);}
 .visit-tailor-hint a{color:var(--cyan);font-weight:600;}
@@ -2678,7 +2715,12 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .calc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.85rem;}
 .calc-tool label{display:grid;gap:0.4rem;font-size:0.98rem;font-weight:600;color:var(--graphite-700);}
 .calc-tool input,.calc-tool select{
-  font:inherit;font-weight:500;font-size:1.02rem;padding:0.75rem 0.85rem;border-radius:10px;border:1px solid rgba(15,23,36,0.12);background:#fff;
+  font:inherit;font-weight:500;font-size:1.02rem;padding:0.75rem 0.85rem;border-radius:10px;border:1px solid rgba(15,23,36,0.12);background:#fff;color:var(--graphite-800);
+}
+.calc-tool select option,
+.calc-tool select optgroup{
+  background-color:#fff;
+  color:var(--graphite-800);
 }
 .calc-result{background:#0f1a2a;color:#e8eef7;border-radius:16px;padding:1.25rem 1.35rem;}
 .calc-result ul{margin:0.75rem 0;padding-left:1.1rem;}
@@ -3232,6 +3274,11 @@ a.chip.chip-active{
   padding:0.55rem 0.65rem;border-radius:10px;
   border:1px solid rgba(255,255,255,0.14);
   background:#0b1220;color:#e8eef7;
+}
+.personalize-fab-panel select option,
+.personalize-fab-panel select optgroup{
+  background-color:var(--white);
+  color:var(--graphite-800);
 }
 .personalize-fab-links{display:grid;gap:0.35rem;margin-top:0.35rem;}
 .personalize-fab-links .link{color:#7ee0d6;font-size:0.86rem;}
