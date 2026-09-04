@@ -33,9 +33,9 @@ export const MIGRATION_CURRENT_STATE = {
   nameservers: ['ns1.urbanvendo.com', 'ns2.urbanvendo.com'],
   currentIp: '14.195.24.149',
   currentHost: 'UrbanVendo / Tata Teleservices (India)',
-  targetHost: 'Hostinger VPS or Node-enabled hosting',
+  targetHost: 'Hostinger KVM 2 VPS 200.234.45.106 (srv1954986.hstgr.cloud)',
   note:
-    'The domain stays registered at BigRock unless you transfer it. You only change DNS to point www and apex traffic to your Hostinger server IP.',
+    'The domain stays registered at BigRock unless you transfer it. You only change DNS A records for @ and www to 200.234.45.106. Full VPS install playbook: /admin/guide/hostinger-prod',
 };
 
 export const MIGRATION_PLAN_RECOMMENDATION = {
@@ -197,12 +197,12 @@ export const MIGRATION_PHASES: MigrationPhase[] = [
     steps: [
       'Log in to BigRock domain control panel (or UrbanVendo DNS manager if they manage DNS for you).',
       'Lower TTL on existing A records to 300 seconds at least 24 hours before cutover (if editable).',
-      'Update or add A record: @ (apex) → YOUR_HOSTINGER_VPS_IP',
-      'Update or add A record: www → YOUR_HOSTINGER_VPS_IP (or CNAME www → @ if your DNS provider supports apex ALIAS)',
+      'Update or add A record: @ (apex) → 200.234.45.106',
+      'Update or add A record: www → 200.234.45.106',
       'Remove or update old A records pointing to 14.195.24.149 once new site is verified.',
-      'Keep uat A record pointing to UAT server for ongoing QA.',
-      'Wait for propagation (minutes to 48h; usually under 1h with low TTL). Verify: nslookup www.zigma-technologies.com',
-      'Confirm HTTPS redirect: http://zigma-technologies.com → https://www.zigma-technologies.com (configure in Nginx).',
+      'Keep uat A record pointing to UAT server for ongoing QA (if used).',
+      'Wait for propagation. Verify: nslookup zigma-technologies.com 8.8.8.8 → 200.234.45.106',
+      'Then issue SSL on the VPS: certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com (see /admin/guide/hostinger-prod Step 13).',
       'Submit updated sitemap in Google Search Console after cutover.',
     ],
     checklist: [
@@ -243,23 +243,23 @@ export const MIGRATION_DNS_RECORDS: MigrationDnsRecord[] = [
   {
     type: 'A',
     name: '@',
-    value: '<HOSTINGER_VPS_IP>',
+    value: '200.234.45.106',
     ttl: '300–3600',
-    notes: 'Apex domain zigma-technologies.com → Hostinger',
+    notes: 'Apex zigma-technologies.com → Hostinger KVM 2',
   },
   {
     type: 'A',
     name: 'www',
-    value: '<HOSTINGER_VPS_IP>',
+    value: '200.234.45.106',
     ttl: '300–3600',
-    notes: 'Primary public URL www.zigma-technologies.com',
+    notes: 'www → same VPS (canonical public URL is https://zigma-technologies.com)',
   },
   {
     type: 'A',
     name: 'uat',
     value: '<UAT_VPS_IP or same VPS>',
     ttl: '3600',
-    notes: 'QA environment — can share VPS with different Nginx server_name',
+    notes: 'QA environment — optional; can share VPS with different Nginx server_name',
   },
   {
     type: 'MX',
@@ -290,7 +290,7 @@ export const MIGRATION_NGINX_SNIPPET = `server {
 }`;
 
 export const MIGRATION_ENV_PROD = `NODE_ENV=production
-NEXT_PUBLIC_SITE_URL=https://www.zigma-technologies.com
+NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=zigmatech_prod

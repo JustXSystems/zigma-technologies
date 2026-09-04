@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Production deploy on Hostinger KVM 2 (deploy@200.234.45.106).
 # Used by GitHub Actions (.github/workflows/deploy-prod.yml) and manual SSH deploys.
+#
+# Resets the app tree to origin/master so local edits to tracked files
+# (e.g. scripts/schema.sql) cannot block deploys. .env and untracked uploads stay.
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-/var/www/zigma-technologies}"
@@ -18,7 +21,7 @@ fi
 
 git fetch origin
 git checkout "$BRANCH"
-git pull origin "$BRANCH"
+git reset --hard "origin/$BRANCH"
 
 echo "==> HEAD $(git rev-parse --short HEAD) — $(git log -1 --oneline)"
 

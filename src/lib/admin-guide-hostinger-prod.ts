@@ -1,4 +1,4 @@
-/** Hostinger KVM 2 — production setup from empty VPS + GitHub Actions (operator guide). */
+/** Hostinger KVM 2 — production setup from empty VPS + BigRock DNS cutover + GitHub Actions. */
 
 export type ProdPhase = {
   id: string;
@@ -13,7 +13,7 @@ export type ProdPhase = {
 
 export type ProdFaq = { q: string; a: string };
 
-/** Live PROD VPS inventory — fill secrets only in password manager / GitHub Secrets, never in git. */
+/** Live PROD VPS inventory — secrets only in password manager / GitHub Secrets, never in git. */
 export const PROD_SERVER = {
   provider: 'Hostinger',
   plan: 'KVM 2',
@@ -39,6 +39,9 @@ export const PROD_SERVER = {
   domainWww: 'www.zigma-technologies.com',
   publicUrl: 'https://zigma-technologies.com',
   adminUrl: 'https://zigma-technologies.com/admin/login',
+  registrar: 'BigRock (bigrock.com) — domain stays here; only DNS A records change',
+  oldWebIp: '14.195.24.149',
+  oldHostNote: 'Current live site / UrbanVendo (or BigRock-managed DNS) — keep until cutover is stable',
 };
 
 export const PROD_STACK = {
@@ -50,34 +53,69 @@ export const PROD_STACK = {
   proxy: 'Nginx + Certbot (Let’s Encrypt)',
   database: 'MySQL 8 on the same VPS (localhost only)',
   source: 'GitHub JustXSystems/zigma-technologies + Actions auto-deploy',
-  domain: 'zigma-technologies.com',
+  domain: 'zigma-technologies.com (DNS at BigRock → VPS IP)',
   appPort: '3000 (localhost only — Nginx terminates HTTPS)',
 };
 
+export const PROD_CUTOVER = {
+  title: 'How the domain moves from BigRock to this VPS',
+  points: [
+    'Domain registration stays at BigRock (bigrock.com). You do NOT transfer the domain to Hostinger unless you want one vendor.',
+    'Today the website still points at the old host (historically ~14.195.24.149 / UrbanVendo). Visitors keep seeing the old site until you change DNS.',
+    'On Hostinger you finish the full stack first (Steps 1–11): app reachable on the VPS via hosts-file test. There is no hPanel “Add website” step for a KVM VPS — Nginx on the VPS is the web server.',
+    'When ready, at BigRock DNS change only A records for @ and www → 200.234.45.106 (Step 13). Leave MX / mail records untouched unless you are also moving email.',
+    'After DNS propagates, run Certbot for HTTPS (Step 14). Then public traffic hits this Next.js app at https://zigma-technologies.com/.',
+  ],
+};
+
+export const PROD_HOSTINGER_NOTES = [
+  {
+    title: 'VPS ≠ shared hosting',
+    detail:
+      'On KVM you manage Node, Nginx, MySQL, and SSL yourself over SSH. Do not look for “Node.js Web App” or “Add website” in hPanel for this production path — those are for shared/cloud web hosting.',
+  },
+  {
+    title: 'Firewall layers',
+    detail:
+      'Enable UFW on the VPS (22/80/443 only). Also check hPanel → VPS → Firewall (if present) and allow the same ports. Never open MySQL 3306 publicly.',
+  },
+  {
+    title: 'Backups',
+    detail:
+      'Turn on Hostinger VPS snapshots/backups in hPanel before DNS cutover. Also schedule mysqldump for zigmatech_prod.',
+  },
+  {
+    title: 'Email stays separate',
+    detail:
+      'Changing website A records does not move email. Keep existing MX at BigRock/UrbanVendo unless you intentionally migrate mailboxes.',
+  },
+];
+
 export const PROD_PREREQUISITES = [
   'Hostinger hPanel access for VPS srv1954986.hstgr.cloud (IPv4 200.234.45.106)',
-  'Ability to SSH as root@200.234.45.106 (password or key from hPanel → VPS → SSH Access)',
-  'GitHub org access to JustXSystems/zigma-technologies (Settings → Secrets, Deploy keys, Actions)',
-  'Domain DNS access for zigma-technologies.com (A records for @ and www)',
-  'Laptop with SSH client (Windows: PowerShell / Windows Terminal; macOS/Linux: Terminal)',
-  'Password manager for PROD secrets (DB password, AUTH_SECRET, admin password, SMTP, Actions SSH key)',
-  'Optional content export from DEV/UAT: npm run db:export -- --with-cms-media',
-  'Local quality gates green before first go-live: npm run typecheck && npm run lint && npm run build',
+  'Ability to SSH as root@200.234.45.106 (hPanel → VPS → SSH Access)',
+  'BigRock login for zigma-technologies.com DNS (or whoever manages DNS if nameservers point elsewhere)',
+  'GitHub org access to JustXSystems/zigma-technologies (Deploy keys, Actions secrets)',
+  'Laptop with SSH (Windows PowerShell / Terminal)',
+  'Password manager for PROD secrets (DB, AUTH_SECRET, admin, SMTP, Actions SSH key)',
+  'Optional content export: npm run db:export -- --with-cms-media',
+  'Local quality gates: npm run typecheck && npm run lint && npm run build',
 ];
 
 export const PROD_ARCHITECTURE = [
   {
-    label: 'Internet / DNS',
+    label: 'DNS (BigRock)',
     items: [
-      'HTTPS → https://zigma-technologies.com',
-      'A records @ and www → 200.234.45.106',
+      'Registrar: BigRock — domain stays registered there',
+      'A @ and www → 200.234.45.106 (after cutover)',
+      'MX unchanged (email stays on current provider)',
     ],
   },
   {
     label: 'Hostinger KVM 2 (Mumbai 2)',
     items: [
       'Hostname srv1954986.hstgr.cloud',
-      'Nginx :443 / :80 + Certbot',
+      'UFW + Nginx :80/:443 + Certbot',
       'PM2 → Next.js on 127.0.0.1:3000',
       'MySQL 8 on localhost:3306',
     ],
@@ -87,7 +125,7 @@ export const PROD_ARCHITECTURE = [
     items: [
       'SSH as deploy@200.234.45.106',
       'App at /var/www/zigma-technologies',
-      'GitHub Actions push → SSH → scripts/deploy-prod.sh',
+      'Actions → scripts/deploy-prod.sh (git reset --hard origin/master)',
       '.env never in Git',
     ],
   },
@@ -98,24 +136,48 @@ export const PROD_SERVER_FACTS: { label: string; value: string }[] = [
   { label: 'Location', value: 'India — Mumbai 2' },
   { label: 'OS', value: 'Ubuntu 26.04 LTS' },
   { label: 'Hostname', value: 'srv1954986.hstgr.cloud' },
-  { label: 'IPv4', value: '200.234.45.106' },
+  { label: 'IPv4 (new web)', value: '200.234.45.106' },
+  { label: 'Old web IP (pre-cutover)', value: '14.195.24.149 (UrbanVendo — do not delete until stable)' },
+  { label: 'Domain registrar', value: 'BigRock — keep registration; change DNS A only' },
   { label: 'First SSH', value: 'ssh root@200.234.45.106' },
   { label: 'App SSH', value: 'ssh deploy@200.234.45.106' },
   { label: 'Resources', value: '2 CPU · 8 GB RAM · 100 GB disk · 8 TB bandwidth' },
   { label: 'Repository', value: 'https://github.com/JustXSystems/zigma-technologies' },
   { label: 'Actions', value: 'https://github.com/JustXSystems/zigma-technologies/actions' },
-  { label: 'Public site', value: 'https://zigma-technologies.com/' },
+  { label: 'Public site (after cutover)', value: 'https://zigma-technologies.com/' },
   { label: 'Admin', value: 'https://zigma-technologies.com/admin/login' },
 ];
 
+export const PROD_DNS_RECORDS: { type: string; name: string; value: string; notes: string }[] = [
+  {
+    type: 'A',
+    name: '@',
+    value: '200.234.45.106',
+    notes: 'Apex zigma-technologies.com → Hostinger VPS',
+  },
+  {
+    type: 'A',
+    name: 'www',
+    value: '200.234.45.106',
+    notes: 'www → same VPS (Nginx can redirect www → apex)',
+  },
+  {
+    type: 'MX',
+    name: '@',
+    value: '(leave unchanged)',
+    notes: 'Do not edit MX/SPF/DKIM unless migrating email',
+  },
+];
+
 export const PROD_PURCHASE_STEPS = [
-  'VPS is already provisioned: open https://hpanel.hostinger.com → VPS → confirm srv1954986.hstgr.cloud is Active.',
+  'VPS is already provisioned: https://hpanel.hostinger.com → VPS → confirm srv1954986.hstgr.cloud is Active.',
   'Confirm location India — Mumbai 2, OS Ubuntu 26.04 LTS, plan KVM 2 (2 CPU / 8 GB / 100 GB / 8 TB).',
-  'Record IPv4 200.234.45.106 — used for SSH, UFW allowlists, DNS A records, and GitHub Actions secret PROD_HOST.',
-  'hPanel → VPS → SSH Access: set a strong root password and/or add your laptop SSH public key.',
-  'From your laptop verify: ssh root@200.234.45.106',
-  'Optional: enable Hostinger VPS automatic backups / snapshots before go-live.',
-  'Keep domain registration where it is today; only change DNS A records in Step 11 (do not transfer the domain unless intentional).',
+  'Record IPv4 200.234.45.106 — SSH, UFW, BigRock A records, GitHub secret PROD_HOST.',
+  'hPanel → VPS → SSH Access: strong root password and/or laptop SSH public key.',
+  'Optional: hPanel → VPS → Firewall — allow TCP 22, 80, 443 (in addition to UFW on the OS).',
+  'Optional: enable Hostinger VPS automatic backups / snapshots before DNS cutover.',
+  'Domain stays at BigRock — do not transfer to Hostinger for go-live. Only A records change in Step 13.',
+  'There is no “Add website” / “Node.js app” hPanel step for this KVM path — you configure Nginx on the VPS.',
 ];
 
 export const PROD_PHASES: ProdPhase[] = [
@@ -124,15 +186,15 @@ export const PROD_PHASES: ProdPhase[] = [
     phase: 'Step 1',
     title: 'Confirm VPS access (empty Ubuntu server)',
     summary:
-      'You start from a brand-new empty Ubuntu 26.04 box. Prove SSH works as root before installing anything.',
+      'Brand-new empty Ubuntu 26.04. Prove SSH as root before installing anything. Public DNS still points at BigRock’s old host until Step 13.',
     steps: [
-      'Open hPanel → VPS → confirm status Active for hostname srv1954986.hstgr.cloud.',
-      'From your laptop run: ssh root@200.234.45.106',
-      'On first password login, change root password: passwd',
-      'Confirm identity: hostnamectl  (expect Ubuntu 26.04) and hostname (expect srv1954986.hstgr.cloud or similar).',
-      'Confirm resources: df -h && free -h && nproc — expect ~100 GB disk, ~8 GB RAM, 2 CPUs.',
-      'Confirm you are on a clean OS: which node || echo "node not installed yet"; which nginx || echo "nginx not installed yet"',
-      'Store root credentials in the team password manager — never in Slack, email, or Git.',
+      'Open hPanel → VPS → confirm Active for srv1954986.hstgr.cloud.',
+      'From laptop: ssh root@200.234.45.106',
+      'On first password login: passwd',
+      'Confirm: hostnamectl (Ubuntu 26.04) and hostname (srv1954986…).',
+      'Confirm resources: df -h && free -h && nproc — ~100 GB disk, ~8 GB RAM, 2 CPUs.',
+      'Confirm clean OS: which node || echo "node not installed"; which nginx || echo "nginx not installed"',
+      'Store root credentials in the password manager.',
     ],
     checklist: [
       'SSH root@200.234.45.106 succeeds',
@@ -150,80 +212,66 @@ ip -4 addr show`,
     phase: 'Step 2',
     title: 'Base OS update, deploy user, firewall',
     summary:
-      'Patch the empty server, create the non-root deploy user used by humans and GitHub Actions, and lock the firewall.',
+      'Patch the empty server, create deploy (used by humans + GitHub Actions), open only SSH/HTTP/HTTPS.',
     steps: [
       'As root: apt update && apt upgrade -y',
-      'Install base tools: apt install -y curl git ufw fail2ban ca-certificates gnupg unzip software-properties-common',
-      'Create deploy user: adduser deploy   (set a strong password; save it)',
-      'Grant sudo: usermod -aG sudo deploy',
-      'While still on the VPS as root, switch user with: su - deploy   (do NOT run ssh-copy-id on the VPS — that command is for your laptop only, and root usually has no SSH key yet).',
-      'As deploy, confirm sudo works: sudo -v  (enter the deploy password)',
-      'Exit back to root with exit, then continue firewall setup below. Laptop key login can wait until you open a second terminal from your PC.',
-      'From your laptop (not the VPS): if you have no key yet, run ssh-keygen -t ed25519 -C "your-email" -f ~/.ssh/id_ed25519 -N "" then ssh-copy-id deploy@200.234.45.106',
-      'Windows PowerShell (no ssh-copy-id): type $env:USERPROFILE\\.ssh\\id_ed25519.pub | ssh deploy@200.234.45.106 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"',
-      'Verify from laptop: ssh deploy@200.234.45.106',
-      'Configure UFW (as root or sudo): ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable',
-      'Verify: ufw status verbose — only 22/80/443. Do NOT open MySQL 3306 to the internet.',
-      'Optional hardening after key login works: disable root password SSH and PasswordAuthentication in /etc/ssh/sshd_config, then systemctl reload ssh',
+      'apt install -y curl git ufw fail2ban ca-certificates gnupg unzip software-properties-common',
+      'adduser deploy  (strong password; save it) then usermod -aG sudo deploy',
+      'On the VPS use su - deploy — do NOT run ssh-copy-id on the VPS (no identities / wrong machine).',
+      'As deploy: sudo -v then exit back to root',
+      'UFW: ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable',
+      'ufw status verbose — only 22/80/443. Never open 3306.',
+      'If hPanel has a VPS Firewall, allow 22/80/443 there too.',
+      'From laptop (optional now): install your SSH public key for deploy (see Commands).',
     ],
     checklist: [
       'Packages updated',
-      'deploy exists and can sudo (su - deploy works)',
+      'deploy can sudo (su - deploy)',
       'UFW allows 22/80/443 only',
-      'Port 3306 not publicly exposed',
-      'Optional: laptop can ssh deploy@200.234.45.106 with a key',
+      'Port 3306 not public',
     ],
     warning:
-      'ssh-copy-id must run on your laptop (or any machine that already has an SSH private key). Running it as root on the VPS fails with “No identities found” because the server has no ~/.ssh/id_*.pub yet — keep working with su - deploy. Never expose MySQL to 0.0.0.0; GitHub Actions will SSH as deploy, not root.',
-    code: `# As root@200.234.45.106 (you are already here)
+      'ssh-copy-id is for your laptop → deploy. Running it as root on the VPS fails with “No identities found”. Keep working with su - deploy.',
+    code: `# As root@200.234.45.106
 apt update && apt upgrade -y
 apt install -y curl git ufw fail2ban ca-certificates gnupg unzip software-properties-common
 adduser deploy
 usermod -aG sudo deploy
-
-# Stay on the VPS — switch to deploy (password you just set). Do NOT ssh-copy-id here.
 su - deploy
 sudo -v
 exit
 
-# Firewall (still as root)
 ufw allow OpenSSH
 ufw allow 80/tcp
 ufw allow 443/tcp
 ufw --force enable
 ufw status verbose
 
-# --- Later, FROM YOUR LAPTOP (new terminal) ---
-# Create a key only if you do not already have one:
-#   ssh-keygen -t ed25519 -C "dev@zigma" -f ~/.ssh/id_ed25519 -N ""
-# Linux/macOS/Git Bash:
-#   ssh-copy-id deploy@200.234.45.106
-# Windows PowerShell:
-#   type $env:USERPROFILE\\.ssh\\id_ed25519.pub | ssh deploy@200.234.45.106 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-#   ssh deploy@200.234.45.106`,
+# FROM LAPTOP (PowerShell) — optional human key for deploy:
+# type $env:USERPROFILE\\.ssh\\id_ed25519.pub | ssh deploy@200.234.45.106 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"`,
   },
   {
     id: 'stack',
     phase: 'Step 3',
     title: 'Install Node.js 20, Nginx, PM2, Certbot',
-    summary: 'Install the full application runtime on the empty VPS.',
+    summary: 'Runtime stack on the empty VPS. Certbot is installed now; you run it only after DNS in Step 14.',
     steps: [
-      'Install Node.js 20 LTS via NodeSource (commands below).',
-      'Confirm: node -v shows v20.x and npm -v works.',
-      'Install PM2 globally: npm install -g pm2',
-      'Install Nginx: apt install -y nginx && systemctl enable --now nginx',
-      'Install Certbot: apt install -y certbot python3-certbot-nginx',
-      'Create app parent dir owned by deploy: mkdir -p /var/www && chown deploy:deploy /var/www',
-      'Quick check: curl -I http://127.0.0.1  — Nginx default page is OK for now.',
+      'Install Node 20 LTS via NodeSource (commands below).',
+      'node -v → v20.x ; npm -v works',
+      'npm install -g pm2',
+      'apt install -y nginx && systemctl enable --now nginx',
+      'apt install -y certbot python3-certbot-nginx',
+      'mkdir -p /var/www && chown deploy:deploy /var/www',
+      'curl -I http://127.0.0.1 — Nginx default page is OK for now',
     ],
     checklist: [
       'node -v → v20.x',
       'pm2 -v works',
-      'nginx is active',
+      'nginx active',
       'certbot installed',
       '/var/www owned by deploy',
     ],
-    code: `# As root (or sudo)
+    code: `# As root / sudo
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt install -y nodejs nginx certbot python3-certbot-nginx
 npm install -g pm2
@@ -235,23 +283,21 @@ systemctl status nginx --no-pager`,
     id: 'mysql',
     phase: 'Step 4',
     title: 'Install & configure MySQL 8 (production database)',
-    summary: 'Create a dedicated PROD database and least-privilege app user. MySQL stays on localhost only.',
+    summary: 'Dedicated PROD DB on localhost only. App connects via DB_* in .env.',
     steps: [
-      'apt install -y mysql-server',
-      'systemctl enable --now mysql',
-      'Run: mysql_secure_installation  (set root password, remove anonymous users, disallow remote root, remove test DB).',
-      'Create database zigmatech_prod and user zigmatech_prod with a 32+ character random password.',
-      'GRANT ALL PRIVILEGES ON zigmatech_prod.* TO the app user; FLUSH PRIVILEGES.',
-      'Confirm bind-address is 127.0.0.1 in MySQL config (Ubuntu default for local packages).',
+      'apt install -y mysql-server && systemctl enable --now mysql',
+      'mysql_secure_installation',
+      'Create DB zigmatech_prod and user zigmatech_prod (32+ char password)',
+      'GRANT ALL ON zigmatech_prod.* ; FLUSH PRIVILEGES',
+      'Confirm bind-address 127.0.0.1',
       'Test: mysql -u zigmatech_prod -p zigmatech_prod -e "SELECT 1;"',
-      'Record DB_HOST=localhost, DB_PORT=3306, DB_NAME=zigmatech_prod, DB_USER=zigmatech_prod, DB_PASSWORD in the password manager for .env.',
+      'Save DB_* values for .env (Step 6)',
     ],
     checklist: [
-      'mysql service running',
-      'zigmatech_prod database exists',
-      'App user can SELECT 1',
-      'No public 3306 access',
-      'Credentials stored securely',
+      'mysql running',
+      'zigmatech_prod exists',
+      'App user SELECT 1 works',
+      '3306 not public',
     ],
     code: `sudo apt install -y mysql-server
 sudo systemctl enable --now mysql
@@ -263,42 +309,36 @@ CREATE USER 'zigmatech_prod'@'localhost' IDENTIFIED BY 'REPLACE_WITH_STRONG_PASS
 GRANT ALL PRIVILEGES ON zigmatech_prod.* TO 'zigmatech_prod'@'localhost';
 FLUSH PRIVILEGES;
 "
-
 mysql -u zigmatech_prod -p zigmatech_prod -e "SELECT 1;"`,
-    warning:
-      'Never reuse DEV or UAT database passwords on PROD. Generate a new AUTH_SECRET and admin password for production.',
+    warning: 'Never reuse DEV/UAT DB passwords or AUTH_SECRET on PROD.',
   },
   {
     id: 'github',
     phase: 'Step 5',
     title: 'Clone JustXSystems/zigma-technologies as deploy',
-    summary:
-      'Pull application source into /var/www/zigma-technologies. Prefer a read-only GitHub Deploy Key for private repos.',
+    summary: 'Source at /var/www/zigma-technologies. Prefer a read-only GitHub Deploy Key for private repos.',
     steps: [
-      'Switch to deploy: ssh deploy@200.234.45.106  (or su - deploy)',
+      'ssh deploy@200.234.45.106 (or su - deploy)',
       'cd /var/www',
-      'If the repo is private: ssh-keygen -t ed25519 -C "zigma-prod-git-readonly" -f ~/.ssh/github_zigma_ro -N ""',
-      'Show the public key: cat ~/.ssh/github_zigma_ro.pub',
-      'GitHub → JustXSystems/zigma-technologies → Settings → Deploy keys → Add deploy key (read-only) → paste the public key.',
-      'Configure SSH for GitHub: create ~/.ssh/config with Host github.com → IdentityFile ~/.ssh/github_zigma_ro',
-      'chmod 600 ~/.ssh/config ~/.ssh/github_zigma_ro',
-      'Test: ssh -T git@github.com  (expect a success / Hi JustXSystems message)',
-      'Clone: git clone git@github.com:JustXSystems/zigma-technologies.git',
+      'Create read-only key: ssh-keygen -t ed25519 -C "zigma-prod-git-readonly" -f ~/.ssh/github_zigma_ro -N ""',
+      'cat ~/.ssh/github_zigma_ro.pub → GitHub → Settings → Deploy keys → Add (read-only)',
+      'Configure ~/.ssh/config IdentityFile for github.com (see Commands)',
+      'ssh -T git@github.com',
+      'git clone git@github.com:JustXSystems/zigma-technologies.git',
       'cd zigma-technologies && git checkout master && git rev-parse --short HEAD',
-      'Confirm package.json exists at the repo root. Ownership must stay deploy:deploy.',
-      'Public repo alternative: git clone https://github.com/JustXSystems/zigma-technologies.git',
+      'Confirm package.json and scripts/deploy-prod.sh exist at repo root',
     ],
     checklist: [
       'Repo at /var/www/zigma-technologies',
-      'Branch master (or agreed prod branch)',
+      'Branch master',
       'deploy owns the tree',
-      'Deploy key or HTTPS remote works without interactive password',
+      'scripts/deploy-prod.sh present (or pull latest master)',
     ],
     code: `# As deploy@200.234.45.106
 cd /var/www
 ssh-keygen -t ed25519 -C "zigma-prod-git-readonly" -f ~/.ssh/github_zigma_ro -N ""
 cat ~/.ssh/github_zigma_ro.pub
-# → add that key in GitHub → Settings → Deploy keys (read-only)
+# → GitHub Deploy keys (read-only)
 
 cat >> ~/.ssh/config <<'EOF'
 Host github.com
@@ -308,73 +348,62 @@ Host github.com
   IdentitiesOnly yes
 EOF
 chmod 600 ~/.ssh/config ~/.ssh/github_zigma_ro
-
 ssh -T git@github.com
 git clone git@github.com:JustXSystems/zigma-technologies.git
 cd zigma-technologies
 git checkout master
-git status
-git rev-parse --short HEAD`,
+ls -la package.json scripts/deploy-prod.sh`,
   },
   {
     id: 'env',
     phase: 'Step 6',
     title: 'Create production .env (secrets)',
-    summary: 'Copy .env.example, fill PROD-only values, lock permissions. Never commit .env.',
+    summary:
+      'Copy .env.example → .env. Cookie name is hardcoded in the app as zigma_admin_session — do not invent COOKIE_NAME. Canonical site URL is the apex domain.',
     steps: [
       'cd /var/www/zigma-technologies',
       'cp .env.example .env && chmod 600 .env',
-      'Edit: nano .env — set NODE_ENV=production and all required keys (see .env template section).',
-      'Generate AUTH_SECRET: openssl rand -hex 32',
-      'Generate PREVIEW_SECRET: openssl rand -hex 32 (different value).',
-      'Set NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com',
-      'Do NOT set NEXT_PUBLIC_BASE_PATH for this deploy (domain root, not a subdirectory).',
-      'Set MEDIA_BASE_URL=/assets',
-      'Set SMTP_* if enquiry emails should send (Hostinger mailbox or Google Workspace App Password).',
-      'Confirm DEV_BYPASS_AUTH is absent.',
-      'Confirm .env is gitignored: git check-ignore -v .env',
+      'nano .env — use the .env template in this guide',
+      'openssl rand -hex 32 for AUTH_SECRET and a different PREVIEW_SECRET',
+      'NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com',
+      'Do NOT set NEXT_PUBLIC_BASE_PATH (this is domain-root PROD, not justxsystems staging)',
+      'DB_NAME=zigmatech_prod (not zigmatech)',
+      'MEDIA_BASE_URL=/assets',
+      'SMTP_* if enquiry email should send',
+      'git check-ignore -v .env',
     ],
     checklist: [
       '.env mode 600',
       'Unique AUTH_SECRET / PREVIEW_SECRET',
-      'PROD DB credentials only',
+      'DB_NAME=zigmatech_prod',
       'NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com',
-      'No BASE_PATH for apex domain',
+      'No BASE_PATH',
     ],
-    warning:
-      'Do not paste local DEV passwords into production. Rotate ADMIN_PASSWORD after first seed login.',
+    warning: 'Never paste DEV laptop passwords into PROD. Rotate ADMIN_PASSWORD after first seed login.',
   },
   {
     id: 'schema',
     phase: 'Step 7',
-    title: 'Load MySQL schema (or import full CMS export)',
+    title: 'Load MySQL schema (fresh install)',
     summary:
-      'Fresh install: run schema.sql once, then STOP — do not run migrate-*.sql. Migrations are only for upgrading older databases that were created before those columns existed.',
+      'Run schema.sql once against zigmatech_prod. Do NOT run migrate-*.sql after a fresh schema — they are already baked in (ERROR 1060 Duplicate column).',
     steps: [
-      'Option A — Fresh install (your case): mysql -u zigmatech_prod -p zigmatech_prod < scripts/schema.sql',
-      'IMPORTANT: Use database name zigmatech_prod (not zigmatech). Match DB_NAME in .env.',
-      'After a successful fresh schema.sql import, skip ALL scripts/migrate-*.sql files. schema.sql already includes those columns/tables — re-running migrations causes ERROR 1060 Duplicate column name (e.g. admin_notes).',
-      'Option B — Promote content from UAT/DEV: scp the export folder to the server, then npm run db:import -- storage/exports/zigma-… --force (skip schema.sql / migrate if the export already has full schema).',
-      'Option C — Upgrading an old PROD DB that was created months ago: only then run migrate-*.sql in README order, and skip any that error with Duplicate column / table already exists.',
-      'Create upload dirs: mkdir -p public/assets/uploads/resumes public/assets/uploads/documents && chmod -R 755 public/assets',
-      'Verify: mysql -u zigmatech_prod -p zigmatech_prod -e "SHOW TABLES;"',
-      'Optional ZTools tables (if you need the mobile portal and they are missing from SHOW TABLES): run migrate-ztools.sql / migrate-ztools-push.sql against zigmatech_prod — edit or override USE zigmatech inside those files first.',
+      'mysql -u zigmatech_prod -p zigmatech_prod < scripts/schema.sql',
+      'Skip ALL scripts/migrate-*.sql on a fresh install',
+      'Optional content promote: npm run db:import -- storage/exports/… --force instead of empty schema',
+      'mkdir -p public/assets/uploads/resumes public/assets/uploads/documents && chmod -R 755 public/assets',
+      'mysql -u zigmatech_prod -p zigmatech_prod -e "SHOW TABLES;"',
     ],
     checklist: [
-      'Tables present (pages, catalog_items, admin_users, …)',
-      'Fresh install: migrations NOT applied (or skipped after Duplicate column)',
-      'Upload directories writable',
-      'DB_NAME in .env is zigmatech_prod',
+      'Tables present',
+      'Migrations skipped (fresh install)',
+      'Upload dirs writable',
     ],
     warning:
-      'ERROR 1060 Duplicate column name after schema.sql means the migration is already baked into the schema — safe to ignore and continue. Wrong database name (zigmatech vs zigmatech_prod) will create/update the wrong schema.',
-    code: `# Fresh schema ONLY — as deploy, from app dir
-cd /var/www/zigma-technologies
+      'ERROR 1060 Duplicate column = already in schema.sql — ignore and continue. Wrong DB name zigmatech vs zigmatech_prod is a common mistake.',
+    code: `cd /var/www/zigma-technologies
 mysql -u zigmatech_prod -p zigmatech_prod < scripts/schema.sql
-
-# Do NOT run migrate-*.sql after a fresh schema.sql.
-# Duplicate column errors (e.g. admin_notes) mean "already applied" — ignore and continue.
-
+# Do NOT run migrate-*.sql after fresh schema.sql
 mkdir -p public/assets/uploads/resumes public/assets/uploads/documents
 chmod -R 755 public/assets
 mysql -u zigmatech_prod -p zigmatech_prod -e "SHOW TABLES;"`,
@@ -383,21 +412,15 @@ mysql -u zigmatech_prod -p zigmatech_prod -e "SHOW TABLES;"`,
     id: 'build',
     phase: 'Step 8',
     title: 'Install dependencies & production build',
-    summary: 'First production build must succeed on the VPS before PM2 or Actions deploys.',
+    summary: 'First build on the VPS before PM2. Matches what scripts/deploy-prod.sh runs later.',
     steps: [
       'cd /var/www/zigma-technologies',
       'npm ci',
       'npm run build',
-      'Confirm .next/ was created: ls -la .next',
-      'If build OOMs (rare on 8 GB): add 2 GB swap (commands in Troubleshooting) and retry.',
-      'Make the deploy script executable: chmod +x scripts/deploy-prod.sh',
+      'ls -la .next',
+      'chmod +x scripts/deploy-prod.sh',
     ],
-    checklist: [
-      'npm ci completed',
-      'npm run build exit 0',
-      '.next present',
-      'deploy-prod.sh executable',
-    ],
+    checklist: ['npm ci OK', 'build exit 0', '.next present', 'deploy-prod.sh executable'],
     code: `cd /var/www/zigma-technologies
 npm ci
 npm run build
@@ -408,150 +431,199 @@ chmod +x scripts/deploy-prod.sh`,
     id: 'pm2',
     phase: 'Step 9',
     title: 'Start Next.js with PM2',
-    summary: 'Keep the Node process alive across SSH logout and reboots.',
+    summary: 'Process name zigma — same name Actions / deploy-prod.sh restarts.',
     steps: [
       'cd /var/www/zigma-technologies',
       'pm2 start npm --name zigma -- start',
-      'pm2 status — state should be online',
-      'curl -I http://127.0.0.1:3000 — expect HTTP 200 or 307/308',
-      'pm2 save',
-      'pm2 startup systemd — copy/run the printed sudo command so the app starts on boot (run as deploy)',
-      'pm2 logs zigma --lines 50 — check for DB connection errors',
+      'pm2 status — online',
+      'curl -I http://127.0.0.1:3000 — 200 or 307/308',
+      'pm2 save && pm2 startup (run the printed sudo command)',
+      'pm2 logs zigma --lines 50 — no DB errors',
     ],
-    checklist: [
-      'PM2 process zigma online',
-      'Localhost :3000 responds',
-      'Startup on boot configured',
-      'No DB errors in logs',
-    ],
+    checklist: ['PM2 zigma online', ':3000 responds', 'startup on boot', 'no DB errors'],
     code: `cd /var/www/zigma-technologies
 pm2 start npm --name zigma -- start
 pm2 save
 pm2 startup
-# Run the sudo command that pm2 prints, then:
+# run the sudo command pm2 prints
 curl -I http://127.0.0.1:3000
 pm2 logs zigma --lines 50`,
   },
   {
     id: 'nginx',
     phase: 'Step 10',
-    title: 'Nginx reverse proxy + HTTPS',
-    summary: 'Terminate SSL at Nginx and proxy to PM2. Prefer hosts-file test before public DNS cutover.',
+    title: 'Nginx reverse proxy (HTTP only — before public DNS)',
+    summary:
+      'Proxy port 80 → 127.0.0.1:3000. Do NOT run Certbot yet (DNS still points at BigRock’s old IP). Test with a hosts-file override on your laptop.',
     steps: [
-      'As root/sudo: create /etc/nginx/sites-available/zigma with the Nginx snippet from this guide.',
-      'ln -s /etc/nginx/sites-available/zigma /etc/nginx/sites-enabled/',
-      'Remove default site if it conflicts: rm -f /etc/nginx/sites-enabled/default',
+      'As root: create /etc/nginx/sites-available/zigma with the HTTP Nginx snippet from this guide',
+      'ln -sf …/zigma …/sites-enabled/ && rm -f …/sites-enabled/default',
       'nginx -t && systemctl reload nginx',
-      'Optional pre-DNS test on your laptop hosts file: 200.234.45.106 zigma-technologies.com www.zigma-technologies.com',
-      'After DNS A records point to 200.234.45.106: certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com',
-      'Confirm HTTPS redirect (Certbot usually adds it).',
-      'client_max_body_size 25M is required for media / resume uploads.',
+      'On your laptop hosts file add: 200.234.45.106 zigma-technologies.com www.zigma-technologies.com',
+      'Windows hosts path: C:\\Windows\\System32\\drivers\\etc\\hosts (edit as Administrator)',
+      'Browse http://zigma-technologies.com/ — you should hit THIS VPS (not the old BigRock site). Remove hosts lines after testing.',
+      'curl -I -H "Host: zigma-technologies.com" http://127.0.0.1 from the VPS should reach Next via Nginx',
+      'Leave Certbot for Step 14 after BigRock DNS points here',
     ],
     checklist: [
       'nginx -t OK',
-      'HTTP reaches Next via proxy',
-      'HTTPS certificate valid for apex + www',
-      'https://zigma-technologies.com loads',
+      'Hosts-file test shows new app (not old vendor site)',
+      'PM2 still online',
+      'Certbot NOT run yet (unless you already cut over DNS)',
     ],
-    code: `sudo nano /etc/nginx/sites-available/zigma
-# paste the Nginx config from this guide, then:
+    warning:
+      'If you open https://zigma-technologies.com in a normal browser before Step 13, you still see the OLD BigRock/UrbanVendo site. That is expected. Use hosts-file or curl with Host header to test the VPS.',
+    code: `sudo tee /etc/nginx/sites-available/zigma >/dev/null <<'EOF'
+server {
+    listen 80;
+    server_name zigma-technologies.com www.zigma-technologies.com;
+    client_max_body_size 25M;
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+EOF
 sudo ln -sf /etc/nginx/sites-available/zigma /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
 
-# After DNS points here:
-sudo certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com`,
-  },
-  {
-    id: 'dns',
-    phase: 'Step 11',
-    title: 'DNS cutover for zigma-technologies.com',
-    summary: 'Point apex and www to 200.234.45.106. Leave MX records unchanged unless migrating email separately.',
-    steps: [
-      'Lower TTL on A records to 300s at least 24h before cutover if possible.',
-      'Update A record @ (apex) → 200.234.45.106',
-      'Update A record www → 200.234.45.106',
-      'Do not change MX / SPF / DKIM unless email is intentionally moving (see Email migration guide).',
-      'Verify from your laptop: nslookup zigma-technologies.com and nslookup www.zigma-technologies.com',
-      'Open https://zigma-technologies.com/ and run the post-deploy checklist.',
-      'Submit sitemap in Google Search Console after cutover.',
-    ],
-    checklist: [
-      'Apex and www resolve to 200.234.45.106',
-      'HTTPS padlock valid',
-      'MX unchanged (if mail stays elsewhere)',
-      'Post-deploy checklist passed',
-    ],
-    warning:
-      'If email still uses another provider, changing only A records is correct — never delete MX during website cutover.',
+# Laptop hosts-file test (Windows Admin notepad):
+# 200.234.45.106 zigma-technologies.com www.zigma-technologies.com
+# Then open http://zigma-technologies.com/ — remove hosts lines when done.`,
   },
   {
     id: 'gha',
-    phase: 'Step 12',
+    phase: 'Step 11',
     title: 'GitHub Actions auto-deploy (deploy@200.234.45.106)',
     summary:
-      'Wire https://github.com/JustXSystems/zigma-technologies/actions so every push to master SSHs in as deploy and runs scripts/deploy-prod.sh.',
+      'Wire Actions before or after DNS — it only needs SSH to the VPS. Parts A→D on your laptop + GitHub UI. deploy-prod.sh does git reset --hard origin/master (discards local tracked edits; keeps .env).',
     steps: [
-      'On the VPS as deploy, generate a dedicated Actions key (separate from the read-only git clone key): ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ~/.ssh/gha_zigma_prod -N ""',
-      'Append the public key to authorized_keys: cat ~/.ssh/gha_zigma_prod.pub >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys',
-      'On your laptop, securely obtain the PRIVATE key contents from the server (or generate the keypair locally and only copy the public key to the server). Prefer generating on laptop and scp’ing the .pub to the server.',
-      'GitHub → JustXSystems/zigma-technologies → Settings → Secrets and variables → Actions → New repository secret.',
-      'Create secret PROD_HOST = 200.234.45.106',
-      'Create secret PROD_SSH_USER = deploy',
-      'Create secret PROD_SSH_KEY = full private key PEM (including BEGIN/END lines) for the Actions key.',
-      'Optional: PROD_SSH_PORT = 22 if you changed SSH port.',
-      'Confirm workflow file exists in the repo: .github/workflows/deploy-prod.yml (push it on master if missing).',
-      'Confirm scripts/deploy-prod.sh is executable on the server and pulls origin/master, runs npm ci, build, pm2 restart.',
-      'Trigger: GitHub → Actions → Deploy Production → Run workflow (workflow_dispatch), or push a commit to master.',
-      'Watch the run at https://github.com/JustXSystems/zigma-technologies/actions — job must SSH successfully and finish green.',
-      'On the server verify: pm2 status && curl -I http://127.0.0.1:3000 && git -C /var/www/zigma-technologies rev-parse --short HEAD',
+      'PART A (laptop Downloads): ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N ""',
+      'PART B: install .pub into deploy authorized_keys; verify ssh -i ./gha_zigma_prod deploy@200.234.45.106 "whoami" → deploy',
+      'PART B0: on VPS, git fetch && git reset --hard origin/master (or discard dirty files then pull) until ls scripts/deploy-prod.sh works',
+      'PART B dry-run: ssh -i ./gha_zigma_prod deploy@… "cd /var/www/zigma-technologies && chmod +x scripts/deploy-prod.sh && ./scripts/deploy-prod.sh"',
+      'PART C GitHub secrets: PROD_HOST=200.234.45.106 , PROD_SSH_USER=deploy , PROD_SSH_KEY=private key contents',
+      'Confirm https://github.com/JustXSystems/zigma-technologies/blob/master/.github/workflows/deploy-prod.yml exists',
+      'PART D: Actions → Deploy Production → Run workflow → master → green',
+      'Cleanup: password-manager the private key; delete local gha_zigma_prod files',
     ],
     checklist: [
-      'PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY secrets set',
-      'deploy authorized_keys contains Actions public key',
-      'Workflow file on master',
-      'Manual “Run workflow” succeeds',
-      'Site still healthy after Actions deploy',
+      'Actions SSH key works (whoami)',
+      'deploy-prod.sh on server',
+      'Three secrets set',
+      'Manual Run workflow green',
     ],
     warning:
-      'Never commit the private key. Never put PROD .env values into GitHub Secrets unless you intentionally sync env that way — this workflow only SSHs and runs the server-side deploy script; .env stays on the VPS.',
-    code: `# --- Recommended: generate Actions key on your laptop ---
-ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N ""
-type .\\gha_zigma_prod.pub   # Windows PowerShell — copy this line
-# macOS/Linux: cat ./gha_zigma_prod.pub
-
-# Install public key on the server
+      'Missing deploy-prod.sh = VPS behind GitHub — reset/pull master. Dirty schema.sql blocks pull — discard with git checkout -- scripts/schema.sql or use deploy-prod.sh reset --hard.',
+    code: `# Laptop PowerShell
+cd $env:USERPROFILE\\Downloads
+ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N '""'
 type .\\gha_zigma_prod.pub | ssh deploy@200.234.45.106 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "whoami && hostname"
 
-# Test exactly like Actions will:
-ssh -i ./gha_zigma_prod deploy@200.234.45.106 "cd /var/www/zigma-technologies && ./scripts/deploy-prod.sh"
+# Sync code (discards local tracked edits on VPS — .env stays)
+ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "cd /var/www/zigma-technologies && git fetch origin && git reset --hard origin/master && ls -la scripts/deploy-prod.sh"
 
-# Then paste private key file contents into GitHub secret PROD_SSH_KEY
-# Delete the local private key from disk after storing in GitHub Secrets + password manager.`,
+ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "cd /var/www/zigma-technologies && chmod +x scripts/deploy-prod.sh && ./scripts/deploy-prod.sh"
+
+Get-Content .\\gha_zigma_prod -Raw | Set-Clipboard
+# Paste into GitHub → Settings → Secrets → Actions → PROD_SSH_KEY
+# Also set PROD_HOST=200.234.45.106 and PROD_SSH_USER=deploy
+# Then: https://github.com/JustXSystems/zigma-technologies/actions → Deploy Production → Run workflow`,
+  },
+  {
+    id: 'dns',
+    phase: 'Step 12',
+    title: 'BigRock DNS cutover → 200.234.45.106',
+    summary:
+      'Point the live domain at Hostinger. Domain registration stays at BigRock. Only change website A records. Do this after hosts-file smoke tests pass (Step 10).',
+    steps: [
+      'Confirm the new site works via hosts file / VPS curl (Step 10) and PM2 is healthy',
+      'Optional 24h before: at BigRock lower TTL on @ and www A records to 300 seconds',
+      'Log in to https://www.bigrock.com (or the DNS panel if nameservers are UrbanVendo — use whoever answers nslookup NS)',
+      'Find DNS management for zigma-technologies.com',
+      'Set A record @ (apex / blank host) → 200.234.45.106',
+      'Set A record www → 200.234.45.106',
+      'Do NOT change MX, SPF, DKIM, or TXT mail records',
+      'Do NOT delete the old A value until you can roll back if needed — overwrite/replace @ and www to the new IP',
+      'From laptop: nslookup zigma-technologies.com and nslookup www.zigma-technologies.com — both must return 200.234.45.106',
+      'Windows: nslookup zigma-technologies.com 8.8.8.8 to bypass local cache',
+      'Remove any temporary hosts-file overrides so you see real public DNS',
+      'Proceed to Step 13 (Certbot) once A records resolve to the new IP',
+    ],
+    checklist: [
+      'A @ → 200.234.45.106',
+      'A www → 200.234.45.106',
+      'MX unchanged',
+      'nslookup shows new IP (not 14.195.24.149)',
+    ],
+    warning:
+      'Changing A records does not transfer the domain. If email uses @zigma-technologies.com, touching MX will break mail. Keep old hosting paid for 7–14 days for rollback.',
+    code: `# Verify public DNS (laptop)
+nslookup zigma-technologies.com 8.8.8.8
+nslookup www.zigma-technologies.com 8.8.8.8
+# Expect: 200.234.45.106
+
+# BigRock DNS records to set:
+#   Type A | Host @   | Value 200.234.45.106
+#   Type A | Host www | Value 200.234.45.106
+#   MX / mail TXT — leave as-is`,
+  },
+  {
+    id: 'ssl',
+    phase: 'Step 13',
+    title: 'HTTPS with Certbot (after DNS points here)',
+    summary:
+      'Let’s Encrypt needs public DNS for zigma-technologies.com → this VPS. Run only after Step 12 nslookup is correct.',
+    steps: [
+      'Confirm nslookup returns 200.234.45.106 for apex and www',
+      'As root: certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com',
+      'Follow prompts (email, agree ToS). Certbot will modify Nginx for 443 and HTTP→HTTPS',
+      'Optional: add www → apex redirect in Nginx if Certbot did not (see Nginx section)',
+      'curl -I https://zigma-technologies.com — expect 200/308 and valid cert',
+      'certbot renew --dry-run (renewal timer is installed by default)',
+    ],
+    checklist: [
+      'HTTPS padlock on apex',
+      'www also HTTPS',
+      'HTTP redirects to HTTPS',
+      'renew dry-run OK',
+    ],
+    code: `sudo certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com
+curl -I https://zigma-technologies.com
+curl -I https://www.zigma-technologies.com
+sudo certbot renew --dry-run`,
   },
   {
     id: 'admin',
-    phase: 'Step 13',
-    title: 'Admin bootstrap, security & content handoff',
-    summary: 'Seed or log in, rotate passwords, verify forms and SMTP on the live domain.',
+    phase: 'Step 14',
+    title: 'Admin bootstrap, security & go-live handoff',
+    summary: 'Seed/login on the live HTTPS URL, rotate passwords, verify forms, keep old host as rollback.',
     steps: [
       'Open https://zigma-technologies.com/admin/login',
-      'If fresh DB: use Seed default admin (ADMIN_EMAIL / ADMIN_PASSWORD from .env), then change password immediately under Account.',
-      'If imported DB: log in with known UAT admin, then rotate all admin passwords on PROD.',
-      'Dashboard → Bootstrap missing seeds only if content is incomplete.',
-      'Site Settings → company contact, analytics (PROD only), enquiry notify email.',
-      'Submit a test enquiry → Enquiries module + SMTP inbox.',
-      'Confirm /api/public/theme.css loads and catalog pages render.',
-      'Confirm GitHub Actions is the only ongoing deploy path (or document who may SSH manually).',
-      'Revoke any temporary GitHub PATs used during setup if you migrated to deploy keys.',
+      'Fresh DB: Seed default admin from ADMIN_* in .env, then change password under Account',
+      'Imported DB: log in and rotate all admin passwords',
+      'Dashboard → Bootstrap missing seeds if content empty',
+      'Site Settings → contacts, analytics, enquiry notify email',
+      'Submit test enquiry → Enquiries + SMTP',
+      'Confirm /api/public/theme.css and catalog pages',
+      'Keep BigRock/old hosting active 7–14 days; rollback = restore A records to old IP',
+      'After stable: cancel old web hosting only (not the BigRock domain registration)',
     ],
     checklist: [
-      'Admin login works over HTTPS',
-      'Default passwords rotated',
-      'Enquiry form + email OK',
-      'Theme CSS OK',
-      'No DEV secrets on server',
+      'Admin HTTPS login OK',
+      'Passwords rotated',
+      'Enquiry + email OK',
       'Actions deploy verified',
+      'Old host retained for rollback window',
     ],
   },
 ];
@@ -560,32 +632,76 @@ export const PROD_GHA_SECRETS: { name: string; example: string; purpose: string 
   {
     name: 'PROD_HOST',
     example: '200.234.45.106',
-    purpose: 'VPS IPv4 — SSH target for Actions',
+    purpose: 'VPS IPv4 — Actions SSH target',
   },
   {
     name: 'PROD_SSH_USER',
     example: 'deploy',
-    purpose: 'Non-root OS user that owns /var/www/zigma-technologies and PM2',
+    purpose: 'OS user that owns the app + PM2 (never root)',
   },
   {
     name: 'PROD_SSH_KEY',
-    example: '-----BEGIN OPENSSH PRIVATE KEY----- …',
-    purpose: 'Private key whose public half is in deploy’s authorized_keys',
+    example: '-----BEGIN OPENSSH PRIVATE KEY----- … -----END OPENSSH PRIVATE KEY-----',
+    purpose: 'Private half of gha_zigma_prod; public half in /home/deploy/.ssh/authorized_keys',
+  },
+];
+
+export const PROD_GHA_HOW_IT_WORKS = [
+  'Developer merges to master (or clicks Run workflow).',
+  'GitHub job “Deploy Production” SSHs to deploy@200.234.45.106 using PROD_* secrets.',
+  'Runner executes scripts/deploy-prod.sh on the VPS.',
+  'Script: git fetch + reset --hard origin/master → npm ci → npm run build → pm2 restart zigma.',
+  '.env and untracked uploads stay on the server (never uploaded by Actions).',
+];
+
+export const PROD_GHA_PARTS: {
+  id: string;
+  where: string;
+  title: string;
+  detail: string;
+}[] = [
+  {
+    id: 'a',
+    where: 'Your laptop only',
+    title: 'Part A — Create Actions SSH keypair',
+    detail:
+      'In Downloads: ssh-keygen … -f ./gha_zigma_prod. Do not create this key as root on the VPS.',
   },
   {
-    name: 'PROD_SSH_PORT',
-    example: '22',
-    purpose: 'Optional — only if SSH listens on a non-default port',
+    id: 'b',
+    where: 'Laptop → VPS',
+    title: 'Part B — Authorize public key',
+    detail:
+      'Install .pub into deploy authorized_keys. ssh -i gha_zigma_prod … whoami must return deploy with no password.',
+  },
+  {
+    id: 'b0',
+    where: 'VPS git sync',
+    title: 'Part B0 — Ensure deploy-prod.sh exists',
+    detail:
+      'git fetch && git reset --hard origin/master (or discard dirty tracked files). ls scripts/deploy-prod.sh must succeed before dry-run.',
+  },
+  {
+    id: 'c',
+    where: 'GitHub website',
+    title: 'Part C — Three repository secrets',
+    detail: 'PROD_HOST, PROD_SSH_USER, PROD_SSH_KEY. Confirm deploy-prod.yml on master.',
+  },
+  {
+    id: 'd',
+    where: 'Actions',
+    title: 'Part D — Run workflow once',
+    detail: 'Actions → Deploy Production → Run workflow. Confirm green + pm2 healthy.',
   },
 ];
 
 export const PROD_GHA_STEPS = [
-  'Merge/push .github/workflows/deploy-prod.yml and scripts/deploy-prod.sh to master if not already present.',
-  'Create the three required repository secrets (PROD_HOST, PROD_SSH_USER, PROD_SSH_KEY) under Settings → Secrets and variables → Actions.',
-  'Authorize the matching public key on deploy@200.234.45.106.',
-  'Open https://github.com/JustXSystems/zigma-technologies/actions → Deploy Production → Run workflow.',
-  'Confirm the job SSHs in, runs git pull + npm ci + npm run build + pm2 restart zigma, and exits 0.',
-  'Thereafter: merge to master → Actions deploys automatically (see workflow on: push branches).',
+  'Part A: create gha_zigma_prod on the laptop.',
+  'Part B: install .pub; test whoami.',
+  'Part B0: git reset --hard origin/master until deploy-prod.sh exists.',
+  'Part B dry-run: ./scripts/deploy-prod.sh',
+  'Part C: PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY',
+  'Part D: Run workflow → green',
 ];
 
 export const PROD_ENV_TEMPLATE = `NODE_ENV=production
@@ -598,29 +714,30 @@ DB_NAME=zigmatech_prod
 DB_USER=zigmatech_prod
 DB_PASSWORD=<generate-strong-password>
 
-# Auth (openssl rand -hex 32 for each)
+# Auth (openssl rand -hex 32 for each) — cookie name is fixed in code as zigma_admin_session
 AUTH_SECRET=<unique-prod-secret-min-32-chars>
 PREVIEW_SECRET=<unique-preview-secret>
-COOKIE_NAME=zigma_admin
 
 # First admin seed only — change password after first login
 ADMIN_EMAIL=admin@zigma-technologies.com
 ADMIN_PASSWORD=<strong-one-time-password>
 ADMIN_NAME=Site Admin
 
-# Media served by Next.js from /public/assets
+# Media from /public/assets
 MEDIA_BASE_URL=/assets
 
-# Enquiry notifications (Hostinger mailbox or Google Workspace)
+# Enquiry notifications (optional — Hostinger mailbox or Google Workspace)
 SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=587
 SMTP_USER=noreply@zigma-technologies.com
 SMTP_PASS=<mailbox-or-app-password>
 SMTP_FROM="Zigma Technologies <noreply@zigma-technologies.com>"
 
-# Optional: Cloudflare Turnstile on public forms
+# Optional Cloudflare Turnstile
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=`;
+TURNSTILE_SECRET_KEY=
+
+# Do NOT set NEXT_PUBLIC_BASE_PATH on this domain-root PROD deploy`;
 
 export const PROD_NGINX = `server {
     listen 80;
@@ -641,18 +758,17 @@ export const PROD_NGINX = `server {
     }
 }`;
 
-export const PROD_UPDATE_COMMANDS = `# Manual deploy (same steps Actions runs)
+export const PROD_UPDATE_COMMANDS = `# Same path Actions uses
 ssh deploy@200.234.45.106
 cd /var/www/zigma-technologies
 ./scripts/deploy-prod.sh
 
-# Or step-by-step:
+# Manual equivalent:
 cd /var/www/zigma-technologies
 git fetch origin
-git checkout master
-git pull origin master
+git reset --hard origin/master
 npm ci
-# If schema changed, apply migrate-*.sql BEFORE restart
+# If schema changed on an OLD database, apply migrate-*.sql before restart
 npm run build
 pm2 restart zigma
 pm2 logs zigma --lines 80`;
@@ -660,161 +776,153 @@ pm2 logs zigma --lines 80`;
 export const PROD_BACKUP = [
   {
     title: 'Application code',
-    detail:
-      'Git is the source of truth (JustXSystems/zigma-technologies). Tag releases: git tag -a vYYYY.MM.DD -m "prod" && git push --tags',
+    detail: 'Git (JustXSystems/zigma-technologies). Tag releases after go-live.',
   },
   {
     title: 'MySQL dump (daily)',
     detail:
-      'mysqldump -u zigmatech_prod -p zigmatech_prod | gzip > /var/backups/zigma/db-$(date +%F).sql.gz — keep 14+ days; store off-server if possible.',
+      'mysqldump -u zigmatech_prod -p zigmatech_prod | gzip > /var/backups/zigma/db-$(date +%F).sql.gz',
   },
   {
     title: 'CMS media & uploads',
-    detail:
-      'Include public/assets in backups (rsync or tar). Or use npm run db:export -- --with-cms-media before major changes.',
+    detail: 'Backup public/assets (rsync/tar) or npm run db:export -- --with-cms-media',
   },
   {
     title: 'Hostinger snapshots',
-    detail: 'Enable VPS backups in hPanel for full-disk restore after catastrophic failure.',
+    detail: 'Enable VPS backups in hPanel before BigRock DNS cutover.',
   },
 ];
 
 export const PROD_CHECKLIST = [
-  'https://zigma-technologies.com/ loads over HTTPS',
-  'www redirects or also serves correctly',
+  'Hosts-file (or post-DNS) https://zigma-technologies.com/ loads THIS app',
+  'www works or redirects to apex',
   '/admin/login works; passwords rotated',
-  'Dashboard stats look sane',
-  '/products, /projects, /services list items',
-  'One detail page + media load',
-  'Enquiry form → Enquiries row + email',
-  '/api/public/theme.css returns CSS',
-  '/sitemap.xml accessible',
-  'HTTPS only — no mixed content',
-  '.env not web-accessible',
-  '/assets/uploads/resumes blocked from direct URL',
-  'pm2 status online; pm2 startup enabled',
-  'UFW active; 3306 closed externally',
-  'GitHub Actions Deploy Production run succeeded',
-  'MX records unchanged (unless email migrated)',
+  '/products, /projects, /services OK',
+  'Enquiry form → Enquiries + email',
+  '/api/public/theme.css OK',
+  '/sitemap.xml OK',
+  'UFW 22/80/443; 3306 closed',
+  'pm2 zigma online + startup enabled',
+  'GitHub Actions Deploy Production green',
+  'BigRock A @ and www → 200.234.45.106',
+  'MX unchanged',
+  'Old host retained 7–14 days for rollback',
 ];
 
 export const PROD_TROUBLESHOOT = [
   {
+    symptom: 'Browser still shows the old BigRock/UrbanVendo website',
+    fixes: [
+      'DNS not cut over yet — expected until Step 12',
+      'nslookup zigma-technologies.com 8.8.8.8 — if still old IP, wait or fix BigRock A records',
+      'Flush local DNS / remove hosts-file overrides',
+      'Test VPS directly: curl -I -H "Host: zigma-technologies.com" http://200.234.45.106',
+    ],
+  },
+  {
     symptom: 'Cannot SSH to root@200.234.45.106',
     fixes: [
-      'Confirm VPS is Active in hPanel',
-      'Reset root password / re-add SSH key under VPS → SSH Access',
-      'From laptop: ping 200.234.45.106 and ssh -v root@200.234.45.106',
-      'Confirm your IP is not blocked by fail2ban: sudo fail2ban-client status sshd',
+      'VPS Active in hPanel',
+      'Reset SSH password/key under VPS → SSH Access',
+      'ssh -v root@200.234.45.106',
+      'fail2ban-client status sshd',
     ],
   },
   {
     symptom: 'Database connection failed / 500 everywhere',
     fixes: [
-      'Verify DB_* in /var/www/zigma-technologies/.env',
+      'Check DB_* in /var/www/zigma-technologies/.env (DB_NAME=zigmatech_prod)',
       'systemctl status mysql',
       'mysql -u zigmatech_prod -p zigmatech_prod -e "SELECT 1;"',
-      'Confirm schema imported',
     ],
   },
   {
-    symptom: 'Admin login loop',
+    symptom: 'Admin login loop after HTTPS',
     fixes: [
-      'AUTH_SECRET must be stable — changing it invalidates cookies',
-      'Nginx must send X-Forwarded-Proto $scheme',
-      'Clear browser cookies for zigma-technologies.com and retry',
+      'Nginx must send X-Forwarded-Proto $scheme (required for secure cookies)',
+      'AUTH_SECRET must be stable',
+      'Clear cookies for zigma-technologies.com',
     ],
   },
   {
-    symptom: 'npm run build fails / OOM',
+    symptom: 'Certbot fails / connection refused on challenge',
     fixes: [
-      'Run typecheck locally first',
-      'Ensure .env exists on server before build',
-      'Add swap: fallocate -l 2G /swapfile && mkswap /swapfile && swapon /swapfile && echo "/swapfile none swap sw 0 0" >> /etc/fstab',
+      'DNS A records must already point to 200.234.45.106',
+      'UFW/hPanel firewall allow 80 and 443',
+      'Nginx listening on 80; no other process bound to 80',
     ],
   },
   {
-    symptom: 'Images / media 404',
+    symptom: 'git pull: local changes would be overwritten',
     fixes: [
-      'Re-import with --with-cms-media',
-      'MEDIA_BASE_URL=/assets',
-      'Files under public/assets/…',
+      'Prefer: git fetch origin && git reset --hard origin/master (deploy servers)',
+      'Or: git checkout -- scripts/schema.sql then git pull',
+      'Never commit on the VPS',
     ],
   },
   {
-    symptom: 'Enquiry emails not sending',
+    symptom: 'chmod: deploy-prod.sh No such file',
     fixes: [
-      'Check SMTP_* and Site Settings enquiry notify toggle',
-      'Test mailbox login in Hostinger Emails or Google App Password',
-      'pm2 logs for nodemailer errors',
-    ],
-  },
-  {
-    symptom: 'git pull denied on server',
-    fixes: [
-      'Confirm read-only deploy key is attached to JustXSystems/zigma-technologies',
-      'ssh -T git@github.com as deploy user',
-      'Check ~/.ssh/config IdentityFile path',
+      'VPS clone behind GitHub — git fetch && git reset --hard origin/master',
+      'Confirm file on GitHub master blob URL',
     ],
   },
   {
     symptom: 'GitHub Actions deploy fails on SSH',
     fixes: [
-      'Confirm secrets PROD_HOST=200.234.45.106, PROD_SSH_USER=deploy, PROD_SSH_KEY is the private key',
-      'Public key must be in /home/deploy/.ssh/authorized_keys',
-      'UFW must allow SSH from GitHub-hosted runners (do not IP-restrict port 22 unless you use a self-hosted runner)',
-      'Test locally: ssh -i gha_zigma_prod deploy@200.234.45.106 "whoami"',
-      'Open the failed job log at https://github.com/JustXSystems/zigma-technologies/actions',
+      'PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY secrets',
+      'Public key in deploy authorized_keys',
+      'Do not IP-restrict port 22 against GitHub runners',
     ],
   },
   {
-    symptom: 'Actions succeeds but site unchanged',
+    symptom: 'npm run build OOM',
     fixes: [
-      'Confirm workflow checked out/pulled master and pm2 restarted zigma',
-      'git -C /var/www/zigma-technologies log -1 --oneline',
-      'pm2 logs zigma --lines 100',
-      'Hard-refresh browser / purge CDN if any',
+      'Add 2G swap: fallocate -l 2G /swapfile && mkswap /swapfile && swapon /swapfile',
+      'Ensure .env exists before build',
     ],
   },
 ];
 
 export const PROD_FAQ: ProdFaq[] = [
   {
-    q: 'Why KVM 2 and not shared hosting?',
-    a: 'This app is Next.js 16 with a persistent Node process, API routes, and MySQL. Basic shared PHP hosting cannot run it. KVM 2 (2 vCPU / 8 GB) is the recommended production tier for build + runtime + MySQL on one box in Mumbai.',
+    q: 'Do we transfer the domain from BigRock to Hostinger?',
+    a: 'No for go-live. Keep registration at BigRock. Only change A records for @ and www to 200.234.45.106. Transfer is optional later for billing convenience.',
   },
   {
-    q: 'Is this server already purchased?',
-    a: 'Yes — Hostinger KVM 2 at 200.234.45.106 (srv1954986.hstgr.cloud, Ubuntu 26.04, Mumbai 2). The guide starts from that empty OS image through go-live on https://zigma-technologies.com/.',
+    q: 'Is there an “Add website” or “Enable Node.js” click in Hostinger hPanel?',
+    a: 'Not for this KVM VPS path. You install Nginx/Node/PM2 over SSH. Shared-hosting “Node.js Web App” is a different product — do not mix the two.',
   },
   {
-    q: 'Can MySQL stay on Hostinger shared hosting while the app is on VPS?',
-    a: 'Possible via Remote MySQL + VPS IP allowlist, but not recommended. Prefer MySQL on the same KVM 2 with bind-address 127.0.0.1.',
+    q: 'When will visitors see the new app?',
+    a: 'Only after BigRock A records point to 200.234.45.106 and Certbot has issued HTTPS (Steps 12–13). Until then the public domain still shows the old vendor site.',
+  },
+  {
+    q: 'Will changing DNS break email?',
+    a: 'Not if you leave MX (and related TXT) unchanged. Only edit website A records for @ and www.',
   },
   {
     q: 'How does GitHub Actions deploy work?',
-    a: 'Push (or manual run) on master triggers .github/workflows/deploy-prod.yml. The runner SSHs as deploy@200.234.45.106 using PROD_SSH_KEY and executes scripts/deploy-prod.sh (git pull, npm ci, build, pm2 restart). Secrets never include the production .env.',
+    a: 'Push/manual run on master → SSH as deploy → scripts/deploy-prod.sh (reset --hard origin/master, npm ci, build, pm2 restart). .env stays on the VPS.',
   },
   {
-    q: 'What about JWT_SECRET in older .env files?',
-    a: 'The application signs admin sessions with AUTH_SECRET only. Prefer AUTH_SECRET from .env.example. Ignore legacy JWT_* keys unless you have custom code depending on them.',
+    q: 'Why skip migrate-*.sql after schema.sql?',
+    a: 'Fresh schema.sql already includes those columns. Re-running migrations causes ERROR 1060 Duplicate column (e.g. admin_notes).',
   },
   {
-    q: 'Is DEV_BYPASS_AUTH dangerous in production?',
-    a: 'It has no effect when NODE_ENV=production. Still omit it from PROD .env to avoid confusion.',
-  },
-  {
-    q: 'How do UAT and PROD coexist on one VPS?',
-    a: 'Possible with two folders, two PM2 apps (different ports), two Nginx server_names, and two MySQL databases. Prefer a separate UAT host if budget allows. Staging subdirectory docs live at /admin/guide/justxsystems.',
+    q: 'What about COOKIE_NAME in older docs?',
+    a: 'The app hardcodes cookie zigma_admin_session in src/lib/auth.ts. Do not set COOKIE_NAME in .env.',
   },
 ];
 
 export const PROD_TOC = [
   { id: 'overview', label: 'Overview' },
+  { id: 'cutover', label: 'Domain cutover plan' },
   { id: 'server', label: 'This VPS' },
   { id: 'prereqs', label: 'Prerequisites' },
   { id: 'purchase', label: 'Confirm KVM 2' },
   { id: 'phases', label: 'Setup steps' },
+  { id: 'dns-table', label: 'BigRock DNS records' },
   { id: 'gha', label: 'GitHub Actions' },
   { id: 'env', label: '.env template' },
   { id: 'nginx', label: 'Nginx' },

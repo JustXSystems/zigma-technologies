@@ -221,13 +221,13 @@ export default function AdminGuidePage() {
               <p>
                 Blind-follow playbook for the live KVM 2 in Mumbai (<code>200.234.45.106</code> / Ubuntu 26.04): harden
                 the empty OS, install MySQL 8, clone <code>JustXSystems/zigma-technologies</code>, configure{' '}
-                <code>.env</code>, run under PM2 + Nginx, point <code>zigma-technologies.com</code>, then wire GitHub
-                Actions auto-deploy as <code>deploy@200.234.45.106</code>.
+                <code>.env</code>, run under PM2 + Nginx, wire GitHub Actions as <code>deploy@200.234.45.106</code>, then
+                cut over BigRock DNS so <code>zigma-technologies.com</code> serves this app (domain stays at BigRock).
               </p>
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
-              <strong>Start here for greenfield PROD:</strong> VPS is already provisioned (KVM 2 · 8 GB · Mumbai 2). Use
-              the migration guide only when cutting DNS over from an old host.
+              <strong>Start here for greenfield PROD:</strong> VPS is already provisioned (KVM 2 · 8 GB · Mumbai 2). Do
+              not change BigRock A records until hosts-file smoke tests pass on the VPS.
             </div>
             <Link href="/admin/guide/hostinger-prod" className="admin-guide-module admin-guide-module--link">
               <div className="admin-guide-module-top">
@@ -235,8 +235,8 @@ export default function AdminGuidePage() {
                 <span className="admin-guide-badge admin-guide-badge--admin">Admin / DevOps</span>
               </div>
               <p className="admin-guide-module-summary">
-                Empty Ubuntu → firewall · Node/Nginx/PM2 · MySQL · GitHub clone · .env · SSL · DNS · Actions secrets ·
-                deploy-prod.sh · go-live checklist…
+                Empty Ubuntu → firewall · Node/Nginx/PM2 · MySQL · GitHub · hosts-file test · Actions · BigRock A records
+                → Certbot · go-live…
               </p>
               <span className="admin-guide-module-cta">Read production guide →</span>
             </Link>

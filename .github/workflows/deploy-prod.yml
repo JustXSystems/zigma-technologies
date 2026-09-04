@@ -3,7 +3,7 @@
 #   PROD_HOST      = 200.234.45.106
 #   PROD_SSH_USER  = deploy
 #   PROD_SSH_KEY   = private key whose public half is in deploy's authorized_keys
-#   PROD_SSH_PORT  = 22 (optional)
+# On the VPS, scripts/deploy-prod.sh runs: git reset --hard origin/master → npm ci → build → pm2 restart
 name: Deploy Production
 
 on:

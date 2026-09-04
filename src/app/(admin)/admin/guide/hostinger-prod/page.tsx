@@ -5,10 +5,15 @@ import {
   PROD_ARCHITECTURE,
   PROD_BACKUP,
   PROD_CHECKLIST,
+  PROD_CUTOVER,
+  PROD_DNS_RECORDS,
   PROD_ENV_TEMPLATE,
   PROD_FAQ,
+  PROD_GHA_HOW_IT_WORKS,
+  PROD_GHA_PARTS,
   PROD_GHA_SECRETS,
   PROD_GHA_STEPS,
+  PROD_HOSTINGER_NOTES,
   PROD_NGINX,
   PROD_PHASES,
   PROD_PREREQUISITES,
@@ -38,13 +43,13 @@ export default function AdminHostingerProdGuidePage() {
             <div className="admin-guide-eyebrow">DevOps · Production · Hostinger</div>
             <h2 className="admin-guide-title">Hostinger KVM 2 — production setup</h2>
             <p className="admin-guide-lead">
-              Blind-follow playbook for a <strong>brand-new empty</strong> {PROD_STACK.os} VPS (
-              <code>{PROD_SERVER.ipv4}</code>) through MySQL, clone of{' '}
+              Blind-follow playbook: empty {PROD_STACK.os} VPS (<code>{PROD_SERVER.ipv4}</code>) → MySQL/Nginx/PM2 →
+              clone{' '}
               <a href={PROD_SERVER.githubRepo} target="_blank" rel="noopener noreferrer">
                 JustXSystems/zigma-technologies
-              </a>
-              , Nginx + PM2, GitHub Actions auto-deploy as <code>{PROD_SERVER.sshDeploy}</code>, and HTTPS on{' '}
-              <strong>{PROD_SERVER.publicUrl}/</strong>.
+              </a>{' '}
+              as <code>{PROD_SERVER.sshDeploy}</code> → GitHub Actions → then BigRock DNS cutover so{' '}
+              <strong>{PROD_SERVER.publicUrl}/</strong> serves this app (domain stays registered at BigRock).
             </p>
             <div className="admin-guide-hero-actions">
               <Link href="/admin/guide" className="admin-btn admin-btn-secondary">
@@ -121,9 +126,11 @@ export default function AdminHostingerProdGuidePage() {
               {PROD_STACK.runtime} · {PROD_STACK.process} · {PROD_STACK.proxy} · {PROD_STACK.database}.
             </div>
             <div className="admin-guide-callout admin-guide-callout--warn">
-              Do <strong>not</strong> host company mailboxes on this VPS. Keep website and mail separate — see the{' '}
-              <Link href="/admin/guide/email">email migration guide</Link>. For DNS cutover from an old host, also use the{' '}
-              <Link href="/admin/guide/migration">Hostinger migration guide</Link>.
+              Until BigRock A records point here, the public domain still shows the <strong>old vendor site</strong>.
+              Finish Steps 1–11 and hosts-file smoke tests first, then cut over DNS (Step 12) and Certbot (Step 13). Do{' '}
+              <strong>not</strong> host company mailboxes on this VPS — see the{' '}
+              <Link href="/admin/guide/email">email guide</Link>. Related:{' '}
+              <Link href="/admin/guide/migration">migration / DNS guide</Link>.
             </div>
             <div className="admin-guide-diagram">
               <p className="admin-guide-diagram-caption">Production topology</p>
@@ -176,6 +183,35 @@ export default function AdminHostingerProdGuidePage() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </section>
+
+          <section id="cutover" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">BigRock → Hostinger</div>
+              <h3>{PROD_CUTOVER.title}</h3>
+              <p>
+                Domain registrar stays <strong>BigRock</strong>. Hostinger only receives web traffic after you change A
+                records to <code>{PROD_SERVER.ipv4}</code>.
+              </p>
+            </div>
+            <ol className="admin-guide-steps">
+              {PROD_CUTOVER.points.map((point, i) => (
+                <li key={point} className="admin-guide-step">
+                  <div className="admin-guide-step-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <p>{point}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="admin-guide-ref-grid">
+              {PROD_HOSTINGER_NOTES.map((n) => (
+                <div key={n.title} className="admin-guide-ref-card">
+                  <h4>{n.title}</h4>
+                  <p>{n.detail}</p>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -254,8 +290,9 @@ export default function AdminHostingerProdGuidePage() {
               <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Execution</div>
               <h3>Production setup — empty server to go-live</h3>
               <p>
-                {PROD_PHASES.length} steps from first SSH as <code>root@{PROD_SERVER.ipv4}</code> through GitHub Actions
-                and admin handoff. Complete them in order. Commands already use the live IP, hostname, and repo.
+                {PROD_PHASES.length} steps from first SSH as <code>root@{PROD_SERVER.ipv4}</code> through BigRock DNS
+                cutover and HTTPS. Order matters: finish the VPS + hosts-file test before changing BigRock A records;
+                run Certbot only after DNS points here. Commands use the live IP, repo, and domain.
               </p>
             </div>
             <div className="admin-guide-detail-list">
@@ -302,19 +339,100 @@ export default function AdminHostingerProdGuidePage() {
             </div>
           </section>
 
+          <section id="dns-table" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">BigRock</div>
+              <h3>DNS records to set at cutover (Step 12)</h3>
+              <p>
+                Log in at{' '}
+                <a href="https://www.bigrock.com" target="_blank" rel="noopener noreferrer">
+                  bigrock.com
+                </a>{' '}
+                (or your DNS host if nameservers are not at BigRock). Change <strong>only</strong> website A records.
+              </p>
+            </div>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROD_DNS_RECORDS.map((row) => (
+                    <tr key={`${row.type}-${row.name}`}>
+                      <td>
+                        <code>{row.type}</code>
+                      </td>
+                      <td>
+                        <code>{row.name}</code>
+                      </td>
+                      <td>
+                        <code>{row.value}</code>
+                      </td>
+                      <td>{row.notes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="admin-guide-callout admin-guide-callout--warn">
+              Rollback within the first days: set A @ and www back to <code>{PROD_SERVER.oldWebIp}</code> (old host). Keep
+              old hosting billed until the new site is stable.
+            </div>
+          </section>
+
           <section id="gha" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">CI/CD</div>
-              <h3>GitHub Actions — auto deploy</h3>
+              <h3>GitHub Actions — auto deploy (detailed)</h3>
               <p>
-                After Step 12, pushes to <code>master</code> deploy via SSH to <code>{PROD_SERVER.sshDeploy}</code>.
-                Monitor runs at{' '}
+                Same procedure as <a href="#phase-gha">Step 11</a>. Target: <code>{PROD_SERVER.sshDeploy}</code>. Monitor
+                runs at{' '}
                 <a href={PROD_SERVER.githubActions} target="_blank" rel="noopener noreferrer">
                   {PROD_SERVER.githubActions}
                 </a>
-                .
+                . Actions does not need public DNS — you can finish this before BigRock cutover.
               </p>
             </div>
+
+            <div className="admin-guide-callout admin-guide-callout--info">
+              <strong>What “auto-deploy” means:</strong> GitHub SSHs into the VPS and runs{' '}
+              <code>scripts/deploy-prod.sh</code> (<code>git reset --hard origin/master</code> → <code>npm ci</code> →
+              build → <code>pm2 restart zigma</code>). Production <code>.env</code> never leaves the server.
+            </div>
+
+            <span className="admin-guide-detail-label">How it works</span>
+            <ol className="admin-guide-steps">
+              {PROD_GHA_HOW_IT_WORKS.map((step, i) => (
+                <li key={step} className="admin-guide-step">
+                  <div className="admin-guide-step-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <p>{step}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <span className="admin-guide-detail-label">Setup — four parts</span>
+            <div className="admin-guide-detail-list">
+              {PROD_GHA_PARTS.map((part) => (
+                <article key={part.id} className="admin-guide-detail">
+                  <div className="admin-guide-detail-head">
+                    <div>
+                      <span className="admin-guide-detail-label">{part.where}</span>
+                      <h4>{part.title}</h4>
+                    </div>
+                  </div>
+                  <p className="admin-guide-flow-summary">{part.detail}</p>
+                </article>
+              ))}
+            </div>
+
+            <span className="admin-guide-detail-label">Quick checklist</span>
             <ol className="admin-guide-steps">
               {PROD_GHA_STEPS.map((step, i) => (
                 <li key={step} className="admin-guide-step">
@@ -325,12 +443,14 @@ export default function AdminHostingerProdGuidePage() {
                 </li>
               ))}
             </ol>
+
+            <span className="admin-guide-detail-label">Repository secrets (exact values)</span>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
                   <tr>
                     <th>Secret name</th>
-                    <th>Value</th>
+                    <th>Exact value</th>
                     <th>Purpose</th>
                   </tr>
                 </thead>
@@ -349,18 +469,45 @@ export default function AdminHostingerProdGuidePage() {
                 </tbody>
               </table>
             </div>
-            <div className="admin-guide-callout admin-guide-callout--info">
-              Workflow file: <code>.github/workflows/deploy-prod.yml</code> · Server script:{' '}
-              <code>scripts/deploy-prod.sh</code>. The workflow does <strong>not</strong> upload{' '}
-              <code>.env</code> — secrets stay on the VPS only.
-            </div>
-            <CodeBlock>{`# GitHub → Settings → Secrets and variables → Actions
-PROD_HOST=${PROD_SERVER.ipv4}
-PROD_SSH_USER=deploy
-PROD_SSH_KEY=<private key for Actions → deploy authorized_keys>
 
-# Verify manually before trusting Actions:
-ssh -i ./gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && ./scripts/deploy-prod.sh"`}</CodeBlock>
+            <div className="admin-guide-callout admin-guide-callout--warn">
+              Create secrets at{' '}
+              <a
+                href="https://github.com/JustXSystems/zigma-technologies/settings/secrets/actions"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Settings → Secrets and variables → Actions
+              </a>
+              . Workflow file must exist on master:{' '}
+              <a
+                href="https://github.com/JustXSystems/zigma-technologies/blob/master/.github/workflows/deploy-prod.yml"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                .github/workflows/deploy-prod.yml
+              </a>
+              . Full copy-paste commands are under <a href="#phase-gha">Step 12 → Commands</a>.
+            </div>
+
+            <CodeBlock>{`# PART A+B — Windows PowerShell (laptop)
+cd $env:USERPROFILE\\Downloads
+ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N '""'
+type .\\gha_zigma_prod.pub | ssh deploy@${PROD_SERVER.ipv4} "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "whoami"
+
+# PART B0 — sync VPS to GitHub master (fixes missing deploy-prod.sh / dirty schema.sql)
+ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && git fetch origin && git reset --hard origin/master && ls -la scripts/deploy-prod.sh"
+
+# PART B dry-run
+ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && chmod +x scripts/deploy-prod.sh && ./scripts/deploy-prod.sh"
+
+# PART C — clipboard → GitHub secret PROD_SSH_KEY
+Get-Content .\\gha_zigma_prod -Raw | Set-Clipboard
+
+# PART D — browser
+# ${PROD_SERVER.githubActions}
+# → Deploy Production → Run workflow → master`}</CodeBlock>
           </section>
 
           <section id="env" className="admin-guide-section">
@@ -384,14 +531,16 @@ ssh -i ./gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && 
               <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Proxy</div>
               <h3>Nginx site config</h3>
               <p>
-                Save as <code>/etc/nginx/sites-available/zigma</code>, enable the site, then run Certbot after DNS A
-                records point to <code>{PROD_SERVER.ipv4}</code>.
+                Save as <code>/etc/nginx/sites-available/zigma</code> in Step 10 (HTTP only). Run Certbot in Step 13{' '}
+                <strong>after</strong> BigRock A records point to <code>{PROD_SERVER.ipv4}</code>.
               </p>
             </div>
             <CodeBlock>{PROD_NGINX}</CodeBlock>
             <CodeBlock>{`sudo ln -sf /etc/nginx/sites-available/zigma /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
+
+# ONLY after BigRock DNS A @ and www → ${PROD_SERVER.ipv4}:
 sudo certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com`}</CodeBlock>
           </section>
 
