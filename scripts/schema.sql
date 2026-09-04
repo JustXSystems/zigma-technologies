@@ -353,3 +353,27 @@ CREATE TABLE IF NOT EXISTS site_testimonials (
   INDEX idx_testimonial_pub (status, enabled, featured, sort_order)
 ) ENGINE=InnoDB;
 
+
+-- Press posts (media coverage/news)
+
+-- Press posts module. Safe to re-run.
+
+CREATE TABLE IF NOT EXISTS press_posts (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug VARCHAR(160) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  excerpt TEXT NULL,
+  body_html MEDIUMTEXT NULL,
+  cover_url VARCHAR(500) NULL,
+  source_name VARCHAR(160) NULL,
+  source_url VARCHAR(500) NULL,
+  status ENUM('draft','published') NOT NULL DEFAULT 'draft',
+  published_at DATETIME NULL,
+  enabled TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_press_slug (slug),
+  INDEX idx_press_pub (status, enabled, published_at)
+) ENGINE=InnoDB;
+
