@@ -42,9 +42,9 @@ export const MIGRATION_PLAN_RECOMMENDATION = {
   primary: 'Hostinger KVM 2 VPS',
   primaryReason:
     'This Next.js 16 app runs as a persistent Node.js process with MySQL, PM2, and Nginx. Shared PHP hosting cannot run it. KVM 2 (2 vCPU, 8 GB RAM, 100 GB NVMe) is the sweet spot for production: enough headroom for builds, MySQL on the same VPS, and traffic spikes without over-provisioning.',
-  uatOption: 'Hostinger Business Web Hosting (Node.js) or a second KVM 1 VPS',
+  uatOption: 'PreProd on JustXSystems VPS (justxsystems.com/zigma-technologies)',
   uatReason:
-    'Use a separate UAT environment at uat.zigma-technologies.com before cutting over production DNS. Business hosting with Node.js is simpler for UAT; KVM 1 is fine for a staging-only server.',
+    'Use PreProd at https://justxsystems.com/zigma-technologies on deploy@193.203.161.219 (basePath) for QA before cutting over production DNS on the separate Zigma VPS (200.234.45.106). See /admin/guide/justxsystems.',
   avoid:
     'Premium / Starter shared hosting without Node.js — these plans serve static/PHP sites only and will not run this application.',
 };

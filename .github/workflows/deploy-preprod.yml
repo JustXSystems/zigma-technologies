@@ -1,0 +1,139 @@
+# Deploy PreProd on JustXSystems VPS (subdirectory under justxsystems.com).
+# Target: https://justxsystems.com/zigma-technologies  via deploy@193.203.161.219
+#
+# Secrets (repo → Settings → Secrets and variables → Actions):
+#   PREPROD_HOST      = 193.203.161.219
+#   PREPROD_SSH_USER  = deploy
+#   PREPROD_SSH_KEY   = private key authorized on JustXSystems VPS only
+#
+# On that VPS: /var/www/zigma-technologies → scripts/deploy-preprod.sh
+name: Deploy PreProd
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Git branch to deploy
+        required: true
+        default: master
+        type: string
+      sync_code:
+        description: Git fetch + reset --hard to branch
+        type: boolean
+        default: true
+      install_deps:
+        description: npm ci
+        type: boolean
+        default: true
+      build:
+        description: npm run build (basePath baked from PreProd .env)
+        type: boolean
+        default: true
+      restart_pm2:
+        description: Restart PM2 process zigma-preprod
+        type: boolean
+        default: true
+      clear_next:
+        description: Delete .next before build
+        type: boolean
+        default: false
+      healthcheck:
+        description: Localhost curl after restart
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-preprod
+  cancel-in-progress: false
+
+jobs:
+  deploy-preprod:
+    name: SSH → JustXSystems VPS (PreProd)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Resolve deploy options
+        id: opts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+            echo "sync=${{ inputs.sync_code }}" >> "$GITHUB_OUTPUT"
+            echo "install=${{ inputs.install_deps }}" >> "$GITHUB_OUTPUT"
+            echo "build=${{ inputs.build }}" >> "$GITHUB_OUTPUT"
+            echo "restart=${{ inputs.restart_pm2 }}" >> "$GITHUB_OUTPUT"
+            echo "clear_next=${{ inputs.clear_next }}" >> "$GITHUB_OUTPUT"
+            echo "health=${{ inputs.healthcheck }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch=master" >> "$GITHUB_OUTPUT"
+            echo "sync=true" >> "$GITHUB_OUTPUT"
+            echo "install=true" >> "$GITHUB_OUTPUT"
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "restart=true" >> "$GITHUB_OUTPUT"
+            echo "clear_next=false" >> "$GITHUB_OUTPUT"
+            echo "health=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require PreProd SSH secrets
+        id: ssh
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOST="${{ secrets.PREPROD_HOST }}"
+          USER="${{ secrets.PREPROD_SSH_USER }}"
+          KEY="${{ secrets.PREPROD_SSH_KEY }}"
+          if [[ -z "$HOST" || -z "$USER" || -z "$KEY" ]]; then
+            echo "Missing PreProd secrets. Set PREPROD_HOST=193.203.161.219, PREPROD_SSH_USER=deploy, PREPROD_SSH_KEY (JustXSystems VPS)." >&2
+            exit 1
+          fi
+          if [[ "$HOST" == "200.234.45.106" ]]; then
+            echo "PREPROD_HOST points at the Production VPS. Use 193.203.161.219 (JustXSystems)." >&2
+            exit 1
+          fi
+          {
+            echo "host=$HOST"
+            echo "user=$USER"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "key<<EOF"
+            echo "$KEY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Deploy PreProd over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_BRANCH: ${{ steps.opts.outputs.branch }}
+          IN_SYNC: ${{ steps.opts.outputs.sync }}
+          IN_INSTALL: ${{ steps.opts.outputs.install }}
+          IN_BUILD: ${{ steps.opts.outputs.build }}
+          IN_RESTART: ${{ steps.opts.outputs.restart }}
+          IN_CLEAR_NEXT: ${{ steps.opts.outputs.clear_next }}
+          IN_HEALTH: ${{ steps.opts.outputs.health }}
+        with:
+          host: ${{ steps.ssh.outputs.host }}
+          username: ${{ steps.ssh.outputs.user }}
+          key: ${{ steps.ssh.outputs.key }}
+          port: 22
+          script_stop: true
+          command_timeout: 25m
+          envs: DEPLOY_BRANCH,IN_SYNC,IN_INSTALL,IN_BUILD,IN_RESTART,IN_CLEAR_NEXT,IN_HEALTH
+          script: |
+            set -euo pipefail
+            cd /var/www/zigma-technologies
+            chmod +x scripts/deploy.sh scripts/deploy-preprod.sh
+
+            ARGS=(--env preprod --branch "${DEPLOY_BRANCH:-master}")
+            [[ "${IN_SYNC}" == "true" ]] && ARGS+=(--sync) || ARGS+=(--no-sync)
+            [[ "${IN_INSTALL}" == "true" ]] && ARGS+=(--install) || ARGS+=(--no-install)
+            [[ "${IN_BUILD}" == "true" ]] && ARGS+=(--build) || ARGS+=(--no-build)
+            [[ "${IN_RESTART}" == "true" ]] && ARGS+=(--restart) || ARGS+=(--no-restart)
+            [[ "${IN_CLEAR_NEXT}" == "true" ]] && ARGS+=(--clear-next) || ARGS+=(--no-clear-next)
+            [[ "${IN_HEALTH}" == "true" ]] && ARGS+=(--healthcheck) || ARGS+=(--no-healthcheck)
+
+            echo "Running on JustXSystems VPS: ./scripts/deploy.sh ${ARGS[*]}"
+            ./scripts/deploy.sh "${ARGS[@]}"

@@ -7,37 +7,18 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Updating Prod setup">
-      <change afterPath="$PROJECT_DIR$/public/assets/images/1789031652755-eh4bzb.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/assets/images/1789032079119-xhvu0t.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/assets/images/1789046902164-bx3l57.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/assets/images/1789057952313-0szyun.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/database.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/meta.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/careers.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/certifications.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/contact.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/documents/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/resumes/.gitkeep" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/exports/zigma-20260910-231148/uploads/resumes/1786509635889-damqsr2i.pdf" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Product/Services/Project background image set">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ADMIN.md" beforeDir="false" afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/images/1786518180037-61q2dk.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/deploy-prod.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy-prod.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/guide/hostinger-prod/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/guide/hostinger-prod/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/guide/justxsystems/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/guide/justxsystems/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/guide/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/guide/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-migration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-migration.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,23 +63,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000000014075" />
-      <entry key="MS500" value="1.0042664086599546" />
-      <entry key="S2" value="1.3234283762209826" />
-      <entry key="S5" value="2.134182485568157" />
-      <entry key="S10" value="3.0625465202114763" />
-      <entry key="S30" value="4.556341776400314" />
-      <entry key="S60" value="5.189677135216613" />
-      <entry key="M2" value="5.569361923682377" />
-      <entry key="M5" value="5.821138266454812" />
-      <entry key="M10" value="5.90949100573379" />
-      <entry key="M15" value="5.9480069638204505" />
-      <entry key="M30" value="7.140740526102261" />
-      <entry key="H1" value="23.38963929603527" />
-      <entry key="H2" value="104.62106501273632" />
-      <entry key="H4" value="302.9870153895598" />
-      <entry key="D1" value="1521.2061458755409" />
-      <entry key="W1" value="8690.01062427883" />
+      <entry key="MS100" value="1.0000007031970242" />
+      <entry key="MS500" value="1.1563978302655458" />
+      <entry key="S2" value="5.46090636172919" />
+      <entry key="S5" value="15.13431089267278" />
+      <entry key="S10" value="27.937114340990185" />
+      <entry key="S30" value="62.71223822183166" />
+      <entry key="S60" value="95.88892496688355" />
+      <entry key="M2" value="138.61462413578295" />
+      <entry key="M5" value="223.59739462158174" />
+      <entry key="M10" value="360.31475243626363" />
+      <entry key="M15" value="479.1927022992789" />
+      <entry key="M30" value="700.4047914050045" />
+      <entry key="H1" value="888.6529678242554" />
+      <entry key="H2" value="1068.1648919577876" />
+      <entry key="H4" value="1317.12408453116" />
+      <entry key="D1" value="2598.394756156499" />
+      <entry key="W1" value="9783.916464747745" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -109,34 +90,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="1.2758717163273574E-154" />
-      <entry key="M10" value="1.1295449155865324E-77" />
-      <entry key="M15" value="5.034260331523256E-52" />
-      <entry key="M30" value="2.2437157421392177E-26" />
-      <entry key="H1" value="1.497903782670711E-13" />
-      <entry key="H2" value="3.870276195145115E-7" />
-      <entry key="H4" value="6.221154390686971E-4" />
-      <entry key="D1" value="0.29686074681568897" />
-      <entry key="W1" value="1.3035770233126798" />
+      <entry key="M5" value="1.3965761405117543E-157" />
+      <entry key="M10" value="3.7370792612838733E-79" />
+      <entry key="M15" value="5.188257701153394E-53" />
+      <entry key="M30" value="7.202956130057587E-27" />
+      <entry key="H1" value="8.48702311182061E-14" />
+      <entry key="H2" value="2.913249579390785E-7" />
+      <entry key="H4" value="5.397452713539511E-4" />
+      <entry key="D1" value="0.28991615761932965" />
+      <entry key="W1" value="1.2991762563083022" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9659363289262146" />
-      <entry key="MS500" value="0.9973352987382627" />
-      <entry key="S2" value="1.321213553436185" />
-      <entry key="S5" value="2.1327609798592233" />
-      <entry key="S10" value="3.061501372230319" />
-      <entry key="S30" value="4.555799152291147" />
-      <entry key="S60" value="5.189363045677845" />
-      <entry key="M2" value="5.569191907283497" />
-      <entry key="M5" value="5.821066798613904" />
-      <entry key="M10" value="5.909454662391406" />
-      <entry key="M15" value="5.9479825221043905" />
-      <entry key="M30" value="7.1407227278330945" />
-      <entry key="H1" value="23.389594034471163" />
-      <entry key="H2" value="104.62096507500392" />
-      <entry key="H4" value="302.9875004824685" />
-      <entry key="D1" value="1521.5028347958898" />
-      <entry key="W1" value="8691.31403353154" />
+      <entry key="MS100" value="0.9395234329875312" />
+      <entry key="MS500" value="1.142939233727602" />
+      <entry key="S2" value="5.449422214597361" />
+      <entry key="S5" value="15.122278678050666" />
+      <entry key="S10" value="27.92620603338029" />
+      <entry key="S30" value="62.70411848775038" />
+      <entry key="S60" value="95.88268753769508" />
+      <entry key="M2" value="138.6100898887011" />
+      <entry key="M5" value="223.5944521824006" />
+      <entry key="M10" value="360.31236967174686" />
+      <entry key="M15" value="479.190586529573" />
+      <entry key="M30" value="700.4032429337055" />
+      <entry key="H1" value="888.6519747032289" />
+      <entry key="H2" value="1068.1642699623962" />
+      <entry key="H4" value="1317.1242140906188" />
+      <entry key="D1" value="2598.684453260805" />
+      <entry key="W1" value="9785.21546641002" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -257,7 +238,8 @@
     <MESSAGE value="ready to test env deployment" />
     <MESSAGE value="press_posts table doesn't exist in the zigmatech_prod database." />
     <MESSAGE value="Updating Prod setup" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updating Prod setup" />
+    <MESSAGE value="Product/Services/Project background image set" />
+    <option name="LAST_COMMIT_MESSAGE" value="Product/Services/Project background image set" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

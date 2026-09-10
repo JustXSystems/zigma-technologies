@@ -9,13 +9,13 @@ Independent control portal at **`/admin`** for the public marketing site. This d
 | Resource | Location |
 |----------|----------|
 | **In-app guide** | [/admin/guide](/admin/guide) — architecture, flows, 21 module references, playbooks |
-| **KVM 2 production setup** | [/admin/guide/hostinger-prod](/admin/guide/hostinger-prod) — empty Ubuntu VPS → MySQL → PM2/Nginx → GitHub Actions (`deploy@` Hostinger) |
-| **justxsystems staging (subdir)** | [/admin/guide/justxsystems](/admin/guide/justxsystems) — `https://justxsystems.com/zigma-technologies/` |
+| **KVM 2 production setup** | [/admin/guide/hostinger-prod](/admin/guide/hostinger-prod) — Zigma VPS `deploy@200.234.45.106` · selective GitHub Actions (`PROD_*`) |
+| **justxsystems PreProd (subdir)** | [/admin/guide/justxsystems](/admin/guide/justxsystems) — JustXSystems VPS `deploy@193.203.161.219` · auto-deploy on `master` (`PREPROD_*`) |
 | **Hostinger migration / DNS** | [/admin/guide/migration](/admin/guide/migration) |
 | **Email migration** | [/admin/guide/email](/admin/guide/email) |
 | **Dashboard** | `/admin` — stats, setup checklist, bootstrap |
 | **Public site** | `/` |
-| **Guide source** | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts`, `src/lib/admin-guide-hostinger-prod.ts` |
+| **Guide source** | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts`, `src/lib/admin-guide-hostinger-prod.ts`, `src/lib/admin-guide-justxsystems.ts`, `src/lib/admin-guide-deploy-inventory.ts` |
 
 ---
 
@@ -513,7 +513,7 @@ CRM webhook, partner portal, video case studies, availability/lead time, press/n
 | Admin shell | `src/app/(admin)/admin/layout.tsx` |
 | In-app guide | `src/app/(admin)/admin/guide/page.tsx` |
 | KVM 2 production guide | `src/app/(admin)/admin/guide/hostinger-prod/page.tsx` |
-| justxsystems staging guide | `src/app/(admin)/admin/guide/justxsystems/page.tsx` |
+| justxsystems PreProd guide | `src/app/(admin)/admin/guide/justxsystems/page.tsx` |
 | Guide data | `src/lib/admin-guide.ts`, `src/lib/admin-guide-modules.ts`, `src/lib/admin-guide-hostinger-prod.ts`, `src/lib/admin-guide-justxsystems.ts` |
 | CMS | `src/lib/cms.ts`, `src/lib/cms-types.ts` |
 | Catalog | `src/lib/catalog.ts`, `src/lib/catalog-case-study.ts` |

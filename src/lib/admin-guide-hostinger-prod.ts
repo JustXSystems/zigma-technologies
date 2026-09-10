@@ -52,9 +52,12 @@ export const PROD_STACK = {
   process: 'PM2',
   proxy: 'Nginx + Certbot (Let’s Encrypt)',
   database: 'MySQL 8 on the same VPS (localhost only)',
-  source: 'GitHub JustXSystems/zigma-technologies + Actions auto-deploy',
-  domain: 'zigma-technologies.com (DNS at BigRock → VPS IP)',
+  source:
+    'GitHub JustXSystems/zigma-technologies — PreProd auto-deploys to JustXSystems VPS; Production is manual selective Actions to this Zigma VPS only',
+  domain: 'zigma-technologies.com (DNS at BigRock → this VPS IP)',
   appPort: '3000 (localhost only — Nginx terminates HTTPS)',
+  preprodNote:
+    'PreProd is a DIFFERENT VPS: deploy@193.203.161.219 (JustXSystems) → https://justxsystems.com/zigma-technologies — see /admin/guide/justxsystems',
 };
 
 export const PROD_CUTOVER = {
@@ -112,21 +115,33 @@ export const PROD_ARCHITECTURE = [
     ],
   },
   {
-    label: 'Hostinger KVM 2 (Mumbai 2)',
+    label: 'Zigma Technologies VPS (this guide)',
     items: [
+      'SSH deploy@200.234.45.106',
       'Hostname srv1954986.hstgr.cloud',
       'UFW + Nginx :80/:443 + Certbot',
-      'PM2 → Next.js on 127.0.0.1:3000',
-      'MySQL 8 on localhost:3306',
+      'PM2 zigma → 127.0.0.1:3000',
+      'MySQL zigmatech_prod on localhost',
+      'App /var/www/zigma-technologies (domain root, no BASE_PATH)',
     ],
   },
   {
-    label: 'Deploy path',
+    label: 'JustXSystems VPS (PreProd — separate machine)',
     items: [
-      'SSH as deploy@200.234.45.106',
-      'App at /var/www/zigma-technologies',
-      'Actions → scripts/deploy-prod.sh (git reset --hard origin/master)',
-      '.env never in Git',
+      'SSH deploy@193.203.161.219',
+      'https://justxsystems.com/zigma-technologies/',
+      'App /var/www/zigma-technologies · PM2 zigma-preprod :3001',
+      'NEXT_PUBLIC_BASE_PATH=/zigma-technologies',
+      'Secrets PREPROD_* — never use PROD_* here',
+      'Guide: /admin/guide/justxsystems',
+    ],
+  },
+  {
+    label: 'GitHub Actions',
+    items: [
+      'master push → Deploy PreProd → JustXSystems VPS only',
+      'Deploy Production → workflow_dispatch + components → this VPS only',
+      'PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY',
     ],
   },
 ];
@@ -502,42 +517,41 @@ sudo nginx -t && sudo systemctl reload nginx
   {
     id: 'gha',
     phase: 'Step 11',
-    title: 'GitHub Actions auto-deploy (deploy@200.234.45.106)',
+    title: 'GitHub Actions — selective Production deploy (deploy@200.234.45.106)',
     summary:
-      'Wire Actions before or after DNS — it only needs SSH to the VPS. Parts A→D on your laptop + GitHub UI. deploy-prod.sh does git reset --hard origin/master (discards local tracked edits; keeps .env).',
+      'Production is NEVER auto-deployed on push. master push → Deploy PreProd to JustXSystems VPS (193.203.161.219) only. For Prod: Actions → Deploy Production → confirm_production=DEPLOY_PROD + component toggles → this Zigma VPS.',
     steps: [
-      'PART A (laptop Downloads): ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N ""',
-      'PART B: install .pub into deploy authorized_keys; verify ssh -i ./gha_zigma_prod deploy@200.234.45.106 "whoami" → deploy',
-      'PART B0: on VPS, git fetch && git reset --hard origin/master (or discard dirty files then pull) until ls scripts/deploy-prod.sh works',
-      'PART B dry-run: ssh -i ./gha_zigma_prod deploy@… "cd /var/www/zigma-technologies && chmod +x scripts/deploy-prod.sh && ./scripts/deploy-prod.sh"',
-      'PART C GitHub secrets: PROD_HOST=200.234.45.106 , PROD_SSH_USER=deploy , PROD_SSH_KEY=private key contents',
-      'Confirm https://github.com/JustXSystems/zigma-technologies/blob/master/.github/workflows/deploy-prod.yml exists',
-      'PART D: Actions → Deploy Production → Run workflow → master → green',
-      'Cleanup: password-manager the private key; delete local gha_zigma_prod files',
+      'PART A (laptop): ssh-keygen -t ed25519 -C "gha-zigma-prod" -f ./gha_zigma_prod -N "" (Production key — separate from PreProd)',
+      'PART B: install .pub into deploy@200.234.45.106 authorized_keys; verify whoami → deploy',
+      'PART B0: ensure scripts/deploy.sh + deploy-prod.sh exist under /var/www/zigma-technologies on THIS VPS',
+      'PART B dry-run: ./scripts/deploy-prod.sh --confirm-prod DEPLOY_PROD --dry-run',
+      'PART C secrets: PROD_HOST=200.234.45.106 , PROD_SSH_USER=deploy , PROD_SSH_KEY=private key',
+      'Confirm deploy-prod.yml is workflow_dispatch only (no push trigger)',
+      'PART D: Actions → Deploy Production → confirm_production=DEPLOY_PROD → choose components → green',
+      'Cleanup: password-manager the private key; delete local key files when done',
     ],
     checklist: [
-      'Actions SSH key works (whoami)',
-      'deploy-prod.sh on server',
-      'Three secrets set',
-      'Manual Run workflow green',
+      'Actions SSH key works (whoami on 200.234.45.106)',
+      'deploy.sh on Zigma VPS',
+      'PROD_* secrets set (not PREPROD_*)',
+      'Selective Run workflow green',
+      'pm2 zigma online',
     ],
     warning:
-      'Missing deploy-prod.sh = VPS behind GitHub — reset/pull master. Dirty schema.sql blocks pull — discard with git checkout -- scripts/schema.sql or use deploy-prod.sh reset --hard.',
-    code: `# Laptop PowerShell
+      'confirm_production must be exactly DEPLOY_PROD. Workflow refuses if PROD_HOST is the JustXSystems IP (193.203.161.219).',
+    code: `# Laptop PowerShell — Production key only (do not reuse PreProd key)
 cd $env:USERPROFILE\\Downloads
-ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N '""'
+ssh-keygen -t ed25519 -C "gha-zigma-prod" -f ./gha_zigma_prod -N '""'
 type .\\gha_zigma_prod.pub | ssh deploy@200.234.45.106 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "whoami && hostname"
+ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "whoami && hostname -I"
+# hostname -I must include 200.234.45.106 (not 193.203.161.219)
 
-# Sync code (discards local tracked edits on VPS — .env stays)
-ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "cd /var/www/zigma-technologies && git fetch origin && git reset --hard origin/master && ls -la scripts/deploy-prod.sh"
-
-ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "cd /var/www/zigma-technologies && chmod +x scripts/deploy-prod.sh && ./scripts/deploy-prod.sh"
+ssh -i .\\gha_zigma_prod deploy@200.234.45.106 "cd /var/www/zigma-technologies && git fetch origin && git reset --hard origin/master && chmod +x scripts/deploy.sh scripts/deploy-prod.sh && ./scripts/deploy-prod.sh --confirm-prod DEPLOY_PROD --dry-run"
 
 Get-Content .\\gha_zigma_prod -Raw | Set-Clipboard
 # Paste into GitHub → Settings → Secrets → Actions → PROD_SSH_KEY
 # Also set PROD_HOST=200.234.45.106 and PROD_SSH_USER=deploy
-# Then: https://github.com/JustXSystems/zigma-technologies/actions → Deploy Production → Run workflow`,
+# Actions → Deploy Production → confirm_production=DEPLOY_PROD → select components`,
   },
   {
     id: 'dns',
@@ -632,26 +646,54 @@ export const PROD_GHA_SECRETS: { name: string; example: string; purpose: string 
   {
     name: 'PROD_HOST',
     example: '200.234.45.106',
-    purpose: 'VPS IPv4 — Actions SSH target',
+    purpose: 'Zigma Technologies VPS IPv4 only (never the JustXSystems PreProd IP)',
   },
   {
     name: 'PROD_SSH_USER',
     example: 'deploy',
-    purpose: 'OS user that owns the app + PM2 (never root)',
+    purpose: 'OS user on the Zigma Technologies VPS (never root)',
   },
   {
     name: 'PROD_SSH_KEY',
     example: '-----BEGIN OPENSSH PRIVATE KEY----- … -----END OPENSSH PRIVATE KEY-----',
-    purpose: 'Private half of gha_zigma_prod; public half in /home/deploy/.ssh/authorized_keys',
+    purpose: 'Private half of gha_zigma_prod; public half on deploy@200.234.45.106 only',
   },
 ];
 
+export const PROD_GHA_INPUTS: { name: string; default: string; purpose: string }[] = [
+  {
+    name: 'confirm_production',
+    default: '(required) DEPLOY_PROD',
+    purpose: 'Safety gate — workflow refuses to run without this exact phrase',
+  },
+  { name: 'branch', default: 'master', purpose: 'Git branch to reset the Prod tree to' },
+  { name: 'sync_code', default: 'true', purpose: 'git fetch + checkout + reset --hard' },
+  { name: 'install_deps', default: 'true', purpose: 'npm ci' },
+  { name: 'clear_next', default: 'false', purpose: 'rm -rf .next before build' },
+  { name: 'build', default: 'true', purpose: 'npm run build (must have no BASE_PATH in .env)' },
+  { name: 'restart_pm2', default: 'true', purpose: 'pm2 restart zigma' },
+  { name: 'db_backup', default: 'true', purpose: 'mysqldump → /var/backups/zigma/*.sql.gz' },
+  {
+    name: 'apply_migrations',
+    default: 'false',
+    purpose: 'Apply listed scripts/*.sql (never applies all blindly)',
+  },
+  {
+    name: 'migration_files',
+    default: '(empty)',
+    purpose: 'Comma-separated filenames, e.g. migrate-wave3.sql,migrate-newsletter.sql',
+  },
+  { name: 'healthcheck', default: 'true', purpose: 'curl localhost:3000/ after restart' },
+  { name: 'dry_run', default: 'false', purpose: 'Print plan on VPS; make no changes' },
+];
+
 export const PROD_GHA_HOW_IT_WORKS = [
-  'Developer merges to master (or clicks Run workflow).',
-  'GitHub job “Deploy Production” SSHs to deploy@200.234.45.106 using PROD_* secrets.',
-  'Runner executes scripts/deploy-prod.sh on the VPS.',
-  'Script: git fetch + reset --hard origin/master → npm ci → npm run build → pm2 restart zigma.',
-  '.env and untracked uploads stay on the server (never uploaded by Actions).',
+  'QA first on PreProd (https://justxsystems.com/zigma-technologies on deploy@193.203.161.219) — auto-deployed on master push.',
+  'Operator opens Actions → Deploy Production → Run workflow (never triggered by push).',
+  'Types confirm_production = DEPLOY_PROD and toggles only the components needed for this release.',
+  'GitHub SSHs to deploy@200.234.45.106 using PROD_* secrets (separate from PREPROD_*).',
+  'Runner executes scripts/deploy.sh --env prod with the selected flags on the Zigma Technologies VPS.',
+  '.env and untracked uploads stay on that server (never uploaded by Actions).',
 ];
 
 export const PROD_GHA_PARTS: {
@@ -663,45 +705,45 @@ export const PROD_GHA_PARTS: {
   {
     id: 'a',
     where: 'Your laptop only',
-    title: 'Part A — Create Actions SSH keypair',
+    title: 'Part A — Create Production Actions SSH keypair',
     detail:
-      'In Downloads: ssh-keygen … -f ./gha_zigma_prod. Do not create this key as root on the VPS.',
+      'ssh-keygen … -f ./gha_zigma_prod. Keep separate from gha_zigma_preprod (JustXSystems VPS).',
   },
   {
     id: 'b',
-    where: 'Laptop → VPS',
-    title: 'Part B — Authorize public key',
-    detail:
-      'Install .pub into deploy authorized_keys. ssh -i gha_zigma_prod … whoami must return deploy with no password.',
+    where: 'Laptop → Zigma VPS',
+    title: 'Part B — Authorize public key on 200.234.45.106',
+    detail: 'Install .pub into deploy authorized_keys. whoami must return deploy; hostname -I includes 200.234.45.106.',
   },
   {
     id: 'b0',
-    where: 'VPS git sync',
-    title: 'Part B0 — Ensure deploy-prod.sh exists',
+    where: 'Zigma VPS git sync',
+    title: 'Part B0 — Ensure deploy.sh exists',
     detail:
-      'git fetch && git reset --hard origin/master (or discard dirty tracked files). ls scripts/deploy-prod.sh must succeed before dry-run.',
+      'git fetch && git reset --hard origin/master. ls scripts/deploy.sh scripts/deploy-prod.sh must succeed.',
   },
   {
     id: 'c',
     where: 'GitHub website',
-    title: 'Part C — Three repository secrets',
-    detail: 'PROD_HOST, PROD_SSH_USER, PROD_SSH_KEY. Confirm deploy-prod.yml on master.',
+    title: 'Part C — PROD_* repository secrets',
+    detail: 'PROD_HOST=200.234.45.106, PROD_SSH_USER, PROD_SSH_KEY. Confirm deploy-prod.yml is workflow_dispatch only.',
   },
   {
     id: 'd',
     where: 'Actions',
-    title: 'Part D — Run workflow once',
-    detail: 'Actions → Deploy Production → Run workflow. Confirm green + pm2 healthy.',
+    title: 'Part D — Selective Run workflow',
+    detail:
+      'confirm_production=DEPLOY_PROD. Example: restart-only → sync off, install off, build off, restart on.',
   },
 ];
 
 export const PROD_GHA_STEPS = [
-  'Part A: create gha_zigma_prod on the laptop.',
-  'Part B: install .pub; test whoami.',
-  'Part B0: git reset --hard origin/master until deploy-prod.sh exists.',
-  'Part B dry-run: ./scripts/deploy-prod.sh',
+  'Part A: create gha_zigma_prod on the laptop (separate from PreProd key).',
+  'Part B: install .pub on deploy@200.234.45.106; test whoami.',
+  'Part B0: git reset --hard until deploy.sh exists.',
+  'Part B dry-run: ./scripts/deploy-prod.sh --confirm-prod DEPLOY_PROD --dry-run',
   'Part C: PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY',
-  'Part D: Run workflow → green',
+  'Part D: Run workflow with confirm_production=DEPLOY_PROD + component toggles → green',
 ];
 
 export const PROD_ENV_TEMPLATE = `NODE_ENV=production
@@ -758,19 +800,24 @@ export const PROD_NGINX = `server {
     }
 }`;
 
-export const PROD_UPDATE_COMMANDS = `# Same path Actions uses
+export const PROD_UPDATE_COMMANDS = `# Full Production deploy (same as default Actions toggles)
 ssh deploy@200.234.45.106
 cd /var/www/zigma-technologies
-./scripts/deploy-prod.sh
+./scripts/deploy-prod.sh --confirm-prod DEPLOY_PROD
 
-# Manual equivalent:
-cd /var/www/zigma-technologies
-git fetch origin
-git reset --hard origin/master
-npm ci
-# If schema changed on an OLD database, apply migrate-*.sql before restart
-npm run build
-pm2 restart zigma
+# Restart-only (no git / npm / build)
+./scripts/deploy.sh --env prod --confirm-prod DEPLOY_PROD \\
+  --no-sync --no-install --no-build --restart --healthcheck
+
+# Code + build + restart, skip npm ci (node_modules already warm)
+./scripts/deploy.sh --env prod --confirm-prod DEPLOY_PROD \\
+  --sync --no-install --build --restart --healthcheck
+
+# Backup DB + apply one migration, then rebuild
+./scripts/deploy.sh --env prod --confirm-prod DEPLOY_PROD \\
+  --db-backup --migrations --migration-files migrate-wave3.sql \\
+  --sync --install --build --restart --healthcheck
+
 pm2 logs zigma --lines 80`;
 
 export const PROD_BACKUP = [
@@ -803,7 +850,8 @@ export const PROD_CHECKLIST = [
   '/sitemap.xml OK',
   'UFW 22/80/443; 3306 closed',
   'pm2 zigma online + startup enabled',
-  'GitHub Actions Deploy Production green',
+  'GitHub Actions Deploy Production green (manual selective run → 200.234.45.106)',
+  'master push only updates PreProd on JustXSystems VPS (193.203.161.219) — verify that separately',
   'BigRock A @ and www → 200.234.45.106',
   'MX unchanged',
   'Old host retained 7–14 days for rollback',
@@ -870,9 +918,17 @@ export const PROD_TROUBLESHOOT = [
   {
     symptom: 'GitHub Actions deploy fails on SSH',
     fixes: [
-      'PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY secrets',
-      'Public key in deploy authorized_keys',
+      'PROD_HOST=200.234.45.106 / PROD_SSH_USER / PROD_SSH_KEY (not PREPROD_*)',
+      'Public key in deploy authorized_keys on the Zigma VPS',
       'Do not IP-restrict port 22 against GitHub runners',
+    ],
+  },
+  {
+    symptom: 'Workflow refused: confirm_production / wrong host',
+    fixes: [
+      'Type exactly DEPLOY_PROD (case-sensitive)',
+      'PROD_HOST must be 200.234.45.106 — workflow rejects 193.203.161.219 (JustXSystems PreProd)',
+      'Push to master never deploys Production — only PreProd to JustXSystems VPS',
     ],
   },
   {
@@ -902,8 +958,12 @@ export const PROD_FAQ: ProdFaq[] = [
     a: 'Not if you leave MX (and related TXT) unchanged. Only edit website A records for @ and www.',
   },
   {
-    q: 'How does GitHub Actions deploy work?',
-    a: 'Push/manual run on master → SSH as deploy → scripts/deploy-prod.sh (reset --hard origin/master, npm ci, build, pm2 restart). .env stays on the VPS.',
+    q: 'How does GitHub Actions deploy work for Production?',
+    a: 'Manual only: Actions → Deploy Production → confirm_production=DEPLOY_PROD → toggle components. SSH target is deploy@200.234.45.106 via PROD_* secrets. Push to master deploys PreProd to JustXSystems VPS only.',
+  },
+  {
+    q: 'Where is PreProd?',
+    a: 'Different VPS: deploy@193.203.161.219 (JustXSystems). URL https://justxsystems.com/zigma-technologies/, app dir /var/www/zigma-technologies, PM2 zigma-preprod on :3001. Secrets PREPROD_*. See /admin/guide/justxsystems.',
   },
   {
     q: 'Why skip migrate-*.sql after schema.sql?',
