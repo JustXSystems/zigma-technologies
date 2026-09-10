@@ -8,7 +8,7 @@ Corporate-grade reference for engineers, QA, and DevOps operating the Zigma Tech
 | **Database** | MySQL 8.x (`zigmatech` schema) |
 | **Admin portal** | `/admin` |
 | **Public site** | `/` |
-| **Production host** | Hostinger (VPS or Node-enabled hosting) |
+| **Production host** | Zigma VPS `deploy@200.234.45.106` · PreProd JustXSystems VPS `deploy@193.203.161.219` |
 | **Operator docs** | [`ADMIN.md`](./ADMIN.md) · in-app guide at `/admin/guide` |
 
 ---
@@ -28,8 +28,8 @@ Corporate-grade reference for engineers, QA, and DevOps operating the Zigma Tech
 11. [Environment strategy (DEV → UAT → PROD)](#11-environment-strategy-dev--uat--prod)
 12. [Hostinger: what you need before deploying](#12-hostinger-what-you-need-before-deploying)
 13. [MySQL on Hostinger (detailed)](#13-mysql-on-hostinger-detailed)
-14. [Deploy to UAT on Hostinger](#14-deploy-to-uat-on-hostinger)
-15. [Deploy to PROD on Hostinger](#15-deploy-to-prod-on-hostinger)
+14. [Deploy to PreProd (justxsystems subdirectory)](#14-deploy-to-preprod-justxsystems-subdirectory)
+15. [Deploy to PROD (domain root)](#15-deploy-to-prod-domain-root)
 16. [Deployment method A — VPS + PM2 + Nginx (recommended)](#16-deployment-method-a--vps--pm2--nginx-recommended)
 17. [Deployment method B — hPanel Node.js Web App](#17-deployment-method-b--hpanel-nodejs-web-app)
 18. [Database migration between environments](#18-database-migration-between-environments)
@@ -399,7 +399,7 @@ npm run build
 3. Develop locally with `.env` pointed at local MySQL
 4. Run `npm run typecheck` and `npm run build`
 5. Open PR → code review → merge
-6. Deploy to UAT → QA sign-off → deploy to PROD
+6. Deploy to PreProd → QA sign-off → selective Production deploy
 
 ---
 
@@ -423,21 +423,33 @@ npm run build        # Production build — must succeed
 
 ---
 
-## 11. Environment strategy (DEV → UAT → PROD)
+## 11. Environment strategy (DEV → PreProd → PROD)
 
-| Environment | Purpose | URL example | Database |
-|-------------|---------|-------------|----------|
-| **DEV** | Local developer machines | `http://localhost:3000` | Local MySQL |
-| **UAT / TEST** | QA, stakeholder review | `https://uat.zigma-technologies.com` | Hostinger MySQL (UAT DB) |
-| **PROD** | Live public site | `https://www.zigma-technologies.com` | Hostinger MySQL (PROD DB) |
+| Environment | Purpose | URL | Deploy kind | VPS | Database | GitHub Actions |
+|-------------|---------|-----|-------------|-----|----------|----------------|
+| **DEV** | Local developer machines | `http://localhost:3000` | Domain root (no basePath) | Laptop | Local MySQL | — |
+| **PreProd** | QA / stakeholder review | `https://justxsystems.com/zigma-technologies` | **Subdirectory** (`NEXT_PUBLIC_BASE_PATH=/zigma-technologies`) | **JustXSystems** `deploy@193.203.161.219` | `zigmatech_preprod` | **Default:** push to `master` → Deploy PreProd |
+| **PROD** | Live public site | `https://zigma-technologies.com` | **Domain root** (no basePath) | **Zigma Technologies** `deploy@200.234.45.106` | `zigmatech_prod` | **Manual only:** Deploy Production + component toggles |
+
+**Two separate VPS boxes** — never the same machine:
+
+| | PreProd (JustXSystems VPS) | Production (Zigma Technologies VPS) |
+|---|----------------------------|--------------------------------------|
+| SSH | `deploy@193.203.161.219` | `deploy@200.234.45.106` |
+| App dir | `/var/www/zigma-technologies` | `/var/www/zigma-technologies` |
+| PM2 | `zigma-preprod` · `:3001` | `zigma` · `:3000` |
+| Nginx | `location /zigma-technologies` on justxsystems.com | `server_name zigma-technologies.com` |
+| Actions secrets | `PREPROD_HOST` / `PREPROD_SSH_USER` / `PREPROD_SSH_KEY` | `PROD_HOST` / `PROD_SSH_USER` / `PROD_SSH_KEY` |
+| Script | `scripts/deploy-preprod.sh` | `scripts/deploy-prod.sh` (`--confirm-prod DEPLOY_PROD`) |
 
 ### Golden rules
 
-1. **Never** point UAT/PROD at a developer's local database.
-2. **Never** reuse `AUTH_SECRET`, admin passwords, or DB passwords across environments.
-3. **Always** run QA on UAT before PROD deployment.
-4. **Always** take a DB export before PROD schema/content changes.
+1. **Never** point PreProd/PROD at a developer's local database.
+2. **Never** reuse `AUTH_SECRET`, admin passwords, DB passwords, or **SSH deploy keys** across environments / VPS boxes.
+3. **Always** run QA on PreProd (JustXSystems VPS) before a Production release.
+4. **Always** take a DB export / enable `db_backup` before PROD schema/content changes.
 5. Content can be promoted via `db:export` / `db:import` or manual admin edits — agree on process with your team.
+6. Push to `master` deploys **PreProd only** (JustXSystems). Production is never auto-deployed.
 
 ---
 
@@ -543,88 +555,121 @@ If your **Node app runs on a VPS** but **MySQL stays on Hostinger web hosting**:
 
 ---
 
-## 14. Deploy to UAT on Hostinger
+## 14. Deploy to PreProd (justxsystems subdirectory)
 
-**Goal:** A stable test URL (e.g. `uat.zigma-technologies.com`) mirroring production configuration.
+**Goal:** QA URL at `https://justxsystems.com/zigma-technologies/` on the **JustXSystems VPS** (`deploy@193.203.161.219`).
+
+This is a **subdirectory (path) deploy** under justxsystems.com — not a DNS subdomain and not the apex of zigma-technologies.com. Next.js requires `NEXT_PUBLIC_BASE_PATH=/zigma-technologies` at **build** time.
+
+**In-app guide:** [/admin/guide/justxsystems](/admin/guide/justxsystems)
 
 ### Pre-flight checklist
 
-- [ ] UAT MySQL database created and schema imported ([Section 13](#13-mysql-on-hostinger-detailed))
-- [ ] UAT `.env` prepared with UAT-specific secrets
-- [ ] DNS A record: `uat` → server IP (or subdomain configured in hPanel)
-- [ ] Latest code merged to deploy branch
-- [ ] `npm run build` passes locally
+- [ ] JustXSystems VPS reachable as `deploy@193.203.161.219` (not `200.234.45.106`)
+- [ ] MySQL DB `zigmatech_preprod` created on that VPS
+- [ ] App cloned to `/var/www/zigma-technologies` on JustXSystems VPS
+- [ ] PreProd `.env` with `NEXT_PUBLIC_BASE_PATH` + path `SITE_URL`
+- [ ] Nginx `location /zigma-technologies` on justxsystems.com → `127.0.0.1:3001`
+- [ ] GitHub secrets `PREPROD_HOST` / `PREPROD_SSH_USER` / `PREPROD_SSH_KEY`
+- [ ] `npm run typecheck` + `npm run build` pass locally
 
-### UAT deployment steps (high level)
+### Default CI path (recommended)
 
-1. **Provision server** (VPS or enable Node.js on web hosting)
-2. **Upload / clone code** to server
-3. **Install dependencies & build**
-4. **Configure `.env`** with UAT values
-5. **Import content** — bootstrap via admin or `db:import` from dev export
-6. **Start app** (PM2 or hPanel Node.js)
-7. **Configure Nginx / domain** → HTTPS
-8. **Run post-deployment checklist** ([Section 20](#20-post-deployment-checklist))
-9. **Hand off to QA**
+1. Merge to `master`
+2. GitHub Action **Deploy PreProd** runs automatically → SSH to JustXSystems VPS
+3. VPS runs `scripts/deploy-preprod.sh` (sync → npm ci → build → pm2 restart `zigma-preprod` → healthcheck)
+4. Smoke-test `https://justxsystems.com/zigma-technologies/` and `/admin/login`
+5. Hand off to QA
 
-Detailed server commands: [Section 16](#16-deployment-method-a--vps--pm2--nginx-recommended) or [Section 17](#17-deployment-method-b--hpanel-nodejs-web-app).
+Manual SSH equivalent:
 
-### UAT-specific environment values
+```bash
+ssh deploy@193.203.161.219
+cd /var/www/zigma-technologies
+./scripts/deploy-preprod.sh
+```
+
+### PreProd `.env` (critical keys)
 
 ```env
 NODE_ENV=production
-NEXT_PUBLIC_SITE_URL=https://uat.zigma-technologies.com
-DB_HOST=localhost
-DB_NAME=u123456789_zigmatech_uat
-DB_USER=u123456789_zigma_uat
-DB_PASSWORD=<uat-db-password>
-AUTH_SECRET=<unique-uat-secret>
-PREVIEW_SECRET=<unique-uat-preview-secret>
-ADMIN_EMAIL=admin-uat@yourcompany.com
-ADMIN_PASSWORD=<change-immediately-after-seed>
+PORT=3001
+NEXT_PUBLIC_BASE_PATH=/zigma-technologies
+NEXT_PUBLIC_SITE_URL=https://justxsystems.com/zigma-technologies
+DB_NAME=zigmatech_preprod
+DB_USER=zigmatech_preprod
+# AUTH_SECRET / PREVIEW_SECRET unique from Production
 ```
 
 ---
 
-## 15. Deploy to PROD on Hostinger
+## 15. Deploy to PROD (domain root)
 
-**Goal:** Zero-downtime (or minimal-downtime) go-live at the production domain.
+**Goal:** Live site at `https://zigma-technologies.com/` on the **Zigma Technologies VPS** (`deploy@200.234.45.106`), domain-root deploy (**no** `NEXT_PUBLIC_BASE_PATH`).
+
+**In-app guide:** [/admin/guide/hostinger-prod](/admin/guide/hostinger-prod)
+
+Production is **never** auto-deployed on push. Use Actions → **Deploy Production** → Run workflow.
 
 ### Pre-flight checklist (PROD)
 
-- [ ] UAT sign-off documented (QA checklist completed)
-- [ ] PROD MySQL database created — **separate from UAT**
-- [ ] PROD `.env` secrets generated — **never copied from UAT**
-- [ ] DNS for `www` and apex domain planned
-- [ ] SSL certificate ready
-- [ ] Database backup / export taken from UAT (if promoting content)
-- [ ] SMTP configured for live enquiry notifications
-- [ ] `NEXT_PUBLIC_SITE_URL` set to production domain
-- [ ] Admin passwords rotated — no default/dev passwords
+- [ ] PreProd QA sign-off documented (JustXSystems VPS)
+- [ ] Zigma Technologies VPS reachable as `deploy@200.234.45.106`
+- [ ] Prod MySQL `zigmatech_prod` on **this** VPS
+- [ ] App at `/var/www/zigma-technologies` on Zigma VPS
+- [ ] Prod `.env` — **no** `NEXT_PUBLIC_BASE_PATH`; `SITE_URL=https://zigma-technologies.com`
+- [ ] Nginx `server_name zigma-technologies.com www.zigma-technologies.com` → `:3000`
+- [ ] BigRock A `@` / `www` → `200.234.45.106` (after hosts-file smoke tests)
+- [ ] GitHub secrets `PROD_HOST` / `PROD_SSH_USER` / `PROD_SSH_KEY` (separate from `PREPROD_*`)
 - [ ] Rollback plan agreed ([Section 21](#21-rollback-procedure))
 
-### PROD deployment sequence
+### Selective Production release (GitHub Actions)
 
-| # | Action | Owner |
-|---|--------|-------|
-| 1 | Announce maintenance window (if needed) | PM / DevOps |
-| 2 | Backup PROD database (if upgrading existing) | DevOps |
-| 3 | Deploy application code | DevOps |
-| 4 | Apply any new `migrate-*.sql` files | DevOps |
-| 5 | Import UAT-approved content (optional) | DevOps |
-| 6 | Verify `.env` on server | DevOps |
-| 7 | `npm run build && pm2 restart` (or hPanel restart) | DevOps |
-| 8 | Run post-deployment checklist | QA + DevOps |
-| 9 | Monitor error logs for 30 minutes | DevOps |
+1. Open **Actions → Deploy Production → Run workflow**
+2. Set `confirm_production` = `DEPLOY_PROD` (required safety gate)
+3. Choose components for **this** release (defaults shown):
+
+| Input | Default | Use when |
+|-------|---------|----------|
+| `sync_code` | true | Pull latest git commit |
+| `install_deps` | true | Dependencies / lockfile changed |
+| `clear_next` | false | Need a fully clean `.next` |
+| `build` | true | Code or env affecting the bundle changed |
+| `restart_pm2` | true | Always after build, or for env-only restart |
+| `db_backup` | true | Before migrations / risky content changes |
+| `apply_migrations` | false | Schema change — also set `migration_files` |
+| `migration_files` | (empty) | e.g. `migrate-wave3.sql,migrate-newsletter.sql` |
+| `healthcheck` | true | Verify localhost after restart |
+| `dry_run` | false | Print plan only |
+
+**Examples**
+
+- Full release: leave defaults + `DEPLOY_PROD`
+- Restart only: sync/install/build off, restart on
+- Migration release: `db_backup` + `apply_migrations` + filenames + build/restart
+
+### Manual SSH equivalents
+
+```bash
+ssh deploy@200.234.45.106
+cd /var/www/zigma-technologies
+
+# Full
+./scripts/deploy-prod.sh --confirm-prod DEPLOY_PROD
+
+# Restart only
+./scripts/deploy.sh --env prod --confirm-prod DEPLOY_PROD \
+  --no-sync --no-install --no-build --restart --healthcheck
+```
 
 ### PROD environment values
 
 ```env
 NODE_ENV=production
-NEXT_PUBLIC_SITE_URL=https://www.zigma-technologies.com
+NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com
 DB_HOST=localhost
-DB_NAME=u123456789_zigmatech_prod
-DB_USER=u123456789_zigma_prod
+DB_NAME=zigmatech_prod
+DB_USER=zigmatech_prod
 DB_PASSWORD=<prod-db-password>
 AUTH_SECRET=<unique-prod-secret>
 PREVIEW_SECRET=<unique-prod-preview-secret>
@@ -633,6 +678,7 @@ SMTP_PORT=587
 SMTP_USER=noreply@zigma-technologies.com
 SMTP_PASS=<smtp-password>
 SMTP_FROM="Zigma Technologies <noreply@zigma-technologies.com>"
+# Do NOT set NEXT_PUBLIC_BASE_PATH on Production
 ```
 
 > Hostinger email SMTP often uses `smtp.hostinger.com` with the mailbox credentials from hPanel → **Emails**.
@@ -641,7 +687,7 @@ SMTP_FROM="Zigma Technologies <noreply@zigma-technologies.com>"
 
 ## 16. Deployment method A — VPS + PM2 + Nginx (recommended)
 
-Use this for **production-grade** deployments on Hostinger VPS.
+Use this for **production-grade** deployments. PreProd and Production use **two Hostinger VPS boxes** as documented in [Section 11](#11-environment-strategy-dev--preprod--prod).
 
 ### A.1 — Initial VPS setup (one time)
 
@@ -1124,8 +1170,8 @@ PORT=3001 npm run start
 |----------|----------|---------|
 | [`ADMIN.md`](./ADMIN.md) | Editors, admins, operators | Module reference, API summary, seeds |
 | `/admin/guide` | Admin users | In-app architecture & playbooks |
-| `/admin/guide/hostinger-prod` | DevOps | Hostinger KVM 2 + MySQL + GitHub production setup |
-| `/admin/guide/justxsystems` | DevOps | Staging at justxsystems.com/zigma-technologies (basePath) |
+| `/admin/guide/hostinger-prod` | DevOps | Production on Zigma VPS `deploy@200.234.45.106` + selective Actions (`PROD_*`) |
+| `/admin/guide/justxsystems` | DevOps | PreProd on JustXSystems VPS `deploy@193.203.161.219` (auto-deploy, `PREPROD_*`) |
 | `/admin/guide/migration` | DevOps | UrbanVendo → Hostinger DNS cutover |
 | [`.env.example`](./.env.example) | Developers | Environment variable template |
 | `scripts/schema.sql` | DevOps | Database DDL |

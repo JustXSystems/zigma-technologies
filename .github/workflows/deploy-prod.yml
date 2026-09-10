@@ -1,38 +1,162 @@
-# Auto-deploy production to Hostinger KVM 2 (deploy@200.234.45.106).
+# Deploy Production on Zigma Technologies VPS — manual selective components only.
+# Target: https://zigma-technologies.com  via deploy@200.234.45.106
+#
+# Does NOT run on push. PreProd auto-deploys to the JustXSystems VPS separately.
+#
 # Secrets (repo → Settings → Secrets and variables → Actions):
 #   PROD_HOST      = 200.234.45.106
 #   PROD_SSH_USER  = deploy
-#   PROD_SSH_KEY   = private key whose public half is in deploy's authorized_keys
-# On the VPS, scripts/deploy-prod.sh runs: git reset --hard origin/master → npm ci → build → pm2 restart
+#   PROD_SSH_KEY   = private key authorized on Zigma Technologies VPS only
+#
+# Safety: confirm_production must be exactly DEPLOY_PROD.
 name: Deploy Production
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: 'Type DEPLOY_PROD to confirm this is a production release'
+        required: true
+        type: string
+      branch:
+        description: Git branch to deploy
+        required: true
+        default: master
+        type: string
+      sync_code:
+        description: 'Component — Git fetch + reset --hard to branch'
+        type: boolean
+        default: true
+      install_deps:
+        description: 'Component — npm ci (install dependencies)'
+        type: boolean
+        default: true
+      clear_next:
+        description: 'Component — Delete .next before build (clean build)'
+        type: boolean
+        default: false
+      build:
+        description: 'Component — npm run build (no BASE_PATH; domain root)'
+        type: boolean
+        default: true
+      restart_pm2:
+        description: 'Component — Restart PM2 process zigma'
+        type: boolean
+        default: true
+      db_backup:
+        description: 'Component — mysqldump to /var/backups/zigma before DB changes'
+        type: boolean
+        default: true
+      apply_migrations:
+        description: 'Component — Apply listed SQL migration files'
+        type: boolean
+        default: false
+      migration_files:
+        description: 'Comma-separated scripts/*.sql names (required if apply_migrations)'
+        required: false
+        default: ''
+        type: string
+      healthcheck:
+        description: 'Component — Localhost curl after restart'
+        type: boolean
+        default: true
+      dry_run:
+        description: 'Print deploy plan on the VPS only (no changes)'
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-production
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: SSH deploy to Hostinger
+  deploy-prod:
+    name: SSH → Zigma Technologies VPS (Prod)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
-      - name: Deploy over SSH
+      - name: Confirm production phrase
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ inputs.confirm_production }}" != "DEPLOY_PROD" ]]; then
+            echo "Refusing production deploy. confirm_production must be exactly DEPLOY_PROD." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.apply_migrations }}" == "true" && -z "${{ inputs.migration_files }}" ]]; then
+            echo "apply_migrations=true requires migration_files (e.g. migrate-wave3.sql)." >&2
+            exit 1
+          fi
+
+      - name: Require Production SSH secrets
+        id: ssh
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOST="${{ secrets.PROD_HOST }}"
+          USER="${{ secrets.PROD_SSH_USER }}"
+          KEY="${{ secrets.PROD_SSH_KEY }}"
+          if [[ -z "$HOST" || -z "$USER" || -z "$KEY" ]]; then
+            echo "Missing Production secrets. Set PROD_HOST=200.234.45.106, PROD_SSH_USER=deploy, PROD_SSH_KEY (Zigma Technologies VPS)." >&2
+            exit 1
+          fi
+          if [[ "$HOST" == "193.203.161.219" ]]; then
+            echo "PROD_HOST points at the JustXSystems (PreProd) VPS. Use 200.234.45.106 (Zigma Technologies)." >&2
+            exit 1
+          fi
+          {
+            echo "host=$HOST"
+            echo "user=$USER"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "key<<EOF"
+            echo "$KEY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Deploy Production over SSH
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEPLOY_BRANCH: ${{ inputs.branch }}
+          IN_SYNC: ${{ inputs.sync_code }}
+          IN_INSTALL: ${{ inputs.install_deps }}
+          IN_BUILD: ${{ inputs.build }}
+          IN_RESTART: ${{ inputs.restart_pm2 }}
+          IN_DB_BACKUP: ${{ inputs.db_backup }}
+          IN_MIGRATIONS: ${{ inputs.apply_migrations }}
+          IN_MIG_FILES: ${{ inputs.migration_files }}
+          IN_CLEAR_NEXT: ${{ inputs.clear_next }}
+          IN_HEALTH: ${{ inputs.healthcheck }}
+          IN_DRY_RUN: ${{ inputs.dry_run }}
         with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_SSH_USER }}
-          key: ${{ secrets.PROD_SSH_KEY }}
+          host: ${{ steps.ssh.outputs.host }}
+          username: ${{ steps.ssh.outputs.user }}
+          key: ${{ steps.ssh.outputs.key }}
           port: 22
           script_stop: true
-          command_timeout: 25m
+          command_timeout: 40m
+          envs: DEPLOY_BRANCH,IN_SYNC,IN_INSTALL,IN_BUILD,IN_RESTART,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_CLEAR_NEXT,IN_HEALTH,IN_DRY_RUN
           script: |
             set -euo pipefail
             cd /var/www/zigma-technologies
-            chmod +x scripts/deploy-prod.sh
-            ./scripts/deploy-prod.sh
+            chmod +x scripts/deploy.sh scripts/deploy-prod.sh
+
+            ARGS=(--env prod --confirm-prod DEPLOY_PROD --branch "${DEPLOY_BRANCH:-master}")
+            [[ "${IN_SYNC}" == "true" ]] && ARGS+=(--sync) || ARGS+=(--no-sync)
+            [[ "${IN_INSTALL}" == "true" ]] && ARGS+=(--install) || ARGS+=(--no-install)
+            [[ "${IN_BUILD}" == "true" ]] && ARGS+=(--build) || ARGS+=(--no-build)
+            [[ "${IN_RESTART}" == "true" ]] && ARGS+=(--restart) || ARGS+=(--no-restart)
+            [[ "${IN_DB_BACKUP}" == "true" ]] && ARGS+=(--db-backup) || ARGS+=(--no-db-backup)
+            [[ "${IN_CLEAR_NEXT}" == "true" ]] && ARGS+=(--clear-next) || ARGS+=(--no-clear-next)
+            [[ "${IN_HEALTH}" == "true" ]] && ARGS+=(--healthcheck) || ARGS+=(--no-healthcheck)
+            if [[ "${IN_MIGRATIONS}" == "true" ]]; then
+              ARGS+=(--migrations --migration-files "${IN_MIG_FILES}")
+            else
+              ARGS+=(--no-migrations)
+            fi
+            if [[ "${IN_DRY_RUN}" == "true" ]]; then
+              ARGS+=(--dry-run)
+            fi
+
+            echo "Running on Zigma Technologies VPS: ./scripts/deploy.sh ${ARGS[*]}"
+            ./scripts/deploy.sh "${ARGS[@]}"

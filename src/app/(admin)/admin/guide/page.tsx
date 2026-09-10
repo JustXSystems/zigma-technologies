@@ -14,8 +14,8 @@ import {
 } from '@/lib/admin-guide';
 
 const TOC = [
-  { id: 'justxsystems', label: 'justxsystems staging' },
-  { id: 'hostinger-prod', label: 'KVM 2 production setup' },
+  { id: 'justxsystems', label: 'PreProd (justxsystems)' },
+  { id: 'hostinger-prod', label: 'Production (domain root)' },
   { id: 'migration', label: 'Hostinger migration' },
   { id: 'email', label: 'Email migration' },
   { id: 'architecture', label: 'Architecture' },
@@ -124,10 +124,10 @@ export default function AdminGuidePage() {
             </p>
             <div className="admin-guide-hero-actions">
               <Link href="/admin/guide/justxsystems" className="admin-btn admin-btn-primary">
-                justxsystems staging →
+                PreProd guide →
               </Link>
               <Link href="/admin/guide/hostinger-prod" className="admin-btn admin-btn-secondary">
-                KVM 2 production →
+                Production guide
               </Link>
               <Link href="/admin/guide/migration" className="admin-btn admin-btn-secondary">
                 DNS / migration →
@@ -187,47 +187,49 @@ export default function AdminGuidePage() {
         <div className="admin-guide-main">
           <section id="justxsystems" className="admin-guide-section">
             <div className="admin-guide-section-head">
-              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Staging test</div>
-              <h3>justxsystems.com/zigma-technologies — Hostinger subdirectory deploy</h3>
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">PreProd</div>
+              <h3>justxsystems.com/zigma-technologies — JustXSystems VPS</h3>
               <p>
-                Blind-follow playbook to bring this app up at{' '}
-                <strong>https://justxsystems.com/zigma-technologies/</strong> on Hostinger: MySQL database, GitHub clone,{' '}
-                <code>NEXT_PUBLIC_BASE_PATH=/zigma-technologies</code>, PM2 on port 3001, and an Nginx{' '}
-                <code>location</code> that does not disturb the existing JustX homepage.
+                Default CI target: every push to <code>master</code> deploys PreProd at{' '}
+                <strong>https://justxsystems.com/zigma-technologies/</strong> on{' '}
+                <code>deploy@193.203.161.219</code> (JustXSystems VPS) — path deploy with{' '}
+                <code>NEXT_PUBLIC_BASE_PATH=/zigma-technologies</code>, app dir{' '}
+                <code>/var/www/zigma-technologies</code>, PM2 <code>zigma-preprod</code> on port 3001.
               </p>
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
-              <strong>Use this for deployment testing.</strong> Final production on{' '}
-              <code>www.zigma-technologies.com</code> (domain root) remains the{' '}
-              <Link href="/admin/guide/hostinger-prod">KVM 2 production guide</Link>.
+              <strong>Different machine from Production.</strong> Production is{' '}
+              <code>deploy@200.234.45.106</code> (Zigma Technologies VPS). Use separate{' '}
+              <code>PREPROD_*</code> GitHub secrets. See the{' '}
+              <Link href="/admin/guide/hostinger-prod">Production guide</Link> for domain-root deploy.
             </div>
             <Link href="/admin/guide/justxsystems" className="admin-guide-module admin-guide-module--link">
               <div className="admin-guide-module-top">
-                <h4>Open justxsystems staging guide</h4>
+                <h4>Open PreProd (JustXSystems) guide</h4>
                 <span className="admin-guide-badge admin-guide-badge--admin">Admin / DevOps</span>
               </div>
               <p className="admin-guide-module-summary">
-                SSH · MySQL zigmatech_jx · .env with basePath · build · PM2 :3001 · Nginx location · smoke tests ·
-                git pull updates…
+                JustXSystems VPS · MySQL zigmatech_preprod · basePath · PM2 :3001 · Nginx location · PREPROD_* secrets ·
+                Deploy PreProd workflow…
               </p>
-              <span className="admin-guide-module-cta">Read staging guide →</span>
+              <span className="admin-guide-module-cta">Read PreProd guide →</span>
             </Link>
           </section>
 
           <section id="hostinger-prod" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Production</div>
-              <h3>Hostinger KVM 2 — production setup from empty VPS</h3>
+              <h3>Zigma Technologies VPS — production (domain root)</h3>
               <p>
-                Blind-follow playbook for the live KVM 2 in Mumbai (<code>200.234.45.106</code> / Ubuntu 26.04): harden
-                the empty OS, install MySQL 8, clone <code>JustXSystems/zigma-technologies</code>, configure{' '}
-                <code>.env</code>, run under PM2 + Nginx, wire GitHub Actions as <code>deploy@200.234.45.106</code>, then
-                cut over BigRock DNS so <code>zigma-technologies.com</code> serves this app (domain stays at BigRock).
+                Blind-follow playbook for Production at <code>https://zigma-technologies.com</code> on{' '}
+                <code>deploy@200.234.45.106</code> (Zigma Technologies VPS): harden OS, MySQL, clone into{' '}
+                <code>/var/www/zigma-technologies</code>, PM2 + Nginx, then wire <strong>manual selective</strong> GitHub
+                Actions via <code>PROD_*</code> secrets. master push never auto-deploys Production.
               </p>
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
-              <strong>Start here for greenfield PROD:</strong> VPS is already provisioned (KVM 2 · 8 GB · Mumbai 2). Do
-              not change BigRock A records until hosts-file smoke tests pass on the VPS.
+              <strong>Separate from PreProd VPS.</strong> Do not SSH to <code>193.203.161.219</code> for Production
+              releases. Production requires <code>confirm_production=DEPLOY_PROD</code> plus component toggles.
             </div>
             <Link href="/admin/guide/hostinger-prod" className="admin-guide-module admin-guide-module--link">
               <div className="admin-guide-module-top">
@@ -235,8 +237,8 @@ export default function AdminGuidePage() {
                 <span className="admin-guide-badge admin-guide-badge--admin">Admin / DevOps</span>
               </div>
               <p className="admin-guide-module-summary">
-                Empty Ubuntu → firewall · Node/Nginx/PM2 · MySQL · GitHub · hosts-file test · Actions · BigRock A records
-                → Certbot · go-live…
+                Domain root · no basePath · PROD_* secrets · selective Deploy Production · BigRock DNS · Certbot ·
+                go-live…
               </p>
               <span className="admin-guide-module-cta">Read production guide →</span>
             </Link>

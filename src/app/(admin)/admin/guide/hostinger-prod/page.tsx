@@ -10,10 +10,12 @@ import {
   PROD_ENV_TEMPLATE,
   PROD_FAQ,
   PROD_GHA_HOW_IT_WORKS,
+  PROD_GHA_INPUTS,
   PROD_GHA_PARTS,
   PROD_GHA_SECRETS,
   PROD_GHA_STEPS,
   PROD_HOSTINGER_NOTES,
+  PROD_HOWTO,
   PROD_NGINX,
   PROD_PHASES,
   PROD_PREREQUISITES,
@@ -40,16 +42,14 @@ export default function AdminHostingerProdGuidePage() {
       <header className="admin-guide-hero">
         <div className="admin-guide-hero-grid">
           <div>
-            <div className="admin-guide-eyebrow">DevOps · Production · Hostinger</div>
-            <h2 className="admin-guide-title">Hostinger KVM 2 — production setup</h2>
+            <div className="admin-guide-eyebrow">Production · Zigma Technologies VPS · Domain root</div>
+            <h2 className="admin-guide-title">Production — zigma-technologies.com</h2>
             <p className="admin-guide-lead">
-              Blind-follow playbook: empty {PROD_STACK.os} VPS (<code>{PROD_SERVER.ipv4}</code>) → MySQL/Nginx/PM2 →
-              clone{' '}
-              <a href={PROD_SERVER.githubRepo} target="_blank" rel="noopener noreferrer">
-                JustXSystems/zigma-technologies
-              </a>{' '}
-              as <code>{PROD_SERVER.sshDeploy}</code> → GitHub Actions → then BigRock DNS cutover so{' '}
-              <strong>{PROD_SERVER.publicUrl}/</strong> serves this app (domain stays registered at BigRock).
+              Blind-follow playbook for domain-root Production on the <strong>Zigma Technologies VPS</strong> (
+              <code>{PROD_SERVER.ipv4}</code> / <code>{PROD_SERVER.sshDeploy}</code>): MySQL/Nginx/PM2, clone into{' '}
+              <code>{PROD_SERVER.appDir}</code>, then <strong>manual selective</strong> GitHub Actions via{' '}
+              <code>PROD_*</code> secrets (never auto on push). PreProd is on a <em>different</em> JustXSystems VPS.
+              After smoke tests, BigRock DNS cutover so <strong>{PROD_SERVER.publicUrl}/</strong> serves this app.
             </p>
             <div className="admin-guide-hero-actions">
               <Link href="/admin/guide" className="admin-btn admin-btn-secondary">
@@ -59,7 +59,7 @@ export default function AdminHostingerProdGuidePage() {
                 DNS / migration
               </Link>
               <Link href="/admin/guide/justxsystems" className="admin-btn admin-btn-secondary">
-                justxsystems staging
+                PreProd guide
               </Link>
               <Link href="/admin/guide/email" className="admin-btn admin-btn-primary">
                 Email guide
@@ -184,6 +184,43 @@ export default function AdminHostingerProdGuidePage() {
                 </tbody>
               </table>
             </div>
+          </section>
+
+          <section id="howto" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Fresher rules</div>
+              <h3>How to use this guide</h3>
+              <p>
+                Copy-paste in order. Production is always <code>{PROD_SERVER.ipv4}</code> — PreProd (
+                <code>193.203.161.219</code>) is a different VPS.
+              </p>
+            </div>
+            <ol className="admin-guide-steps">
+              {PROD_HOWTO.map((rule, i) => (
+                <li key={rule} className="admin-guide-step">
+                  <div className="admin-guide-step-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <p>{rule}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section id="laptop" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Before SSH</div>
+              <h3>Laptop setup checklist</h3>
+              <p>
+                Items tagged LAPTOP in prerequisites — confirm these on your PC before connecting to{' '}
+                <code>{PROD_SERVER.sshRoot}</code>.
+              </p>
+            </div>
+            <ul className="admin-guide-checklist">
+              {PROD_PREREQUISITES.filter((item) => item.startsWith('LAPTOP')).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </section>
 
           <section id="cutover" className="admin-guide-section">
@@ -388,21 +425,26 @@ export default function AdminHostingerProdGuidePage() {
           <section id="gha" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">CI/CD</div>
-              <h3>GitHub Actions — auto deploy (detailed)</h3>
+              <h3>GitHub Actions — selective Production deploy</h3>
               <p>
                 Same procedure as <a href="#phase-gha">Step 11</a>. Target: <code>{PROD_SERVER.sshDeploy}</code>. Monitor
                 runs at{' '}
                 <a href={PROD_SERVER.githubActions} target="_blank" rel="noopener noreferrer">
                   {PROD_SERVER.githubActions}
                 </a>
-                . Actions does not need public DNS — you can finish this before BigRock cutover.
+                . <strong>master push deploys PreProd only</strong> — Production is always manual.
               </p>
             </div>
 
+            <div className="admin-guide-callout admin-guide-callout--warn">
+              <strong>Safety:</strong> Run workflow requires <code>confirm_production=DEPLOY_PROD</code>. Toggle only the
+              components you need (e.g. restart-only, or backup + migrate + build). Full fresh deploy is not required
+              every time.
+            </div>
+
             <div className="admin-guide-callout admin-guide-callout--info">
-              <strong>What “auto-deploy” means:</strong> GitHub SSHs into the VPS and runs{' '}
-              <code>scripts/deploy-prod.sh</code> (<code>git reset --hard origin/master</code> → <code>npm ci</code> →
-              build → <code>pm2 restart zigma</code>). Production <code>.env</code> never leaves the server.
+              <strong>What the runner does:</strong> SSHs into the VPS and runs <code>scripts/deploy.sh --env prod</code>{' '}
+              with your selected flags. Production <code>.env</code> never leaves the server.
             </div>
 
             <span className="admin-guide-detail-label">How it works</span>
@@ -417,7 +459,7 @@ export default function AdminHostingerProdGuidePage() {
               ))}
             </ol>
 
-            <span className="admin-guide-detail-label">Setup — four parts</span>
+            <span className="admin-guide-detail-label">Setup — five parts</span>
             <div className="admin-guide-detail-list">
               {PROD_GHA_PARTS.map((part) => (
                 <article key={part.id} className="admin-guide-detail">
@@ -444,6 +486,32 @@ export default function AdminHostingerProdGuidePage() {
               ))}
             </ol>
 
+            <span className="admin-guide-detail-label">workflow_dispatch inputs (all components)</span>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Input</th>
+                    <th>Default</th>
+                    <th>Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROD_GHA_INPUTS.map((row) => (
+                    <tr key={row.name}>
+                      <td>
+                        <code>{row.name}</code>
+                      </td>
+                      <td>
+                        <code>{row.default}</code>
+                      </td>
+                      <td>{row.purpose}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
             <span className="admin-guide-detail-label">Repository secrets (exact values)</span>
             <div className="admin-table-wrap">
               <table className="admin-table">
@@ -469,6 +537,11 @@ export default function AdminHostingerProdGuidePage() {
                 </tbody>
               </table>
             </div>
+            <div className="admin-guide-callout admin-guide-callout--info">
+              Production uses <code>PROD_HOST</code> / <code>PROD_SSH_USER</code> / <code>PROD_SSH_KEY</code> aimed at{' '}
+              <code>{PROD_SERVER.ipv4}</code>. PreProd uses separate <code>PREPROD_*</code> secrets aimed at the
+              JustXSystems VPS (<code>193.203.161.219</code>). Do not cross-wire them.
+            </div>
 
             <div className="admin-guide-callout admin-guide-callout--warn">
               Create secrets at{' '}
@@ -490,24 +563,26 @@ export default function AdminHostingerProdGuidePage() {
               . Full copy-paste commands are under <a href="#phase-gha">Step 12 → Commands</a>.
             </div>
 
-            <CodeBlock>{`# PART A+B — Windows PowerShell (laptop)
+            <CodeBlock>{`# PART A+B — Windows PowerShell (laptop) — Production key only
 cd $env:USERPROFILE\\Downloads
-ssh-keygen -t ed25519 -C "github-actions-zigma-prod" -f ./gha_zigma_prod -N '""'
+ssh-keygen -t ed25519 -C "gha-zigma-prod" -f ./gha_zigma_prod -N '""'
 type .\\gha_zigma_prod.pub | ssh deploy@${PROD_SERVER.ipv4} "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "whoami"
+ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "whoami && hostname -I"
+# Must show ${PROD_SERVER.ipv4} — not the JustXSystems PreProd IP
 
-# PART B0 — sync VPS to GitHub master (fixes missing deploy-prod.sh / dirty schema.sql)
-ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && git fetch origin && git reset --hard origin/master && ls -la scripts/deploy-prod.sh"
-
-# PART B dry-run
-ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && chmod +x scripts/deploy-prod.sh && ./scripts/deploy-prod.sh"
+# PART B0 + dry-run
+ssh -i .\\gha_zigma_prod deploy@${PROD_SERVER.ipv4} "cd ${PROD_SERVER.appDir} && git fetch origin && git reset --hard origin/master && chmod +x scripts/deploy.sh scripts/deploy-prod.sh && ./scripts/deploy-prod.sh --confirm-prod DEPLOY_PROD --dry-run"
 
 # PART C — clipboard → GitHub secret PROD_SSH_KEY
 Get-Content .\\gha_zigma_prod -Raw | Set-Clipboard
+# Also set PROD_HOST=${PROD_SERVER.ipv4} and PROD_SSH_USER=deploy
+# (PreProd uses separate PREPROD_* secrets → 193.203.161.219)
 
 # PART D — browser
 # ${PROD_SERVER.githubActions}
-# → Deploy Production → Run workflow → master`}</CodeBlock>
+# → Deploy Production → Run workflow
+# → confirm_production = DEPLOY_PROD
+# → toggle components (sync / install / build / restart / db_backup / migrations / …)`}</CodeBlock>
           </section>
 
           <section id="env" className="admin-guide-section">

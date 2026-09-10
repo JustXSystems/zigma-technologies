@@ -2,8 +2,13 @@
 
 import Link from 'next/link';
 import {
+  JX_ARCHITECTURE,
   JX_ENV,
   JX_FAQ,
+  JX_GHA_HOW,
+  JX_GHA_SECRETS,
+  JX_HOWTO,
+  JX_LAPTOP,
   JX_NGINX,
   JX_PHASES,
   JX_PREREQS,
@@ -29,30 +34,30 @@ export default function AdminJustxsystemsGuidePage() {
       <header className="admin-guide-hero">
         <div className="admin-guide-hero-grid">
           <div>
-            <div className="admin-guide-eyebrow">Staging · Hostinger · Subdirectory</div>
-            <h2 className="admin-guide-title">Deploy to justxsystems.com/zigma-technologies</h2>
+            <div className="admin-guide-eyebrow">PreProd · JustXSystems VPS · Subdirectory</div>
+            <h2 className="admin-guide-title">Deploy PreProd to justxsystems.com/zigma-technologies</h2>
             <p className="admin-guide-lead">
-              Blind-follow Hostinger setup for this Next.js app at{' '}
-              <strong>{JX_TARGET.publicUrlSlash}</strong> — including MySQL, GitHub clone,{' '}
-              <code>NEXT_PUBLIC_BASE_PATH</code>, PM2 on port {JX_TARGET.appPort}, and an Nginx location that leaves the
-              existing JustX homepage intact.
+              Blind-follow setup for PreProd at <strong>{JX_TARGET.publicUrlSlash}</strong> on the{' '}
+              <strong>{JX_TARGET.vpsLabel}</strong> (<code>{JX_TARGET.sshDeploy}</code>) — subdirectory (path) deploy with{' '}
+              <code>NEXT_PUBLIC_BASE_PATH</code>, PM2 on port {JX_TARGET.appPort}, and GitHub Actions auto-deploy on every{' '}
+              <code>master</code> push. Production lives on a <em>different</em> VPS.
             </p>
             <div className="admin-guide-hero-actions">
               <Link href="/admin/guide" className="admin-btn admin-btn-secondary">
                 ← Admin guide
               </Link>
               <Link href="/admin/guide/hostinger-prod" className="admin-btn admin-btn-secondary">
-                KVM 2 (domain root)
+                Production (domain root)
               </Link>
               <a href={JX_TARGET.publicUrlSlash} className="admin-btn admin-btn-primary" target="_blank" rel="noreferrer">
-                Open staging URL
+                Open PreProd URL
               </a>
             </div>
           </div>
           <div className="admin-guide-hero-stats">
             <div className="admin-guide-stat">
-              <span className="admin-guide-stat-label">Path</span>
-              <span className="admin-guide-stat-value">/zigma…</span>
+              <span className="admin-guide-stat-label">Kind</span>
+              <span className="admin-guide-stat-value">Path</span>
             </div>
             <div className="admin-guide-stat">
               <span className="admin-guide-stat-label">Port</span>
@@ -63,15 +68,15 @@ export default function AdminJustxsystemsGuidePage() {
               <span className="admin-guide-stat-value">{JX_PHASES.length}</span>
             </div>
             <div className="admin-guide-stat">
-              <span className="admin-guide-stat-label">DB</span>
-              <span className="admin-guide-stat-value">MySQL</span>
+              <span className="admin-guide-stat-label">SSH</span>
+              <span className="admin-guide-stat-value">deploy@</span>
             </div>
           </div>
         </div>
       </header>
 
       <div className="admin-guide-layout">
-        <nav className="admin-guide-toc" aria-label="JustX staging guide sections">
+        <nav className="admin-guide-toc" aria-label="PreProd guide sections">
           <div className="admin-guide-toc-inner">
             <div className="admin-guide-toc-title">Contents</div>
             <ul>
@@ -99,8 +104,8 @@ export default function AdminJustxsystemsGuidePage() {
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Target</div>
               <h3>What you are deploying</h3>
               <p>
-                Staging / test instance of Zigma Technologies under a path on an existing Hostinger domain — not the final
-                production hostname.
+                PreProd is a <strong>subdirectory (path) deploy</strong> under justxsystems.com — not a DNS subdomain and
+                not the apex of zigma-technologies.com. Production stays on the main domain (see the Production guide).
               </p>
             </div>
             <div className="admin-table-wrap">
@@ -116,6 +121,16 @@ export default function AdminJustxsystemsGuidePage() {
                     <th>Admin</th>
                     <td>
                       <code>{JX_TARGET.adminUrl}</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Deploy kind</th>
+                    <td>Subdirectory / path (<code>NEXT_PUBLIC_BASE_PATH</code>)</td>
+                  </tr>
+                  <tr>
+                    <th>SSH</th>
+                    <td>
+                      <code>{JX_TARGET.sshDeploy}</code>
                     </td>
                   </tr>
                   <tr>
@@ -142,6 +157,12 @@ export default function AdminJustxsystemsGuidePage() {
                       <code>{JX_TARGET.dbName}</code> / <code>{JX_TARGET.dbUser}</code>
                     </td>
                   </tr>
+                  <tr>
+                    <th>Workflow</th>
+                    <td>
+                      <code>{JX_TARGET.workflow}</code> (auto on <code>master</code> push)
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -151,9 +172,73 @@ export default function AdminJustxsystemsGuidePage() {
               ))}
             </ul>
             <div className="admin-guide-callout admin-guide-callout--warn">
-              Local DEV should leave <code>NEXT_PUBLIC_BASE_PATH</code> unset. Only the JustX staging build uses{' '}
+              Local DEV should leave <code>NEXT_PUBLIC_BASE_PATH</code> unset. Only PreProd uses{' '}
               <code>/zigma-technologies</code>. Changing basePath always requires a fresh <code>npm run build</code>.
             </div>
+          </section>
+
+          <section id="architecture" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Architecture</div>
+              <h3>Two-VPS architecture</h3>
+              <p>
+                PreProd runs only on the JustXSystems VPS (<code>{JX_TARGET.ipv4}</code>). Production runs on a separate
+                Zigma Technologies VPS — different SSH, secrets, MySQL, and Nginx.
+              </p>
+            </div>
+            <div className="admin-guide-arch-stack">
+              {JX_ARCHITECTURE.map((layer, i) => (
+                <div key={layer.label} className="admin-guide-arch-layer">
+                  <span className="admin-guide-arch-index">{String(i + 1).padStart(2, '0')}</span>
+                  <strong>{layer.label}</strong>
+                  <ul>
+                    {layer.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="howto" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Fresher</div>
+              <h3>How to use this guide</h3>
+              <p>
+                Copy-paste friendly. Comments starting with <code>#</code> explain each line; look for{' '}
+                <code># Expect:</code> to know if you succeeded.
+              </p>
+            </div>
+            <ol className="admin-guide-steps">
+              {JX_HOWTO.map((item, i) => (
+                <li key={item} className="admin-guide-step">
+                  <div className="admin-guide-step-index">{String(i + 1).padStart(2, '0')}</div>
+                  <div>
+                    <p>{item}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="admin-guide-callout admin-guide-callout--warn">
+              Wrong VPS check every time you SSH: <code>hostname -I</code> must include <code>{JX_TARGET.ipv4}</code>. If
+              you see <code>200.234.45.106</code>, you are on Production — type <code>exit</code>.
+            </div>
+          </section>
+
+          <section id="laptop" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Before SSH</div>
+              <h3>Laptop prep</h3>
+              <p>Do this on Windows PowerShell before touching the JustXSystems VPS.</p>
+            </div>
+            <ol>
+              {JX_LAPTOP.steps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+            <span className="admin-guide-detail-label">Commands</span>
+            <CodeBlock>{JX_LAPTOP.code}</CodeBlock>
           </section>
 
           <section id="validated" className="admin-guide-section">
@@ -161,10 +246,6 @@ export default function AdminJustxsystemsGuidePage() {
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Verified</div>
               <h3>Quality gates (run before Hostinger)</h3>
               <p>{JX_VALIDATED.dateNote}</p>
-            </div>
-            <div className="admin-guide-callout admin-guide-callout--info">
-              Root <code>tsconfig.json</code> excludes <code>apps/**</code> so React Native&apos;s FormData types do not
-              break <code>npm run typecheck</code> / <code>next build</code> for this web app.
             </div>
             <h4 className="admin-guide-subheading">On your laptop (before git push)</h4>
             <CodeBlock>{JX_VALIDATED.localQualityGates}</CodeBlock>
@@ -237,7 +318,7 @@ export default function AdminJustxsystemsGuidePage() {
           <section id="env" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--orange">Secrets</div>
-              <h3>.env for justxsystems (exact template)</h3>
+              <h3>.env for PreProd (exact template)</h3>
               <p>
                 Save as <code>{JX_TARGET.appDir}/.env</code> with mode <code>600</code>. Fill every{' '}
                 <code>&lt;…&gt;</code> placeholder before building.
@@ -257,6 +338,49 @@ export default function AdminJustxsystemsGuidePage() {
             </div>
             <CodeBlock>{JX_NGINX}</CodeBlock>
             <CodeBlock>{`sudo nginx -t && sudo systemctl reload nginx`}</CodeBlock>
+          </section>
+
+          <section id="gha" className="admin-guide-section">
+            <div className="admin-guide-section-head">
+              <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">CI/CD</div>
+              <h3>GitHub Actions — Deploy PreProd (default)</h3>
+              <p>
+                Every push to <code>master</code> deploys PreProd. Production is never auto-deployed from this workflow.
+              </p>
+            </div>
+            <ol>
+              {JX_GHA_HOW.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Secret</th>
+                    <th>Example</th>
+                    <th>Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {JX_GHA_SECRETS.map((row) => (
+                    <tr key={row.name}>
+                      <td>
+                        <code>{row.name}</code>
+                      </td>
+                      <td>
+                        <code>{row.example}</code>
+                      </td>
+                      <td>{row.purpose}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="admin-guide-callout admin-guide-callout--info">
+              Manual Run workflow also exposes optional toggles (sync / install / build / restart / clear .next /
+              healthcheck). Push events always run the full default set.
+            </div>
           </section>
 
           <section id="verify" className="admin-guide-section">
@@ -289,7 +413,7 @@ export default function AdminJustxsystemsGuidePage() {
           <section id="updates" className="admin-guide-section">
             <div className="admin-guide-section-head">
               <div className="admin-guide-eyebrow admin-guide-eyebrow--cyan">Operations</div>
-              <h3>Deploy updates from GitHub</h3>
+              <h3>Deploy updates (SSH or Actions)</h3>
             </div>
             <CodeBlock>{JX_UPDATE}</CodeBlock>
           </section>
@@ -308,7 +432,7 @@ export default function AdminJustxsystemsGuidePage() {
               ))}
             </div>
             <div className="admin-guide-callout admin-guide-callout--info">
-              Related: <Link href="/admin/guide/hostinger-prod">KVM 2 production (domain root)</Link> ·{' '}
+              Related: <Link href="/admin/guide/hostinger-prod">Production (domain root)</Link> ·{' '}
               <Link href="/admin/guide/migration">DNS migration</Link>
             </div>
           </section>
