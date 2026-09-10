@@ -40,6 +40,8 @@ export type CatalogItem = {
   price_label: string | null;
   availability_label: string | null;
   lead_time_label: string | null;
+  /** Backdrop for catalog-gallery-main in product/service/project popups */
+  background_image_url: string | null;
   status: 'draft' | 'published';
   featured: number;
   sort_order: number;

@@ -14,6 +14,7 @@ const updateSchema = z.object({
   price_label: z.string().nullable().optional(),
   availability_label: z.string().nullable().optional(),
   lead_time_label: z.string().nullable().optional(),
+  background_image_url: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).optional(),
   featured: z.boolean().optional(),
   enabled: z.boolean().optional(),

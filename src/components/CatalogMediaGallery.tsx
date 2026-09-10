@@ -8,9 +8,17 @@ type Props = {
   title?: string;
   className?: string;
   variant?: 'default' | 'detail';
+  /** Optional backdrop behind gallery media (catalog-gallery-main) */
+  backgroundImageUrl?: string | null;
 };
 
-export default function CatalogMediaGallery({ media, title, className, variant = 'default' }: Props) {
+export default function CatalogMediaGallery({
+  media,
+  title,
+  className,
+  variant = 'default',
+  backgroundImageUrl,
+}: Props) {
   const sorted = useMemo(
     () => [...media].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) || a.sort_order - b.sort_order || a.id - b.id),
     [media]
@@ -23,18 +31,32 @@ export default function CatalogMediaGallery({ media, title, className, variant =
   }, [sorted]);
 
   const active = sorted.find((m) => m.id === activeId) || sorted[0];
+  const bg = backgroundImageUrl?.trim() || '';
 
-  const rootClass = ['catalog-gallery', variant === 'detail' ? 'catalog-gallery--detail' : '', className]
+  const rootClass = [
+    'catalog-gallery',
+    variant === 'detail' ? 'catalog-gallery--detail' : '',
+    bg ? 'catalog-gallery--has-bg' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 
+  const mainStyle = bg ? ({ backgroundImage: `url("${bg.replace(/"/g, '\\"')}")` } as const) : undefined;
+
   if (!sorted.length) {
-    return <div className={`${rootClass} catalog-gallery--empty`} aria-hidden="true" />;
+    return (
+      <div
+        className={`${rootClass} catalog-gallery--empty`}
+        style={mainStyle}
+        aria-hidden="true"
+      />
+    );
   }
 
   return (
     <div className={rootClass}>
-      <div className="catalog-gallery-main">
+      <div className="catalog-gallery-main" style={mainStyle}>
         {active?.kind === 'video' ? (
           <video key={active.id} src={active.url} controls playsInline className="catalog-gallery-media" />
         ) : (

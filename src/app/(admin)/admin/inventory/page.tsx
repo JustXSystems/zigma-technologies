@@ -98,7 +98,9 @@ function InventoryInner() {
   const [mediaItem, setMediaItem] = useState<CatalogItem | null>(null);
   const [itemMedia, setItemMedia] = useState<CatalogMedia[]>([]);
   const [attachUrl, setAttachUrl] = useState('');
+  const [backgroundUrl, setBackgroundUrl] = useState('');
   const [mediaMsg, setMediaMsg] = useState('');
+  const [savingBackground, setSavingBackground] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -268,6 +270,7 @@ function InventoryInner() {
         price_label: item.price_label,
         availability_label: item.availability_label,
         lead_time_label: item.lead_time_label,
+        background_image_url: item.background_image_url,
         status: 'draft',
         featured: false,
         enabled: false,
@@ -343,14 +346,42 @@ function InventoryInner() {
     });
   }
 
-  async function openMedia(item: CatalogItem) {
+  async function openMedia(item: CatalogItem, opts?: { resetBackground?: boolean }) {
+    const switching = mediaItem?.id !== item.id;
     setMediaItem(item);
     setMediaMsg('');
     setAttachUrl('');
+    if (opts?.resetBackground !== false && (switching || !mediaItem)) {
+      setBackgroundUrl(item.background_image_url || '');
+    }
     const res = await fetch(`/api/admin/catalog/${item.id}/media`);
     const data = await res.json();
     if (res.ok) setItemMedia(data.media || []);
     else setError(data.error || 'Failed to load media');
+  }
+
+  async function saveBackgroundImage(url: string | null) {
+    if (!mediaItem) return;
+    setSavingBackground(true);
+    setMediaMsg('');
+    try {
+      const res = await fetch(`/api/admin/catalog/${mediaItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ background_image_url: url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not save background');
+      const nextUrl = data.item?.background_image_url || '';
+      setBackgroundUrl(nextUrl);
+      setMediaItem({ ...mediaItem, background_image_url: nextUrl || null });
+      setMediaMsg(nextUrl ? 'Background image saved.' : 'Background image cleared.');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save background');
+    } finally {
+      setSavingBackground(false);
+    }
   }
 
   async function attachLibraryMedia(url: string, isPrimary = false) {
@@ -368,7 +399,7 @@ function InventoryInner() {
     }
     setMediaMsg('Attached.');
     setAttachUrl('');
-    await openMedia(mediaItem);
+    await openMedia(mediaItem, { resetBackground: false });
     await load();
   }
 
@@ -412,7 +443,7 @@ function InventoryInner() {
   async function removeMedia(mediaId: number) {
     if (!mediaItem) return;
     await fetch(`/api/admin/catalog/${mediaItem.id}/media?media_id=${mediaId}`, { method: 'DELETE' });
-    await openMedia(mediaItem);
+    await openMedia(mediaItem, { resetBackground: false });
     await load();
   }
 
@@ -787,9 +818,49 @@ function InventoryInner() {
           <div className="admin-modal" style={{ width: 'min(860px, 100%)' }} onClick={(e) => e.stopPropagation()}>
             <h2>Media · {mediaItem.title}</h2>
             <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem', marginTop: 0 }}>
-              Attach multiple images, SVG, or videos. Set one image/SVG as the <strong>card thumbnail</strong> (★). Videos appear in the detail gallery but are not used as list thumbnails.
+              Attach multiple images, SVG, or videos. Set one image/SVG as the <strong>card thumbnail</strong> (★).
+              Optionally set a <strong>gallery background</strong> for the public product/service/project popup. Videos appear in
+              the detail gallery but are not used as list thumbnails.
             </p>
             {mediaMsg ? <div className="admin-success">{mediaMsg}</div> : null}
+
+            <div
+              style={{
+                border: '1px solid #e5e7eb',
+                borderRadius: 10,
+                padding: '0.85rem 1rem',
+                marginBottom: '1rem',
+                background: '#fafbfc',
+              }}
+            >
+              <MediaPicker
+                value={backgroundUrl}
+                onChange={setBackgroundUrl}
+                label="Gallery background image (catalog popup)"
+              />
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.65rem' }}>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-primary"
+                  disabled={savingBackground || backgroundUrl === (mediaItem.background_image_url || '')}
+                  onClick={() => saveBackgroundImage(backgroundUrl.trim() || null)}
+                >
+                  {savingBackground ? 'Saving…' : 'Save background'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary"
+                  disabled={savingBackground || (!backgroundUrl && !mediaItem.background_image_url)}
+                  onClick={() => {
+                    setBackgroundUrl('');
+                    void saveBackgroundImage(null);
+                  }}
+                >
+                  Clear background
+                </button>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.8rem' }}>
               <label className="admin-btn admin-btn-primary" style={{ cursor: 'pointer' }}>
                 Upload files
@@ -803,7 +874,7 @@ function InventoryInner() {
                     if (!files?.length || !mediaItem) return;
                     try {
                       await uploadMedia(files, mediaItem.id, itemMedia.length === 0);
-                      await openMedia(mediaItem);
+                      await openMedia(mediaItem, { resetBackground: false });
                       setMediaMsg(`Uploaded ${files.length} file(s).`);
                     } catch (err) {
                       setError(err instanceof Error ? err.message : 'Upload failed');

@@ -262,6 +262,7 @@ mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-categories.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-resource-posts.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-testimonials.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-wave3.sql
+mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-background.sql
 ```
 
 When in doubt, ask a senior dev or check git history for new `scripts/migrate-*.sql` files.

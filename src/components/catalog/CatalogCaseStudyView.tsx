@@ -318,7 +318,12 @@ export default function CatalogCaseStudyView({
             {item.media?.length ? (
               <div className="case-study-sidebar-block">
                 <h3>Gallery</h3>
-                <CatalogMediaGallery media={item.media} title={item.title} variant="detail" />
+                <CatalogMediaGallery
+                  media={item.media}
+                  title={item.title}
+                  variant="detail"
+                  backgroundImageUrl={item.background_image_url}
+                />
               </div>
             ) : null}
 

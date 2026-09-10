@@ -194,7 +194,12 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
           <div className={`catalog-detail-layout${showMedia ? '' : ' catalog-detail-layout--no-media'}`}>
             {showMedia ? (
               <aside className="catalog-detail-media-col">
-                <CatalogMediaGallery media={item.media || []} title={item.title} variant="detail" />
+                <CatalogMediaGallery
+                  media={item.media || []}
+                  title={item.title}
+                  variant="detail"
+                  backgroundImageUrl={item.background_image_url}
+                />
               </aside>
             ) : null}
 

@@ -30,6 +30,7 @@ function mapItem(row: RowDataPacket): CatalogItem {
     price_label: row.price_label,
     availability_label: row.availability_label ?? null,
     lead_time_label: row.lead_time_label ?? null,
+    background_image_url: row.background_image_url ?? null,
     status: row.status,
     featured: row.featured,
     sort_order: row.sort_order,
@@ -226,6 +227,7 @@ export async function createCatalogItem(input: {
   price_label?: string | null;
   availability_label?: string | null;
   lead_time_label?: string | null;
+  background_image_url?: string | null;
   status?: 'draft' | 'published';
   featured?: boolean;
   enabled?: boolean;
@@ -236,8 +238,8 @@ export async function createCatalogItem(input: {
   const slug = slugify(input.slug || input.title);
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO catalog_items
-      (item_type, slug, title, summary, description, category_id, tags_json, specs_json, price_label, availability_label, lead_time_label, status, featured, enabled, sort_order, case_study_json, cta_config_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (item_type, slug, title, summary, description, category_id, tags_json, specs_json, price_label, availability_label, lead_time_label, background_image_url, status, featured, enabled, sort_order, case_study_json, cta_config_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.item_type,
       slug,
@@ -250,6 +252,7 @@ export async function createCatalogItem(input: {
       input.price_label ?? null,
       input.availability_label ?? null,
       input.lead_time_label ?? null,
+      input.background_image_url?.trim() || null,
       input.status || 'draft',
       input.featured ? 1 : 0,
       input.enabled === false ? 0 : 1,
@@ -274,6 +277,7 @@ export async function updateCatalogItem(
     price_label: string | null;
     availability_label: string | null;
     lead_time_label: string | null;
+    background_image_url: string | null;
     status: 'draft' | 'published';
     featured: boolean;
     enabled: boolean;
@@ -296,6 +300,10 @@ export async function updateCatalogItem(
     price_label: input.price_label,
     availability_label: input.availability_label,
     lead_time_label: input.lead_time_label,
+    background_image_url:
+      input.background_image_url !== undefined
+        ? input.background_image_url?.trim() || null
+        : undefined,
     status: input.status,
     featured: input.featured === undefined ? undefined : input.featured ? 1 : 0,
     enabled: input.enabled === undefined ? undefined : input.enabled ? 1 : 0,

@@ -109,6 +109,7 @@ mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-categories.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-resource-posts.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-testimonials.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-wave3.sql
+mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-background.sql
 ```
 
 ### 2. Environment variables
