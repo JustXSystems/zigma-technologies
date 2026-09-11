@@ -733,6 +733,13 @@ sudo grep -R "justxsystems.com" /etc/nginx/sites-available/ /etc/nginx/sites-ena
 # sudo nano /etc/nginx/sites-available/justxsystems.com
 
 # Paste INSIDE server { ... } for justxsystems.com :443 — exact block also in "Nginx location" section:
+#     # Serve CMS media from disk (runtime uploads). MUST be above the proxy location.
+#     location ^~ /zigma-technologies/assets/ {
+#         alias /var/www/zigma-technologies/public/assets/;
+#         access_log off;
+#         expires 7d;
+#         add_header Cache-Control "public";
+#     }
 #     location /zigma-technologies {
 #         proxy_pass http://127.0.0.1:3001;
 #         proxy_http_version 1.1;
@@ -951,6 +958,14 @@ export const JX_NGINX = `# Insert inside the existing HTTPS server { ... } for j
 # BAD:  proxy_pass http://127.0.0.1:${PREPROD.appPort}/zigma-technologies;
 
     # --- Zigma PreProd on JustXSystems VPS ---
+    # Runtime CMS uploads: serve public/assets from disk (Next production may 404 new files).
+    location ^~ /zigma-technologies/assets/ {
+        alias /var/www/zigma-technologies/public/assets/;
+        access_log off;
+        expires 7d;
+        add_header Cache-Control "public";
+    }
+
     location /zigma-technologies {
         proxy_pass http://127.0.0.1:${PREPROD.appPort};
         proxy_http_version 1.1;
