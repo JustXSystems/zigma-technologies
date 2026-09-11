@@ -34,6 +34,8 @@ export default function CatalogMediaGallery({
   const active = sorted.find((m) => m.id === activeId) || sorted[0];
   // CSS url() is not rewritten by BasePathBootstrap (only <img>/<a>/fetch) — must prefix here.
   const bg = withBasePath(backgroundImageUrl?.trim() || '');
+  // Encode special chars in URLs for CSS url("…") (spaces, etc.)
+  const bgCss = bg ? bg.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)') : '';
 
   const rootClass = [
     'catalog-gallery',
@@ -44,7 +46,7 @@ export default function CatalogMediaGallery({
     .filter(Boolean)
     .join(' ');
 
-  const mainStyle = bg ? ({ backgroundImage: `url("${bg.replace(/"/g, '\\"')}")` } as const) : undefined;
+  const mainStyle = bgCss ? ({ backgroundImage: `url("${bgCss}")` } as const) : undefined;
 
   if (!sorted.length) {
     return (

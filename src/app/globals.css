@@ -2031,15 +2031,29 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 /* Catalog media gallery */
 .catalog-gallery--empty{background:#f4f6f9;min-height:240px;border-radius:12px;}
 .catalog-gallery-main{
-  border-radius:12px;overflow:hidden;background:#0f1720;
+  position:relative;border-radius:12px;overflow:hidden;background:#0f1720;
   background-size:cover;background-position:center;background-repeat:no-repeat;
 }
 .catalog-gallery-media{width:100%;max-height:420px;display:block;object-fit:cover;background:#000;}
-.catalog-gallery--has-bg .catalog-gallery-media{
-  object-fit:contain;background:transparent;
+/* Gallery background must stay visible around the foreground media (not covered by a full-bleed photo). */
+.catalog-gallery--has-bg .catalog-gallery-main{
+  display:flex;align-items:center;justify-content:center;
+  min-height:280px;padding:1.35rem;box-sizing:border-box;
+  background-color:#0f1720;
+  background-size:cover;background-position:center;background-repeat:no-repeat;
 }
-.catalog-gallery--has-bg.catalog-gallery--empty,
-.catalog-gallery--has-bg .catalog-gallery-main{background-color:#0f1720;}
+.catalog-gallery--has-bg .catalog-gallery-media{
+  position:relative;z-index:1;
+  width:auto;max-width:100%;height:auto;
+  max-height:min(44vh,380px);
+  object-fit:contain;background:rgba(255,255,255,0.04);
+  border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,0.45);
+}
+.catalog-gallery--has-bg.catalog-gallery--empty{
+  min-height:320px;background-size:cover;background-position:center;background-color:#0f1720;
+}
+.catalog-gallery--detail.catalog-gallery--has-bg .catalog-gallery-main{min-height:min(52vh,420px);padding:1.5rem;}
+.catalog-gallery--detail.catalog-gallery--has-bg .catalog-gallery-media{max-height:min(46vh,400px);}
 .catalog-gallery--detail .catalog-gallery-main{border-radius:14px;}
 .catalog-gallery--detail .catalog-gallery-media{max-height:min(52vh,480px);}
 .catalog-gallery-thumbs{display:flex;gap:0.5rem;margin-top:0.7rem;overflow-x:auto;padding-bottom:2px;}

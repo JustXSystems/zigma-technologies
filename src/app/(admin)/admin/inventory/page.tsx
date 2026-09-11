@@ -838,6 +838,10 @@ function InventoryInner() {
                 onChange={setBackgroundUrl}
                 label="Gallery background image (catalog popup)"
               />
+              <p style={{ margin: '0.55rem 0 0', fontSize: '0.8rem', color: 'var(--admin-muted)' }}>
+                Shown behind the product media in the public catalog popup (inset frame). Save, then open the public
+                products/services/projects page → click the item to verify.
+              </p>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.65rem' }}>
                 <button
                   type="button"
