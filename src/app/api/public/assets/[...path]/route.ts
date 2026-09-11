@@ -21,11 +21,10 @@ const MIME: Record<string, string> = {
 };
 
 /**
- * Serve CMS / public media from disk.
- *
- * Next.js production indexes `public/` only at process start, so files uploaded
- * or copied after start 404 from the static layer. This handler always reads the
- * live `public/assets` tree (and never resumes/documents).
+ * Disk-backed CMS media. Used via next.config beforeFiles rewrite from
+ * /assets/{images,svg,video}/* so runtime uploads work in production
+ * (Next's public/ index does not pick up files added after process start).
+ * Safe for both PreProd (basePath) and Production (domain root).
  */
 export async function GET(
   _request: Request,
@@ -42,6 +41,12 @@ export async function GET(
 
   const relUrlPath = `/assets/${segments.join('/')}`;
   if (isPrivateUploadPath(relUrlPath)) {
+    return new NextResponse('Not found', { status: 404 });
+  }
+
+  // Only allow CMS library folders (not private uploads)
+  const top = segments[0];
+  if (top !== 'images' && top !== 'svg' && top !== 'video') {
     return new NextResponse('Not found', { status: 404 });
   }
 

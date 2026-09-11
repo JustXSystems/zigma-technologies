@@ -13,6 +13,7 @@ import {
   type FormField,
   type Enquiry,
 } from '@/lib/types';
+import { toStorageMediaPath } from '@/lib/media-paths';
 
 function mapItem(row: RowDataPacket): CatalogItem {
   return {
@@ -30,7 +31,9 @@ function mapItem(row: RowDataPacket): CatalogItem {
     price_label: row.price_label,
     availability_label: row.availability_label ?? null,
     lead_time_label: row.lead_time_label ?? null,
-    background_image_url: row.background_image_url ?? null,
+    background_image_url: row.background_image_url
+      ? toStorageMediaPath(String(row.background_image_url))
+      : null,
     status: row.status,
     featured: row.featured,
     sort_order: row.sort_order,
@@ -252,7 +255,9 @@ export async function createCatalogItem(input: {
       input.price_label ?? null,
       input.availability_label ?? null,
       input.lead_time_label ?? null,
-      input.background_image_url?.trim() || null,
+      input.background_image_url?.trim()
+        ? toStorageMediaPath(input.background_image_url.trim())
+        : null,
       input.status || 'draft',
       input.featured ? 1 : 0,
       input.enabled === false ? 0 : 1,
@@ -302,7 +307,9 @@ export async function updateCatalogItem(
     lead_time_label: input.lead_time_label,
     background_image_url:
       input.background_image_url !== undefined
-        ? input.background_image_url?.trim() || null
+        ? input.background_image_url?.trim()
+          ? toStorageMediaPath(input.background_image_url.trim())
+          : null
         : undefined,
     status: input.status,
     featured: input.featured === undefined ? undefined : input.featured ? 1 : 0,

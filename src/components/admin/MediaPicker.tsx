@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { withBasePath } from '@/lib/base-path';
+import { toStorageMediaPath } from '@/lib/media-url';
 
 type Asset = { id: number | null; path: string; mime: string | null; alt: string | null };
 
@@ -34,6 +35,8 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
   const isImage = (mime: string | null, path: string) =>
     (mime && mime.startsWith('image/')) || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
 
+  const previewSrc = value && isImage(null, value) ? withBasePath(toStorageMediaPath(value)) : '';
+
   return (
     <div className="admin-field">
       <label>{label}</label>
@@ -42,17 +45,17 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
           className="admin-input"
           style={{ flex: 1, minWidth: 180 }}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(toStorageMediaPath(e.target.value) || e.target.value)}
           placeholder="/assets/images/… or /assets/svg/…"
         />
         <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setOpen(true)}>
           Browse media
         </button>
       </div>
-      {value && isImage(null, value) ? (
+      {previewSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={withBasePath(value)}
+          src={previewSrc}
           alt=""
           style={{ marginTop: '0.55rem', maxHeight: 72, borderRadius: 6 }}
         />
@@ -83,34 +86,40 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
               >
                 {assets
                   .filter((a) => isImage(a.mime, a.path))
-                  .map((asset) => (
-                    <button
-                      key={asset.id ?? asset.path}
-                      type="button"
-                      onClick={() => {
-                        onChange(asset.path);
-                        setOpen(false);
-                      }}
-                      style={{
-                        border: value === asset.path ? '2px solid var(--orange, #FF6B1A)' : '1px solid #e5e7eb',
-                        borderRadius: 8,
-                        padding: '0.45rem',
-                        background: '#fff',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={withBasePath(asset.path)}
-                        alt={asset.alt || ''}
-                        style={{ width: '100%', height: 88, objectFit: 'cover', borderRadius: 6 }}
-                      />
-                      <code style={{ display: 'block', marginTop: 6, fontSize: '0.65rem', wordBreak: 'break-all' }}>
-                        {asset.path}
-                      </code>
-                    </button>
-                  ))}
+                  .map((asset) => {
+                    const storagePath = toStorageMediaPath(asset.path);
+                    return (
+                      <button
+                        key={asset.id ?? storagePath}
+                        type="button"
+                        onClick={() => {
+                          onChange(storagePath);
+                          setOpen(false);
+                        }}
+                        style={{
+                          border:
+                            value === storagePath || value === asset.path
+                              ? '2px solid var(--orange, #FF6B1A)'
+                              : '1px solid #e5e7eb',
+                          borderRadius: 8,
+                          padding: '0.45rem',
+                          background: '#fff',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={withBasePath(storagePath)}
+                          alt={asset.alt || ''}
+                          style={{ width: '100%', height: 88, objectFit: 'cover', borderRadius: 6 }}
+                        />
+                        <code style={{ display: 'block', marginTop: 6, fontSize: '0.65rem', wordBreak: 'break-all' }}>
+                          {storagePath}
+                        </code>
+                      </button>
+                    );
+                  })}
               </div>
             )}
           </div>

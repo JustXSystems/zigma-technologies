@@ -16,7 +16,8 @@
 #   scripts/deploy-preprod.sh  → .github/workflows/deploy-preprod.yml
 #   scripts/deploy-prod.sh     → .github/workflows/deploy-prod.yml
 #
-# .env and untracked uploads stay on the server (never overwritten by git).
+# .env and untracked uploads under public/assets stay on the server
+# (git reset --hard does not delete untracked files; this script never runs git clean).
 set -euo pipefail
 
 ENV_NAME=""
@@ -149,6 +150,14 @@ log "  public=$PUBLIC_HINT"
 [[ -d "$APP_DIR" ]] || die "App directory missing: $APP_DIR (are you on the correct VPS? expected $SSH_HINT)"
 cd "$APP_DIR"
 
+# CMS media dirs must exist for MediaPicker uploads (do not rely on git-tracked files alone)
+mkdir -p \
+  public/assets/images \
+  public/assets/svg \
+  public/assets/video \
+  public/assets/uploads/resumes \
+  public/assets/uploads/documents
+
 if [[ ! -f .env ]]; then
   die "$APP_DIR/.env is missing. Create it from .env.example before deploying."
 fi
@@ -276,6 +285,22 @@ if [[ "$DO_HEALTHCHECK" -eq 1 && "$DO_RESTART" -eq 1 ]]; then
     200|301|302|307|308) log "Healthcheck OK (HTTP $CODE)" ;;
     *) die "Healthcheck failed (HTTP ${CODE:-none}). Check: pm2 logs $PM2_NAME --lines 80" ;;
   esac
+
+  # Prove CMS media rewrite serves from disk (admin MediaPicker + backgrounds)
+  ASSET_REL="assets/images/zigma-technologies-logo.png"
+  if [[ -f "public/${ASSET_REL}" ]]; then
+    ASSET_URL="http://127.0.0.1:${APP_PORT}${EXPECT_BASE_PATH}/${ASSET_REL}"
+    log "Asset healthcheck ${ASSET_URL}"
+    ACODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$ASSET_URL" || true)"
+    ATYPE="$(curl -s -o /dev/null -w '%{content_type}' --max-time 15 "$ASSET_URL" || true)"
+    if [[ "$ACODE" != "200" ]]; then
+      die "Asset healthcheck failed (HTTP ${ACODE}). CMS media rewrite broken — admin background previews will fail."
+    fi
+    log "Asset healthcheck OK (HTTP $ACODE, type=${ATYPE})"
+  else
+    log "Skip asset healthcheck (public/${ASSET_REL} missing)"
+  fi
 fi
 
 log "Deploy finished OK ($ENV_NAME @ $SSH_HINT → $PUBLIC_HINT)"
+log "Note: runtime uploads live under public/assets/{images,svg,video} (untracked). Never git clean -fd here."

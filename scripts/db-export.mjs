@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Export MySQL CMS database (+ optional media) for UAT/prod transfer.
+ * Export MySQL CMS database (+ media) for UAT/prod transfer.
  *
  * Usage:
  *   node scripts/db-export.mjs
- *   node scripts/db-export.mjs --with-cms-media
+ *   node scripts/db-export.mjs --no-cms-media
  *   node scripts/db-export.mjs --no-uploads
  *   node scripts/db-export.mjs --out storage/exports/my-snapshot
  *
@@ -12,7 +12,7 @@
  *   <out>/database.sql
  *   <out>/meta.json
  *   <out>/uploads/          (public/assets/uploads) unless --no-uploads
- *   <out>/cms-media/…       if --with-cms-media (images, svg, video)
+ *   <out>/cms-media/…       images, svg, video (default ON; use --no-cms-media to skip)
  */
 
 import fs from 'fs';
@@ -59,7 +59,7 @@ function loadProjectEnv() {
 function parseArgs(argv) {
   const out = {
     withUploads: true,
-    withCmsMedia: false,
+    withCmsMedia: true, // CMS library (images/svg/video) — required for backgrounds / MediaPicker
     outDir: null,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -67,10 +67,47 @@ function parseArgs(argv) {
     if (a === '--no-uploads') out.withUploads = false;
     else if (a === '--with-uploads') out.withUploads = true;
     else if (a === '--with-cms-media') out.withCmsMedia = true;
+    else if (a === '--no-cms-media') out.withCmsMedia = false;
     else if (a === '--out') out.outDir = argv[++i];
     else if (a === '--help' || a === '-h') out.help = true;
   }
   return out;
+}
+
+function listFilesRecursive(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const out = [];
+  const walk = (d, prefix = '') => {
+    for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
+      const rel = prefix ? `${prefix}/${ent.name}` : ent.name;
+      const full = path.join(d, ent.name);
+      if (ent.isDirectory()) walk(full, rel);
+      else out.push(rel.replace(/\\/g, '/'));
+    }
+  };
+  walk(dir);
+  return out;
+}
+
+/** Collect root-relative /assets/images|svg|video paths referenced in dump rows. */
+function collectCmsAssetRefs(connEscapeUnused, tablesData) {
+  void connEscapeUnused;
+  const refs = new Set();
+  const re = /\/(?:zigma-technologies\/)?assets\/(images|svg|video)\/[A-Za-z0-9._-]+/g;
+  for (const rows of tablesData) {
+    for (const row of rows) {
+      for (const v of Object.values(row)) {
+        if (typeof v !== 'string') continue;
+        let m;
+        re.lastIndex = 0;
+        while ((m = re.exec(v))) {
+          const cleaned = m[0].replace(/^\/zigma-technologies/, '');
+          refs.add(cleaned);
+        }
+      }
+    }
+  }
+  return [...refs].sort();
 }
 
 function stamp() {
@@ -102,7 +139,10 @@ async function main() {
     console.log(`Export Zigma CMS database for UAT/prod.
 
 Usage:
-  node scripts/db-export.mjs [--out DIR] [--no-uploads] [--with-cms-media]
+  node scripts/db-export.mjs [--out DIR] [--no-uploads] [--no-cms-media]
+
+Defaults: includes public/assets/uploads AND cms-media (images/svg/video).
+Use --no-cms-media only for SQL-only dumps (background images will break on import).
 
 Reads DB_* from environment / .env / .env.local
 `);
@@ -153,6 +193,8 @@ Reads DB_* from environment / .env / .env.local
     lines.push('');
 
     const rowCounts = {};
+    /** @type {Record<string, object[]>} */
+    const tableRowsCache = {};
 
     for (const table of tables) {
       const [createRows] = await conn.query(`SHOW CREATE TABLE \`${table}\``);
@@ -166,6 +208,7 @@ Reads DB_* from environment / .env / .env.local
 
       const [rows] = await conn.query(`SELECT * FROM \`${table}\``);
       rowCounts[table] = rows.length;
+      tableRowsCache[table] = rows;
       if (!rows.length) {
         lines.push(`-- (empty)`);
         lines.push('');
@@ -216,6 +259,7 @@ Reads DB_* from environment / .env / .env.local
     }
 
     let cmsMediaMeta = { images: 0, svg: 0, video: 0 };
+    const cmsMediaFiles = [];
     if (args.withCmsMedia) {
       for (const cat of ['images', 'svg', 'video']) {
         const r = copyDirIfExists(
@@ -223,13 +267,37 @@ Reads DB_* from environment / .env / .env.local
           path.join(outDir, 'cms-media', cat)
         );
         cmsMediaMeta[cat] = r.files;
-        if (r.copied) console.log(`  ✓ cms-media/${cat} (${r.files} files)`);
+        if (r.copied) {
+          console.log(`  ✓ cms-media/${cat} (${r.files} files)`);
+          for (const rel of listFilesRecursive(path.join(outDir, 'cms-media', cat))) {
+            cmsMediaFiles.push(`/assets/${cat}/${rel}`);
+          }
+        }
       }
+    } else {
+      console.log('  · cms-media skipped (--no-cms-media) — catalog backgrounds may break on import');
+    }
+
+    const referenced = collectCmsAssetRefs(null, Object.values(tableRowsCache));
+    const missingOnDisk = [];
+    const missingInExport = [];
+    for (const ref of referenced) {
+      const disk = path.join(ROOT, 'public', ref.replace(/^\//, ''));
+      if (!fs.existsSync(disk)) missingOnDisk.push(ref);
+      else if (args.withCmsMedia && !cmsMediaFiles.includes(ref)) missingInExport.push(ref);
+    }
+    if (missingOnDisk.length) {
+      console.warn(`\nWARNING: ${missingOnDisk.length} asset path(s) in DB but missing on disk:`);
+      missingOnDisk.slice(0, 20).forEach((p) => console.warn(`  - ${p}`));
+    }
+    if (args.withCmsMedia && missingInExport.length) {
+      console.warn(`\nWARNING: ${missingInExport.length} referenced asset(s) not copied into export (unexpected):`);
+      missingInExport.slice(0, 20).forEach((p) => console.warn(`  - ${p}`));
     }
 
     const meta = {
       app: 'zigma-technologies',
-      formatVersion: 1,
+      formatVersion: 2,
       exportedAt: new Date().toISOString(),
       database: config.database,
       host: config.host,
@@ -241,13 +309,19 @@ Reads DB_* from environment / .env / .env.local
       uploadFiles: uploadsMeta.files,
       includesCmsMedia: Boolean(args.withCmsMedia),
       cmsMedia: cmsMediaMeta,
+      cmsMediaFiles,
+      referencedCmsAssets: referenced,
+      missingOnDisk,
     };
     fs.writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(meta, null, 2));
 
     console.log(`\nExport complete → ${outDir}`);
     console.log(`  database.sql  (${(sqlBytes / 1024).toFixed(1)} KB)`);
-    console.log(`\nImport on target:`);
-    console.log(`  npm run db:import -- "${path.relative(ROOT, outDir)}" --force`);
+    console.log(`  cms-media     ${args.withCmsMedia ? `${cmsMediaFiles.length} files` : 'skipped'}`);
+    console.log(`  DB refs       ${referenced.length} /assets/{images,svg,video}/… paths`);
+    console.log(`\nCopy the whole export folder to the target VPS (storage/exports/ is gitignored), then:`);
+    console.log(`  npm run db:import -- "${path.relative(ROOT, outDir).replace(/\\/g, '/')}" --force`);
+    console.log(`  pm2 restart <zigma|zigma-preprod> --update-env`);
   } finally {
     await conn.end();
   }

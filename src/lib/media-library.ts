@@ -7,7 +7,7 @@ import {
   adminMediaDiskDir,
   adminMediaPublicPath,
   isManagedMediaPath,
-  mediaBaseUrl,
+  toStorageMediaPath,
   type AdminMediaCategory,
 } from '@/lib/media-paths';
 
@@ -40,10 +40,10 @@ function mimeFromFilename(filename: string): string | null {
 }
 
 function categoryFromPath(publicPath: string): MediaLibraryItem['category'] {
-  const base = mediaBaseUrl();
-  if (publicPath.startsWith(`${base}/svg/`)) return 'svg';
-  if (publicPath.startsWith(`${base}/video/`)) return 'video';
-  if (publicPath.startsWith(`${base}/images/`)) return 'images';
+  const clean = toStorageMediaPath(publicPath);
+  if (clean.startsWith('/assets/svg/')) return 'svg';
+  if (clean.startsWith('/assets/video/')) return 'video';
+  if (clean.startsWith('/assets/images/')) return 'images';
   return 'legacy';
 }
 
@@ -85,7 +85,11 @@ function parseTags(raw: unknown): string[] | null {
 }
 
 function rowToItem(row: RowDataPacket): MediaLibraryItem {
-  const assetPath = String(row.path || '');
+  const assetPath = toStorageMediaPath(String(row.path || ''));
+  const managed =
+    assetPath.startsWith('/assets/images/') ||
+    assetPath.startsWith('/assets/svg/') ||
+    assetPath.startsWith('/assets/video/');
   return {
     id: Number(row.id),
     path: assetPath,
@@ -96,7 +100,7 @@ function rowToItem(row: RowDataPacket): MediaLibraryItem {
     height: row.height != null ? Number(row.height) : null,
     created_at: row.created_at ? String(row.created_at) : null,
     category: categoryFromPath(assetPath),
-    source: assetPath.startsWith(`${mediaBaseUrl()}/`) ? 'database' : 'legacy',
+    source: managed ? 'database' : 'legacy',
   };
 }
 
@@ -109,7 +113,11 @@ export async function listMediaLibrary(query = ''): Promise<MediaLibraryItem[]> 
   const legacyDb: MediaLibraryItem[] = [];
   for (const row of rows) {
     const item = rowToItem(row);
-    if (item.path.startsWith(`${mediaBaseUrl()}/images/`) || item.path.startsWith(`${mediaBaseUrl()}/svg/`) || item.path.startsWith(`${mediaBaseUrl()}/video/`)) {
+    if (
+      item.path.startsWith('/assets/images/') ||
+      item.path.startsWith('/assets/svg/') ||
+      item.path.startsWith('/assets/video/')
+    ) {
       dbByPath.set(item.path, { ...item, source: 'database' });
     } else {
       legacyDb.push({ ...item, source: 'legacy' });
@@ -180,7 +188,7 @@ export async function upsertMediaMetadata(input: {
   tags?: string[];
   mime?: string | null;
 }) {
-  const assetPath = input.path.trim();
+  const assetPath = toStorageMediaPath(input.path.trim());
   if (!assetPath) throw new Error('path required');
 
   const [rows] = await pool.query<RowDataPacket[]>(

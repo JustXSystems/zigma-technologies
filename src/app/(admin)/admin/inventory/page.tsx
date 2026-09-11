@@ -365,10 +365,11 @@ function InventoryInner() {
     setSavingBackground(true);
     setMediaMsg('');
     try {
+      const normalized = url ? url.trim() : null;
       const res = await fetch(`/api/admin/catalog/${mediaItem.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ background_image_url: url }),
+        body: JSON.stringify({ background_image_url: normalized }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not save background');

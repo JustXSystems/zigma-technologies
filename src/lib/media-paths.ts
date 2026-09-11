@@ -1,14 +1,7 @@
 import path from 'path';
-import { appBasePath, stripBasePath, withBasePath } from '@/lib/base-path';
+import { mediaBaseUrl, mediaStoragePrefix, toStorageMediaPath } from '@/lib/media-url';
 
-/** Public URL prefix for all site media (env override for CDN later). */
-export function mediaBaseUrl(): string {
-  if (process.env.MEDIA_BASE_URL) {
-    return process.env.MEDIA_BASE_URL.replace(/\/$/, '');
-  }
-  const base = appBasePath();
-  return base ? `${base}/assets` : '/assets';
-}
+export { mediaBaseUrl, mediaStoragePrefix, toStorageMediaPath };
 
 /** Admin CMS library: images, SVG, video. */
 export type AdminMediaCategory = 'images' | 'svg' | 'video';
@@ -32,7 +25,7 @@ export function adminCategoryFromMime(mime: string): AdminMediaCategory {
 }
 
 export function adminMediaPublicPath(category: AdminMediaCategory, filename: string): string {
-  return `${mediaBaseUrl()}/${category}/${path.basename(filename)}`;
+  return `${mediaStoragePrefix()}/${category}/${path.basename(filename)}`;
 }
 
 export function adminMediaDiskDir(category: AdminMediaCategory): string {
@@ -40,7 +33,7 @@ export function adminMediaDiskDir(category: AdminMediaCategory): string {
 }
 
 export function publicUploadPublicPath(category: PublicUploadCategory, filename: string): string {
-  return `${mediaBaseUrl()}/uploads/${category}/${path.basename(filename)}`;
+  return `${mediaStoragePrefix()}/uploads/${category}/${path.basename(filename)}`;
 }
 
 export function publicUploadDiskDir(category: PublicUploadCategory): string {
@@ -48,14 +41,15 @@ export function publicUploadDiskDir(category: PublicUploadCategory): string {
 }
 
 export function isPrivateUploadPath(publicPath: string): boolean {
-  const normalized = stripBasePath(publicPath.split('?')[0]);
+  const normalized = toStorageMediaPath(publicPath);
   return PRIVATE_UPLOAD_PREFIXES.some((prefix) => normalized.startsWith(prefix));
 }
 
 /** Map a stored public path to an on-disk file (supports legacy /uploads and storage/). */
 export function resolvePublicAssetDiskPath(publicPath: string): string | null {
-  if (!publicPath || !publicPath.startsWith('/')) return null;
-  const clean = stripBasePath(publicPath.split('?')[0]);
+  if (!publicPath || (!publicPath.startsWith('/') && !/^https?:\/\//i.test(publicPath))) return null;
+  if (/^https?:\/\//i.test(publicPath)) return null;
+  const clean = toStorageMediaPath(publicPath);
 
   if (clean.startsWith('/assets/')) {
     return path.join(process.cwd(), 'public', clean.slice(1));
@@ -78,7 +72,7 @@ export function legacyAssetDiskPaths(publicPath: string): string[] {
   const disk = resolvePublicAssetDiskPath(publicPath);
   if (disk) paths.push(disk);
 
-  const clean = stripBasePath(publicPath);
+  const clean = toStorageMediaPath(publicPath);
   if (clean.startsWith('/uploads/')) {
     paths.push(path.join(process.cwd(), 'public', clean.slice(1)));
   }
@@ -99,15 +93,14 @@ export function ensureAssetDirectories() {
 }
 
 export function isManagedMediaPath(publicPath: string): boolean {
-  const base = mediaBaseUrl();
-  const normalized = withBasePath(stripBasePath(publicPath));
+  const normalized = toStorageMediaPath(publicPath);
   if (
-    normalized.startsWith(`${base}/images/`) ||
-    normalized.startsWith(`${base}/svg/`) ||
-    normalized.startsWith(`${base}/video/`)
+    normalized.startsWith('/assets/images/') ||
+    normalized.startsWith('/assets/svg/') ||
+    normalized.startsWith('/assets/video/')
   ) {
     return true;
   }
-  if (stripBasePath(publicPath).startsWith('/uploads/')) return true;
+  if (normalized.startsWith('/uploads/')) return true;
   return false;
 }

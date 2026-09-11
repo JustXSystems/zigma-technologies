@@ -31,7 +31,19 @@ const nextConfig: NextConfig = {
     unoptimized: false,
   },
   async rewrites() {
-    return [{ source: '/favicon.ico', destination: '/assets/images/zigma.png' }];
+    // beforeFiles: always serve CMS media from disk via API (PreProd + Prod).
+    // Next production does not reliably expose files added to public/ after start;
+    // admin MediaPicker + catalog backgrounds depend on this.
+    // With basePath, Next prefixes source/destination automatically.
+    return {
+      beforeFiles: [
+        { source: '/assets/images/:path*', destination: '/api/public/assets/images/:path*' },
+        { source: '/assets/svg/:path*', destination: '/api/public/assets/svg/:path*' },
+        { source: '/assets/video/:path*', destination: '/api/public/assets/video/:path*' },
+      ],
+      afterFiles: [{ source: '/favicon.ico', destination: '/assets/images/zigma.png' }],
+      fallback: [],
+    };
   },
   async headers() {
     return [

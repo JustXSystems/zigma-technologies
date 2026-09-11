@@ -195,23 +195,56 @@ Target DB comes from DB_* in .env / .env.local / environment.
     if (fs.existsSync(uploadsSrc)) {
       const n = copyDirIfExists(uploadsSrc, path.join(ROOT, 'public', 'assets', 'uploads'));
       console.log(`  ✓ uploads restored (${n} files)`);
+    } else {
+      console.log('  · no uploads/ in snapshot');
     }
 
     const cmsRoot = path.join(snap.dir, 'cms-media');
+    let cmsTotal = 0;
     if (fs.existsSync(cmsRoot)) {
       for (const cat of ['images', 'svg', 'video']) {
         const src = path.join(cmsRoot, cat);
         if (!fs.existsSync(src)) continue;
         const n = copyDirIfExists(src, path.join(ROOT, 'public', 'assets', cat));
+        cmsTotal += n;
         console.log(`  ✓ cms-media/${cat} restored (${n} files)`);
       }
+    } else {
+      console.warn(
+        '  ! no cms-media/ in snapshot — catalog backgrounds / Media library images will 404 until you re-export with cms-media (default) and re-import'
+      );
+    }
+
+    const expected = Array.isArray(snap.meta?.cmsMediaFiles) ? snap.meta.cmsMediaFiles : [];
+    const missing = [];
+    for (const rel of expected) {
+      const disk = path.join(ROOT, 'public', String(rel).replace(/^\//, ''));
+      if (!fs.existsSync(disk)) missing.push(rel);
+    }
+    if (expected.length) {
+      console.log(`  ✓ verified ${expected.length - missing.length}/${expected.length} cms media files on disk`);
+    }
+    if (missing.length) {
+      console.warn(`  ! missing after import (${missing.length}):`);
+      missing.slice(0, 15).forEach((p) => console.warn(`    - ${p}`));
+    }
+    if (!cmsTotal && !expected.length && snap.meta && snap.meta.includesCmsMedia === false) {
+      console.warn('  ! Export was created with --no-cms-media (or old exporter). Re-export without that flag.');
     }
   } else {
     console.log('  · media copy skipped (--skip-media)');
   }
 
+  // Ensure empty CMS dirs exist for future uploads
+  for (const cat of ['images', 'svg', 'video']) {
+    fs.mkdirSync(path.join(ROOT, 'public', 'assets', cat), { recursive: true });
+  }
+  fs.mkdirSync(path.join(ROOT, 'public', 'assets', 'uploads', 'resumes'), { recursive: true });
+  fs.mkdirSync(path.join(ROOT, 'public', 'assets', 'uploads', 'documents'), { recursive: true });
+
   console.log('\nImport complete.');
-  console.log('Next: set AUTH_SECRET / SMTP / NEXT_PUBLIC_SITE_URL for this environment, then npm run build && npm start');
+  console.log('Next: npm run build && pm2 restart <zigma|zigma-preprod> --update-env');
+  console.log('Admin MediaPicker previews need the disk-backed /assets rewrite (deploy latest master).');
 }
 
 main().catch((err) => {
