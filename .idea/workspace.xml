@@ -7,11 +7,8 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="GitHub deployment changes for PreProd and Production">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="inventory items can set background image now">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deploy-preprod.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy-preprod.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deploy-prod.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy-prod.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deploy.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,23 +56,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.547686629887718" />
-      <entry key="MS500" value="3.0538593142540584" />
-      <entry key="S2" value="7.628081120553101" />
-      <entry key="S5" value="12.971351814867958" />
-      <entry key="S10" value="20.28643355663607" />
-      <entry key="S30" value="33.63309825981439" />
-      <entry key="S60" value="39.47521943866625" />
-      <entry key="M2" value="42.99641011294013" />
-      <entry key="M5" value="45.3361626580506" />
-      <entry key="M10" value="46.15727859113926" />
-      <entry key="M15" value="46.43575430670639" />
-      <entry key="M30" value="46.716948124533765" />
-      <entry key="H1" value="47.11660228015025" />
-      <entry key="H2" value="58.3741980342898" />
-      <entry key="H4" value="167.48696351722091" />
-      <entry key="D1" value="1878.0907604630947" />
-      <entry key="W1" value="9484.91377330622" />
+      <entry key="MS100" value="1.4513408000122565" />
+      <entry key="MS500" value="3.8139474942837865" />
+      <entry key="S2" value="9.440674813646778" />
+      <entry key="S5" value="17.293119302149307" />
+      <entry key="S10" value="25.482157629570256" />
+      <entry key="S30" value="47.80194151815319" />
+      <entry key="S60" value="64.07227892975791" />
+      <entry key="M2" value="76.40194173717799" />
+      <entry key="M5" value="85.75416248952416" />
+      <entry key="M10" value="89.26683784497527" />
+      <entry key="M15" value="90.48663076278724" />
+      <entry key="M30" value="92.096741445952" />
+      <entry key="H1" value="101.60232610304173" />
+      <entry key="H2" value="141.83637159292147" />
+      <entry key="H4" value="244.8524435011961" />
+      <entry key="D1" value="1851.601061322505" />
+      <entry key="W1" value="9547.847183609329" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,34 +83,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="3.917507708952332E-219" />
-      <entry key="M10" value="6.258999687611804E-110" />
-      <entry key="M15" value="1.5764128025505567E-73" />
-      <entry key="M30" value="3.970406531516095E-37" />
-      <entry key="H1" value="6.301116195973703E-19" />
-      <entry key="H2" value="7.937957039423692E-10" />
-      <entry key="H4" value="2.8174380276578603E-5" />
-      <entry key="D1" value="0.1772352114762916" />
-      <entry key="W1" value="1.2109781346770978" />
+      <entry key="M5" value="5.1242736961294216E-241" />
+      <entry key="M10" value="7.15840324103749E-121" />
+      <entry key="M15" value="8.002225264368709E-81" />
+      <entry key="M30" value="8.945515784105906E-41" />
+      <entry key="H1" value="9.45807368553777E-21" />
+      <entry key="H2" value="9.72526281677654E-11" />
+      <entry key="H4" value="9.86167471432001E-6" />
+      <entry key="D1" value="0.1487873668633887" />
+      <entry key="W1" value="1.1810858096995616" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4646933583655857" />
-      <entry key="MS500" value="3.022405233051465" />
-      <entry key="S2" value="7.609296852592494" />
-      <entry key="S5" value="12.958468864802443" />
-      <entry key="S10" value="20.276071195634568" />
-      <entry key="S30" value="33.627148452802544" />
-      <entry key="S60" value="39.47168519451565" />
-      <entry key="M2" value="42.994473031871436" />
-      <entry key="M5" value="45.33534244792323" />
-      <entry key="M10" value="46.156860505544635" />
-      <entry key="M15" value="46.435473777239615" />
-      <entry key="M30" value="46.71680694810712" />
-      <entry key="H1" value="47.116531173320055" />
-      <entry key="H2" value="58.37415577628334" />
-      <entry key="H4" value="167.48693554350436" />
-      <entry key="D1" value="1878.2678431610598" />
-      <entry key="W1" value="9486.124585230085" />
+      <entry key="MS100" value="1.3929108775051382" />
+      <entry key="MS500" value="3.7832311755459838" />
+      <entry key="S2" value="9.42125384637283" />
+      <entry key="S5" value="17.2784960412742" />
+      <entry key="S10" value="25.471059367794922" />
+      <entry key="S30" value="47.794365393120565" />
+      <entry key="S60" value="64.06699309812934" />
+      <entry key="M2" value="76.39872068886098" />
+      <entry key="M5" value="85.7526969921916" />
+      <entry key="M10" value="89.26607168941086" />
+      <entry key="M15" value="90.48611224803561" />
+      <entry key="M30" value="92.09647738964976" />
+      <entry key="H1" value="101.60218265266683" />
+      <entry key="H2" value="141.8362757962417" />
+      <entry key="H4" value="244.85237361577774" />
+      <entry key="D1" value="1851.7497064001739" />
+      <entry key="W1" value="9549.028105123687" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -236,7 +233,8 @@
     <MESSAGE value="Updating Prod setup" />
     <MESSAGE value="Product/Services/Project background image set" />
     <MESSAGE value="GitHub deployment changes for PreProd and Production" />
-    <option name="LAST_COMMIT_MESSAGE" value="GitHub deployment changes for PreProd and Production" />
+    <MESSAGE value="inventory items can set background image now" />
+    <option name="LAST_COMMIT_MESSAGE" value="inventory items can set background image now" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

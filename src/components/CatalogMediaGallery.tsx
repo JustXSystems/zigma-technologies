@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { CatalogMedia } from '@/lib/types';
+import { withBasePath } from '@/lib/base-path';
 
 type Props = {
   media: CatalogMedia[];
@@ -31,7 +32,8 @@ export default function CatalogMediaGallery({
   }, [sorted]);
 
   const active = sorted.find((m) => m.id === activeId) || sorted[0];
-  const bg = backgroundImageUrl?.trim() || '';
+  // CSS url() is not rewritten by BasePathBootstrap (only <img>/<a>/fetch) — must prefix here.
+  const bg = withBasePath(backgroundImageUrl?.trim() || '');
 
   const rootClass = [
     'catalog-gallery',
@@ -58,12 +60,18 @@ export default function CatalogMediaGallery({
     <div className={rootClass}>
       <div className="catalog-gallery-main" style={mainStyle}>
         {active?.kind === 'video' ? (
-          <video key={active.id} src={active.url} controls playsInline className="catalog-gallery-media" />
+          <video
+            key={active.id}
+            src={withBasePath(active.url)}
+            controls
+            playsInline
+            className="catalog-gallery-media"
+          />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={active?.id}
-            src={active?.url || ''}
+            src={withBasePath(active?.url || '')}
             alt={active?.alt || title || ''}
             className="catalog-gallery-media"
           />
@@ -85,12 +93,12 @@ export default function CatalogMediaGallery({
               >
                 {m.kind === 'video' ? (
                   <>
-                    <video src={m.url} muted className="catalog-gallery-thumb-media" />
+                    <video src={withBasePath(m.url)} muted className="catalog-gallery-thumb-media" />
                     <span className="catalog-gallery-thumb-play">▶</span>
                   </>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.url} alt={m.alt || ''} className="catalog-gallery-thumb-media" />
+                  <img src={withBasePath(m.url)} alt={m.alt || ''} className="catalog-gallery-thumb-media" />
                 )}
               </button>
             );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { withBasePath } from '@/lib/base-path';
 
 type Asset = { id: number | null; path: string; mime: string | null; alt: string | null };
 
@@ -50,7 +51,11 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
       </div>
       {value && isImage(null, value) ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={value} alt="" style={{ marginTop: '0.55rem', maxHeight: 72, borderRadius: 6 }} />
+        <img
+          src={withBasePath(value)}
+          alt=""
+          style={{ marginTop: '0.55rem', maxHeight: 72, borderRadius: 6 }}
+        />
       ) : null}
 
       {open ? (
@@ -97,7 +102,7 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={asset.path}
+                        src={withBasePath(asset.path)}
                         alt={asset.alt || ''}
                         style={{ width: '100%', height: 88, objectFit: 'cover', borderRadius: 6 }}
                       />
