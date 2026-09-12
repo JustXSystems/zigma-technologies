@@ -134,14 +134,37 @@ if [[ "$DO_DB_BACKUP" -eq 1 ]]; then
   DB_USER="$(env_get DB_USER)"
   DB_PASSWORD="$(env_get DB_PASSWORD)"
   [[ -n "$DB_NAME" && -n "$DB_USER" ]] || die "DB_NAME/DB_USER missing in .env"
-  BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/zigma}"
-  mkdir -p "$BACKUP_ROOT"
+  command -v mysqldump >/dev/null 2>&1 || die "mysqldump not found on VPS"
+  command -v gzip >/dev/null 2>&1 || die "gzip not found on VPS"
+
+  # Prefer paths the deploy user can write. /var/backups/zigma often needs root.
+  REQUESTED_BACKUP_ROOT="${BACKUP_ROOT:-}"
+  BACKUP_ROOT=""
+  for candidate in \
+    "$REQUESTED_BACKUP_ROOT" \
+    "${APP_DIR}/storage/db-backups" \
+    "${HOME}/zigma-backups" \
+    "/tmp/zigma-backups"
+  do
+    [[ -n "$candidate" ]] || continue
+    if mkdir -p "$candidate" 2>/dev/null && [[ -w "$candidate" ]]; then
+      BACKUP_ROOT="$candidate"
+      break
+    fi
+  done
+  [[ -n "$BACKUP_ROOT" ]] || die "No writable DB backup directory (tried \$BACKUP_ROOT, APP_DIR/storage/db-backups, ~/zigma-backups, /tmp/zigma-backups)"
+
   OUT="$BACKUP_ROOT/${ENV_NAME}-${DB_NAME}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
   export MYSQL_PWD="${DB_PASSWORD}"
-  mysqldump -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" \
-    --single-transaction --routines --triggers "$DB_NAME" | gzip >"$OUT"
+  if ! mysqldump -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" \
+    --single-transaction --routines --triggers "$DB_NAME" | gzip >"$OUT"; then
+    unset MYSQL_PWD
+    rm -f "$OUT"
+    die "mysqldump failed (check DB_* in .env and that deploy can connect)"
+  fi
   unset MYSQL_PWD
-  log "Backup written: $OUT"
+  [[ -s "$OUT" ]] || die "DB backup file empty: $OUT"
+  log "Backup written: $OUT ($(wc -c <"$OUT" | tr -d ' ') bytes)"
 fi
 
 if [[ "$DO_MIGRATIONS" -eq 1 ]]; then
