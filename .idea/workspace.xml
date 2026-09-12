@@ -7,7 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1.">
       <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,23 +56,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3597271285727743" />
-      <entry key="MS500" value="2.4344609552796723" />
-      <entry key="S2" value="4.7996081232253776" />
-      <entry key="S5" value="7.422393888671977" />
-      <entry key="S10" value="12.348323191023379" />
-      <entry key="S30" value="28.530266484685185" />
-      <entry key="S60" value="38.56818163423813" />
-      <entry key="M2" value="45.44656850201122" />
-      <entry key="M5" value="50.35528647623328" />
-      <entry key="M10" value="52.64418048913605" />
-      <entry key="M15" value="56.938033863240136" />
-      <entry key="M30" value="99.95670856264773" />
-      <entry key="H1" value="222.98488957251604" />
-      <entry key="H2" value="385.22080360516577" />
-      <entry key="H4" value="566.0813645591747" />
-      <entry key="D1" value="2153.4474704233285" />
-      <entry key="W1" value="10088.499161461335" />
+      <entry key="MS100" value="1.2341986403258711" />
+      <entry key="MS500" value="3.4510958108411973" />
+      <entry key="S2" value="10.356160608585412" />
+      <entry key="S5" value="17.655143842326414" />
+      <entry key="S10" value="22.266810628592573" />
+      <entry key="S30" value="26.53852543703601" />
+      <entry key="S60" value="29.745679472541962" />
+      <entry key="M2" value="38.83348483957357" />
+      <entry key="M5" value="56.75488665162146" />
+      <entry key="M10" value="68.1380165380853" />
+      <entry key="M15" value="75.74435312961482" />
+      <entry key="M30" value="119.6103547373354" />
+      <entry key="H1" value="241.33443942679529" />
+      <entry key="H2" value="404.91728622491263" />
+      <entry key="H4" value="588.2065906484149" />
+      <entry key="D1" value="2178.0691731821526" />
+      <entry key="W1" value="10114.566887497502" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -83,34 +83,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="2.1029862539297245E-296" />
-      <entry key="M10" value="1.4501676640753673E-148" />
-      <entry key="M15" value="2.760231310660963E-99" />
-      <entry key="M30" value="5.25379035617239E-50" />
-      <entry key="H1" value="2.292114821768898E-25" />
-      <entry key="H2" value="4.787603598637682E-13" />
-      <entry key="H4" value="6.919251114679735E-7" />
-      <entry key="D1" value="0.0955544230294412" />
-      <entry key="W1" value="1.1086841596669401" />
+      <entry key="M5" value="1.1703927625632466E-296" />
+      <entry key="M10" value="1.0818469219641442E-148" />
+      <entry key="M15" value="2.2704426821796435E-99" />
+      <entry key="M30" value="4.764916244992849E-50" />
+      <entry key="H1" value="2.1828688107609885E-25" />
+      <entry key="H2" value="4.672118160707142E-13" />
+      <entry key="H4" value="6.835289431227631E-7" />
+      <entry key="D1" value="0.09536018770726631" />
+      <entry key="W1" value="1.108361929740365" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3203443084635322" />
-      <entry key="MS500" value="2.4195534109793413" />
-      <entry key="S2" value="4.791157648307558" />
-      <entry key="S5" value="7.416757636345406" />
-      <entry key="S10" value="12.343249504290256" />
-      <entry key="S30" value="28.526008261213303" />
-      <entry key="S60" value="38.56524592550406" />
-      <entry key="M2" value="45.4448232575342" />
-      <entry key="M5" value="50.35450905117062" />
-      <entry key="M10" value="52.643773537210215" />
-      <entry key="M15" value="56.93774145226576" />
-      <entry key="M30" value="99.95646251097791" />
-      <entry key="H1" value="222.98462690055902" />
-      <entry key="H2" value="385.2205809609497" />
-      <entry key="H4" value="566.0812027797817" />
-      <entry key="D1" value="2153.542888229008" />
-      <entry key="W1" value="10089.607683875714" />
+      <entry key="MS100" value="1.1851435366505036" />
+      <entry key="MS500" value="3.4278948339690567" />
+      <entry key="S2" value="10.339050644412607" />
+      <entry key="S5" value="17.642976831491016" />
+      <entry key="S10" value="22.258989901028787" />
+      <entry key="S30" value="26.535373345625114" />
+      <entry key="S60" value="29.74387410274872" />
+      <entry key="M2" value="38.83223656061305" />
+      <entry key="M5" value="56.75411087441362" />
+      <entry key="M10" value="68.13754052785492" />
+      <entry key="M15" value="75.74399746750316" />
+      <entry key="M30" value="119.61007391568586" />
+      <entry key="H1" value="241.3341604172927" />
+      <entry key="H2" value="404.91705451675386" />
+      <entry key="H4" value="588.2064236133649" />
+      <entry key="D1" value="2178.164395826874" />
+      <entry key="W1" value="10115.67508755705" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -241,7 +241,8 @@
     <MESSAGE value="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls." />
     <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
     <MESSAGE value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
+    <MESSAGE value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
+    <option name="LAST_COMMIT_MESSAGE" value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

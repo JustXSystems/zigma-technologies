@@ -193,10 +193,11 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
   fi
 
   log "Install release files into $APP_DIR"
-  # VPS deploy user often cannot chown/chgrp (−a implies both) → rsync code 23.
-  # Protect leftover git-deploy dirs (apps/src/storage) so --delete does not try to remove them.
+  # VPS deploy users often cannot chown/chgrp/utime the app root dir (rsync code 23).
+  # Protect leftover git-deploy dirs so --delete does not try to remove them.
   # Excluded paths are not deleted unless --delete-excluded (which we do not use).
-  rsync -a --delete --no-owner --no-group \
+  set +e
+  rsync -a --delete --no-owner --no-group --omit-dir-times \
     --exclude '.env' \
     --exclude '.env.*' \
     --exclude '.git/' \
@@ -208,9 +209,21 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     --exclude 'public/assets/uploads/resumes/' \
     --exclude 'public/assets/uploads/documents/' \
     "$STAGE"/ "$APP_DIR"/
+  RSYNC_RC=$?
+  set -e
+  # 0 = ok; 23 = partial transfer (usually dir utime/attrs on unowned APP_DIR)
+  if [[ "$RSYNC_RC" -ne 0 && "$RSYNC_RC" -ne 23 ]]; then
+    die "rsync failed with code $RSYNC_RC"
+  fi
+  [[ -f "$APP_DIR/server.js" && -f "$APP_DIR/release-manifest.json" ]] \
+    || die "rsync finished (rc=$RSYNC_RC) but server.js / release-manifest.json missing"
+  if [[ "$RSYNC_RC" -eq 23 ]]; then
+    log "rsync reported code 23 (directory attribute warnings on unowned app root) — release files OK, continuing"
+  fi
 
   # Restore .env
-  cp -a "/tmp/zigma-env-backup-$$.env" "$APP_DIR/.env"
+  cp --no-preserve=ownership "/tmp/zigma-env-backup-$$.env" "$APP_DIR/.env" 2>/dev/null \
+    || cp -f "/tmp/zigma-env-backup-$$.env" "$APP_DIR/.env"
   rm -f "/tmp/zigma-env-backup-$$.env"
 
   # Merge preserved media back (server-only files win if not in release — we copy preserved over)
@@ -219,7 +232,7 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
       if [[ -d "$MEDIA_BAK/$d" ]]; then
         mkdir -p "$APP_DIR/$d"
         # Do not delete release files; add/overwrite with preserved runtime files
-        rsync -a --no-owner --no-group "$MEDIA_BAK/$d"/ "$APP_DIR/$d"/
+        rsync -a --no-owner --no-group --omit-dir-times "$MEDIA_BAK/$d"/ "$APP_DIR/$d"/ || true
       fi
     done
     rm -rf "$MEDIA_BAK"
