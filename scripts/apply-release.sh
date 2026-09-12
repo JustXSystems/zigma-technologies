@@ -109,11 +109,14 @@ log "  db_backup=$DO_DB_BACKUP migrations=$DO_MIGRATIONS"
 [[ "$DRY_RUN" -eq 1 ]] && { log "Dry-run only — exiting."; exit 0; }
 
 [[ -d "$APP_DIR" ]] || die "App dir missing: $APP_DIR"
+[[ -w "$APP_DIR" ]] || die "App dir not writable by $(id -un): $APP_DIR (fix ownership/permissions on the VPS)"
 cd "$APP_DIR"
 
 if [[ ! -f .env ]]; then
   die "$APP_DIR/.env missing — create from .env.example before applying a release"
 fi
+
+command -v rsync >/dev/null 2>&1 || die "rsync not found on VPS (apt install rsync)"
 
 # --- optional DB backup / migrations (same as deploy.sh) ---
 env_get() {
@@ -190,12 +193,18 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
   fi
 
   log "Install release files into $APP_DIR"
-  # Replace app code but never delete .env via rsync exclude
-  rsync -a --delete \
+  # VPS deploy user often cannot chown/chgrp (−a implies both) → rsync code 23.
+  # Protect leftover git-deploy dirs (apps/src/storage) so --delete does not try to remove them.
+  # Excluded paths are not deleted unless --delete-excluded (which we do not use).
+  rsync -a --delete --no-owner --no-group \
     --exclude '.env' \
     --exclude '.env.*' \
     --exclude '.git/' \
-    --exclude 'storage/exports/' \
+    --exclude 'storage/' \
+    --exclude 'apps/' \
+    --exclude 'src/' \
+    --exclude 'coverage/' \
+    --exclude 'docs/' \
     --exclude 'public/assets/uploads/resumes/' \
     --exclude 'public/assets/uploads/documents/' \
     "$STAGE"/ "$APP_DIR"/
@@ -210,7 +219,7 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
       if [[ -d "$MEDIA_BAK/$d" ]]; then
         mkdir -p "$APP_DIR/$d"
         # Do not delete release files; add/overwrite with preserved runtime files
-        rsync -a "$MEDIA_BAK/$d"/ "$APP_DIR/$d"/
+        rsync -a --no-owner --no-group "$MEDIA_BAK/$d"/ "$APP_DIR/$d"/
       fi
     done
     rm -rf "$MEDIA_BAK"
@@ -241,7 +250,8 @@ if [[ "$DO_RESTART" -eq 1 ]]; then
     # Update to node server.js if still on legacy npm start
     pm2 delete "$PM2_NAME" || true
   fi
-  PORT="${PORT:-$APP_PORT}" HOSTNAME="${HOSTNAME:-127.0.0.1}" \
+  # Do NOT reuse shell HOSTNAME (machine name) — Next standalone treats it as listen host.
+  PORT="${PORT:-$APP_PORT}" HOSTNAME="127.0.0.1" \
     pm2 start "$APP_DIR/server.js" --name "$PM2_NAME" --update-env
   pm2 save
   pm2 status "$PM2_NAME"

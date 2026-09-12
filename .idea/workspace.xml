@@ -7,8 +7,8 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive.">
-      <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree.">
+      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,23 +56,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.785776213967211" />
-      <entry key="MS500" value="3.58722783309318" />
-      <entry key="S2" value="7.697829979766742" />
-      <entry key="S5" value="11.764434699037867" />
-      <entry key="S10" value="14.020524741096615" />
-      <entry key="S30" value="15.912219909165431" />
-      <entry key="S60" value="16.44325783293131" />
-      <entry key="M2" value="16.731677719098002" />
-      <entry key="M5" value="19.30268318291774" />
-      <entry key="M10" value="38.747788480888914" />
-      <entry key="M15" value="75.3231301805676" />
-      <entry key="M30" value="197.52784996860646" />
-      <entry key="H1" value="348.61089958993887" />
-      <entry key="H2" value="475.51661570116164" />
-      <entry key="H4" value="613.5167103489963" />
-      <entry key="D1" value="2163.6039984333843" />
-      <entry key="W1" value="10077.734888484698" />
+      <entry key="MS100" value="1.3597271285727743" />
+      <entry key="MS500" value="2.4344609552796723" />
+      <entry key="S2" value="4.7996081232253776" />
+      <entry key="S5" value="7.422393888671977" />
+      <entry key="S10" value="12.348323191023379" />
+      <entry key="S30" value="28.530266484685185" />
+      <entry key="S60" value="38.56818163423813" />
+      <entry key="M2" value="45.44656850201122" />
+      <entry key="M5" value="50.35528647623328" />
+      <entry key="M10" value="52.64418048913605" />
+      <entry key="M15" value="56.938033863240136" />
+      <entry key="M30" value="99.95670856264773" />
+      <entry key="H1" value="222.98488957251604" />
+      <entry key="H2" value="385.22080360516577" />
+      <entry key="H4" value="566.0813645591747" />
+      <entry key="D1" value="2153.4474704233285" />
+      <entry key="W1" value="10088.499161461335" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -83,34 +83,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="1.2218103559889037E-292" />
-      <entry key="M10" value="1.1053553075771394E-146" />
-      <entry key="M15" value="4.9621276695806274E-98" />
-      <entry key="M30" value="2.227583369838421E-49" />
-      <entry key="H1" value="4.719728138186077E-25" />
-      <entry key="H2" value="6.870027756993399E-13" />
-      <entry key="H4" value="8.288563058350863E-7" />
-      <entry key="D1" value="0.0984738278629116" />
-      <entry key="W1" value="1.1134609462315779" />
+      <entry key="M5" value="2.1029862539297245E-296" />
+      <entry key="M10" value="1.4501676640753673E-148" />
+      <entry key="M15" value="2.760231310660963E-99" />
+      <entry key="M30" value="5.25379035617239E-50" />
+      <entry key="H1" value="2.292114821768898E-25" />
+      <entry key="H2" value="4.787603598637682E-13" />
+      <entry key="H4" value="6.919251114679735E-7" />
+      <entry key="D1" value="0.0955544230294412" />
+      <entry key="W1" value="1.1086841596669401" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.700735646359986" />
-      <entry key="MS500" value="3.5559247076885496" />
-      <entry key="S2" value="7.681071496565811" />
-      <entry key="S5" value="11.754087932876216" />
-      <entry key="S10" value="14.01432910416953" />
-      <entry key="S30" value="15.90986732604945" />
-      <entry key="S60" value="16.44204108440846" />
-      <entry key="M2" value="16.73105828550437" />
-      <entry key="M5" value="19.302392340639184" />
-      <entry key="M10" value="38.74749602689032" />
-      <entry key="M15" value="75.322764069786" />
-      <entry key="M30" value="197.52739055688457" />
-      <entry key="H1" value="348.61050135922346" />
-      <entry key="H2" value="475.5163460701151" />
-      <entry key="H4" value="613.5165373949295" />
-      <entry key="D1" value="2163.702334462044" />
-      <entry key="W1" value="10078.84818740541" />
+      <entry key="MS100" value="1.3203443084635322" />
+      <entry key="MS500" value="2.4195534109793413" />
+      <entry key="S2" value="4.791157648307558" />
+      <entry key="S5" value="7.416757636345406" />
+      <entry key="S10" value="12.343249504290256" />
+      <entry key="S30" value="28.526008261213303" />
+      <entry key="S60" value="38.56524592550406" />
+      <entry key="M2" value="45.4448232575342" />
+      <entry key="M5" value="50.35450905117062" />
+      <entry key="M10" value="52.643773537210215" />
+      <entry key="M15" value="56.93774145226576" />
+      <entry key="M30" value="99.95646251097791" />
+      <entry key="H1" value="222.98462690055902" />
+      <entry key="H2" value="385.2205809609497" />
+      <entry key="H4" value="566.0812027797817" />
+      <entry key="D1" value="2153.542888229008" />
+      <entry key="W1" value="10089.607683875714" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -240,7 +240,8 @@
     <MESSAGE value="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths." />
     <MESSAGE value="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls." />
     <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
+    <MESSAGE value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
