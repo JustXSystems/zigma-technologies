@@ -1,0 +1,58 @@
+# Optional PreProd path when GitHub cloud runners cannot reach VPS :22.
+# Install a self-hosted runner ON the JustXSystems VPS (outbound to GitHub only),
+# label it: zigma-preprod
+#
+# Docs: https://docs.github.com/en/actions/hosting-your-own-runners
+#
+# This job downloads the artifact built by "Deploy PreProd" OR builds locally
+# on the runner. Prefer pairing with the main workflow's build artifact via
+# workflow_run, or build here when the runner has enough RAM.
+name: Deploy PreProd (self-hosted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      use_artifact_from_run:
+        description: 'Optional — Actions run id that uploaded zigma-preprod-release (leave empty to build on runner)'
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: deploy-preprod-self-hosted
+  cancel-in-progress: false
+
+jobs:
+  apply-on-vps:
+    name: Apply on JustXSystems VPS runner
+    runs-on: [self-hosted, zigma-preprod]
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build + package on runner (VPS)
+        if: ${{ inputs.use_artifact_from_run == '' }}
+        env:
+          NEXT_PUBLIC_BASE_PATH: /zigma-technologies
+          NEXT_PUBLIC_SITE_URL: https://justxsystems.com/zigma-technologies
+          MEDIA_BASE_URL: /assets
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          chmod +x scripts/package-release.sh scripts/apply-release.sh
+          ./scripts/package-release.sh --env preprod --out /tmp/zigma-preprod.tgz
+
+      - name: Apply release
+        run: |
+          set -euo pipefail
+          chmod +x scripts/apply-release.sh
+          ./scripts/apply-release.sh \
+            --env preprod \
+            --tarball /tmp/zigma-preprod.tgz \
+            --extract --restart --healthcheck --preserve-uploads

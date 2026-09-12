@@ -12,6 +12,7 @@
     "db:export": "node scripts/db-export.mjs",
     "db:import": "node scripts/db-import.mjs",
     "db:push": "node scripts/db-push-remote.mjs",
+    "release:pack": "bash scripts/package-release.sh",
     "lighthouse:home": "npx lighthouse http://localhost:3000 --only-categories=performance,accessibility --budget-path=scripts/lighthouse-budget.json --chrome-flags=\"--headless=new\" --quiet",
     "ztools:android": "npm run android:emu --prefix apps/ztools-mobile",
     "ztools:android:emu": "npm run android:emu --prefix apps/ztools-mobile",

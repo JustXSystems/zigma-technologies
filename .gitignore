@@ -43,6 +43,9 @@ JustXSystems_hostinget_VPS_Ubantu.pub
 # vercel
 .vercel
 
+# CI release tarballs
+/dist/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

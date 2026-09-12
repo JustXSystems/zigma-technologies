@@ -26,6 +26,8 @@ const basePath = resolveBasePath();
 
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath } : {}),
+  // CI packages .next/standalone into a release tarball for VPS apply (see scripts/package-release.sh).
+  output: 'standalone',
   images: {
     remotePatterns: [],
     unoptimized: false,

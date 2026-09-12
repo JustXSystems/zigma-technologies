@@ -873,11 +873,12 @@ Get-Content .\\gha_zigma_preprod -Raw | Set-Clipboard
     summary:
       'After the first successful setup, most updates are: merge to master (Actions auto-deploys) or SSH and run deploy-preprod.sh. Use selective flags when you only need restart or migrations.',
     steps: [
-      'Default path: merge/PR to master → GitHub Actions Deploy PreProd SSHs to JustXSystems VPS → scripts/deploy-preprod.sh.',
-      'SSH path: ssh deploy@193.203.161.219 → cd /var/www/zigma-technologies → ./scripts/deploy-preprod.sh.',
-      'Selective examples: --no-install when node_modules is warm; --no-build --restart for env-only restarts after you did not change code; --clear-next when build cache looks corrupt.',
+      'Default path: merge to master → GitHub Actions builds a PreProd release tarball in CI → SCP → scripts/apply-release.sh (parameterized extract/restart/health/preserve-uploads).',
+      'If Actions times out on dial tcp :22, Hostinger/UFW is blocking GitHub — open TCP 22 or use workflow Deploy PreProd (self-hosted).',
+      'SSH path (laptop): still supported via scripts/deploy-preprod.sh for emergency git-based rebuilds on the box.',
+      'Selective examples: workflow_dispatch toggles apply_release / restart_pm2 / preserve_uploads / db_backup / migrations.',
       'Always confirm hostname -I still shows 193.203.161.219 before running destructive git reset on a box.',
-      'What success looks like: workflow or script exit 0; smoke URL still OK; pm2 online.',
+      'What success looks like: workflow green; smoke URL OK; pm2 zigma-preprod online; asset healthcheck 200.',
     ],
     checklist: [
       'Know push-to-master auto path',
@@ -1096,7 +1097,7 @@ export const JX_FAQ = [
   },
   {
     q: 'What happens when I push to master?',
-    a: 'Only “Deploy PreProd” runs — GitHub SSHs to the JustXSystems VPS using PREPROD_* secrets and runs scripts/deploy-preprod.sh. Production requires a separate manual workflow on the Zigma VPS.',
+    a: 'Only “Deploy PreProd” runs — CI builds a standalone release with NEXT_PUBLIC_BASE_PATH=/zigma-technologies, SCPs the tarball, then apply-release.sh on the JustXSystems VPS (PREPROD_* secrets). Production is a separate manual workflow on the Zigma VPS.',
   },
   {
     q: 'Homepage blank / CSS 404 under /zigma-technologies',
@@ -1121,6 +1122,10 @@ export const JX_FAQ = [
   {
     q: 'justxsystems.com homepage broke after Nginx edit',
     a: 'You likely overwrote location / or broke the SSL server block. Restore from backup/snapshot if needed; add only location /zigma-technologies and keep the original root location. nginx -t before every reload.',
+  },
+  {
+    q: 'GitHub Actions dial tcp :22 i/o timeout / auto-deploy never finishes',
+    a: 'GitHub’s cloud runners cannot open SSH to the VPS (Hostinger firewall / UFW allowlist). Opening TCP 22 from Anywhere (hPanel + ufw allow OpenSSH) fixes SCP of the CI release tarball. Alternative: install a self-hosted runner on the VPS and use “Deploy PreProd (self-hosted)”. Building in CI alone does not bypass a closed port 22.',
   },
   {
     q: 'GitHub Actions fails host check / wrong IP',

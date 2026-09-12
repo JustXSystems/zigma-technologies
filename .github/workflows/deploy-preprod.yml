@@ -1,81 +1,151 @@
-# Deploy PreProd on JustXSystems VPS (subdirectory under justxsystems.com).
-# Target: https://justxsystems.com/zigma-technologies  via deploy@193.203.161.219
+# Deploy PreProd — build release in GitHub Actions, ship tarball to JustXSystems VPS.
 #
-# Secrets (repo → Settings → Secrets and variables → Actions):
-#   PREPROD_HOST      = 193.203.161.219
-#   PREPROD_SSH_USER  = deploy
-#   PREPROD_SSH_KEY   = private key authorized on JustXSystems VPS only
+# Why not "SSH and build on the VPS"?
+#   1) Faster / reproducible builds in CI
+#   2) VPS only applies a verified artifact (basePath checked in package-release)
 #
-# On that VPS: /var/www/zigma-technologies → scripts/deploy-preprod.sh
+# Why auto-deploy sometimes never ran before:
+#   appleboy/ssh-action dial tcp :22 i/o timeout = Hostinger/UFW blocks inbound SSH
+#   from GitHub's cloud IPs. Building a tar does NOT fix that by itself — SCP still
+#   needs TCP/22. Fix: open 22 to the world (or install a self-hosted runner on the VPS).
+#
+# Secrets:
+#   PREPROD_HOST, PREPROD_SSH_USER, PREPROD_SSH_KEY
+#
 name: Deploy PreProd
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
     inputs:
       branch:
-        description: Git branch to deploy
+        description: Git branch to build
         required: true
         default: master
         type: string
-      sync_code:
-        description: Git fetch + reset --hard to branch
-        type: boolean
-        default: true
-      install_deps:
-        description: npm ci
-        type: boolean
-        default: true
-      build:
-        description: npm run build (basePath baked from PreProd .env)
+      apply_release:
+        description: Extract tarball on VPS
         type: boolean
         default: true
       restart_pm2:
-        description: Restart PM2 process zigma-preprod
+        description: Restart PM2 (standalone server.js)
         type: boolean
         default: true
-      clear_next:
-        description: Delete .next before build
+      healthcheck:
+        description: Localhost + asset curl after restart
+        type: boolean
+        default: true
+      preserve_uploads:
+        description: Keep runtime CMS/media uploads on VPS
+        type: boolean
+        default: true
+      db_backup:
+        description: mysqldump before apply
         type: boolean
         default: false
-      healthcheck:
-        description: Localhost curl after restart
+      apply_migrations:
+        description: Apply SQL migrations
         type: boolean
-        default: true
+        default: false
+      migration_files:
+        description: Comma-separated scripts/*.sql (if apply_migrations)
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: Print apply plan only on VPS
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-preprod
   cancel-in-progress: false
 
 jobs:
-  deploy-preprod:
-    name: SSH → JustXSystems VPS (PreProd)
+  build-release:
+    name: Build PreProd release (CI)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
+    outputs:
+      artifact: ${{ steps.pack.outputs.artifact }}
     steps:
-      - name: Resolve deploy options
+      - name: Resolve options
         id: opts
         shell: bash
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
-            echo "sync=${{ inputs.sync_code }}" >> "$GITHUB_OUTPUT"
-            echo "install=${{ inputs.install_deps }}" >> "$GITHUB_OUTPUT"
-            echo "build=${{ inputs.build }}" >> "$GITHUB_OUTPUT"
-            echo "restart=${{ inputs.restart_pm2 }}" >> "$GITHUB_OUTPUT"
-            echo "clear_next=${{ inputs.clear_next }}" >> "$GITHUB_OUTPUT"
-            echo "health=${{ inputs.healthcheck }}" >> "$GITHUB_OUTPUT"
           else
             echo "branch=master" >> "$GITHUB_OUTPUT"
-            echo "sync=true" >> "$GITHUB_OUTPUT"
-            echo "install=true" >> "$GITHUB_OUTPUT"
-            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.opts.outputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install + build (PreProd public env baked in)
+        env:
+          NEXT_PUBLIC_BASE_PATH: /zigma-technologies
+          NEXT_PUBLIC_SITE_URL: https://justxsystems.com/zigma-technologies
+          MEDIA_BASE_URL: /assets
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          node -e "const b=require('./.next/routes-manifest.json').basePath||''; if(b!=='/zigma-technologies'){console.error('bad basePath',b); process.exit(1)} console.log('basePath',b)"
+
+      - name: Package release tarball
+        id: pack
+        run: |
+          set -euo pipefail
+          chmod +x scripts/package-release.sh
+          ./scripts/package-release.sh --env preprod --out dist/zigma-preprod.tgz
+          ls -lh dist/zigma-preprod.tgz
+          echo "artifact=zigma-preprod.tgz" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zigma-preprod-release
+          path: dist/zigma-preprod.tgz
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy-release:
+    name: Ship tarball → JustXSystems VPS
+    needs: build-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Resolve apply flags
+        id: opts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "apply=${{ inputs.apply_release }}" >> "$GITHUB_OUTPUT"
+            echo "restart=${{ inputs.restart_pm2 }}" >> "$GITHUB_OUTPUT"
+            echo "health=${{ inputs.healthcheck }}" >> "$GITHUB_OUTPUT"
+            echo "preserve=${{ inputs.preserve_uploads }}" >> "$GITHUB_OUTPUT"
+            echo "db_backup=${{ inputs.db_backup }}" >> "$GITHUB_OUTPUT"
+            echo "migrations=${{ inputs.apply_migrations }}" >> "$GITHUB_OUTPUT"
+            echo "migration_files=${{ inputs.migration_files }}" >> "$GITHUB_OUTPUT"
+            echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "apply=true" >> "$GITHUB_OUTPUT"
             echo "restart=true" >> "$GITHUB_OUTPUT"
-            echo "clear_next=false" >> "$GITHUB_OUTPUT"
             echo "health=true" >> "$GITHUB_OUTPUT"
+            echo "preserve=true" >> "$GITHUB_OUTPUT"
+            echo "db_backup=false" >> "$GITHUB_OUTPUT"
+            echo "migrations=false" >> "$GITHUB_OUTPUT"
+            echo "migration_files=" >> "$GITHUB_OUTPUT"
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Require PreProd SSH secrets
@@ -87,53 +157,102 @@ jobs:
           USER="${{ secrets.PREPROD_SSH_USER }}"
           KEY="${{ secrets.PREPROD_SSH_KEY }}"
           if [[ -z "$HOST" || -z "$USER" || -z "$KEY" ]]; then
-            echo "Missing PreProd secrets. Set PREPROD_HOST=193.203.161.219, PREPROD_SSH_USER=deploy, PREPROD_SSH_KEY (JustXSystems VPS)." >&2
+            echo "Missing PREPROD_HOST / PREPROD_SSH_USER / PREPROD_SSH_KEY" >&2
             exit 1
           fi
           if [[ "$HOST" == "200.234.45.106" ]]; then
-            echo "PREPROD_HOST points at the Production VPS. Use 193.203.161.219 (JustXSystems)." >&2
+            echo "PREPROD_HOST must not be Production IP" >&2
             exit 1
           fi
-          {
-            echo "host=$HOST"
-            echo "user=$USER"
-          } >> "$GITHUB_OUTPUT"
+          echo "host=$HOST" >> "$GITHUB_OUTPUT"
+          echo "user=$USER" >> "$GITHUB_OUTPUT"
           {
             echo "key<<EOF"
             echo "$KEY"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Deploy PreProd over SSH
+      - name: TCP probe port 22 (fail with clear firewall guidance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOST="${{ steps.ssh.outputs.host }}"
+          echo "Probing ${HOST}:22 from GitHub runner…"
+          if ! timeout 12 bash -c "echo >/dev/tcp/${HOST}/22" 2>/dev/null; then
+            cat <<'MSG' >&2
+          ============================================================
+          GitHub Actions cannot open TCP port 22 to the PreProd VPS.
+          This is why auto-deploy "never ran" / timed out before.
+
+          Fix ONE of:
+            A) Hostinger hPanel → VPS Firewall + UFW: allow TCP 22 from Anywhere
+            B) Install a self-hosted GitHub runner ON the VPS (outbound only)
+               then use workflow deploy-preprod-self-hosted.yml
+
+          Building a tarball in CI does not bypass a closed SSH port —
+          SCP still needs :22 reachable from GitHub's IPs.
+          ============================================================
+          MSG
+            exit 1
+          fi
+          echo "Port 22 reachable."
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: zigma-preprod-release
+          path: dist
+
+      - name: SCP tarball to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ steps.ssh.outputs.host }}
+          username: ${{ steps.ssh.outputs.user }}
+          key: ${{ steps.ssh.outputs.key }}
+          port: 22
+          source: dist/zigma-preprod.tgz
+          target: /tmp/
+          overwrite: true
+
+      - name: Apply release on VPS
         uses: appleboy/ssh-action@v1.2.0
         env:
-          DEPLOY_BRANCH: ${{ steps.opts.outputs.branch }}
-          IN_SYNC: ${{ steps.opts.outputs.sync }}
-          IN_INSTALL: ${{ steps.opts.outputs.install }}
-          IN_BUILD: ${{ steps.opts.outputs.build }}
+          IN_APPLY: ${{ steps.opts.outputs.apply }}
           IN_RESTART: ${{ steps.opts.outputs.restart }}
-          IN_CLEAR_NEXT: ${{ steps.opts.outputs.clear_next }}
           IN_HEALTH: ${{ steps.opts.outputs.health }}
+          IN_PRESERVE: ${{ steps.opts.outputs.preserve }}
+          IN_DB_BACKUP: ${{ steps.opts.outputs.db_backup }}
+          IN_MIGRATIONS: ${{ steps.opts.outputs.migrations }}
+          IN_MIG_FILES: ${{ steps.opts.outputs.migration_files }}
+          IN_DRY: ${{ steps.opts.outputs.dry_run }}
         with:
           host: ${{ steps.ssh.outputs.host }}
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
           script_stop: true
-          command_timeout: 25m
-          envs: DEPLOY_BRANCH,IN_SYNC,IN_INSTALL,IN_BUILD,IN_RESTART,IN_CLEAR_NEXT,IN_HEALTH
+          command_timeout: 20m
+          envs: IN_APPLY,IN_RESTART,IN_HEALTH,IN_PRESERVE,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_DRY
           script: |
             set -euo pipefail
             cd /var/www/zigma-technologies
-            chmod +x scripts/deploy.sh scripts/deploy-preprod.sh
+            mkdir -p /tmp/zigma-rel-script
+            tar -xzf /tmp/zigma-preprod.tgz -C /tmp/zigma-rel-script
+            APPLY=/tmp/zigma-rel-script/scripts/apply-release.sh
+            chmod +x "$APPLY"
 
-            ARGS=(--env preprod --branch "${DEPLOY_BRANCH:-master}")
-            [[ "${IN_SYNC}" == "true" ]] && ARGS+=(--sync) || ARGS+=(--no-sync)
-            [[ "${IN_INSTALL}" == "true" ]] && ARGS+=(--install) || ARGS+=(--no-install)
-            [[ "${IN_BUILD}" == "true" ]] && ARGS+=(--build) || ARGS+=(--no-build)
+            ARGS=(--env preprod --tarball /tmp/zigma-preprod.tgz)
+            [[ "${IN_APPLY}" == "true" ]] && ARGS+=(--extract) || ARGS+=(--no-extract)
             [[ "${IN_RESTART}" == "true" ]] && ARGS+=(--restart) || ARGS+=(--no-restart)
-            [[ "${IN_CLEAR_NEXT}" == "true" ]] && ARGS+=(--clear-next) || ARGS+=(--no-clear-next)
             [[ "${IN_HEALTH}" == "true" ]] && ARGS+=(--healthcheck) || ARGS+=(--no-healthcheck)
+            [[ "${IN_PRESERVE}" == "true" ]] && ARGS+=(--preserve-uploads) || ARGS+=(--no-preserve-uploads)
+            [[ "${IN_DB_BACKUP}" == "true" ]] && ARGS+=(--db-backup) || ARGS+=(--no-db-backup)
+            if [[ "${IN_MIGRATIONS}" == "true" ]]; then
+              ARGS+=(--migrations --migration-files "${IN_MIG_FILES}")
+            else
+              ARGS+=(--no-migrations)
+            fi
+            [[ "${IN_DRY}" == "true" ]] && ARGS+=(--dry-run)
 
-            echo "Running on JustXSystems VPS: ./scripts/deploy.sh ${ARGS[*]}"
-            ./scripts/deploy.sh "${ARGS[@]}"
+            echo "Running: $APPLY ${ARGS[*]}"
+            bash "$APPLY" "${ARGS[@]}"
+            rm -f /tmp/zigma-preprod.tgz
