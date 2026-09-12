@@ -202,6 +202,16 @@ jobs:
           name: zigma-preprod-release
           path: dist
 
+      - name: Flatten tarball path for SCP
+        shell: bash
+        run: |
+          set -euo pipefail
+          # appleboy/scp-action preserves source dirs → dist/foo.tgz becomes /tmp/dist/foo.tgz
+          # Flatten so the remote path is always /tmp/zigma-preprod.tgz
+          test -f dist/zigma-preprod.tgz
+          cp -f dist/zigma-preprod.tgz ./zigma-preprod.tgz
+          ls -lh ./zigma-preprod.tgz
+
       - name: SCP tarball to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -209,7 +219,7 @@ jobs:
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          source: dist/zigma-preprod.tgz
+          source: zigma-preprod.tgz
           target: /tmp/
           overwrite: true
 
@@ -235,12 +245,33 @@ jobs:
           script: |
             set -euo pipefail
             cd /var/www/zigma-technologies
+
+            TGZ=""
+            for candidate in /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz; do
+              if [[ -f "$candidate" ]]; then
+                TGZ="$candidate"
+                break
+              fi
+            done
+            if [[ -z "$TGZ" ]]; then
+              echo "ERROR: release tarball not found under /tmp after SCP" >&2
+              ls -la /tmp | head -50 >&2
+              exit 1
+            fi
+            # Normalize to a stable path for apply-release
+            if [[ "$TGZ" != /tmp/zigma-preprod.tgz ]]; then
+              cp -f "$TGZ" /tmp/zigma-preprod.tgz
+              TGZ=/tmp/zigma-preprod.tgz
+            fi
+            ls -lh "$TGZ"
+
             mkdir -p /tmp/zigma-rel-script
-            tar -xzf /tmp/zigma-preprod.tgz -C /tmp/zigma-rel-script
+            tar -xzf "$TGZ" -C /tmp/zigma-rel-script
             APPLY=/tmp/zigma-rel-script/scripts/apply-release.sh
+            test -f "$APPLY"
             chmod +x "$APPLY"
 
-            ARGS=(--env preprod --tarball /tmp/zigma-preprod.tgz)
+            ARGS=(--env preprod --tarball "$TGZ")
             [[ "${IN_APPLY}" == "true" ]] && ARGS+=(--extract) || ARGS+=(--no-extract)
             [[ "${IN_RESTART}" == "true" ]] && ARGS+=(--restart) || ARGS+=(--no-restart)
             [[ "${IN_HEALTH}" == "true" ]] && ARGS+=(--healthcheck) || ARGS+=(--no-healthcheck)
@@ -255,4 +286,4 @@ jobs:
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
-            rm -f /tmp/zigma-preprod.tgz
+            rm -f /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz

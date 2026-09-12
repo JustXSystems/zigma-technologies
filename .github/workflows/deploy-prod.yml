@@ -156,6 +156,14 @@ jobs:
           name: zigma-prod-release
           path: dist
 
+      - name: Flatten tarball path for SCP
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist/zigma-prod.tgz
+          cp -f dist/zigma-prod.tgz ./zigma-prod.tgz
+          ls -lh ./zigma-prod.tgz
+
       - name: SCP tarball to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -163,7 +171,7 @@ jobs:
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          source: dist/zigma-prod.tgz
+          source: zigma-prod.tgz
           target: /tmp/
           overwrite: true
 
@@ -189,12 +197,32 @@ jobs:
           script: |
             set -euo pipefail
             cd /var/www/zigma-technologies
+
+            TGZ=""
+            for candidate in /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz; do
+              if [[ -f "$candidate" ]]; then
+                TGZ="$candidate"
+                break
+              fi
+            done
+            if [[ -z "$TGZ" ]]; then
+              echo "ERROR: release tarball not found under /tmp after SCP" >&2
+              ls -la /tmp | head -50 >&2
+              exit 1
+            fi
+            if [[ "$TGZ" != /tmp/zigma-prod.tgz ]]; then
+              cp -f "$TGZ" /tmp/zigma-prod.tgz
+              TGZ=/tmp/zigma-prod.tgz
+            fi
+            ls -lh "$TGZ"
+
             mkdir -p /tmp/zigma-rel-script
-            tar -xzf /tmp/zigma-prod.tgz -C /tmp/zigma-rel-script
+            tar -xzf "$TGZ" -C /tmp/zigma-rel-script
             APPLY=/tmp/zigma-rel-script/scripts/apply-release.sh
+            test -f "$APPLY"
             chmod +x "$APPLY"
 
-            ARGS=(--env prod --confirm-prod DEPLOY_PROD --tarball /tmp/zigma-prod.tgz)
+            ARGS=(--env prod --confirm-prod DEPLOY_PROD --tarball "$TGZ")
             [[ "${IN_APPLY}" == "true" ]] && ARGS+=(--extract) || ARGS+=(--no-extract)
             [[ "${IN_RESTART}" == "true" ]] && ARGS+=(--restart) || ARGS+=(--no-restart)
             [[ "${IN_HEALTH}" == "true" ]] && ARGS+=(--healthcheck) || ARGS+=(--no-healthcheck)
@@ -209,4 +237,4 @@ jobs:
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
-            rm -f /tmp/zigma-prod.tgz
+            rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz
