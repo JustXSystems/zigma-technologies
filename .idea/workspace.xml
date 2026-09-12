@@ -7,13 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance.">
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/db.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/db.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/nav-data.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-data.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-shell.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-shell.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths.">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.6196526921058612" />
-      <entry key="MS500" value="3.3002405827606296" />
-      <entry key="S2" value="6.652824696942847" />
-      <entry key="S5" value="15.099431307626965" />
-      <entry key="S10" value="27.299482425107715" />
-      <entry key="S30" value="48.496430812053454" />
-      <entry key="S60" value="57.52294408350649" />
-      <entry key="M2" value="62.91650848492692" />
-      <entry key="M5" value="71.20031269521581" />
-      <entry key="M10" value="118.36628912164005" />
-      <entry key="M15" value="180.26404241012563" />
-      <entry key="M30" value="317.3093004908411" />
-      <entry key="H1" value="439.63037755058144" />
-      <entry key="H2" value="527.9378584529787" />
-      <entry key="H4" value="640.0825065166732" />
-      <entry key="D1" value="2171.9706378317965" />
-      <entry key="W1" value="10077.633393085189" />
+      <entry key="MS100" value="1.785776213967211" />
+      <entry key="MS500" value="3.58722783309318" />
+      <entry key="S2" value="7.697829979766742" />
+      <entry key="S5" value="11.764434699037867" />
+      <entry key="S10" value="14.020524741096615" />
+      <entry key="S30" value="15.912219909165431" />
+      <entry key="S60" value="16.44325783293131" />
+      <entry key="M2" value="16.731677719098002" />
+      <entry key="M5" value="19.30268318291774" />
+      <entry key="M10" value="38.747788480888914" />
+      <entry key="M15" value="75.3231301805676" />
+      <entry key="M30" value="197.52784996860646" />
+      <entry key="H1" value="348.61089958993887" />
+      <entry key="H2" value="475.51661570116164" />
+      <entry key="H4" value="613.5167103489963" />
+      <entry key="D1" value="2163.6039984333843" />
+      <entry key="W1" value="10077.734888484698" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -88,34 +85,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="3.60048755142899E-291" />
-      <entry key="M10" value="6.000406279102385E-146" />
-      <entry key="M15" value="1.5326880496749834E-97" />
-      <entry key="M30" value="3.9149560018919815E-49" />
-      <entry key="H1" value="6.256960925155431E-25" />
-      <entry key="H2" value="7.910095400913502E-13" />
-      <entry key="H4" value="8.893871711004811E-7" />
-      <entry key="D1" value="0.09963748480250272" />
-      <entry key="W1" value="1.115331163671641" />
+      <entry key="M5" value="1.2218103559889037E-292" />
+      <entry key="M10" value="1.1053553075771394E-146" />
+      <entry key="M15" value="4.9621276695806274E-98" />
+      <entry key="M30" value="2.227583369838421E-49" />
+      <entry key="H1" value="4.719728138186077E-25" />
+      <entry key="H2" value="6.870027756993399E-13" />
+      <entry key="H4" value="8.288563058350863E-7" />
+      <entry key="D1" value="0.0984738278629116" />
+      <entry key="W1" value="1.1134609462315779" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5704915101254315" />
-      <entry key="MS500" value="3.275780695194522" />
-      <entry key="S2" value="6.637849291576406" />
-      <entry key="S5" value="15.084708790858873" />
-      <entry key="S10" value="27.285866903490867" />
-      <entry key="S30" value="48.48820385571104" />
-      <entry key="S60" value="57.51803527995779" />
-      <entry key="M2" value="62.91381543585486" />
-      <entry key="M5" value="71.19911242127718" />
-      <entry key="M10" value="118.36538274727613" />
-      <entry key="M15" value="180.26317027677004" />
-      <entry key="M30" value="317.30856676307275" />
-      <entry key="H1" value="439.6298774211282" />
-      <entry key="H2" value="527.9375600805622" />
-      <entry key="H4" value="640.0823265609719" />
-      <entry key="D1" value="2172.070136773802" />
-      <entry key="W1" value="10078.748562076333" />
+      <entry key="MS100" value="1.700735646359986" />
+      <entry key="MS500" value="3.5559247076885496" />
+      <entry key="S2" value="7.681071496565811" />
+      <entry key="S5" value="11.754087932876216" />
+      <entry key="S10" value="14.01432910416953" />
+      <entry key="S30" value="15.90986732604945" />
+      <entry key="S60" value="16.44204108440846" />
+      <entry key="M2" value="16.73105828550437" />
+      <entry key="M5" value="19.302392340639184" />
+      <entry key="M10" value="38.74749602689032" />
+      <entry key="M15" value="75.322764069786" />
+      <entry key="M30" value="197.52739055688457" />
+      <entry key="H1" value="348.61050135922346" />
+      <entry key="H2" value="475.5163460701151" />
+      <entry key="H4" value="613.5165373949295" />
+      <entry key="D1" value="2163.702334462044" />
+      <entry key="W1" value="10078.84818740541" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -241,7 +238,9 @@
     <MESSAGE value="inventory items can set background image now" />
     <MESSAGE value="inventory items background image issue fixed" />
     <MESSAGE value="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance." />
+    <MESSAGE value="Allow CI next build without MySQL for PreProd release artifacts.&#10;&#10;Site layout is dynamic; CMS/nav/catalog reads return safe fallbacks on connection refused so GitHub Actions can package standalone releases." />
+    <MESSAGE value="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

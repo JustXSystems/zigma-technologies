@@ -191,50 +191,52 @@ jobs:
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          script_stop: true
+          # Do NOT use script_stop — it breaks if/[[ and hides real stderr (appleboy/ssh-action#130/#139).
           command_timeout: 40m
           envs: IN_APPLY,IN_RESTART,IN_HEALTH,IN_PRESERVE,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_DRY
           script: |
-            set -euo pipefail
+            set -euxo pipefail
             cd /var/www/zigma-technologies
 
             TGZ=""
             for candidate in /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz; do
-              if [[ -f "$candidate" ]]; then
+              if [ -f "$candidate" ]; then
                 TGZ="$candidate"
                 break
               fi
             done
-            if [[ -z "$TGZ" ]]; then
+            if [ -z "$TGZ" ]; then
               echo "ERROR: release tarball not found under /tmp after SCP" >&2
               ls -la /tmp | head -50 >&2
               exit 1
             fi
-            if [[ "$TGZ" != /tmp/zigma-prod.tgz ]]; then
+            if [ "$TGZ" != /tmp/zigma-prod.tgz ]; then
               cp -f "$TGZ" /tmp/zigma-prod.tgz
               TGZ=/tmp/zigma-prod.tgz
             fi
             ls -lh "$TGZ"
 
+            rm -rf /tmp/zigma-rel-script
             mkdir -p /tmp/zigma-rel-script
-            tar -xzf "$TGZ" -C /tmp/zigma-rel-script
+            tar -xzf "$TGZ" -C /tmp/zigma-rel-script scripts/apply-release.sh
             APPLY=/tmp/zigma-rel-script/scripts/apply-release.sh
             test -f "$APPLY"
             chmod +x "$APPLY"
 
             ARGS=(--env prod --confirm-prod DEPLOY_PROD --tarball "$TGZ")
-            [[ "${IN_APPLY}" == "true" ]] && ARGS+=(--extract) || ARGS+=(--no-extract)
-            [[ "${IN_RESTART}" == "true" ]] && ARGS+=(--restart) || ARGS+=(--no-restart)
-            [[ "${IN_HEALTH}" == "true" ]] && ARGS+=(--healthcheck) || ARGS+=(--no-healthcheck)
-            [[ "${IN_PRESERVE}" == "true" ]] && ARGS+=(--preserve-uploads) || ARGS+=(--no-preserve-uploads)
-            [[ "${IN_DB_BACKUP}" == "true" ]] && ARGS+=(--db-backup) || ARGS+=(--no-db-backup)
-            if [[ "${IN_MIGRATIONS}" == "true" ]]; then
+            if [ "${IN_APPLY}" = "true" ]; then ARGS+=(--extract); else ARGS+=(--no-extract); fi
+            if [ "${IN_RESTART}" = "true" ]; then ARGS+=(--restart); else ARGS+=(--no-restart); fi
+            if [ "${IN_HEALTH}" = "true" ]; then ARGS+=(--healthcheck); else ARGS+=(--no-healthcheck); fi
+            if [ "${IN_PRESERVE}" = "true" ]; then ARGS+=(--preserve-uploads); else ARGS+=(--no-preserve-uploads); fi
+            if [ "${IN_DB_BACKUP}" = "true" ]; then ARGS+=(--db-backup); else ARGS+=(--no-db-backup); fi
+            if [ "${IN_MIGRATIONS}" = "true" ]; then
               ARGS+=(--migrations --migration-files "${IN_MIG_FILES}")
             else
               ARGS+=(--no-migrations)
             fi
-            [[ "${IN_DRY}" == "true" ]] && ARGS+=(--dry-run)
+            if [ "${IN_DRY}" = "true" ]; then ARGS+=(--dry-run); fi
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
+            rm -rf /tmp/zigma-rel-script
             rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz
