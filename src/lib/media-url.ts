@@ -19,6 +19,16 @@ export function mediaBaseUrl(): string {
   return withBasePath(storage);
 }
 
+/** Browser URL for a stored media path (adds basePath on subdirectory deploys). */
+export function publicMediaUrl(publicPath: string): string {
+  const storage = toStorageMediaPath(publicPath);
+  if (!storage) return '';
+  if (/^https?:\/\//i.test(storage) || storage.startsWith('data:') || storage.startsWith('blob:')) {
+    return storage;
+  }
+  return withBasePath(storage);
+}
+
 /** Normalize any stored / displayed media path to root-relative `/assets/...` (or absolute CDN). */
 export function toStorageMediaPath(publicPath: string): string {
   const trimmed = (publicPath || '').trim();

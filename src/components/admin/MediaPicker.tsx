@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { withBasePath } from '@/lib/base-path';
-import { toStorageMediaPath } from '@/lib/media-url';
+import { publicMediaUrl, toStorageMediaPath } from '@/lib/media-url';
 
 type Asset = { id: number | null; path: string; mime: string | null; alt: string | null };
 
@@ -35,7 +34,7 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
   const isImage = (mime: string | null, path: string) =>
     (mime && mime.startsWith('image/')) || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
 
-  const previewSrc = value && isImage(null, value) ? withBasePath(toStorageMediaPath(value)) : '';
+  const previewSrc = value && isImage(null, value) ? publicMediaUrl(value) : '';
 
   return (
     <div className="admin-field">
@@ -58,6 +57,9 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
           src={previewSrc}
           alt=""
           style={{ marginTop: '0.55rem', maxHeight: 72, borderRadius: 6 }}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.outline = '2px solid #c9540f';
+          }}
         />
       ) : null}
 
@@ -110,7 +112,7 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={withBasePath(storagePath)}
+                          src={publicMediaUrl(storagePath)}
                           alt={asset.alt || ''}
                           style={{ width: '100%', height: 88, objectFit: 'cover', borderRadius: 6 }}
                         />

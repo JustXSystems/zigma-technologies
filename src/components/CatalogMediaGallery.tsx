@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { CatalogMedia } from '@/lib/types';
-import { withBasePath } from '@/lib/base-path';
+import { publicMediaUrl } from '@/lib/media-url';
 
 type Props = {
   media: CatalogMedia[];
@@ -21,7 +21,10 @@ export default function CatalogMediaGallery({
   backgroundImageUrl,
 }: Props) {
   const sorted = useMemo(
-    () => [...media].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) || a.sort_order - b.sort_order || a.id - b.id),
+    () =>
+      [...media].sort(
+        (a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) || a.sort_order - b.sort_order || a.id - b.id
+      ),
     [media]
   );
 
@@ -32,10 +35,11 @@ export default function CatalogMediaGallery({
   }, [sorted]);
 
   const active = sorted.find((m) => m.id === activeId) || sorted[0];
-  // CSS url() is not rewritten by BasePathBootstrap (only <img>/<a>/fetch) — must prefix here.
-  const bg = withBasePath(backgroundImageUrl?.trim() || '');
-  // Encode special chars in URLs for CSS url("…") (spaces, etc.)
-  const bgCss = bg ? bg.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)') : '';
+  // CSS url() is not rewritten by BasePathBootstrap — must prefix here for PreProd.
+  const bg = publicMediaUrl(backgroundImageUrl?.trim() || '');
+  const bgCss = bg
+    ? encodeURI(bg).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
+    : '';
 
   const rootClass = [
     'catalog-gallery',
@@ -49,13 +53,7 @@ export default function CatalogMediaGallery({
   const mainStyle = bgCss ? ({ backgroundImage: `url("${bgCss}")` } as const) : undefined;
 
   if (!sorted.length) {
-    return (
-      <div
-        className={`${rootClass} catalog-gallery--empty`}
-        style={mainStyle}
-        aria-hidden="true"
-      />
-    );
+    return <div className={`${rootClass} catalog-gallery--empty`} style={mainStyle} aria-hidden="true" />;
   }
 
   return (
@@ -64,7 +62,7 @@ export default function CatalogMediaGallery({
         {active?.kind === 'video' ? (
           <video
             key={active.id}
-            src={withBasePath(active.url)}
+            src={publicMediaUrl(active.url)}
             controls
             playsInline
             className="catalog-gallery-media"
@@ -73,7 +71,7 @@ export default function CatalogMediaGallery({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={active?.id}
-            src={withBasePath(active?.url || '')}
+            src={publicMediaUrl(active?.url || '')}
             alt={active?.alt || title || ''}
             className="catalog-gallery-media"
           />
@@ -95,12 +93,12 @@ export default function CatalogMediaGallery({
               >
                 {m.kind === 'video' ? (
                   <>
-                    <video src={withBasePath(m.url)} muted className="catalog-gallery-thumb-media" />
+                    <video src={publicMediaUrl(m.url)} muted className="catalog-gallery-thumb-media" />
                     <span className="catalog-gallery-thumb-play">▶</span>
                   </>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={withBasePath(m.url)} alt={m.alt || ''} className="catalog-gallery-thumb-media" />
+                  <img src={publicMediaUrl(m.url)} alt={m.alt || ''} className="catalog-gallery-thumb-media" />
                 )}
               </button>
             );

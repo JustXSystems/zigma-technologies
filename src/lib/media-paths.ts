@@ -1,7 +1,7 @@
 import path from 'path';
-import { mediaBaseUrl, mediaStoragePrefix, toStorageMediaPath } from '@/lib/media-url';
+import { mediaBaseUrl, mediaStoragePrefix, publicMediaUrl, toStorageMediaPath } from '@/lib/media-url';
 
-export { mediaBaseUrl, mediaStoragePrefix, toStorageMediaPath };
+export { mediaBaseUrl, mediaStoragePrefix, publicMediaUrl, toStorageMediaPath };
 
 /** Admin CMS library: images, SVG, video. */
 export type AdminMediaCategory = 'images' | 'svg' | 'video';
@@ -29,7 +29,8 @@ export function adminMediaPublicPath(category: AdminMediaCategory, filename: str
 }
 
 export function adminMediaDiskDir(category: AdminMediaCategory): string {
-  return path.join(process.cwd(), 'public', 'assets', category);
+  const root = process.env.ZIGMA_APP_DIR || process.cwd();
+  return path.join(root, 'public', 'assets', category);
 }
 
 export function publicUploadPublicPath(category: PublicUploadCategory, filename: string): string {
@@ -37,7 +38,8 @@ export function publicUploadPublicPath(category: PublicUploadCategory, filename:
 }
 
 export function publicUploadDiskDir(category: PublicUploadCategory): string {
-  return path.join(process.cwd(), 'public', 'assets', 'uploads', category);
+  const root = process.env.ZIGMA_APP_DIR || process.cwd();
+  return path.join(root, 'public', 'assets', 'uploads', category);
 }
 
 export function isPrivateUploadPath(publicPath: string): boolean {
@@ -52,7 +54,8 @@ export function resolvePublicAssetDiskPath(publicPath: string): string | null {
   const clean = toStorageMediaPath(publicPath);
 
   if (clean.startsWith('/assets/')) {
-    return path.join(process.cwd(), 'public', clean.slice(1));
+    const root = process.env.ZIGMA_APP_DIR || process.cwd();
+    return path.join(root, 'public', clean.slice(1));
   }
 
   if (clean.startsWith('/uploads/')) {

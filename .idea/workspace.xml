@@ -7,9 +7,15 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Standalone deploy only ships traced server deps. scripts/db-import.mjs can’t resolve mysql2 from that tree">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/MediaPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/MediaPicker.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/media-url.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-url.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,23 +63,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1312632681907666" />
-      <entry key="MS500" value="2.6706019732779094" />
-      <entry key="S2" value="5.975027007207021" />
-      <entry key="S5" value="9.861768755315664" />
-      <entry key="S10" value="14.969477878523115" />
-      <entry key="S30" value="26.172492473217332" />
-      <entry key="S60" value="31.918316171025594" />
-      <entry key="M2" value="35.608596803392935" />
-      <entry key="M5" value="38.15167873997104" />
-      <entry key="M10" value="39.36088952985362" />
-      <entry key="M15" value="41.46688938053584" />
-      <entry key="M30" value="59.49010114213873" />
-      <entry key="H1" value="135.86905550481399" />
-      <entry key="H2" value="297.5074047410552" />
-      <entry key="H4" value="515.9208203137235" />
-      <entry key="D1" value="2154.6327593710926" />
-      <entry key="W1" value="10123.304992499508" />
+      <entry key="MS100" value="1.2129999318482647" />
+      <entry key="MS500" value="3.3966260587325516" />
+      <entry key="S2" value="8.79047372190304" />
+      <entry key="S5" value="17.15498608318764" />
+      <entry key="S10" value="29.543323501718184" />
+      <entry key="S30" value="66.65354809934657" />
+      <entry key="S60" value="100.26069946190421" />
+      <entry key="M2" value="143.3319689489832" />
+      <entry key="M5" value="208.36330517177677" />
+      <entry key="M10" value="251.04835420210122" />
+      <entry key="M15" value="271.17891589663236" />
+      <entry key="M30" value="307.2499143750405" />
+      <entry key="H1" value="387.89816497832254" />
+      <entry key="H2" value="550.9672667135399" />
+      <entry key="H4" value="774.0721676261436" />
+      <entry key="D1" value="2420.3269712582123" />
+      <entry key="W1" value="10393.865407974758" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -84,34 +90,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="2.6059113199121866E-302" />
-      <entry key="M10" value="1.6142835314504998E-151" />
-      <entry key="M15" value="2.964739530826604E-101" />
-      <entry key="M30" value="5.44494217676061E-51" />
-      <entry key="H1" value="7.378985144829121E-26" />
-      <entry key="H2" value="2.71642874834386E-13" />
-      <entry key="H4" value="5.211937018456537E-7" />
-      <entry key="D1" value="0.09114666980569294" />
-      <entry key="W1" value="1.1012295185409593" />
+      <entry key="M5" value="4.0141357805127244E-303" />
+      <entry key="M10" value="6.335720780237146E-152" />
+      <entry key="M15" value="1.5892687829449175E-101" />
+      <entry key="M30" value="3.986563410940475E-51" />
+      <entry key="H1" value="6.313923828286724E-26" />
+      <entry key="H2" value="2.512752241723526E-13" />
+      <entry key="H4" value="5.012736021184975E-7" />
+      <entry key="D1" value="0.09055659511224469" />
+      <entry key="W1" value="1.1002082166864233" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0646768196914846" />
-      <entry key="MS500" value="2.643463790245231" />
-      <entry key="S2" value="5.960656588273901" />
-      <entry key="S5" value="9.852305187903102" />
-      <entry key="S10" value="14.962362333961893" />
-      <entry key="S30" value="26.168393317173976" />
-      <entry key="S60" value="31.91582278211816" />
-      <entry key="M2" value="35.60720734670558" />
-      <entry key="M5" value="38.15108356377513" />
-      <entry key="M10" value="39.36058281273797" />
-      <entry key="M15" value="41.46667494278185" />
-      <entry key="M30" value="59.48995176794141" />
-      <entry key="H1" value="135.86889278946896" />
-      <entry key="H2" value="297.50723133849937" />
-      <entry key="H4" value="515.920672074769" />
-      <entry key="D1" value="2154.723770838004" />
-      <entry key="W1" value="10124.406060648616" />
+      <entry key="MS100" value="1.1713368548380754" />
+      <entry key="MS500" value="3.3732482699542468" />
+      <entry key="S2" value="8.775618246385124" />
+      <entry key="S5" value="17.143288143032677" />
+      <entry key="S10" value="29.533173016997722" />
+      <entry key="S30" value="66.64578973834016" />
+      <entry key="S60" value="100.25475369466311" />
+      <entry key="M2" value="143.32759752774163" />
+      <entry key="M5" value="208.3606683190482" />
+      <entry key="M10" value="251.04673445462873" />
+      <entry key="M15" value="271.1777401193696" />
+      <entry key="M30" value="307.24924069879546" />
+      <entry key="H1" value="387.8977344436918" />
+      <entry key="H2" value="550.9669582822775" />
+      <entry key="H4" value="774.0719504316112" />
+      <entry key="D1" value="2420.4173810036423" />
+      <entry key="W1" value="10394.965453180726" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -245,7 +251,8 @@
     <MESSAGE value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
     <MESSAGE value="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified." />
     <MESSAGE value="Standalone deploy only ships traced server deps. scripts/db-import.mjs can’t resolve mysql2 from that tree" />
-    <option name="LAST_COMMIT_MESSAGE" value="Standalone deploy only ships traced server deps. scripts/db-import.mjs can’t resolve mysql2 from that tree" />
+    <MESSAGE value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
+    <option name="LAST_COMMIT_MESSAGE" value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -1,5 +1,6 @@
--- Upgrade existing DBs: per-item gallery background image for catalog popups
-USE zigmatech;
+-- Upgrade existing DBs: per-item gallery background image for catalog popups.
+-- Uses DATABASE() from the connection — do not hardcode a schema name.
+-- Idempotent.
 
 SET @db = DATABASE();
 

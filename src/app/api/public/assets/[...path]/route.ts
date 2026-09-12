@@ -26,6 +26,19 @@ const MIME: Record<string, string> = {
  * (Next's public/ index does not pick up files added after process start).
  * Safe for both PreProd (basePath) and Production (domain root).
  */
+function resolveAssetsRoot(): string {
+  const candidates = [
+    process.env.ZIGMA_APP_DIR
+      ? path.resolve(process.env.ZIGMA_APP_DIR, 'public', 'assets')
+      : '',
+    path.resolve(process.cwd(), 'public', 'assets'),
+  ].filter(Boolean);
+  for (const root of candidates) {
+    if (existsSync(root)) return root;
+  }
+  return candidates[0] || path.resolve(process.cwd(), 'public', 'assets');
+}
+
 export async function GET(
   _request: Request,
   context: { params: Promise<{ path: string[] }> }
@@ -50,7 +63,7 @@ export async function GET(
     return new NextResponse('Not found', { status: 404 });
   }
 
-  const assetsRoot = path.resolve(process.cwd(), 'public', 'assets');
+  const assetsRoot = resolveAssetsRoot();
   const diskPath = path.resolve(assetsRoot, ...segments);
   if (diskPath !== assetsRoot && !diskPath.startsWith(`${assetsRoot}${path.sep}`)) {
     return new NextResponse('Not found', { status: 404 });

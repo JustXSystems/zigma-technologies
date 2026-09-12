@@ -252,6 +252,27 @@ else
   log "Skip extract"
 fi
 
+# After extract (so new SQL is on disk): ensure gallery-background column (idempotent).
+if [[ -f scripts/migrate-catalog-background.sql ]]; then
+  log "Ensure schema: catalog_items.background_image_url"
+  DB_HOST="$(env_get DB_HOST)"; DB_HOST="${DB_HOST:-localhost}"
+  DB_PORT="$(env_get DB_PORT)"; DB_PORT="${DB_PORT:-3306}"
+  DB_NAME="$(env_get DB_NAME)"
+  DB_USER="$(env_get DB_USER)"
+  DB_PASSWORD="$(env_get DB_PASSWORD)"
+  if [[ -n "$DB_NAME" && -n "$DB_USER" ]] && command -v mysql >/dev/null 2>&1; then
+    export MYSQL_PWD="${DB_PASSWORD}"
+    if mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" <scripts/migrate-catalog-background.sql; then
+      log "Schema ensure OK (background_image_url)"
+    else
+      log "WARNING: schema ensure failed — app will retry on first catalog request"
+    fi
+    unset MYSQL_PWD
+  else
+    log "Skip schema ensure (mysql CLI or DB_* missing) — app self-heal on request"
+  fi
+fi
+
 if [[ "$DO_RESTART" -eq 1 ]]; then
   command -v pm2 >/dev/null 2>&1 || die "pm2 not found"
   log "PM2 restart $PM2_NAME (standalone server.js)"
@@ -264,8 +285,9 @@ if [[ "$DO_RESTART" -eq 1 ]]; then
     pm2 delete "$PM2_NAME" || true
   fi
   # Do NOT reuse shell HOSTNAME (machine name) — Next standalone treats it as listen host.
-  PORT="${PORT:-$APP_PORT}" HOSTNAME="127.0.0.1" \
-    pm2 start "$APP_DIR/server.js" --name "$PM2_NAME" --update-env
+  # --cwd + ZIGMA_APP_DIR keep disk asset resolution correct even if PM2's inherited cwd drifts.
+  PORT="${PORT:-$APP_PORT}" HOSTNAME="127.0.0.1" ZIGMA_APP_DIR="$APP_DIR" \
+    pm2 start "$APP_DIR/server.js" --name "$PM2_NAME" --cwd "$APP_DIR" --update-env
   pm2 save
   pm2 status "$PM2_NAME"
 else

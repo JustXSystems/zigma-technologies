@@ -14,6 +14,7 @@ import {
   type Enquiry,
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
+import { ensureCatalogBackgroundColumn } from '@/lib/schema-ensure';
 
 function mapItem(row: RowDataPacket): CatalogItem {
   return {
@@ -81,6 +82,7 @@ export async function listCatalogItems(opts: {
   sort?: 'featured' | 'newest' | 'title';
 }) {
   try {
+  await ensureCatalogBackgroundColumn();
   const where: string[] = ['i.item_type = ?'];
   const params: unknown[] = [opts.itemType];
 
@@ -179,6 +181,7 @@ export async function listCatalogItemsByIds(
 
 export async function getCatalogItemBySlug(itemType: CatalogItemType, slug: string, admin = false) {
   try {
+    await ensureCatalogBackgroundColumn();
     const where = ['i.item_type = ?', 'i.slug = ?'];
     const params: unknown[] = [itemType, slug];
     if (!admin) {
@@ -206,6 +209,7 @@ export async function getCatalogItemBySlug(itemType: CatalogItemType, slug: stri
 }
 
 export async function getCatalogItemById(id: number) {
+  await ensureCatalogBackgroundColumn();
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT i.*, c.name AS category_name, c.slug AS category_slug
      FROM catalog_items i
@@ -225,7 +229,16 @@ export async function listItemMedia(itemId: number): Promise<CatalogMedia[]> {
     'SELECT * FROM catalog_media WHERE item_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC',
     [itemId]
   );
-  return rows as CatalogMedia[];
+  return rows.map((row) => ({
+    id: row.id,
+    item_id: row.item_id,
+    kind: row.kind,
+    url: toStorageMediaPath(String(row.url || '')),
+    alt: row.alt,
+    sort_order: row.sort_order,
+    is_primary: row.is_primary,
+    created_at: row.created_at,
+  })) as CatalogMedia[];
 }
 
 export async function createCatalogItem(input: {
@@ -248,6 +261,7 @@ export async function createCatalogItem(input: {
   case_study_json?: CatalogCaseStudy | null;
   cta_config_json?: Record<string, unknown> | null;
 }) {
+  await ensureCatalogBackgroundColumn();
   const slug = slugify(input.slug || input.title);
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO catalog_items
@@ -301,6 +315,7 @@ export async function updateCatalogItem(
     case_study_json: CatalogCaseStudy | null;
   }>
 ) {
+  await ensureCatalogBackgroundColumn();
   const fields: string[] = [];
   const params: unknown[] = [];
 
