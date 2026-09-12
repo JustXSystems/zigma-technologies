@@ -19,6 +19,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+die() { echo "ERROR: $*" >&2; exit 1; }
+
 ENV_NAME=""
 OUT=""
 INCLUDE_UPLOADS_GITKEEP=1
@@ -65,6 +67,28 @@ mkdir -p "$STAGE"
 # Standalone server tree (includes minimal node_modules + server.js)
 cp -a .next/standalone/. "$STAGE/"
 
+# Never ship secrets if a local/contaminated standalone copied .env
+rm -f "$STAGE/.env"
+rm -f "$STAGE"/.env.local "$STAGE"/.env.* 2>/dev/null || true
+# Keep .env.example if present
+find "$STAGE" -maxdepth 3 -type f -name '.env' -delete 2>/dev/null || true
+find "$STAGE" -maxdepth 3 -type f -name '.env.*' ! -name '.env.example' -delete 2>/dev/null || true
+
+# Some Next layouts nest server.js (e.g. monorepo / package name). Flatten to STAGE root.
+if [[ ! -f "$STAGE/server.js" ]]; then
+  NESTED="$(find "$STAGE" -maxdepth 4 -type f -name server.js | head -n1 || true)"
+  [[ -n "$NESTED" ]] || die "standalone server.js not found under $STAGE"
+  NEST_DIR="$(dirname "$NESTED")"
+  echo "==> Flattening nested standalone from $NEST_DIR"
+  # Move nested tree up without clobbering accidentally; prefer rsync then cleanup
+  rsync -a "$NEST_DIR"/ "$STAGE"/
+  # Remove empty nest path if it was a subdirectory of STAGE
+  case "$NEST_DIR" in
+    "$STAGE"/*) rm -rf "$NEST_DIR" ;;
+  esac
+  [[ -f "$STAGE/server.js" ]] || die "server.js still missing after flatten"
+fi
+
 # Static assets Next does not copy into standalone by default
 mkdir -p "$STAGE/.next"
 cp -a .next/static "$STAGE/.next/static"
@@ -85,10 +109,18 @@ if [[ -d public ]]; then
   [[ -f public/assets/uploads/documents/.gitkeep ]] && cp -a public/assets/uploads/documents/.gitkeep "$STAGE/public/assets/uploads/documents/" || true
 fi
 
-# Ops scripts + lockfiles for on-box tools (db:import, apply-release)
+# Ops scripts — replace any traced/partial scripts dir from standalone.
+rm -rf "$STAGE/scripts"
 mkdir -p "$STAGE/scripts"
-cp -a scripts/*.sh scripts/*.mjs "$STAGE/scripts/" 2>/dev/null || true
-cp -a package.json package-lock.json next.config.ts "$STAGE/" 2>/dev/null || true
+shopt -s nullglob
+SCRIPT_FILES=(scripts/*.sh scripts/*.mjs)
+shopt -u nullglob
+((${#SCRIPT_FILES[@]} > 0)) || die "No scripts/*.sh or scripts/*.mjs to package"
+cp -a "${SCRIPT_FILES[@]}" "$STAGE/scripts/"
+[[ -f "$STAGE/scripts/apply-release.sh" ]] || die "apply-release.sh missing after staging scripts"
+echo "==> Staged ${#SCRIPT_FILES[@]} script file(s) including apply-release.sh"
+cp -a package.json package-lock.json "$STAGE/"
+[[ -f next.config.ts ]] && cp -a next.config.ts "$STAGE/"
 [[ -f .env.example ]] && cp -a .env.example "$STAGE/"
 
 BASE_PATH_VAL="$(node -e "console.log(require('./.next/routes-manifest.json').basePath||'')")"
@@ -119,3 +151,11 @@ tar -C "$STAGE" -czf "$OUT" .
 BYTES="$(wc -c < "$OUT" | tr -d ' ')"
 echo "==> Wrote $OUT ($BYTES bytes)"
 echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
+
+# Hard guarantee for the VPS apply step
+if ! tar -tzf "$OUT" | grep -Exq '(\./)?scripts/apply-release\.sh'; then
+  echo "ERROR: tarball is missing scripts/apply-release.sh — listing scripts/ entries:" >&2
+  tar -tzf "$OUT" | grep -E 'scripts/' | head -50 >&2 || true
+  exit 1
+fi
+echo "==> Verified scripts/apply-release.sh is in the tarball"

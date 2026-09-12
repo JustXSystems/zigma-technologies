@@ -197,6 +197,13 @@ jobs:
           fi
           echo "Port 22 reachable."
 
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || 'master' }}
+          sparse-checkout: |
+            scripts/apply-release.sh
+          sparse-checkout-cone-mode: false
+
       - uses: actions/download-artifact@v4
         with:
           name: zigma-preprod-release
@@ -210,16 +217,18 @@ jobs:
           # Flatten so the remote path is always /tmp/zigma-preprod.tgz
           test -f dist/zigma-preprod.tgz
           cp -f dist/zigma-preprod.tgz ./zigma-preprod.tgz
-          ls -lh ./zigma-preprod.tgz
+          test -f scripts/apply-release.sh
+          cp -f scripts/apply-release.sh ./apply-release.sh
+          ls -lh ./zigma-preprod.tgz ./apply-release.sh
 
-      - name: SCP tarball to VPS
+      - name: SCP tarball + apply script to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ steps.ssh.outputs.host }}
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          source: zigma-preprod.tgz
+          source: "zigma-preprod.tgz,apply-release.sh"
           target: /tmp/
           overwrite: true
 
@@ -264,12 +273,18 @@ jobs:
             fi
             ls -lh "$TGZ"
 
-            # Pull only apply-release.sh from the tarball (avoid a full second extract here)
-            rm -rf /tmp/zigma-rel-script
-            mkdir -p /tmp/zigma-rel-script
-            tar -xzf "$TGZ" -C /tmp/zigma-rel-script scripts/apply-release.sh
-            APPLY=/tmp/zigma-rel-script/scripts/apply-release.sh
-            test -f "$APPLY"
+            APPLY=""
+            for candidate in /tmp/apply-release.sh /tmp/scripts/apply-release.sh; do
+              if [ -f "$candidate" ]; then
+                APPLY="$candidate"
+                break
+              fi
+            done
+            if [ -z "$APPLY" ]; then
+              echo "ERROR: apply-release.sh not found under /tmp after SCP" >&2
+              ls -la /tmp | head -50 >&2
+              exit 1
+            fi
             chmod +x "$APPLY"
 
             ARGS=(--env preprod --tarball "$TGZ")
@@ -287,5 +302,4 @@ jobs:
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
-            rm -rf /tmp/zigma-rel-script
-            rm -f /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz
+            rm -f /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh

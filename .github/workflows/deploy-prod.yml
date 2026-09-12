@@ -151,6 +151,13 @@ jobs:
             exit 1
           fi
 
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          sparse-checkout: |
+            scripts/apply-release.sh
+          sparse-checkout-cone-mode: false
+
       - uses: actions/download-artifact@v4
         with:
           name: zigma-prod-release
@@ -162,16 +169,18 @@ jobs:
           set -euo pipefail
           test -f dist/zigma-prod.tgz
           cp -f dist/zigma-prod.tgz ./zigma-prod.tgz
-          ls -lh ./zigma-prod.tgz
+          test -f scripts/apply-release.sh
+          cp -f scripts/apply-release.sh ./apply-release.sh
+          ls -lh ./zigma-prod.tgz ./apply-release.sh
 
-      - name: SCP tarball to VPS
+      - name: SCP tarball + apply script to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ steps.ssh.outputs.host }}
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          source: zigma-prod.tgz
+          source: "zigma-prod.tgz,apply-release.sh"
           target: /tmp/
           overwrite: true
 
@@ -216,11 +225,18 @@ jobs:
             fi
             ls -lh "$TGZ"
 
-            rm -rf /tmp/zigma-rel-script
-            mkdir -p /tmp/zigma-rel-script
-            tar -xzf "$TGZ" -C /tmp/zigma-rel-script scripts/apply-release.sh
-            APPLY=/tmp/zigma-rel-script/scripts/apply-release.sh
-            test -f "$APPLY"
+            APPLY=""
+            for candidate in /tmp/apply-release.sh /tmp/scripts/apply-release.sh; do
+              if [ -f "$candidate" ]; then
+                APPLY="$candidate"
+                break
+              fi
+            done
+            if [ -z "$APPLY" ]; then
+              echo "ERROR: apply-release.sh not found under /tmp after SCP" >&2
+              ls -la /tmp | head -50 >&2
+              exit 1
+            fi
             chmod +x "$APPLY"
 
             ARGS=(--env prod --confirm-prod DEPLOY_PROD --tarball "$TGZ")
@@ -238,5 +254,4 @@ jobs:
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
-            rm -rf /tmp/zigma-rel-script
-            rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz
+            rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh
