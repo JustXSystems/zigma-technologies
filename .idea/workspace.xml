@@ -7,15 +7,9 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/MediaPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/MediaPicker.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/media-url.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-url.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,23 +57,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2129999318482647" />
-      <entry key="MS500" value="3.3966260587325516" />
-      <entry key="S2" value="8.79047372190304" />
-      <entry key="S5" value="17.15498608318764" />
-      <entry key="S10" value="29.543323501718184" />
-      <entry key="S30" value="66.65354809934657" />
-      <entry key="S60" value="100.26069946190421" />
-      <entry key="M2" value="143.3319689489832" />
-      <entry key="M5" value="208.36330517177677" />
-      <entry key="M10" value="251.04835420210122" />
-      <entry key="M15" value="271.17891589663236" />
-      <entry key="M30" value="307.2499143750405" />
-      <entry key="H1" value="387.89816497832254" />
-      <entry key="H2" value="550.9672667135399" />
-      <entry key="H4" value="774.0721676261436" />
-      <entry key="D1" value="2420.3269712582123" />
-      <entry key="W1" value="10393.865407974758" />
+      <entry key="MS100" value="1.3439526953962666" />
+      <entry key="MS500" value="3.2177519414284856" />
+      <entry key="S2" value="8.678212636023186" />
+      <entry key="S5" value="18.714829067119936" />
+      <entry key="S10" value="30.940682578070813" />
+      <entry key="S30" value="55.41390226834689" />
+      <entry key="S60" value="72.47942704694653" />
+      <entry key="M2" value="86.73656424167368" />
+      <entry key="M5" value="101.38390987548921" />
+      <entry key="M10" value="123.58151691174673" />
+      <entry key="M15" value="152.3906699597047" />
+      <entry key="M30" value="238.14608021537256" />
+      <entry key="H1" value="371.50193807993026" />
+      <entry key="H2" value="574.7937470876095" />
+      <entry key="H4" value="837.493671358218" />
+      <entry key="D1" value="2536.121956019397" />
+      <entry key="W1" value="10533.288751068203" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -90,34 +84,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="4.0141357805127244E-303" />
-      <entry key="M10" value="6.335720780237146E-152" />
-      <entry key="M15" value="1.5892687829449175E-101" />
-      <entry key="M30" value="3.986563410940475E-51" />
-      <entry key="H1" value="6.313923828286724E-26" />
-      <entry key="H2" value="2.512752241723526E-13" />
-      <entry key="H4" value="5.012736021184975E-7" />
-      <entry key="D1" value="0.09055659511224469" />
-      <entry key="W1" value="1.1002082166864233" />
+      <entry key="M5" value="2.768312932190305E-306" />
+      <entry key="M10" value="1.6638247901117463E-153" />
+      <entry key="M15" value="1.4041227000282226E-102" />
+      <entry key="M30" value="1.1849568346687722E-51" />
+      <entry key="H1" value="3.4423201981640756E-26" />
+      <entry key="H2" value="1.855349077172271E-13" />
+      <entry key="H4" value="4.307376321190242E-7" />
+      <entry key="D1" value="0.08829641724874528" />
+      <entry key="W1" value="1.0962427666547736" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1713368548380754" />
-      <entry key="MS500" value="3.3732482699542468" />
-      <entry key="S2" value="8.775618246385124" />
-      <entry key="S5" value="17.143288143032677" />
-      <entry key="S10" value="29.533173016997722" />
-      <entry key="S30" value="66.64578973834016" />
-      <entry key="S60" value="100.25475369466311" />
-      <entry key="M2" value="143.32759752774163" />
-      <entry key="M5" value="208.3606683190482" />
-      <entry key="M10" value="251.04673445462873" />
-      <entry key="M15" value="271.1777401193696" />
-      <entry key="M30" value="307.24924069879546" />
-      <entry key="H1" value="387.8977344436918" />
-      <entry key="H2" value="550.9669582822775" />
-      <entry key="H4" value="774.0719504316112" />
-      <entry key="D1" value="2420.4173810036423" />
-      <entry key="W1" value="10394.965453180726" />
+      <entry key="MS100" value="1.2993173497707293" />
+      <entry key="MS500" value="3.1953961755503677" />
+      <entry key="S2" value="8.662530162403955" />
+      <entry key="S5" value="18.70150589978204" />
+      <entry key="S10" value="30.929868018752398" />
+      <entry key="S30" value="55.407581818167785" />
+      <entry key="S60" value="72.47531819181737" />
+      <entry key="M2" value="86.73411132968626" />
+      <entry key="M5" value="101.38276196887956" />
+      <entry key="M10" value="123.58080839098297" />
+      <entry key="M15" value="152.39007656186178" />
+      <entry key="M30" value="238.14559848511337" />
+      <entry key="H1" value="371.5015493952155" />
+      <entry key="H2" value="574.7934383864756" />
+      <entry key="H4" value="837.493443148973" />
+      <entry key="D1" value="2536.210102161424" />
+      <entry key="W1" value="10534.384830394627" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -252,7 +246,8 @@
     <MESSAGE value="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified." />
     <MESSAGE value="Standalone deploy only ships traced server deps. scripts/db-import.mjs can’t resolve mysql2 from that tree" />
     <MESSAGE value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
-    <option name="LAST_COMMIT_MESSAGE" value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
+    <MESSAGE value="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

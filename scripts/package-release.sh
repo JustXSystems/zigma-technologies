@@ -9,7 +9,7 @@
 #   - Next standalone server + traced node_modules
 #   - .next/static
 #   - public/ (seed assets; excludes private uploads bodies)
-#   - scripts/ (db-export/import, apply-release, deploy helpers)
+#   - scripts/ (*.sh, *.mjs, *.sql — apply-release, db tools, migrations)
 #   - package.json / package-lock.json / next.config.ts / .env.example
 #   - release-manifest.json
 #
@@ -122,16 +122,19 @@ if [[ -d public ]]; then
   [[ -f public/assets/uploads/documents/.gitkeep ]] && cp -a public/assets/uploads/documents/.gitkeep "$STAGE/public/assets/uploads/documents/" || true
 fi
 
-# Ops scripts — replace any traced/partial scripts dir from standalone.
+# Ops scripts + SQL migrations — replace any traced/partial scripts dir from standalone.
+# MUST include *.sql: apply-release runs migrate-catalog-background.sql on every deploy.
 rm -rf "$STAGE/scripts"
 mkdir -p "$STAGE/scripts"
 shopt -s nullglob
-SCRIPT_FILES=(scripts/*.sh scripts/*.mjs)
+SCRIPT_FILES=(scripts/*.sh scripts/*.mjs scripts/*.sql)
 shopt -u nullglob
-((${#SCRIPT_FILES[@]} > 0)) || die "No scripts/*.sh or scripts/*.mjs to package"
+((${#SCRIPT_FILES[@]} > 0)) || die "No scripts/*.{sh,mjs,sql} to package"
 cp -a "${SCRIPT_FILES[@]}" "$STAGE/scripts/"
 [[ -f "$STAGE/scripts/apply-release.sh" ]] || die "apply-release.sh missing after staging scripts"
-echo "==> Staged ${#SCRIPT_FILES[@]} script file(s) including apply-release.sh"
+[[ -f "$STAGE/scripts/migrate-catalog-background.sql" ]] || die "migrate-catalog-background.sql missing after staging scripts"
+[[ -f "$STAGE/scripts/schema.sql" ]] || die "schema.sql missing after staging scripts"
+echo "==> Staged ${#SCRIPT_FILES[@]} scripts/ files (sh+mjs+sql), including apply-release + migrations"
 cp -a package.json package-lock.json "$STAGE/"
 [[ -f next.config.ts ]] && cp -a next.config.ts "$STAGE/"
 [[ -f .env.example ]] && cp -a .env.example "$STAGE/"
@@ -184,9 +187,16 @@ echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
 # Do not use `tar | grep -q` under pipefail: grep -q closes the pipe early →
 # tar "stdout: write error" → false failure even when the file is present.
 VERIFY_LIST="$(tar -tzf "$OUT")"
-if ! grep -Exq '(\./)?scripts/apply-release\.sh' <<<"$VERIFY_LIST"; then
-  echo "ERROR: tarball is missing scripts/apply-release.sh — listing scripts/ entries:" >&2
-  grep -E 'scripts/' <<<"$VERIFY_LIST" | head -50 >&2 || true
-  exit 1
-fi
-echo "==> Verified scripts/apply-release.sh is in the tarball"
+require_in_tar() {
+  local pat="$1"
+  if ! grep -Exq "$pat" <<<"$VERIFY_LIST"; then
+    echo "ERROR: tarball is missing required path matching: $pat" >&2
+    grep -E 'scripts/' <<<"$VERIFY_LIST" | head -80 >&2 || true
+    exit 1
+  fi
+}
+require_in_tar '(\./)?scripts/apply-release\.sh'
+require_in_tar '(\./)?scripts/migrate-catalog-background\.sql'
+require_in_tar '(\./)?scripts/schema\.sql'
+require_in_tar '(\./)?server\.js'
+echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js in tarball"
