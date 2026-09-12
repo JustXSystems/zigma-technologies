@@ -7,9 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls.">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive.">
       <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -241,7 +239,8 @@
     <MESSAGE value="Allow CI next build without MySQL for PreProd release artifacts.&#10;&#10;Site layout is dynamic; CMS/nav/catalog reads return safe fallbacks on connection refused so GitHub Actions can package standalone releases." />
     <MESSAGE value="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths." />
     <MESSAGE value="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls." />
+    <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

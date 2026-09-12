@@ -86,8 +86,21 @@ if [[ ! -f "$STAGE/server.js" ]]; then
   case "$NEST_DIR" in
     "$STAGE"/*) rm -rf "$NEST_DIR" ;;
   esac
-  [[ -f "$STAGE/server.js" ]] || die "server.js still missing after flatten"
+[[ -f "$STAGE/server.js" ]] || die "server.js still missing after flatten"
 fi
+
+# Drop non-runtime trees Next may have traced into standalone (mobile app, source, etc.)
+rm -rf \
+  "$STAGE/apps" \
+  "$STAGE/src" \
+  "$STAGE/storage" \
+  "$STAGE/.git" \
+  "$STAGE/.github" \
+  "$STAGE/.cursor" \
+  "$STAGE/coverage" \
+  "$STAGE/docs" \
+  "$STAGE/tests" \
+  "$STAGE/__tests__"
 
 # Static assets Next does not copy into standalone by default
 mkdir -p "$STAGE/.next"
@@ -152,10 +165,13 @@ BYTES="$(wc -c < "$OUT" | tr -d ' ')"
 echo "==> Wrote $OUT ($BYTES bytes)"
 echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
 
-# Hard guarantee for the VPS apply step
-if ! tar -tzf "$OUT" | grep -Exq '(\./)?scripts/apply-release\.sh'; then
+# Hard guarantee for the VPS apply step.
+# Do not use `tar | grep -q` under pipefail: grep -q closes the pipe early →
+# tar "stdout: write error" → false failure even when the file is present.
+VERIFY_LIST="$(tar -tzf "$OUT")"
+if ! grep -Exq '(\./)?scripts/apply-release\.sh' <<<"$VERIFY_LIST"; then
   echo "ERROR: tarball is missing scripts/apply-release.sh — listing scripts/ entries:" >&2
-  tar -tzf "$OUT" | grep -E 'scripts/' | head -50 >&2 || true
+  grep -E 'scripts/' <<<"$VERIFY_LIST" | head -50 >&2 || true
   exit 1
 fi
 echo "==> Verified scripts/apply-release.sh is in the tarball"
