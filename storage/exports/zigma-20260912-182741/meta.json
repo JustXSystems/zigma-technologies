@@ -1,7 +1,7 @@
 {
   "app": "zigma-technologies",
   "formatVersion": 2,
-  "exportedAt": "2026-09-12T12:48:26.741Z",
+  "exportedAt": "2026-09-12T12:57:41.843Z",
   "database": "zigmatech",
   "host": "localhost",
   "tables": [
@@ -55,7 +55,7 @@
     "ztools_users": 1
   },
   "sqlFile": "database.sql",
-  "sqlBytes": 154445,
+  "sqlBytes": 154483,
   "includesUploads": true,
   "uploadFiles": 9,
   "includesCmsMedia": true,
@@ -209,6 +209,12 @@
   ],
   "missingOnDisk": [],
   "hasBackgroundImageColumn": true,
-  "backgroundImageCount": 0,
-  "backgroundSamples": []
+  "backgroundImageCount": 1,
+  "backgroundSamples": [
+    {
+      "id": 90,
+      "slug": "abb-industrial-server-ups",
+      "background_image_url": "/assets/images/1789123673029-wgkt2h.jpeg"
+    }
+  ]
 }
