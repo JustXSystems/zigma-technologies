@@ -1,4 +1,4 @@
-import pool from '@/lib/db';
+import pool, { isDbUnavailableError } from '@/lib/db';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { cache } from 'react';
 import { parseJsonField, slugify } from '@/lib/types';
@@ -45,20 +45,25 @@ export async function listPages(admin = false) {
 }
 
 export async function getPageBySlug(slug: string, admin = false) {
-  const where = ['slug = ?'];
-  const params: unknown[] = [slug];
-  if (!admin) {
-    where.push('enabled = 1');
-    where.push("status = 'published'");
+  try {
+    const where = ['slug = ?'];
+    const params: unknown[] = [slug];
+    if (!admin) {
+      where.push('enabled = 1');
+      where.push("status = 'published'");
+    }
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM pages WHERE ${where.join(' AND ')} LIMIT 1`,
+      params
+    );
+    if (!rows[0]) return null;
+    const page = mapPage(rows[0]);
+    page.sections = await listSections(page.id, admin);
+    return page;
+  } catch (err) {
+    if (isDbUnavailableError(err)) return null;
+    throw err;
   }
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT * FROM pages WHERE ${where.join(' AND ')} LIMIT 1`,
-    params
-  );
-  if (!rows[0]) return null;
-  const page = mapPage(rows[0]);
-  page.sections = await listSections(page.id, admin);
-  return page;
 }
 
 export async function getPageById(id: number) {
@@ -271,12 +276,17 @@ export async function reorderNavItems(location: 'header' | 'footer', orderedIds:
 }
 
 export const getThemeSettings = cache(async () => {
-  const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM theme_settings');
-  const out: Record<string, unknown> = {};
-  for (const row of rows) {
-    out[row.setting_key] = parseJsonField(row.value_json, {});
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM theme_settings');
+    const out: Record<string, unknown> = {};
+    for (const row of rows) {
+      out[row.setting_key] = parseJsonField(row.value_json, {});
+    }
+    return out;
+  } catch (err) {
+    if (isDbUnavailableError(err)) return {};
+    throw err;
   }
-  return out;
 });
 
 export async function upsertThemeSetting(key: string, value: unknown) {

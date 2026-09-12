@@ -11,6 +11,9 @@ import {
   ThemePreviewBridge,
 } from '@/components/SiteLazyClient';
 
+/** CMS-backed chrome — always request-time (CI has no MySQL for SSG). */
+export const dynamic = 'force-dynamic';
+
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const shell = await loadSiteShell();
 

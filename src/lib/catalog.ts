@@ -1,4 +1,4 @@
-import pool from '@/lib/db';
+import pool, { isDbUnavailableError } from '@/lib/db';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 import {
   parseJsonField,
@@ -80,6 +80,7 @@ export async function listCatalogItems(opts: {
   searchFields?: string[] | null;
   sort?: 'featured' | 'newest' | 'title';
 }) {
+  try {
   const where: string[] = ['i.item_type = ?'];
   const params: unknown[] = [opts.itemType];
 
@@ -141,6 +142,10 @@ export async function listCatalogItems(opts: {
   );
 
   return rows.map(mapItem);
+  } catch (err) {
+    if (isDbUnavailableError(err)) return [];
+    throw err;
+  }
 }
 
 export async function listCatalogItemsByIds(
@@ -173,26 +178,31 @@ export async function listCatalogItemsByIds(
 }
 
 export async function getCatalogItemBySlug(itemType: CatalogItemType, slug: string, admin = false) {
-  const where = ['i.item_type = ?', 'i.slug = ?'];
-  const params: unknown[] = [itemType, slug];
-  if (!admin) {
-    where.push("i.status = 'published'");
-    where.push('i.enabled = 1');
-  }
+  try {
+    const where = ['i.item_type = ?', 'i.slug = ?'];
+    const params: unknown[] = [itemType, slug];
+    if (!admin) {
+      where.push("i.status = 'published'");
+      where.push('i.enabled = 1');
+    }
 
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT i.*, c.name AS category_name, c.slug AS category_slug
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT i.*, c.name AS category_name, c.slug AS category_slug
      FROM catalog_items i
      LEFT JOIN catalog_categories c ON c.id = i.category_id
      WHERE ${where.join(' AND ')}
      LIMIT 1`,
-    params
-  );
-  if (!rows[0]) return null;
-  const item = mapItem(rows[0]);
-  item.media = await listItemMedia(item.id);
-  item.primary_image = pickCatalogThumbnail(item.media);
-  return item;
+      params
+    );
+    if (!rows[0]) return null;
+    const item = mapItem(rows[0]);
+    item.media = await listItemMedia(item.id);
+    item.primary_image = pickCatalogThumbnail(item.media);
+    return item;
+  } catch (err) {
+    if (isDbUnavailableError(err)) return null;
+    throw err;
+  }
 }
 
 export async function getCatalogItemById(id: number) {

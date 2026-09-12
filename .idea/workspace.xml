@@ -7,14 +7,13 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="inventory items background image issue fixed">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance.">
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/db.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/db.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/nav-data.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-data.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-shell.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-shell.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -241,7 +240,8 @@
     <MESSAGE value="GitHub deployment changes for PreProd and Production" />
     <MESSAGE value="inventory items can set background image now" />
     <MESSAGE value="inventory items background image issue fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="inventory items background image issue fixed" />
+    <MESSAGE value="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

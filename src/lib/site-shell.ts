@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { getThemeSettings } from '@/lib/cms';
+import { isDbUnavailableError } from '@/lib/db';
 import { getPublicNavRows } from '@/lib/nav-data';
 import { buildFooterColumns, buildNavTree, type FooterColumn } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
@@ -15,16 +16,28 @@ export type SiteShellData = {
 
 /** Single cached fetch for layout chrome — avoids duplicate DB/API round-trips per request. */
 export const loadSiteShell = cache(async (): Promise<SiteShellData> => {
-  const [theme, headerRows, footerRows] = await Promise.all([
-    getThemeSettings(),
-    getPublicNavRows('header'),
-    getPublicNavRows('footer'),
-  ]);
+  try {
+    const [theme, headerRows, footerRows] = await Promise.all([
+      getThemeSettings(),
+      getPublicNavRows('header'),
+      getPublicNavRows('footer'),
+    ]);
 
-  const settings = mergeSiteSettings(theme.site);
-  const copy = mergeSiteCopy(theme.site_copy);
-  const headerNav = headerRows.length ? buildNavTree(headerRows) : null;
-  const footerColumns = footerRows.length ? buildFooterColumns(footerRows) : null;
+    const settings = mergeSiteSettings(theme.site);
+    const copy = mergeSiteCopy(theme.site_copy);
+    const headerNav = headerRows.length ? buildNavTree(headerRows) : null;
+    const footerColumns = footerRows.length ? buildFooterColumns(footerRows) : null;
 
-  return { settings, copy, headerNav, footerColumns };
+    return { settings, copy, headerNav, footerColumns };
+  } catch (err) {
+    if (isDbUnavailableError(err)) {
+      return {
+        settings: mergeSiteSettings(undefined),
+        copy: mergeSiteCopy(undefined),
+        headerNav: null,
+        footerColumns: null,
+      };
+    }
+    throw err;
+  }
 });
