@@ -28,6 +28,9 @@ const TARGETS = {
     user: 'deploy',
     appDir: '/var/www/zigma-technologies',
     pm2: 'zigma-preprod',
+    pm2Env: 'preprod',
+    port: 3001,
+    basePath: '/zigma-technologies',
     defaultKey: path.join(process.env.USERPROFILE || process.env.HOME || '', 'Downloads', 'gha_zigma_preprod'),
   },
   prod: {
@@ -35,6 +38,9 @@ const TARGETS = {
     user: 'deploy',
     appDir: '/var/www/zigma-technologies',
     pm2: 'zigma',
+    pm2Env: 'prod',
+    port: 3000,
+    basePath: '',
     defaultKey: path.join(process.env.USERPROFILE || process.env.HOME || '', 'Downloads', 'gha_zigma_prod'),
   },
 };
@@ -66,6 +72,16 @@ function run(cmd, args, opts = {}) {
   if (r.status !== 0) {
     throw new Error(`Command failed (${r.status}): ${cmd}`);
   }
+  return r;
+}
+
+function runCapture(cmd, args, opts = {}) {
+  const r = spawnSync(cmd, args, { encoding: 'utf8', shell: false, ...opts });
+  return {
+    status: r.status ?? 1,
+    stdout: r.stdout || '',
+    stderr: r.stderr || '',
+  };
 }
 
 function latestExportDir() {
@@ -91,6 +107,11 @@ Usage:
   npm run db:push -- --target preprod --export
   npm run db:push -- --target preprod --dir storage/exports/zigma-...
   npm run db:push -- --target prod --export --key path\\to\\gha_zigma_prod
+
+What is pushed (from a normal export):
+  • ALL tables + ALL rows in database.sql (full CMS DB replace)
+  • public/assets/images|svg|video (cms-media/) unless --no-cms-media
+  • public/assets/uploads unless --no-uploads
 
 Targets: preprod (JustXSystems 193.203.161.219) | prod (Zigma 200.234.45.106)
 `);
@@ -121,12 +142,24 @@ Targets: preprod (JustXSystems 193.203.161.219) | prod (Zigma 200.234.45.106)
     throw new Error(`Missing database.sql in ${abs}`);
   }
   const metaPath = path.join(abs, 'meta.json');
+  let meta = null;
   if (fs.existsSync(metaPath)) {
-    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
     if (meta.includesCmsMedia === false) {
       console.warn('WARNING: snapshot has includesCmsMedia=false — backgrounds may break. Prefer a fresh npm run db:export');
     } else {
       console.log(`Snapshot OK: cms media files ≈ ${meta.cmsMediaFiles?.length ?? meta.cmsMedia?.images ?? '?'}`);
+    }
+    const bg = meta.backgroundImageCount;
+    if (typeof bg === 'number') {
+      console.log(`Snapshot gallery backgrounds set: ${bg}`);
+      if (bg === 0) {
+        console.warn(
+          'WARNING: This export has 0 background_image_url values.\n' +
+            '  Pushing it will NOT populate PreProd gallery backgrounds.\n' +
+            '  Set backgrounds on local admin, then: npm run db:push -- --target preprod --export'
+        );
+      }
     }
   }
 
@@ -144,17 +177,41 @@ Targets: preprod (JustXSystems 193.203.161.219) | prod (Zigma 200.234.45.106)
     return;
   }
 
+  // Import + fool-proof PM2 start (kills orphans on listen port; do NOT use bare pm2 restart)
   const remoteCmd = [
+    `set -euo pipefail`,
     `cd ${preset.appDir}`,
-    // Standalone releases may lack a root-resolvable mysql2 for scripts/*.mjs
     `node --input-type=module -e "import('mysql2/promise')" 2>/dev/null || npm install mysql2 --omit=dev --no-audit --no-fund --no-save`,
     `node scripts/db-import.mjs storage/exports/${baseName} --force`,
-    `pm2 restart ${preset.pm2} --update-env`,
+    `chmod +x scripts/pm2-start-app.sh scripts/apply-release.sh 2>/dev/null || true`,
+    `bash scripts/pm2-start-app.sh ${preset.pm2Env}`,
   ].join(' && ');
 
   run('ssh', [...sshBase, remoteCmd]);
+
+  // Post-verify API exposes background_image_url key
+  const apiPath = `${preset.basePath}/api/public/catalog/product?limit=1`;
+  const verify = runCapture('ssh', [
+    ...sshBase,
+    `curl -sS --max-time 15 "http://127.0.0.1:${preset.port}${apiPath}" | head -c 4000`,
+  ]);
+  if (verify.status === 0 && verify.stdout.includes('background_image_url')) {
+    console.log('\nVerify OK: API includes background_image_url');
+  } else if (verify.status === 0) {
+    console.warn(
+      '\nWARNING: API response missing background_image_url key — PM2 may still be stale.\n' +
+        `  On VPS run: bash scripts/pm2-start-app.sh ${preset.pm2Env}\n` +
+        `  Snippet: ${verify.stdout.slice(0, 300)}`
+    );
+  } else {
+    console.warn('\nWARNING: could not curl local API for verify:', verify.stderr || verify.stdout);
+  }
+
   console.log(`\nDone. Imported on ${args.target} (${user}@${host}) and restarted ${preset.pm2}.`);
-  console.log('Hard-refresh admin inventory to see MediaPicker previews.');
+  console.log('Hard-refresh admin inventory (Ctrl+Shift+R).');
+  if (meta && meta.backgroundImageCount === 0) {
+    console.log('Reminder: export had 0 backgrounds — set one in admin and Save background, or re-export from local with values.');
+  }
 }
 
 try {

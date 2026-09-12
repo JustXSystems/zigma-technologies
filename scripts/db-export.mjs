@@ -295,6 +295,35 @@ Reads DB_* from environment / .env / .env.local
       missingInExport.slice(0, 20).forEach((p) => console.warn(`  - ${p}`));
     }
 
+    const catalogItems = tableRowsCache.catalog_items || [];
+    const hasBgColumn =
+      catalogItems.length === 0
+        ? tables.includes('catalog_items')
+        : Object.prototype.hasOwnProperty.call(catalogItems[0] || {}, 'background_image_url');
+    let backgroundImageCount = 0;
+    const backgroundSamples = [];
+    for (const row of catalogItems) {
+      const v = row?.background_image_url;
+      if (v != null && String(v).trim()) {
+        backgroundImageCount += 1;
+        if (backgroundSamples.length < 5) {
+          backgroundSamples.push({ id: row.id, slug: row.slug, background_image_url: String(v) });
+        }
+      }
+    }
+    if (!hasBgColumn) {
+      console.warn(
+        '\nWARNING: catalog_items has no background_image_url column in THIS database. Run scripts/migrate-catalog-background.sql locally before export.'
+      );
+    } else if (backgroundImageCount === 0) {
+      console.warn(
+        '\nWARNING: All catalog_items.background_image_url values are NULL in this export.\n' +
+          '  PreProd/Prod gallery backgrounds will stay blank after db:push until you set them in admin (or export from a DB that has values).'
+      );
+    } else {
+      console.log(`  ✓ gallery backgrounds in dump: ${backgroundImageCount} item(s)`);
+    }
+
     const meta = {
       app: 'zigma-technologies',
       formatVersion: 2,
@@ -312,11 +341,19 @@ Reads DB_* from environment / .env / .env.local
       cmsMediaFiles,
       referencedCmsAssets: referenced,
       missingOnDisk,
+      hasBackgroundImageColumn: hasBgColumn,
+      backgroundImageCount,
+      backgroundSamples,
     };
     fs.writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(meta, null, 2));
 
     console.log(`\nExport complete → ${outDir}`);
     console.log(`  database.sql  (${(sqlBytes / 1024).toFixed(1)} KB)`);
+    console.log(`  tables: ${tables.length} | catalog_items: ${rowCounts.catalog_items ?? 0}`);
+    console.log(`  cms-media files: ${cmsMediaFiles.length} | backgrounds set: ${backgroundImageCount}`);
+    console.log(`  meta.json`);
+    if (args.withUploads) console.log(`  uploads/ (${uploadsMeta.files} files)`);
+    if (args.withCmsMedia) console.log(`  cms-media/ (images/svg/video)`);
     console.log(`  cms-media     ${args.withCmsMedia ? `${cmsMediaFiles.length} files` : 'skipped'}`);
     console.log(`  DB refs       ${referenced.length} /assets/{images,svg,video}/… paths`);
     console.log(`\nCopy the whole export folder to the target VPS (storage/exports/ is gitignored), then:`);

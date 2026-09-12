@@ -275,21 +275,16 @@ fi
 
 if [[ "$DO_RESTART" -eq 1 ]]; then
   command -v pm2 >/dev/null 2>&1 || die "pm2 not found"
-  log "PM2 restart $PM2_NAME (standalone server.js)"
-  # Prefer standalone server.js at app root
+  log "PM2 restart $PM2_NAME (standalone server.js on :$APP_PORT)"
   if [[ ! -f server.js ]]; then
     die "server.js missing after extract — cannot start standalone"
   fi
-  if pm2 describe "$PM2_NAME" >/dev/null 2>&1; then
-    # Update to node server.js if still on legacy npm start
-    pm2 delete "$PM2_NAME" || true
+  if [[ -f scripts/pm2-start-app.sh ]]; then
+    chmod +x scripts/pm2-start-app.sh
+    bash scripts/pm2-start-app.sh "$ENV_NAME"
+  else
+    die "scripts/pm2-start-app.sh missing from release — repackage"
   fi
-  # Do NOT reuse shell HOSTNAME (machine name) — Next standalone treats it as listen host.
-  # --cwd + ZIGMA_APP_DIR keep disk asset resolution correct even if PM2's inherited cwd drifts.
-  PORT="${PORT:-$APP_PORT}" HOSTNAME="127.0.0.1" ZIGMA_APP_DIR="$APP_DIR" \
-    pm2 start "$APP_DIR/server.js" --name "$PM2_NAME" --cwd "$APP_DIR" --update-env
-  pm2 save
-  pm2 status "$PM2_NAME"
 else
   log "Skip restart"
 fi

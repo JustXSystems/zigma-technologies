@@ -208,10 +208,52 @@ Target DB comes from DB_* in .env / .env.local / environment.
   });
 
   try {
+    // Ensure column exists before dump (and again after, if dump lacked it)
+    const migratePath = path.join(ROOT, 'scripts', 'migrate-catalog-background.sql');
+    if (fs.existsSync(migratePath)) {
+      try {
+        await conn.query(fs.readFileSync(migratePath, 'utf8'));
+        console.log('  ✓ ensured catalog_items.background_image_url (pre-import)');
+      } catch (err) {
+        console.warn('  ! pre-import schema ensure:', err.message || err);
+      }
+    }
+
     const sql = fs.readFileSync(snap.sqlPath, 'utf8');
     console.log('Importing SQL…');
     await conn.query(sql);
     console.log('  ✓ database restored');
+
+    if (fs.existsSync(migratePath)) {
+      try {
+        await conn.query(fs.readFileSync(migratePath, 'utf8'));
+        console.log('  ✓ ensured catalog_items.background_image_url (post-import)');
+      } catch (err) {
+        console.warn('  ! post-import schema ensure:', err.message || err);
+      }
+    }
+
+    try {
+      const [bgRows] = await conn.query(
+        `SELECT COUNT(*) AS c FROM catalog_items
+         WHERE background_image_url IS NOT NULL AND TRIM(background_image_url) <> ''`
+      );
+      const bgCount = Number(bgRows?.[0]?.c || 0);
+      console.log(`  ✓ gallery backgrounds in DB after import: ${bgCount}`);
+      if (bgCount === 0) {
+        console.warn(
+          '  ! No background_image_url values imported.\n' +
+            '    Source export had all-NULL backgrounds (check meta.json backgroundImageCount).\n' +
+            '    Set them in admin on the source, re-export, then db:push again.'
+        );
+      }
+      const metaCount = snap.meta?.backgroundImageCount;
+      if (typeof metaCount === 'number' && metaCount > 0 && bgCount === 0) {
+        console.warn(`  ! meta.json expected ${metaCount} backgrounds but DB has 0`);
+      }
+    } catch (err) {
+      console.warn('  ! could not count backgrounds:', err.message || err);
+    }
   } finally {
     await conn.end();
   }
@@ -269,8 +311,8 @@ Target DB comes from DB_* in .env / .env.local / environment.
   fs.mkdirSync(path.join(ROOT, 'public', 'assets', 'uploads', 'documents'), { recursive: true });
 
   console.log('\nImport complete.');
-  console.log('Next: npm run build && pm2 restart <zigma|zigma-preprod> --update-env');
-  console.log('Admin MediaPicker previews need the disk-backed /assets rewrite (deploy latest master).');
+  console.log('Next on VPS: bash scripts/pm2-start-app.sh preprod   # or: prod');
+  console.log('(Do not use bare `pm2 restart` — orphans on :3001 cause stale API / EADDRINUSE.)');
 }
 
 main().catch((err) => {

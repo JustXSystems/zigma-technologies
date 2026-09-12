@@ -7,9 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Include SQL migrations in release tarball so VPS apply can ensure schema.&#10;&#10;Previously only *.sh/*.mjs were packed, so migrate-*.sql never reached PreProd.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/db-export.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/db-export.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/db-import.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/db-import.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/db-push-remote.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/db-push-remote.mjs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3439526953962666" />
-      <entry key="MS500" value="3.2177519414284856" />
-      <entry key="S2" value="8.678212636023186" />
-      <entry key="S5" value="18.714829067119936" />
-      <entry key="S10" value="30.940682578070813" />
-      <entry key="S30" value="55.41390226834689" />
-      <entry key="S60" value="72.47942704694653" />
-      <entry key="M2" value="86.73656424167368" />
-      <entry key="M5" value="101.38390987548921" />
-      <entry key="M10" value="123.58151691174673" />
-      <entry key="M15" value="152.3906699597047" />
-      <entry key="M30" value="238.14608021537256" />
-      <entry key="H1" value="371.50193807993026" />
-      <entry key="H2" value="574.7937470876095" />
-      <entry key="H4" value="837.493671358218" />
-      <entry key="D1" value="2536.121956019397" />
-      <entry key="W1" value="10533.288751068203" />
+      <entry key="MS100" value="1.0703604923102712" />
+      <entry key="MS500" value="2.920084588790851" />
+      <entry key="S2" value="8.675571293486165" />
+      <entry key="S5" value="15.320295951369054" />
+      <entry key="S10" value="21.349689409107874" />
+      <entry key="S30" value="31.544533920093087" />
+      <entry key="S60" value="44.10432640186117" />
+      <entry key="M2" value="68.47421758953843" />
+      <entry key="M5" value="120.16049356758589" />
+      <entry key="M10" value="173.59395409463076" />
+      <entry key="M15" value="212.03309310839305" />
+      <entry key="M30" value="307.59114016165813" />
+      <entry key="H1" value="463.6750549914801" />
+      <entry key="H2" value="699.5284295731315" />
+      <entry key="H4" value="1002.4940172438447" />
+      <entry key="D1" value="2762.7349227725344" />
+      <entry key="W1" value="10786.67237568222" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -84,34 +87,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="2.768312932190305E-306" />
-      <entry key="M10" value="1.6638247901117463E-153" />
-      <entry key="M15" value="1.4041227000282226E-102" />
-      <entry key="M30" value="1.1849568346687722E-51" />
-      <entry key="H1" value="3.4423201981640756E-26" />
-      <entry key="H2" value="1.855349077172271E-13" />
-      <entry key="H4" value="4.307376321190242E-7" />
-      <entry key="D1" value="0.08829641724874528" />
-      <entry key="W1" value="1.0962427666547736" />
+      <entry key="M5" value="1.74727657196823E-309" />
+      <entry key="M10" value="4.180043746144645E-155" />
+      <entry key="M15" value="1.2044456790463752E-103" />
+      <entry key="M30" value="3.470512467988531E-52" />
+      <entry key="H1" value="1.8629311495567214E-26" />
+      <entry key="H2" value="1.3648923582307374E-13" />
+      <entry key="H4" value="3.694444962747328E-7" />
+      <entry key="D1" value="0.08606617045333956" />
+      <entry key="W1" value="1.0922436080533904" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2993173497707293" />
-      <entry key="MS500" value="3.1953961755503677" />
-      <entry key="S2" value="8.662530162403955" />
-      <entry key="S5" value="18.70150589978204" />
-      <entry key="S10" value="30.929868018752398" />
-      <entry key="S30" value="55.407581818167785" />
-      <entry key="S60" value="72.47531819181737" />
-      <entry key="M2" value="86.73411132968626" />
-      <entry key="M5" value="101.38276196887956" />
-      <entry key="M10" value="123.58080839098297" />
-      <entry key="M15" value="152.39007656186178" />
-      <entry key="M30" value="238.14559848511337" />
-      <entry key="H1" value="371.5015493952155" />
-      <entry key="H2" value="574.7934383864756" />
-      <entry key="H4" value="837.493443148973" />
-      <entry key="D1" value="2536.210102161424" />
-      <entry key="W1" value="10534.384830394627" />
+      <entry key="MS100" value="1.0276993775639351" />
+      <entry key="MS500" value="2.9000508071456905" />
+      <entry key="S2" value="8.660058289905965" />
+      <entry key="S5" value="15.309215704514285" />
+      <entry key="S10" value="21.34205350921701" />
+      <entry key="S30" value="31.54079923303828" />
+      <entry key="S60" value="44.10164905175353" />
+      <entry key="M2" value="68.472093690716" />
+      <entry key="M5" value="120.15900755126121" />
+      <entry key="M10" value="173.59289468642098" />
+      <entry key="M15" value="212.0322365007795" />
+      <entry key="M30" value="307.5905205955056" />
+      <entry key="H1" value="463.67458137551273" />
+      <entry key="H2" value="699.5280640380787" />
+      <entry key="H4" value="1002.4937504761072" />
+      <entry key="D1" value="2762.820830362891" />
+      <entry key="W1" value="10787.764454711063" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -247,7 +250,8 @@
     <MESSAGE value="Standalone deploy only ships traced server deps. scripts/db-import.mjs can’t resolve mysql2 from that tree" />
     <MESSAGE value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
     <MESSAGE value="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public." />
+    <MESSAGE value="Include SQL migrations in release tarball so VPS apply can ensure schema.&#10;&#10;Previously only *.sh/*.mjs were packed, so migrate-*.sql never reached PreProd." />
+    <option name="LAST_COMMIT_MESSAGE" value="Include SQL migrations in release tarball so VPS apply can ensure schema.&#10;&#10;Previously only *.sh/*.mjs were packed, so migrate-*.sql never reached PreProd." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
