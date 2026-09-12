@@ -136,18 +136,16 @@ cp -a package.json package-lock.json "$STAGE/"
 [[ -f next.config.ts ]] && cp -a next.config.ts "$STAGE/"
 [[ -f .env.example ]] && cp -a .env.example "$STAGE/"
 
-# Ops scripts (db:import / db:export) need mysql2 at the app root. Next standalone
-# traces server imports, but Node ESM from scripts/*.mjs often cannot resolve the
-# nested/traced copy — copy mysql2 + its runtime deps from the build tree.
+# Ops scripts (db:import / db:export) need a root-resolvable mysql2 tree.
+# Do NOT hand-copy dep names — versions drift (e.g. sql-escaper). Install the
+# package into the stage so npm pulls the full runtime dependency tree.
 echo "==> Ensuring mysql2 for ops scripts (db:import on VPS)"
-mkdir -p "$STAGE/node_modules"
+[[ -f "$STAGE/package.json" ]] || die "package.json missing from stage"
 [[ -d node_modules/mysql2 ]] || die "node_modules/mysql2 missing — run npm ci before package-release"
-# Keep in sync with `npm ls mysql2` runtime deps (hoisted names).
-for pkg in mysql2 denque generate-function is-property long lru.min named-placeholders seq-queue sqlstring aws-ssl-profiles; do
-  if [[ -d "node_modules/$pkg" && ! -e "$STAGE/node_modules/$pkg" ]]; then
-    cp -a "node_modules/$pkg" "$STAGE/node_modules/"
-  fi
-done
+MYSQL2_VER="$(node -p "require('./node_modules/mysql2/package.json').version")"
+npm install --prefix "$STAGE" "mysql2@${MYSQL2_VER}" \
+  --omit=dev --no-audit --no-fund --no-save --no-package-lock --prefer-offline \
+  || die "npm install mysql2@${MYSQL2_VER} into release stage failed"
 (
   cd "$STAGE"
   node --input-type=module -e "import('mysql2/promise').then(() => console.log('mysql2 resolve OK')).catch((e) => { console.error(e); process.exit(1) })"
