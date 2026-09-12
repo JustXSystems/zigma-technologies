@@ -1,7 +1,7 @@
 {
   "app": "zigma-technologies",
   "formatVersion": 2,
-  "exportedAt": "2026-09-11T18:37:13.119Z",
+  "exportedAt": "2026-09-12T12:48:26.741Z",
   "database": "zigmatech",
   "host": "localhost",
   "tables": [
@@ -55,7 +55,7 @@
     "ztools_users": 1
   },
   "sqlFile": "database.sql",
-  "sqlBytes": 154483,
+  "sqlBytes": 154445,
   "includesUploads": true,
   "uploadFiles": 9,
   "includesCmsMedia": true,
@@ -207,5 +207,8 @@
     "/assets/images/seed-vertiv-ups.jpg",
     "/assets/images/solar-farm-with-wind-turbines-at-sunset-.jpg"
   ],
-  "missingOnDisk": []
+  "missingOnDisk": [],
+  "hasBackgroundImageColumn": true,
+  "backgroundImageCount": 0,
+  "backgroundSamples": []
 }
