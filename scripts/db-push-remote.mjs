@@ -177,14 +177,21 @@ Targets: preprod (JustXSystems 193.203.161.219) | prod (Zigma 200.234.45.106)
     return;
   }
 
-  // Import + fool-proof PM2 start (kills orphans on listen port; do NOT use bare pm2 restart)
+  // Import + fool-proof PM2 start (kills orphans on listen port).
+  // Inline fallback if pm2-start-app.sh is not on the VPS yet (not in last release tarball).
   const remoteCmd = [
     `set -euo pipefail`,
     `cd ${preset.appDir}`,
     `node --input-type=module -e "import('mysql2/promise')" 2>/dev/null || npm install mysql2 --omit=dev --no-audit --no-fund --no-save`,
     `node scripts/db-import.mjs storage/exports/${baseName} --force`,
-    `chmod +x scripts/pm2-start-app.sh scripts/apply-release.sh 2>/dev/null || true`,
-    `bash scripts/pm2-start-app.sh ${preset.pm2Env}`,
+    `chmod +x scripts/*.sh 2>/dev/null || true`,
+    `if [ -f scripts/pm2-start-app.sh ]; then bash scripts/pm2-start-app.sh ${preset.pm2Env}; ` +
+      `else echo "==> pm2-start-app.sh missing — inline restart"; ` +
+      `pm2 delete ${preset.pm2} >/dev/null 2>&1 || true; ` +
+      `fuser -k ${preset.port}/tcp 2>/dev/null || true; sleep 1; ` +
+      `ECO=$(mktemp /tmp/zigma-pm2-XXXXXX.config.cjs); ` +
+      `printf '%s\\n' "module.exports={apps:[{name:'${preset.pm2}',script:'${preset.appDir}/server.js',cwd:'${preset.appDir}',env:{NODE_ENV:'production',PORT:'${preset.port}',HOSTNAME:'127.0.0.1',ZIGMA_APP_DIR:'${preset.appDir}'}}]};" >"$ECO"; ` +
+      `pm2 start "$ECO"; rm -f "$ECO"; pm2 save; sleep 2; pm2 status ${preset.pm2}; fi`,
   ].join(' && ');
 
   run('ssh', [...sshBase, remoteCmd]);
