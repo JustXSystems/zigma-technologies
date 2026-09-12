@@ -136,6 +136,23 @@ cp -a package.json package-lock.json "$STAGE/"
 [[ -f next.config.ts ]] && cp -a next.config.ts "$STAGE/"
 [[ -f .env.example ]] && cp -a .env.example "$STAGE/"
 
+# Ops scripts (db:import / db:export) need mysql2 at the app root. Next standalone
+# traces server imports, but Node ESM from scripts/*.mjs often cannot resolve the
+# nested/traced copy — copy mysql2 + its runtime deps from the build tree.
+echo "==> Ensuring mysql2 for ops scripts (db:import on VPS)"
+mkdir -p "$STAGE/node_modules"
+[[ -d node_modules/mysql2 ]] || die "node_modules/mysql2 missing — run npm ci before package-release"
+# Keep in sync with `npm ls mysql2` runtime deps (hoisted names).
+for pkg in mysql2 denque generate-function is-property long lru.min named-placeholders seq-queue sqlstring aws-ssl-profiles; do
+  if [[ -d "node_modules/$pkg" && ! -e "$STAGE/node_modules/$pkg" ]]; then
+    cp -a "node_modules/$pkg" "$STAGE/node_modules/"
+  fi
+done
+(
+  cd "$STAGE"
+  node --input-type=module -e "import('mysql2/promise').then(() => console.log('mysql2 resolve OK')).catch((e) => { console.error(e); process.exit(1) })"
+) || die "mysql2 does not resolve from staged release (ops scripts would fail on VPS)"
+
 BASE_PATH_VAL="$(node -e "console.log(require('./.next/routes-manifest.json').basePath||'')")"
 cat > "$STAGE/release-manifest.json" <<EOF
 {

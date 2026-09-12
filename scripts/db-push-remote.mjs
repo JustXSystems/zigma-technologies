@@ -146,7 +146,9 @@ Targets: preprod (JustXSystems 193.203.161.219) | prod (Zigma 200.234.45.106)
 
   const remoteCmd = [
     `cd ${preset.appDir}`,
-    `npm run db:import -- storage/exports/${baseName} --force`,
+    // Standalone releases may lack a root-resolvable mysql2 for scripts/*.mjs
+    `node --input-type=module -e "import('mysql2/promise')" 2>/dev/null || npm install mysql2 --omit=dev --no-audit --no-fund --no-save`,
+    `node scripts/db-import.mjs storage/exports/${baseName} --force`,
     `pm2 restart ${preset.pm2} --update-env`,
   ].join(' && ');
 

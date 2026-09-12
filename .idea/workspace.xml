@@ -7,8 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1.">
-      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/db-import.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/db-import.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/db-push-remote.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/db-push-remote.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,23 +59,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2341986403258711" />
-      <entry key="MS500" value="3.4510958108411973" />
-      <entry key="S2" value="10.356160608585412" />
-      <entry key="S5" value="17.655143842326414" />
-      <entry key="S10" value="22.266810628592573" />
-      <entry key="S30" value="26.53852543703601" />
-      <entry key="S60" value="29.745679472541962" />
-      <entry key="M2" value="38.83348483957357" />
-      <entry key="M5" value="56.75488665162146" />
-      <entry key="M10" value="68.1380165380853" />
-      <entry key="M15" value="75.74435312961482" />
-      <entry key="M30" value="119.6103547373354" />
-      <entry key="H1" value="241.33443942679529" />
-      <entry key="H2" value="404.91728622491263" />
-      <entry key="H4" value="588.2065906484149" />
-      <entry key="D1" value="2178.0691731821526" />
-      <entry key="W1" value="10114.566887497502" />
+      <entry key="MS100" value="1.85559772205642" />
+      <entry key="MS500" value="4.17608477511974" />
+      <entry key="S2" value="8.332644570216592" />
+      <entry key="S5" value="14.099751227711105" />
+      <entry key="S10" value="18.812306518156603" />
+      <entry key="S30" value="24.21335914926372" />
+      <entry key="S60" value="27.11846197732924" />
+      <entry key="M2" value="29.737091620178038" />
+      <entry key="M5" value="35.412997169831186" />
+      <entry key="M10" value="49.65915295728593" />
+      <entry key="M15" value="62.96591557746599" />
+      <entry key="M30" value="108.51238842277155" />
+      <entry key="H1" value="224.7623327842298" />
+      <entry key="H2" value="394.0818406220357" />
+      <entry key="H4" value="588.7111269406577" />
+      <entry key="D1" value="2190.911557572917" />
+      <entry key="W1" value="10134.476154806847" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -83,34 +86,34 @@
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
-      <entry key="M5" value="1.1703927625632466E-296" />
-      <entry key="M10" value="1.0818469219641442E-148" />
-      <entry key="M15" value="2.2704426821796435E-99" />
-      <entry key="M30" value="4.764916244992849E-50" />
-      <entry key="H1" value="2.1828688107609885E-25" />
-      <entry key="H2" value="4.672118160707142E-13" />
-      <entry key="H4" value="6.835289431227631E-7" />
-      <entry key="D1" value="0.09536018770726631" />
-      <entry key="W1" value="1.108361929740365" />
+      <entry key="M5" value="7.0445730723538E-298" />
+      <entry key="M10" value="2.6541614631280606E-149" />
+      <entry key="M15" value="8.897846161611564E-100" />
+      <entry key="M30" value="2.9829257720586492E-50" />
+      <entry key="H1" value="1.7271148693873256E-25" />
+      <entry key="H2" value="4.1558571551333355E-13" />
+      <entry key="H4" value="6.446593794612734E-7" />
+      <entry key="D1" value="0.09443420533536942" />
+      <entry key="W1" value="1.1068179781471401" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1851435366505036" />
-      <entry key="MS500" value="3.4278948339690567" />
-      <entry key="S2" value="10.339050644412607" />
-      <entry key="S5" value="17.642976831491016" />
-      <entry key="S10" value="22.258989901028787" />
-      <entry key="S30" value="26.535373345625114" />
-      <entry key="S60" value="29.74387410274872" />
-      <entry key="M2" value="38.83223656061305" />
-      <entry key="M5" value="56.75411087441362" />
-      <entry key="M10" value="68.13754052785492" />
-      <entry key="M15" value="75.74399746750316" />
-      <entry key="M30" value="119.61007391568586" />
-      <entry key="H1" value="241.3341604172927" />
-      <entry key="H2" value="404.91705451675386" />
-      <entry key="H4" value="588.2064236133649" />
-      <entry key="D1" value="2178.164395826874" />
-      <entry key="W1" value="10115.67508755705" />
+      <entry key="MS100" value="1.7740426070025317" />
+      <entry key="MS500" value="4.126915288955082" />
+      <entry key="S2" value="8.3101784590366" />
+      <entry key="S5" value="14.08636441199932" />
+      <entry key="S10" value="18.80385692364332" />
+      <entry key="S30" value="24.209872576096874" />
+      <entry key="S60" value="27.116539535236203" />
+      <entry key="M2" value="29.736049857249828" />
+      <entry key="M5" value="35.41250603632869" />
+      <entry key="M10" value="49.65880815097887" />
+      <entry key="M15" value="62.965622789386174" />
+      <entry key="M30" value="108.51213520020258" />
+      <entry key="H1" value="224.76207313131522" />
+      <entry key="H2" value="394.08161502178353" />
+      <entry key="H4" value="588.7109596446667" />
+      <entry key="D1" value="2191.005853942617" />
+      <entry key="W1" value="10135.582810907652" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -242,7 +245,8 @@
     <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
     <MESSAGE value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
     <MESSAGE value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
-    <option name="LAST_COMMIT_MESSAGE" value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
+    <MESSAGE value="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified." />
+    <option name="LAST_COMMIT_MESSAGE" value="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

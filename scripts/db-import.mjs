@@ -12,12 +12,37 @@
 
 import fs from 'fs';
 import path from 'path';
-import mysql from 'mysql2/promise';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import readline from 'readline';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+
+async function loadMysql() {
+  try {
+    return await import('mysql2/promise');
+  } catch (firstErr) {
+    // Standalone VPS: try require from app root node_modules explicitly
+    try {
+      const require = createRequire(path.join(ROOT, 'package.json'));
+      return require('mysql2/promise');
+    } catch {
+      console.error(`
+ERROR: Cannot find package 'mysql2' (needed by db:import).
+
+On a standalone VPS release, install it once then retry:
+  cd ${ROOT}
+  npm install mysql2 --omit=dev --no-audit --no-fund --no-save
+
+Or re-run from your laptop (installs automatically if missing):
+  npm run db:push -- --target preprod --dir <export-dir>
+`);
+      console.error(String(firstErr?.message || firstErr));
+      process.exit(1);
+    }
+  }
+}
 
 function parseEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return {};
@@ -157,6 +182,7 @@ Target DB comes from DB_* in .env / .env.local / environment.
   }
 
   console.log('Connecting…');
+  const mysql = await loadMysql();
   const bootstrap = await mysql.createConnection({
     host: config.host,
     port: config.port,
