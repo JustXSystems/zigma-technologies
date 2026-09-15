@@ -50,7 +50,14 @@ export default function CatalogMediaGallery({
     .filter(Boolean)
     .join(' ');
 
-  const mainStyle = bgCss ? ({ backgroundImage: `url("${bgCss}")` } as const) : undefined;
+  const mainStyle = bgCss
+    ? ({
+        backgroundImage: `url("${bgCss}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      } as const)
+    : undefined;
 
   if (!sorted.length) {
     return <div className={`${rootClass} catalog-gallery--empty`} style={mainStyle} aria-hidden="true" />;

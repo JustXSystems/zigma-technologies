@@ -7,10 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="poweredByPrefix added to admin to edit">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,23 +59,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0728807546524248" />
-      <entry key="MS500" value="2.711759111882381" />
-      <entry key="S2" value="8.071295076915966" />
-      <entry key="S5" value="15.67363854633036" />
-      <entry key="S10" value="26.67726133802051" />
-      <entry key="S30" value="59.536301751149615" />
-      <entry key="S60" value="91.30165839945664" />
-      <entry key="M2" value="121.6912970537875" />
-      <entry key="M5" value="148.67758850944142" />
-      <entry key="M10" value="159.71849799180416" />
-      <entry key="M15" value="163.70526461952568" />
-      <entry key="M30" value="169.8355392241944" />
-      <entry key="H1" value="185.42206820519007" />
-      <entry key="H2" value="213.7217561097001" />
-      <entry key="H4" value="242.50476082368635" />
-      <entry key="D1" value="580.0666051206215" />
-      <entry key="W1" value="8159.935128303342" />
+      <entry key="MS100" value="1.0088644650646212" />
+      <entry key="MS500" value="1.88978581517941" />
+      <entry key="S2" value="4.972605452594558" />
+      <entry key="S5" value="10.322040213832373" />
+      <entry key="S10" value="17.425069817475624" />
+      <entry key="S30" value="28.151229123632795" />
+      <entry key="S60" value="33.90531380777288" />
+      <entry key="M2" value="42.63384888335411" />
+      <entry key="M5" value="68.26521376313795" />
+      <entry key="M10" value="109.9389184356032" />
+      <entry key="M15" value="138.9312406770286" />
+      <entry key="M30" value="184.1735436103487" />
+      <entry key="H1" value="225.38957786390114" />
+      <entry key="H2" value="268.8745686381789" />
+      <entry key="H4" value="307.29338425772505" />
+      <entry key="D1" value="652.8302235695594" />
+      <entry key="W1" value="8227.56633514819" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,33 +87,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="2.851006493340427E-295" />
-      <entry key="M15" value="4.3317708152000124E-197" />
-      <entry key="M30" value="6.581618961319514E-99" />
-      <entry key="H1" value="8.112717769847457E-50" />
-      <entry key="H2" value="2.8482833022449168E-25" />
-      <entry key="H4" value="5.336931049152904E-13" />
-      <entry key="D1" value="0.009150739898560042" />
-      <entry key="W1" value="0.7929864368244256" />
+      <entry key="M10" value="7.928123410830496E-296" />
+      <entry key="M15" value="1.8454980949894365E-197" />
+      <entry key="M30" value="4.295926087573504E-99" />
+      <entry key="H1" value="6.554331459099189E-50" />
+      <entry key="H2" value="2.560142859119194E-25" />
+      <entry key="H4" value="5.059785429448317E-13" />
+      <entry key="D1" value="0.009069770456346587" />
+      <entry key="W1" value="0.7919802340631773" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0353647042612555" />
-      <entry key="MS500" value="2.687326939198602" />
-      <entry key="S2" value="8.049757612422304" />
-      <entry key="S5" value="15.656512233263095" />
-      <entry key="S10" value="26.662832639386437" />
-      <entry key="S30" value="59.52547918905379" />
-      <entry key="S60" value="91.29312119540818" />
-      <entry key="M2" value="121.68546734361998" />
-      <entry key="M5" value="148.6746875798066" />
-      <entry key="M10" value="159.7169295682351" />
-      <entry key="M15" value="163.70419032993118" />
-      <entry key="M30" value="169.83497872439315" />
-      <entry key="H1" value="185.42175883620462" />
-      <entry key="H2" value="213.72157637148186" />
-      <entry key="H4" value="242.5046585791746" />
-      <entry key="D1" value="580.0757189063389" />
-      <entry key="W1" value="8160.727991983772" />
+      <entry key="MS100" value="0.9536270530284825" />
+      <entry key="MS500" value="1.8579684232648637" />
+      <entry key="S2" value="4.950953638935954" />
+      <entry key="S5" value="10.306874227304272" />
+      <entry key="S10" value="17.413501680587935" />
+      <entry key="S30" value="28.14536651646116" />
+      <entry key="S60" value="33.901839299382914" />
+      <entry key="M2" value="42.63169114390927" />
+      <entry key="M5" value="68.263848048521" />
+      <entry key="M10" value="109.93782369168387" />
+      <entry key="M15" value="138.93031910354003" />
+      <entry key="M30" value="184.1729316929303" />
+      <entry key="H1" value="225.38920098382167" />
+      <entry key="H2" value="268.8743425863689" />
+      <entry key="H4" value="307.29325481093406" />
+      <entry key="D1" value="652.8392512569806" />
+      <entry key="W1" value="8228.358192001293" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -288,7 +289,8 @@
     <MESSAGE value="background_image_url issue" />
     <MESSAGE value="prod background_image_url issue" />
     <MESSAGE value="poweredByPrefix added to admin to edit" />
-    <option name="LAST_COMMIT_MESSAGE" value="poweredByPrefix added to admin to edit" />
+    <MESSAGE value="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed" />
+    <option name="LAST_COMMIT_MESSAGE" value="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

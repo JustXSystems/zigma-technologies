@@ -9,7 +9,7 @@ import CatalogDetailModal from '@/components/CatalogDetailModal';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { Suspense } from 'react';
-import SmartImage from '@/components/SmartImage';
+import { publicMediaUrl } from '@/lib/media-url';
 
 type Props = {
   itemType: CatalogItemType;
@@ -535,13 +535,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? (
                     <div className="catalog-card-media">
                       {item.primary_image ? (
-                        <SmartImage
-                          src={item.primary_image}
-                          alt={item.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          style={{ objectFit: 'cover' }}
-                        />
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={publicMediaUrl(item.primary_image)} alt={item.title} loading="lazy" />
                       ) : null}
                     </div>
                   ) : null}
