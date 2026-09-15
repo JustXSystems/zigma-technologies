@@ -87,7 +87,6 @@ export type SiteCopy = {
     privacy: string;
     cookies: string;
     terms: string;
-    poweredByPrefix: string;
   };
   cookies: {
     bannerBody: string;
@@ -264,7 +263,6 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     privacy: 'Privacy Policy',
     cookies: 'Cookies',
     terms: 'Terms',
-    poweredByPrefix: 'Powered by',
   },
   cookies: {
     bannerBody:

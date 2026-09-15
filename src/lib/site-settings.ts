@@ -14,6 +14,11 @@ export type SiteSettings = {
   /** Percent 0–100 to show variant B */
   ctaVariantBPercent: string;
   copyright: string;
+  /** Footer credit: show/hide (true/false) */
+  poweredByEnabled: string;
+  poweredByPrefix: string;
+  poweredByName: string;
+  poweredByUrl: string;
   defaultMetaDescription: string;
   ogImage: string;
   enquiryNotifyEmail: string;
@@ -63,6 +68,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   headerCtaLabelB: 'Get a Quote',
   ctaVariantBPercent: '50',
   copyright: '© 2026 Zigma Technologies. All rights reserved.',
+  poweredByEnabled: 'true',
+  poweredByPrefix: 'Powered by',
+  poweredByName: 'JustX Systems',
+  poweredByUrl: 'https://www.justxsystems.com/',
   defaultMetaDescription:
     'Zigma Technologies delivers Solar EPC, UPS, BESS, EV charging, and industrial engineering solutions across India.',
   ogImage: '/assets/images/zigma-technologies-logo.png',

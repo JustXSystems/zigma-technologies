@@ -175,7 +175,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
     ],
     how: [
       'Edit company profile, logo URL, logo alt, phones, emails, WhatsApp',
-      'Footer blurb, copyright, social and legal links',
+      'Footer blurb, copyright, Powered by credit, social and legal links',
       'Enquiry notify emails (comma-separated), visitor auto-reply toggle',
       'Analytics IDs, consent requirement, CRM webhook URL/secret',
       'SLA metrics JSON for /sla dashboard; A/B header CTA variant',

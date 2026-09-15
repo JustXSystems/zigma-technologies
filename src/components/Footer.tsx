@@ -190,12 +190,18 @@ export default function Footer() {
           </div>
           <div className="foot-bottom">
             <span>{site.copyright}</span>
-            <span className="foot-powered">
-              {copy.footer.poweredByPrefix}{' '}
-              <a href="https://www.justxsystems.com/" target="_blank" rel="noopener noreferrer">
-                <strong>JustX Systems</strong>
-              </a>
-            </span>
+            {site.poweredByEnabled === 'true' && site.poweredByName.trim() ? (
+              <span className="foot-powered">
+                {site.poweredByPrefix.trim() ? `${site.poweredByPrefix.trim()} ` : null}
+                {site.poweredByUrl.trim() ? (
+                  <a href={site.poweredByUrl.trim()} target="_blank" rel="noopener noreferrer">
+                    <strong>{site.poweredByName.trim()}</strong>
+                  </a>
+                ) : (
+                  <strong>{site.poweredByName.trim()}</strong>
+                )}
+              </span>
+            ) : null}
             <span className="foot-legal">
               {site.privacyUrl ? <a href={appHref(site.privacyUrl)}>{copy.footer.privacy}</a> : null}
               {site.cookiePolicyUrl ? (

@@ -21,6 +21,18 @@ const FIELDS: Array<{ key: keyof SiteSettings; label: string; hint?: string }> =
   { key: 'ctaVariantBPercent', label: 'Variant B percent 0–100', hint: 'e.g. 50 shows B half the time' },
   { key: 'headerCtaHref', label: 'Header CTA href' },
   { key: 'copyright', label: 'Copyright line' },
+  {
+    key: 'poweredByEnabled',
+    label: 'Powered by credit (true/false)',
+    hint: 'When false, the footer credit is hidden',
+  },
+  { key: 'poweredByPrefix', label: 'Powered by prefix', hint: 'e.g. Powered by' },
+  { key: 'poweredByName', label: 'Powered by name', hint: 'e.g. JustX Systems' },
+  {
+    key: 'poweredByUrl',
+    label: 'Powered by URL',
+    hint: 'Leave blank to show the name without a link',
+  },
   { key: 'defaultMetaDescription', label: 'Default meta description' },
   { key: 'ogImage', label: 'Default OG / social image URL' },
   {
