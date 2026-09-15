@@ -123,7 +123,7 @@
   .nav-links a:hover{color:var(--white);}
   .caret{font-size:0.6rem;opacity:0.7;}
   .mega{
-    position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(8px);
+    position:absolute;top:calc(100% + 0.5rem);left:50%;transform:translateX(-50%) translateY(-0.2rem);
     background:var(--navy-900);
     border:1px solid rgba(255,255,255,0.08);
     border-radius:10px;
@@ -133,6 +133,15 @@
     opacity:0;visibility:hidden;
     transition:opacity .2s ease, transform .2s ease;
     box-shadow:0 24px 48px rgba(0,0,0,0.4);
+  }
+  /* Bridge the visual gap so moving the pointer from the top link into the panel
+     does not leave :hover (otherwise the mega closes mid-travel). */
+  .mega::before{
+    content:"";
+    position:absolute;
+    left:0;right:0;
+    bottom:100%;
+    height:0.85rem;
   }
   .nav-links > li:hover .mega{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
   .mega-2x2{grid-template-columns:repeat(3, 1fr) !important;min-width:600px;}
@@ -571,6 +580,7 @@
       box-shadow:none;background:rgba(255,255,255,0.03);padding:0.2rem 1.4rem 1rem;
       grid-template-columns:1fr;gap:1.2rem;
     }
+    .nav-links .mega::before{display:none;}
     /* The desktop ".nav-links > li:hover .mega" rule (which centers the
        dropdown with translateX(-50%)) has higher specificity than the reset
        above, so it can still fire on hover at this breakpoint and shove the

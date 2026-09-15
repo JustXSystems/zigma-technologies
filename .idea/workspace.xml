@@ -7,13 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="prod background_image_url issue">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="poweredByPrefix added to admin to edit">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3949435398469507" />
-      <entry key="MS500" value="3.4358991418072136" />
-      <entry key="S2" value="5.973761336850533" />
-      <entry key="S5" value="10.39224925739613" />
-      <entry key="S10" value="18.6943518940463" />
-      <entry key="S30" value="41.65011605518448" />
-      <entry key="S60" value="59.293968251904325" />
-      <entry key="M2" value="76.54463538556445" />
-      <entry key="M5" value="93.26727291854806" />
-      <entry key="M10" value="100.56188661534807" />
-      <entry key="M15" value="103.23735039883444" />
-      <entry key="M30" value="106.04730416752616" />
-      <entry key="H1" value="107.50527303154881" />
-      <entry key="H2" value="108.24797285922634" />
-      <entry key="H4" value="108.6253788308998" />
-      <entry key="D1" value="435.3114281190471" />
-      <entry key="W1" value="8076.7071198399035" />
+      <entry key="MS100" value="1.0728807546524248" />
+      <entry key="MS500" value="2.711759111882381" />
+      <entry key="S2" value="8.071295076915966" />
+      <entry key="S5" value="15.67363854633036" />
+      <entry key="S10" value="26.67726133802051" />
+      <entry key="S30" value="59.536301751149615" />
+      <entry key="S60" value="91.30165839945664" />
+      <entry key="M2" value="121.6912970537875" />
+      <entry key="M5" value="148.67758850944142" />
+      <entry key="M10" value="159.71849799180416" />
+      <entry key="M15" value="163.70526461952568" />
+      <entry key="M30" value="169.8355392241944" />
+      <entry key="H1" value="185.42206820519007" />
+      <entry key="H2" value="213.7217561097001" />
+      <entry key="H4" value="242.50476082368635" />
+      <entry key="D1" value="580.0666051206215" />
+      <entry key="W1" value="8159.935128303342" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,33 +86,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="6.039856126599271E-290" />
-      <entry key="M15" value="1.539398511800802E-193" />
-      <entry key="M30" value="3.923516932295326E-97" />
-      <entry key="H1" value="6.263798314358106E-49" />
-      <entry key="H2" value="7.914416159362557E-25" />
-      <entry key="H4" value="8.896300444359018E-13" />
-      <entry key="D1" value="0.009964201911107607" />
-      <entry key="W1" value="0.8026930774396843" />
+      <entry key="M10" value="2.851006493340427E-295" />
+      <entry key="M15" value="4.3317708152000124E-197" />
+      <entry key="M30" value="6.581618961319514E-99" />
+      <entry key="H1" value="8.112717769847457E-50" />
+      <entry key="H2" value="2.8482833022449168E-25" />
+      <entry key="H4" value="5.336931049152904E-13" />
+      <entry key="D1" value="0.009150739898560042" />
+      <entry key="W1" value="0.7929864368244256" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3455738082810558" />
-      <entry key="MS500" value="3.4109053389745134" />
-      <entry key="S2" value="5.962982386382957" />
-      <entry key="S5" value="10.384696415577148" />
-      <entry key="S10" value="18.68730368340233" />
-      <entry key="S30" value="41.64457456654665" />
-      <entry key="S60" value="59.28985709974799" />
-      <entry key="M2" value="76.54186857732236" />
-      <entry key="M5" value="93.26587631652713" />
-      <entry key="M10" value="100.56112360883108" />
-      <entry key="M15" value="103.23682578707282" />
-      <entry key="M30" value="106.04703345945718" />
-      <entry key="H1" value="107.5051354917723" />
-      <entry key="H2" value="108.24790353186663" />
-      <entry key="H4" value="108.62534402574492" />
-      <entry key="D1" value="435.32136771617746" />
-      <entry key="W1" value="8077.509690758615" />
+      <entry key="MS100" value="1.0353647042612555" />
+      <entry key="MS500" value="2.687326939198602" />
+      <entry key="S2" value="8.049757612422304" />
+      <entry key="S5" value="15.656512233263095" />
+      <entry key="S10" value="26.662832639386437" />
+      <entry key="S30" value="59.52547918905379" />
+      <entry key="S60" value="91.29312119540818" />
+      <entry key="M2" value="121.68546734361998" />
+      <entry key="M5" value="148.6746875798066" />
+      <entry key="M10" value="159.7169295682351" />
+      <entry key="M15" value="163.70419032993118" />
+      <entry key="M30" value="169.83497872439315" />
+      <entry key="H1" value="185.42175883620462" />
+      <entry key="H2" value="213.72157637148186" />
+      <entry key="H4" value="242.5046585791746" />
+      <entry key="D1" value="580.0757189063389" />
+      <entry key="W1" value="8160.727991983772" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -230,6 +227,42 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="19f58f80-d35c-43fe-abbc-44c28cb867e5" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="19f58f80-d35c-43fe-abbc-44c28cb867e5">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="ready to test" />
     <MESSAGE value="ready to test ztools" />
@@ -254,7 +287,8 @@
     <MESSAGE value="Include SQL migrations in release tarball so VPS apply can ensure schema.&#10;&#10;Previously only *.sh/*.mjs were packed, so migrate-*.sql never reached PreProd." />
     <MESSAGE value="background_image_url issue" />
     <MESSAGE value="prod background_image_url issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="prod background_image_url issue" />
+    <MESSAGE value="poweredByPrefix added to admin to edit" />
+    <option name="LAST_COMMIT_MESSAGE" value="poweredByPrefix added to admin to edit" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
