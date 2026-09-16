@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { CatalogItem, CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
@@ -28,6 +28,33 @@ function hasField(fields: string[] | null | undefined, name: string, fallback: s
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
+}
+
+/** Escape a public media path for use inside CSS url("…"). */
+function cssUrlValue(path: string): string {
+  const resolved = publicMediaUrl(path);
+  if (!resolved) return '';
+  return encodeURI(resolved)
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function CatalogCardMedia({ item }: { item: CatalogItem }) {
+  const bgCss = item.background_image_url?.trim() ? cssUrlValue(item.background_image_url) : '';
+  const style = bgCss
+    ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties)
+    : undefined;
+
+  return (
+    <div className={cx('catalog-card-media', bgCss && 'catalog-card-media--has-bg')} style={style}>
+      {item.primary_image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={publicMediaUrl(item.primary_image)} alt={item.title} loading="lazy" />
+      ) : null}
+    </div>
+  );
 }
 
 function CatalogHero({
@@ -533,12 +560,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   }}
                 >
                   {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? (
-                    <div className="catalog-card-media">
-                      {item.primary_image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={publicMediaUrl(item.primary_image)} alt={item.title} loading="lazy" />
-                      ) : null}
-                    </div>
+                    <CatalogCardMedia item={item} />
                   ) : null}
                   <div className="catalog-card-body">
                     {hasField(cardFields, 'category', DEFAULT_CARD) ? (
