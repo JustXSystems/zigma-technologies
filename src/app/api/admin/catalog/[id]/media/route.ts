@@ -10,6 +10,7 @@ import {
   mediaKindFromUrl,
   reorderItemMedia,
   setItemMediaPrimary,
+  updateItemMediaFit,
 } from '@/lib/catalog';
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -33,6 +34,8 @@ const postSchema = z.object({
   alt: z.string().optional(),
   is_primary: z.boolean().optional(),
   kind: z.enum(['image', 'video', 'svg']).optional(),
+  fit_to_space: z.boolean().optional(),
+  fit_percent: z.number().min(20).max(100).optional(),
 });
 
 export async function POST(request: Request, ctx: Ctx) {
@@ -49,6 +52,8 @@ export async function POST(request: Request, ctx: Ctx) {
       url: body.url,
       alt: body.alt,
       is_primary: body.is_primary,
+      fit_to_space: body.fit_to_space,
+      fit_percent: body.fit_percent,
     });
     return jsonOk({ mediaId }, { status: 201 });
   } catch (error) {
@@ -59,10 +64,12 @@ export async function POST(request: Request, ctx: Ctx) {
 }
 
 const patchSchema = z.object({
-  action: z.enum(['set_primary', 'reorder', 'copy_from']),
+  action: z.enum(['set_primary', 'reorder', 'copy_from', 'update_fit']),
   media_id: z.number().int().positive().optional(),
   ordered_ids: z.array(z.number().int().positive()).optional(),
   from_item_id: z.number().int().positive().optional(),
+  fit_to_space: z.boolean().optional(),
+  fit_percent: z.number().min(20).max(100).optional(),
 });
 
 export async function PATCH(request: Request, ctx: Ctx) {
@@ -90,6 +97,12 @@ export async function PATCH(request: Request, ctx: Ctx) {
     } else if (body.action === 'copy_from') {
       if (!body.from_item_id) return jsonError('from_item_id required', 400);
       await copyItemMedia(body.from_item_id, itemId);
+    } else if (body.action === 'update_fit') {
+      if (!body.media_id) return jsonError('media_id required', 400);
+      await updateItemMediaFit(itemId, body.media_id, {
+        fit_to_space: body.fit_to_space,
+        fit_percent: body.fit_percent,
+      });
     }
 
     const media = await listItemMedia(itemId);

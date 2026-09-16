@@ -9,9 +9,11 @@ type Props = {
   value: string;
   onChange: (path: string) => void;
   label?: string;
+  /** Hide thumbnail strip; denser row for studio layouts */
+  compact?: boolean;
 };
 
-export default function MediaPicker({ value, onChange, label = 'Image URL' }: Props) {
+export default function MediaPicker({ value, onChange, label = 'Image URL', compact = false }: Props) {
   const [open, setOpen] = useState(false);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,21 +36,21 @@ export default function MediaPicker({ value, onChange, label = 'Image URL' }: Pr
   const isImage = (mime: string | null, path: string) =>
     (mime && mime.startsWith('image/')) || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
 
-  const previewSrc = value && isImage(null, value) ? publicMediaUrl(value) : '';
+  const previewSrc = !compact && value && isImage(null, value) ? publicMediaUrl(value) : '';
 
   return (
-    <div className="admin-field">
-      <label>{label}</label>
-      <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+    <div className={`admin-field${compact ? ' admin-field--compact' : ''}`}>
+      {label ? <label>{label}</label> : null}
+      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           className="admin-input"
-          style={{ flex: 1, minWidth: 180 }}
+          style={{ flex: 1, minWidth: compact ? 140 : 180 }}
           value={value}
           onChange={(e) => onChange(toStorageMediaPath(e.target.value) || e.target.value)}
           placeholder="/assets/images/… or /assets/svg/…"
         />
         <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setOpen(true)}>
-          Browse media
+          Browse
         </button>
       </div>
       {previewSrc ? (

@@ -48,8 +48,21 @@ export default function CatalogMediaGallery({
     ? encodeURI(bg).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
     : '';
   const shading = backgroundShadingStyle || 'medium';
-  const fitToSpace = mediaFitToSpace !== false;
-  const fitPct = Math.min(100, Math.max(20, Number(mediaFitPercent) || DEFAULT_MEDIA_FIT_PERCENT));
+  const fitToSpace =
+    active?.fit_to_space !== undefined && active?.fit_to_space !== null
+      ? active.fit_to_space !== false
+      : mediaFitToSpace !== false;
+  const fitPct = Math.min(
+    100,
+    Math.max(
+      20,
+      Number(
+        active?.fit_percent !== undefined && active?.fit_percent !== null
+          ? active.fit_percent
+          : mediaFitPercent
+      ) || DEFAULT_MEDIA_FIT_PERCENT
+    )
+  );
   const useFit = !!bg && fitToSpace;
 
   const rootClass = [

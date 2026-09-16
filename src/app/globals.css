@@ -1765,6 +1765,10 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   object-fit:contain;transform:translate(-50%,-50%) scale(1);
   border-radius:8px;background:rgba(255,255,255,0.04);
 }
+.catalog-page .catalog-card-media--has-bg.catalog-card-media--fit{
+  /* Let product drop-shadows show around the inset image. */
+  overflow:visible;
+}
 .catalog-page .catalog-card-media--cover img{
   inset:0;width:100%;height:100%;max-width:none;max-height:none;
   object-fit:cover;transform:scale(1.02);border-radius:0;background:transparent;
@@ -1776,23 +1780,26 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   transform:translate(-50%,-50%) scale(1.04);
 }
 .catalog-page .catalog-card--tile .catalog-card-media::after{
+  /* Keep a light text-legibility veil on tile cards; product shadow is separate. */
   content:'';
   position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(6,17,33,0.15) 0%,rgba(6,17,33,0.55) 42%,rgba(6,17,33,0.92) 100%);
+  background:linear-gradient(180deg,rgba(6,17,33,0.08) 0%,rgba(6,17,33,0.28) 55%,rgba(6,17,33,0.78) 100%);
 }
-.catalog-page .catalog-card-media--shade-none::after{display:none !important;}
-.catalog-page .catalog-card-media--shade-soft::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.05) 0%,rgba(6,17,33,0.22) 55%,rgba(6,17,33,0.55) 100%) !important;
+/* Drop-shadow styles on the product image (not a gray wash over the background). */
+.catalog-page .catalog-card-media--fit img{box-shadow:none;}
+.catalog-page .catalog-card-media--shade-soft.catalog-card-media--fit img{
+  box-shadow:0 6px 18px rgba(0,0,0,0.28),0 2px 6px rgba(0,0,0,0.16);
 }
-.catalog-page .catalog-card-media--shade-medium::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.15) 0%,rgba(6,17,33,0.55) 42%,rgba(6,17,33,0.92) 100%) !important;
+.catalog-page .catalog-card-media--shade-medium.catalog-card-media--fit img{
+  box-shadow:0 14px 34px rgba(0,0,0,0.42),0 4px 12px rgba(0,0,0,0.22);
 }
-.catalog-page .catalog-card-media--shade-strong::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.35) 0%,rgba(6,17,33,0.72) 40%,rgba(6,17,33,0.96) 100%) !important;
+.catalog-page .catalog-card-media--shade-strong.catalog-card-media--fit img{
+  box-shadow:0 22px 48px rgba(0,0,0,0.55),0 8px 18px rgba(0,0,0,0.3);
 }
-.catalog-page .catalog-card-media--shade-bottom::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.02) 0%,rgba(6,17,33,0.18) 45%,rgba(6,17,33,0.88) 100%) !important;
+.catalog-page .catalog-card-media--shade-bottom.catalog-card-media--fit img{
+  box-shadow:0 28px 36px -18px rgba(0,0,0,0.7),0 10px 16px -10px rgba(0,0,0,0.4);
 }
+.catalog-page .catalog-card-media--shade-none.catalog-card-media--fit img{box-shadow:none;}
 .catalog-page .catalog-card--tile .catalog-card-body{
   position:relative;z-index:2;margin-top:auto;
   padding:1.35rem 1.35rem 1.45rem;
@@ -2353,6 +2360,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   background-size:cover;background-position:center;background-repeat:no-repeat;
   --catalog-media-fit:78%;
   position:relative;
+  overflow:visible;
 }
 .catalog-gallery--fit .catalog-gallery-media,
 .catalog-gallery--has-bg.catalog-gallery--fit .catalog-gallery-media{
@@ -2368,24 +2376,20 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .catalog-gallery--has-bg.catalog-gallery--cover .catalog-gallery-media{
   position:absolute;inset:0;width:100%;height:100%;max-height:none;border-radius:0;
 }
-.catalog-gallery-main::after{
-  content:'';
-  position:absolute;inset:0;z-index:0;pointer-events:none;
-  background:transparent;
+/* Product drop-shadow (no gray wash over the background photo). */
+.catalog-gallery--shade-soft.catalog-gallery--fit .catalog-gallery-media{
+  box-shadow:0 8px 22px rgba(0,0,0,0.3),0 2px 8px rgba(0,0,0,0.18);
 }
-.catalog-gallery--shade-none .catalog-gallery-main::after{display:none;}
-.catalog-gallery--shade-soft .catalog-gallery-main::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.08),rgba(6,17,33,0.35));
+.catalog-gallery--shade-medium.catalog-gallery--fit .catalog-gallery-media{
+  box-shadow:0 16px 36px rgba(0,0,0,0.42),0 4px 12px rgba(0,0,0,0.22);
 }
-.catalog-gallery--shade-medium .catalog-gallery-main::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.18),rgba(6,17,33,0.55));
+.catalog-gallery--shade-strong.catalog-gallery--fit .catalog-gallery-media{
+  box-shadow:0 24px 52px rgba(0,0,0,0.55),0 8px 18px rgba(0,0,0,0.3);
 }
-.catalog-gallery--shade-strong .catalog-gallery-main::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.35),rgba(6,17,33,0.78));
+.catalog-gallery--shade-bottom.catalog-gallery--fit .catalog-gallery-media{
+  box-shadow:0 30px 40px -18px rgba(0,0,0,0.72),0 12px 18px -10px rgba(0,0,0,0.4);
 }
-.catalog-gallery--shade-bottom .catalog-gallery-main::after{
-  background:linear-gradient(180deg,rgba(6,17,33,0.02) 0%,rgba(6,17,33,0.55) 100%);
-}
+.catalog-gallery--shade-none.catalog-gallery--fit .catalog-gallery-media{box-shadow:none;}
 .catalog-gallery--has-bg.catalog-gallery--empty{
   min-height:320px;background-size:cover;background-position:center;background-color:#0f1720;
 }

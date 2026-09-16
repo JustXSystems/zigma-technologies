@@ -51,3 +51,28 @@ SET @sql := IF(@pct_exists = 0,
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- Per attached catalog media asset: fit controls
+SET @media_fit_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_media' AND COLUMN_NAME = 'fit_to_space'
+);
+SET @sql := IF(@media_fit_exists = 0,
+  'ALTER TABLE catalog_media ADD COLUMN fit_to_space TINYINT(1) NOT NULL DEFAULT 1 AFTER is_primary',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @media_pct_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_media' AND COLUMN_NAME = 'fit_percent'
+);
+SET @sql := IF(@media_pct_exists = 0,
+  'ALTER TABLE catalog_media ADD COLUMN fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER fit_to_space',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

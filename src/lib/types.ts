@@ -1,6 +1,6 @@
 export type CatalogItemType = 'project' | 'product' | 'service';
 
-/** Overlay shading on catalog card/gallery backgrounds */
+/** Drop-shadow style on catalog product media over the background */
 export type CatalogBackgroundShading = 'none' | 'soft' | 'medium' | 'strong' | 'bottom';
 
 export const CATALOG_BACKGROUND_SHADING_OPTIONS: Array<{
@@ -8,11 +8,11 @@ export const CATALOG_BACKGROUND_SHADING_OPTIONS: Array<{
   label: string;
   hint: string;
 }> = [
-  { value: 'none', label: 'None', hint: 'No darkening overlay' },
-  { value: 'soft', label: 'Soft', hint: 'Light veil for bright photos' },
-  { value: 'medium', label: 'Medium', hint: 'Default balance for text readability' },
-  { value: 'strong', label: 'Strong', hint: 'Deep shade for busy backgrounds' },
-  { value: 'bottom', label: 'Bottom fade', hint: 'Darkens toward the lower edge' },
+  { value: 'none', label: 'None', hint: 'No drop shadow' },
+  { value: 'soft', label: 'Soft shadow', hint: 'Light lift around the product' },
+  { value: 'medium', label: 'Medium shadow', hint: 'Balanced depth (default)' },
+  { value: 'strong', label: 'Strong shadow', hint: 'High contrast depth' },
+  { value: 'bottom', label: 'Ground shadow', hint: 'Shadow pooled under the product' },
 ];
 
 export const DEFAULT_MEDIA_FIT_PERCENT = 78;
@@ -59,11 +59,11 @@ export type CatalogItem = {
   lead_time_label: string | null;
   /** Backdrop for catalog-gallery-main in product/service/project popups */
   background_image_url: string | null;
-  /** Overlay shading applied over the gallery/card background image */
+  /** Drop-shadow style on product media over the gallery/card background */
   background_shading_style: CatalogBackgroundShading;
-  /** When true, primary/catalog media uses object-fit contain sized by media_fit_percent */
+  /** Default fit for new attaches / fallback when media has no override */
   media_fit_to_space: boolean;
-  /** Max width/height of catalog media as % of the available frame (when fit is on) */
+  /** Default fit % for new attaches / fallback when media has no override */
   media_fit_percent: number;
   status: 'draft' | 'published';
   featured: number;
@@ -85,6 +85,11 @@ export type CatalogMedia = {
   alt: string | null;
   sort_order: number;
   is_primary: number;
+  /** When true, this asset is contained within the frame at fit_percent */
+  fit_to_space: boolean;
+  /** Max width/height of this asset as % of the available frame (when fit is on) */
+  fit_percent: number;
+  created_at?: string;
 };
 
 export type CatalogCategory = {

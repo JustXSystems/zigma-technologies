@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, Suspense, useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type {
   CatalogItem,
@@ -16,6 +16,7 @@ import {
 import { buildCaseStudyJson, caseStudyToEditor } from '@/lib/catalog-case-study';
 import { getBrochureUrl, withBrochureUrl } from '@/lib/catalog-brochure';
 import MediaPicker from '@/components/admin/MediaPicker';
+import { publicMediaUrl } from '@/lib/media-url';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
 
@@ -108,12 +109,13 @@ function InventoryInner() {
   const [mediaItem, setMediaItem] = useState<CatalogItem | null>(null);
   const [itemMedia, setItemMedia] = useState<CatalogMedia[]>([]);
   const [attachUrl, setAttachUrl] = useState('');
+  const [attachFitToSpace, setAttachFitToSpace] = useState(true);
+  const [attachFitPercent, setAttachFitPercent] = useState(DEFAULT_MEDIA_FIT_PERCENT);
   const [backgroundUrl, setBackgroundUrl] = useState('');
   const [backgroundShading, setBackgroundShading] = useState<CatalogBackgroundShading>('medium');
-  const [mediaFitToSpace, setMediaFitToSpace] = useState(true);
-  const [mediaFitPercent, setMediaFitPercent] = useState(DEFAULT_MEDIA_FIT_PERCENT);
   const [mediaMsg, setMediaMsg] = useState('');
   const [savingBackground, setSavingBackground] = useState(false);
+  const [savingMediaFitId, setSavingMediaFitId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -370,8 +372,8 @@ function InventoryInner() {
     if (opts?.resetBackground !== false && (switching || !mediaItem)) {
       setBackgroundUrl(item.background_image_url || '');
       setBackgroundShading(item.background_shading_style || 'medium');
-      setMediaFitToSpace(item.media_fit_to_space !== false);
-      setMediaFitPercent(item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+      setAttachFitToSpace(item.media_fit_to_space !== false);
+      setAttachFitPercent(item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
     }
     const res = await fetch(`/api/admin/catalog/${item.id}/media`);
     const data = await res.json();
@@ -382,9 +384,7 @@ function InventoryInner() {
   function mediaPresentationDirty(item: CatalogItem) {
     return (
       backgroundUrl !== (item.background_image_url || '') ||
-      backgroundShading !== (item.background_shading_style || 'medium') ||
-      mediaFitToSpace !== (item.media_fit_to_space !== false) ||
-      mediaFitPercent !== (item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT)
+      backgroundShading !== (item.background_shading_style || 'medium')
     );
   }
 
@@ -400,28 +400,20 @@ function InventoryInner() {
         body: JSON.stringify({
           background_image_url: normalized,
           background_shading_style: backgroundShading,
-          media_fit_to_space: mediaFitToSpace,
-          media_fit_percent: mediaFitPercent,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not save media presentation');
       const nextUrl = data.item?.background_image_url || '';
       const nextShading = (data.item?.background_shading_style || backgroundShading) as CatalogBackgroundShading;
-      const nextFit = data.item?.media_fit_to_space !== false;
-      const nextPct = Number(data.item?.media_fit_percent) || mediaFitPercent;
       setBackgroundUrl(nextUrl);
       setBackgroundShading(nextShading);
-      setMediaFitToSpace(nextFit);
-      setMediaFitPercent(nextPct);
       setMediaItem({
         ...mediaItem,
         background_image_url: nextUrl || null,
         background_shading_style: nextShading,
-        media_fit_to_space: nextFit,
-        media_fit_percent: nextPct,
       });
-      setMediaMsg(nextUrl ? 'Media presentation saved.' : 'Background cleared; fit & shading saved.');
+      setMediaMsg(nextUrl ? 'Background & shadow saved.' : 'Background cleared; shadow style saved.');
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save media presentation');
@@ -436,17 +428,49 @@ function InventoryInner() {
     const res = await fetch(`/api/admin/catalog/${mediaItem.id}/media`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, is_primary: isPrimary || itemMedia.length === 0 }),
+      body: JSON.stringify({
+        url,
+        is_primary: isPrimary || itemMedia.length === 0,
+        fit_to_space: attachFitToSpace,
+        fit_percent: attachFitPercent,
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
       setError(data.error || 'Attach failed');
       return;
     }
-    setMediaMsg('Attached.');
+    setMediaMsg('Attached with fit settings.');
     setAttachUrl('');
     await openMedia(mediaItem, { resetBackground: false });
     await load();
+  }
+
+  async function saveAttachedMediaFit(mediaId: number, fitToSpace: boolean, fitPercent: number) {
+    if (!mediaItem) return;
+    setSavingMediaFitId(mediaId);
+    setMediaMsg('');
+    try {
+      const res = await fetch(`/api/admin/catalog/${mediaItem.id}/media`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_fit',
+          media_id: mediaId,
+          fit_to_space: fitToSpace,
+          fit_percent: fitPercent,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not save fit settings');
+      setItemMedia(data.media || []);
+      setMediaMsg('Fit settings saved.');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save fit settings');
+    } finally {
+      setSavingMediaFitId(null);
+    }
   }
 
   async function setPrimaryMedia(mediaId: number) {
@@ -861,201 +885,184 @@ function InventoryInner() {
 
       {mediaItem ? (
         <div className="admin-modal-backdrop" onClick={() => setMediaItem(null)}>
-          <div className="admin-modal" style={{ width: 'min(860px, 100%)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal" style={{ width: 'min(960px, 100%)' }} onClick={(e) => e.stopPropagation()}>
             <h2>Media · {mediaItem.title}</h2>
-            <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem', marginTop: 0 }}>
-              Attach multiple images, SVG, or videos. Set one image/SVG as the <strong>card thumbnail</strong> (★).
-              Optionally set a <strong>gallery background</strong>, <strong>shading style</strong>, and catalog image
-              <strong> fit %</strong> for public cards and the detail popup. Videos appear in the detail gallery but
-              are not used as list thumbnails.
+            <p className="admin-media-lead">
+              Background + shadow for cards/popup. Attach assets with fit controls. ★ marks the card thumbnail.
             </p>
             {mediaMsg ? <div className="admin-success">{mediaMsg}</div> : null}
 
-            <div
-              style={{
-                border: '1px solid #e5e7eb',
-                borderRadius: 10,
-                padding: '0.85rem 1rem',
-                marginBottom: '1rem',
-                background: '#fafbfc',
-              }}
-            >
-              <MediaPicker
-                value={backgroundUrl}
-                onChange={setBackgroundUrl}
-                label="Gallery background image (catalog popup)"
-              />
-              <div className="admin-field" style={{ marginTop: '0.75rem' }}>
-                <label htmlFor="bg-shading">Background shading style</label>
-                <select
-                  id="bg-shading"
-                  className="admin-select"
-                  value={backgroundShading}
-                  onChange={(e) => setBackgroundShading(e.target.value as CatalogBackgroundShading)}
-                >
-                  {CATALOG_BACKGROUND_SHADING_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label} — {opt.hint}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p style={{ margin: '0.55rem 0 0', fontSize: '0.8rem', color: 'var(--admin-muted)' }}>
-                Shown behind the product media on public catalog cards and in the
-                product/service/project popup. Shading controls the dark overlay for text readability.
-              </p>
+            <div className="admin-media-studio">
+              <div className="admin-media-panel">
+                <div className="admin-media-panel-head">
+                  <h3>Presentation</h3>
+                  <span>Background · Shadow · Attach</span>
+                </div>
 
-              <div
-                style={{
-                  borderTop: '1px solid #e5e7eb',
-                  marginTop: '0.9rem',
-                  paddingTop: '0.85rem',
-                  display: 'grid',
-                  gap: '0.65rem',
-                }}
-              >
-                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Catalog image fit</div>
-                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.9rem' }}>
-                  <input
-                    type="checkbox"
-                    checked={mediaFitToSpace}
-                    onChange={(e) => setMediaFitToSpace(e.target.checked)}
-                  />
-                  Fit to available space
-                </label>
-                <div className="admin-field" style={{ maxWidth: 220 }}>
-                  <label htmlFor="media-fit-pct">Fit percentage</label>
-                  <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                <MediaPicker
+                  value={backgroundUrl}
+                  onChange={setBackgroundUrl}
+                  label="Background"
+                  compact
+                />
+
+                <div className="admin-media-inline">
+                  <label htmlFor="bg-shadow">
+                    Shadow
+                    <select
+                      id="bg-shadow"
+                      className="admin-select"
+                      value={backgroundShading}
+                      onChange={(e) => setBackgroundShading(e.target.value as CatalogBackgroundShading)}
+                      style={{ minWidth: 150 }}
+                    >
+                      {CATALOG_BACKGROUND_SHADING_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="admin-media-actions" style={{ marginTop: 0 }}>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-primary"
+                      disabled={savingBackground || !mediaPresentationDirty(mediaItem)}
+                      onClick={() => saveMediaPresentation(backgroundUrl.trim() || null)}
+                    >
+                      {savingBackground ? 'Saving…' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      disabled={savingBackground || (!backgroundUrl && !mediaItem.background_image_url)}
+                      onClick={() => {
+                        setBackgroundUrl('');
+                        void saveMediaPresentation(null);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--admin-border)', margin: '0.75rem 0 0.55rem' }} />
+
+                <MediaPicker
+                  value={attachUrl}
+                  onChange={setAttachUrl}
+                  label="Attach from library / URL"
+                  compact
+                />
+
+                <div className="admin-media-inline">
+                  <label>
                     <input
-                      id="media-fit-pct"
+                      type="checkbox"
+                      checked={attachFitToSpace}
+                      onChange={(e) => setAttachFitToSpace(e.target.checked)}
+                    />
+                    Fit to space
+                  </label>
+                  <label>
+                    Fit %
+                    <input
                       className="admin-input"
                       type="number"
                       min={20}
                       max={100}
                       step={1}
-                      disabled={!mediaFitToSpace}
-                      value={mediaFitPercent}
+                      disabled={!attachFitToSpace}
+                      value={attachFitPercent}
                       onChange={(e) => {
                         const n = Number(e.target.value);
                         if (!Number.isFinite(n)) return;
-                        setMediaFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                        setAttachFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                      }}
+                      style={{ width: 64 }}
+                    />
+                  </label>
+                  <label className="admin-btn admin-btn-primary" style={{ cursor: 'pointer', margin: 0 }}>
+                    Upload
+                    <input
+                      type="file"
+                      accept="image/*,video/mp4,video/webm,.svg"
+                      multiple
+                      hidden
+                      onChange={async (e) => {
+                        const files = e.target.files;
+                        if (!files?.length || !mediaItem) return;
+                        try {
+                          await uploadMedia(files, mediaItem.id, itemMedia.length === 0);
+                          await openMedia(mediaItem, { resetBackground: false });
+                          setMediaMsg(`Uploaded ${files.length} file(s).`);
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Upload failed');
+                        } finally {
+                          e.target.value = '';
+                        }
                       }}
                     />
-                    <span style={{ color: 'var(--admin-muted)', fontSize: '0.85rem' }}>%</span>
-                  </div>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--admin-muted)' }}>
-                  When a background is set and fit is on, the catalog image is contained within the
-                  frame at this size (default {DEFAULT_MEDIA_FIT_PERCENT}%). When fit is off, the
-                  image covers the media area over the background.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.65rem' }}>
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-primary"
-                  disabled={savingBackground || !mediaPresentationDirty(mediaItem)}
-                  onClick={() => saveMediaPresentation(backgroundUrl.trim() || null)}
-                >
-                  {savingBackground ? 'Saving…' : 'Save presentation'}
-                </button>
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-secondary"
-                  disabled={savingBackground || (!backgroundUrl && !mediaItem.background_image_url)}
-                  onClick={() => {
-                    setBackgroundUrl('');
-                    void saveMediaPresentation(null);
-                  }}
-                >
-                  Clear background
-                </button>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.8rem' }}>
-              <label className="admin-btn admin-btn-primary" style={{ cursor: 'pointer' }}>
-                Upload files
-                <input
-                  type="file"
-                  accept="image/*,video/mp4,video/webm,.svg"
-                  multiple
-                  hidden
-                  onChange={async (e) => {
-                    const files = e.target.files;
-                    if (!files?.length || !mediaItem) return;
-                    try {
-                      await uploadMedia(files, mediaItem.id, itemMedia.length === 0);
-                      await openMedia(mediaItem, { resetBackground: false });
-                      setMediaMsg(`Uploaded ${files.length} file(s).`);
-                    } catch (err) {
-                      setError(err instanceof Error ? err.message : 'Upload failed');
-                    } finally {
-                      e.target.value = '';
-                    }
-                  }}
-                />
-              </label>
-            </div>
-            <MediaPicker value={attachUrl} onChange={setAttachUrl} label="Attach from library / URL" />
-            <div style={{ margin: '0.7rem 0 1rem' }}>
-              <button
-                type="button"
-                className="admin-btn admin-btn-secondary"
-                disabled={!attachUrl}
-                onClick={() => attachLibraryMedia(attachUrl)}
-              >
-                Attach to item
-              </button>
-            </div>
-            {itemMedia.length === 0 ? (
-              <p className="admin-empty">No media attached yet. Upload or attach from the media library.</p>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: '0.8rem' }}>
-                {itemMedia.map((m, idx) => (
-                  <div
-                    key={m.id}
-                    style={{
-                      border: m.is_primary ? '2px solid var(--orange, #FF6B1A)' : '1px solid #e5e7eb',
-                      borderRadius: 8,
-                      padding: '0.55rem',
-                      background: '#fff',
-                    }}
+                  </label>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-secondary"
+                    disabled={!attachUrl}
+                    onClick={() => attachLibraryMedia(attachUrl)}
                   >
-                    {m.kind === 'video' ? (
-                      <video src={m.url} muted style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 6 }} />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={m.url} alt={m.alt || ''} style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 6 }} />
-                    )}
-                    <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span className="admin-badge" style={{ fontSize: '0.68rem' }}>{m.kind}</span>
-                      {m.is_primary ? <span style={{ fontSize: '0.72rem', color: 'var(--orange, #FF6B1A)', fontWeight: 700 }}>★ Thumbnail</span> : null}
-                    </div>
-                    <code style={{ display: 'block', fontSize: '0.62rem', marginTop: 6, wordBreak: 'break-all' }}>{m.url}</code>
-                    <div style={{ display: 'flex', gap: '0.3rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                      {m.kind !== 'video' && !m.is_primary ? (
-                        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setPrimaryMedia(m.id)}>
-                          Set thumbnail
-                        </button>
-                      ) : null}
-                      <button type="button" className="admin-btn admin-btn-secondary" disabled={idx === 0} onClick={() => moveMedia(m.id, -1)}>
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-secondary"
-                        disabled={idx === itemMedia.length - 1}
-                        onClick={() => moveMedia(m.id, 1)}
-                      >
-                        ↓
-                      </button>
-                      <button type="button" className="admin-btn admin-btn-danger" onClick={() => removeMedia(m.id)}>
-                        Remove
-                      </button>
-                    </div>
-                  </div>
+                    Attach
+                  </button>
+                </div>
+              </div>
+
+              <MediaPresentationPreview
+                backgroundUrl={backgroundUrl}
+                productUrl={
+                  attachUrl ||
+                  itemMedia.find((m) => m.is_primary && m.kind !== 'video')?.url ||
+                  itemMedia.find((m) => m.kind !== 'video')?.url ||
+                  ''
+                }
+                shading={backgroundShading}
+                fitToSpace={
+                  attachUrl
+                    ? attachFitToSpace
+                    : (itemMedia.find((m) => m.is_primary)?.fit_to_space ??
+                        itemMedia.find((m) => m.kind !== 'video')?.fit_to_space) !== false
+                }
+                fitPercent={
+                  attachUrl
+                    ? attachFitPercent
+                    : itemMedia.find((m) => m.is_primary)?.fit_percent ||
+                      itemMedia.find((m) => m.kind !== 'video')?.fit_percent ||
+                      DEFAULT_MEDIA_FIT_PERCENT
+                }
+                previewSource={attachUrl ? 'attach' : 'thumbnail'}
+              />
+            </div>
+
+            {itemMedia.length === 0 ? (
+              <p className="admin-empty">No media attached yet.</p>
+            ) : (
+              <div className="admin-media-list">
+                {itemMedia.map((m, idx) => (
+                  <AttachedMediaCard
+                    key={m.id}
+                    media={m}
+                    index={idx}
+                    total={itemMedia.length}
+                    saving={savingMediaFitId === m.id}
+                    onSetPrimary={() => setPrimaryMedia(m.id)}
+                    onMove={(dir) => moveMedia(m.id, dir)}
+                    onRemove={() => removeMedia(m.id)}
+                    onSaveFit={(fitToSpace, fitPercent) => saveAttachedMediaFit(m.id, fitToSpace, fitPercent)}
+                    onPreview={() => {
+                      if (m.kind === 'video') return;
+                      setAttachUrl(m.url);
+                      setAttachFitToSpace(m.fit_to_space !== false);
+                      setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+                    }}
+                  />
                 ))}
               </div>
             )}
@@ -1067,6 +1074,182 @@ function InventoryInner() {
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function MediaPresentationPreview({
+  backgroundUrl,
+  productUrl,
+  shading,
+  fitToSpace,
+  fitPercent,
+  previewSource,
+}: {
+  backgroundUrl: string;
+  productUrl: string;
+  shading: CatalogBackgroundShading;
+  fitToSpace: boolean;
+  fitPercent: number;
+  previewSource: 'attach' | 'thumbnail';
+}) {
+  const bg = backgroundUrl.trim() ? publicMediaUrl(backgroundUrl.trim()) : '';
+  const product = productUrl.trim() ? publicMediaUrl(productUrl.trim()) : '';
+  const useFit = !!bg && fitToSpace;
+  const pct = Math.min(100, Math.max(20, fitPercent || DEFAULT_MEDIA_FIT_PERCENT));
+  const shadeLabel = CATALOG_BACKGROUND_SHADING_OPTIONS.find((o) => o.value === shading)?.label || shading;
+
+  return (
+    <div className={`admin-media-preview admin-media-preview--shade-${shading}`}>
+      <div className="admin-media-preview-label">
+        <span>Live preview</span>
+        <span>
+          {shadeLabel}
+          {bg ? ` · ${useFit ? `${pct}% fit` : 'cover'}` : ''}
+          {product ? ` · ${previewSource}` : ''}
+        </span>
+      </div>
+      <div
+        className={`admin-media-preview-stage${useFit ? ' admin-media-preview-stage--fit' : ''}`}
+        style={{
+          ...(bg
+            ? {
+                backgroundImage: `url("${encodeURI(bg).replace(/"/g, '\\"')}")`,
+              }
+            : null),
+          ...(useFit ? ({ ['--preview-fit']: `${pct}%` } as CSSProperties) : null),
+        }}
+      >
+        {product ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product}
+            alt=""
+            className={`admin-media-preview-product${useFit ? '' : ' admin-media-preview-product--cover'}`}
+          />
+        ) : (
+          <div className="admin-media-preview-empty">
+            {bg
+              ? 'Select or attach a product image to preview fit & shadow.'
+              : 'Choose a background and product image to preview presentation.'}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AttachedMediaCard({
+  media: m,
+  index: idx,
+  total,
+  saving,
+  onSetPrimary,
+  onMove,
+  onRemove,
+  onSaveFit,
+  onPreview,
+}: {
+  media: CatalogMedia;
+  index: number;
+  total: number;
+  saving: boolean;
+  onSetPrimary: () => void;
+  onMove: (dir: -1 | 1) => void;
+  onRemove: () => void;
+  onSaveFit: (fitToSpace: boolean, fitPercent: number) => void;
+  onPreview: () => void;
+}) {
+  const [fitToSpace, setFitToSpace] = useState(m.fit_to_space !== false);
+  const [fitPercent, setFitPercent] = useState(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+
+  useEffect(() => {
+    setFitToSpace(m.fit_to_space !== false);
+    setFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+  }, [m.id, m.fit_to_space, m.fit_percent]);
+
+  const dirty =
+    fitToSpace !== (m.fit_to_space !== false) ||
+    fitPercent !== (m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+
+  return (
+    <div className={`admin-media-card${m.is_primary ? ' is-primary' : ''}`}>
+      {m.kind === 'video' ? (
+        <video src={m.url} muted className="admin-media-card-thumb" />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={m.url} alt={m.alt || ''} className="admin-media-card-thumb" />
+      )}
+      <div className="admin-media-card-meta">
+        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span className="admin-badge" style={{ fontSize: '0.65rem' }}>{m.kind}</span>
+          {m.is_primary ? (
+            <span style={{ fontSize: '0.7rem', color: 'var(--admin-accent)', fontWeight: 700 }}>★ Thumbnail</span>
+          ) : null}
+        </div>
+        <code title={m.url}>{m.url}</code>
+        {m.kind !== 'video' ? (
+          <div className="admin-media-card-fit">
+            <label>
+              <input
+                type="checkbox"
+                checked={fitToSpace}
+                onChange={(e) => setFitToSpace(e.target.checked)}
+              />{' '}
+              Fit
+            </label>
+            <label>
+              %
+              <input
+                className="admin-input"
+                type="number"
+                min={20}
+                max={100}
+                step={1}
+                disabled={!fitToSpace}
+                value={fitPercent}
+                onChange={(e) => {
+                  const n = Number(e.target.value);
+                  if (!Number.isFinite(n)) return;
+                  setFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              disabled={!dirty || saving}
+              onClick={() => onSaveFit(fitToSpace, fitPercent)}
+            >
+              {saving ? '…' : 'Save fit'}
+            </button>
+            <button type="button" className="admin-btn admin-btn-secondary" onClick={onPreview}>
+              Preview
+            </button>
+          </div>
+        ) : null}
+      </div>
+      <div className="admin-media-card-actions">
+        {m.kind !== 'video' && !m.is_primary ? (
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={onSetPrimary}>
+            ★ Thumb
+          </button>
+        ) : null}
+        <button type="button" className="admin-btn admin-btn-secondary" disabled={idx === 0} onClick={() => onMove(-1)}>
+          ↑
+        </button>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary"
+          disabled={idx === total - 1}
+          onClick={() => onMove(1)}
+        >
+          ↓
+        </button>
+        <button type="button" className="admin-btn admin-btn-danger" onClick={onRemove}>
+          Remove
+        </button>
+      </div>
     </div>
   );
 }

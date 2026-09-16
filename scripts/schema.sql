@@ -116,6 +116,8 @@ CREATE TABLE IF NOT EXISTS catalog_media (
   alt VARCHAR(255) NULL,
   sort_order INT NOT NULL DEFAULT 0,
   is_primary TINYINT(1) NOT NULL DEFAULT 0,
+  fit_to_space TINYINT(1) NOT NULL DEFAULT 1,
+  fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_media_item FOREIGN KEY (item_id) REFERENCES catalog_items(id) ON DELETE CASCADE,
   INDEX idx_media_item_sort (item_id, sort_order)

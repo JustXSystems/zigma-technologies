@@ -2,6 +2,7 @@ import type { RowDataPacket } from 'mysql2';
 import pool, { isDbUnavailableError } from '@/lib/db';
 
 let backgroundColumnReady: Promise<void> | null = null;
+let catalogMediaFitReady: Promise<void> | null = null;
 let discoveryColumnsReady: Promise<void> | null = null;
 
 const CATALOG_ITEM_MEDIA_COLUMNS: Array<{ name: string; ddl: string }> = [
@@ -20,6 +21,17 @@ const CATALOG_ITEM_MEDIA_COLUMNS: Array<{ name: string; ddl: string }> = [
   {
     name: 'media_fit_percent',
     ddl: `ALTER TABLE catalog_items ADD COLUMN media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER media_fit_to_space`,
+  },
+];
+
+const CATALOG_MEDIA_FIT_COLUMNS: Array<{ name: string; ddl: string }> = [
+  {
+    name: 'fit_to_space',
+    ddl: `ALTER TABLE catalog_media ADD COLUMN fit_to_space TINYINT(1) NOT NULL DEFAULT 1 AFTER is_primary`,
+  },
+  {
+    name: 'fit_percent',
+    ddl: `ALTER TABLE catalog_media ADD COLUMN fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER fit_to_space`,
   },
 ];
 
@@ -59,6 +71,39 @@ export function ensureCatalogBackgroundColumn(): Promise<void> {
     });
   }
   return backgroundColumnReady;
+}
+
+/** Idempotent: ensure catalog_media fit_to_space / fit_percent columns exist. */
+export function ensureCatalogMediaFitColumns(): Promise<void> {
+  if (!catalogMediaFitReady) {
+    catalogMediaFitReady = (async () => {
+      try {
+        for (const col of CATALOG_MEDIA_FIT_COLUMNS) {
+          const [rows] = await pool.query<RowDataPacket[]>(
+            `SELECT COUNT(*) AS c
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'catalog_media'
+               AND COLUMN_NAME = ?`,
+            [col.name]
+          );
+          if (Number(rows[0]?.c || 0) > 0) continue;
+          await pool.query(col.ddl);
+          console.info(`[schema] added catalog_media.${col.name}`);
+        }
+      } catch (err) {
+        if (isDbUnavailableError(err)) throw err;
+        console.error(
+          '[schema] could not ensure catalog_media fit columns — run scripts/migrate-catalog-background.sql',
+          err
+        );
+      }
+    })().catch((err) => {
+      catalogMediaFitReady = null;
+      throw err;
+    });
+  }
+  return catalogMediaFitReady;
 }
 
 const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
