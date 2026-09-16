@@ -16,6 +16,7 @@ import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { Suspense } from 'react';
 import { publicMediaUrl } from '@/lib/media-url';
+import { heroHas, toolbarHas } from '@/lib/catalog-page-elements';
 
 type Props = {
   itemType: CatalogItemType;
@@ -24,7 +25,7 @@ type Props = {
   lead: string;
 };
 
-const DEFAULT_CARD = ['title', 'summary', 'category', 'primary_image', 'price_label'];
+const DEFAULT_CARD = ['title', 'summary', 'category', 'primary_image', 'price_label', 'quick_view', 'case_study_link'];
 const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
 const INTENT_CHIP_LIMIT = 8;
 
@@ -136,42 +137,50 @@ function CatalogHero({
       </div>
       <div className={cx('container catalog-hero-layout', variant === 'standard' && 'catalog-hero-layout--standard')}>
         <div className={cx('catalog-hero-copy', revealEnabled && 'reveal')}>
-          <div className="eyebrow">{heroEyebrow}</div>
-          <h1>{heroTitle}</h1>
-          <p className="lead">{heroLead}</p>
-          {settings?.hero_meta_enabled !== 0 ? (
+          {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
+          {heroHas(settings, 'title') ? <h1>{heroTitle}</h1> : null}
+          {heroHas(settings, 'lead') ? <p className="lead">{heroLead}</p> : null}
+          {heroHas(settings, 'meta') ? (
             <div className="catalog-hero-meta">
               <span>{slides.length} curated highlights</span>
               <span>Autoplay {Math.round(autoplayMs / 1000)}s</span>
               <span>{itemType}s</span>
             </div>
           ) : null}
-          {variant === 'standard' && settings?.hero_standard_panel_enabled !== 0 ? (
+          {variant === 'standard' && heroHas(settings, 'standard_panel') ? (
             <div className="catalog-hero-standard-panel">
-              <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
+              {heroHas(settings, 'kicker') ? (
+                <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
+              ) : null}
               <h2>{active.title}</h2>
               <p>{active.summary || active.description || `Explore this ${itemType} in more detail.`}</p>
-              <div className="catalog-hero-actions">
-                <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
-                  View details
-                </button>
-                <a href="/contact" className="btn btn-ghost-dark">
-                  Contact team
-                </a>
-              </div>
+              {heroHas(settings, 'actions') ? (
+                <div className="catalog-hero-actions">
+                  <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
+                    View details
+                  </button>
+                  <a href="/contact" className="btn btn-ghost-dark">
+                    Contact team
+                  </a>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>
 
-        {variant === 'spotlight' ? (
+        {variant === 'spotlight' && heroHas(settings, 'spotlight') ? (
         <div className={cx('catalog-hero-spotlight', revealEnabled && 'reveal')}>
           <div className="catalog-hero-spotlight-top">
-            <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
-            {active.price_label ? <span className="catalog-hero-price">{active.price_label}</span> : null}
+            {heroHas(settings, 'kicker') ? (
+              <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
+            ) : null}
+            {heroHas(settings, 'price') && active.price_label ? (
+              <span className="catalog-hero-price">{active.price_label}</span>
+            ) : null}
           </div>
           <h2>{active.title}</h2>
           <p>{active.summary || active.description || `Explore this ${itemType} in more detail.`}</p>
-          {active.tags_json?.length ? (
+          {heroHas(settings, 'tags') && active.tags_json?.length ? (
             <div className="catalog-hero-tags">
               {active.tags_json.slice(0, 4).map((tagValue) => (
                 <span key={tagValue} className="catalog-hero-tag">
@@ -180,18 +189,20 @@ function CatalogHero({
               ))}
             </div>
           ) : null}
-          <div className="catalog-hero-actions">
-            <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
-              View spotlight
-            </button>
-            <Link href={catalogPublicPath(itemType, active.slug)} className="btn btn-ghost-dark">
-              Full {caseStudyLabel(itemType).toLowerCase()}
-            </Link>
-            <a href="/contact" className="btn btn-ghost-dark">
-              Talk to sales
-            </a>
-          </div>
-          {slides.length > 1 ? (
+          {heroHas(settings, 'actions') ? (
+            <div className="catalog-hero-actions">
+              <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
+                View spotlight
+              </button>
+              <Link href={catalogPublicPath(itemType, active.slug)} className="btn btn-ghost-dark">
+                Full {caseStudyLabel(itemType).toLowerCase()}
+              </Link>
+              <a href="/contact" className="btn btn-ghost-dark">
+                Talk to sales
+              </a>
+            </div>
+          ) : null}
+          {heroHas(settings, 'dots') && slides.length > 1 ? (
             <div className="catalog-hero-dots" aria-label="Spotlight items">
               {slides.map((item, index) => (
                 <button
@@ -206,7 +217,10 @@ function CatalogHero({
           ) : null}
         </div>
         ) : null}
-        {slides.length > 1 && variant === 'standard' && settings?.hero_standard_panel_enabled !== 0 ? (
+        {heroHas(settings, 'dots') &&
+        slides.length > 1 &&
+        variant === 'standard' &&
+        heroHas(settings, 'standard_panel') ? (
           <div className="catalog-hero-standard-dots" aria-label="Spotlight items">
             {slides.map((item, index) => (
               <button
@@ -299,14 +313,18 @@ function CatalogItemCard({
         {hasField(cardFields, 'tags', DEFAULT_CARD) && item.tags_json?.length ? (
           <p className="catalog-card-tags">{item.tags_json.join(' · ')}</p>
         ) : null}
-        <span className="catalog-card-link">Quick view →</span>
-        <Link
-          href={catalogPublicPath(itemType, item.slug)}
-          className="catalog-card-page-link"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {caseStudyLabel(itemType)} page →
-        </Link>
+        {hasField(cardFields, 'quick_view', DEFAULT_CARD) ? (
+          <span className="catalog-card-link">Quick view →</span>
+        ) : null}
+        {hasField(cardFields, 'case_study_link', DEFAULT_CARD) ? (
+          <Link
+            href={catalogPublicPath(itemType, item.slug)}
+            className="catalog-card-page-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {caseStudyLabel(itemType)} page →
+          </Link>
+        ) : null}
       </div>
     </button>
   );
@@ -621,15 +639,17 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
             id="catalog-results"
           >
             <div className="catalog-toolbar-controls">
-              <label className="catalog-toolbar-search">
-                <span className="sr-only">Search {itemType}s</span>
-                <input
-                  className="catalog-toolbar-input"
-                  placeholder={`Search ${itemType}s…`}
-                  value={searchDraft}
-                  onChange={(e) => setSearchDraft(e.target.value)}
-                />
-              </label>
+              {toolbarHas(settings, 'search') ? (
+                <label className="catalog-toolbar-search">
+                  <span className="sr-only">Search {itemType}s</span>
+                  <input
+                    className="catalog-toolbar-input"
+                    placeholder={`Search ${itemType}s…`}
+                    value={searchDraft}
+                    onChange={(e) => setSearchDraft(e.target.value)}
+                  />
+                </label>
+              ) : null}
               {facetRailEnabled && (showCategoryFilters || showTagFilters) ? (
                 <button
                   type="button"
@@ -640,49 +660,53 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   Filters
                 </button>
               ) : null}
-              <select
-                className="catalog-toolbar-select"
-                value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
-                onChange={(e) => setFilterParam('sort', e.target.value, { scroll: false })}
-                aria-label="Sort catalog"
-              >
-                <option value="featured">Sort: Featured</option>
-                <option value="newest">Sort: Newest</option>
-                <option value="title">Sort: Title A–Z</option>
-              </select>
-              {hasActiveFilters ? (
+              {toolbarHas(settings, 'sort') ? (
+                <select
+                  className="catalog-toolbar-select"
+                  value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
+                  onChange={(e) => setFilterParam('sort', e.target.value, { scroll: false })}
+                  aria-label="Sort catalog"
+                >
+                  <option value="featured">Sort: Featured</option>
+                  <option value="newest">Sort: Newest</option>
+                  <option value="title">Sort: Title A–Z</option>
+                </select>
+              ) : null}
+              {toolbarHas(settings, 'clear') && hasActiveFilters ? (
                 <button type="button" className="catalog-toolbar-clear" onClick={clearFilters}>
                   Clear
                 </button>
               ) : null}
-              <p className="catalog-toolbar-meta">
-                <span className="catalog-toolbar-kicker">Showing</span>
-                {hasActiveFilters ? (
-                  <span className="catalog-toolbar-scope">
-                    {activeCategoryName ? <strong>{activeCategoryName}</strong> : null}
-                    {tag ? (
-                      <>
-                        {activeCategoryName ? ' · ' : null}
-                        tagged <strong>{tag}</strong>
-                      </>
-                    ) : null}
-                    {q ? (
-                      <>
-                        {activeCategoryName || tag ? ' · ' : null}
-                        matching <strong>&ldquo;{q}&rdquo;</strong>
-                      </>
-                    ) : null}
+              {toolbarHas(settings, 'result_meta') ? (
+                <p className="catalog-toolbar-meta">
+                  <span className="catalog-toolbar-kicker">Showing</span>
+                  {hasActiveFilters ? (
+                    <span className="catalog-toolbar-scope">
+                      {activeCategoryName ? <strong>{activeCategoryName}</strong> : null}
+                      {tag ? (
+                        <>
+                          {activeCategoryName ? ' · ' : null}
+                          tagged <strong>{tag}</strong>
+                        </>
+                      ) : null}
+                      {q ? (
+                        <>
+                          {activeCategoryName || tag ? ' · ' : null}
+                          matching <strong>&ldquo;{q}&rdquo;</strong>
+                        </>
+                      ) : null}
+                    </span>
+                  ) : (
+                    <span className="catalog-toolbar-scope">all {itemType}s by group</span>
+                  )}
+                  <span className="catalog-toolbar-count">
+                    {loading ? '…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
                   </span>
-                ) : (
-                  <span className="catalog-toolbar-scope">all {itemType}s by group</span>
-                )}
-                <span className="catalog-toolbar-count">
-                  {loading ? '…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
-                </span>
-              </p>
+                </p>
+              ) : null}
             </div>
 
-            {hasActiveFilters ? (
+            {toolbarHas(settings, 'filter_chips') && hasActiveFilters ? (
               <div className="catalog-filter-chips" aria-label="Active filters">
                 {activeCategoryName ? (
                   <button

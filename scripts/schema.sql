@@ -137,6 +137,8 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   hero_variant ENUM('standard','spotlight') NOT NULL DEFAULT 'spotlight',
   hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1,
   hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1,
+  hero_elements_json JSON NULL,
+  toolbar_elements_json JSON NULL,
   loading_skeleton_enabled TINYINT(1) NOT NULL DEFAULT 1,
   reveal_animation_enabled TINYINT(1) NOT NULL DEFAULT 1,
   premium_borders_enabled TINYINT(1) NOT NULL DEFAULT 1,

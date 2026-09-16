@@ -3,15 +3,32 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
 import { slugify } from '@/lib/types';
+import {
+  DEFAULT_HERO_ELEMENTS,
+  DEFAULT_TOOLBAR_ELEMENTS,
+  resolveHeroElements,
+  resolveToolbarElements,
+} from '@/lib/catalog-page-elements';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
 
 const FILTER_OPTS = ['category', 'tags'] as const;
 const SEARCH_OPTS = ['title', 'summary', 'description', 'tags', 'price_label'] as const;
-const CARD_OPTS = ['title', 'summary', 'category', 'primary_image', 'price_label', 'tags'] as const;
+const CARD_OPTS = [
+  'title',
+  'summary',
+  'category',
+  'primary_image',
+  'price_label',
+  'tags',
+  'quick_view',
+  'case_study_link',
+] as const;
 const MODAL_OPTS = ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'] as const;
 const VISUAL_STYLE_OPTS = ['classic', 'premium', 'glass', 'minimal', 'bold-corporate'] as const;
 const HERO_VARIANT_OPTS = ['standard', 'spotlight'] as const;
+const HERO_ELEMENT_OPTS = DEFAULT_HERO_ELEMENTS;
+const TOOLBAR_ELEMENT_OPTS = DEFAULT_TOOLBAR_ELEMENTS;
 
 function toggleInList(list: string[] | null | undefined, value: string, on: boolean) {
   const base = [...(list || [])];
@@ -81,6 +98,7 @@ function CatalogAppearancePreview({
     .filter(Boolean) as Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>;
   const previewItems = (orderedSelected.length ? orderedSelected : items).slice(0, 2);
   const active = previewItems[0];
+  const heroEls = new Set(resolveHeroElements(settings));
 
   if (!active) {
     return (
@@ -118,38 +136,56 @@ function CatalogAppearancePreview({
             style={{ padding: 0 }}
           >
             <div className="catalog-hero-copy">
-              <div className="eyebrow">{settings.hero_eyebrow || `${type} spotlight`}</div>
-              <h1 style={{ maxWidth: 480, marginBottom: '0.6rem' }}>{settings.hero_title || `Preview /${type}s`}</h1>
-              <p className="lead" style={{ maxWidth: 480, marginTop: 0 }}>
-                {settings.hero_lead || 'Curated hero presentation with controlled visual presets.'}
-              </p>
-              {settings.hero_meta_enabled !== 0 ? (
+              {heroEls.has('eyebrow') ? (
+                <div className="eyebrow">{settings.hero_eyebrow || `${type} spotlight`}</div>
+              ) : null}
+              {heroEls.has('title') ? (
+                <h1 style={{ maxWidth: 480, marginBottom: '0.6rem' }}>{settings.hero_title || `Preview /${type}s`}</h1>
+              ) : null}
+              {heroEls.has('lead') ? (
+                <p className="lead" style={{ maxWidth: 480, marginTop: 0 }}>
+                  {settings.hero_lead || 'Curated hero presentation with controlled visual presets.'}
+                </p>
+              ) : null}
+              {heroEls.has('meta') ? (
                 <div className="catalog-hero-meta">
                   <span>{settings.visual_style}</span>
                   <span>{settings.hero_variant}</span>
                   <span>{settings.loading_skeleton_enabled ? 'skeleton on' : 'skeleton off'}</span>
                 </div>
               ) : null}
-              {settings.hero_variant === 'standard' && settings.hero_standard_panel_enabled !== 0 ? (
+              {settings.hero_variant === 'standard' && heroEls.has('standard_panel') ? (
                 <div className="catalog-hero-standard-panel">
-                  <span className="catalog-hero-kicker">{type}</span>
+                  {heroEls.has('kicker') ? <span className="catalog-hero-kicker">{type}</span> : null}
                   <h2>{active.title}</h2>
                   <p>Previewing the standard hero variant with compact active-item messaging.</p>
+                  {heroEls.has('actions') ? (
+                    <div className="catalog-hero-actions">
+                      <span className="btn btn-primary">View details</span>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
-            {settings.hero_variant === 'spotlight' ? (
+            {settings.hero_variant === 'spotlight' && heroEls.has('spotlight') ? (
               <div className="catalog-hero-spotlight">
                 <div className="catalog-hero-spotlight-top">
-                  <span className="catalog-hero-kicker">{type}</span>
-                  <span className="catalog-hero-price">Preview</span>
+                  {heroEls.has('kicker') ? <span className="catalog-hero-kicker">{type}</span> : null}
+                  {heroEls.has('price') ? <span className="catalog-hero-price">Preview</span> : null}
                 </div>
                 <h2>{active.title}</h2>
                 <p>Premium spotlight card showing how the active catalog item will be framed on the public page.</p>
-                <div className="catalog-hero-tags">
-                  <span className="catalog-hero-tag">interactive</span>
-                  <span className="catalog-hero-tag">premium</span>
-                </div>
+                {heroEls.has('tags') ? (
+                  <div className="catalog-hero-tags">
+                    <span className="catalog-hero-tag">interactive</span>
+                    <span className="catalog-hero-tag">premium</span>
+                  </div>
+                ) : null}
+                {heroEls.has('actions') ? (
+                  <div className="catalog-hero-actions">
+                    <span className="btn btn-primary">View spotlight</span>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -273,8 +309,10 @@ export default function CatalogSettingsPage() {
         hero_lead: settings.hero_lead || null,
         visual_style: settings.visual_style,
         hero_variant: settings.hero_variant,
-        hero_standard_panel_enabled: !!settings.hero_standard_panel_enabled,
-        hero_meta_enabled: !!settings.hero_meta_enabled,
+        hero_elements_json: resolveHeroElements(settings),
+        toolbar_elements_json: resolveToolbarElements(settings),
+        hero_standard_panel_enabled: resolveHeroElements(settings).includes('standard_panel'),
+        hero_meta_enabled: resolveHeroElements(settings).includes('meta'),
         loading_skeleton_enabled: !!settings.loading_skeleton_enabled,
         reveal_animation_enabled: !!settings.reveal_animation_enabled,
         premium_borders_enabled: !!settings.premium_borders_enabled,
@@ -393,69 +431,6 @@ export default function CatalogSettingsPage() {
                   </select>
                 </div>
                 <div className="admin-field">
-                  <label>Standard hero panel</label>
-                  <label
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      border: '1px solid var(--admin-border)',
-                      borderRadius: 10,
-                      padding: '0.55rem 0.8rem',
-                      background: '#fff',
-                      minHeight: 42,
-                      opacity: settings.hero_variant !== 'standard' ? 0.7 : 1,
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!!settings.hero_standard_panel_enabled}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          hero_standard_panel_enabled: e.target.checked ? 1 : 0,
-                        })
-                      }
-                    />
-                    Show <code>.catalog-hero-standard-panel</code>
-                  </label>
-                  <p style={{ margin: '0.35rem 0 0', color: 'var(--admin-muted)', fontSize: '0.78rem' }}>
-                    {settings.hero_variant !== 'standard'
-                      ? 'Switch Hero variant to “standard” to see this panel on the public page.'
-                      : 'Hides/shows the compact active-item card in the standard hero.'}
-                  </p>
-                </div>
-                <div className="admin-field">
-                  <label>Hero meta row</label>
-                  <label
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      border: '1px solid var(--admin-border)',
-                      borderRadius: 10,
-                      padding: '0.55rem 0.8rem',
-                      background: '#fff',
-                      minHeight: 42,
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={settings.hero_meta_enabled !== 0}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          hero_meta_enabled: e.target.checked ? 1 : 0,
-                        })
-                      }
-                    />
-                    Show <code>.catalog-hero-meta</code>
-                  </label>
-                  <p style={{ margin: '0.35rem 0 0', color: 'var(--admin-muted)', fontSize: '0.78rem' }}>
-                    Highlights / autoplay / type chips under the hero headline.
-                  </p>
-                </div>
-                <div className="admin-field">
                   <label>Hero eyebrow</label>
                   <input
                     className="admin-input"
@@ -495,6 +470,24 @@ export default function CatalogSettingsPage() {
                     placeholder="Supporting copy shown above the spotlight card."
                   />
                 </div>
+                <ChipGroup
+                  label="Hero elements (show / hide)"
+                  options={HERO_ELEMENT_OPTS}
+                  values={resolveHeroElements(settings)}
+                  onChange={(hero_elements_json) =>
+                    setSettings({
+                      ...settings,
+                      hero_elements_json,
+                      hero_meta_enabled: hero_elements_json.includes('meta') ? 1 : 0,
+                      hero_standard_panel_enabled: hero_elements_json.includes('standard_panel') ? 1 : 0,
+                    })
+                  }
+                />
+                <p className="admin-field full" style={{ margin: '-0.35rem 0 0.5rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
+                  <code>standard_panel</code> applies to the standard variant; <code>spotlight</code> to the spotlight
+                  card. <code>meta</code> is <code>.catalog-hero-meta</code>; <code>kicker</code>, <code>price</code>,{' '}
+                  <code>tags</code>, <code>actions</code>, and <code>dots</code> control pieces inside those panels.
+                </p>
                 <div className="admin-field full">
                   <label>Curated appearance toggles</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -715,6 +708,15 @@ export default function CatalogSettingsPage() {
                   Cards shown per category before “View all”.
                 </p>
               </div>
+              <ChipGroup
+                label="Toolbar elements (show / hide)"
+                options={TOOLBAR_ELEMENT_OPTS}
+                values={resolveToolbarElements(settings)}
+                onChange={(toolbar_elements_json) => setSettings({ ...settings, toolbar_elements_json })}
+              />
+              <p style={{ margin: '0 0 0.25rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
+                Controls search, sort, result count, active filter chips, and Clear inside the listing toolbar.
+              </p>
             </div>
 
             <ChipGroup

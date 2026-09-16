@@ -25,6 +25,26 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET @col_exists := (
   SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'hero_elements_json'
+);
+SET @sql := IF(@col_exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN hero_elements_json JSON NULL AFTER hero_meta_enabled',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'toolbar_elements_json'
+);
+SET @sql := IF(@col_exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN toolbar_elements_json JSON NULL AFTER hero_elements_json',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'discovery_profile_rail_enabled'
 );
 SET @sql := IF(@col_exists = 0,

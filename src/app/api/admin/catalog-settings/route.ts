@@ -37,6 +37,8 @@ const putSchema = z.object({
   hero_variant: z.enum(['standard', 'spotlight']).optional(),
   hero_standard_panel_enabled: z.boolean().optional(),
   hero_meta_enabled: z.boolean().optional(),
+  hero_elements_json: z.array(z.string()).optional(),
+  toolbar_elements_json: z.array(z.string()).optional(),
   loading_skeleton_enabled: z.boolean().optional(),
   reveal_animation_enabled: z.boolean().optional(),
   premium_borders_enabled: z.boolean().optional(),
@@ -57,6 +59,8 @@ export async function PUT(request: Request) {
       hero_enabled,
       hero_standard_panel_enabled,
       hero_meta_enabled,
+      hero_elements_json,
+      toolbar_elements_json,
       loading_skeleton_enabled,
       reveal_animation_enabled,
       premium_borders_enabled,
@@ -73,6 +77,8 @@ export async function PUT(request: Request) {
       hero_standard_panel_enabled:
         hero_standard_panel_enabled === undefined ? undefined : hero_standard_panel_enabled ? 1 : 0,
       hero_meta_enabled: hero_meta_enabled === undefined ? undefined : hero_meta_enabled ? 1 : 0,
+      hero_elements_json,
+      toolbar_elements_json,
       loading_skeleton_enabled:
         loading_skeleton_enabled === undefined ? undefined : loading_skeleton_enabled ? 1 : 0,
       reveal_animation_enabled:

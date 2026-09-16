@@ -7,11 +7,9 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#4 show/hide switch in admin for catalog-hero-standard-panel">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#4 show/hide switch in admin for catalog-hero-meta">
       <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
@@ -64,23 +62,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4942345661203664" />
-      <entry key="MS500" value="3.0980070514584144" />
-      <entry key="S2" value="6.855715306865989" />
-      <entry key="S5" value="12.785552481514713" />
-      <entry key="S10" value="19.125236134850393" />
-      <entry key="S30" value="28.471349536191706" />
-      <entry key="S60" value="32.26150168355278" />
-      <entry key="M2" value="35.09076513589306" />
-      <entry key="M5" value="43.022538576312286" />
-      <entry key="M10" value="59.01530719386371" />
-      <entry key="M15" value="84.59091963493961" />
-      <entry key="M30" value="179.48313787555125" />
-      <entry key="H1" value="312.88973993189273" />
-      <entry key="H2" value="453.6080985181628" />
-      <entry key="H4" value="617.6953142032384" />
-      <entry key="D1" value="1203.3378641318334" />
-      <entry key="W1" value="8686.096386545927" />
+      <entry key="MS100" value="1.4919141233563218" />
+      <entry key="MS500" value="3.595539052528296" />
+      <entry key="S2" value="7.711893085481707" />
+      <entry key="S5" value="13.94556170482065" />
+      <entry key="S10" value="22.318606586950274" />
+      <entry key="S30" value="39.6098220066016" />
+      <entry key="S60" value="48.423655449050166" />
+      <entry key="M2" value="54.326060384926606" />
+      <entry key="M5" value="63.454495960214075" />
+      <entry key="M10" value="80.34470691544993" />
+      <entry key="M15" value="102.24682988349099" />
+      <entry key="M30" value="187.3293394006495" />
+      <entry key="H1" value="323.76903024411" />
+      <entry key="H2" value="476.7651229528274" />
+      <entry key="H4" value="652.3945695217553" />
+      <entry key="D1" value="1255.6535012021861" />
+      <entry key="W1" value="8738.122688523286" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -92,33 +90,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="9.90214504454175E-310" />
-      <entry key="M15" value="9.93465650217528E-207" />
-      <entry key="M30" value="9.967274703837246E-104" />
-      <entry key="H1" value="3.157099096296762E-52" />
-      <entry key="H2" value="1.776822753202092E-26" />
-      <entry key="H4" value="1.3329751510295048E-13" />
-      <entry key="D1" value="0.007261805646436335" />
-      <entry key="W1" value="0.7672223510915955" />
+      <entry key="M10" value="3.49387440518197E-310" />
+      <entry key="M15" value="4.960645505326205E-207" />
+      <entry key="M30" value="7.043185007740647E-104" />
+      <entry key="H1" value="2.6538999618940165E-52" />
+      <entry key="H2" value="1.629079482988455E-26" />
+      <entry key="H4" value="1.2763539803062074E-13" />
+      <entry key="D1" value="0.007209461085053066" />
+      <entry key="W1" value="0.7664298575778096" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4267575956552405" />
-      <entry key="MS500" value="3.071215101713023" />
-      <entry key="S2" value="6.840872324910863" />
-      <entry key="S5" value="12.774498955418819" />
-      <entry key="S10" value="19.117007561188537" />
-      <entry key="S30" value="28.467270769470822" />
-      <entry key="S60" value="32.25918888903084" />
-      <entry key="M2" value="35.089510199403485" />
-      <entry key="M5" value="43.02193902201274" />
-      <entry key="M10" value="59.01491170844431" />
-      <entry key="M15" value="84.59054941401756" />
-      <entry key="M30" value="179.48274477081176" />
-      <entry key="H1" value="312.88939124467714" />
-      <entry key="H2" value="453.6078362250123" />
-      <entry key="H4" value="617.6951242208925" />
-      <entry key="D1" value="1203.3450579712653" />
-      <entry key="W1" value="8686.86348417689" />
+      <entry key="MS100" value="1.4399978340195854" />
+      <entry key="MS500" value="3.569292834826584" />
+      <entry key="S2" value="7.697853584666057" />
+      <entry key="S5" value="13.935317162760914" />
+      <entry key="S10" value="22.310337578427138" />
+      <entry key="S30" value="39.60488359020928" />
+      <entry key="S60" value="48.42062839405033" />
+      <entry key="M2" value="54.324359139646184" />
+      <entry key="M5" value="63.45369332611566" />
+      <entry key="M10" value="80.34419435551251" />
+      <entry key="M15" value="102.24639428844303" />
+      <entry key="M30" value="187.32893521287556" />
+      <entry key="H1" value="323.76867366632" />
+      <entry key="H2" value="476.7648506701103" />
+      <entry key="H4" value="652.3943716931517" />
+      <entry key="D1" value="1255.6606405319721" />
+      <entry key="W1" value="8738.888993410232" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -270,7 +268,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="press_posts table doesn't exist in the zigmatech_prod database." />
     <MESSAGE value="Updating Prod setup" />
     <MESSAGE value="Product/Services/Project background image set" />
     <MESSAGE value="GitHub deployment changes for PreProd and Production" />
@@ -295,7 +292,8 @@
     <MESSAGE value="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again." />
     <MESSAGE value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-standard-panel" />
-    <option name="LAST_COMMIT_MESSAGE" value="#4 show/hide switch in admin for catalog-hero-standard-panel" />
+    <MESSAGE value="#4 show/hide switch in admin for catalog-hero-meta" />
+    <option name="LAST_COMMIT_MESSAGE" value="#4 show/hide switch in admin for catalog-hero-meta" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

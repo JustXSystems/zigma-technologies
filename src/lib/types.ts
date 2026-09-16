@@ -113,6 +113,10 @@ export type CatalogPageSettings = {
   hero_standard_panel_enabled: number;
   /** Show/hide the hero meta row (highlights / autoplay / type). */
   hero_meta_enabled: number;
+  /** Explicit hero UI pieces (eyebrow, title, lead, meta, standard_panel, spotlight, kicker, price, tags, actions, dots). */
+  hero_elements_json: string[] | null;
+  /** Toolbar pieces (search, sort, result_meta, filter_chips, clear). */
+  toolbar_elements_json: string[] | null;
   loading_skeleton_enabled: number;
   reveal_animation_enabled: number;
   premium_borders_enabled: number;
