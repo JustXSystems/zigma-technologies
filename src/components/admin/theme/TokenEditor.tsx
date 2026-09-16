@@ -5,6 +5,7 @@ import {
   THEME_TOKEN_META,
   type ThemeTokenGroup,
 } from '@/lib/theme-tokens';
+import AdminCollapsible from '@/components/admin/AdminCollapsible';
 
 type Props = {
   tokens: Record<string, string>;
@@ -29,14 +30,18 @@ export default function TokenEditor({ tokens, onChange }: Props) {
   };
 
   return (
-    <div className="theme-token-editor">
-      {THEME_TOKEN_GROUPS.map((group) => {
+    <div className="theme-token-editor admin-page-stack">
+      {THEME_TOKEN_GROUPS.map((group, index) => {
         const items = THEME_TOKEN_META.filter((t) => t.group === group.id);
         if (!items.length) return null;
         return (
-          <section key={group.id} className="theme-token-group" data-group={group.id as ThemeTokenGroup}>
-            <h3>{group.label}</h3>
-            <div className="theme-token-grid">
+          <AdminCollapsible
+            key={group.id}
+            title={group.label}
+            defaultOpen={index === 0}
+            className="theme-token-group-collapse"
+          >
+            <div className="theme-token-grid" data-group={group.id as ThemeTokenGroup}>
               {items.map((meta) => {
                 const value = tokens[meta.key] ?? '';
                 return (
@@ -73,7 +78,7 @@ export default function TokenEditor({ tokens, onChange }: Props) {
                 );
               })}
             </div>
-          </section>
+          </AdminCollapsible>
         );
       })}
     </div>

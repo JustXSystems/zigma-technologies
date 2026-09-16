@@ -11,6 +11,7 @@ import TokenEditor from './TokenEditor';
 import SiteCssEditor from './SiteCssEditor';
 import ThemePreviewPane from './ThemePreviewPane';
 import ThemeVersionHistory, { type ThemeHistoryRow } from './ThemeVersionHistory';
+import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 
 type Tab = 'tokens' | 'css';
 
@@ -198,39 +199,42 @@ export default function ThemeStudio() {
   }
 
   return (
-    <div className="theme-studio">
+    <div className="theme-studio admin-page-stack">
+      <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary"
+          onClick={() => {
+            setTokens({ ...DEFAULT_THEME_TOKENS });
+            setMessage('Tokens reset to defaults (not saved yet).');
+          }}
+        >
+          Reset tokens
+        </button>
+        <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void saveTokens()}>
+          Save tokens
+        </button>
+        <button type="button" className="admin-btn admin-btn-secondary" disabled={saving} onClick={() => void saveDraft()}>
+          Save CSS draft
+        </button>
+        <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void publishDraft()}>
+          Publish CSS
+        </button>
+      </AdminFloatingActions>
+
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
-      <div className="theme-studio-intro admin-card">
+      <div className="theme-studio-intro admin-card admin-page-intro">
         <div>
-          <h2 style={{ margin: 0 }}>Theme Studio</h2>
+          <h2>Theme Studio</h2>
           <p className="theme-help" style={{ marginBottom: 0 }}>
             Tokens for brand variables, plus the full site stylesheet (globals.css body) with section navigation,
             version history, and live preview.
-            {hasFullStylesheet ? ' A full stylesheet is currently published.' : ' No full stylesheet published yet — Load from globals.css to start.'}
+            {hasFullStylesheet
+              ? ' A full stylesheet is currently published.'
+              : ' No full stylesheet published yet — Load from globals.css to start.'}
           </p>
-        </div>
-        <div className="theme-studio-actions">
-          <button
-            type="button"
-            className="admin-btn admin-btn-secondary"
-            onClick={() => {
-              setTokens({ ...DEFAULT_THEME_TOKENS });
-              setMessage('Tokens reset to defaults (not saved yet).');
-            }}
-          >
-            Reset tokens
-          </button>
-          <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={saveTokens}>
-            Save tokens
-          </button>
-          <button type="button" className="admin-btn admin-btn-secondary" disabled={saving} onClick={saveDraft}>
-            Save CSS draft
-          </button>
-          <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={publishDraft}>
-            Publish CSS
-          </button>
         </div>
       </div>
 

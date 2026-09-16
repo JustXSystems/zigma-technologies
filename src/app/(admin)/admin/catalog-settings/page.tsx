@@ -9,6 +9,8 @@ import {
   resolveHeroElements,
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
+import AdminCollapsible from '@/components/admin/AdminCollapsible';
+import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
 
@@ -226,6 +228,7 @@ export default function CatalogSettingsPage() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [saving, setSaving] = useState(false);
   const previewSettings = useMemo(() => settings, [settings]);
 
   async function load() {
@@ -286,51 +289,57 @@ export default function CatalogSettingsPage() {
     await load();
   }
 
-  async function saveSettings(e: FormEvent) {
-    e.preventDefault();
+  async function saveSettings(e?: FormEvent) {
+    e?.preventDefault();
     if (!settings) return;
+    setSaving(true);
+    setError('');
     setMessage('');
-    const res = await fetch('/api/admin/catalog-settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        item_type: type,
-        layout: settings.layout,
-        grid_columns: settings.grid_columns,
-        filters_json: settings.filters_json,
-        search_fields_json: settings.search_fields_json,
-        card_fields_json: settings.card_fields_json,
-        modal_fields_json: settings.modal_fields_json,
-        hero_enabled: !!settings.hero_enabled,
-        hero_autoplay_ms: settings.hero_autoplay_ms,
-        hero_item_ids_json: settings.hero_item_ids_json || [],
-        hero_eyebrow: settings.hero_eyebrow || null,
-        hero_title: settings.hero_title || null,
-        hero_lead: settings.hero_lead || null,
-        visual_style: settings.visual_style,
-        hero_variant: settings.hero_variant,
-        hero_elements_json: resolveHeroElements(settings),
-        toolbar_elements_json: resolveToolbarElements(settings),
-        hero_standard_panel_enabled: resolveHeroElements(settings).includes('standard_panel'),
-        hero_meta_enabled: resolveHeroElements(settings).includes('meta'),
-        loading_skeleton_enabled: !!settings.loading_skeleton_enabled,
-        reveal_animation_enabled: !!settings.reveal_animation_enabled,
-        premium_borders_enabled: !!settings.premium_borders_enabled,
-        discovery_profile_rail_enabled: !!settings.discovery_profile_rail_enabled,
-        discovery_quick_find_enabled: !!settings.discovery_quick_find_enabled,
-        discovery_facet_rail_enabled: !!settings.discovery_facet_rail_enabled,
-        discovery_grouped_results_enabled: !!settings.discovery_grouped_results_enabled,
-        discovery_sticky_toolbar_enabled: !!settings.discovery_sticky_toolbar_enabled,
-        discovery_group_preview_count: settings.discovery_group_preview_count || 4,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Save failed');
-      return;
+    try {
+      const res = await fetch('/api/admin/catalog-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_type: type,
+          layout: settings.layout,
+          grid_columns: settings.grid_columns,
+          filters_json: settings.filters_json,
+          search_fields_json: settings.search_fields_json,
+          card_fields_json: settings.card_fields_json,
+          modal_fields_json: settings.modal_fields_json,
+          hero_enabled: !!settings.hero_enabled,
+          hero_autoplay_ms: settings.hero_autoplay_ms,
+          hero_item_ids_json: settings.hero_item_ids_json || [],
+          hero_eyebrow: settings.hero_eyebrow || null,
+          hero_title: settings.hero_title || null,
+          hero_lead: settings.hero_lead || null,
+          visual_style: settings.visual_style,
+          hero_variant: settings.hero_variant,
+          hero_elements_json: resolveHeroElements(settings),
+          toolbar_elements_json: resolveToolbarElements(settings),
+          hero_standard_panel_enabled: resolveHeroElements(settings).includes('standard_panel'),
+          hero_meta_enabled: resolveHeroElements(settings).includes('meta'),
+          loading_skeleton_enabled: !!settings.loading_skeleton_enabled,
+          reveal_animation_enabled: !!settings.reveal_animation_enabled,
+          premium_borders_enabled: !!settings.premium_borders_enabled,
+          discovery_profile_rail_enabled: !!settings.discovery_profile_rail_enabled,
+          discovery_quick_find_enabled: !!settings.discovery_quick_find_enabled,
+          discovery_facet_rail_enabled: !!settings.discovery_facet_rail_enabled,
+          discovery_grouped_results_enabled: !!settings.discovery_grouped_results_enabled,
+          discovery_sticky_toolbar_enabled: !!settings.discovery_sticky_toolbar_enabled,
+          discovery_group_preview_count: settings.discovery_group_preview_count || 4,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Save failed');
+        return;
+      }
+      setMessage('Catalog page settings saved. Public listing updates on next load.');
+      setSettings(data.settings);
+    } finally {
+      setSaving(false);
     }
-    setMessage('Catalog page settings saved. Public listing updates on next load.');
-    setSettings(data.settings);
   }
 
   function moveHeroItem(itemId: number, dir: -1 | 1) {
@@ -345,9 +354,19 @@ export default function CatalogSettingsPage() {
     next.splice(nextIdx, 0, moved);
     setSettings({ ...settings, hero_item_ids_json: next });
   }
-
   return (
-    <div>
+    <div className="admin-page-stack">
+      <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary"
+          disabled={saving || !settings}
+          onClick={() => void saveSettings()}
+        >
+          {saving ? 'Saving…' : 'Save settings'}
+        </button>
+      </AdminFloatingActions>
+
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
@@ -366,300 +385,147 @@ export default function CatalogSettingsPage() {
         </div>
       </div>
 
-      <div className="admin-card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ marginTop: 0 }}>Listing settings · {type}</h2>
-        <p style={{ color: 'var(--admin-muted)', marginTop: 0 }}>
-          Controls public /{type}s layout, hero spotlight, discovery filters, search fields, card contents, and detail modal sections.
+      <div className="admin-card admin-page-intro">
+        <h2>Listing settings · {type}</h2>
+        <p>
+          Controls public /{type}s layout, hero spotlight, discovery filters, search fields, card contents, and detail
+          modal sections. Collapse sections you are not editing.
         </p>
-        {settings ? (
-          <form onSubmit={saveSettings} className="admin-form-grid">
-            <div className="full" style={{ border: '1px solid var(--admin-border)', borderRadius: 12, padding: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.9rem' }}>
-                <div>
-                  <h3 style={{ margin: '0 0 0.3rem' }}>Hero spotlight</h3>
-                  <p style={{ color: 'var(--admin-muted)', margin: 0, fontSize: '0.9rem' }}>
-                    Curate which {type}s rotate in the public page hero. If none are selected, featured items are used automatically.
-                  </p>
-                </div>
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 600 }}>
-                  <input
-                    type="checkbox"
-                    checked={!!settings.hero_enabled}
-                    onChange={(e) => setSettings({ ...settings, hero_enabled: e.target.checked ? 1 : 0 })}
-                  />
-                  Enable hero spotlight
-                </label>
-              </div>
+      </div>
 
-              <div className="admin-form-grid">
-                <div className="admin-field">
-                  <label>Visual style preset</label>
-                  <select
-                    className="admin-select"
-                    value={settings.visual_style}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        visual_style: e.target.value as CatalogPageSettings['visual_style'],
-                      })
-                    }
-                  >
-                    {VISUAL_STYLE_OPTS.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="admin-field">
-                  <label>Hero variant</label>
-                  <select
-                    className="admin-select"
-                    value={settings.hero_variant}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        hero_variant: e.target.value as CatalogPageSettings['hero_variant'],
-                      })
-                    }
-                  >
-                    {HERO_VARIANT_OPTS.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="admin-field">
-                  <label>Hero eyebrow</label>
-                  <input
-                    className="admin-input"
-                    value={settings.hero_eyebrow || ''}
-                    onChange={(e) => setSettings({ ...settings, hero_eyebrow: e.target.value })}
-                    placeholder={type === 'product' ? 'Product Spotlight' : type === 'project' ? 'Selected Projects' : 'Service Spotlight'}
-                  />
-                </div>
-                <div className="admin-field">
-                  <label>Rotation interval (ms)</label>
-                  <input
-                    className="admin-input"
-                    type="number"
-                    min={2500}
-                    max={30000}
-                    step={500}
-                    value={settings.hero_autoplay_ms || 6000}
-                    onChange={(e) => setSettings({ ...settings, hero_autoplay_ms: Number(e.target.value) || 6000 })}
-                  />
-                </div>
-                <div className="admin-field full">
-                  <label>Hero title</label>
-                  <input
-                    className="admin-input"
-                    value={settings.hero_title || ''}
-                    onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
-                    placeholder={`Headline for /${type}s`}
-                  />
-                </div>
-                <div className="admin-field full">
-                  <label>Hero lead</label>
-                  <textarea
-                    className="admin-input"
-                    value={settings.hero_lead || ''}
-                    onChange={(e) => setSettings({ ...settings, hero_lead: e.target.value })}
-                    rows={3}
-                    placeholder="Supporting copy shown above the spotlight card."
-                  />
-                </div>
-                <ChipGroup
-                  label="Hero elements (show / hide)"
-                  options={HERO_ELEMENT_OPTS}
-                  values={resolveHeroElements(settings)}
-                  onChange={(hero_elements_json) =>
+      {settings ? (
+        <form
+          onSubmit={(e) => {
+            void saveSettings(e);
+          }}
+          className="admin-page-stack"
+        >
+          <AdminCollapsible
+            title="Hero spotlight"
+            description={`Curate which ${type}s rotate in the public page hero. If none are selected, featured items are used automatically.`}
+            defaultOpen
+            badge={
+              <label
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 600, fontSize: '0.8rem' }}
+              >
+                <input
+                  type="checkbox"
+                  checked={!!settings.hero_enabled}
+                  onChange={(e) => setSettings({ ...settings, hero_enabled: e.target.checked ? 1 : 0 })}
+                />
+                Enabled
+              </label>
+            }
+          >
+            <div className="admin-form-grid">
+              <div className="admin-field">
+                <label>Visual style preset</label>
+                <select
+                  className="admin-select"
+                  value={settings.visual_style}
+                  onChange={(e) =>
                     setSettings({
                       ...settings,
-                      hero_elements_json,
-                      hero_meta_enabled: hero_elements_json.includes('meta') ? 1 : 0,
-                      hero_standard_panel_enabled: hero_elements_json.includes('standard_panel') ? 1 : 0,
+                      visual_style: e.target.value as CatalogPageSettings['visual_style'],
                     })
                   }
-                />
-                <p className="admin-field full" style={{ margin: '-0.35rem 0 0.5rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
-                  <code>standard_panel</code> applies to the standard variant; <code>spotlight</code> to the spotlight
-                  card. <code>meta</code> is <code>.catalog-hero-meta</code>; <code>kicker</code>, <code>price</code>,{' '}
-                  <code>tags</code>, <code>actions</code>, and <code>dots</code> control pieces inside those panels.
-                </p>
-                <div className="admin-field full">
-                  <label>Curated appearance toggles</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                    {[
-                      ['loading_skeleton_enabled', 'Skeleton loading'],
-                      ['reveal_animation_enabled', 'Reveal animation'],
-                      ['premium_borders_enabled', 'Premium borders'],
-                    ].map(([key, label]) => (
-                      <label
-                        key={key}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          border: '1px solid var(--admin-border)',
-                          borderRadius: 999,
-                          padding: '0.45rem 0.8rem',
-                          background: '#fff',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={Boolean(settings[key as keyof CatalogPageSettings])}
-                          onChange={(e) =>
-                            setSettings({
-                              ...settings,
-                              [key]: e.target.checked ? 1 : 0,
-                            } as CatalogPageSettings)
-                          }
-                        />
-                        {label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className="admin-field full">
-                  <label>Selected spotlight items</label>
-                  <div
-                    style={{
-                      border: '1px solid var(--admin-border)',
-                      borderRadius: 12,
-                      background: '#fff',
-                      maxHeight: 300,
-                      overflow: 'auto',
-                      padding: '0.75rem',
-                    }}
-                  >
-                    {items.length ? (
-                      <div style={{ display: 'grid', gap: '0.55rem' }}>
-                        {items.map((item) => {
-                          const activeIds = settings.hero_item_ids_json || [];
-                          const checked = activeIds.includes(item.id);
-                          const idx = activeIds.indexOf(item.id);
-                          const canUp = checked && idx > 0;
-                          const canDown = checked && idx >= 0 && idx < activeIds.length - 1;
-                          return (
-                            <label
-                              key={item.id}
-                              style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr auto auto',
-                                gap: '0.75rem',
-                                alignItems: 'center',
-                                border: '1px solid var(--admin-border)',
-                                borderRadius: 10,
-                                padding: '0.65rem 0.8rem',
-                                background: checked ? 'rgba(37, 99, 235, 0.06)' : '#fff',
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={(e) => {
-                                  const next = e.target.checked
-                                    ? [...activeIds, item.id]
-                                    : activeIds.filter((id) => id !== item.id);
-                                  setSettings({ ...settings, hero_item_ids_json: next });
-                                }}
-                              />
-                              <span>
-                                <strong style={{ display: 'block' }}>{item.title}</strong>
-                                <span style={{ fontSize: '0.82rem', color: 'var(--admin-muted)' }}>
-                                  {item.status}
-                                  {item.featured ? ' · featured' : ''}
-                                </span>
-                              </span>
-                              {checked && activeIds.length > 1 ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-                                  <button
-                                    type="button"
-                                    className="admin-btn admin-btn-secondary"
-                                    style={{ padding: '0.25rem 0.55rem', minWidth: 70, opacity: canUp ? 1 : 0.5 }}
-                                    disabled={!canUp}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      moveHeroItem(item.id, -1);
-                                    }}
-                                  >
-                                    ↑
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="admin-btn admin-btn-secondary"
-                                    style={{ padding: '0.25rem 0.55rem', minWidth: 70, opacity: canDown ? 1 : 0.5 }}
-                                    disabled={!canDown}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      moveHeroItem(item.id, 1);
-                                    }}
-                                  >
-                                    ↓
-                                  </button>
-                                </div>
-                              ) : (
-                                <span />
-                              )}
-                              <code>#{item.id}</code>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="admin-empty">Create or seed some {type}s to curate hero spotlight items.</p>
-                    )}
-                  </div>
-                  <p style={{ margin: '0.55rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
-                    Selection order controls slide order. Leave empty to fall back to featured items automatically.
-                  </p>
-                </div>
-                {previewSettings ? <CatalogAppearancePreview type={type} settings={previewSettings} items={items} /> : null}
+                >
+                  {VISUAL_STYLE_OPTS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
-            <div className="admin-field">
-              <label>Layout</label>
-              <select
-                className="admin-select"
-                value={settings.layout}
-                onChange={(e) => setSettings({ ...settings, layout: e.target.value as 'grid' | 'list' })}
-              >
-                <option value="grid">grid</option>
-                <option value="list">list</option>
-              </select>
-            </div>
-            <div className="admin-field">
-              <label>Grid columns</label>
-              <input
-                className="admin-input"
-                type="number"
-                min={1}
-                max={4}
-                value={settings.grid_columns}
-                onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
+              <div className="admin-field">
+                <label>Hero variant</label>
+                <select
+                  className="admin-select"
+                  value={settings.hero_variant}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      hero_variant: e.target.value as CatalogPageSettings['hero_variant'],
+                    })
+                  }
+                >
+                  {HERO_VARIANT_OPTS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="admin-field">
+                <label>Hero eyebrow</label>
+                <input
+                  className="admin-input"
+                  value={settings.hero_eyebrow || ''}
+                  onChange={(e) => setSettings({ ...settings, hero_eyebrow: e.target.value })}
+                  placeholder={
+                    type === 'product' ? 'Product Spotlight' : type === 'project' ? 'Selected Projects' : 'Service Spotlight'
+                  }
+                />
+              </div>
+              <div className="admin-field">
+                <label>Rotation interval (ms)</label>
+                <input
+                  className="admin-input"
+                  type="number"
+                  min={2500}
+                  max={30000}
+                  step={500}
+                  value={settings.hero_autoplay_ms || 6000}
+                  onChange={(e) => setSettings({ ...settings, hero_autoplay_ms: Number(e.target.value) || 6000 })}
+                />
+              </div>
+              <div className="admin-field full">
+                <label>Hero title</label>
+                <input
+                  className="admin-input"
+                  value={settings.hero_title || ''}
+                  onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
+                  placeholder={`Headline for /${type}s`}
+                />
+              </div>
+              <div className="admin-field full">
+                <label>Hero lead</label>
+                <textarea
+                  className="admin-input"
+                  value={settings.hero_lead || ''}
+                  onChange={(e) => setSettings({ ...settings, hero_lead: e.target.value })}
+                  rows={3}
+                  placeholder="Supporting copy shown above the spotlight card."
+                />
+              </div>
+              <ChipGroup
+                label="Hero elements (show / hide)"
+                options={HERO_ELEMENT_OPTS}
+                values={resolveHeroElements(settings)}
+                onChange={(hero_elements_json) =>
+                  setSettings({
+                    ...settings,
+                    hero_elements_json,
+                    hero_meta_enabled: hero_elements_json.includes('meta') ? 1 : 0,
+                    hero_standard_panel_enabled: hero_elements_json.includes('standard_panel') ? 1 : 0,
+                  })
+                }
               />
-            </div>
-
-            <div className="full" style={{ border: '1px solid var(--admin-border)', borderRadius: 12, padding: '1rem' }}>
-              <h3 style={{ margin: '0 0 0.3rem' }}>Discovery experience</h3>
-              <p style={{ color: 'var(--admin-muted)', margin: '0 0 0.9rem', fontSize: '0.9rem' }}>
-                One-click profile browsing on public /{type}s. Toggle each element independently; category/tag
-                filters below still control which dimensions are available.
+              <p
+                className="admin-field full"
+                style={{ margin: '-0.35rem 0 0.5rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}
+              >
+                <code>standard_panel</code> applies to the standard variant; <code>spotlight</code> to the spotlight card.{' '}
+                <code>meta</code> is <code>.catalog-hero-meta</code>; <code>kicker</code>, <code>price</code>,{' '}
+                <code>tags</code>, <code>actions</code>, and <code>dots</code> control pieces inside those panels.
               </p>
-              <div className="admin-field full" style={{ marginBottom: '0.75rem' }}>
-                <label>Discovery toggles</label>
+              <div className="admin-field full">
+                <label>Curated appearance toggles</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                   {[
-                    ['discovery_profile_rail_enabled', 'Shop by profile rail'],
-                    ['discovery_quick_find_enabled', 'Quick find chips'],
-                    ['discovery_facet_rail_enabled', 'Refine facet rail'],
-                    ['discovery_grouped_results_enabled', 'Grouped results (All view)'],
-                    ['discovery_sticky_toolbar_enabled', 'Sticky search toolbar'],
+                    ['loading_skeleton_enabled', 'Skeleton loading'],
+                    ['reveal_animation_enabled', 'Reveal animation'],
+                    ['premium_borders_enabled', 'Premium borders'],
                   ].map(([key, label]) => (
                     <label
                       key={key}
@@ -688,6 +554,204 @@ export default function CatalogSettingsPage() {
                   ))}
                 </div>
               </div>
+              <div className="admin-field full">
+                <label>Selected spotlight items</label>
+                <div
+                  style={{
+                    border: '1px solid var(--admin-border)',
+                    borderRadius: 12,
+                    background: '#fff',
+                    maxHeight: 300,
+                    overflow: 'auto',
+                    padding: '0.75rem',
+                  }}
+                >
+                  {items.length ? (
+                    <div style={{ display: 'grid', gap: '0.55rem' }}>
+                      {items.map((item) => {
+                        const activeIds = settings.hero_item_ids_json || [];
+                        const checked = activeIds.includes(item.id);
+                        const idx = activeIds.indexOf(item.id);
+                        const canUp = checked && idx > 0;
+                        const canDown = checked && idx >= 0 && idx < activeIds.length - 1;
+                        return (
+                          <label
+                            key={item.id}
+                            style={{
+                              display: 'grid',
+                              gridTemplateColumns: 'auto 1fr auto auto',
+                              gap: '0.75rem',
+                              alignItems: 'center',
+                              border: '1px solid var(--admin-border)',
+                              borderRadius: 10,
+                              padding: '0.65rem 0.8rem',
+                              background: checked ? 'rgba(37, 99, 235, 0.06)' : '#fff',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={(e) => {
+                                const next = e.target.checked
+                                  ? [...activeIds, item.id]
+                                  : activeIds.filter((id) => id !== item.id);
+                                setSettings({ ...settings, hero_item_ids_json: next });
+                              }}
+                            />
+                            <span>
+                              <strong style={{ display: 'block' }}>{item.title}</strong>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--admin-muted)' }}>
+                                {item.status}
+                                {item.featured ? ' · featured' : ''}
+                              </span>
+                            </span>
+                            {checked && activeIds.length > 1 ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-secondary"
+                                  style={{ padding: '0.25rem 0.55rem', minWidth: 70, opacity: canUp ? 1 : 0.5 }}
+                                  disabled={!canUp}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    moveHeroItem(item.id, -1);
+                                  }}
+                                >
+                                  ↑
+                                </button>
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-secondary"
+                                  style={{ padding: '0.25rem 0.55rem', minWidth: 70, opacity: canDown ? 1 : 0.5 }}
+                                  disabled={!canDown}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    moveHeroItem(item.id, 1);
+                                  }}
+                                >
+                                  ↓
+                                </button>
+                              </div>
+                            ) : (
+                              <span />
+                            )}
+                            <code>#{item.id}</code>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="admin-empty">Create or seed some {type}s to curate hero spotlight items.</p>
+                  )}
+                </div>
+                <p style={{ margin: '0.55rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
+                  Selection order controls slide order. Leave empty to fall back to featured items automatically.
+                </p>
+              </div>
+              {previewSettings ? <CatalogAppearancePreview type={type} settings={previewSettings} items={items} /> : null}
+            </div>
+          </AdminCollapsible>
+
+          <AdminCollapsible
+            title="Layout and listing fields"
+            description="Grid layout, filters, search fields, card and modal contents."
+            defaultOpen={false}
+          >
+            <div className="admin-form-grid">
+              <div className="admin-field">
+                <label>Layout</label>
+                <select
+                  className="admin-select"
+                  value={settings.layout}
+                  onChange={(e) => setSettings({ ...settings, layout: e.target.value as 'grid' | 'list' })}
+                >
+                  <option value="grid">grid</option>
+                  <option value="list">list</option>
+                </select>
+              </div>
+              <div className="admin-field">
+                <label>Grid columns</label>
+                <input
+                  className="admin-input"
+                  type="number"
+                  min={1}
+                  max={4}
+                  value={settings.grid_columns}
+                  onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
+                />
+              </div>
+              <ChipGroup
+                label="Filters"
+                options={FILTER_OPTS}
+                values={settings.filters_json}
+                onChange={(filters_json) => setSettings({ ...settings, filters_json })}
+              />
+              <ChipGroup
+                label="Search fields"
+                options={SEARCH_OPTS}
+                values={settings.search_fields_json}
+                onChange={(search_fields_json) => setSettings({ ...settings, search_fields_json })}
+              />
+              <ChipGroup
+                label="Card fields"
+                options={CARD_OPTS}
+                values={settings.card_fields_json}
+                onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
+              />
+              <ChipGroup
+                label="Modal fields"
+                options={MODAL_OPTS}
+                values={settings.modal_fields_json}
+                onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
+              />
+            </div>
+          </AdminCollapsible>
+
+          <AdminCollapsible
+            title="Discovery experience"
+            description={`One-click profile browsing on public /${type}s. Toggle each element independently.`}
+            defaultOpen={false}
+          >
+            <div className="admin-field full" style={{ marginBottom: '0.75rem' }}>
+              <label>Discovery toggles</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                {[
+                  ['discovery_profile_rail_enabled', 'Shop by profile rail'],
+                  ['discovery_quick_find_enabled', 'Quick find chips'],
+                  ['discovery_facet_rail_enabled', 'Refine facet rail'],
+                  ['discovery_grouped_results_enabled', 'Grouped results (All view)'],
+                  ['discovery_sticky_toolbar_enabled', 'Sticky search toolbar'],
+                ].map(([key, label]) => (
+                  <label
+                    key={key}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      border: '1px solid var(--admin-border)',
+                      borderRadius: 999,
+                      padding: '0.45rem 0.8rem',
+                      background: '#fff',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={Boolean(settings[key as keyof CatalogPageSettings])}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          [key]: e.target.checked ? 1 : 0,
+                        } as CatalogPageSettings)
+                      }
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="admin-form-grid">
               <div className="admin-field" style={{ maxWidth: 220 }}>
                 <label>Group preview count</label>
                 <input
@@ -714,49 +778,18 @@ export default function CatalogSettingsPage() {
                 values={resolveToolbarElements(settings)}
                 onChange={(toolbar_elements_json) => setSettings({ ...settings, toolbar_elements_json })}
               />
-              <p style={{ margin: '0 0 0.25rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
-                Controls search, sort, result count, active filter chips, and Clear inside the listing toolbar.
-              </p>
             </div>
+            <p style={{ margin: '0.5rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
+              Controls search, sort, result count, active filter chips, and Clear inside the listing toolbar.
+            </p>
+          </AdminCollapsible>
+        </form>
+      ) : (
+        <p className="admin-empty">Loading settings…</p>
+      )}
 
-            <ChipGroup
-              label="Filters"
-              options={FILTER_OPTS}
-              values={settings.filters_json}
-              onChange={(filters_json) => setSettings({ ...settings, filters_json })}
-            />
-            <ChipGroup
-              label="Search fields"
-              options={SEARCH_OPTS}
-              values={settings.search_fields_json}
-              onChange={(search_fields_json) => setSettings({ ...settings, search_fields_json })}
-            />
-            <ChipGroup
-              label="Card fields"
-              options={CARD_OPTS}
-              values={settings.card_fields_json}
-              onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
-            />
-            <ChipGroup
-              label="Modal fields"
-              options={MODAL_OPTS}
-              values={settings.modal_fields_json}
-              onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
-            />
-            <div className="full">
-              <button type="submit" className="admin-btn admin-btn-primary">
-                Save settings
-              </button>
-            </div>
-          </form>
-        ) : (
-          <p className="admin-empty">Loading settings…</p>
-        )}
-      </div>
-
-      <div className="admin-card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ marginTop: 0 }}>Categories · {type}</h2>
-        <form onSubmit={addCategory} className="admin-form-grid" style={{ marginBottom: '1rem' }}>
+      <AdminCollapsible title={`Categories · ${type}`} description="Add, enable, or remove listing categories." defaultOpen={false}>
+        <form onSubmit={addCategory} className="admin-form-grid" style={{ marginBottom: '0.75rem' }}>
           <div className="admin-field">
             <label>Name</label>
             <input className="admin-input" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -798,7 +831,7 @@ export default function CatalogSettingsPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </AdminCollapsible>
     </div>
   );
 }

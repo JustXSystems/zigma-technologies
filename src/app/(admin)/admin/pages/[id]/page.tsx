@@ -6,6 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { SECTION_TYPES } from '@/lib/cms-types';
 import SectionEditor from '@/components/admin/SectionEditor';
+import AdminCollapsible from '@/components/admin/AdminCollapsible';
+import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 
 export default function AdminPageSectionsPage() {
   const params = useParams<{ id: string }>();
@@ -21,6 +23,7 @@ export default function AdminPageSectionsPage() {
   const [metaDescription, setMetaDescription] = useState('');
   const [pageTitle, setPageTitle] = useState('');
   const [pageSlug, setPageSlug] = useState('');
+  const [savingMeta, setSavingMeta] = useState(false);
 
   async function load() {
     const res = await fetch(`/api/admin/pages/${pageId}`);
@@ -44,27 +47,32 @@ export default function AdminPageSectionsPage() {
     return (type: string) => map[type] || type;
   }, []);
 
-  async function saveMeta(e: FormEvent) {
-    e.preventDefault();
+  async function saveMeta(e?: FormEvent) {
+    e?.preventDefault();
     setError('');
     setMessage('');
-    const res = await fetch(`/api/admin/pages/${pageId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: pageTitle,
-        slug: pageSlug,
-        meta_title: metaTitle || null,
-        meta_description: metaDescription || null,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Save failed');
-      return;
+    setSavingMeta(true);
+    try {
+      const res = await fetch(`/api/admin/pages/${pageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: pageTitle,
+          slug: pageSlug,
+          meta_title: metaTitle || null,
+          meta_description: metaDescription || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Save failed');
+        return;
+      }
+      setMessage('Page details saved.');
+      await load();
+    } finally {
+      setSavingMeta(false);
     }
-    setMessage('Page details saved.');
-    await load();
   }
 
   async function deletePage() {
@@ -151,8 +159,36 @@ export default function AdminPageSectionsPage() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: '1rem' }}>
+    <div className="admin-page-stack">
+      <AdminFloatingActions status={message || (savingMeta ? 'Saving…' : undefined)}>
+        {page ? (
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={async () => {
+              const res = await fetch(`/api/admin/pages/${page.id}/preview`, { method: 'POST' });
+              const data = await res.json();
+              if (!res.ok) {
+                setError(data.error || 'Preview failed');
+                return;
+              }
+              window.open(data.url, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            Preview
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary"
+          disabled={savingMeta}
+          onClick={() => void saveMeta()}
+        >
+          {savingMeta ? 'Saving…' : 'Save page details'}
+        </button>
+      </AdminFloatingActions>
+
+      <div>
         <Link href="/admin/pages" className="admin-btn admin-btn-secondary">
           ← Back to pages
         </Link>
@@ -160,32 +196,15 @@ export default function AdminPageSectionsPage() {
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
-      <div className="admin-card" style={{ marginBottom: '1rem' }}>
-        <div className="admin-toolbar" style={{ marginBottom: '0.8rem' }}>
+      <div className="admin-card admin-page-intro">
+        <div className="admin-toolbar" style={{ marginBottom: 0 }}>
           <div>
-            <h2 style={{ marginTop: 0, marginBottom: 0 }}>{page?.title || 'Page'} sections</h2>
-            <p style={{ color: 'var(--admin-muted)', marginTop: '0.35rem', marginBottom: 0 }}>
+            <h2>{page?.title || 'Page'} sections</h2>
+            <p>
               Slug: <code>/{page?.slug === 'home' ? '' : page?.slug}</code>
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-            {page ? (
-              <button
-                type="button"
-                className="admin-btn admin-btn-secondary"
-                onClick={async () => {
-                  const res = await fetch(`/api/admin/pages/${page.id}/preview`, { method: 'POST' });
-                  const data = await res.json();
-                  if (!res.ok) {
-                    setError(data.error || 'Preview failed');
-                    return;
-                  }
-                  window.open(data.url, '_blank', 'noopener,noreferrer');
-                }}
-              >
-                Open preview
-              </button>
-            ) : null}
             <button type="button" className="admin-btn admin-btn-danger" onClick={deletePage}>
               Delete page
             </button>
@@ -208,8 +227,15 @@ export default function AdminPageSectionsPage() {
             </button>
           </div>
         </div>
+      </div>
 
-        <form onSubmit={saveMeta} className="admin-form-grid" style={{ marginBottom: '1rem' }}>
+      <AdminCollapsible title="Page details / SEO" description="Title, slug, and meta fields for this page." defaultOpen>
+        <form
+          onSubmit={(e) => {
+            void saveMeta(e);
+          }}
+          className="admin-form-grid"
+        >
           <div className="admin-field">
             <label>Title</label>
             <input className="admin-input" value={pageTitle} onChange={(e) => setPageTitle(e.target.value)} required />
@@ -230,13 +256,10 @@ export default function AdminPageSectionsPage() {
               onChange={(e) => setMetaDescription(e.target.value)}
             />
           </div>
-          <div className="full">
-            <button type="submit" className="admin-btn admin-btn-primary">
-              Save page details
-            </button>
-          </div>
         </form>
+      </AdminCollapsible>
 
+      <AdminCollapsible title="Add section" description="Append a new CMS section type to this page." defaultOpen={false}>
         <form onSubmit={addSection} style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
           <select className="admin-select" value={addType} onChange={(e) => setAddType(e.target.value)}>
             {SECTION_TYPES.map((t) => (
@@ -249,7 +272,7 @@ export default function AdminPageSectionsPage() {
             Add section
           </button>
         </form>
-      </div>
+      </AdminCollapsible>
 
       <div className="admin-table-wrap admin-card" style={{ padding: 0 }}>
         <table className="admin-table">

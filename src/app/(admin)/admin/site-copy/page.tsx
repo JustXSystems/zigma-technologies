@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_SITE_COPY, type SiteCopy } from '@/lib/site-copy';
 import type { IndustryDef } from '@/lib/industries';
 import type { LocationDef } from '@/lib/locations';
+import AdminCollapsible from '@/components/admin/AdminCollapsible';
+import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 
 type Tab = 'chrome' | 'hubs' | 'legal' | 'features' | 'consultation' | 'tools' | 'catalog' | 'locales' | 'industries' | 'locations';
 
@@ -151,13 +153,29 @@ export default function SiteCopyAdminPage() {
   }
 
   return (
-    <div>
+    <div className="admin-page-stack">
+      <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary"
+          onClick={() => {
+            setCopy(DEFAULT_SITE_COPY);
+            setMessage('Reset to defaults in editor (not saved yet).');
+          }}
+        >
+          Reset
+        </button>
+        <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void save()}>
+          {saving ? 'Saving…' : 'Save site copy'}
+        </button>
+      </AdminFloatingActions>
+
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
-      <div className="admin-card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ marginTop: 0 }}>Site Copy</h2>
-        <p style={{ color: 'var(--admin-muted)' }}>
+      <div className="admin-card admin-page-intro">
+        <h2>Site Copy</h2>
+        <p>
           Marketing chrome and hub page text for this deployment. Use with <strong>New Client</strong> to brand a
           similar industrial site without editing React.
         </p>
@@ -206,10 +224,14 @@ export default function SiteCopyAdminPage() {
         ) : null}
 
         {tab === 'hubs' ? (
-          <div className="admin-form-grid">
-            {(['industries', 'locations', 'resources', 'press', 'sla', 'search'] as const).map((hub) => (
-              <div key={hub} className="full" style={{ borderTop: '1px solid var(--admin-border)', paddingTop: '1rem' }}>
-                <h3 style={{ textTransform: 'capitalize', marginTop: 0 }}>{hub}</h3>
+          <div className="admin-page-stack">
+            {(['industries', 'locations', 'resources', 'press', 'sla', 'search'] as const).map((hub, i) => (
+              <AdminCollapsible
+                key={hub}
+                title={hub.charAt(0).toUpperCase() + hub.slice(1)}
+                description={`Copy for the /${hub} hub page.`}
+                defaultOpen={i === 0}
+              >
                 <div className="admin-form-grid">
                   <Field label="Eyebrow" path={`hubs.${hub}.eyebrow`} copy={copy} onChange={setCopy} />
                   <Field label="Title" path={`hubs.${hub}.title`} copy={copy} onChange={setCopy} />
@@ -234,7 +256,7 @@ export default function SiteCopyAdminPage() {
                     <Field label="CTA band lead" path={`hubs.${hub}.ctaBandLead`} copy={copy} onChange={setCopy} multiline />
                   </div>
                 </div>
-              </div>
+              </AdminCollapsible>
             ))}
           </div>
         ) : null}
@@ -391,10 +413,14 @@ export default function SiteCopyAdminPage() {
         ) : null}
 
         {tab === 'locales' ? (
-          <div className="admin-form-grid">
-            {(['hi', 'kn'] as const).map((locale) => (
-              <div key={locale} className="full" style={{ borderTop: '1px solid var(--admin-border)', paddingTop: '1rem' }}>
-                <h3 style={{ marginTop: 0, textTransform: 'uppercase' }}>{locale}</h3>
+          <div className="admin-page-stack">
+            {(['hi', 'kn'] as const).map((locale, i) => (
+              <AdminCollapsible
+                key={locale}
+                title={locale.toUpperCase()}
+                description={`Locale landing copy for /${locale}.`}
+                defaultOpen={i === 0}
+              >
                 <div className="admin-form-grid">
                   <Field label="Language name" path={`locales.${locale}.langName`} copy={copy} onChange={setCopy} />
                   <Field label="Title" path={`locales.${locale}.title`} copy={copy} onChange={setCopy} />
@@ -408,7 +434,7 @@ export default function SiteCopyAdminPage() {
                   <Field label="English site link" path={`locales.${locale}.englishSite`} copy={copy} onChange={setCopy} />
                   <Field label="Alt locale link" path={`locales.${locale}.altLocaleLabel`} copy={copy} onChange={setCopy} />
                 </div>
-              </div>
+              </AdminCollapsible>
             ))}
           </div>
         ) : null}
@@ -442,19 +468,9 @@ export default function SiteCopyAdminPage() {
           </div>
         ) : null}
 
-        <div style={{ marginTop: '1.2rem', display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={save}>
+        <div className="admin-inline-save" aria-hidden="true">
+          <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void save()}>
             {saving ? 'Saving…' : 'Save site copy'}
-          </button>
-          <button
-            type="button"
-            className="admin-btn admin-btn-secondary"
-            onClick={() => {
-              setCopy(DEFAULT_SITE_COPY);
-              setMessage('Reset to defaults in editor (not saved yet).');
-            }}
-          >
-            Reset editor to defaults
           </button>
         </div>
       </div>

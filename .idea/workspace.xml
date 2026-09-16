@@ -7,14 +7,18 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#4 show/hide switch in admin for catalog-hero-meta">
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link">
+      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminCollapsible.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminFloatingActions.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/theme/ThemeStudio.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/theme/ThemeStudio.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/theme/TokenEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/theme/TokenEditor.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,23 +66,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4919141233563218" />
-      <entry key="MS500" value="3.595539052528296" />
-      <entry key="S2" value="7.711893085481707" />
-      <entry key="S5" value="13.94556170482065" />
-      <entry key="S10" value="22.318606586950274" />
-      <entry key="S30" value="39.6098220066016" />
-      <entry key="S60" value="48.423655449050166" />
-      <entry key="M2" value="54.326060384926606" />
-      <entry key="M5" value="63.454495960214075" />
-      <entry key="M10" value="80.34470691544993" />
-      <entry key="M15" value="102.24682988349099" />
-      <entry key="M30" value="187.3293394006495" />
-      <entry key="H1" value="323.76903024411" />
-      <entry key="H2" value="476.7651229528274" />
-      <entry key="H4" value="652.3945695217553" />
-      <entry key="D1" value="1255.6535012021861" />
-      <entry key="W1" value="8738.122688523286" />
+      <entry key="MS100" value="1.0000000012353178" />
+      <entry key="MS500" value="1.0356932669699226" />
+      <entry key="S2" value="3.54274995917636" />
+      <entry key="S5" value="11.183421691279115" />
+      <entry key="S10" value="22.84906411857381" />
+      <entry key="S30" value="62.72912031761215" />
+      <entry key="S60" value="108.64657500200512" />
+      <entry key="M2" value="162.05250809715145" />
+      <entry key="M5" value="229.12639646842956" />
+      <entry key="M10" value="275.9330356269045" />
+      <entry key="M15" value="308.3372079776374" />
+      <entry key="M30" value="401.6631157696234" />
+      <entry key="H1" value="545.4500738951663" />
+      <entry key="H2" value="707.7618105840885" />
+      <entry key="H4" value="891.201773177559" />
+      <entry key="D1" value="1505.5824860793803" />
+      <entry key="W1" value="8988.231103837166" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -90,33 +94,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="3.49387440518197E-310" />
-      <entry key="M15" value="4.960645505326205E-207" />
-      <entry key="M30" value="7.043185007740647E-104" />
-      <entry key="H1" value="2.6538999618940165E-52" />
-      <entry key="H2" value="1.629079482988455E-26" />
-      <entry key="H4" value="1.2763539803062074E-13" />
-      <entry key="D1" value="0.007209461085053066" />
-      <entry key="W1" value="0.7664298575778096" />
+      <entry key="M10" value="1.99298992227297E-310" />
+      <entry key="M15" value="3.411955841520913E-207" />
+      <entry key="M30" value="5.84119494754362E-104" />
+      <entry key="H1" value="2.4168564184791785E-52" />
+      <entry key="H2" value="1.5546242049058332E-26" />
+      <entry key="H4" value="1.2468457021453614E-13" />
+      <entry key="D1" value="0.007181410150519109" />
+      <entry key="W1" value="0.766003136357743" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4399978340195854" />
-      <entry key="MS500" value="3.569292834826584" />
-      <entry key="S2" value="7.697853584666057" />
-      <entry key="S5" value="13.935317162760914" />
-      <entry key="S10" value="22.310337578427138" />
-      <entry key="S30" value="39.60488359020928" />
-      <entry key="S60" value="48.42062839405033" />
-      <entry key="M2" value="54.324359139646184" />
-      <entry key="M5" value="63.45369332611566" />
-      <entry key="M10" value="80.34419435551251" />
-      <entry key="M15" value="102.24639428844303" />
-      <entry key="M30" value="187.32893521287556" />
-      <entry key="H1" value="323.76867366632" />
-      <entry key="H2" value="476.7648506701103" />
-      <entry key="H4" value="652.3943716931517" />
-      <entry key="D1" value="1255.6606405319721" />
-      <entry key="W1" value="8738.888993410232" />
+      <entry key="MS100" value="0.9726549485977156" />
+      <entry key="MS500" value="1.029906144211731" />
+      <entry key="S2" value="3.537283515813551" />
+      <entry key="S5" value="11.176343624663549" />
+      <entry key="S10" value="22.841740315831643" />
+      <entry key="S30" value="62.72234590816162" />
+      <entry key="S60" value="108.64066868949467" />
+      <entry key="M2" value="162.04806720662705" />
+      <entry key="M5" value="229.1238473125155" />
+      <entry key="M10" value="275.93147867891486" />
+      <entry key="M15" value="308.3360358943802" />
+      <entry key="M30" value="401.6623288844277" />
+      <entry key="H1" value="545.4495193278232" />
+      <entry key="H2" value="707.7614348079812" />
+      <entry key="H4" value="891.2015216967835" />
+      <entry key="D1" value="1505.589587890916" />
+      <entry key="W1" value="8988.996980680131" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -268,7 +272,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Updating Prod setup" />
     <MESSAGE value="Product/Services/Project background image set" />
     <MESSAGE value="GitHub deployment changes for PreProd and Production" />
     <MESSAGE value="inventory items can set background image now" />
@@ -293,7 +296,8 @@
     <MESSAGE value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-standard-panel" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-meta" />
-    <option name="LAST_COMMIT_MESSAGE" value="#4 show/hide switch in admin for catalog-hero-meta" />
+    <MESSAGE value="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link" />
+    <option name="LAST_COMMIT_MESSAGE" value="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

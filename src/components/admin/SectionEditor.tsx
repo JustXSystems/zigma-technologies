@@ -80,7 +80,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
   return (
     <div className="admin-modal-backdrop" onClick={onClose}>
       <form className="admin-modal" style={{ width: 'min(920px, 100%)' }} onClick={(e) => e.stopPropagation()} onSubmit={save}>
-        <div className="admin-toolbar" style={{ marginBottom: '1rem' }}>
+        <div className="admin-toolbar" style={{ marginBottom: '0.75rem' }}>
           <h2 style={{ margin: 0 }}>Edit · {section.type}</h2>
           <button
             type="button"
@@ -99,6 +99,14 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             }}
           >
             {jsonMode ? 'Form mode' : 'JSON mode'}
+          </button>
+        </div>
+        <div className="admin-modal-actions">
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
+            {saving ? 'Saving…' : 'Save section'}
           </button>
         </div>
         {error ? <div className="admin-error">{error}</div> : null}
@@ -1233,15 +1241,6 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
           </div>
         )}
-
-        <div className="admin-modal-actions">
-          <button type="button" className="admin-btn admin-btn-secondary" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-            {saving ? 'Saving…' : 'Save section'}
-          </button>
-        </div>
       </form>
     </div>
   );
