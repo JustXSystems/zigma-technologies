@@ -21,22 +21,36 @@ const DEFAULT_CARD_FIELDS = [
   'summary',
   'category',
   'primary_image',
+  'background_image',
   'price_label',
   'quick_view',
   'case_study_link',
 ] as const;
+const CARD_FIELDS_V2 = 'card_fields_v2';
 const CARD_FIELD_OPTS: Array<{ id: string; label: string; group: 'media' | 'body' }> = [
-  { id: 'primary_image', label: 'Product / media image', group: 'media' },
-  { id: 'category', label: 'Category eyebrow', group: 'body' },
+  { id: 'primary_image', label: 'Product image', group: 'media' },
+  { id: 'background_image', label: 'Background image', group: 'media' },
+  { id: 'category', label: 'Category', group: 'body' },
   { id: 'title', label: 'Title', group: 'body' },
   { id: 'price_label', label: 'Price / stat', group: 'body' },
-  { id: 'summary', label: 'Description / summary', group: 'body' },
+  { id: 'summary', label: 'Description', group: 'body' },
   { id: 'tags', label: 'Tags', group: 'body' },
   { id: 'availability_label', label: 'Availability', group: 'body' },
   { id: 'lead_time_label', label: 'Lead time', group: 'body' },
-  { id: 'quick_view', label: 'Quick view link', group: 'body' },
-  { id: 'case_study_link', label: 'Detail / case-study page link', group: 'body' },
+  { id: 'quick_view', label: 'Quick view', group: 'body' },
+  { id: 'case_study_link', label: 'Detail page link', group: 'body' },
 ];
+
+function normalizeAdminCardFields(fields: string[] | null | undefined): string[] {
+  if (!fields?.length) return [...DEFAULT_CARD_FIELDS];
+  const cleaned = fields.filter((f) => f !== CARD_FIELDS_V2);
+  if (fields.includes(CARD_FIELDS_V2) || cleaned.includes('background_image')) return cleaned;
+  const next = [...cleaned];
+  const idx = next.indexOf('primary_image');
+  if (idx >= 0) next.splice(idx + 1, 0, 'background_image');
+  else next.push('background_image');
+  return next;
+}
 const MODAL_OPTS = ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'] as const;
 const VISUAL_STYLE_OPTS = ['classic', 'premium', 'glass', 'minimal', 'bold-corporate'] as const;
 const HERO_VARIANT_OPTS = ['standard', 'spotlight'] as const;
@@ -117,22 +131,34 @@ function CardFieldsChecklist({
 
   function renderGroup(title: string, opts: typeof CARD_FIELD_OPTS) {
     return (
-      <div style={{ marginBottom: '0.85rem' }}>
-        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted)', marginBottom: '0.45rem' }}>
+      <div style={{ marginBottom: '0.55rem' }}>
+        <div
+          style={{
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            color: 'var(--admin-muted)',
+            marginBottom: '0.3rem',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {title}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.35rem', overflowX: 'auto', paddingBottom: 2 }}>
           {opts.map((opt) => (
             <label
               key={opt.id}
+              title={opt.label}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 8,
+                gap: 5,
                 border: '1px solid var(--admin-border)',
-                borderRadius: 10,
-                padding: '0.45rem 0.8rem',
-                fontSize: '0.84rem',
+                borderRadius: 8,
+                padding: '0.28rem 0.55rem',
+                fontSize: '0.78rem',
+                lineHeight: 1.2,
+                whiteSpace: 'nowrap',
+                flex: '0 0 auto',
                 background: set.has(opt.id) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
                 cursor: 'pointer',
               }}
@@ -153,9 +179,6 @@ function CardFieldsChecklist({
   return (
     <div className="admin-field full">
       <label>Catalog card fields</label>
-      <p style={{ margin: '0 0 0.65rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-        Checkboxes control what appears on public catalog cards (media + body panel).
-      </p>
       {renderGroup('Media', media)}
       {renderGroup('Card body', body)}
     </div>
@@ -343,9 +366,7 @@ export default function CatalogSettingsPage() {
       ...settingsData.settings,
       card_style: settingsData.settings?.card_style || 'marketplace',
       card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
-      card_fields_json: settingsData.settings?.card_fields_json?.length
-        ? settingsData.settings.card_fields_json
-        : [...DEFAULT_CARD_FIELDS],
+      card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
       modal_fields_json: settingsData.settings?.modal_fields_json?.length
         ? settingsData.settings.modal_fields_json
         : ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'],
@@ -410,7 +431,7 @@ export default function CatalogSettingsPage() {
           grid_columns: settings.grid_columns,
           filters_json: settings.filters_json,
           search_fields_json: settings.search_fields_json,
-          card_fields_json: settings.card_fields_json,
+          card_fields_json: [...(settings.card_fields_json || []).filter((f) => f !== CARD_FIELDS_V2), CARD_FIELDS_V2],
           modal_fields_json: settings.modal_fields_json,
           hero_enabled: !!settings.hero_enabled,
           hero_autoplay_ms: settings.hero_autoplay_ms,
@@ -443,7 +464,12 @@ export default function CatalogSettingsPage() {
         return;
       }
       setMessage('Catalog page settings saved. Public listing updates on next load.');
-      setSettings(data.settings);
+      setSettings({
+        ...data.settings,
+        card_style: data.settings?.card_style || 'marketplace',
+        card_body_bg_color: data.settings?.card_body_bg_color || '#ffffff',
+        card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
+      });
     } finally {
       setSaving(false);
     }

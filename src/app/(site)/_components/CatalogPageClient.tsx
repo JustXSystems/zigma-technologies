@@ -30,12 +30,14 @@ const DEFAULT_CARD = [
   'summary',
   'category',
   'primary_image',
+  'background_image',
   'price_label',
   'quick_view',
   'case_study_link',
 ];
 const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
 const INTENT_CHIP_LIMIT = 8;
+const CARD_FIELDS_V2 = 'card_fields_v2';
 const CARD_BODY_FIELDS = [
   'category',
   'title',
@@ -52,6 +54,21 @@ function hasField(fields: string[] | null | undefined, name: string, fallback: s
   // null/undefined → defaults; explicit [] means show nothing
   const list = fields == null ? fallback : fields;
   return list.includes(name);
+}
+
+/** Resolve card field toggles; legacy lists (pre background toggle) keep background on. */
+function resolveCardFields(fields: string[] | null | undefined): string[] {
+  if (fields == null) return [...DEFAULT_CARD];
+  const cleaned = fields.filter((f) => f !== CARD_FIELDS_V2);
+  if (fields.includes(CARD_FIELDS_V2) || cleaned.includes('background_image')) {
+    return cleaned;
+  }
+  // Legacy saved list: enable background beside product image
+  const next = [...cleaned];
+  const idx = next.indexOf('primary_image');
+  if (idx >= 0) next.splice(idx + 1, 0, 'background_image');
+  else next.push('background_image');
+  return next;
 }
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -72,11 +89,18 @@ function cssUrlValue(path: string): string {
 function CatalogCardMedia({
   item,
   cardStyle = 'marketplace',
+  showBackground = true,
+  showProduct = true,
 }: {
   item: CatalogItem;
   cardStyle?: 'overlay' | 'marketplace';
+  showBackground?: boolean;
+  showProduct?: boolean;
 }) {
-  const bgCss = item.background_image_url?.trim() ? cssUrlValue(item.background_image_url) : '';
+  const bgCss =
+    showBackground && item.background_image_url?.trim()
+      ? cssUrlValue(item.background_image_url)
+      : '';
   const bgShadow = item.background_shading_style || 'medium';
   const bgFit = item.background_fit_to_space === true;
   const bgPct = Math.min(100, Math.max(20, Number(item.background_fit_percent) || 100));
@@ -95,8 +119,17 @@ function CatalogCardMedia({
   const useProductFit = !!bgCss ? (marketplace ? true : productFit) : marketplace;
 
   const style = {
-    ...(bgCss ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties) : null),
-    ...(bgCss && bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%` } as CSSProperties) : null),
+    // Inline backgroundImage like the popup gallery so CSS resets cannot hide it.
+    ...(bgCss
+      ? ({
+          ['--catalog-card-bg']: `url("${bgCss}")`,
+          backgroundImage: `url("${bgCss}")`,
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: bgFit ? undefined : 'cover',
+        } as CSSProperties)
+      : null),
+    ...(bgCss && bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%`, backgroundSize: `${bgPct}% auto` } as CSSProperties) : null),
     ...(useProductFit || (marketplace && !bgCss)
       ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties)
       : null),
@@ -119,7 +152,7 @@ function CatalogCardMedia({
       )}
       style={style}
     >
-      {item.primary_image ? (
+      {showProduct && item.primary_image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={publicMediaUrl(item.primary_image)} alt={item.title} loading="lazy" />
       ) : null}
@@ -350,7 +383,9 @@ function CatalogItemCard({
   onOpen: (item: CatalogItem) => void;
 }) {
   const marketplace = layout !== 'list' && cardStyle === 'marketplace';
-  const showMedia = hasField(cardFields, 'primary_image', DEFAULT_CARD);
+  const showProduct = hasField(cardFields, 'primary_image', DEFAULT_CARD);
+  const showBackground = hasField(cardFields, 'background_image', DEFAULT_CARD);
+  const showMedia = showProduct || showBackground;
   const showBody = CARD_BODY_FIELDS.some((name) => hasField(cardFields, name, DEFAULT_CARD));
   return (
     <button
@@ -370,7 +405,12 @@ function CatalogItemCard({
       }}
     >
       {showMedia ? (
-        <CatalogCardMedia item={item} cardStyle={marketplace ? 'marketplace' : 'overlay'} />
+        <CatalogCardMedia
+          item={item}
+          cardStyle={marketplace ? 'marketplace' : 'overlay'}
+          showBackground={showBackground}
+          showProduct={showProduct}
+        />
       ) : null}
       {showBody ? (
         <div className="catalog-card-body">
@@ -448,7 +488,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filters = settings?.filters_json || ['category', 'tags'];
-  const cardFields = settings?.card_fields_json ?? DEFAULT_CARD;
+  const cardFields = resolveCardFields(settings?.card_fields_json);
   const cardStyle = settings?.card_style === 'overlay' ? 'overlay' : 'marketplace';
   const cardBodyBg = settings?.card_body_bg_color || '#ffffff';
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;

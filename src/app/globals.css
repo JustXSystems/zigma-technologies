@@ -1832,8 +1832,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   box-shadow:0 2px 4px rgba(15,23,42,0.08),0 16px 32px -18px rgba(15,23,42,0.35);
   border-color:rgba(255,107,26,0.35);
 }
-.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media,
-.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--has-bg.catalog-card-media--product-fit{
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media{
   position:relative;
   inset:auto;
   width:100%;
@@ -1841,7 +1840,6 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   min-height:0;
   flex:0 0 auto;
   background-color:#fff;
-  background-image:none;
   overflow:hidden;
   display:flex;
   align-items:center;
@@ -1850,15 +1848,15 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   box-sizing:border-box;
   border-radius:18px 18px 0 0;
 }
-/* Match popup gallery: let product drop-shadows render around the fitted image */
+/* Match popup gallery: background + product drop-shadows */
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--has-bg,
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--has-bg.catalog-card-media--product-fit{
-  overflow:visible;
-  z-index:1;
-}
-.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--has-bg{
   background-image:var(--catalog-card-bg);
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
+  overflow:visible;
+  z-index:1;
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--bg-fit{
   background-size:var(--catalog-bg-fit) auto;
