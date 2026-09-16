@@ -658,7 +658,10 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
     ? facets.categories
     : categories.map((c) => ({ slug: c.slug, name: c.name, count: 0, sort_order: c.sort_order }));
   const facetTags = facets?.tags || [];
-  const intentTags = facetTags.slice(0, INTENT_CHIP_LIMIT);
+  // Refine + Quick find: only offer filters that still match items (keep active choice visible).
+  const visibleFacetCategories = facetCategories.filter((c) => c.count > 0 || c.slug === category);
+  const visibleFacetTags = facetTags.filter((t) => t.count > 0 || t.value === tag);
+  const intentTags = visibleFacetTags.slice(0, INTENT_CHIP_LIMIT);
   const facetTotal = facets?.total ?? items.length;
 
   const activeCategoryName =
@@ -737,7 +740,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   <span className="catalog-profile-tile-name">All {itemType}s</span>
                   <span className="catalog-profile-tile-count">{facetTotal}</span>
                 </button>
-                {facetCategories.map((c) => (
+                {visibleFacetCategories.map((c) => (
                   <button
                     key={c.slug}
                     type="button"
@@ -745,7 +748,6 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                     className={cx('catalog-profile-tile', category === c.slug && 'is-active')}
                     onClick={() => selectCategory(c.slug)}
                     aria-pressed={category === c.slug}
-                    disabled={c.count === 0 && category !== c.slug}
                   >
                     <span className="catalog-profile-tile-name">{c.name}</span>
                     <span className="catalog-profile-tile-count">{c.count}</span>
@@ -918,13 +920,12 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                           <span>{facetTotal}</span>
                         </button>
                       </li>
-                      {facetCategories.map((c) => (
+                      {visibleFacetCategories.map((c) => (
                         <li key={c.slug}>
                           <button
                             type="button"
                             className={cx(category === c.slug && 'is-active')}
                             onClick={() => selectCategory(c.slug)}
-                            disabled={c.count === 0 && category !== c.slug}
                           >
                             <span>{c.name}</span>
                             <span>{c.count}</span>
@@ -935,17 +936,16 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   </div>
                 ) : null}
 
-                {showTagFilters && facetTags.length > 0 ? (
+                {showTagFilters && visibleFacetTags.length > 0 ? (
                   <div className="catalog-facet-group">
                     <h4>Needs &amp; tags</h4>
                     <ul>
-                      {facetTags.map((t) => (
+                      {visibleFacetTags.map((t) => (
                         <li key={t.value}>
                           <button
                             type="button"
                             className={cx(tag === t.value && 'is-active')}
                             onClick={() => selectTag(t.value)}
-                            disabled={t.count === 0 && tag !== t.value}
                           >
                             <span>{t.value}</span>
                             <span>{t.count}</span>
