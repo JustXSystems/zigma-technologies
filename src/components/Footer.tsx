@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { FooterColumn } from '@/lib/nav-tree';
-import { telHref, logoAltText } from '@/lib/site-settings';
+import { telHref, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { whatsappHref } from '@/lib/whatsapp';
@@ -121,7 +121,7 @@ export default function Footer() {
                 </span>
                 <span className="logo-word">
                   {site.companyName}
-                  <small>{site.tagline}</small>
+                  <small dangerouslySetInnerHTML={{ __html: sanitizeTaglineHtml(site.tagline) }} />
                 </span>
               </a>
               <p className="footer-tagline">{site.footerBlurb}</p>

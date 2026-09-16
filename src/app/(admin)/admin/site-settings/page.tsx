@@ -22,7 +22,12 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
     defaultOpen: true,
     fields: [
       { key: 'companyName', label: 'Company name' },
-      { key: 'tagline', label: 'Logo tagline' },
+      {
+        key: 'tagline',
+        label: 'Logo tagline',
+        hint: 'Supports HTML: <br>, <b>, <i>, <em>, <strong>, <span>',
+        full: true,
+      },
       { key: 'logoUrl', label: 'Logo image URL', hint: 'Used in header, footer, and ecosystem mark', full: true },
       { key: 'logoAlt', label: 'Logo alt text', hint: 'Accessible name for the logo image sitewide' },
       { key: 'footerBlurb', label: 'Footer blurb', full: true, multiline: true },

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
-import { ctaLabelForVariant, pickCtaVariant, logoAltText } from '@/lib/site-settings';
+import { ctaLabelForVariant, pickCtaVariant, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
 import SiteSearchForm from '@/components/SiteSearchForm';
 import HeaderIconMenus from '@/components/HeaderIconMenus';
 import { trackEvent } from '@/lib/analytics';
@@ -285,7 +285,7 @@ export default function Header() {
             </span>
             <span className="logo-word">
               {site.companyName}
-              <small>{site.tagline}</small>
+              <small dangerouslySetInnerHTML={{ __html: sanitizeTaglineHtml(site.tagline) }} />
             </span>
           </a>
           <nav className="primary-nav" aria-label="Primary">

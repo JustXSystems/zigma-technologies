@@ -145,6 +145,22 @@ export function logoAltText(settings: SiteSettings) {
   return name ? `${name} logo` : DEFAULT_SITE_SETTINGS.logoAlt;
 }
 
+/**
+ * Logo tagline may include limited HTML (e.g. &lt;br&gt; for line breaks).
+ * Strips everything except a small inline whitelist.
+ */
+export function sanitizeTaglineHtml(input: string | undefined): string {
+  const raw = input ?? '';
+  if (!raw) return '';
+  const escaped = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br />')
+    .replace(/&lt;(\/?)(b|i|em|strong|span)&gt;/gi, '<$1$2>');
+}
+
 /** Allow only CSS length values (px/rem/em) for logo sizing injection. */
 export function sanitizeCssSize(value: string | undefined, fallback: string): string {
   const trimmed = value?.trim() || '';

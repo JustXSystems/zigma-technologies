@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSiteShell } from '@/components/SiteProviders';
-import { logoAltText } from '@/lib/site-settings';
+import { logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
 
 type ZtoolsPortalBrandProps = {
   layout?: 'header' | 'centered';
@@ -40,7 +40,7 @@ export default function ZtoolsPortalBrand({ layout = 'header', homeHref = '/' }:
         </span>
         <span className="ztools-portal-logo-word">
           <strong>{settings.companyName}</strong>
-          <small>{settings.tagline}</small>
+          <small dangerouslySetInnerHTML={{ __html: sanitizeTaglineHtml(settings.tagline) }} />
         </span>
       </Link>
       <span className="ztools-portal-brand-divider" aria-hidden />
