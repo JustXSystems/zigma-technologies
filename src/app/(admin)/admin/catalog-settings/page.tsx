@@ -390,6 +390,39 @@ export default function CatalogSettingsPage() {
                   </select>
                 </div>
                 <div className="admin-field">
+                  <label>Standard hero panel</label>
+                  <label
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      border: '1px solid var(--admin-border)',
+                      borderRadius: 10,
+                      padding: '0.55rem 0.8rem',
+                      background: '#fff',
+                      minHeight: 42,
+                      opacity: settings.hero_variant !== 'standard' ? 0.7 : 1,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!settings.hero_standard_panel_enabled}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          hero_standard_panel_enabled: e.target.checked ? 1 : 0,
+                        })
+                      }
+                    />
+                    Show <code>.catalog-hero-standard-panel</code>
+                  </label>
+                  <p style={{ margin: '0.35rem 0 0', color: 'var(--admin-muted)', fontSize: '0.78rem' }}>
+                    {settings.hero_variant !== 'standard'
+                      ? 'Switch Hero variant to “standard” to see this panel on the public page.'
+                      : 'Hides/shows the compact active-item card in the standard hero.'}
+                  </p>
+                </div>
+                <div className="admin-field">
                   <label>Hero eyebrow</label>
                   <input
                     className="admin-input"
@@ -436,7 +469,6 @@ export default function CatalogSettingsPage() {
                       ['loading_skeleton_enabled', 'Skeleton loading'],
                       ['reveal_animation_enabled', 'Reveal animation'],
                       ['premium_borders_enabled', 'Premium borders'],
-                      ['hero_standard_panel_enabled', 'Standard hero panel'],
                     ].map(([key, label]) => (
                       <label
                         key={key}
@@ -448,23 +480,11 @@ export default function CatalogSettingsPage() {
                           borderRadius: 999,
                           padding: '0.45rem 0.8rem',
                           background: '#fff',
-                          opacity:
-                            key === 'hero_standard_panel_enabled' && settings.hero_variant !== 'standard'
-                              ? 0.55
-                              : 1,
                         }}
-                        title={
-                          key === 'hero_standard_panel_enabled' && settings.hero_variant !== 'standard'
-                            ? 'Applies when Hero variant is set to standard'
-                            : undefined
-                        }
                       >
                         <input
                           type="checkbox"
                           checked={Boolean(settings[key as keyof CatalogPageSettings])}
-                          disabled={
-                            key === 'hero_standard_panel_enabled' && settings.hero_variant !== 'standard'
-                          }
                           onChange={(e) =>
                             setSettings({
                               ...settings,
@@ -476,10 +496,6 @@ export default function CatalogSettingsPage() {
                       </label>
                     ))}
                   </div>
-                  <p style={{ margin: '0.45rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
-                    Standard hero panel controls the compact active-item card inside the standard hero variant
-                    (<code>.catalog-hero-standard-panel</code>).
-                  </p>
                 </div>
                 <div className="admin-field full">
                   <label>Selected spotlight items</label>

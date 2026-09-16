@@ -7,19 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again.">
-      <change afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/catalog/[type]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/catalog/[type]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -66,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4112406506274833" />
-      <entry key="MS500" value="3.812149963604541" />
-      <entry key="S2" value="6.390988915272887" />
-      <entry key="S5" value="7.928678477345569" />
-      <entry key="S10" value="11.706652426693658" />
-      <entry key="S30" value="27.57150378567154" />
-      <entry key="S60" value="42.50301072618947" />
-      <entry key="M2" value="58.70915250545427" />
-      <entry key="M5" value="99.2952284893944" />
-      <entry key="M10" value="175.40924545268737" />
-      <entry key="M15" value="236.48522645982595" />
-      <entry key="M30" value="339.5653025542201" />
-      <entry key="H1" value="419.62597576833457" />
-      <entry key="H2" value="501.67413830142806" />
-      <entry key="H4" value="624.7649299557254" />
-      <entry key="D1" value="1156.2425694609547" />
-      <entry key="W1" value="8640.81703444288" />
+      <entry key="MS100" value="1.7429485432796046" />
+      <entry key="MS500" value="3.4728974931324497" />
+      <entry key="S2" value="6.189276163791992" />
+      <entry key="S5" value="9.135464045856363" />
+      <entry key="S10" value="14.276251629270424" />
+      <entry key="S30" value="24.5509143229983" />
+      <entry key="S60" value="29.11954647022318" />
+      <entry key="M2" value="31.874129931621333" />
+      <entry key="M5" value="34.50192633529904" />
+      <entry key="M10" value="49.81840442244671" />
+      <entry key="M15" value="81.34385999547253" />
+      <entry key="M30" value="185.82299285826846" />
+      <entry key="H1" value="314.97308189163766" />
+      <entry key="H2" value="445.1159094925246" />
+      <entry key="H4" value="600.2255719944184" />
+      <entry key="D1" value="1172.7821491682348" />
+      <entry key="W1" value="8655.903770433457" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -94,33 +82,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="2.5166359910888054E-308" />
-      <entry key="M15" value="8.587767317113083E-206" />
-      <entry key="M30" value="2.930489262412196E-103" />
-      <entry key="H1" value="5.4133993593788776E-52" />
-      <entry key="H2" value="2.3266713045419007E-26" />
-      <entry key="H4" value="1.5253430121190847E-13" />
-      <entry key="D1" value="0.007426808034645887" />
-      <entry key="W1" value="0.769688833647434" />
+      <entry key="M10" value="2.18835933682498E-309" />
+      <entry key="M15" value="1.685565981045173E-206" />
+      <entry key="M30" value="1.298293488023871E-103" />
+      <entry key="H1" value="3.6031839920047746E-52" />
+      <entry key="H2" value="1.8982054662245234E-26" />
+      <entry key="H4" value="1.3777537756394163E-13" />
+      <entry key="D1" value="0.007301905600891551" />
+      <entry key="W1" value="0.7678261564440698" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3588479212439282" />
-      <entry key="MS500" value="3.7837181719044595" />
-      <entry key="S2" value="6.379827354885582" />
-      <entry key="S5" value="7.923262268216318" />
-      <entry key="S10" value="11.702774486148778" />
-      <entry key="S30" value="27.568580041841148" />
-      <entry key="S60" value="42.50078166807588" />
-      <entry key="M2" value="58.70762004921086" />
-      <entry key="M5" value="99.29415195003693" />
-      <entry key="M10" value="175.4082028670269" />
-      <entry key="M15" value="236.4842460705288" />
-      <entry key="M30" value="339.5645641966569" />
-      <entry key="H1" value="419.6255068214501" />
-      <entry key="H2" value="501.6738456160118" />
-      <entry key="H4" value="624.7647350991874" />
-      <entry key="D1" value="1156.2499301622959" />
-      <entry key="W1" value="8641.586598633565" />
+      <entry key="MS100" value="1.6966551300152994" />
+      <entry key="MS500" value="3.4520366212968794" />
+      <entry key="S2" value="6.179048881728966" />
+      <entry key="S5" value="9.129228552336265" />
+      <entry key="S10" value="14.271297643130437" />
+      <entry key="S30" value="24.5480342968267" />
+      <entry key="S60" value="29.117832237559742" />
+      <entry key="M2" value="31.8731900233956" />
+      <entry key="M5" value="34.50151944466945" />
+      <entry key="M10" value="49.818109128314326" />
+      <entry key="M15" value="81.34352949325411" />
+      <entry key="M30" value="185.82259562287805" />
+      <entry key="H1" value="314.9727343550064" />
+      <entry key="H2" value="445.1156529069825" />
+      <entry key="H4" value="600.2253870660381" />
+      <entry key="D1" value="1172.7893845874933" />
+      <entry key="W1" value="8656.671472035414" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -272,7 +260,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="ready to test ztools" />
     <MESSAGE value="ready to test env deployment" />
     <MESSAGE value="press_posts table doesn't exist in the zigmatech_prod database." />
     <MESSAGE value="Updating Prod setup" />
@@ -297,7 +284,8 @@
     <MESSAGE value="poweredByPrefix added to admin to edit" />
     <MESSAGE value="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed" />
     <MESSAGE value="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again." />
-    <option name="LAST_COMMIT_MESSAGE" value="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again." />
+    <MESSAGE value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
+    <option name="LAST_COMMIT_MESSAGE" value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
