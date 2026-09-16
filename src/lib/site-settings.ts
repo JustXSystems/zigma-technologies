@@ -158,7 +158,11 @@ export function logoSizingCss(settings: SiteSettings): string {
   const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
   const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
   const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
-  return `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};}`;
+  return [
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};}`,
+    /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
+    `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}}`,
+  ].join('');
 }
 
 export const DEFAULT_FAVICON = '/assets/images/zigma.png';

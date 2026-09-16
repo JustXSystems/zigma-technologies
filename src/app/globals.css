@@ -185,10 +185,16 @@
   .nav-links{display:flex;gap:2rem;flex-wrap:nowrap;align-items:center;}
   .header-right{margin-left:auto;flex:0 0 auto;}
   .nav-links > li{position:relative;}
-  .nav-links > li > a{
+  .nav-links > li > a,
+  .nav-links > li > .nav-parent{
     color:#D6DDE8;
     font-size:0.92rem;
     font-weight:500;
+    font-family:inherit;
+    line-height:inherit;
+    background:none;
+    border:none;
+    cursor:pointer;
     display:flex;align-items:center;gap:0.3rem;
     padding:0.5rem 0;
     transition:color .2s;
@@ -200,10 +206,14 @@
     transition:color .2s;
   }
   .nav-links > li > a:hover,
-  .nav-links > li:hover > a{color:#fff;}
+  .nav-links > li:hover > a,
+  .nav-links > li > .nav-parent:hover,
+  .nav-links > li:hover > .nav-parent,
+  .nav-links > li.nav-item-open > .nav-parent{color:#fff;}
   .nav-links a[aria-current="page"]{color:var(--orange);}
   .nav-links > li > a[aria-current="page"]{color:var(--orange);}
-  .caret{font-size:0.6rem;opacity:0.7;transition:transform .2s ease;}
+  .caret{font-size:0.6rem;opacity:0.7;transition:transform .2s ease;display:inline-block;}
+  .nav-links > li.nav-item-open > .nav-parent .caret{transform:rotate(180deg);}
   .mega{
     position:absolute;top:calc(100% + 0.5rem);left:50%;transform:translateX(-50%) translateY(-0.2rem);
     background:var(--navy-900);
@@ -213,7 +223,8 @@
     min-width:560px;
     display:grid;grid-template-columns:repeat(auto-fit, minmax(150px,1fr));gap:1.7rem;
     opacity:0;visibility:hidden;
-    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease, visibility .2s ease;
     box-shadow:0 28px 56px rgba(0,0,0,0.45);
     z-index:1100;
   }
@@ -226,7 +237,15 @@
     bottom:100%;
     height:0.85rem;
   }
-  .nav-links > li:hover .mega{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+  /* Hover for fine pointers; click/keyboard via .nav-item-open / :focus-within */
+  @media (hover: hover) and (pointer: fine){
+    .nav-links > li:hover > .mega{
+      opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);
+    }
+  }
+  .nav-links > li.nav-item-open > .mega{
+    opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);
+  }
   .mega-2x2{grid-template-columns:repeat(3, 1fr) !important;min-width:640px;}
   .mega-col h5{
     font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.1em;
@@ -1071,22 +1090,32 @@
     }
     .nav-links.is-open{transform:translateX(0);}
     .nav-links > li{border-bottom:1px solid rgba(255,255,255,0.08);}
-    .nav-links > li > a{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;font-size:1.15rem;font-weight:600;}
+    .nav-links > li > a,
+    .nav-links > li > .nav-parent{
+      display:flex;align-items:center;justify-content:space-between;
+      width:100%;text-align:left;
+      padding:1.1rem 1.4rem;font-size:1.15rem;font-weight:600;
+    }
     .nav-links .mega{
-      position:static;display:none;opacity:1;visibility:visible;transform:none;
+      position:static;display:none;opacity:1;visibility:visible;pointer-events:auto;transform:none;
       box-shadow:none;background:rgba(255,255,255,0.03);padding:0.2rem 1.4rem 1rem;
-      grid-template-columns:1fr;gap:1.2rem;
+      grid-template-columns:1fr;gap:1.2rem;min-width:0;border:none;border-radius:0;
+      transition:none;
     }
     .nav-links .mega::before{display:none;}
-    /* The desktop ".nav-links > li:hover .mega" rule (which centers the
-       dropdown with translateX(-50%)) has higher specificity than the reset
-       above, so it can still fire on hover at this breakpoint and shove the
-       panel half its own width off-screen. Pin it down explicitly here. */
-    .nav-links > li:hover .mega{position:static;transform:none;}
-    .nav-links li.nav-item-open .mega{display:grid;}
+    /* Disable desktop hover mega rules inside the drawer — accordion only. */
+    .nav-links > li:hover > .mega{
+      position:static;transform:none;display:none;opacity:1;visibility:visible;pointer-events:auto;
+    }
+    .nav-links > li.nav-item-open > .mega,
+    .nav-links > li.nav-item-open:hover > .mega{
+      display:grid;
+    }
+    .nav-links li.nav-item-open > .nav-parent .caret,
     .nav-links li.nav-item-open > a .caret{transform:rotate(180deg);}
     .nav-links .mega-col h5{color:#9FB0CB;font-size:0.9rem;}
     .nav-links .mega-col a{padding:0.35rem 0;font-size:0.85rem;}
+    .nav-links .mega-2x2{grid-template-columns:1fr !important;min-width:0;}
     .header-right .menu-toggle{position:relative;z-index:901;}
     .header-right .menu-toggle.is-active{color:var(--orange);}
     body.nav-open{overflow:hidden;}
@@ -3592,6 +3621,7 @@ footer{
 header .logo{font-size:var(--logo-word-size);}
 header .logo-word small{font-size:0.6em;}
 header .nav-links > li > a,
+header .nav-links > li > .nav-parent,
 header .nav-links a{font-size:0.92em;}
 header .mega-col h5{font-size:0.72em;}
 header .mega-col a{font-size:0.92em;}
@@ -3615,7 +3645,11 @@ footer .foot-bottom{font-size:0.85em;}
 footer .foot-legal a{font-size:0.92em;}
 footer .foot-powered{font-size:0.8em;}
 @media (max-width:760px){
-  header .nav-links > li > a{font-size:1.05em;}
+  header .logo{font-size:var(--logo-word-size-mobile);}
+  .page-shell .logo{font-size:var(--logo-word-size-mobile);}
+  footer .footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}
+  header .nav-links > li > a,
+  header .nav-links > li > .nav-parent{font-size:1.05em;}
   header .nav-links .mega-col h5{font-size:0.9em;}
   header .nav-links .mega-col a{font-size:0.92em;}
 }

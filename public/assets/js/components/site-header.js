@@ -112,8 +112,10 @@ class SiteHeader extends HTMLElement {
       const cols = item.mega.map((c) => this.renderMegaCol(c)).join("\n");
       return `
         <li>
-          <a href="${this.resolveHref(item)}">${item.label} <span class="caret">▾</span></a>
-          <div class="mega ${item.megaClass || ""}">${cols}</div>
+          <button type="button" class="nav-parent" aria-expanded="false" aria-haspopup="true">
+            ${item.label} <span class="caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="mega ${item.megaClass || ""}" role="region" aria-label="${item.label} submenu">${cols}</div>
         </li>`;
     }
     return `<li><a href="${this.resolveHref(item)}"${current}>${item.label}</a></li>`;
@@ -132,7 +134,7 @@ class SiteHeader extends HTMLElement {
             <span class="logo-chip"><img src="assets/images/zigma-technologies-logo.png" alt="Zigma Technologies logo"></span>
             <span class="logo-word">Zigma Technologies<small>POWER &amp; ENERGY ENGINEERING</small></span>
           </a>
-          <nav class="primary-nav">
+          <nav class="primary-nav" aria-label="Primary">
             <ul class="nav-links">
               ${navItems}
             </ul>
@@ -149,6 +151,20 @@ class SiteHeader extends HTMLElement {
     const header = this.querySelector("#siteHeader");
     const toggle = this.querySelector(".menu-toggle");
     const navLinks = this.querySelector(".nav-links");
+    const mobileMq = window.matchMedia("(max-width: 760px)");
+
+    const closeDrawer = () => {
+      navLinks.classList.remove("is-open");
+      toggle.classList.remove("is-active");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "☰";
+      document.body.classList.remove("nav-open");
+      navLinks.querySelectorAll("li.nav-item-open").forEach((li) => {
+        li.classList.remove("nav-item-open");
+        const parent = li.querySelector(".nav-parent");
+        if (parent) parent.setAttribute("aria-expanded", "false");
+      });
+    };
 
     // Header scroll state (adds subtle elevation/backdrop once the page scrolls)
     const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 40);
@@ -162,31 +178,77 @@ class SiteHeader extends HTMLElement {
       toggle.setAttribute("aria-expanded", String(isOpen));
       toggle.textContent = isOpen ? "✕" : "☰";
       document.body.classList.toggle("nav-open", isOpen);
+      if (!isOpen) {
+        navLinks.querySelectorAll("li.nav-item-open").forEach((li) => {
+          li.classList.remove("nav-item-open");
+          const parent = li.querySelector(".nav-parent");
+          if (parent) parent.setAttribute("aria-expanded", "false");
+        });
+      }
     });
 
-    // Mobile: tapping a mega-menu parent expands its submenu instead of navigating
+    // Mega parents: expand/pin submenu — never navigate
     navLinks.querySelectorAll("li").forEach((li) => {
       const mega = li.querySelector(".mega");
       if (!mega) return;
-      const link = li.querySelector("a");
-      link.addEventListener("click", (e) => {
-        if (window.innerWidth > 760) return;
-        e.preventDefault();
-        li.classList.toggle("nav-item-open");
+      const parent = li.querySelector(".nav-parent");
+      if (!parent) return;
+
+      parent.addEventListener("click", () => {
+        const willOpen = !li.classList.contains("nav-item-open");
+        navLinks.querySelectorAll("li.nav-item-open").forEach((other) => {
+          if (other === li) return;
+          other.classList.remove("nav-item-open");
+          const otherParent = other.querySelector(".nav-parent");
+          if (otherParent) otherParent.setAttribute("aria-expanded", "false");
+        });
+        li.classList.toggle("nav-item-open", willOpen);
+        parent.setAttribute("aria-expanded", String(willOpen));
+      });
+
+      li.addEventListener("focusout", (e) => {
+        if (mobileMq.matches) return;
+        if (li.contains(e.relatedTarget)) return;
+        li.classList.remove("nav-item-open");
+        parent.setAttribute("aria-expanded", "false");
       });
     });
 
-    // Close the drawer whenever a real navigation link is tapped
+    // Close drawer when a real navigation link is tapped (mobile)
     navLinks.querySelectorAll("a").forEach((a) => {
       a.addEventListener("click", () => {
-        if (window.innerWidth > 760) return;
-        if (a.parentElement.querySelector(".mega")) return;
-        navLinks.classList.remove("is-open");
-        toggle.classList.remove("is-active");
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.textContent = "☰";
-        document.body.classList.remove("nav-open");
+        if (!mobileMq.matches) {
+          navLinks.querySelectorAll("li.nav-item-open").forEach((li) => {
+            li.classList.remove("nav-item-open");
+            const parent = li.querySelector(".nav-parent");
+            if (parent) parent.setAttribute("aria-expanded", "false");
+          });
+          return;
+        }
+        closeDrawer();
       });
+    });
+
+    // Smooth desktop ↔ mobile: clear drawer / pinned megas at the breakpoint
+    const onViewportChange = () => {
+      closeDrawer();
+    };
+    mobileMq.addEventListener("change", onViewportChange);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      closeDrawer();
+    });
+
+    document.addEventListener("mousedown", (e) => {
+      if (mobileMq.matches) return;
+      const openItem = navLinks.querySelector("li.nav-item-open");
+      if (!openItem) return;
+      if (!openItem.contains(e.target)) {
+        openItem.classList.remove("nav-item-open");
+        const parent = openItem.querySelector(".nav-parent");
+        if (parent) parent.setAttribute("aria-expanded", "false");
+      }
     });
   }
 }

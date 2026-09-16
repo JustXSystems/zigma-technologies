@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
@@ -13,6 +13,9 @@ import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
 import { filterNavForFeatures } from '@/lib/nav-features';
 import { appHref } from '@/lib/base-path';
+
+/** Matches CSS mobile nav breakpoint (`max-width: 760px`). */
+const MOBILE_NAV_MQ = '(max-width: 760px)';
 
 const DEFAULT_NAV: NavItem[] = [
   {
@@ -126,10 +129,12 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<string | null>(null);
+  const [isMobileNav, setIsMobileNav] = useState(false);
   // Always start with A so SSR and the first client paint match. pickCtaVariant()
   // reads sessionStorage / Math.random() and must only run after mount.
   const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>('A');
   const [callbackOpen, setCallbackOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const copy = useSiteCopy();
   const navItems = useMemo(
     () => filterNavForFeatures(shellNav?.length ? shellNav : DEFAULT_NAV, copy.features),
@@ -151,6 +156,29 @@ export default function Header() {
                 ? 'services'
                 : 'home';
 
+  const setBodyNavOpen = useCallback((open: boolean) => {
+    document.body.classList.toggle('nav-open', open);
+  }, []);
+
+  const closeMobileNav = useCallback(() => {
+    setMobileOpen(false);
+    setOpenMega(null);
+    setBodyNavOpen(false);
+  }, [setBodyNavOpen]);
+
+  const toggleMobile = useCallback(() => {
+    setMobileOpen((prev) => {
+      const next = !prev;
+      setBodyNavOpen(next);
+      if (!next) setOpenMega(null);
+      return next;
+    });
+  }, [setBodyNavOpen]);
+
+  const toggleMega = useCallback((label: string) => {
+    setOpenMega((prev) => (prev === label ? null : label));
+  }, []);
+
   useEffect(() => {
     setCtaVariant(pickCtaVariant(site));
     trackEvent('cta_variant_shown', { variant: pickCtaVariant(site), placement: 'header' });
@@ -162,6 +190,60 @@ export default function Header() {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Keep drawer / mega state in sync when crossing the mobile breakpoint.
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_NAV_MQ);
+    const syncViewport = () => {
+      const mobile = mq.matches;
+      setIsMobileNav(mobile);
+      if (!mobile) {
+        setMobileOpen(false);
+        setOpenMega(null);
+        document.body.classList.remove('nav-open');
+      } else {
+        setOpenMega(null);
+      }
+    };
+    syncViewport();
+    mq.addEventListener('change', syncViewport);
+    return () => {
+      mq.removeEventListener('change', syncViewport);
+      document.body.classList.remove('nav-open');
+    };
+  }, []);
+
+  // Escape closes mega / mobile drawer; outside click closes desktop-pinned mega.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setOpenMega(null);
+      if (mobileOpen) {
+        setMobileOpen(false);
+        document.body.classList.remove('nav-open');
+      }
+    };
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (!openMega || isMobileNav) return;
+      const target = e.target as Node | null;
+      if (!target || !headerRef.current) return;
+      const openItem = headerRef.current.querySelector('li.nav-item-open');
+      if (openItem && !openItem.contains(target)) setOpenMega(null);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('touchstart', onPointerDown, { passive: true });
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('touchstart', onPointerDown);
+    };
+  }, [openMega, mobileOpen, isMobileNav]);
+
+  // Route changes should always leave the drawer closed.
+  useEffect(() => {
+    closeMobileNav();
+  }, [pathname, closeMobileNav]);
 
   const resolveHref = (item: { href?: string }) => appHref(item.href);
 
@@ -177,15 +259,9 @@ export default function Header() {
     return false;
   };
 
-  const toggleMobile = () => {
-    setMobileOpen(!mobileOpen);
-    document.body.classList.toggle('nav-open', !mobileOpen);
-  };
-
-  const toggleMega = (label: string) => {
-    if (window.innerWidth <= 760) {
-      setOpenMega(openMega === label ? null : label);
-    }
+  const onNavLeafClick = () => {
+    if (typeof window !== 'undefined' && window.matchMedia(MOBILE_NAV_MQ).matches) closeMobileNav();
+    else setOpenMega(null);
   };
 
   const openConsultation = (subject: string) => {
@@ -200,7 +276,7 @@ export default function Header() {
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <header id="siteHeader" className={scrolled ? 'scrolled' : ''}>
+      <header id="siteHeader" ref={headerRef} className={scrolled ? 'scrolled' : ''}>
         <div className="container nav-wrap">
           <a href={current === 'home' ? '#home' : appHref('/')} className="logo">
             <span className="logo-chip">
@@ -212,32 +288,55 @@ export default function Header() {
               <small>{site.tagline}</small>
             </span>
           </a>
-          <nav className="primary-nav">
+          <nav className="primary-nav" aria-label="Primary">
             <ul className={`nav-links ${mobileOpen ? 'is-open' : ''}`}>
               {navItems.map((item, idx) => (
-                <li key={`${item.label}-${idx}`} className={openMega === item.label ? 'nav-item-open' : ''}>
+                <li
+                  key={`${item.label}-${idx}`}
+                  className={openMega === item.label ? 'nav-item-open' : ''}
+                  onMouseEnter={() => {
+                    if (isMobileNav) return;
+                    if (openMega && openMega !== item.label) setOpenMega(null);
+                  }}
+                  onBlur={(e) => {
+                    if (isMobileNav || openMega !== item.label) return;
+                    const next = e.relatedTarget as Node | null;
+                    if (next && e.currentTarget.contains(next)) return;
+                    setOpenMega(null);
+                  }}
+                >
                   {item.mega ? (
                     <>
-                      <a
-                        href={resolveHref(item)}
-                        onClick={() => toggleMega(item.label)}
+                      <button
+                        type="button"
+                        className="nav-parent"
                         aria-expanded={openMega === item.label}
                         aria-haspopup="true"
+                        onClick={() => toggleMega(item.label)}
                       >
-                        {item.label} <span className="caret">▾</span>
-                      </a>
-                      <div className={`mega ${item.megaClass || ''}`}>
+                        {item.label} <span className="caret" aria-hidden>
+                          ▾
+                        </span>
+                      </button>
+                      <div className={`mega ${item.megaClass || ''}`} role="region" aria-label={`${item.label} submenu`}>
                         {item.mega.map((col, colIdx) => (
                           <div key={colIdx} className="mega-col">
                             {col.headingHref ? (
                               <h5>
-                                <a href={appHref(col.headingHref)}>{col.heading}</a>
+                                <a href={appHref(col.headingHref)} onClick={onNavLeafClick}>
+                                  {col.heading}
+                                </a>
                               </h5>
                             ) : (
                               <h5>{col.heading}</h5>
                             )}
                             {col.links.filter((link) => !isMegaLearnMoreLink(link)).map((link, linkIdx) => (
-                              <a key={linkIdx} href={resolveHref(link)} className={link.className}>
+                              <a
+                                key={linkIdx}
+                                href={resolveHref(link)}
+                                className={link.className}
+                                onClick={onNavLeafClick}
+                              >
                                 {link.label}
                               </a>
                             ))}
@@ -246,7 +345,11 @@ export default function Header() {
                       </div>
                     </>
                   ) : (
-                    <a href={resolveHref(item)} aria-current={isCurrentPage(item) ? 'page' : undefined}>
+                    <a
+                      href={resolveHref(item)}
+                      aria-current={isCurrentPage(item) ? 'page' : undefined}
+                      onClick={onNavLeafClick}
+                    >
                       {item.label}
                     </a>
                   )}

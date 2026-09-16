@@ -7,13 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#5 Hero element toggles now apply across all hero variants and visual style presets.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Company logo name and subtitle resize in desktop and mobile">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/js/components/site-header.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/js/components/site-header.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -62,23 +61,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.5666684451845814" />
-      <entry key="MS500" value="3.787807569319479" />
-      <entry key="S2" value="6.4639530483744325" />
-      <entry key="S5" value="11.444255091781145" />
-      <entry key="S10" value="17.24695060624733" />
-      <entry key="S30" value="31.934697752029983" />
-      <entry key="S60" value="45.85879772727351" />
-      <entry key="M2" value="59.03522237825484" />
-      <entry key="M5" value="74.80979603936181" />
-      <entry key="M10" value="89.27019022103792" />
-      <entry key="M15" value="102.90423840378845" />
-      <entry key="M30" value="166.87478786006986" />
-      <entry key="H1" value="324.7909455695009" />
-      <entry key="H2" value="557.6833424290816" />
-      <entry key="H4" value="821.9688158725539" />
-      <entry key="D1" value="1567.2155325362198" />
-      <entry key="W1" value="9057.858273804603" />
+      <entry key="MS100" value="1.4521229321779916" />
+      <entry key="MS500" value="3.4697825677784926" />
+      <entry key="S2" value="7.231469774984373" />
+      <entry key="S5" value="14.919714943829641" />
+      <entry key="S10" value="25.19012475562315" />
+      <entry key="S30" value="43.4348974214309" />
+      <entry key="S60" value="52.831086923454265" />
+      <entry key="M2" value="73.9877341264356" />
+      <entry key="M5" value="156.00537524602677" />
+      <entry key="M10" value="244.39225040785402" />
+      <entry key="M15" value="297.9614350632067" />
+      <entry key="M30" value="403.7710394808709" />
+      <entry key="H1" value="578.0132980062398" />
+      <entry key="H2" value="832.7306222304805" />
+      <entry key="H4" value="1125.9504885914594" />
+      <entry key="D1" value="1924.831662825037" />
+      <entry key="W1" value="9420.55767516548" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -90,33 +89,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="6.9440565647E-313" />
-      <entry key="M15" value="7.841674897752993E-209" />
-      <entry key="M30" value="8.855323200060486E-105" />
-      <entry key="H1" value="9.41027268471062E-53" />
-      <entry key="H2" value="9.700656000864208E-27" />
-      <entry key="H4" value="9.849190830312889E-14" />
-      <entry key="D1" value="0.006904639966652244" />
-      <entry key="W1" value="0.761714395033817" />
+      <entry key="M10" value="8.2696912137E-314" />
+      <entry key="M15" value="1.8981310598264967E-209" />
+      <entry key="M30" value="4.3567545946799315E-105" />
+      <entry key="H1" value="6.600571637881257E-53" />
+      <entry key="H2" value="8.12439021581372E-27" />
+      <entry key="H4" value="9.01353993505783E-14" />
+      <entry key="D1" value="0.006803360909275585" />
+      <entry key="W1" value="0.760108122496801" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4972941031996931" />
-      <entry key="MS500" value="3.7583894085120537" />
-      <entry key="S2" value="6.452553738643082" />
-      <entry key="S5" value="11.436724575275074" />
-      <entry key="S10" value="17.24141037854502" />
-      <entry key="S30" value="31.931261525283276" />
-      <entry key="S60" value="45.85632685010906" />
-      <entry key="M2" value="59.03363537730936" />
-      <entry key="M5" value="74.80899086177112" />
-      <entry key="M10" value="89.26970717114071" />
-      <entry key="M15" value="102.90386489462261" />
-      <entry key="M30" value="166.87447610016892" />
-      <entry key="H1" value="324.7906273090611" />
-      <entry key="H2" value="557.6830550542303" />
-      <entry key="H4" value="821.9685903125007" />
-      <entry key="D1" value="1567.2223560940583" />
-      <entry key="W1" value="9058.619861961495" />
+      <entry key="MS100" value="1.4140669641632417" />
+      <entry key="MS500" value="3.45097530904497" />
+      <entry key="S2" value="7.22130975809699" />
+      <entry key="S5" value="14.910852696127943" />
+      <entry key="S10" value="25.182447294391398" />
+      <entry key="S30" value="43.4304113278309" />
+      <entry key="S60" value="52.828344902405554" />
+      <entry key="M2" value="73.98579173056213" />
+      <entry key="M5" value="156.0037140798995" />
+      <entry key="M10" value="244.39094391458448" />
+      <entry key="M15" value="297.96037105753084" />
+      <entry key="M30" value="403.7703120640511" />
+      <entry key="H1" value="578.0127621479436" />
+      <entry key="H2" value="832.7302182953575" />
+      <entry key="H4" value="1125.9501987323204" />
+      <entry key="D1" value="1924.8383721294474" />
+      <entry key="W1" value="9421.317655286262" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -268,7 +267,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="inventory items can set background image now" />
     <MESSAGE value="inventory items background image issue fixed" />
     <MESSAGE value="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance." />
     <MESSAGE value="Allow CI next build without MySQL for PreProd release artifacts.&#10;&#10;Site layout is dynamic; CMS/nav/catalog reads return safe fallbacks on connection refused so GitHub Actions can package standalone releases." />
@@ -293,7 +291,8 @@
     <MESSAGE value="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link" />
     <MESSAGE value="#5 Admin Page realign and floating Save Button to access easily" />
     <MESSAGE value="#5 Hero element toggles now apply across all hero variants and visual style presets." />
-    <option name="LAST_COMMIT_MESSAGE" value="#5 Hero element toggles now apply across all hero variants and visual style presets." />
+    <MESSAGE value="#6 Company logo name and subtitle resize in desktop and mobile" />
+    <option name="LAST_COMMIT_MESSAGE" value="#6 Company logo name and subtitle resize in desktop and mobile" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
