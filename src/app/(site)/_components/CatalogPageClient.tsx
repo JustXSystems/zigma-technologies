@@ -139,11 +139,13 @@ function CatalogHero({
           <div className="eyebrow">{heroEyebrow}</div>
           <h1>{heroTitle}</h1>
           <p className="lead">{heroLead}</p>
-          <div className="catalog-hero-meta">
-            <span>{slides.length} curated highlights</span>
-            <span>Autoplay {Math.round(autoplayMs / 1000)}s</span>
-            <span>{itemType}s</span>
-          </div>
+          {settings?.hero_meta_enabled !== 0 ? (
+            <div className="catalog-hero-meta">
+              <span>{slides.length} curated highlights</span>
+              <span>Autoplay {Math.round(autoplayMs / 1000)}s</span>
+              <span>{itemType}s</span>
+            </div>
+          ) : null}
           {variant === 'standard' && settings?.hero_standard_panel_enabled !== 0 ? (
             <div className="catalog-hero-standard-panel">
               <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>

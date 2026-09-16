@@ -36,6 +36,7 @@ const putSchema = z.object({
   visual_style: z.enum(['classic', 'premium', 'glass', 'minimal', 'bold-corporate']).optional(),
   hero_variant: z.enum(['standard', 'spotlight']).optional(),
   hero_standard_panel_enabled: z.boolean().optional(),
+  hero_meta_enabled: z.boolean().optional(),
   loading_skeleton_enabled: z.boolean().optional(),
   reveal_animation_enabled: z.boolean().optional(),
   premium_borders_enabled: z.boolean().optional(),
@@ -55,6 +56,7 @@ export async function PUT(request: Request) {
       item_type,
       hero_enabled,
       hero_standard_panel_enabled,
+      hero_meta_enabled,
       loading_skeleton_enabled,
       reveal_animation_enabled,
       premium_borders_enabled,
@@ -70,6 +72,7 @@ export async function PUT(request: Request) {
       hero_enabled: hero_enabled === undefined ? undefined : hero_enabled ? 1 : 0,
       hero_standard_panel_enabled:
         hero_standard_panel_enabled === undefined ? undefined : hero_standard_panel_enabled ? 1 : 0,
+      hero_meta_enabled: hero_meta_enabled === undefined ? undefined : hero_meta_enabled ? 1 : 0,
       loading_skeleton_enabled:
         loading_skeleton_enabled === undefined ? undefined : loading_skeleton_enabled ? 1 : 0,
       reveal_animation_enabled:

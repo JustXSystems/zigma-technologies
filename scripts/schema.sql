@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   visual_style ENUM('classic','premium','glass','minimal','bold-corporate') NOT NULL DEFAULT 'premium',
   hero_variant ENUM('standard','spotlight') NOT NULL DEFAULT 'spotlight',
   hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1,
+  hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1,
   loading_skeleton_enabled TINYINT(1) NOT NULL DEFAULT 1,
   reveal_animation_enabled TINYINT(1) NOT NULL DEFAULT 1,
   premium_borders_enabled TINYINT(1) NOT NULL DEFAULT 1,
@@ -239,15 +240,15 @@ CREATE TABLE IF NOT EXISTS css_overrides (
 INSERT INTO catalog_page_settings (
   item_type, layout, grid_columns, filters_json, search_fields_json, card_fields_json, modal_fields_json,
   hero_enabled, hero_autoplay_ms, hero_item_ids_json, hero_eyebrow, hero_title, hero_lead,
-  visual_style, hero_variant, hero_standard_panel_enabled,
+  visual_style, hero_variant, hero_standard_panel_enabled, hero_meta_enabled,
   loading_skeleton_enabled, reveal_animation_enabled, premium_borders_enabled,
   discovery_profile_rail_enabled, discovery_quick_find_enabled, discovery_facet_rail_enabled,
   discovery_grouped_results_enabled, discovery_sticky_toolbar_enabled, discovery_group_preview_count
 )
 VALUES
-  ('project', 'grid', 3, JSON_ARRAY('category','tags'), JSON_ARRAY('title','summary','tags'), JSON_ARRAY('title','summary','category','primary_image'), JSON_ARRAY('title','description','specs','media','enquiry'), 1, 6000, NULL, 'Selected Projects', 'Projects engineered for performance and long-term reliability.', 'Browse selected delivery highlights, then dive into the full portfolio below.', 'premium', 'spotlight', 1, 1, 1, 1, 1, 1, 1, 1, 1, 4),
-  ('product', 'grid', 3, JSON_ARRAY('category','tags'), JSON_ARRAY('title','summary','tags'), JSON_ARRAY('title','summary','price_label','primary_image'), JSON_ARRAY('title','description','specs','media','enquiry'), 1, 6000, NULL, 'Product Spotlight', 'Configured power and automation products for critical infrastructure.', 'Highlight priority products in the hero while keeping the rest of the catalog fully searchable.', 'premium', 'spotlight', 1, 1, 1, 1, 1, 1, 1, 1, 1, 4),
-  ('service', 'grid', 3, JSON_ARRAY('category','tags'), JSON_ARRAY('title','summary','tags'), JSON_ARRAY('title','summary','category','primary_image'), JSON_ARRAY('title','description','specs','media','enquiry'), 1, 6000, NULL, 'Service Spotlight', 'End-to-end services for uptime, efficiency, and expansion.', 'Feature selected service capabilities in a rotating hero to guide visitors before they browse.', 'premium', 'spotlight', 1, 1, 1, 1, 1, 1, 1, 1, 1, 4)
+  ('project', 'grid', 3, JSON_ARRAY('category','tags'), JSON_ARRAY('title','summary','tags'), JSON_ARRAY('title','summary','category','primary_image'), JSON_ARRAY('title','description','specs','media','enquiry'), 1, 6000, NULL, 'Selected Projects', 'Projects engineered for performance and long-term reliability.', 'Browse selected delivery highlights, then dive into the full portfolio below.', 'premium', 'spotlight', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4),
+  ('product', 'grid', 3, JSON_ARRAY('category','tags'), JSON_ARRAY('title','summary','tags'), JSON_ARRAY('title','summary','price_label','primary_image'), JSON_ARRAY('title','description','specs','media','enquiry'), 1, 6000, NULL, 'Product Spotlight', 'Configured power and automation products for critical infrastructure.', 'Highlight priority products in the hero while keeping the rest of the catalog fully searchable.', 'premium', 'spotlight', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4),
+  ('service', 'grid', 3, JSON_ARRAY('category','tags'), JSON_ARRAY('title','summary','tags'), JSON_ARRAY('title','summary','category','primary_image'), JSON_ARRAY('title','description','specs','media','enquiry'), 1, 6000, NULL, 'Service Spotlight', 'End-to-end services for uptime, efficiency, and expansion.', 'Feature selected service capabilities in a rotating hero to guide visitors before they browse.', 'premium', 'spotlight', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4)
 ON DUPLICATE KEY UPDATE layout = VALUES(layout);
 
 INSERT INTO form_definitions (form_key, name, item_type, enabled)

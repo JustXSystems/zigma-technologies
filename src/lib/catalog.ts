@@ -493,6 +493,7 @@ export async function getPageSettings(itemType: CatalogItemType) {
     visual_style: row.visual_style ?? 'premium',
     hero_variant: row.hero_variant ?? 'spotlight',
     hero_standard_panel_enabled: Number(row.hero_standard_panel_enabled ?? 1),
+    hero_meta_enabled: Number(row.hero_meta_enabled ?? 1),
     loading_skeleton_enabled: Number(row.loading_skeleton_enabled ?? 1),
     reveal_animation_enabled: Number(row.reveal_animation_enabled ?? 1),
     premium_borders_enabled: Number(row.premium_borders_enabled ?? 1),
@@ -544,6 +545,8 @@ export async function updatePageSettings(
         : input.hero_standard_panel_enabled
           ? 1
           : 0,
+    hero_meta_enabled:
+      input.hero_meta_enabled === undefined ? undefined : input.hero_meta_enabled ? 1 : 0,
     loading_skeleton_enabled:
       input.loading_skeleton_enabled === undefined ? undefined : input.loading_skeleton_enabled ? 1 : 0,
     reveal_animation_enabled:

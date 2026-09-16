@@ -123,11 +123,13 @@ function CatalogAppearancePreview({
               <p className="lead" style={{ maxWidth: 480, marginTop: 0 }}>
                 {settings.hero_lead || 'Curated hero presentation with controlled visual presets.'}
               </p>
-              <div className="catalog-hero-meta">
-                <span>{settings.visual_style}</span>
-                <span>{settings.hero_variant}</span>
-                <span>{settings.loading_skeleton_enabled ? 'skeleton on' : 'skeleton off'}</span>
-              </div>
+              {settings.hero_meta_enabled !== 0 ? (
+                <div className="catalog-hero-meta">
+                  <span>{settings.visual_style}</span>
+                  <span>{settings.hero_variant}</span>
+                  <span>{settings.loading_skeleton_enabled ? 'skeleton on' : 'skeleton off'}</span>
+                </div>
+              ) : null}
               {settings.hero_variant === 'standard' && settings.hero_standard_panel_enabled !== 0 ? (
                 <div className="catalog-hero-standard-panel">
                   <span className="catalog-hero-kicker">{type}</span>
@@ -272,6 +274,7 @@ export default function CatalogSettingsPage() {
         visual_style: settings.visual_style,
         hero_variant: settings.hero_variant,
         hero_standard_panel_enabled: !!settings.hero_standard_panel_enabled,
+        hero_meta_enabled: !!settings.hero_meta_enabled,
         loading_skeleton_enabled: !!settings.loading_skeleton_enabled,
         reveal_animation_enabled: !!settings.reveal_animation_enabled,
         premium_borders_enabled: !!settings.premium_borders_enabled,
@@ -420,6 +423,36 @@ export default function CatalogSettingsPage() {
                     {settings.hero_variant !== 'standard'
                       ? 'Switch Hero variant to “standard” to see this panel on the public page.'
                       : 'Hides/shows the compact active-item card in the standard hero.'}
+                  </p>
+                </div>
+                <div className="admin-field">
+                  <label>Hero meta row</label>
+                  <label
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      border: '1px solid var(--admin-border)',
+                      borderRadius: 10,
+                      padding: '0.55rem 0.8rem',
+                      background: '#fff',
+                      minHeight: 42,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={settings.hero_meta_enabled !== 0}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          hero_meta_enabled: e.target.checked ? 1 : 0,
+                        })
+                      }
+                    />
+                    Show <code>.catalog-hero-meta</code>
+                  </label>
+                  <p style={{ margin: '0.35rem 0 0', color: 'var(--admin-muted)', fontSize: '0.78rem' }}>
+                    Highlights / autoplay / type chips under the hero headline.
                   </p>
                 </div>
                 <div className="admin-field">

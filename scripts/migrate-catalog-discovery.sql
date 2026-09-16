@@ -15,6 +15,16 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET @col_exists := (
   SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'hero_meta_enabled'
+);
+SET @sql := IF(@col_exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_standard_panel_enabled',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'discovery_profile_rail_enabled'
 );
 SET @sql := IF(@col_exists = 0,

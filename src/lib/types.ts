@@ -111,6 +111,8 @@ export type CatalogPageSettings = {
   hero_variant: 'standard' | 'spotlight';
   /** When hero_variant is standard, show/hide the compact active-item panel. */
   hero_standard_panel_enabled: number;
+  /** Show/hide the hero meta row (highlights / autoplay / type). */
+  hero_meta_enabled: number;
   loading_skeleton_enabled: number;
   reveal_animation_enabled: number;
   premium_borders_enabled: number;

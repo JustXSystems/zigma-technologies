@@ -48,6 +48,10 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_variant`,
   },
   {
+    name: 'hero_meta_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_standard_panel_enabled`,
+  },
+  {
     name: 'discovery_profile_rail_enabled',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_profile_rail_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER premium_borders_enabled`,
   },
