@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import type { CatalogBackgroundShading, CatalogMedia } from '@/lib/types';
+import type { CatalogShadowStyle, CatalogMedia } from '@/lib/types';
 import { DEFAULT_MEDIA_FIT_PERCENT } from '@/lib/types';
 import { publicMediaUrl } from '@/lib/media-url';
 
@@ -10,9 +10,11 @@ type Props = {
   title?: string;
   className?: string;
   variant?: 'default' | 'detail';
-  /** Optional backdrop behind gallery media (catalog-gallery-main) */
   backgroundImageUrl?: string | null;
-  backgroundShadingStyle?: CatalogBackgroundShading | null;
+  backgroundShadingStyle?: CatalogShadowStyle | null;
+  backgroundFitToSpace?: boolean | null;
+  backgroundFitPercent?: number | null;
+  /** Fallback product fit when active media lacks values */
   mediaFitToSpace?: boolean | null;
   mediaFitPercent?: number | null;
 };
@@ -24,6 +26,8 @@ export default function CatalogMediaGallery({
   variant = 'default',
   backgroundImageUrl,
   backgroundShadingStyle = 'medium',
+  backgroundFitToSpace = false,
+  backgroundFitPercent = 100,
   mediaFitToSpace = true,
   mediaFitPercent = DEFAULT_MEDIA_FIT_PERCENT,
 }: Props) {
@@ -42,17 +46,19 @@ export default function CatalogMediaGallery({
   }, [sorted]);
 
   const active = sorted.find((m) => m.id === activeId) || sorted[0];
-  // CSS url() is not rewritten by BasePathBootstrap — must prefix here for PreProd.
   const bg = publicMediaUrl(backgroundImageUrl?.trim() || '');
   const bgCss = bg
     ? encodeURI(bg).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
     : '';
-  const shading = backgroundShadingStyle || 'medium';
-  const fitToSpace =
+  const bgShadow = backgroundShadingStyle || 'medium';
+  const bgFit = backgroundFitToSpace === true;
+  const bgPct = Math.min(100, Math.max(20, Number(backgroundFitPercent) || 100));
+
+  const productFit =
     active?.fit_to_space !== undefined && active?.fit_to_space !== null
       ? active.fit_to_space !== false
       : mediaFitToSpace !== false;
-  const fitPct = Math.min(
+  const productPct = Math.min(
     100,
     Math.max(
       20,
@@ -63,14 +69,17 @@ export default function CatalogMediaGallery({
       ) || DEFAULT_MEDIA_FIT_PERCENT
     )
   );
-  const useFit = !!bg && fitToSpace;
+  const productShadow = active?.shadow_style || 'medium';
+  const useProductFit = !!bg && productFit;
 
   const rootClass = [
     'catalog-gallery',
     variant === 'detail' ? 'catalog-gallery--detail' : '',
     bg ? 'catalog-gallery--has-bg' : '',
-    bg ? (useFit ? 'catalog-gallery--fit' : 'catalog-gallery--cover') : '',
-    `catalog-gallery--shade-${shading}`,
+    bg ? (bgFit ? 'catalog-gallery--bg-fit' : 'catalog-gallery--bg-cover') : '',
+    bg ? `catalog-gallery--bg-shade-${bgShadow}` : '',
+    bg ? (useProductFit ? 'catalog-gallery--product-fit' : 'catalog-gallery--product-cover') : '',
+    bg ? `catalog-gallery--product-shade-${productShadow}` : '',
     className,
   ]
     .filter(Boolean)
@@ -80,16 +89,13 @@ export default function CatalogMediaGallery({
     ...(bgCss
       ? {
           backgroundImage: `url("${bgCss}")`,
-          backgroundSize: 'cover',
+          backgroundSize: bgFit ? undefined : 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
         }
       : null),
-    ...(useFit
-      ? ({
-          ['--catalog-media-fit']: `${fitPct}%`,
-        } as CSSProperties)
-      : null),
+    ...(bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%`, backgroundSize: `${bgPct}% auto` } as CSSProperties) : null),
+    ...(useProductFit ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties) : null),
   } as CSSProperties | undefined;
 
   if (!sorted.length) {

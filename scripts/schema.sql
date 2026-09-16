@@ -93,6 +93,8 @@ CREATE TABLE IF NOT EXISTS catalog_items (
   lead_time_label VARCHAR(120) NULL,
   background_image_url VARCHAR(500) NULL,
   background_shading_style VARCHAR(20) NOT NULL DEFAULT 'medium',
+  background_fit_to_space TINYINT(1) NOT NULL DEFAULT 0,
+  background_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 100,
   media_fit_to_space TINYINT(1) NOT NULL DEFAULT 1,
   media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78,
   status ENUM('draft','published') NOT NULL DEFAULT 'draft',
@@ -118,6 +120,7 @@ CREATE TABLE IF NOT EXISTS catalog_media (
   is_primary TINYINT(1) NOT NULL DEFAULT 0,
   fit_to_space TINYINT(1) NOT NULL DEFAULT 1,
   fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78,
+  shadow_style VARCHAR(20) NOT NULL DEFAULT 'medium',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_media_item FOREIGN KEY (item_id) REFERENCES catalog_items(id) ON DELETE CASCADE,
   INDEX idx_media_item_sort (item_id, sort_order)

@@ -7,10 +7,10 @@ import type {
   CatalogCategory,
   CatalogItemType,
   CatalogMedia,
-  CatalogBackgroundShading,
+  CatalogShadowStyle,
 } from '@/lib/types';
 import {
-  CATALOG_BACKGROUND_SHADING_OPTIONS,
+  CATALOG_SHADOW_STYLE_OPTIONS,
   DEFAULT_MEDIA_FIT_PERCENT,
 } from '@/lib/types';
 import { buildCaseStudyJson, caseStudyToEditor } from '@/lib/catalog-case-study';
@@ -111,8 +111,11 @@ function InventoryInner() {
   const [attachUrl, setAttachUrl] = useState('');
   const [attachFitToSpace, setAttachFitToSpace] = useState(true);
   const [attachFitPercent, setAttachFitPercent] = useState(DEFAULT_MEDIA_FIT_PERCENT);
+  const [attachShadow, setAttachShadow] = useState<CatalogShadowStyle>('medium');
   const [backgroundUrl, setBackgroundUrl] = useState('');
-  const [backgroundShading, setBackgroundShading] = useState<CatalogBackgroundShading>('medium');
+  const [backgroundShading, setBackgroundShading] = useState<CatalogShadowStyle>('medium');
+  const [backgroundFitToSpace, setBackgroundFitToSpace] = useState(false);
+  const [backgroundFitPercent, setBackgroundFitPercent] = useState(100);
   const [mediaMsg, setMediaMsg] = useState('');
   const [savingBackground, setSavingBackground] = useState(false);
   const [savingMediaFitId, setSavingMediaFitId] = useState<number | null>(null);
@@ -372,8 +375,11 @@ function InventoryInner() {
     if (opts?.resetBackground !== false && (switching || !mediaItem)) {
       setBackgroundUrl(item.background_image_url || '');
       setBackgroundShading(item.background_shading_style || 'medium');
+      setBackgroundFitToSpace(item.background_fit_to_space === true);
+      setBackgroundFitPercent(item.background_fit_percent || 100);
       setAttachFitToSpace(item.media_fit_to_space !== false);
       setAttachFitPercent(item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+      setAttachShadow('medium');
     }
     const res = await fetch(`/api/admin/catalog/${item.id}/media`);
     const data = await res.json();
@@ -384,7 +390,9 @@ function InventoryInner() {
   function mediaPresentationDirty(item: CatalogItem) {
     return (
       backgroundUrl !== (item.background_image_url || '') ||
-      backgroundShading !== (item.background_shading_style || 'medium')
+      backgroundShading !== (item.background_shading_style || 'medium') ||
+      backgroundFitToSpace !== (item.background_fit_to_space === true) ||
+      backgroundFitPercent !== (item.background_fit_percent || 100)
     );
   }
 
@@ -400,20 +408,28 @@ function InventoryInner() {
         body: JSON.stringify({
           background_image_url: normalized,
           background_shading_style: backgroundShading,
+          background_fit_to_space: backgroundFitToSpace,
+          background_fit_percent: backgroundFitPercent,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not save media presentation');
       const nextUrl = data.item?.background_image_url || '';
-      const nextShading = (data.item?.background_shading_style || backgroundShading) as CatalogBackgroundShading;
+      const nextShading = (data.item?.background_shading_style || backgroundShading) as CatalogShadowStyle;
+      const nextBgFit = data.item?.background_fit_to_space === true;
+      const nextBgPct = Number(data.item?.background_fit_percent) || backgroundFitPercent;
       setBackgroundUrl(nextUrl);
       setBackgroundShading(nextShading);
+      setBackgroundFitToSpace(nextBgFit);
+      setBackgroundFitPercent(nextBgPct);
       setMediaItem({
         ...mediaItem,
         background_image_url: nextUrl || null,
         background_shading_style: nextShading,
+        background_fit_to_space: nextBgFit,
+        background_fit_percent: nextBgPct,
       });
-      setMediaMsg(nextUrl ? 'Background & shadow saved.' : 'Background cleared; shadow style saved.');
+      setMediaMsg(nextUrl ? 'Background presentation saved.' : 'Background cleared; shadow & fit saved.');
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save media presentation');
@@ -433,6 +449,7 @@ function InventoryInner() {
         is_primary: isPrimary || itemMedia.length === 0,
         fit_to_space: attachFitToSpace,
         fit_percent: attachFitPercent,
+        shadow_style: attachShadow,
       }),
     });
     const data = await res.json();
@@ -446,7 +463,12 @@ function InventoryInner() {
     await load();
   }
 
-  async function saveAttachedMediaFit(mediaId: number, fitToSpace: boolean, fitPercent: number) {
+  async function saveAttachedMediaFit(
+    mediaId: number,
+    fitToSpace: boolean,
+    fitPercent: number,
+    shadowStyle: CatalogShadowStyle
+  ) {
     if (!mediaItem) return;
     setSavingMediaFitId(mediaId);
     setMediaMsg('');
@@ -459,15 +481,16 @@ function InventoryInner() {
           media_id: mediaId,
           fit_to_space: fitToSpace,
           fit_percent: fitPercent,
+          shadow_style: shadowStyle,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Could not save fit settings');
+      if (!res.ok) throw new Error(data.error || 'Could not save presentation');
       setItemMedia(data.media || []);
-      setMediaMsg('Fit settings saved.');
+      setMediaMsg('Image shadow & fit saved.');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save fit settings');
+      setError(err instanceof Error ? err.message : 'Could not save presentation');
     } finally {
       setSavingMediaFitId(null);
     }
@@ -888,21 +911,22 @@ function InventoryInner() {
           <div className="admin-modal" style={{ width: 'min(960px, 100%)' }} onClick={(e) => e.stopPropagation()}>
             <h2>Media · {mediaItem.title}</h2>
             <p className="admin-media-lead">
-              Background + shadow for cards/popup. Attach assets with fit controls. ★ marks the card thumbnail.
+              Separate shadow &amp; fit for background and each attached image. Applied on public catalog cards —
+              no gray wash.
             </p>
             {mediaMsg ? <div className="admin-success">{mediaMsg}</div> : null}
 
             <div className="admin-media-studio">
               <div className="admin-media-panel">
                 <div className="admin-media-panel-head">
-                  <h3>Presentation</h3>
-                  <span>Background · Shadow · Attach</span>
+                  <h3>Background</h3>
+                  <span>Own shadow · Own fit</span>
                 </div>
 
                 <MediaPicker
                   value={backgroundUrl}
                   onChange={setBackgroundUrl}
-                  label="Background"
+                  label="Background image"
                   compact
                 />
 
@@ -913,15 +937,41 @@ function InventoryInner() {
                       id="bg-shadow"
                       className="admin-select"
                       value={backgroundShading}
-                      onChange={(e) => setBackgroundShading(e.target.value as CatalogBackgroundShading)}
-                      style={{ minWidth: 150 }}
+                      onChange={(e) => setBackgroundShading(e.target.value as CatalogShadowStyle)}
+                      style={{ minWidth: 140 }}
                     >
-                      {CATALOG_BACKGROUND_SHADING_OPTIONS.map((opt) => (
+                      {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
                       ))}
                     </select>
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={backgroundFitToSpace}
+                      onChange={(e) => setBackgroundFitToSpace(e.target.checked)}
+                    />
+                    Fit to space
+                  </label>
+                  <label>
+                    Fit %
+                    <input
+                      className="admin-input"
+                      type="number"
+                      min={20}
+                      max={100}
+                      step={1}
+                      disabled={!backgroundFitToSpace}
+                      value={backgroundFitPercent}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        if (!Number.isFinite(n)) return;
+                        setBackgroundFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                      }}
+                      style={{ width: 64 }}
+                    />
                   </label>
                   <div className="admin-media-actions" style={{ marginTop: 0 }}>
                     <button
@@ -948,6 +998,11 @@ function InventoryInner() {
 
                 <div style={{ borderTop: '1px solid var(--admin-border)', margin: '0.75rem 0 0.55rem' }} />
 
+                <div className="admin-media-panel-head" style={{ borderBottom: 'none', marginBottom: '0.35rem', paddingBottom: 0 }}>
+                  <h3>Attached image</h3>
+                  <span>Own shadow · Own fit</span>
+                </div>
+
                 <MediaPicker
                   value={attachUrl}
                   onChange={setAttachUrl}
@@ -956,6 +1011,22 @@ function InventoryInner() {
                 />
 
                 <div className="admin-media-inline">
+                  <label htmlFor="attach-shadow">
+                    Shadow
+                    <select
+                      id="attach-shadow"
+                      className="admin-select"
+                      value={attachShadow}
+                      onChange={(e) => setAttachShadow(e.target.value as CatalogShadowStyle)}
+                      style={{ minWidth: 140 }}
+                    >
+                      {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <label>
                     <input
                       type="checkbox"
@@ -1023,14 +1094,23 @@ function InventoryInner() {
                   itemMedia.find((m) => m.kind !== 'video')?.url ||
                   ''
                 }
-                shading={backgroundShading}
-                fitToSpace={
+                backgroundShadow={backgroundShading}
+                backgroundFit={backgroundFitToSpace}
+                backgroundFitPercent={backgroundFitPercent}
+                productShadow={
+                  attachUrl
+                    ? attachShadow
+                    : itemMedia.find((m) => m.is_primary)?.shadow_style ||
+                      itemMedia.find((m) => m.kind !== 'video')?.shadow_style ||
+                      'medium'
+                }
+                productFit={
                   attachUrl
                     ? attachFitToSpace
                     : (itemMedia.find((m) => m.is_primary)?.fit_to_space ??
                         itemMedia.find((m) => m.kind !== 'video')?.fit_to_space) !== false
                 }
-                fitPercent={
+                productFitPercent={
                   attachUrl
                     ? attachFitPercent
                     : itemMedia.find((m) => m.is_primary)?.fit_percent ||
@@ -1055,12 +1135,15 @@ function InventoryInner() {
                     onSetPrimary={() => setPrimaryMedia(m.id)}
                     onMove={(dir) => moveMedia(m.id, dir)}
                     onRemove={() => removeMedia(m.id)}
-                    onSaveFit={(fitToSpace, fitPercent) => saveAttachedMediaFit(m.id, fitToSpace, fitPercent)}
+                    onSaveFit={(fitToSpace, fitPercent, shadowStyle) =>
+                      saveAttachedMediaFit(m.id, fitToSpace, fitPercent, shadowStyle)
+                    }
                     onPreview={() => {
                       if (m.kind === 'video') return;
                       setAttachUrl(m.url);
                       setAttachFitToSpace(m.fit_to_space !== false);
                       setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+                      setAttachShadow(m.shadow_style || 'medium');
                     }}
                   />
                 ))}
@@ -1081,43 +1164,56 @@ function InventoryInner() {
 function MediaPresentationPreview({
   backgroundUrl,
   productUrl,
-  shading,
-  fitToSpace,
-  fitPercent,
+  backgroundShadow,
+  backgroundFit,
+  backgroundFitPercent,
+  productShadow,
+  productFit,
+  productFitPercent,
   previewSource,
 }: {
   backgroundUrl: string;
   productUrl: string;
-  shading: CatalogBackgroundShading;
-  fitToSpace: boolean;
-  fitPercent: number;
+  backgroundShadow: CatalogShadowStyle;
+  backgroundFit: boolean;
+  backgroundFitPercent: number;
+  productShadow: CatalogShadowStyle;
+  productFit: boolean;
+  productFitPercent: number;
   previewSource: 'attach' | 'thumbnail';
 }) {
   const bg = backgroundUrl.trim() ? publicMediaUrl(backgroundUrl.trim()) : '';
   const product = productUrl.trim() ? publicMediaUrl(productUrl.trim()) : '';
-  const useFit = !!bg && fitToSpace;
-  const pct = Math.min(100, Math.max(20, fitPercent || DEFAULT_MEDIA_FIT_PERCENT));
-  const shadeLabel = CATALOG_BACKGROUND_SHADING_OPTIONS.find((o) => o.value === shading)?.label || shading;
+  const useProductFit = !!bg && productFit;
+  const bgPct = Math.min(100, Math.max(20, backgroundFitPercent || 100));
+  const productPct = Math.min(100, Math.max(20, productFitPercent || DEFAULT_MEDIA_FIT_PERCENT));
+  const bgLabel = CATALOG_SHADOW_STYLE_OPTIONS.find((o) => o.value === backgroundShadow)?.label || backgroundShadow;
+  const productLabel = CATALOG_SHADOW_STYLE_OPTIONS.find((o) => o.value === productShadow)?.label || productShadow;
 
   return (
-    <div className={`admin-media-preview admin-media-preview--shade-${shading}`}>
+    <div
+      className={`admin-media-preview admin-media-preview--bg-shade-${backgroundShadow} admin-media-preview--product-shade-${productShadow}`}
+    >
       <div className="admin-media-preview-label">
         <span>Live preview</span>
         <span>
-          {shadeLabel}
-          {bg ? ` · ${useFit ? `${pct}% fit` : 'cover'}` : ''}
-          {product ? ` · ${previewSource}` : ''}
+          bg {bgLabel}
+          {bg ? ` · ${backgroundFit ? `${bgPct}%` : 'cover'}` : ''}
+          {product ? ` · img ${productLabel} · ${useProductFit ? `${productPct}%` : 'cover'} · ${previewSource}` : ''}
         </span>
       </div>
       <div
-        className={`admin-media-preview-stage${useFit ? ' admin-media-preview-stage--fit' : ''}`}
+        className={`admin-media-preview-stage${useProductFit ? ' admin-media-preview-stage--fit' : ''}`}
         style={{
           ...(bg
             ? {
                 backgroundImage: `url("${encodeURI(bg).replace(/"/g, '\\"')}")`,
+                backgroundSize: backgroundFit ? `${bgPct}% auto` : 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
               }
             : null),
-          ...(useFit ? ({ ['--preview-fit']: `${pct}%` } as CSSProperties) : null),
+          ...(useProductFit ? ({ ['--preview-fit']: `${productPct}%` } as CSSProperties) : null),
         }}
       >
         {product ? (
@@ -1125,12 +1221,14 @@ function MediaPresentationPreview({
           <img
             src={product}
             alt=""
-            className={`admin-media-preview-product${useFit ? '' : ' admin-media-preview-product--cover'}`}
+            className={`admin-media-preview-product admin-media-preview-product--shade-${productShadow}${
+              useProductFit ? '' : ' admin-media-preview-product--cover'
+            }`}
           />
         ) : (
           <div className="admin-media-preview-empty">
             {bg
-              ? 'Select or attach a product image to preview fit & shadow.'
+              ? 'Select or attach a product image to preview its shadow & fit.'
               : 'Choose a background and product image to preview presentation.'}
           </div>
         )}
@@ -1157,20 +1255,23 @@ function AttachedMediaCard({
   onSetPrimary: () => void;
   onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
-  onSaveFit: (fitToSpace: boolean, fitPercent: number) => void;
+  onSaveFit: (fitToSpace: boolean, fitPercent: number, shadowStyle: CatalogShadowStyle) => void;
   onPreview: () => void;
 }) {
   const [fitToSpace, setFitToSpace] = useState(m.fit_to_space !== false);
   const [fitPercent, setFitPercent] = useState(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+  const [shadowStyle, setShadowStyle] = useState<CatalogShadowStyle>(m.shadow_style || 'medium');
 
   useEffect(() => {
     setFitToSpace(m.fit_to_space !== false);
     setFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
-  }, [m.id, m.fit_to_space, m.fit_percent]);
+    setShadowStyle(m.shadow_style || 'medium');
+  }, [m.id, m.fit_to_space, m.fit_percent, m.shadow_style]);
 
   const dirty =
     fitToSpace !== (m.fit_to_space !== false) ||
-    fitPercent !== (m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+    fitPercent !== (m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT) ||
+    shadowStyle !== (m.shadow_style || 'medium');
 
   return (
     <div className={`admin-media-card${m.is_primary ? ' is-primary' : ''}`}>
@@ -1190,6 +1291,21 @@ function AttachedMediaCard({
         <code title={m.url}>{m.url}</code>
         {m.kind !== 'video' ? (
           <div className="admin-media-card-fit">
+            <label>
+              Shadow
+              <select
+                className="admin-select"
+                value={shadowStyle}
+                onChange={(e) => setShadowStyle(e.target.value as CatalogShadowStyle)}
+                style={{ minWidth: 110, minHeight: 28, padding: '0.15rem 0.35rem', fontSize: '0.75rem' }}
+              >
+                {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label>
               <input
                 type="checkbox"
@@ -1219,9 +1335,9 @@ function AttachedMediaCard({
               type="button"
               className="admin-btn admin-btn-secondary"
               disabled={!dirty || saving}
-              onClick={() => onSaveFit(fitToSpace, fitPercent)}
+              onClick={() => onSaveFit(fitToSpace, fitPercent, shadowStyle)}
             >
-              {saving ? '…' : 'Save fit'}
+              {saving ? '…' : 'Save'}
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={onPreview}>
               Preview

@@ -36,6 +36,7 @@ const postSchema = z.object({
   kind: z.enum(['image', 'video', 'svg']).optional(),
   fit_to_space: z.boolean().optional(),
   fit_percent: z.number().min(20).max(100).optional(),
+  shadow_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
 });
 
 export async function POST(request: Request, ctx: Ctx) {
@@ -54,6 +55,7 @@ export async function POST(request: Request, ctx: Ctx) {
       is_primary: body.is_primary,
       fit_to_space: body.fit_to_space,
       fit_percent: body.fit_percent,
+      shadow_style: body.shadow_style,
     });
     return jsonOk({ mediaId }, { status: 201 });
   } catch (error) {
@@ -70,6 +72,7 @@ const patchSchema = z.object({
   from_item_id: z.number().int().positive().optional(),
   fit_to_space: z.boolean().optional(),
   fit_percent: z.number().min(20).max(100).optional(),
+  shadow_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
 });
 
 export async function PATCH(request: Request, ctx: Ctx) {
@@ -102,6 +105,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
       await updateItemMediaFit(itemId, body.media_id, {
         fit_to_space: body.fit_to_space,
         fit_percent: body.fit_percent,
+        shadow_style: body.shadow_style,
       });
     }
 

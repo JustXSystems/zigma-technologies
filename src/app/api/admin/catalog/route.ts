@@ -18,6 +18,8 @@ const createSchema = z.object({
   lead_time_label: z.string().nullable().optional(),
   background_image_url: z.string().nullable().optional(),
   background_shading_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
+  background_fit_to_space: z.boolean().optional(),
+  background_fit_percent: z.number().min(20).max(100).optional(),
   media_fit_to_space: z.boolean().optional(),
   media_fit_percent: z.number().min(20).max(100).optional(),
   status: z.enum(['draft', 'published']).optional(),

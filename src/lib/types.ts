@@ -1,19 +1,24 @@
 export type CatalogItemType = 'project' | 'product' | 'service';
 
-/** Drop-shadow style on catalog product media over the background */
-export type CatalogBackgroundShading = 'none' | 'soft' | 'medium' | 'strong' | 'bottom';
+/** Drop-shadow style for background frame or attached product media */
+export type CatalogShadowStyle = 'none' | 'soft' | 'medium' | 'strong' | 'bottom';
+/** @deprecated Prefer CatalogShadowStyle */
+export type CatalogBackgroundShading = CatalogShadowStyle;
 
-export const CATALOG_BACKGROUND_SHADING_OPTIONS: Array<{
-  value: CatalogBackgroundShading;
+export const CATALOG_SHADOW_STYLE_OPTIONS: Array<{
+  value: CatalogShadowStyle;
   label: string;
   hint: string;
 }> = [
   { value: 'none', label: 'None', hint: 'No drop shadow' },
-  { value: 'soft', label: 'Soft shadow', hint: 'Light lift around the product' },
+  { value: 'soft', label: 'Soft shadow', hint: 'Light lift' },
   { value: 'medium', label: 'Medium shadow', hint: 'Balanced depth (default)' },
   { value: 'strong', label: 'Strong shadow', hint: 'High contrast depth' },
-  { value: 'bottom', label: 'Ground shadow', hint: 'Shadow pooled under the product' },
+  { value: 'bottom', label: 'Ground shadow', hint: 'Shadow pooled underneath' },
 ];
+
+/** @deprecated Prefer CATALOG_SHADOW_STYLE_OPTIONS */
+export const CATALOG_BACKGROUND_SHADING_OPTIONS = CATALOG_SHADOW_STYLE_OPTIONS;
 
 export const DEFAULT_MEDIA_FIT_PERCENT = 78;
 
@@ -59,12 +64,20 @@ export type CatalogItem = {
   lead_time_label: string | null;
   /** Backdrop for catalog-gallery-main in product/service/project popups */
   background_image_url: string | null;
-  /** Drop-shadow style on product media over the gallery/card background */
-  background_shading_style: CatalogBackgroundShading;
-  /** Default fit for new attaches / fallback when media has no override */
+  /** Drop-shadow on the background frame (catalog-card-media) */
+  background_shading_style: CatalogShadowStyle;
+  /** How the background image fills the media frame */
+  background_fit_to_space: boolean;
+  /** Background image size % when fit is on */
+  background_fit_percent: number;
+  /** @deprecated Defaults for new attaches — prefer per-media fit */
   media_fit_to_space: boolean;
-  /** Default fit % for new attaches / fallback when media has no override */
+  /** @deprecated Defaults for new attaches — prefer per-media fit */
   media_fit_percent: number;
+  /** Primary attached image presentation (from list query / media) */
+  primary_fit_to_space?: boolean;
+  primary_fit_percent?: number;
+  primary_shadow_style?: CatalogShadowStyle;
   status: 'draft' | 'published';
   featured: number;
   sort_order: number;
@@ -85,6 +98,8 @@ export type CatalogMedia = {
   alt: string | null;
   sort_order: number;
   is_primary: number;
+  /** Drop-shadow on this product/asset image */
+  shadow_style: CatalogShadowStyle;
   /** When true, this asset is contained within the frame at fit_percent */
   fit_to_space: boolean;
   /** Max width/height of this asset as % of the available frame (when fit is on) */

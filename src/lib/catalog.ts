@@ -11,6 +11,7 @@ import {
   type CatalogPageSettings,
   type CatalogFacets,
   type CatalogBackgroundShading,
+  type CatalogShadowStyle,
   type FormDefinition,
   type FormField,
   type Enquiry,
@@ -19,14 +20,14 @@ import {
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
 
-const SHADING_VALUES = new Set<CatalogBackgroundShading>(['none', 'soft', 'medium', 'strong', 'bottom']);
+const SHADING_VALUES = new Set<CatalogShadowStyle>(['none', 'soft', 'medium', 'strong', 'bottom']);
 
-export function normalizeBackgroundShading(value: unknown): CatalogBackgroundShading {
+export function normalizeBackgroundShading(value: unknown): CatalogShadowStyle {
   const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
-  return SHADING_VALUES.has(raw as CatalogBackgroundShading)
-    ? (raw as CatalogBackgroundShading)
-    : 'medium';
+  return SHADING_VALUES.has(raw as CatalogShadowStyle) ? (raw as CatalogShadowStyle) : 'medium';
 }
+
+export const normalizeShadowStyle = normalizeBackgroundShading;
 
 export function normalizeMediaFitPercent(value: unknown): number {
   const n = typeof value === 'number' ? value : Number(value);
@@ -54,14 +55,36 @@ function mapItem(row: RowDataPacket): CatalogItem {
       ? toStorageMediaPath(String(row.background_image_url))
       : null,
     background_shading_style: normalizeBackgroundShading(row.background_shading_style),
-    media_fit_to_space: row.media_fit_to_space === undefined || row.media_fit_to_space === null
-      ? true
-      : !!Number(row.media_fit_to_space),
+    background_fit_to_space:
+      row.background_fit_to_space === undefined || row.background_fit_to_space === null
+        ? false
+        : !!Number(row.background_fit_to_space),
+    background_fit_percent: normalizeMediaFitPercent(
+      row.background_fit_percent === undefined || row.background_fit_percent === null
+        ? 100
+        : row.background_fit_percent
+    ),
+    media_fit_to_space:
+      row.media_fit_to_space === undefined || row.media_fit_to_space === null
+        ? true
+        : !!Number(row.media_fit_to_space),
     media_fit_percent: normalizeMediaFitPercent(
       row.media_fit_percent === undefined || row.media_fit_percent === null
         ? DEFAULT_MEDIA_FIT_PERCENT
         : row.media_fit_percent
     ),
+    primary_fit_to_space:
+      row.primary_fit_to_space === undefined || row.primary_fit_to_space === null
+        ? undefined
+        : !!Number(row.primary_fit_to_space),
+    primary_fit_percent:
+      row.primary_fit_percent === undefined || row.primary_fit_percent === null
+        ? undefined
+        : normalizeMediaFitPercent(row.primary_fit_percent),
+    primary_shadow_style:
+      row.primary_shadow_style === undefined || row.primary_shadow_style === null
+        ? undefined
+        : normalizeShadowStyle(row.primary_shadow_style),
     status: row.status,
     featured: row.featured,
     sort_order: row.sort_order,
@@ -96,6 +119,24 @@ const THUMBNAIL_SUBQUERY = `(SELECT m.url FROM catalog_media m
   WHERE m.item_id = i.id AND m.kind IN ('image','svg')
   ORDER BY m.is_primary DESC, m.sort_order ASC, m.id ASC LIMIT 1)`;
 
+const PRIMARY_FIT_SUBQUERY = `(SELECT m.fit_to_space FROM catalog_media m
+  WHERE m.item_id = i.id AND m.kind IN ('image','svg')
+  ORDER BY m.is_primary DESC, m.sort_order ASC, m.id ASC LIMIT 1)`;
+
+const PRIMARY_FIT_PCT_SUBQUERY = `(SELECT m.fit_percent FROM catalog_media m
+  WHERE m.item_id = i.id AND m.kind IN ('image','svg')
+  ORDER BY m.is_primary DESC, m.sort_order ASC, m.id ASC LIMIT 1)`;
+
+const PRIMARY_SHADOW_SUBQUERY = `(SELECT m.shadow_style FROM catalog_media m
+  WHERE m.item_id = i.id AND m.kind IN ('image','svg')
+  ORDER BY m.is_primary DESC, m.sort_order ASC, m.id ASC LIMIT 1)`;
+
+const CATALOG_LIST_SELECT = `i.*, c.name AS category_name, c.slug AS category_slug,
+      ${THUMBNAIL_SUBQUERY} AS primary_image,
+      ${PRIMARY_FIT_SUBQUERY} AS primary_fit_to_space,
+      ${PRIMARY_FIT_PCT_SUBQUERY} AS primary_fit_percent,
+      ${PRIMARY_SHADOW_SUBQUERY} AS primary_shadow_style`;
+
 export async function listCatalogItems(opts: {
   itemType: CatalogItemType;
   q?: string;
@@ -110,6 +151,7 @@ export async function listCatalogItems(opts: {
 }) {
   try {
   await ensureCatalogBackgroundColumn();
+  await ensureCatalogMediaFitColumns();
   const where: string[] = ['i.item_type = ?'];
   const params: unknown[] = [opts.itemType];
 
@@ -161,8 +203,7 @@ export async function listCatalogItems(opts: {
         : 'i.featured DESC, i.sort_order ASC, i.id DESC';
 
   const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT i.*, c.name AS category_name, c.slug AS category_slug,
-      ${THUMBNAIL_SUBQUERY} AS primary_image
+    `SELECT ${CATALOG_LIST_SELECT}
      FROM catalog_items i
      LEFT JOIN catalog_categories c ON c.id = i.category_id
      WHERE ${where.join(' AND ')}
@@ -193,8 +234,7 @@ export async function listCatalogItemsByIds(
   }
 
   const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT i.*, c.name AS category_name, c.slug AS category_slug,
-      ${THUMBNAIL_SUBQUERY} AS primary_image
+    `SELECT ${CATALOG_LIST_SELECT}
      FROM catalog_items i
      LEFT JOIN catalog_categories c ON c.id = i.category_id
      WHERE ${where.join(' AND ')}`,
@@ -228,6 +268,14 @@ export async function getCatalogItemBySlug(itemType: CatalogItemType, slug: stri
     const item = mapItem(rows[0]);
     item.media = await listItemMedia(item.id);
     item.primary_image = pickCatalogThumbnail(item.media);
+    const primaryMedia =
+      item.media.find((m) => m.is_primary && m.kind !== 'video') ||
+      item.media.find((m) => m.kind !== 'video');
+    if (primaryMedia) {
+      item.primary_fit_to_space = primaryMedia.fit_to_space;
+      item.primary_fit_percent = primaryMedia.fit_percent;
+      item.primary_shadow_style = primaryMedia.shadow_style;
+    }
     return item;
   } catch (err) {
     if (isDbUnavailableError(err)) return null;
@@ -248,6 +296,14 @@ export async function getCatalogItemById(id: number) {
   const item = mapItem(rows[0]);
   item.media = await listItemMedia(item.id);
   item.primary_image = pickCatalogThumbnail(item.media);
+  const primaryMedia =
+    item.media.find((m) => m.is_primary && m.kind !== 'video') ||
+    item.media.find((m) => m.kind !== 'video');
+  if (primaryMedia) {
+    item.primary_fit_to_space = primaryMedia.fit_to_space;
+    item.primary_fit_percent = primaryMedia.fit_percent;
+    item.primary_shadow_style = primaryMedia.shadow_style;
+  }
   return item;
 }
 
@@ -265,6 +321,7 @@ export async function listItemMedia(itemId: number): Promise<CatalogMedia[]> {
     alt: row.alt,
     sort_order: row.sort_order,
     is_primary: row.is_primary,
+    shadow_style: normalizeShadowStyle(row.shadow_style),
     fit_to_space:
       row.fit_to_space === undefined || row.fit_to_space === null ? true : !!Number(row.fit_to_space),
     fit_percent: normalizeMediaFitPercent(
@@ -290,6 +347,8 @@ export async function createCatalogItem(input: {
   lead_time_label?: string | null;
   background_image_url?: string | null;
   background_shading_style?: CatalogBackgroundShading;
+  background_fit_to_space?: boolean;
+  background_fit_percent?: number;
   media_fit_to_space?: boolean;
   media_fit_percent?: number;
   status?: 'draft' | 'published';
@@ -303,8 +362,8 @@ export async function createCatalogItem(input: {
   const slug = slugify(input.slug || input.title);
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO catalog_items
-      (item_type, slug, title, summary, description, category_id, tags_json, specs_json, price_label, availability_label, lead_time_label, background_image_url, background_shading_style, media_fit_to_space, media_fit_percent, status, featured, enabled, sort_order, case_study_json, cta_config_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (item_type, slug, title, summary, description, category_id, tags_json, specs_json, price_label, availability_label, lead_time_label, background_image_url, background_shading_style, background_fit_to_space, background_fit_percent, media_fit_to_space, media_fit_percent, status, featured, enabled, sort_order, case_study_json, cta_config_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.item_type,
       slug,
@@ -321,6 +380,8 @@ export async function createCatalogItem(input: {
         ? toStorageMediaPath(input.background_image_url.trim())
         : null,
       normalizeBackgroundShading(input.background_shading_style),
+      input.background_fit_to_space ? 1 : 0,
+      normalizeMediaFitPercent(input.background_fit_percent ?? 100),
       input.media_fit_to_space === false ? 0 : 1,
       normalizeMediaFitPercent(input.media_fit_percent ?? DEFAULT_MEDIA_FIT_PERCENT),
       input.status || 'draft',
@@ -349,6 +410,8 @@ export async function updateCatalogItem(
     lead_time_label: string | null;
     background_image_url: string | null;
     background_shading_style: CatalogBackgroundShading;
+    background_fit_to_space: boolean;
+    background_fit_percent: number;
     media_fit_to_space: boolean;
     media_fit_percent: number;
     status: 'draft' | 'published';
@@ -383,6 +446,12 @@ export async function updateCatalogItem(
     background_shading_style:
       input.background_shading_style !== undefined
         ? normalizeBackgroundShading(input.background_shading_style)
+        : undefined,
+    background_fit_to_space:
+      input.background_fit_to_space === undefined ? undefined : input.background_fit_to_space ? 1 : 0,
+    background_fit_percent:
+      input.background_fit_percent !== undefined
+        ? normalizeMediaFitPercent(input.background_fit_percent)
         : undefined,
     media_fit_to_space:
       input.media_fit_to_space === undefined ? undefined : input.media_fit_to_space ? 1 : 0,
@@ -669,6 +738,7 @@ export async function addItemMedia(input: {
   sort_order?: number;
   fit_to_space?: boolean;
   fit_percent?: number;
+  shadow_style?: CatalogShadowStyle;
 }) {
   await ensureCatalogMediaFitColumns();
   const existing = await listItemMedia(input.item_id);
@@ -686,11 +756,12 @@ export async function addItemMedia(input: {
 
   const fitToSpace = input.fit_to_space === false ? 0 : 1;
   const fitPercent = normalizeMediaFitPercent(input.fit_percent ?? DEFAULT_MEDIA_FIT_PERCENT);
+  const shadowStyle = normalizeShadowStyle(input.shadow_style);
 
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO catalog_media
-      (item_id, kind, url, alt, sort_order, is_primary, fit_to_space, fit_percent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (item_id, kind, url, alt, sort_order, is_primary, fit_to_space, fit_percent, shadow_style)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.item_id,
       input.kind,
@@ -700,15 +771,9 @@ export async function addItemMedia(input: {
       makePrimary ? 1 : 0,
       fitToSpace,
       fitPercent,
+      shadowStyle,
     ]
   );
-
-  if (makePrimary) {
-    await pool.query(
-      'UPDATE catalog_items SET media_fit_to_space = ?, media_fit_percent = ? WHERE id = ?',
-      [fitToSpace, fitPercent, input.item_id]
-    );
-  }
 
   return result.insertId;
 }
@@ -716,7 +781,7 @@ export async function addItemMedia(input: {
 export async function updateItemMediaFit(
   itemId: number,
   mediaId: number,
-  input: { fit_to_space?: boolean; fit_percent?: number }
+  input: { fit_to_space?: boolean; fit_percent?: number; shadow_style?: CatalogShadowStyle }
 ) {
   await ensureCatalogMediaFitColumns();
   const fields: string[] = [];
@@ -729,23 +794,16 @@ export async function updateItemMediaFit(
     fields.push('fit_percent = ?');
     params.push(normalizeMediaFitPercent(input.fit_percent));
   }
+  if (input.shadow_style !== undefined) {
+    fields.push('shadow_style = ?');
+    params.push(normalizeShadowStyle(input.shadow_style));
+  }
   if (!fields.length) return listItemMedia(itemId);
   params.push(mediaId, itemId);
   await pool.query(
     `UPDATE catalog_media SET ${fields.join(', ')} WHERE id = ? AND item_id = ?`,
     params
   );
-
-  const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT is_primary, fit_to_space, fit_percent FROM catalog_media WHERE id = ? AND item_id = ? LIMIT 1',
-    [mediaId, itemId]
-  );
-  if (rows[0]?.is_primary) {
-    await pool.query(
-      'UPDATE catalog_items SET media_fit_to_space = ?, media_fit_percent = ? WHERE id = ?',
-      [Number(rows[0].fit_to_space) ? 1 : 0, normalizeMediaFitPercent(rows[0].fit_percent), itemId]
-    );
-  }
 
   return listItemMedia(itemId);
 }
@@ -761,24 +819,6 @@ export async function setItemMediaPrimary(itemId: number, mediaId: number) {
 
   await pool.query('UPDATE catalog_media SET is_primary = 0 WHERE item_id = ?', [itemId]);
   await pool.query('UPDATE catalog_media SET is_primary = 1 WHERE id = ?', [mediaId]);
-  const [fitRows] = await pool.query<RowDataPacket[]>(
-    'SELECT fit_to_space, fit_percent FROM catalog_media WHERE id = ? LIMIT 1',
-    [mediaId]
-  );
-  if (fitRows[0]) {
-    await pool.query(
-      'UPDATE catalog_items SET media_fit_to_space = ?, media_fit_percent = ? WHERE id = ?',
-      [
-        fitRows[0].fit_to_space === undefined || fitRows[0].fit_to_space === null
-          ? 1
-          : Number(fitRows[0].fit_to_space)
-            ? 1
-            : 0,
-        normalizeMediaFitPercent(fitRows[0].fit_percent ?? DEFAULT_MEDIA_FIT_PERCENT),
-        itemId,
-      ]
-    );
-  }
 }
 
 export async function reorderItemMedia(itemId: number, orderedIds: number[]) {
@@ -803,6 +843,7 @@ export async function copyItemMedia(fromItemId: number, toItemId: number) {
       sort_order: m.sort_order,
       fit_to_space: m.fit_to_space,
       fit_percent: m.fit_percent,
+      shadow_style: m.shadow_style,
     });
   }
 }

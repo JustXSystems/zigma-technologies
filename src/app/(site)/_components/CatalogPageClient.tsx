@@ -51,18 +51,25 @@ function cssUrlValue(path: string): string {
 
 function CatalogCardMedia({ item }: { item: CatalogItem }) {
   const bgCss = item.background_image_url?.trim() ? cssUrlValue(item.background_image_url) : '';
-  const shading = item.background_shading_style || 'medium';
-  const fitToSpace = item.media_fit_to_space !== false;
-  const fitPct = Math.min(100, Math.max(20, Number(item.media_fit_percent) || 78));
-  // Fit-to-space only changes layout when a gallery background is present.
-  const useFit = !!bgCss && fitToSpace;
+  const bgShadow = item.background_shading_style || 'medium';
+  const bgFit = item.background_fit_to_space === true;
+  const bgPct = Math.min(100, Math.max(20, Number(item.background_fit_percent) || 100));
+
+  const productFit =
+    item.primary_fit_to_space !== undefined
+      ? item.primary_fit_to_space !== false
+      : item.media_fit_to_space !== false;
+  const productPct = Math.min(
+    100,
+    Math.max(20, Number(item.primary_fit_percent ?? item.media_fit_percent) || 78)
+  );
+  const productShadow = item.primary_shadow_style || 'medium';
+  const useProductFit = !!bgCss && productFit;
+
   const style = {
     ...(bgCss ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties) : null),
-    ...(useFit
-      ? ({
-          ['--catalog-media-fit']: `${fitPct}%`,
-        } as CSSProperties)
-      : null),
+    ...(bgCss && bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%` } as CSSProperties) : null),
+    ...(useProductFit ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties) : null),
   } as CSSProperties | undefined;
 
   return (
@@ -70,8 +77,10 @@ function CatalogCardMedia({ item }: { item: CatalogItem }) {
       className={cx(
         'catalog-card-media',
         bgCss && 'catalog-card-media--has-bg',
-        bgCss ? (useFit ? 'catalog-card-media--fit' : 'catalog-card-media--cover') : null,
-        `catalog-card-media--shade-${shading}`
+        bgCss ? (bgFit ? 'catalog-card-media--bg-fit' : 'catalog-card-media--bg-cover') : null,
+        bgCss && `catalog-card-media--bg-shade-${bgShadow}`,
+        bgCss ? (useProductFit ? 'catalog-card-media--product-fit' : 'catalog-card-media--product-cover') : null,
+        bgCss && `catalog-card-media--product-shade-${productShadow}`
       )}
       style={style}
     >

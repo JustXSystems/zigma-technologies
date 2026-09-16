@@ -324,6 +324,8 @@ export default function CatalogCaseStudyView({
                   variant="detail"
                   backgroundImageUrl={item.background_image_url}
                   backgroundShadingStyle={item.background_shading_style}
+                  backgroundFitToSpace={item.background_fit_to_space}
+                  backgroundFitPercent={item.background_fit_percent}
                   mediaFitToSpace={item.media_fit_to_space}
                   mediaFitPercent={item.media_fit_percent}
                 />

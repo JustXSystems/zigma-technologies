@@ -2327,20 +2327,37 @@
   padding: 1rem;
   line-height: 1.45;
 }
-.admin-media-preview--shade-soft .admin-media-preview-product:not(.admin-media-preview-product--cover) {
+.admin-media-preview--shade-soft .admin-media-preview-product:not(.admin-media-preview-product--cover),
+.admin-media-preview--product-shade-soft .admin-media-preview-product:not(.admin-media-preview-product--cover) {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
 }
-.admin-media-preview--shade-medium .admin-media-preview-product:not(.admin-media-preview-product--cover) {
+.admin-media-preview--shade-medium .admin-media-preview-product:not(.admin-media-preview-product--cover),
+.admin-media-preview--product-shade-medium .admin-media-preview-product:not(.admin-media-preview-product--cover) {
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48), 0 4px 12px rgba(0, 0, 0, 0.28);
 }
-.admin-media-preview--shade-strong .admin-media-preview-product:not(.admin-media-preview-product--cover) {
+.admin-media-preview--shade-strong .admin-media-preview-product:not(.admin-media-preview-product--cover),
+.admin-media-preview--product-shade-strong .admin-media-preview-product:not(.admin-media-preview-product--cover) {
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.6), 0 8px 18px rgba(0, 0, 0, 0.35);
 }
-.admin-media-preview--shade-bottom .admin-media-preview-product:not(.admin-media-preview-product--cover) {
+.admin-media-preview--shade-bottom .admin-media-preview-product:not(.admin-media-preview-product--cover),
+.admin-media-preview--product-shade-bottom .admin-media-preview-product:not(.admin-media-preview-product--cover) {
   box-shadow: 0 28px 36px -18px rgba(0, 0, 0, 0.75), 0 10px 16px -10px rgba(0, 0, 0, 0.45);
 }
-.admin-media-preview--shade-none .admin-media-preview-product {
+.admin-media-preview--shade-none .admin-media-preview-product,
+.admin-media-preview--product-shade-none .admin-media-preview-product {
   box-shadow: none;
+}
+.admin-media-preview--bg-shade-soft .admin-media-preview-stage {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 8px 22px rgba(0,0,0,0.35);
+}
+.admin-media-preview--bg-shade-medium .admin-media-preview-stage {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 14px 32px rgba(0,0,0,0.45);
+}
+.admin-media-preview--bg-shade-strong .admin-media-preview-stage {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 20px 44px rgba(0,0,0,0.55);
+}
+.admin-media-preview--bg-shade-bottom .admin-media-preview-stage {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 26px 36px -14px rgba(0,0,0,0.6);
 }
 .admin-media-list {
   display: grid;

@@ -15,8 +15,16 @@ const CATALOG_ITEM_MEDIA_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_items ADD COLUMN background_shading_style VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER background_image_url`,
   },
   {
+    name: 'background_fit_to_space',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN background_fit_to_space TINYINT(1) NOT NULL DEFAULT 0 AFTER background_shading_style`,
+  },
+  {
+    name: 'background_fit_percent',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN background_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 100 AFTER background_fit_to_space`,
+  },
+  {
     name: 'media_fit_to_space',
-    ddl: `ALTER TABLE catalog_items ADD COLUMN media_fit_to_space TINYINT(1) NOT NULL DEFAULT 1 AFTER background_shading_style`,
+    ddl: `ALTER TABLE catalog_items ADD COLUMN media_fit_to_space TINYINT(1) NOT NULL DEFAULT 1 AFTER background_fit_percent`,
   },
   {
     name: 'media_fit_percent',
@@ -32,6 +40,10 @@ const CATALOG_MEDIA_FIT_COLUMNS: Array<{ name: string; ddl: string }> = [
   {
     name: 'fit_percent',
     ddl: `ALTER TABLE catalog_media ADD COLUMN fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER fit_to_space`,
+  },
+  {
+    name: 'shadow_style',
+    ddl: `ALTER TABLE catalog_media ADD COLUMN shadow_style VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER fit_percent`,
   },
 ];
 
