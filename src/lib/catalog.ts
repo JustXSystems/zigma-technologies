@@ -613,6 +613,8 @@ export async function getPageSettings(itemType: CatalogItemType) {
     hero_title: row.hero_title ?? null,
     hero_lead: row.hero_lead ?? null,
     visual_style: row.visual_style ?? 'premium',
+    card_style: row.card_style === 'overlay' ? 'overlay' : 'marketplace',
+    card_body_bg_color: row.card_body_bg_color || '#ffffff',
     hero_variant: row.hero_variant ?? 'spotlight',
     hero_standard_panel_enabled: Number(row.hero_standard_panel_enabled ?? 1),
     hero_meta_enabled: Number(row.hero_meta_enabled ?? 1),
@@ -662,6 +664,8 @@ export async function updatePageSettings(
     hero_title: input.hero_title,
     hero_lead: input.hero_lead,
     visual_style: input.visual_style,
+    card_style: input.card_style,
+    card_body_bg_color: input.card_body_bg_color,
     hero_variant: input.hero_variant,
     hero_standard_panel_enabled:
       input.hero_standard_panel_enabled === undefined

@@ -262,7 +262,11 @@ export default function CatalogSettingsPage() {
     if (!settingsRes.ok) throw new Error(settingsData.error || 'Failed settings');
     if (!itemsRes.ok) throw new Error(itemsData.error || 'Failed items');
     setCategories(catsData.categories);
-    setSettings(settingsData.settings);
+    setSettings({
+      ...settingsData.settings,
+      card_style: settingsData.settings?.card_style || 'marketplace',
+      card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
+    });
     setItems(itemsData.items || []);
   }
 
@@ -332,6 +336,8 @@ export default function CatalogSettingsPage() {
           hero_title: settings.hero_title || null,
           hero_lead: settings.hero_lead || null,
           visual_style: settings.visual_style,
+          card_style: settings.card_style || 'marketplace',
+          card_body_bg_color: settings.card_body_bg_color || '#ffffff',
           hero_variant: settings.hero_variant,
           hero_elements_json: resolveHeroElements(settings),
           toolbar_elements_json: resolveToolbarElements(settings),
@@ -680,6 +686,43 @@ export default function CatalogSettingsPage() {
             defaultOpen={false}
           >
             <div className="admin-form-grid">
+              <div className="admin-field">
+                <label>Card style</label>
+                <select
+                  className="admin-select"
+                  value={settings.card_style || 'marketplace'}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      card_style: e.target.value as CatalogPageSettings['card_style'],
+                    })
+                  }
+                >
+                  <option value="marketplace">Marketplace (image above, body below — Amazon-like)</option>
+                  <option value="overlay">Overlay (text over media)</option>
+                </select>
+              </div>
+              <div className="admin-field">
+                <label>Card body background</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={/^#[0-9A-Fa-f]{6}$/.test(settings.card_body_bg_color || '') ? settings.card_body_bg_color! : '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, card_body_bg_color: e.target.value })}
+                    aria-label="Card body background color"
+                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
+                  />
+                  <input
+                    className="admin-input"
+                    value={settings.card_body_bg_color || '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, card_body_bg_color: e.target.value })}
+                    placeholder="#ffffff"
+                  />
+                </div>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                  Used under the product image for Marketplace cards (title/price panel).
+                </p>
+              </div>
               <div className="admin-field">
                 <label>Layout</label>
                 <select

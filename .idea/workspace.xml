@@ -7,20 +7,14 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 The Media modal is now a compact studio layout with a live preview">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/media/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/media/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
@@ -71,23 +65,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.5446332451653062" />
-      <entry key="MS500" value="2.9932539665689317" />
-      <entry key="S2" value="3.8986608307895394" />
-      <entry key="S5" value="6.427502864742209" />
-      <entry key="S10" value="11.441794684778545" />
-      <entry key="S30" value="29.082841620982318" />
-      <entry key="S60" value="49.28996395229282" />
-      <entry key="M2" value="80.74186165707152" />
-      <entry key="M5" value="136.2783145576354" />
-      <entry key="M10" value="191.63139758294585" />
-      <entry key="M15" value="229.20889177496952" />
-      <entry key="M30" value="291.7688683056514" />
-      <entry key="H1" value="358.4831937126902" />
-      <entry key="H2" value="500.75583654619027" />
-      <entry key="H4" value="847.0652612681561" />
-      <entry key="D1" value="2394.3697887328112" />
-      <entry key="W1" value="10071.659233742388" />
+      <entry key="MS100" value="1.2202810456102031" />
+      <entry key="MS500" value="2.2812119400883297" />
+      <entry key="S2" value="2.8031840182387713" />
+      <entry key="S5" value="4.080336306835621" />
+      <entry key="S10" value="9.385069831295631" />
+      <entry key="S30" value="29.036645963276527" />
+      <entry key="S60" value="51.50397114535836" />
+      <entry key="M2" value="91.95152416831249" />
+      <entry key="M5" value="165.50918900316861" />
+      <entry key="M10" value="222.73854717892385" />
+      <entry key="M15" value="263.47508937742805" />
+      <entry key="M30" value="361.5971957575866" />
+      <entry key="H1" value="486.77119114642676" />
+      <entry key="H2" value="668.8159912891269" />
+      <entry key="H4" value="1031.084224411476" />
+      <entry key="D1" value="2637.463325139542" />
+      <entry key="W1" value="10337.074223006482" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -100,32 +94,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="9.426616791641007E-221" />
-      <entry key="M30" value="9.709076573825452E-111" />
-      <entry key="H1" value="9.85346465656947E-56" />
-      <entry key="H2" value="3.139022882453842E-28" />
-      <entry key="H4" value="1.7717287835783243E-14" />
-      <entry key="D1" value="0.005187687648313768" />
-      <entry key="W1" value="0.7312299801154688" />
+      <entry key="M15" value="1.0061114189955851E-221" />
+      <entry key="M30" value="3.1719259433276998E-111" />
+      <entry key="H1" value="5.631985390009468E-56" />
+      <entry key="H2" value="2.3731804377267772E-28" />
+      <entry key="H4" value="1.5405130436990695E-14" />
+      <entry key="D1" value="0.005068177802143312" />
+      <entry key="W1" value="0.7287993762836059" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.482921821244699" />
-      <entry key="MS500" value="2.97079419519327" />
-      <entry key="S2" value="3.8915995222682254" />
-      <entry key="S5" value="6.423194879152466" />
-      <entry key="S10" value="11.438122754472047" />
-      <entry key="S30" value="29.079780814777198" />
-      <entry key="S60" value="49.28738110370889" />
-      <entry key="M2" value="80.73976696390103" />
-      <entry key="M5" value="136.2769162232468" />
-      <entry key="M10" value="191.63041488970646" />
-      <entry key="M15" value="229.2081063626899" />
-      <entry key="M30" value="291.768366010487" />
-      <entry key="H1" value="358.4828828457346" />
-      <entry key="H2" value="500.75561415254055" />
-      <entry key="H4" value="847.0650633550138" />
-      <entry key="D1" value="2394.374869087907" />
-      <entry key="W1" value="10072.390335020402" />
+      <entry key="MS100" value="1.1783873077860496" />
+      <entry key="MS500" value="2.2653750441050384" />
+      <entry key="S2" value="2.798327356581037" />
+      <entry key="S5" value="4.077645376045566" />
+      <entry key="S10" value="9.382218266370295" />
+      <entry key="S30" value="29.033830862790133" />
+      <entry key="S60" value="51.50145308670396" />
+      <entry key="M2" value="91.94923507577515" />
+      <entry key="M5" value="165.5075124871909" />
+      <entry key="M10" value="222.73741087853892" />
+      <entry key="M15" value="263.4741906938539" />
+      <entry key="M30" value="361.59657651478136" />
+      <entry key="H1" value="486.77077222204775" />
+      <entry key="H2" value="668.8156988662471" />
+      <entry key="H4" value="1031.0839892323386" />
+      <entry key="D1" value="2637.468277806761" />
+      <entry key="W1" value="10337.80289258361" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -277,7 +271,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths." />
     <MESSAGE value="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls." />
     <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
     <MESSAGE value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
@@ -302,7 +295,8 @@
     <MESSAGE value="#6 Logo tagline now accepts and renders limited HTML" />
     <MESSAGE value="#6 while selecting the background image, also need to customization to select shading style.&#10;   for the actual catalog image selection, also need to apply fit to available space as checkbox, and fix percentage for each catalog item. in /admin/Inventory - media" />
     <MESSAGE value="#6 The Media modal is now a compact studio layout with a live preview" />
-    <option name="LAST_COMMIT_MESSAGE" value="#6 The Media modal is now a compact studio layout with a live preview" />
+    <MESSAGE value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
+    <option name="LAST_COMMIT_MESSAGE" value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

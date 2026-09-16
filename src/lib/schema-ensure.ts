@@ -159,6 +159,14 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'discovery_group_preview_count',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_group_preview_count TINYINT UNSIGNED NOT NULL DEFAULT 4 AFTER discovery_sticky_toolbar_enabled`,
   },
+  {
+    name: 'card_style',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_style VARCHAR(20) NOT NULL DEFAULT 'marketplace' AFTER visual_style`,
+  },
+  {
+    name: 'card_body_bg_color',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_body_bg_color VARCHAR(32) NULL DEFAULT '#ffffff' AFTER card_style`,
+  },
 ];
 
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */

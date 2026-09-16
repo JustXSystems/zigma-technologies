@@ -49,7 +49,13 @@ function cssUrlValue(path: string): string {
     .replace(/\)/g, '\\)');
 }
 
-function CatalogCardMedia({ item }: { item: CatalogItem }) {
+function CatalogCardMedia({
+  item,
+  cardStyle = 'marketplace',
+}: {
+  item: CatalogItem;
+  cardStyle?: 'overlay' | 'marketplace';
+}) {
   const bgCss = item.background_image_url?.trim() ? cssUrlValue(item.background_image_url) : '';
   const bgShadow = item.background_shading_style || 'medium';
   const bgFit = item.background_fit_to_space === true;
@@ -64,12 +70,17 @@ function CatalogCardMedia({ item }: { item: CatalogItem }) {
     Math.max(20, Number(item.primary_fit_percent ?? item.media_fit_percent) || 78)
   );
   const productShadow = item.primary_shadow_style || 'medium';
-  const useProductFit = !!bgCss && productFit;
+  // Marketplace matches popup: clean contain over background, no drop-shadow/gray wash.
+  const clean = cardStyle === 'marketplace';
+  const useProductFit = !!bgCss ? (clean ? true : productFit) : clean;
+  const fitPct = clean && !!bgCss ? productPct : productPct;
 
   const style = {
     ...(bgCss ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties) : null),
     ...(bgCss && bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%` } as CSSProperties) : null),
-    ...(useProductFit ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties) : null),
+    ...(useProductFit || (clean && !bgCss)
+      ? ({ ['--catalog-media-fit']: `${fitPct}%` } as CSSProperties)
+      : null),
   } as CSSProperties | undefined;
 
   return (
@@ -78,9 +89,14 @@ function CatalogCardMedia({ item }: { item: CatalogItem }) {
         'catalog-card-media',
         bgCss && 'catalog-card-media--has-bg',
         bgCss ? (bgFit ? 'catalog-card-media--bg-fit' : 'catalog-card-media--bg-cover') : null,
-        bgCss && `catalog-card-media--bg-shade-${bgShadow}`,
-        bgCss ? (useProductFit ? 'catalog-card-media--product-fit' : 'catalog-card-media--product-cover') : null,
-        bgCss && `catalog-card-media--product-shade-${productShadow}`
+        !clean && bgCss && `catalog-card-media--bg-shade-${bgShadow}`,
+        bgCss || clean
+          ? useProductFit || clean
+            ? 'catalog-card-media--product-fit'
+            : 'catalog-card-media--product-cover'
+          : null,
+        !clean && bgCss && `catalog-card-media--product-shade-${productShadow}`,
+        clean && 'catalog-card-media--clean'
       )}
       style={style}
     >
@@ -298,6 +314,8 @@ function CatalogItemCard({
   itemType,
   cardFields,
   layout,
+  cardStyle = 'marketplace',
+  cardBodyBg = '#ffffff',
   revealEnabled,
   delayMs,
   onOpen,
@@ -306,22 +324,33 @@ function CatalogItemCard({
   itemType: CatalogItemType;
   cardFields: string[];
   layout: 'grid' | 'list';
+  cardStyle?: 'overlay' | 'marketplace';
+  cardBodyBg?: string;
   revealEnabled: boolean;
   delayMs?: number;
   onOpen: (item: CatalogItem) => void;
 }) {
+  const marketplace = layout !== 'list' && cardStyle === 'marketplace';
   return (
     <button
       type="button"
       className={cx(
         'catalog-card',
         layout === 'list' ? 'catalog-card--list' : 'catalog-card--tile',
+        marketplace && 'catalog-card--marketplace',
         revealEnabled && 'reveal'
       )}
       onClick={() => onOpen(item)}
-      style={{ transitionDelay: revealEnabled && delayMs != null ? `${delayMs}ms` : undefined }}
+      style={{
+        transitionDelay: revealEnabled && delayMs != null ? `${delayMs}ms` : undefined,
+        ...(marketplace
+          ? ({ ['--catalog-card-body-bg']: cardBodyBg || '#ffffff' } as CSSProperties)
+          : null),
+      }}
     >
-      {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? <CatalogCardMedia item={item} /> : null}
+      {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? (
+        <CatalogCardMedia item={item} cardStyle={marketplace ? 'marketplace' : 'overlay'} />
+      ) : null}
       <div className="catalog-card-body">
         {hasField(cardFields, 'category', DEFAULT_CARD) ? (
           <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
@@ -391,6 +420,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
 
   const filters = settings?.filters_json || ['category', 'tags'];
   const cardFields = settings?.card_fields_json || DEFAULT_CARD;
+  const cardStyle = settings?.card_style === 'overlay' ? 'overlay' : 'marketplace';
+  const cardBodyBg = settings?.card_body_bg_color || '#ffffff';
   const modalFields = settings?.modal_fields_json || DEFAULT_MODAL;
   const layout = settings?.layout || 'grid';
   const gridColumns = Number(settings?.grid_columns || 3);
@@ -904,6 +935,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                               itemType={itemType}
                               cardFields={cardFields}
                               layout={layout}
+                              cardStyle={cardStyle}
+                              cardBodyBg={cardBodyBg}
                               revealEnabled={revealEnabled}
                               delayMs={index * 60}
                               onOpen={(next) => void openItem(next)}
@@ -925,6 +958,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                       itemType={itemType}
                       cardFields={cardFields}
                       layout={layout}
+                      cardStyle={cardStyle}
+                      cardBodyBg={cardBodyBg}
                       revealEnabled={revealEnabled}
                       delayMs={index * 60}
                       onOpen={(next) => void openItem(next)}

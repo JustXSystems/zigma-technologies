@@ -102,3 +102,23 @@ SET @sql := IF(@col_exists = 0,
   'SELECT 1'
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'card_style'
+);
+SET @sql := IF(@col_exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN card_style VARCHAR(20) NOT NULL DEFAULT ''marketplace'' AFTER visual_style',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'card_body_bg_color'
+);
+SET @sql := IF(@col_exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN card_body_bg_color VARCHAR(32) NULL DEFAULT ''#ffffff'' AFTER card_style',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

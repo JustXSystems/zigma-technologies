@@ -151,6 +151,14 @@ export type CatalogPageSettings = {
   hero_title: string | null;
   hero_lead: string | null;
   visual_style: 'classic' | 'premium' | 'glass' | 'minimal' | 'bold-corporate';
+  /**
+   * Catalog card composition:
+   * - overlay: cinematic tile (text over media)
+   * - marketplace: Amazon-like stacked image then body below
+   */
+  card_style: 'overlay' | 'marketplace';
+  /** Body panel background for marketplace (and optional overlay body tint) */
+  card_body_bg_color: string | null;
   hero_variant: 'standard' | 'spotlight';
   /** When hero_variant is standard, show/hide the compact active-item panel. */
   hero_standard_panel_enabled: number;
