@@ -7,11 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Marketplace cards now use the same inventory presentation as the popup:&#10;   •&#10;   Background image + background shadow (soft / medium / strong / bottom / none)&#10;   •&#10;   Product image shadow when a background is set&#10;   •&#10;   Fit percent still applied as before&#10;   Cards no longer strip those classes or force box-shadow: none, so Inventory settings show on catalog-card-media the same way they do in the detail gallery." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2239510708934274" />
-      <entry key="MS500" value="2.202024270232937" />
-      <entry key="S2" value="5.340615424574745" />
-      <entry key="S5" value="9.636887440471723" />
-      <entry key="S10" value="13.831843535334084" />
-      <entry key="S30" value="27.330814091286193" />
-      <entry key="S60" value="42.01491361993132" />
-      <entry key="M2" value="56.197299011988626" />
-      <entry key="M5" value="79.39886593204652" />
-      <entry key="M10" value="130.74938191301533" />
-      <entry key="M15" value="181.80510895546865" />
-      <entry key="M30" value="307.0518354713815" />
-      <entry key="H1" value="466.2232814337836" />
-      <entry key="H2" value="675.7777158651604" />
-      <entry key="H4" value="1053.1256988580874" />
-      <entry key="D1" value="2691.669756877531" />
-      <entry key="W1" value="10402.15301880211" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000031209262" />
+      <entry key="S2" value="1.0419008291051723" />
+      <entry key="S5" value="2.777885236820495" />
+      <entry key="S10" value="8.794098477195776" />
+      <entry key="S30" value="33.324124353923814" />
+      <entry key="S60" value="59.58745159673348" />
+      <entry key="M2" value="87.04892541588052" />
+      <entry key="M5" value="113.52636922158563" />
+      <entry key="M10" value="125.56849873959887" />
+      <entry key="M15" value="134.33383166499007" />
+      <entry key="M30" value="185.60843614760418" />
+      <entry key="H1" value="327.8668074502768" />
+      <entry key="H2" value="570.7039547311244" />
+      <entry key="H4" value="981.2485356379751" />
+      <entry key="D1" value="2731.988127328465" />
+      <entry key="W1" value="10485.40817117556" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -87,32 +83,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="4.0691927521775183E-222" />
-      <entry key="M30" value="2.0172240213167435E-111" />
-      <entry key="H1" value="4.49135171336753E-56" />
-      <entry key="H2" value="2.1192809425291417E-28" />
-      <entry key="H4" value="1.455775031589963E-14" />
-      <entry key="D1" value="0.005020611966074417" />
-      <entry key="W1" value="0.7278182910299855" />
+      <entry key="M15" value="1.1746443778812157E-223" />
+      <entry key="M30" value="3.427308532771962E-112" />
+      <entry key="H1" value="1.8512991472942205E-56" />
+      <entry key="H2" value="1.3606245431029386E-28" />
+      <entry key="H4" value="1.1664581189005117E-14" />
+      <entry key="D1" value="0.0048385934978348475" />
+      <entry key="W1" value="0.7239888730292008" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1919981163464797" />
-      <entry key="MS500" value="2.1913665570558654" />
-      <entry key="S2" value="5.333891656156278" />
-      <entry key="S5" value="9.631749234022516" />
-      <entry key="S10" value="13.828052775157111" />
-      <entry key="S30" value="27.328170235571157" />
-      <entry key="S60" value="42.01282668404985" />
-      <entry key="M2" value="56.195885181036196" />
-      <entry key="M5" value="79.39806131759873" />
-      <entry key="M10" value="130.74871659806934" />
-      <entry key="M15" value="181.80449056572263" />
-      <entry key="M30" value="307.05131097798164" />
-      <entry key="H1" value="466.22288118855124" />
-      <entry key="H2" value="675.7774214363924" />
-      <entry key="H4" value="1053.1254599170452" />
-      <entry key="D1" value="2691.6746602726303" />
-      <entry key="W1" value="10402.880707069915" />
+      <entry key="MS100" value="0.9659363289248456" />
+      <entry key="MS500" value="0.9930924985393345" />
+      <entry key="S2" value="1.0401077667365268" />
+      <entry key="S5" value="2.7761117294213453" />
+      <entry key="S10" value="8.791338136883237" />
+      <entry key="S30" value="33.320682570452135" />
+      <entry key="S60" value="59.58439678879689" />
+      <entry key="M2" value="87.0467005389483" />
+      <entry key="M5" value="113.52520963813808" />
+      <entry key="M10" value="125.5678575311738" />
+      <entry key="M15" value="134.33337436621616" />
+      <entry key="M30" value="185.60811990025812" />
+      <entry key="H1" value="327.86652698650545" />
+      <entry key="H2" value="570.7037074703654" />
+      <entry key="H4" value="981.2483149448004" />
+      <entry key="D1" value="2731.992848064401" />
+      <entry key="W1" value="10486.13203001044" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -264,7 +260,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
     <MESSAGE value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
     <MESSAGE value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
     <MESSAGE value="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified." />
@@ -289,7 +284,8 @@
     <MESSAGE value="#6 The Media modal is now a compact studio layout with a live preview" />
     <MESSAGE value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
     <MESSAGE value="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal" />
-    <option name="LAST_COMMIT_MESSAGE" value="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal" />
+    <MESSAGE value="#6 Marketplace cards now use the same inventory presentation as the popup:&#10;   •&#10;   Background image + background shadow (soft / medium / strong / bottom / none)&#10;   •&#10;   Product image shadow when a background is set&#10;   •&#10;   Fit percent still applied as before&#10;   Cards no longer strip those classes or force box-shadow: none, so Inventory settings show on catalog-card-media the same way they do in the detail gallery." />
+    <option name="LAST_COMMIT_MESSAGE" value="#6 Marketplace cards now use the same inventory presentation as the popup:&#10;   •&#10;   Background image + background shadow (soft / medium / strong / bottom / none)&#10;   •&#10;   Product image shadow when a background is set&#10;   •&#10;   Fit percent still applied as before&#10;   Cards no longer strip those classes or force box-shadow: none, so Inventory settings show on catalog-card-media the same way they do in the detail gallery." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

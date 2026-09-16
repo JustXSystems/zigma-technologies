@@ -19,7 +19,7 @@ const TYPE_LABEL: Record<CatalogItemType, string> = {
 };
 
 function hasField(fields: string[] | null | undefined, name: string, fallback = DEFAULT_MODAL) {
-  const list = fields?.length ? fields : fallback;
+  const list = fields == null ? fallback : fields;
   return list.includes(name);
 }
 

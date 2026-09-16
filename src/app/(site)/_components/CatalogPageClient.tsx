@@ -25,12 +25,32 @@ type Props = {
   lead: string;
 };
 
-const DEFAULT_CARD = ['title', 'summary', 'category', 'primary_image', 'price_label', 'quick_view', 'case_study_link'];
+const DEFAULT_CARD = [
+  'title',
+  'summary',
+  'category',
+  'primary_image',
+  'price_label',
+  'quick_view',
+  'case_study_link',
+];
 const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
 const INTENT_CHIP_LIMIT = 8;
+const CARD_BODY_FIELDS = [
+  'category',
+  'title',
+  'price_label',
+  'summary',
+  'tags',
+  'availability_label',
+  'lead_time_label',
+  'quick_view',
+  'case_study_link',
+] as const;
 
 function hasField(fields: string[] | null | undefined, name: string, fallback: string[]) {
-  const list = fields?.length ? fields : fallback;
+  // null/undefined → defaults; explicit [] means show nothing
+  const list = fields == null ? fallback : fields;
   return list.includes(name);
 }
 
@@ -330,6 +350,8 @@ function CatalogItemCard({
   onOpen: (item: CatalogItem) => void;
 }) {
   const marketplace = layout !== 'list' && cardStyle === 'marketplace';
+  const showMedia = hasField(cardFields, 'primary_image', DEFAULT_CARD);
+  const showBody = CARD_BODY_FIELDS.some((name) => hasField(cardFields, name, DEFAULT_CARD));
   return (
     <button
       type="button"
@@ -347,34 +369,42 @@ function CatalogItemCard({
           : null),
       }}
     >
-      {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? (
+      {showMedia ? (
         <CatalogCardMedia item={item} cardStyle={marketplace ? 'marketplace' : 'overlay'} />
       ) : null}
-      <div className="catalog-card-body">
-        {hasField(cardFields, 'category', DEFAULT_CARD) ? (
-          <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
-        ) : null}
-        {hasField(cardFields, 'title', DEFAULT_CARD) ? <h5>{item.title}</h5> : null}
-        {hasField(cardFields, 'price_label', DEFAULT_CARD) && item.price_label ? (
-          <div className="catalog-card-stat">{item.price_label}</div>
-        ) : null}
-        {hasField(cardFields, 'summary', DEFAULT_CARD) ? <p>{item.summary}</p> : null}
-        {hasField(cardFields, 'tags', DEFAULT_CARD) && item.tags_json?.length ? (
-          <p className="catalog-card-tags">{item.tags_json.join(' · ')}</p>
-        ) : null}
-        {hasField(cardFields, 'quick_view', DEFAULT_CARD) ? (
-          <span className="catalog-card-link">Quick view →</span>
-        ) : null}
-        {hasField(cardFields, 'case_study_link', DEFAULT_CARD) ? (
-          <Link
-            href={catalogPublicPath(itemType, item.slug)}
-            className="catalog-card-page-link"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {caseStudyLabel(itemType)} page →
-          </Link>
-        ) : null}
-      </div>
+      {showBody ? (
+        <div className="catalog-card-body">
+          {hasField(cardFields, 'category', DEFAULT_CARD) ? (
+            <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
+          ) : null}
+          {hasField(cardFields, 'title', DEFAULT_CARD) ? <h5>{item.title}</h5> : null}
+          {hasField(cardFields, 'price_label', DEFAULT_CARD) && item.price_label ? (
+            <div className="catalog-card-stat">{item.price_label}</div>
+          ) : null}
+          {hasField(cardFields, 'summary', DEFAULT_CARD) && item.summary ? <p>{item.summary}</p> : null}
+          {hasField(cardFields, 'availability_label', DEFAULT_CARD) && item.availability_label ? (
+            <p className="catalog-card-meta">{item.availability_label}</p>
+          ) : null}
+          {hasField(cardFields, 'lead_time_label', DEFAULT_CARD) && item.lead_time_label ? (
+            <p className="catalog-card-meta">{item.lead_time_label}</p>
+          ) : null}
+          {hasField(cardFields, 'tags', DEFAULT_CARD) && item.tags_json?.length ? (
+            <p className="catalog-card-tags">{item.tags_json.join(' · ')}</p>
+          ) : null}
+          {hasField(cardFields, 'quick_view', DEFAULT_CARD) ? (
+            <span className="catalog-card-link">Quick view →</span>
+          ) : null}
+          {hasField(cardFields, 'case_study_link', DEFAULT_CARD) ? (
+            <Link
+              href={catalogPublicPath(itemType, item.slug)}
+              className="catalog-card-page-link"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {caseStudyLabel(itemType)} page →
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
     </button>
   );
 }
@@ -418,10 +448,10 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filters = settings?.filters_json || ['category', 'tags'];
-  const cardFields = settings?.card_fields_json || DEFAULT_CARD;
+  const cardFields = settings?.card_fields_json ?? DEFAULT_CARD;
   const cardStyle = settings?.card_style === 'overlay' ? 'overlay' : 'marketplace';
   const cardBodyBg = settings?.card_body_bg_color || '#ffffff';
-  const modalFields = settings?.modal_fields_json || DEFAULT_MODAL;
+  const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
   const layout = settings?.layout || 'grid';
   const gridColumns = Number(settings?.grid_columns || 3);
   const revealEnabled = settings?.reveal_animation_enabled !== 0;

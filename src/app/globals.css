@@ -1915,6 +1915,14 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-tags{
   color:var(--graphite-500);
 }
+.catalog-page .catalog-card-meta{
+  margin:0;
+  font-size:0.82rem;
+  color:var(--graphite-500);
+}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-meta{
+  color:var(--graphite-500);
+}
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-link{
   color:var(--admin-accent-2, #0f4c81);
 }

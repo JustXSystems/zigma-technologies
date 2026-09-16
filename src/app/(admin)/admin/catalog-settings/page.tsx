@@ -16,16 +16,27 @@ const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
 
 const FILTER_OPTS = ['category', 'tags'] as const;
 const SEARCH_OPTS = ['title', 'summary', 'description', 'tags', 'price_label'] as const;
-const CARD_OPTS = [
+const DEFAULT_CARD_FIELDS = [
   'title',
   'summary',
   'category',
   'primary_image',
   'price_label',
-  'tags',
   'quick_view',
   'case_study_link',
 ] as const;
+const CARD_FIELD_OPTS: Array<{ id: string; label: string; group: 'media' | 'body' }> = [
+  { id: 'primary_image', label: 'Product / media image', group: 'media' },
+  { id: 'category', label: 'Category eyebrow', group: 'body' },
+  { id: 'title', label: 'Title', group: 'body' },
+  { id: 'price_label', label: 'Price / stat', group: 'body' },
+  { id: 'summary', label: 'Description / summary', group: 'body' },
+  { id: 'tags', label: 'Tags', group: 'body' },
+  { id: 'availability_label', label: 'Availability', group: 'body' },
+  { id: 'lead_time_label', label: 'Lead time', group: 'body' },
+  { id: 'quick_view', label: 'Quick view link', group: 'body' },
+  { id: 'case_study_link', label: 'Detail / case-study page link', group: 'body' },
+];
 const MODAL_OPTS = ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'] as const;
 const VISUAL_STYLE_OPTS = ['classic', 'premium', 'glass', 'minimal', 'bold-corporate'] as const;
 const HERO_VARIANT_OPTS = ['standard', 'spotlight'] as const;
@@ -47,16 +58,23 @@ function ChipGroup({
   options,
   values,
   onChange,
+  optionLabels,
+  hint,
 }: {
   label: string;
   options: readonly string[];
   values: string[] | null | undefined;
   onChange: (next: string[]) => void;
+  optionLabels?: Record<string, string>;
+  hint?: string;
 }) {
   const set = new Set(values || []);
   return (
     <div className="admin-field full">
       <label>{label}</label>
+      {hint ? (
+        <p style={{ margin: '0 0 0.55rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>{hint}</p>
+      ) : null}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
         {options.map((opt) => (
           <label
@@ -70,6 +88,7 @@ function ChipGroup({
               padding: '0.35rem 0.7rem',
               fontSize: '0.82rem',
               background: set.has(opt) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+              cursor: 'pointer',
             }}
           >
             <input
@@ -77,10 +96,68 @@ function ChipGroup({
               checked={set.has(opt)}
               onChange={(e) => onChange(toggleInList(values, opt, e.target.checked))}
             />
-            {opt}
+            {optionLabels?.[opt] || opt}
           </label>
         ))}
       </div>
+    </div>
+  );
+}
+
+function CardFieldsChecklist({
+  values,
+  onChange,
+}: {
+  values: string[] | null | undefined;
+  onChange: (next: string[]) => void;
+}) {
+  const set = new Set(values || []);
+  const media = CARD_FIELD_OPTS.filter((o) => o.group === 'media');
+  const body = CARD_FIELD_OPTS.filter((o) => o.group === 'body');
+
+  function renderGroup(title: string, opts: typeof CARD_FIELD_OPTS) {
+    return (
+      <div style={{ marginBottom: '0.85rem' }}>
+        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted)', marginBottom: '0.45rem' }}>
+          {title}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
+          {opts.map((opt) => (
+            <label
+              key={opt.id}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                border: '1px solid var(--admin-border)',
+                borderRadius: 10,
+                padding: '0.45rem 0.8rem',
+                fontSize: '0.84rem',
+                background: set.has(opt.id) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={set.has(opt.id)}
+                onChange={(e) => onChange(toggleInList(values, opt.id, e.target.checked))}
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-field full">
+      <label>Catalog card fields</label>
+      <p style={{ margin: '0 0 0.65rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+        Checkboxes control what appears on public catalog cards (media + body panel).
+      </p>
+      {renderGroup('Media', media)}
+      {renderGroup('Card body', body)}
     </div>
   );
 }
@@ -266,6 +343,12 @@ export default function CatalogSettingsPage() {
       ...settingsData.settings,
       card_style: settingsData.settings?.card_style || 'marketplace',
       card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
+      card_fields_json: settingsData.settings?.card_fields_json?.length
+        ? settingsData.settings.card_fields_json
+        : [...DEFAULT_CARD_FIELDS],
+      modal_fields_json: settingsData.settings?.modal_fields_json?.length
+        ? settingsData.settings.modal_fields_json
+        : ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'],
     });
     setItems(itemsData.items || []);
   }
@@ -757,9 +840,7 @@ export default function CatalogSettingsPage() {
                 values={settings.search_fields_json}
                 onChange={(search_fields_json) => setSettings({ ...settings, search_fields_json })}
               />
-              <ChipGroup
-                label="Card fields"
-                options={CARD_OPTS}
+              <CardFieldsChecklist
                 values={settings.card_fields_json}
                 onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
               />
@@ -768,6 +849,7 @@ export default function CatalogSettingsPage() {
                 options={MODAL_OPTS}
                 values={settings.modal_fields_json}
                 onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
+                hint="Controls fields shown in the Quick view popup."
               />
             </div>
           </AdminCollapsible>
