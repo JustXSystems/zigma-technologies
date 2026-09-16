@@ -7,9 +7,23 @@ export function appBasePath(): string {
   return withSlash.replace(/\/$/, '');
 }
 
-/** Cookie Path attribute — scoped to the app when using a subdirectory. */
+/**
+ * Cookie Path attribute — scoped to the app when using a subdirectory.
+ * Prefer the basePath so the session is not sent to sibling apps on the same host.
+ */
 export function cookiePath(): string {
   return appBasePath() || '/';
+}
+
+/**
+ * Paths to write/clear for the session cookie.
+ * Always include `/` as well as basePath so older logins (Path=/) and new ones
+ * (Path=/zigma-technologies) both work after deploys that changed cookie scoping.
+ */
+export function cookiePathsForAuth(): string[] {
+  const base = appBasePath();
+  if (!base) return ['/'];
+  return ['/', base];
 }
 
 function isExternalOrSpecial(path: string): boolean {
@@ -65,4 +79,12 @@ export function stripBasePath(path: string): string {
   if (path === base) return '/';
   if (path.startsWith(`${base}/`)) return path.slice(base.length) || '/';
   return path;
+}
+
+/** Inline script source that patches window.fetch before React hydrates (basePath deploys). */
+export function basePathFetchPatchScript(): string {
+  const base = appBasePath();
+  if (!base) return '';
+  // Keep this self-contained — no imports. Runs in <head> before any useEffect fetch.
+  return `(function(){var b=${JSON.stringify(base)};if(!b||window.__zigmaFetchPatched)return;window.__zigmaFetchPatched=1;var o=window.fetch.bind(window);function pref(u){if(!u||u.charAt(0)==='#'||u.charAt(0)==='?'||/^(tel:|mailto:|sms:|javascript:|data:|blob:|\\/\\/)/.test(u))return u;try{if(/^https?:\\/\\//i.test(u)){var x=new URL(u);if(x.origin===location.origin){if(x.pathname!==b&&x.pathname.indexOf(b+'/')!==0)x.pathname=b+x.pathname;return x.toString();}return u;}}catch(e){}var m=String(u).match(/^([^?#]*)([?#].*)?$/);var p=m&&m[1]?m[1]:u;var s=m&&m[2]?m[2]:'';if(p.charAt(0)!=='/')p='/'+p;if(p!==b&&p.indexOf(b+'/')!==0)p=b+p;return p+s;}window.fetch=function(i,n){n=n?Object.assign({},n):{};if(n.credentials==null)n.credentials='same-origin';if(typeof i==='string')return o(pref(i),n);if(i&&typeof URL!=='undefined'&&i instanceof URL)return o(pref(i.toString()),n);if(i&&typeof Request!=='undefined'&&i instanceof Request){var nu=pref(i.url);if(nu!==i.url)return o(new Request(nu,i),n);}return o(i,n);};})();`;
 }

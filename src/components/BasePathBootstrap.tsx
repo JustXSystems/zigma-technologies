@@ -5,7 +5,8 @@ import { useEffect } from 'react';
 /**
  * When NEXT_PUBLIC_BASE_PATH is set (e.g. /zigma-technologies), Next.js Link/_next
  * are handled by basePath — but raw fetch('/api/…'), <img src="/assets/…">, and
- * plain <a href="/projects"> are not. This bootstrap prefixes those client-side.
+ * plain <a href="/projects"> are not. A synchronous <head> script patches fetch
+ * first; this bootstrap covers images/anchors and re-applies fetch if needed.
  */
 export default function BasePathBootstrap() {
   useEffect(() => {
@@ -50,22 +51,29 @@ export default function BasePathBootstrap() {
       return `${prefixPathname(pathname.startsWith('/') ? pathname : `/${pathname}`)}${suffix}`;
     };
 
-    const originalFetch = window.fetch.bind(window);
-    window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
-      if (typeof input === 'string') {
-        return originalFetch(prefixUrl(input), init);
-      }
-      if (input instanceof URL) {
-        return originalFetch(prefixUrl(input.toString()), init);
-      }
-      if (input instanceof Request) {
-        const nextUrl = prefixUrl(input.url);
-        if (nextUrl !== input.url) {
-          return originalFetch(new Request(nextUrl, input), init);
+    // Head script already patches fetch; only install once if missing (HMR / older HTML).
+    const g = window as Window & { __zigmaFetchPatched?: boolean };
+    if (!g.__zigmaFetchPatched) {
+      const originalFetch = window.fetch.bind(window);
+      g.__zigmaFetchPatched = true;
+      window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+        const nextInit: RequestInit = { ...(init || {}) };
+        if (nextInit.credentials == null) nextInit.credentials = 'same-origin';
+        if (typeof input === 'string') {
+          return originalFetch(prefixUrl(input), nextInit);
         }
-      }
-      return originalFetch(input, init);
-    };
+        if (input instanceof URL) {
+          return originalFetch(prefixUrl(input.toString()), nextInit);
+        }
+        if (input instanceof Request) {
+          const nextUrl = prefixUrl(input.url);
+          if (nextUrl !== input.url) {
+            return originalFetch(new Request(nextUrl, input), nextInit);
+          }
+        }
+        return originalFetch(input, nextInit);
+      };
+    }
 
     const fixImg = (img: HTMLImageElement) => {
       const src = img.getAttribute('src');
@@ -110,7 +118,6 @@ export default function BasePathBootstrap() {
     });
 
     return () => {
-      window.fetch = originalFetch;
       mo.disconnect();
     };
   }, []);

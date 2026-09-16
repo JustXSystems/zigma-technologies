@@ -26,7 +26,7 @@ export default function AdminPageSectionsPage() {
   const [savingMeta, setSavingMeta] = useState(false);
 
   async function load() {
-    const res = await fetch(`/api/admin/pages/${pageId}`);
+    const res = await fetch(`/api/admin/pages/${pageId}`, { credentials: 'same-origin' });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to load');
     setPage(data.page);
@@ -130,11 +130,23 @@ export default function AdminPageSectionsPage() {
   }
 
   async function toggle(section: CmsSection) {
-    await fetch(`/api/admin/sections/${section.id}`, {
+    setError('');
+    const res = await fetch(`/api/admin/sections/${section.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({ enabled: !section.enabled }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401) {
+        setError('Session expired — sign in again, then retry Enable/Disable.');
+        router.replace('/admin/login');
+        return;
+      }
+      setError((data as { error?: string }).error || 'Failed to update section');
+      return;
+    }
     await load();
   }
 

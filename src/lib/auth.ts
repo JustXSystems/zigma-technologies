@@ -1,12 +1,12 @@
 import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import type { AdminScreenKey } from '@/lib/admin-screens';
 import { hasScreenAccess } from '@/lib/admin-screens';
 import { ensureAdminRolesSchema, getScreensForUser } from '@/lib/admin-roles';
-import { cookiePath } from '@/lib/base-path';
+import { cookiePathsForAuth } from '@/lib/base-path';
 
 const COOKIE_NAME = 'zigma_admin_session';
 const SESSION_DAYS = 7;
@@ -85,29 +85,52 @@ export async function verifySessionToken(token: string): Promise<AdminSession | 
 
 export async function setSessionCookie(token: string) {
   const jar = await cookies();
-  jar.set(COOKIE_NAME, token, {
+  const opts = {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'lax' as const,
     secure: process.env.NODE_ENV === 'production',
-    path: cookiePath(),
     maxAge: SESSION_DAYS * 24 * 60 * 60,
-  });
+  };
+  // Write on `/` and basePath so Path mismatches after PreProd deploys cannot orphan the session.
+  for (const path of cookiePathsForAuth()) {
+    jar.set(COOKIE_NAME, token, { ...opts, path });
+  }
 }
 
 export async function clearSessionCookie() {
   const jar = await cookies();
-  jar.set(COOKIE_NAME, '', {
+  const opts = {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'lax' as const,
     secure: process.env.NODE_ENV === 'production',
-    path: cookiePath(),
     maxAge: 0,
-  });
+  };
+  for (const path of cookiePathsForAuth()) {
+    jar.set(COOKIE_NAME, '', { ...opts, path });
+  }
+}
+
+function tokenFromCookieHeader(header: string | null): string | undefined {
+  if (!header) return undefined;
+  for (const part of header.split(';')) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) continue;
+    const name = trimmed.slice(0, eq).trim();
+    if (name !== COOKIE_NAME) continue;
+    return decodeURIComponent(trimmed.slice(eq + 1).trim());
+  }
+  return undefined;
 }
 
 export async function getSession(): Promise<AdminSession | null> {
   const jar = await cookies();
-  const token = jar.get(COOKIE_NAME)?.value;
+  let token = jar.get(COOKIE_NAME)?.value;
+  if (!token) {
+    const h = await headers();
+    token = tokenFromCookieHeader(h.get('cookie'));
+  }
   if (!token) return null;
   const session = await verifySessionToken(token);
   if (!session) return null;

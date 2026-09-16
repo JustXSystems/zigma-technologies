@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import BasePathBootstrap from "@/components/BasePathBootstrap";
-import { withBasePath } from "@/lib/base-path";
+import { basePathFetchPatchScript, withBasePath } from "@/lib/base-path";
 import "./globals.css";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
@@ -63,9 +63,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const fetchPatch = basePathFetchPatchScript();
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        {fetchPatch ? (
+          <script
+            // Synchronously patch fetch before any client useEffect admin API calls.
+            dangerouslySetInnerHTML={{ __html: fetchPatch }}
+          />
+        ) : null}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

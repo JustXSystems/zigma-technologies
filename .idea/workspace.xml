@@ -7,7 +7,14 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 deploy error fixed" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#7 Display filters only non-zero item">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/BasePathBootstrap.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/BasePathBootstrap.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/base-path.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/base-path.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,23 +61,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000000683900434" />
-      <entry key="S2" value="1.1065204772922412" />
-      <entry key="S5" value="3.3411782491148796" />
-      <entry key="S10" value="7.780695820324994" />
-      <entry key="S30" value="14.917224694612628" />
-      <entry key="S60" value="17.680047872989977" />
-      <entry key="M2" value="19.327853993242414" />
-      <entry key="M5" value="22.315521290983302" />
-      <entry key="M10" value="39.57625269569889" />
-      <entry key="M15" value="68.83230177175693" />
-      <entry key="M30" value="165.43999235980567" />
-      <entry key="H1" value="338.1515977271587" />
-      <entry key="H2" value="622.251826928307" />
-      <entry key="H4" value="1078.8987871323159" />
-      <entry key="D1" value="2988.1149396345363" />
-      <entry key="W1" value="10805.828164926517" />
+      <entry key="MS100" value="1.830525943862546" />
+      <entry key="MS500" value="3.5141541464431976" />
+      <entry key="S2" value="7.020432992604151" />
+      <entry key="S5" value="11.052858656833108" />
+      <entry key="S10" value="13.525210842418529" />
+      <entry key="S30" value="15.870664134589346" />
+      <entry key="S60" value="18.980655988928568" />
+      <entry key="M2" value="27.803936869079905" />
+      <entry key="M5" value="47.03817034655058" />
+      <entry key="M10" value="72.01132373909263" />
+      <entry key="M15" value="98.74070758952988" />
+      <entry key="M30" value="188.38070443194178" />
+      <entry key="H1" value="361.1869670727819" />
+      <entry key="H2" value="652.8323057676437" />
+      <entry key="H4" value="1120.5675868955993" />
+      <entry key="D1" value="3067.8041306436216" />
+      <entry key="W1" value="10901.275950033969" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -83,32 +90,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.1212647046081241E-225" />
-      <entry key="M30" value="3.3485290869395924E-113" />
-      <entry key="H1" value="5.786647636533582E-57" />
-      <entry key="H2" value="7.607001798693819E-29" />
-      <entry key="H4" value="8.72181276968892E-15" />
-      <entry key="D1" value="0.0046097291184688085" />
-      <entry key="W1" value="0.7189946257490156" />
+      <entry key="M15" value="4.0230400804470126E-226" />
+      <entry key="M30" value="2.0057517494562343E-113" />
+      <entry key="H1" value="4.4785619895860033E-57" />
+      <entry key="H2" value="6.692205906564472E-29" />
+      <entry key="H4" value="8.180590386268337E-15" />
+      <entry key="D1" value="0.004560772265553188" />
+      <entry key="W1" value="0.7178987761230359" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9726549474122855" />
-      <entry key="MS500" value="0.9944702366554017" />
-      <entry key="S2" value="1.1049721331095361" />
-      <entry key="S5" value="3.3391808548278137" />
-      <entry key="S10" value="7.778327056176253" />
-      <entry key="S30" value="14.915701200777463" />
-      <entry key="S60" value="17.679142357738044" />
-      <entry key="M2" value="19.327276826707454" />
-      <entry key="M5" value="22.31478445279732" />
-      <entry key="M10" value="39.57541780269679" />
-      <entry key="M15" value="68.8314952309219" />
-      <entry key="M30" value="165.43932209286783" />
-      <entry key="H1" value="338.1510828193632" />
-      <entry key="H2" value="622.2514372300627" />
-      <entry key="H4" value="1078.8984850275644" />
-      <entry key="D1" value="2988.119412460412" />
-      <entry key="W1" value="10806.547026847747" />
+      <entry key="MS100" value="1.7321289040306231" />
+      <entry key="MS500" value="3.476195188379255" />
+      <entry key="S2" value="7.001324079854446" />
+      <entry key="S5" value="11.040666405623707" />
+      <entry key="S10" value="13.517705934082207" />
+      <entry key="S30" value="15.867716427209972" />
+      <entry key="S60" value="18.978895213076317" />
+      <entry key="M2" value="27.802652485426755" />
+      <entry key="M5" value="47.03731009928943" />
+      <entry key="M10" value="72.01060720605665" />
+      <entry key="M15" value="98.74001571380279" />
+      <entry key="M30" value="188.38007146682858" />
+      <entry key="H1" value="361.18644311081096" />
+      <entry key="H2" value="652.8318974331294" />
+      <entry key="H4" value="1120.567270044226" />
+      <entry key="D1" value="3067.8085502766153" />
+      <entry key="W1" value="10901.993715492275" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -260,7 +267,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
     <MESSAGE value="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public." />
     <MESSAGE value="Include SQL migrations in release tarball so VPS apply can ensure schema.&#10;&#10;Previously only *.sh/*.mjs were packed, so migrate-*.sql never reached PreProd." />
     <MESSAGE value="background_image_url issue" />
@@ -285,7 +291,8 @@
     <MESSAGE value="#6 Marketplace CSS was wiping background-image, so the inventory background never showed on cards.&#10;   Now:&#10;   •&#10;   Background + product image both render in catalog-card-media (same as popup), with shadow/fit settings&#10;   •&#10;   Admin Media row: Product image | Background image (compact, single-line, no-wrap)&#10;   •&#10;   Uncheck either to hide that layer; save catalog settings after changing" />
     <MESSAGE value="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing." />
     <MESSAGE value="#6 deploy error fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#6 deploy error fixed" />
+    <MESSAGE value="#7 Display filters only non-zero item" />
+    <option name="LAST_COMMIT_MESSAGE" value="#7 Display filters only non-zero item" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
