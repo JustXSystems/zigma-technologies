@@ -10,12 +10,29 @@ import {
   type CatalogCaseStudy,
   type CatalogPageSettings,
   type CatalogFacets,
+  type CatalogBackgroundShading,
   type FormDefinition,
   type FormField,
   type Enquiry,
+  DEFAULT_MEDIA_FIT_PERCENT,
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns } from '@/lib/schema-ensure';
+
+const SHADING_VALUES = new Set<CatalogBackgroundShading>(['none', 'soft', 'medium', 'strong', 'bottom']);
+
+export function normalizeBackgroundShading(value: unknown): CatalogBackgroundShading {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return SHADING_VALUES.has(raw as CatalogBackgroundShading)
+    ? (raw as CatalogBackgroundShading)
+    : 'medium';
+}
+
+export function normalizeMediaFitPercent(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return DEFAULT_MEDIA_FIT_PERCENT;
+  return Math.min(100, Math.max(20, Math.round(n)));
+}
 
 function mapItem(row: RowDataPacket): CatalogItem {
   return {
@@ -36,6 +53,15 @@ function mapItem(row: RowDataPacket): CatalogItem {
     background_image_url: row.background_image_url
       ? toStorageMediaPath(String(row.background_image_url))
       : null,
+    background_shading_style: normalizeBackgroundShading(row.background_shading_style),
+    media_fit_to_space: row.media_fit_to_space === undefined || row.media_fit_to_space === null
+      ? true
+      : !!Number(row.media_fit_to_space),
+    media_fit_percent: normalizeMediaFitPercent(
+      row.media_fit_percent === undefined || row.media_fit_percent === null
+        ? DEFAULT_MEDIA_FIT_PERCENT
+        : row.media_fit_percent
+    ),
     status: row.status,
     featured: row.featured,
     sort_order: row.sort_order,
@@ -255,6 +281,9 @@ export async function createCatalogItem(input: {
   availability_label?: string | null;
   lead_time_label?: string | null;
   background_image_url?: string | null;
+  background_shading_style?: CatalogBackgroundShading;
+  media_fit_to_space?: boolean;
+  media_fit_percent?: number;
   status?: 'draft' | 'published';
   featured?: boolean;
   enabled?: boolean;
@@ -266,8 +295,8 @@ export async function createCatalogItem(input: {
   const slug = slugify(input.slug || input.title);
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO catalog_items
-      (item_type, slug, title, summary, description, category_id, tags_json, specs_json, price_label, availability_label, lead_time_label, background_image_url, status, featured, enabled, sort_order, case_study_json, cta_config_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (item_type, slug, title, summary, description, category_id, tags_json, specs_json, price_label, availability_label, lead_time_label, background_image_url, background_shading_style, media_fit_to_space, media_fit_percent, status, featured, enabled, sort_order, case_study_json, cta_config_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.item_type,
       slug,
@@ -283,6 +312,9 @@ export async function createCatalogItem(input: {
       input.background_image_url?.trim()
         ? toStorageMediaPath(input.background_image_url.trim())
         : null,
+      normalizeBackgroundShading(input.background_shading_style),
+      input.media_fit_to_space === false ? 0 : 1,
+      normalizeMediaFitPercent(input.media_fit_percent ?? DEFAULT_MEDIA_FIT_PERCENT),
       input.status || 'draft',
       input.featured ? 1 : 0,
       input.enabled === false ? 0 : 1,
@@ -308,6 +340,9 @@ export async function updateCatalogItem(
     availability_label: string | null;
     lead_time_label: string | null;
     background_image_url: string | null;
+    background_shading_style: CatalogBackgroundShading;
+    media_fit_to_space: boolean;
+    media_fit_percent: number;
     status: 'draft' | 'published';
     featured: boolean;
     enabled: boolean;
@@ -336,6 +371,16 @@ export async function updateCatalogItem(
         ? input.background_image_url?.trim()
           ? toStorageMediaPath(input.background_image_url.trim())
           : null
+        : undefined,
+    background_shading_style:
+      input.background_shading_style !== undefined
+        ? normalizeBackgroundShading(input.background_shading_style)
+        : undefined,
+    media_fit_to_space:
+      input.media_fit_to_space === undefined ? undefined : input.media_fit_to_space ? 1 : 0,
+    media_fit_percent:
+      input.media_fit_percent !== undefined
+        ? normalizeMediaFitPercent(input.media_fit_percent)
         : undefined,
     status: input.status,
     featured: input.featured === undefined ? undefined : input.featured ? 1 : 0,

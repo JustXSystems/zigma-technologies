@@ -1,5 +1,22 @@
 export type CatalogItemType = 'project' | 'product' | 'service';
 
+/** Overlay shading on catalog card/gallery backgrounds */
+export type CatalogBackgroundShading = 'none' | 'soft' | 'medium' | 'strong' | 'bottom';
+
+export const CATALOG_BACKGROUND_SHADING_OPTIONS: Array<{
+  value: CatalogBackgroundShading;
+  label: string;
+  hint: string;
+}> = [
+  { value: 'none', label: 'None', hint: 'No darkening overlay' },
+  { value: 'soft', label: 'Soft', hint: 'Light veil for bright photos' },
+  { value: 'medium', label: 'Medium', hint: 'Default balance for text readability' },
+  { value: 'strong', label: 'Strong', hint: 'Deep shade for busy backgrounds' },
+  { value: 'bottom', label: 'Bottom fade', hint: 'Darkens toward the lower edge' },
+];
+
+export const DEFAULT_MEDIA_FIT_PERCENT = 78;
+
 export type CatalogCaseStudy = {
   enabled?: boolean;
   client_name?: string;
@@ -42,6 +59,12 @@ export type CatalogItem = {
   lead_time_label: string | null;
   /** Backdrop for catalog-gallery-main in product/service/project popups */
   background_image_url: string | null;
+  /** Overlay shading applied over the gallery/card background image */
+  background_shading_style: CatalogBackgroundShading;
+  /** When true, primary/catalog media uses object-fit contain sized by media_fit_percent */
+  media_fit_to_space: boolean;
+  /** Max width/height of catalog media as % of the available frame (when fit is on) */
+  media_fit_percent: number;
   status: 'draft' | 'published';
   featured: number;
   sort_order: number;

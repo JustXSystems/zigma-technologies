@@ -199,6 +199,9 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
                   title={item.title}
                   variant="detail"
                   backgroundImageUrl={item.background_image_url}
+                  backgroundShadingStyle={item.background_shading_style}
+                  mediaFitToSpace={item.media_fit_to_space}
+                  mediaFitPercent={item.media_fit_percent}
                 />
               </aside>
             ) : null}

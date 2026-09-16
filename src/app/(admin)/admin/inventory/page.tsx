@@ -2,7 +2,17 @@
 
 import { FormEvent, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { CatalogItem, CatalogCategory, CatalogItemType, CatalogMedia } from '@/lib/types';
+import type {
+  CatalogItem,
+  CatalogCategory,
+  CatalogItemType,
+  CatalogMedia,
+  CatalogBackgroundShading,
+} from '@/lib/types';
+import {
+  CATALOG_BACKGROUND_SHADING_OPTIONS,
+  DEFAULT_MEDIA_FIT_PERCENT,
+} from '@/lib/types';
 import { buildCaseStudyJson, caseStudyToEditor } from '@/lib/catalog-case-study';
 import { getBrochureUrl, withBrochureUrl } from '@/lib/catalog-brochure';
 import MediaPicker from '@/components/admin/MediaPicker';
@@ -99,6 +109,9 @@ function InventoryInner() {
   const [itemMedia, setItemMedia] = useState<CatalogMedia[]>([]);
   const [attachUrl, setAttachUrl] = useState('');
   const [backgroundUrl, setBackgroundUrl] = useState('');
+  const [backgroundShading, setBackgroundShading] = useState<CatalogBackgroundShading>('medium');
+  const [mediaFitToSpace, setMediaFitToSpace] = useState(true);
+  const [mediaFitPercent, setMediaFitPercent] = useState(DEFAULT_MEDIA_FIT_PERCENT);
   const [mediaMsg, setMediaMsg] = useState('');
   const [savingBackground, setSavingBackground] = useState(false);
 
@@ -271,6 +284,9 @@ function InventoryInner() {
         availability_label: item.availability_label,
         lead_time_label: item.lead_time_label,
         background_image_url: item.background_image_url,
+        background_shading_style: item.background_shading_style,
+        media_fit_to_space: item.media_fit_to_space,
+        media_fit_percent: item.media_fit_percent,
         status: 'draft',
         featured: false,
         enabled: false,
@@ -353,6 +369,9 @@ function InventoryInner() {
     setAttachUrl('');
     if (opts?.resetBackground !== false && (switching || !mediaItem)) {
       setBackgroundUrl(item.background_image_url || '');
+      setBackgroundShading(item.background_shading_style || 'medium');
+      setMediaFitToSpace(item.media_fit_to_space !== false);
+      setMediaFitPercent(item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
     }
     const res = await fetch(`/api/admin/catalog/${item.id}/media`);
     const data = await res.json();
@@ -360,7 +379,16 @@ function InventoryInner() {
     else setError(data.error || 'Failed to load media');
   }
 
-  async function saveBackgroundImage(url: string | null) {
+  function mediaPresentationDirty(item: CatalogItem) {
+    return (
+      backgroundUrl !== (item.background_image_url || '') ||
+      backgroundShading !== (item.background_shading_style || 'medium') ||
+      mediaFitToSpace !== (item.media_fit_to_space !== false) ||
+      mediaFitPercent !== (item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT)
+    );
+  }
+
+  async function saveMediaPresentation(url: string | null) {
     if (!mediaItem) return;
     setSavingBackground(true);
     setMediaMsg('');
@@ -369,17 +397,34 @@ function InventoryInner() {
       const res = await fetch(`/api/admin/catalog/${mediaItem.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ background_image_url: normalized }),
+        body: JSON.stringify({
+          background_image_url: normalized,
+          background_shading_style: backgroundShading,
+          media_fit_to_space: mediaFitToSpace,
+          media_fit_percent: mediaFitPercent,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Could not save background');
+      if (!res.ok) throw new Error(data.error || 'Could not save media presentation');
       const nextUrl = data.item?.background_image_url || '';
+      const nextShading = (data.item?.background_shading_style || backgroundShading) as CatalogBackgroundShading;
+      const nextFit = data.item?.media_fit_to_space !== false;
+      const nextPct = Number(data.item?.media_fit_percent) || mediaFitPercent;
       setBackgroundUrl(nextUrl);
-      setMediaItem({ ...mediaItem, background_image_url: nextUrl || null });
-      setMediaMsg(nextUrl ? 'Background image saved.' : 'Background image cleared.');
+      setBackgroundShading(nextShading);
+      setMediaFitToSpace(nextFit);
+      setMediaFitPercent(nextPct);
+      setMediaItem({
+        ...mediaItem,
+        background_image_url: nextUrl || null,
+        background_shading_style: nextShading,
+        media_fit_to_space: nextFit,
+        media_fit_percent: nextPct,
+      });
+      setMediaMsg(nextUrl ? 'Media presentation saved.' : 'Background cleared; fit & shading saved.');
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save background');
+      setError(err instanceof Error ? err.message : 'Could not save media presentation');
     } finally {
       setSavingBackground(false);
     }
@@ -820,8 +865,9 @@ function InventoryInner() {
             <h2>Media · {mediaItem.title}</h2>
             <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem', marginTop: 0 }}>
               Attach multiple images, SVG, or videos. Set one image/SVG as the <strong>card thumbnail</strong> (★).
-              Optionally set a <strong>gallery background</strong> for the public product/service/project popup. Videos appear in
-              the detail gallery but are not used as list thumbnails.
+              Optionally set a <strong>gallery background</strong>, <strong>shading style</strong>, and catalog image
+              <strong> fit %</strong> for public cards and the detail popup. Videos appear in the detail gallery but
+              are not used as list thumbnails.
             </p>
             {mediaMsg ? <div className="admin-success">{mediaMsg}</div> : null}
 
@@ -839,18 +885,80 @@ function InventoryInner() {
                 onChange={setBackgroundUrl}
                 label="Gallery background image (catalog popup)"
               />
+              <div className="admin-field" style={{ marginTop: '0.75rem' }}>
+                <label htmlFor="bg-shading">Background shading style</label>
+                <select
+                  id="bg-shading"
+                  className="admin-select"
+                  value={backgroundShading}
+                  onChange={(e) => setBackgroundShading(e.target.value as CatalogBackgroundShading)}
+                >
+                  {CATALOG_BACKGROUND_SHADING_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label} — {opt.hint}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <p style={{ margin: '0.55rem 0 0', fontSize: '0.8rem', color: 'var(--admin-muted)' }}>
-                        Shown behind the product media on the public catalog list cards and in the
-                        product/service/project popup (inset frame). Save, then open the public catalogue to verify.
+                Shown behind the product media on public catalog cards and in the
+                product/service/project popup. Shading controls the dark overlay for text readability.
               </p>
+
+              <div
+                style={{
+                  borderTop: '1px solid #e5e7eb',
+                  marginTop: '0.9rem',
+                  paddingTop: '0.85rem',
+                  display: 'grid',
+                  gap: '0.65rem',
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Catalog image fit</div>
+                <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.9rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={mediaFitToSpace}
+                    onChange={(e) => setMediaFitToSpace(e.target.checked)}
+                  />
+                  Fit to available space
+                </label>
+                <div className="admin-field" style={{ maxWidth: 220 }}>
+                  <label htmlFor="media-fit-pct">Fit percentage</label>
+                  <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                    <input
+                      id="media-fit-pct"
+                      className="admin-input"
+                      type="number"
+                      min={20}
+                      max={100}
+                      step={1}
+                      disabled={!mediaFitToSpace}
+                      value={mediaFitPercent}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        if (!Number.isFinite(n)) return;
+                        setMediaFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                      }}
+                    />
+                    <span style={{ color: 'var(--admin-muted)', fontSize: '0.85rem' }}>%</span>
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--admin-muted)' }}>
+                  When a background is set and fit is on, the catalog image is contained within the
+                  frame at this size (default {DEFAULT_MEDIA_FIT_PERCENT}%). When fit is off, the
+                  image covers the media area over the background.
+                </p>
+              </div>
+
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.65rem' }}>
                 <button
                   type="button"
                   className="admin-btn admin-btn-primary"
-                  disabled={savingBackground || backgroundUrl === (mediaItem.background_image_url || '')}
-                  onClick={() => saveBackgroundImage(backgroundUrl.trim() || null)}
+                  disabled={savingBackground || !mediaPresentationDirty(mediaItem)}
+                  onClick={() => saveMediaPresentation(backgroundUrl.trim() || null)}
                 >
-                  {savingBackground ? 'Saving…' : 'Save background'}
+                  {savingBackground ? 'Saving…' : 'Save presentation'}
                 </button>
                 <button
                   type="button"
@@ -858,7 +966,7 @@ function InventoryInner() {
                   disabled={savingBackground || (!backgroundUrl && !mediaItem.background_image_url)}
                   onClick={() => {
                     setBackgroundUrl('');
-                    void saveBackgroundImage(null);
+                    void saveMediaPresentation(null);
                   }}
                 >
                   Clear background

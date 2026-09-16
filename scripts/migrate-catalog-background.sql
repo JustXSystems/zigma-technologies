@@ -1,4 +1,4 @@
--- Upgrade existing DBs: per-item gallery background image for catalog popups.
+-- Upgrade existing DBs: per-item gallery background + presentation controls.
 -- Uses DATABASE() from the connection — do not hardcode a schema name.
 -- Idempotent.
 
@@ -10,6 +10,42 @@ SET @bg_exists := (
 );
 SET @sql := IF(@bg_exists = 0,
   'ALTER TABLE catalog_items ADD COLUMN background_image_url VARCHAR(500) NULL AFTER lead_time_label',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @shade_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_items' AND COLUMN_NAME = 'background_shading_style'
+);
+SET @sql := IF(@shade_exists = 0,
+  'ALTER TABLE catalog_items ADD COLUMN background_shading_style VARCHAR(20) NOT NULL DEFAULT ''medium'' AFTER background_image_url',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @fit_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_items' AND COLUMN_NAME = 'media_fit_to_space'
+);
+SET @sql := IF(@fit_exists = 0,
+  'ALTER TABLE catalog_items ADD COLUMN media_fit_to_space TINYINT(1) NOT NULL DEFAULT 1 AFTER background_shading_style',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @pct_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_items' AND COLUMN_NAME = 'media_fit_percent'
+);
+SET @sql := IF(@pct_exists = 0,
+  'ALTER TABLE catalog_items ADD COLUMN media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER media_fit_to_space',
   'SELECT 1'
 );
 PREPARE stmt FROM @sql;

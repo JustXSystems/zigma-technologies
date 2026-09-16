@@ -51,12 +51,30 @@ function cssUrlValue(path: string): string {
 
 function CatalogCardMedia({ item }: { item: CatalogItem }) {
   const bgCss = item.background_image_url?.trim() ? cssUrlValue(item.background_image_url) : '';
-  const style = bgCss
-    ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties)
-    : undefined;
+  const shading = item.background_shading_style || 'medium';
+  const fitToSpace = item.media_fit_to_space !== false;
+  const fitPct = Math.min(100, Math.max(20, Number(item.media_fit_percent) || 78));
+  // Fit-to-space only changes layout when a gallery background is present.
+  const useFit = !!bgCss && fitToSpace;
+  const style = {
+    ...(bgCss ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties) : null),
+    ...(useFit
+      ? ({
+          ['--catalog-media-fit']: `${fitPct}%`,
+        } as CSSProperties)
+      : null),
+  } as CSSProperties | undefined;
 
   return (
-    <div className={cx('catalog-card-media', bgCss && 'catalog-card-media--has-bg')} style={style}>
+    <div
+      className={cx(
+        'catalog-card-media',
+        bgCss && 'catalog-card-media--has-bg',
+        bgCss ? (useFit ? 'catalog-card-media--fit' : 'catalog-card-media--cover') : null,
+        `catalog-card-media--shade-${shading}`
+      )}
+      style={style}
+    >
       {item.primary_image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={publicMediaUrl(item.primary_image)} alt={item.title} loading="lazy" />

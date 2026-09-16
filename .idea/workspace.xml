@@ -7,13 +7,21 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Company logo name and subtitle resize in desktop and mobile">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Logo tagline now accepts and renders limited HTML">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ztools/ZtoolsPortalBrand.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsPortalBrand.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-background.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,23 +69,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.6783021637242415" />
-      <entry key="MS500" value="1.936051540763537" />
-      <entry key="S2" value="3.568175028454237" />
-      <entry key="S5" value="7.753366376550814" />
-      <entry key="S10" value="14.261867385733792" />
-      <entry key="S30" value="30.661245960068825" />
-      <entry key="S60" value="40.226757268925134" />
-      <entry key="M2" value="46.89756957044641" />
-      <entry key="M5" value="61.30222988244519" />
-      <entry key="M10" value="114.38018069357658" />
-      <entry key="M15" value="176.27412233851678" />
-      <entry key="M30" value="328.5296870892758" />
-      <entry key="H1" value="550.0426918653645" />
-      <entry key="H2" value="848.0388516659442" />
-      <entry key="H4" value="1181.6940936106014" />
-      <entry key="D1" value="2044.1869493778086" />
-      <entry key="W1" value="9548.00418121141" />
+      <entry key="MS100" value="1.1118781338659967" />
+      <entry key="MS500" value="1.6452812646722377" />
+      <entry key="S2" value="1.9362977542595459" />
+      <entry key="S5" value="2.938366699823799" />
+      <entry key="S10" value="6.203184427609124" />
+      <entry key="S30" value="24.775409031640166" />
+      <entry key="S60" value="50.371168408276546" />
+      <entry key="M2" value="85.2062851261326" />
+      <entry key="M5" value="142.25894976459963" />
+      <entry key="M10" value="182.49816230117054" />
+      <entry key="M15" value="200.76434646620845" />
+      <entry key="M30" value="224.19008327744956" />
+      <entry key="H1" value="275.81253127115343" />
+      <entry key="H2" value="473.3084381503771" />
+      <entry key="H4" value="862.9699674173593" />
+      <entry key="D1" value="2083.119433537663" />
+      <entry key="W1" value="9650.63829662613" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,33 +97,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="1.2785277386E-314" />
-      <entry key="M15" value="5.4677263387555354E-210" />
-      <entry key="M30" value="2.3383169885102065E-105" />
-      <entry key="H1" value="4.835614737042625E-53" />
-      <entry key="H2" value="6.953858451997995E-27" />
-      <entry key="H4" value="8.33897982503433E-14" />
-      <entry key="D1" value="0.006715728024399469" />
-      <entry key="W1" value="0.7587016508365961" />
+      <entry key="M10" value="2.33E-321" />
+      <entry key="M15" value="1.707507962201684E-214" />
+      <entry key="M30" value="1.3067164811854338E-107" />
+      <entry key="H1" value="3.6148533596614175E-54" />
+      <entry key="H2" value="1.901276770925587E-27" />
+      <entry key="H4" value="4.3603632543514405E-14" />
+      <entry key="D1" value="0.006027835487229395" />
+      <entry key="W1" value="0.7470789491395732" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.6369978544609356" />
-      <entry key="MS500" value="1.9266195631376275" />
-      <entry key="S2" value="3.563448085878368" />
-      <entry key="S5" value="7.74896068772402" />
-      <entry key="S10" value="14.257475115235582" />
-      <entry key="S30" value="30.65764508840361" />
-      <entry key="S60" value="40.2242925949641" />
-      <entry key="M2" value="46.89610282057129" />
-      <entry key="M5" value="61.30147176311684" />
-      <entry key="M10" value="114.37951328695189" />
-      <entry key="M15" value="176.27345476924035" />
-      <entry key="M30" value="328.5290771108783" />
-      <entry key="H1" value="550.0421760628537" />
-      <entry key="H2" value="848.0384403566181" />
-      <entry key="H4" value="1181.6937915844258" />
-      <entry key="D1" value="2044.19356646072" />
-      <entry key="W1" value="9548.76275426485" />
+      <entry key="MS100" value="1.0629758725802692" />
+      <entry key="MS500" value="1.6338375148860673" />
+      <entry key="S2" value="1.9331790227338055" />
+      <entry key="S5" value="2.9364005735695518" />
+      <entry key="S10" value="6.2010134091434965" />
+      <entry key="S30" value="24.772522875797875" />
+      <entry key="S60" value="50.36824209509648" />
+      <entry key="M2" value="85.20378211000568" />
+      <entry key="M5" value="142.25722363879228" />
+      <entry key="M10" value="182.49703348974668" />
+      <entry key="M15" value="200.76351246814664" />
+      <entry key="M30" value="224.18961441964487" />
+      <entry key="H1" value="275.81224605228823" />
+      <entry key="H2" value="473.3081985104453" />
+      <entry key="H4" value="862.9697448481026" />
+      <entry key="D1" value="2083.12536189927" />
+      <entry key="W1" value="9651.385247381892" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -267,7 +275,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="inventory items background image issue fixed" />
     <MESSAGE value="Add CI standalone release tarball deploy for PreProd and Prod.&#10;&#10;Build in GitHub Actions, SCP artifact, apply-release on VPS with parameterized flags; probe SSH :22 with clear firewall guidance." />
     <MESSAGE value="Allow CI next build without MySQL for PreProd release artifacts.&#10;&#10;Site layout is dynamic; CMS/nav/catalog reads return safe fallbacks on connection refused so GitHub Actions can package standalone releases." />
     <MESSAGE value="Fix CI SCP tarball path so apply-release finds /tmp/zigma-*.tgz.&#10;&#10;appleboy/scp-action was nesting dist/; flatten before upload and resolve common remote paths." />
@@ -292,7 +299,8 @@
     <MESSAGE value="#5 Admin Page realign and floating Save Button to access easily" />
     <MESSAGE value="#5 Hero element toggles now apply across all hero variants and visual style presets." />
     <MESSAGE value="#6 Company logo name and subtitle resize in desktop and mobile" />
-    <option name="LAST_COMMIT_MESSAGE" value="#6 Company logo name and subtitle resize in desktop and mobile" />
+    <MESSAGE value="#6 Logo tagline now accepts and renders limited HTML" />
+    <option name="LAST_COMMIT_MESSAGE" value="#6 Logo tagline now accepts and renders limited HTML" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import type { CatalogMedia } from '@/lib/types';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import type { CatalogBackgroundShading, CatalogMedia } from '@/lib/types';
+import { DEFAULT_MEDIA_FIT_PERCENT } from '@/lib/types';
 import { publicMediaUrl } from '@/lib/media-url';
 
 type Props = {
@@ -11,6 +12,9 @@ type Props = {
   variant?: 'default' | 'detail';
   /** Optional backdrop behind gallery media (catalog-gallery-main) */
   backgroundImageUrl?: string | null;
+  backgroundShadingStyle?: CatalogBackgroundShading | null;
+  mediaFitToSpace?: boolean | null;
+  mediaFitPercent?: number | null;
 };
 
 export default function CatalogMediaGallery({
@@ -19,6 +23,9 @@ export default function CatalogMediaGallery({
   className,
   variant = 'default',
   backgroundImageUrl,
+  backgroundShadingStyle = 'medium',
+  mediaFitToSpace = true,
+  mediaFitPercent = DEFAULT_MEDIA_FIT_PERCENT,
 }: Props) {
   const sorted = useMemo(
     () =>
@@ -40,24 +47,37 @@ export default function CatalogMediaGallery({
   const bgCss = bg
     ? encodeURI(bg).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
     : '';
+  const shading = backgroundShadingStyle || 'medium';
+  const fitToSpace = mediaFitToSpace !== false;
+  const fitPct = Math.min(100, Math.max(20, Number(mediaFitPercent) || DEFAULT_MEDIA_FIT_PERCENT));
+  const useFit = !!bg && fitToSpace;
 
   const rootClass = [
     'catalog-gallery',
     variant === 'detail' ? 'catalog-gallery--detail' : '',
     bg ? 'catalog-gallery--has-bg' : '',
+    bg ? (useFit ? 'catalog-gallery--fit' : 'catalog-gallery--cover') : '',
+    `catalog-gallery--shade-${shading}`,
     className,
   ]
     .filter(Boolean)
     .join(' ');
 
-  const mainStyle = bgCss
-    ? ({
-        backgroundImage: `url("${bgCss}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      } as const)
-    : undefined;
+  const mainStyle = {
+    ...(bgCss
+      ? {
+          backgroundImage: `url("${bgCss}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }
+      : null),
+    ...(useFit
+      ? ({
+          ['--catalog-media-fit']: `${fitPct}%`,
+        } as CSSProperties)
+      : null),
+  } as CSSProperties | undefined;
 
   if (!sorted.length) {
     return <div className={`${rootClass} catalog-gallery--empty`} style={mainStyle} aria-hidden="true" />;

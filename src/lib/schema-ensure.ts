@@ -4,33 +4,52 @@ import pool, { isDbUnavailableError } from '@/lib/db';
 let backgroundColumnReady: Promise<void> | null = null;
 let discoveryColumnsReady: Promise<void> | null = null;
 
+const CATALOG_ITEM_MEDIA_COLUMNS: Array<{ name: string; ddl: string }> = [
+  {
+    name: 'background_image_url',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN background_image_url VARCHAR(500) NULL AFTER lead_time_label`,
+  },
+  {
+    name: 'background_shading_style',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN background_shading_style VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER background_image_url`,
+  },
+  {
+    name: 'media_fit_to_space',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN media_fit_to_space TINYINT(1) NOT NULL DEFAULT 1 AFTER background_shading_style`,
+  },
+  {
+    name: 'media_fit_percent',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER media_fit_to_space`,
+  },
+];
+
 /**
- * Idempotent: ensure catalog_items.background_image_url exists.
- * PreProd/Prod often skip manual migrations; without this column admin "Gallery
- * background" cannot persist and older builds omitted the field from API JSON.
+ * Idempotent: ensure catalog_items background + media presentation columns exist.
+ * PreProd/Prod often skip manual migrations; without these columns admin media
+ * presentation options cannot persist.
  */
 export function ensureCatalogBackgroundColumn(): Promise<void> {
   if (!backgroundColumnReady) {
     backgroundColumnReady = (async () => {
       try {
-        const [rows] = await pool.query<RowDataPacket[]>(
-          `SELECT COUNT(*) AS c
-           FROM information_schema.COLUMNS
-           WHERE TABLE_SCHEMA = DATABASE()
-             AND TABLE_NAME = 'catalog_items'
-             AND COLUMN_NAME = 'background_image_url'`
-        );
-        if (Number(rows[0]?.c || 0) > 0) return;
-        await pool.query(
-          `ALTER TABLE catalog_items
-           ADD COLUMN background_image_url VARCHAR(500) NULL AFTER lead_time_label`
-        );
-        console.info('[schema] added catalog_items.background_image_url');
+        for (const col of CATALOG_ITEM_MEDIA_COLUMNS) {
+          const [rows] = await pool.query<RowDataPacket[]>(
+            `SELECT COUNT(*) AS c
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'catalog_items'
+               AND COLUMN_NAME = ?`,
+            [col.name]
+          );
+          if (Number(rows[0]?.c || 0) > 0) continue;
+          await pool.query(col.ddl);
+          console.info(`[schema] added catalog_items.${col.name}`);
+        }
       } catch (err) {
         if (isDbUnavailableError(err)) throw err;
         // Missing ALTER privilege etc. — do not crash reads; writes will surface SQL errors.
         console.error(
-          '[schema] could not ensure background_image_url — run scripts/migrate-catalog-background.sql',
+          '[schema] could not ensure catalog media presentation columns — run scripts/migrate-catalog-background.sql',
           err
         );
       }
