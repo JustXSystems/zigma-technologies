@@ -246,7 +246,13 @@ jobs:
             if [ "${IN_PRESERVE}" = "true" ]; then ARGS+=(--preserve-uploads); else ARGS+=(--no-preserve-uploads); fi
             if [ "${IN_DB_BACKUP}" = "true" ]; then ARGS+=(--db-backup); else ARGS+=(--no-db-backup); fi
             if [ "${IN_MIGRATIONS}" = "true" ]; then
-              ARGS+=(--migrations --migration-files "${IN_MIG_FILES}")
+              MIG_FILES="$(echo "${IN_MIG_FILES:-}" | xargs)"
+              if [ -z "$MIG_FILES" ]; then
+                echo "WARNING: migrations requested but migration_files empty — using --no-migrations" >&2
+                ARGS+=(--no-migrations)
+              else
+                ARGS+=(--migrations --migration-files "$MIG_FILES")
+              fi
             else
               ARGS+=(--no-migrations)
             fi

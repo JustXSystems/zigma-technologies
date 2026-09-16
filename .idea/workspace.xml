@@ -7,16 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Marketplace CSS was wiping background-image, so the inventory background never showed on cards.&#10;   Now:&#10;   •&#10;   Background + product image both render in catalog-card-media (same as popup), with shadow/fit settings&#10;   •&#10;   Admin Media row: Product image | Background image (compact, single-line, no-wrap)&#10;   •&#10;   Uncheck either to hide that layer; save catalog settings after changing">
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing.">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,23 +59,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0578406454946712" />
-      <entry key="MS500" value="2.6302631233866416" />
-      <entry key="S2" value="4.732809468928128" />
-      <entry key="S5" value="6.429739696332152" />
-      <entry key="S10" value="12.12396987746209" />
-      <entry key="S30" value="43.46979012020047" />
-      <entry key="S60" value="79.90121105592985" />
-      <entry key="M2" value="119.56048209664267" />
-      <entry key="M5" value="163.6972517409874" />
-      <entry key="M10" value="205.99762261570703" />
-      <entry key="M15" value="240.93524741650015" />
-      <entry key="M30" value="324.9748217596262" />
-      <entry key="H1" value="475.2195564660764" />
-      <entry key="H2" value="735.1460812456368" />
-      <entry key="H4" value="1168.7945607231434" />
-      <entry key="D1" value="3013.5068073385223" />
-      <entry key="W1" value="10805.853323823036" />
+      <entry key="MS100" value="1.0000386278698594" />
+      <entry key="MS500" value="1.1414216119844889" />
+      <entry key="S2" value="2.3159100139880717" />
+      <entry key="S5" value="3.7603862716159266" />
+      <entry key="S10" value="4.675323998634511" />
+      <entry key="S30" value="5.501450500219047" />
+      <entry key="S60" value="5.742730875922945" />
+      <entry key="M2" value="5.905450785628851" />
+      <entry key="M5" value="12.349120478460991" />
+      <entry key="M10" value="46.711206924639285" />
+      <entry key="M15" value="87.76408706698788" />
+      <entry key="M30" value="195.3247883184947" />
+      <entry key="H1" value="368.72545553782976" />
+      <entry key="H2" value="648.268561662661" />
+      <entry key="H4" value="1098.4712055841005" />
+      <entry key="D1" value="2985.779944729843" />
+      <entry key="W1" value="10794.493085942639" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -93,32 +88,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="6.030668844834809E-225" />
-      <entry key="M30" value="7.765738113556503E-113" />
-      <entry key="H1" value="8.812342545292574E-57" />
-      <entry key="H2" value="9.387407813284698E-29" />
-      <entry key="H4" value="9.688863614274852E-15" />
-      <entry key="D1" value="0.004691226690637849" />
-      <entry key="W1" value="0.7207969360397048" />
+      <entry key="M15" value="2.0470176927295395E-225" />
+      <entry key="M30" value="4.5243979629663493E-113" />
+      <entry key="H1" value="6.726364518048994E-57" />
+      <entry key="H2" value="8.201441652568435E-29" />
+      <entry key="H4" value="9.056181122772213E-15" />
+      <entry key="D1" value="0.004638723244423298" />
+      <entry key="W1" value="0.7196389351951048" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0350668004945363" />
-      <entry key="MS500" value="2.614860812558079" />
-      <entry key="S2" value="4.725326770008989" />
-      <entry key="S5" value="6.4256641739450435" />
-      <entry key="S10" value="12.120230494734045" />
-      <entry key="S30" value="43.465354028358604" />
-      <entry key="S60" value="79.8971035246246" />
-      <entry key="M2" value="119.55739363010905" />
-      <entry key="M5" value="163.6955553355258" />
-      <entry key="M10" value="205.9965555091089" />
-      <entry key="M15" value="240.93441623124014" />
-      <entry key="M30" value="324.9742625714847" />
-      <entry key="H1" value="475.21914823456984" />
-      <entry key="H2" value="735.145763790103" />
-      <entry key="H4" value="1168.794301344155" />
-      <entry key="D1" value="3013.5113712291163" />
-      <entry key="W1" value="10806.573989417471" />
+      <entry key="MS100" value="0.9726927803314834" />
+      <entry key="MS500" value="1.1347033370707704" />
+      <entry key="S2" value="2.25225909321087" />
+      <entry key="S5" value="3.6755751588543637" />
+      <entry key="S10" value="4.6116091982790675" />
+      <entry key="S30" value="5.473556631526327" />
+      <entry key="S60" value="5.7277983379593795" />
+      <entry key="M2" value="5.897724126083664" />
+      <entry key="M5" value="12.345899833254636" />
+      <entry key="M10" value="46.70940792801598" />
+      <entry key="M15" value="87.76274387398513" />
+      <entry key="M30" value="195.32393078962076" />
+      <entry key="H1" value="368.7248777660319" />
+      <entry key="H2" value="648.2681511507283" />
+      <entry key="H4" value="1098.4708965423788" />
+      <entry key="D1" value="2985.784446439453" />
+      <entry key="W1" value="10795.21259216108" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -270,7 +265,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Tolerate rsync dir utime failures on unowned VPS app root.&#10;&#10;omit-dir-times and accept code 23 when release files verified." />
     <MESSAGE value="Standalone deploy only ships traced server deps. scripts/db-import.mjs can’t resolve mysql2 from that tree" />
     <MESSAGE value="Install mysql2 into release stage via npm instead of a hand-copied dep list.&#10;Hand-copied packages missed sql-escaper and broke CI packaging." />
     <MESSAGE value="Fix PreProd gallery background: ensure DB column and ship current catalog mapping.&#10;Self-heal background_image_url, pin PM2 cwd for assets, unify publicMediaUrl for admin/public." />
@@ -295,7 +289,8 @@
     <MESSAGE value="#6 Marketplace cards now use the same inventory presentation as the popup:&#10;   •&#10;   Background image + background shadow (soft / medium / strong / bottom / none)&#10;   •&#10;   Product image shadow when a background is set&#10;   •&#10;   Fit percent still applied as before&#10;   Cards no longer strip those classes or force box-shadow: none, so Inventory settings show on catalog-card-media the same way they do in the detail gallery." />
     <MESSAGE value="#6 In Admin → Catalog settings → Layout and listing fields, use Catalog card fields checkboxes:&#10;   •&#10;   Media: product image&#10;   •&#10;   Card body: category, title, price/stat, description, tags, availability, lead time, quick view, detail-page link&#10;   Unchecked fields are hidden on public cards. Save settings after changing toggles." />
     <MESSAGE value="#6 Marketplace CSS was wiping background-image, so the inventory background never showed on cards.&#10;   Now:&#10;   •&#10;   Background + product image both render in catalog-card-media (same as popup), with shadow/fit settings&#10;   •&#10;   Admin Media row: Product image | Background image (compact, single-line, no-wrap)&#10;   •&#10;   Uncheck either to hide that layer; save catalog settings after changing" />
-    <option name="LAST_COMMIT_MESSAGE" value="#6 Marketplace CSS was wiping background-image, so the inventory background never showed on cards.&#10;   Now:&#10;   •&#10;   Background + product image both render in catalog-card-media (same as popup), with shadow/fit settings&#10;   •&#10;   Admin Media row: Product image | Background image (compact, single-line, no-wrap)&#10;   •&#10;   Uncheck either to hide that layer; save catalog settings after changing" />
+    <MESSAGE value="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing." />
+    <option name="LAST_COMMIT_MESSAGE" value="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

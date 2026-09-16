@@ -99,7 +99,7 @@ case "$ENV_NAME" in
 esac
 
 if [[ "$DO_MIGRATIONS" -eq 1 && -z "$MIGRATION_FILES" ]]; then
-  die "--migrations requires --migration-files"
+  die "--migrations requires --migration-files (e.g. migrate-catalog-discovery.sql,migrate-catalog-background.sql)"
 fi
 
 log "Apply release plan"

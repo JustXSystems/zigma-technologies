@@ -45,11 +45,11 @@ on:
         type: boolean
         default: false
       apply_migrations:
-        description: Apply SQL migrations
+        description: Apply SQL migrations (also set migration_files)
         type: boolean
         default: false
       migration_files:
-        description: Comma-separated scripts/*.sql (if apply_migrations)
+        description: "Comma-separated scripts/*.sql e.g. migrate-catalog-discovery.sql,migrate-catalog-background.sql"
         required: false
         default: ''
         type: string
@@ -129,13 +129,20 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            MIG="${{ inputs.apply_migrations }}"
+            MIG_FILES="$(echo '${{ inputs.migration_files }}' | xargs)"
+            if [[ "$MIG" == "true" && -z "$MIG_FILES" ]]; then
+              echo "::warning::apply_migrations was true but migration_files is empty — skipping SQL migrations (listing cards still self-heal via schema-ensure)."
+              echo "To apply SQL, re-run with migration_files e.g. migrate-catalog-discovery.sql,migrate-catalog-background.sql"
+              MIG=false
+            fi
             echo "apply=${{ inputs.apply_release }}" >> "$GITHUB_OUTPUT"
             echo "restart=${{ inputs.restart_pm2 }}" >> "$GITHUB_OUTPUT"
             echo "health=${{ inputs.healthcheck }}" >> "$GITHUB_OUTPUT"
             echo "preserve=${{ inputs.preserve_uploads }}" >> "$GITHUB_OUTPUT"
             echo "db_backup=${{ inputs.db_backup }}" >> "$GITHUB_OUTPUT"
-            echo "migrations=${{ inputs.apply_migrations }}" >> "$GITHUB_OUTPUT"
-            echo "migration_files=${{ inputs.migration_files }}" >> "$GITHUB_OUTPUT"
+            echo "migrations=$MIG" >> "$GITHUB_OUTPUT"
+            echo "migration_files=$MIG_FILES" >> "$GITHUB_OUTPUT"
             echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
           else
             echo "apply=true" >> "$GITHUB_OUTPUT"
@@ -294,7 +301,13 @@ jobs:
             if [ "${IN_PRESERVE}" = "true" ]; then ARGS+=(--preserve-uploads); else ARGS+=(--no-preserve-uploads); fi
             if [ "${IN_DB_BACKUP}" = "true" ]; then ARGS+=(--db-backup); else ARGS+=(--no-db-backup); fi
             if [ "${IN_MIGRATIONS}" = "true" ]; then
-              ARGS+=(--migrations --migration-files "${IN_MIG_FILES}")
+              MIG_FILES="$(echo "${IN_MIG_FILES:-}" | xargs)"
+              if [ -z "$MIG_FILES" ]; then
+                echo "WARNING: migrations requested but migration_files empty — using --no-migrations" >&2
+                ARGS+=(--no-migrations)
+              else
+                ARGS+=(--migrations --migration-files "$MIG_FILES")
+              fi
             else
               ARGS+=(--no-migrations)
             fi
