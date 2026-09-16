@@ -16,6 +16,8 @@ import {
   type FormField,
   type Enquiry,
   DEFAULT_MEDIA_FIT_PERCENT,
+  normalizeCardMediaFitPercent,
+  normalizeCardMediaInset,
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
@@ -615,6 +617,8 @@ export async function getPageSettings(itemType: CatalogItemType) {
     visual_style: row.visual_style ?? 'premium',
     card_style: row.card_style === 'overlay' ? 'overlay' : 'marketplace',
     card_body_bg_color: row.card_body_bg_color || '#ffffff',
+    card_media_fit_percent: normalizeCardMediaFitPercent(row.card_media_fit_percent),
+    card_media_inset: normalizeCardMediaInset(row.card_media_inset),
     hero_variant: row.hero_variant ?? 'spotlight',
     hero_standard_panel_enabled: Number(row.hero_standard_panel_enabled ?? 1),
     hero_meta_enabled: Number(row.hero_meta_enabled ?? 1),
@@ -666,6 +670,12 @@ export async function updatePageSettings(
     visual_style: input.visual_style,
     card_style: input.card_style,
     card_body_bg_color: input.card_body_bg_color,
+    card_media_fit_percent:
+      input.card_media_fit_percent !== undefined
+        ? normalizeCardMediaFitPercent(input.card_media_fit_percent)
+        : undefined,
+    card_media_inset:
+      input.card_media_inset !== undefined ? normalizeCardMediaInset(input.card_media_inset) : undefined,
     hero_variant: input.hero_variant,
     hero_standard_panel_enabled:
       input.hero_standard_panel_enabled === undefined

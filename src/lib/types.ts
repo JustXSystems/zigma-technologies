@@ -21,6 +21,31 @@ export const CATALOG_SHADOW_STYLE_OPTIONS: Array<{
 export const CATALOG_BACKGROUND_SHADING_OPTIONS = CATALOG_SHADOW_STYLE_OPTIONS;
 
 export const DEFAULT_MEDIA_FIT_PERCENT = 78;
+/** Listing-card product fill (higher = less empty margin around the image) */
+export const DEFAULT_CARD_MEDIA_FIT_PERCENT = 94;
+export type CatalogCardMediaInset = 'none' | 'snug' | 'roomy';
+export const DEFAULT_CARD_MEDIA_INSET: CatalogCardMediaInset = 'snug';
+export const CARD_MEDIA_INSET_OPTIONS: Array<{
+  value: CatalogCardMediaInset;
+  label: string;
+  hint: string;
+}> = [
+  { value: 'none', label: 'None', hint: 'Edge-to-edge in the media frame' },
+  { value: 'snug', label: 'Snug', hint: 'Tight padding (recommended)' },
+  { value: 'roomy', label: 'Roomy', hint: 'More breathing room around the image' },
+];
+
+export function normalizeCardMediaFitPercent(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return DEFAULT_CARD_MEDIA_FIT_PERCENT;
+  return Math.min(100, Math.max(70, Math.round(n)));
+}
+
+export function normalizeCardMediaInset(value: unknown): CatalogCardMediaInset {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (raw === 'none' || raw === 'snug' || raw === 'roomy') return raw;
+  return DEFAULT_CARD_MEDIA_INSET;
+}
 
 export type CatalogCaseStudy = {
   enabled?: boolean;
@@ -159,6 +184,13 @@ export type CatalogPageSettings = {
   card_style: 'overlay' | 'marketplace';
   /** Body panel background for marketplace (and optional overlay body tint) */
   card_body_bg_color: string | null;
+  /**
+   * Listing-card product image size (% of media frame). Page-level override for
+   * catalog cards only — inventory fit still controls the detail popup.
+   */
+  card_media_fit_percent: number;
+  /** Padding around the product image inside catalog-card-media */
+  card_media_inset: 'none' | 'snug' | 'roomy';
   hero_variant: 'standard' | 'spotlight';
   /** When hero_variant is standard, show/hide the compact active-item panel. */
   hero_standard_panel_enabled: number;

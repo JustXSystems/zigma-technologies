@@ -2,7 +2,14 @@
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
-import { slugify } from '@/lib/types';
+import {
+  slugify,
+  CARD_MEDIA_INSET_OPTIONS,
+  DEFAULT_CARD_MEDIA_FIT_PERCENT,
+  DEFAULT_CARD_MEDIA_INSET,
+  normalizeCardMediaFitPercent,
+  normalizeCardMediaInset,
+} from '@/lib/types';
 import {
   DEFAULT_HERO_ELEMENTS,
   DEFAULT_TOOLBAR_ELEMENTS,
@@ -366,6 +373,8 @@ export default function CatalogSettingsPage() {
       ...settingsData.settings,
       card_style: settingsData.settings?.card_style || 'marketplace',
       card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
+      card_media_fit_percent: normalizeCardMediaFitPercent(settingsData.settings?.card_media_fit_percent),
+      card_media_inset: normalizeCardMediaInset(settingsData.settings?.card_media_inset),
       card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
       modal_fields_json: settingsData.settings?.modal_fields_json?.length
         ? settingsData.settings.modal_fields_json
@@ -442,6 +451,8 @@ export default function CatalogSettingsPage() {
           visual_style: settings.visual_style,
           card_style: settings.card_style || 'marketplace',
           card_body_bg_color: settings.card_body_bg_color || '#ffffff',
+          card_media_fit_percent: normalizeCardMediaFitPercent(settings.card_media_fit_percent),
+          card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
           hero_variant: settings.hero_variant,
           hero_elements_json: resolveHeroElements(settings),
           toolbar_elements_json: resolveToolbarElements(settings),
@@ -468,6 +479,8 @@ export default function CatalogSettingsPage() {
         ...data.settings,
         card_style: data.settings?.card_style || 'marketplace',
         card_body_bg_color: data.settings?.card_body_bg_color || '#ffffff',
+        card_media_fit_percent: normalizeCardMediaFitPercent(data.settings?.card_media_fit_percent),
+        card_media_inset: normalizeCardMediaInset(data.settings?.card_media_inset),
         card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
       });
     } finally {
@@ -831,6 +844,85 @@ export default function CatalogSettingsPage() {
                 <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
                   Used under the product image for Marketplace cards (title/price panel).
                 </p>
+              </div>
+              <div className="admin-field full">
+                <label style={{ whiteSpace: 'nowrap' }}>
+                  Card image fill — {settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}%
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.75rem', alignItems: 'center' }}>
+                  <input
+                    type="range"
+                    min={70}
+                    max={100}
+                    step={1}
+                    value={settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        card_media_fit_percent: normalizeCardMediaFitPercent(Number(e.target.value)),
+                      })
+                    }
+                    style={{ flex: 1, minWidth: 160 }}
+                    aria-label="Card image fill percent"
+                  />
+                  <input
+                    className="admin-input"
+                    type="number"
+                    min={70}
+                    max={100}
+                    value={settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        card_media_fit_percent: normalizeCardMediaFitPercent(Number(e.target.value)),
+                      })
+                    }
+                    style={{ width: 72 }}
+                  />
+                </div>
+                <p style={{ margin: '0.3rem 0 0', fontSize: '0.75rem', color: 'var(--admin-muted)', whiteSpace: 'nowrap' }}>
+                  Listing cards only (higher = less empty space). Popup still uses Inventory fit %.
+                </p>
+              </div>
+              <div className="admin-field full">
+                <label>Card media inset</label>
+                <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.35rem', overflowX: 'auto' }}>
+                  {CARD_MEDIA_INSET_OPTIONS.map((opt) => {
+                    const active = (settings.card_media_inset || DEFAULT_CARD_MEDIA_INSET) === opt.value;
+                    return (
+                      <label
+                        key={opt.value}
+                        title={opt.hint}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          border: '1px solid var(--admin-border)',
+                          borderRadius: 8,
+                          padding: '0.28rem 0.55rem',
+                          fontSize: '0.78rem',
+                          whiteSpace: 'nowrap',
+                          flex: '0 0 auto',
+                          background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="card_media_inset"
+                          checked={active}
+                          onChange={() =>
+                            setSettings({
+                              ...settings,
+                              card_media_inset: opt.value,
+                            })
+                          }
+                        />
+                        {opt.label}
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
               <div className="admin-field">
                 <label>Layout</label>

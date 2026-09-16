@@ -9,6 +9,13 @@ import type {
   CatalogItemType,
   CatalogPageSettings,
   CatalogFacets,
+  CatalogCardMediaInset,
+} from '@/lib/types';
+import {
+  DEFAULT_CARD_MEDIA_FIT_PERCENT,
+  DEFAULT_CARD_MEDIA_INSET,
+  normalizeCardMediaFitPercent,
+  normalizeCardMediaInset,
 } from '@/lib/types';
 import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
@@ -91,11 +98,16 @@ function CatalogCardMedia({
   cardStyle = 'marketplace',
   showBackground = true,
   showProduct = true,
+  mediaFitPercent = DEFAULT_CARD_MEDIA_FIT_PERCENT,
+  mediaInset = DEFAULT_CARD_MEDIA_INSET,
 }: {
   item: CatalogItem;
   cardStyle?: 'overlay' | 'marketplace';
   showBackground?: boolean;
   showProduct?: boolean;
+  /** Page-level listing fill; ignores per-item inventory % on cards */
+  mediaFitPercent?: number;
+  mediaInset?: CatalogCardMediaInset;
 }) {
   const bgCss =
     showBackground && item.background_image_url?.trim()
@@ -109,14 +121,12 @@ function CatalogCardMedia({
     item.primary_fit_to_space !== undefined
       ? item.primary_fit_to_space !== false
       : item.media_fit_to_space !== false;
-  const productPct = Math.min(
-    100,
-    Math.max(20, Number(item.primary_fit_percent ?? item.media_fit_percent) || 78)
-  );
+  const productPct = normalizeCardMediaFitPercent(mediaFitPercent);
   const productShadow = item.primary_shadow_style || 'medium';
   // Marketplace stacks like Amazon; presentation (bg + shadows + fit) matches the popup gallery.
   const marketplace = cardStyle === 'marketplace';
   const useProductFit = !!bgCss ? (marketplace ? true : productFit) : marketplace;
+  const inset = normalizeCardMediaInset(mediaInset);
 
   const style = {
     // Inline backgroundImage like the popup gallery so CSS resets cannot hide it.
@@ -133,7 +143,9 @@ function CatalogCardMedia({
     ...(useProductFit || (marketplace && !bgCss)
       ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties)
       : null),
-  } as CSSProperties | undefined;
+    ['--catalog-media-inset']:
+      inset === 'none' ? '0px' : inset === 'roomy' ? '0.85rem' : '0.35rem',
+  } as CSSProperties;
 
   return (
     <div
@@ -148,7 +160,8 @@ function CatalogCardMedia({
             : 'catalog-card-media--product-cover'
           : null,
         bgCss && `catalog-card-media--product-shade-${productShadow}`,
-        marketplace && 'catalog-card-media--marketplace'
+        marketplace && 'catalog-card-media--marketplace',
+        `catalog-card-media--inset-${inset}`
       )}
       style={style}
     >
@@ -368,6 +381,8 @@ function CatalogItemCard({
   layout,
   cardStyle = 'marketplace',
   cardBodyBg = '#ffffff',
+  mediaFitPercent = DEFAULT_CARD_MEDIA_FIT_PERCENT,
+  mediaInset = DEFAULT_CARD_MEDIA_INSET,
   revealEnabled,
   delayMs,
   onOpen,
@@ -378,6 +393,8 @@ function CatalogItemCard({
   layout: 'grid' | 'list';
   cardStyle?: 'overlay' | 'marketplace';
   cardBodyBg?: string;
+  mediaFitPercent?: number;
+  mediaInset?: CatalogCardMediaInset;
   revealEnabled: boolean;
   delayMs?: number;
   onOpen: (item: CatalogItem) => void;
@@ -410,6 +427,8 @@ function CatalogItemCard({
           cardStyle={marketplace ? 'marketplace' : 'overlay'}
           showBackground={showBackground}
           showProduct={showProduct}
+          mediaFitPercent={mediaFitPercent}
+          mediaInset={mediaInset}
         />
       ) : null}
       {showBody ? (
@@ -491,6 +510,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const cardFields = resolveCardFields(settings?.card_fields_json);
   const cardStyle = settings?.card_style === 'overlay' ? 'overlay' : 'marketplace';
   const cardBodyBg = settings?.card_body_bg_color || '#ffffff';
+  const cardMediaFitPercent = normalizeCardMediaFitPercent(settings?.card_media_fit_percent);
+  const cardMediaInset = normalizeCardMediaInset(settings?.card_media_inset);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
   const layout = settings?.layout || 'grid';
   const gridColumns = Number(settings?.grid_columns || 3);
@@ -1006,6 +1027,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                               layout={layout}
                               cardStyle={cardStyle}
                               cardBodyBg={cardBodyBg}
+                              mediaFitPercent={cardMediaFitPercent}
+                              mediaInset={cardMediaInset}
                               revealEnabled={revealEnabled}
                               delayMs={index * 60}
                               onOpen={(next) => void openItem(next)}
@@ -1029,6 +1052,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                       layout={layout}
                       cardStyle={cardStyle}
                       cardBodyBg={cardBodyBg}
+                      mediaFitPercent={cardMediaFitPercent}
+                      mediaInset={cardMediaInset}
                       revealEnabled={revealEnabled}
                       delayMs={index * 60}
                       onOpen={(next) => void openItem(next)}

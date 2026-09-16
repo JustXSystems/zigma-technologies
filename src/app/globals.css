@@ -1746,8 +1746,11 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   background-position:center;
   background-repeat:no-repeat;
   overflow:hidden;
-  --catalog-media-fit:78%;
+  --catalog-media-fit:94%;
   --catalog-bg-fit:100%;
+  --catalog-media-inset:0.35rem;
+  padding:var(--catalog-media-inset);
+  box-sizing:border-box;
 }
 .catalog-page .catalog-card-media--has-bg{
   background-image:var(--catalog-card-bg);
@@ -1844,7 +1847,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:0.85rem;
+  padding:var(--catalog-media-inset, 0.35rem);
   box-sizing:border-box;
   border-radius:18px 18px 0 0;
 }
@@ -1871,8 +1874,8 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   inset:auto;
   top:auto;left:auto;
   width:auto;height:auto;
-  max-width:var(--catalog-media-fit, 86%);
-  max-height:var(--catalog-media-fit, 86%);
+  max-width:var(--catalog-media-fit, 94%);
+  max-height:var(--catalog-media-fit, 94%);
   object-fit:contain;
   transform:none;
   border-radius:8px;

@@ -167,6 +167,14 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'card_body_bg_color',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_body_bg_color VARCHAR(32) NULL DEFAULT '#ffffff' AFTER card_style`,
   },
+  {
+    name: 'card_media_fit_percent',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94 AFTER card_body_bg_color`,
+  },
+  {
+    name: 'card_media_inset',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug' AFTER card_media_fit_percent`,
+  },
 ];
 
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */
