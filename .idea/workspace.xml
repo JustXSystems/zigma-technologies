@@ -7,17 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2202810456102031" />
-      <entry key="MS500" value="2.2812119400883297" />
-      <entry key="S2" value="2.8031840182387713" />
-      <entry key="S5" value="4.080336306835621" />
-      <entry key="S10" value="9.385069831295631" />
-      <entry key="S30" value="29.036645963276527" />
-      <entry key="S60" value="51.50397114535836" />
-      <entry key="M2" value="91.95152416831249" />
-      <entry key="M5" value="165.50918900316861" />
-      <entry key="M10" value="222.73854717892385" />
-      <entry key="M15" value="263.47508937742805" />
-      <entry key="M30" value="361.5971957575866" />
-      <entry key="H1" value="486.77119114642676" />
-      <entry key="H2" value="668.8159912891269" />
-      <entry key="H4" value="1031.084224411476" />
-      <entry key="D1" value="2637.463325139542" />
-      <entry key="W1" value="10337.074223006482" />
+      <entry key="MS100" value="1.2239510708934274" />
+      <entry key="MS500" value="2.202024270232937" />
+      <entry key="S2" value="5.340615424574745" />
+      <entry key="S5" value="9.636887440471723" />
+      <entry key="S10" value="13.831843535334084" />
+      <entry key="S30" value="27.330814091286193" />
+      <entry key="S60" value="42.01491361993132" />
+      <entry key="M2" value="56.197299011988626" />
+      <entry key="M5" value="79.39886593204652" />
+      <entry key="M10" value="130.74938191301533" />
+      <entry key="M15" value="181.80510895546865" />
+      <entry key="M30" value="307.0518354713815" />
+      <entry key="H1" value="466.2232814337836" />
+      <entry key="H2" value="675.7777158651604" />
+      <entry key="H4" value="1053.1256988580874" />
+      <entry key="D1" value="2691.669756877531" />
+      <entry key="W1" value="10402.15301880211" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -94,32 +87,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.0061114189955851E-221" />
-      <entry key="M30" value="3.1719259433276998E-111" />
-      <entry key="H1" value="5.631985390009468E-56" />
-      <entry key="H2" value="2.3731804377267772E-28" />
-      <entry key="H4" value="1.5405130436990695E-14" />
-      <entry key="D1" value="0.005068177802143312" />
-      <entry key="W1" value="0.7287993762836059" />
+      <entry key="M15" value="4.0691927521775183E-222" />
+      <entry key="M30" value="2.0172240213167435E-111" />
+      <entry key="H1" value="4.49135171336753E-56" />
+      <entry key="H2" value="2.1192809425291417E-28" />
+      <entry key="H4" value="1.455775031589963E-14" />
+      <entry key="D1" value="0.005020611966074417" />
+      <entry key="W1" value="0.7278182910299855" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1783873077860496" />
-      <entry key="MS500" value="2.2653750441050384" />
-      <entry key="S2" value="2.798327356581037" />
-      <entry key="S5" value="4.077645376045566" />
-      <entry key="S10" value="9.382218266370295" />
-      <entry key="S30" value="29.033830862790133" />
-      <entry key="S60" value="51.50145308670396" />
-      <entry key="M2" value="91.94923507577515" />
-      <entry key="M5" value="165.5075124871909" />
-      <entry key="M10" value="222.73741087853892" />
-      <entry key="M15" value="263.4741906938539" />
-      <entry key="M30" value="361.59657651478136" />
-      <entry key="H1" value="486.77077222204775" />
-      <entry key="H2" value="668.8156988662471" />
-      <entry key="H4" value="1031.0839892323386" />
-      <entry key="D1" value="2637.468277806761" />
-      <entry key="W1" value="10337.80289258361" />
+      <entry key="MS100" value="1.1919981163464797" />
+      <entry key="MS500" value="2.1913665570558654" />
+      <entry key="S2" value="5.333891656156278" />
+      <entry key="S5" value="9.631749234022516" />
+      <entry key="S10" value="13.828052775157111" />
+      <entry key="S30" value="27.328170235571157" />
+      <entry key="S60" value="42.01282668404985" />
+      <entry key="M2" value="56.195885181036196" />
+      <entry key="M5" value="79.39806131759873" />
+      <entry key="M10" value="130.74871659806934" />
+      <entry key="M15" value="181.80449056572263" />
+      <entry key="M30" value="307.05131097798164" />
+      <entry key="H1" value="466.22288118855124" />
+      <entry key="H2" value="675.7774214363924" />
+      <entry key="H4" value="1053.1254599170452" />
+      <entry key="D1" value="2691.6746602726303" />
+      <entry key="W1" value="10402.880707069915" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -271,7 +264,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fix VPS apply step: drop ssh-action script_stop that hid errors.&#10;&#10;script_stop breaks conditionals and swallows stderr after the tarball ls." />
     <MESSAGE value="Fix missing apply-release.sh in CI release ship step.&#10;&#10;Package scripts reliably and SCP apply-release.sh alongside the tarball so VPS apply does not depend on extracting it from the archive." />
     <MESSAGE value="Fix release verify false failure from tar|grep pipefail SIGPIPE.&#10;&#10;Also drop apps/src/storage from the staged standalone tree." />
     <MESSAGE value="Harden VPS apply rsync for deploy-user permissions and leftover dirs.&#10;&#10;Skip chown/chgrp, protect apps/storage/src from --delete, bind Next to 127.0.0.1." />
@@ -296,7 +288,8 @@
     <MESSAGE value="#6 while selecting the background image, also need to customization to select shading style.&#10;   for the actual catalog image selection, also need to apply fit to available space as checkbox, and fix percentage for each catalog item. in /admin/Inventory - media" />
     <MESSAGE value="#6 The Media modal is now a compact studio layout with a live preview" />
     <MESSAGE value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
-    <option name="LAST_COMMIT_MESSAGE" value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
+    <MESSAGE value="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal" />
+    <option name="LAST_COMMIT_MESSAGE" value="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

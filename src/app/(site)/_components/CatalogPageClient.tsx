@@ -70,16 +70,15 @@ function CatalogCardMedia({
     Math.max(20, Number(item.primary_fit_percent ?? item.media_fit_percent) || 78)
   );
   const productShadow = item.primary_shadow_style || 'medium';
-  // Marketplace matches popup: clean contain over background, no drop-shadow/gray wash.
-  const clean = cardStyle === 'marketplace';
-  const useProductFit = !!bgCss ? (clean ? true : productFit) : clean;
-  const fitPct = clean && !!bgCss ? productPct : productPct;
+  // Marketplace stacks like Amazon; presentation (bg + shadows + fit) matches the popup gallery.
+  const marketplace = cardStyle === 'marketplace';
+  const useProductFit = !!bgCss ? (marketplace ? true : productFit) : marketplace;
 
   const style = {
     ...(bgCss ? ({ ['--catalog-card-bg']: `url("${bgCss}")` } as CSSProperties) : null),
     ...(bgCss && bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%` } as CSSProperties) : null),
-    ...(useProductFit || (clean && !bgCss)
-      ? ({ ['--catalog-media-fit']: `${fitPct}%` } as CSSProperties)
+    ...(useProductFit || (marketplace && !bgCss)
+      ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties)
       : null),
   } as CSSProperties | undefined;
 
@@ -89,14 +88,14 @@ function CatalogCardMedia({
         'catalog-card-media',
         bgCss && 'catalog-card-media--has-bg',
         bgCss ? (bgFit ? 'catalog-card-media--bg-fit' : 'catalog-card-media--bg-cover') : null,
-        !clean && bgCss && `catalog-card-media--bg-shade-${bgShadow}`,
-        bgCss || clean
-          ? useProductFit || clean
+        bgCss && `catalog-card-media--bg-shade-${bgShadow}`,
+        bgCss || marketplace
+          ? useProductFit || marketplace
             ? 'catalog-card-media--product-fit'
             : 'catalog-card-media--product-cover'
           : null,
-        !clean && bgCss && `catalog-card-media--product-shade-${productShadow}`,
-        clean && 'catalog-card-media--clean'
+        bgCss && `catalog-card-media--product-shade-${productShadow}`,
+        marketplace && 'catalog-card-media--marketplace'
       )}
       style={style}
     >

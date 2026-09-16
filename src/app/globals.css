@@ -1818,10 +1818,11 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   background:linear-gradient(180deg,rgba(6,17,33,0) 0%,rgba(6,17,33,0.72) 42%,rgba(6,17,33,0.92) 100%);
 }
 
-/* Marketplace / Amazon-like: media above, body below — no media gray wash or frame shadows */
+/* Marketplace / Amazon-like: media above, body below — same bg/product shadows as popup */
 .catalog-page .catalog-card--tile.catalog-card--marketplace{
   min-height:0;
   color:inherit;
+  overflow:visible;
   background:var(--catalog-card-body-bg, #fff);
   box-shadow:0 1px 2px rgba(15,23,42,0.06),0 8px 24px -16px rgba(15,23,42,0.28);
   border:1px solid rgba(15,23,42,0.08);
@@ -1841,13 +1842,18 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   flex:0 0 auto;
   background-color:#fff;
   background-image:none;
-  overflow:hidden !important;
+  overflow:hidden;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:0.85rem;
   box-sizing:border-box;
-  box-shadow:none !important;
+  border-radius:18px 18px 0 0;
+}
+/* Match popup gallery: let product drop-shadows render around the fitted image */
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--has-bg.catalog-card-media--product-fit{
+  overflow:visible;
+  z-index:1;
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--has-bg{
   background-image:var(--catalog-card-bg);
@@ -1871,10 +1877,8 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   max-height:var(--catalog-media-fit, 86%);
   object-fit:contain;
   transform:none;
-  border-radius:0;
-  background:transparent !important;
-  box-shadow:none !important;
-  filter:none !important;
+  border-radius:8px;
+  background:transparent;
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace:hover .catalog-card-media img,
 .catalog-page .catalog-card--tile.catalog-card--marketplace:hover .catalog-card-media--product-fit img{
@@ -1882,12 +1886,13 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-body{
   position:relative;
-  z-index:1;
+  z-index:2;
   margin-top:0;
   padding:0.85rem 1rem 1.05rem;
   background:var(--catalog-card-body-bg, #fff);
   color:var(--graphite-800);
   border-top:1px solid rgba(15,23,42,0.06);
+  border-radius:0 0 18px 18px;
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-body h5{
   color:var(--navy-950);
@@ -1918,22 +1923,25 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   color:var(--graphite-500);
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace:hover .catalog-card-page-link{color:var(--navy-950);}
-.catalog-page .catalog-card-media--clean,
-.catalog-page .catalog-card-media--clean.catalog-card-media--bg-shade-soft,
-.catalog-page .catalog-card-media--clean.catalog-card-media--bg-shade-medium,
-.catalog-page .catalog-card-media--clean.catalog-card-media--bg-shade-strong,
-.catalog-page .catalog-card-media--clean.catalog-card-media--bg-shade-bottom{
-  box-shadow:none !important;
+/* Marketplace: keep inventory shadow styles (same values as popup gallery) */
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--bg-shade-soft{box-shadow:0 8px 22px rgba(0,0,0,0.28);}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--bg-shade-medium{box-shadow:0 14px 32px rgba(0,0,0,0.38);}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--bg-shade-strong{box-shadow:0 20px 44px rgba(0,0,0,0.5);}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--bg-shade-bottom{box-shadow:0 26px 36px -14px rgba(0,0,0,0.55);}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--bg-shade-none{box-shadow:none;}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--product-shade-soft.catalog-card-media--product-fit img{
+  box-shadow:0 8px 22px rgba(0,0,0,0.3),0 2px 8px rgba(0,0,0,0.18);
 }
-.catalog-page .catalog-card-media--clean img,
-.catalog-page .catalog-card-media--clean.catalog-card-media--product-fit img,
-.catalog-page .catalog-card-media--clean.catalog-card-media--product-shade-soft img,
-.catalog-page .catalog-card-media--clean.catalog-card-media--product-shade-medium img,
-.catalog-page .catalog-card-media--clean.catalog-card-media--product-shade-strong img,
-.catalog-page .catalog-card-media--clean.catalog-card-media--product-shade-bottom img{
-  box-shadow:none !important;
-  filter:none !important;
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--product-shade-medium.catalog-card-media--product-fit img{
+  box-shadow:0 16px 36px rgba(0,0,0,0.42),0 4px 12px rgba(0,0,0,0.22);
 }
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--product-shade-strong.catalog-card-media--product-fit img{
+  box-shadow:0 24px 52px rgba(0,0,0,0.55),0 8px 18px rgba(0,0,0,0.3);
+}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--product-shade-bottom.catalog-card-media--product-fit img{
+  box-shadow:0 30px 40px -18px rgba(0,0,0,0.72),0 12px 18px -10px rgba(0,0,0,0.4);
+}
+.catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media--product-shade-none.catalog-card-media--product-fit img{box-shadow:none;}
 .catalog-page .catalog-card-eyebrow{
   font-family:var(--font-mono);
   font-size:0.72rem;
