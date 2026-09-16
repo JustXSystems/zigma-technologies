@@ -1457,6 +1457,211 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   .catalog-toolbar-select{flex:1 1 46%;min-width:0;}
 }
 
+/* ---------- CATALOG DISCOVERY (profile rail + facets) ---------- */
+.catalog-profile-rail{
+  margin:0 0 1.1rem;
+}
+.catalog-profile-rail-head{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:0.45rem 1rem;
+  margin-bottom:0.75rem;
+}
+.catalog-profile-rail-kicker{
+  font-family:var(--font-mono);font-size:0.72rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--cyan);
+}
+.catalog-profile-rail-head p{
+  margin:0;font-size:0.92rem;color:var(--graphite-600);
+}
+.catalog-profile-rail-track{
+  display:flex;gap:0.65rem;overflow-x:auto;padding:0.15rem 0.1rem 0.55rem;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.catalog-profile-tile{
+  appearance:none;border:1px solid rgba(15,23,36,0.12);
+  background:linear-gradient(165deg,#fff 0%,#f4f7fb 100%);
+  color:var(--navy-950);
+  border-radius:14px;padding:0.85rem 1rem;min-width:9.5rem;max-width:12rem;
+  text-align:left;cursor:pointer;scroll-snap-align:start;
+  display:flex;flex-direction:column;gap:0.45rem;
+  transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
+  flex:0 0 auto;
+}
+.catalog-profile-tile:hover:not(:disabled){
+  border-color:rgba(0,212,255,0.45);
+  box-shadow:0 14px 28px -20px rgba(10,22,40,0.55);
+  transform:translateY(-1px);
+}
+.catalog-profile-tile.is-active{
+  border-color:rgba(15,31,61,0.55);
+  background:linear-gradient(165deg,var(--navy-950) 0%,#132744 100%);
+  color:#fff;
+  box-shadow:0 16px 32px -18px rgba(10,22,40,0.7);
+}
+.catalog-profile-tile:disabled{
+  opacity:0.42;cursor:not-allowed;
+}
+.catalog-profile-tile-name{
+  font-size:0.92rem;font-weight:700;line-height:1.25;
+}
+.catalog-profile-tile-count{
+  font-family:var(--font-mono);font-size:0.78rem;font-weight:600;
+  letter-spacing:0.04em;color:var(--graphite-500);
+  align-self:flex-start;
+  background:rgba(15,23,36,0.05);border-radius:6px;padding:0.18rem 0.45rem;
+}
+.catalog-profile-tile.is-active .catalog-profile-tile-count{
+  color:rgba(255,255,255,0.82);background:rgba(255,255,255,0.1);
+}
+
+.catalog-intent-row{
+  display:flex;flex-wrap:wrap;align-items:center;gap:0.55rem 0.75rem;
+  margin:0 0 1rem;
+}
+.catalog-intent-label{
+  font-family:var(--font-mono);font-size:0.7rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--graphite-500);
+}
+.catalog-intent-chips{display:flex;flex-wrap:wrap;gap:0.4rem;}
+.catalog-intent-chip{
+  appearance:none;border:1px solid rgba(15,23,36,0.12);background:#fff;
+  color:var(--navy-950);font:inherit;font-size:0.8rem;font-weight:600;
+  border-radius:8px;padding:0.38rem 0.65rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:0.4rem;
+  transition:background .2s ease,border-color .2s ease,color .2s ease;
+}
+.catalog-intent-chip span{
+  font-family:var(--font-mono);font-size:0.68rem;color:var(--graphite-500);
+}
+.catalog-intent-chip:hover{border-color:rgba(255,107,26,0.45);}
+.catalog-intent-chip.is-active{
+  background:var(--navy-950);color:#fff;border-color:var(--navy-950);
+}
+.catalog-intent-chip.is-active span{color:rgba(255,255,255,0.7);}
+
+.catalog-toolbar--sticky{
+  position:sticky;top:4.75rem;z-index:5;
+  backdrop-filter:blur(10px);
+  background:linear-gradient(165deg,rgba(255,255,255,0.96) 0%,rgba(245,248,252,0.96) 100%);
+}
+.catalog-toolbar-filters-btn{
+  display:none;appearance:none;
+  border:1px solid rgba(15,23,36,0.14);background:#fff;
+  color:var(--navy-950);font:inherit;font-size:0.8rem;font-weight:700;
+  border-radius:8px;padding:0.5rem 0.75rem;cursor:pointer;
+}
+.catalog-filter-chips{
+  display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.65rem;
+  padding-top:0.65rem;border-top:1px solid rgba(15,23,36,0.08);
+}
+.catalog-filter-chip{
+  appearance:none;border:1px solid rgba(15,23,36,0.14);
+  background:rgba(0,212,255,0.08);color:var(--navy-950);
+  font:inherit;font-size:0.78rem;font-weight:600;
+  border-radius:8px;padding:0.3rem 0.55rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:0.35rem;
+}
+.catalog-filter-chip span{opacity:0.55;font-size:0.95rem;line-height:1;}
+
+.catalog-discovery{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:1.25rem;
+  align-items:start;
+}
+.catalog-discovery--with-facets{
+  grid-template-columns:220px minmax(0,1fr);
+}
+.catalog-facet-rail{
+  position:sticky;top:9.5rem;
+}
+.catalog-facet-rail-panel{
+  border:1px solid rgba(15,23,36,0.1);
+  border-radius:14px;
+  background:#fff;
+  padding:0.9rem 0.85rem 1rem;
+  box-shadow:0 14px 30px -24px rgba(10,22,40,0.5);
+}
+.catalog-facet-rail-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.65rem;
+}
+.catalog-facet-rail-top h3{
+  margin:0;font-size:0.95rem;font-weight:700;color:var(--navy-950);
+}
+.catalog-facet-close{display:none;}
+.catalog-facet-group + .catalog-facet-group{margin-top:1rem;padding-top:0.85rem;border-top:1px solid rgba(15,23,36,0.08);}
+.catalog-facet-group h4{
+  margin:0 0 0.45rem;font-family:var(--font-mono);font-size:0.68rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--graphite-500);
+}
+.catalog-facet-group ul{list-style:none;margin:0;padding:0;display:grid;gap:0.2rem;}
+.catalog-facet-group button{
+  appearance:none;width:100%;border:0;background:transparent;
+  display:flex;align-items:center;justify-content:space-between;gap:0.5rem;
+  text-align:left;font:inherit;font-size:0.84rem;font-weight:600;
+  color:var(--graphite-700);padding:0.4rem 0.45rem;border-radius:8px;cursor:pointer;
+}
+.catalog-facet-group button span:last-child{
+  font-family:var(--font-mono);font-size:0.7rem;color:var(--graphite-500);
+}
+.catalog-facet-group button:hover:not(:disabled){background:rgba(15,23,36,0.04);color:var(--navy-950);}
+.catalog-facet-group button.is-active{
+  background:rgba(15,31,61,0.08);color:var(--navy-950);
+}
+.catalog-facet-group button:disabled{opacity:0.4;cursor:not-allowed;}
+.catalog-facet-backdrop{
+  display:none;
+}
+
+.catalog-grouped{display:grid;gap:1.75rem;}
+.catalog-group-head{
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+  gap:0.65rem 1rem;margin-bottom:0.85rem;
+  padding-bottom:0.65rem;border-bottom:1px solid rgba(15,23,36,0.1);
+}
+.catalog-group-head h3{
+  margin:0;font-size:1.2rem;font-weight:750;color:var(--navy-950);letter-spacing:-0.01em;
+}
+.catalog-group-head p{margin:0.2rem 0 0;font-size:0.86rem;color:var(--graphite-500);}
+.catalog-group-view-all{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  font:inherit;font-size:0.84rem;font-weight:700;color:var(--orange);
+  padding:0.2rem 0;
+}
+.catalog-group-view-all:hover{text-decoration:underline;}
+
+@media (max-width:960px){
+  .catalog-discovery,
+  .catalog-discovery--with-facets{grid-template-columns:1fr;}
+  .catalog-toolbar-filters-btn{display:inline-flex;}
+  .catalog-facet-rail{
+    position:fixed;inset:0 auto 0 0;width:min(20rem,88vw);z-index:40;
+    transform:translateX(-105%);transition:transform .25s ease;
+    top:0;padding:0;background:transparent;
+  }
+  .catalog-discovery--filters-open .catalog-facet-rail{transform:translateX(0);}
+  .catalog-facet-rail-panel{
+    height:100%;border-radius:0;overflow:auto;
+    box-shadow:8px 0 32px rgba(10,22,40,0.25);
+  }
+  .catalog-facet-close{
+    display:inline-flex;appearance:none;border:1px solid rgba(15,23,36,0.14);
+    background:#fff;border-radius:8px;padding:0.35rem 0.65rem;
+    font:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;
+  }
+  .catalog-facet-backdrop{
+    display:block;position:fixed;inset:0;z-index:35;
+    border:0;padding:0;margin:0;background:rgba(10,22,40,0.42);cursor:pointer;
+  }
+  .catalog-toolbar--sticky{top:4.25rem;}
+}
+
+@media (max-width:700px){
+  .catalog-profile-tile{min-width:8.5rem;padding:0.75rem 0.85rem;}
+  .catalog-profile-rail-head p{font-size:0.84rem;}
+}
+
 /* ---------- CATALOG PRESETS ---------- */
 .catalog-page .catalog-card,
 .catalog-page .proj-card,

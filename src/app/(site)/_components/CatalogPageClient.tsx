@@ -1,9 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { CatalogItem, CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
+import type {
+  CatalogItem,
+  CatalogCategory,
+  CatalogItemType,
+  CatalogPageSettings,
+  CatalogFacets,
+} from '@/lib/types';
 import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
@@ -20,6 +26,7 @@ type Props = {
 
 const DEFAULT_CARD = ['title', 'summary', 'category', 'primary_image', 'price_label'];
 const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
+const INTENT_CHIP_LIMIT = 8;
 
 function hasField(fields: string[] | null | undefined, name: string, fallback: string[]) {
   const list = fields?.length ? fields : fallback;
@@ -137,7 +144,7 @@ function CatalogHero({
             <span>Autoplay {Math.round(autoplayMs / 1000)}s</span>
             <span>{itemType}s</span>
           </div>
-          {variant === 'standard' ? (
+          {variant === 'standard' && settings?.hero_standard_panel_enabled !== 0 ? (
             <div className="catalog-hero-standard-panel">
               <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
               <h2>{active.title}</h2>
@@ -197,7 +204,7 @@ function CatalogHero({
           ) : null}
         </div>
         ) : null}
-        {slides.length > 1 && variant === 'standard' ? (
+        {slides.length > 1 && variant === 'standard' && settings?.hero_standard_panel_enabled !== 0 ? (
           <div className="catalog-hero-standard-dots" aria-label="Spotlight items">
             {slides.map((item, index) => (
               <button
@@ -249,6 +256,60 @@ function CatalogLoadingSkeleton({
   );
 }
 
+function CatalogItemCard({
+  item,
+  itemType,
+  cardFields,
+  layout,
+  revealEnabled,
+  delayMs,
+  onOpen,
+}: {
+  item: CatalogItem;
+  itemType: CatalogItemType;
+  cardFields: string[];
+  layout: 'grid' | 'list';
+  revealEnabled: boolean;
+  delayMs?: number;
+  onOpen: (item: CatalogItem) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={cx(
+        'catalog-card',
+        layout === 'list' ? 'catalog-card--list' : 'catalog-card--tile',
+        revealEnabled && 'reveal'
+      )}
+      onClick={() => onOpen(item)}
+      style={{ transitionDelay: revealEnabled && delayMs != null ? `${delayMs}ms` : undefined }}
+    >
+      {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? <CatalogCardMedia item={item} /> : null}
+      <div className="catalog-card-body">
+        {hasField(cardFields, 'category', DEFAULT_CARD) ? (
+          <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
+        ) : null}
+        {hasField(cardFields, 'title', DEFAULT_CARD) ? <h5>{item.title}</h5> : null}
+        {hasField(cardFields, 'price_label', DEFAULT_CARD) && item.price_label ? (
+          <div className="catalog-card-stat">{item.price_label}</div>
+        ) : null}
+        {hasField(cardFields, 'summary', DEFAULT_CARD) ? <p>{item.summary}</p> : null}
+        {hasField(cardFields, 'tags', DEFAULT_CARD) && item.tags_json?.length ? (
+          <p className="catalog-card-tags">{item.tags_json.join(' · ')}</p>
+        ) : null}
+        <span className="catalog-card-link">Quick view →</span>
+        <Link
+          href={catalogPublicPath(itemType, item.slug)}
+          className="catalog-card-page-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {caseStudyLabel(itemType)} page →
+        </Link>
+      </div>
+    </button>
+  );
+}
+
 export default function CatalogPageClient(props: Props) {
   return (
     <Suspense
@@ -269,6 +330,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   const q = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
@@ -277,13 +339,14 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
 
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [categories, setCategories] = useState<CatalogCategory[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
+  const [facets, setFacets] = useState<CatalogFacets | null>(null);
   const [settings, setSettings] = useState<CatalogPageSettings | null>(null);
   const [heroItems, setHeroItems] = useState<CatalogItem[]>([]);
   const [searchDraft, setSearchDraft] = useState(q);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [active, setActive] = useState<CatalogItem | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const filters = settings?.filters_json || ['category', 'tags'];
   const cardFields = settings?.card_fields_json || DEFAULT_CARD;
@@ -294,9 +357,26 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const showSkeleton = settings?.loading_skeleton_enabled !== 0;
   const stylePreset = settings?.visual_style || 'premium';
   const premiumBordersEnabled = settings?.premium_borders_enabled !== 0;
+  const profileRailEnabled = settings?.discovery_profile_rail_enabled !== 0;
+  const quickFindEnabled = settings?.discovery_quick_find_enabled !== 0;
+  const facetRailEnabled = settings?.discovery_facet_rail_enabled !== 0;
+  const groupedResultsEnabled = settings?.discovery_grouped_results_enabled !== 0;
+  const stickyToolbarEnabled = settings?.discovery_sticky_toolbar_enabled !== 0;
+  const groupPreviewCount = Math.min(
+    12,
+    Math.max(1, Number(settings?.discovery_group_preview_count || 4) || 4)
+  );
+  const showCategoryFilters = filters.includes('category') || (facets?.categories.length ?? 0) > 0;
+  const showTagFilters = filters.includes('tags') || (facets?.tags.length ?? 0) > 0;
+
+  const scrollToResults = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
 
   const setFilterParam = useCallback(
-    (key: 'q' | 'category' | 'tag' | 'sort', value: string) => {
+    (key: 'q' | 'category' | 'tag' | 'sort', value: string, opts?: { scroll?: boolean }) => {
       const params = new URLSearchParams(searchParams.toString());
       if (value && !(key === 'sort' && value === 'featured')) params.set(key, value);
       else if (key === 'sort' && value === 'featured') params.delete(key);
@@ -304,9 +384,16 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
       else params.set(key, value);
       const next = params.toString();
       router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+      if (opts?.scroll !== false && key !== 'sort' && key !== 'q') scrollToResults();
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParams, scrollToResults]
   );
+
+  const clearFilters = useCallback(() => {
+    setSearchDraft('');
+    router.replace(pathname, { scroll: false });
+    scrollToResults();
+  }, [pathname, router, scrollToResults]);
 
   useScrollReveal(
     revealEnabled
@@ -321,7 +408,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   useEffect(() => {
     const handle = window.setTimeout(() => {
       if (searchDraft === q) return;
-      setFilterParam('q', searchDraft.trim());
+      setFilterParam('q', searchDraft.trim(), { scroll: false });
     }, 300);
     return () => window.clearTimeout(handle);
   }, [searchDraft, q, setFilterParam]);
@@ -354,7 +441,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
         if (!r.ok) throw new Error(data.error || 'Failed to load');
         setItems(data.items);
         setCategories(data.categories);
-        setTags(data.tags || []);
+        setFacets(data.facets || null);
         setHeroItems(data.heroItems || []);
         if (data.settings) setSettings(data.settings);
       })
@@ -405,8 +492,54 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
     revealEnabled && 'catalog-reveal-enabled'
   );
 
-  const activeCategoryName = categories.find((c) => c.slug === category)?.name;
+  const facetCategories = facets?.categories?.length
+    ? facets.categories
+    : categories.map((c) => ({ slug: c.slug, name: c.name, count: 0, sort_order: c.sort_order }));
+  const facetTags = facets?.tags || [];
+  const intentTags = facetTags.slice(0, INTENT_CHIP_LIMIT);
+  const facetTotal = facets?.total ?? items.length;
+
+  const activeCategoryName =
+    facetCategories.find((c) => c.slug === category)?.name ||
+    categories.find((c) => c.slug === category)?.name;
   const hasActiveFilters = Boolean(category || tag || q);
+  const useGroupedView = groupedResultsEnabled && !category && !tag && !q;
+
+  const groupedSections = useMemo(() => {
+    if (!useGroupedView) return [];
+    const bySlug = new Map<string, CatalogItem[]>();
+    for (const item of items) {
+      const slug = item.category_slug || '_other';
+      const list = bySlug.get(slug) || [];
+      list.push(item);
+      bySlug.set(slug, list);
+    }
+    const ordered = facetCategories
+      .filter((c) => (bySlug.get(c.slug)?.length || 0) > 0)
+      .map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        items: bySlug.get(c.slug) || [],
+      }));
+    const other = bySlug.get('_other');
+    if (other?.length) ordered.push({ slug: '_other', name: 'Other', items: other });
+    return ordered;
+  }, [useGroupedView, items, facetCategories]);
+
+  function selectCategory(slug: string) {
+    setFilterParam('category', category === slug ? '' : slug);
+    setMobileFiltersOpen(false);
+  }
+
+  function selectTag(value: string) {
+    setFilterParam('tag', tag === value ? '' : value);
+    setMobileFiltersOpen(false);
+  }
+
+  const gridStyle =
+    layout === 'list'
+      ? ({ display: 'grid', gap: '1rem' } as CSSProperties)
+      : ({ gridTemplateColumns: `repeat(${Math.min(gridColumns, columns)}, 1fr)` } as CSSProperties);
 
   return (
     <main id="main-content" className={pageClassName}>
@@ -422,51 +555,93 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
 
       <section className="section section-light catalog-listing">
         <div className="container">
-          <div className="catalog-toolbar">
+          {profileRailEnabled && showCategoryFilters ? (
+            <div className="catalog-profile-rail" aria-label={`${itemType} profiles`}>
+              <div className="catalog-profile-rail-head">
+                <span className="catalog-profile-rail-kicker">Shop by profile</span>
+                <p>One tap to jump straight to the right {itemType} group.</p>
+              </div>
+              <div className="catalog-profile-rail-track" role="list">
+                <button
+                  type="button"
+                  role="listitem"
+                  className={cx('catalog-profile-tile', !category && 'is-active')}
+                  onClick={() => {
+                    setFilterParam('category', '');
+                    scrollToResults();
+                  }}
+                  aria-pressed={!category}
+                >
+                  <span className="catalog-profile-tile-name">All {itemType}s</span>
+                  <span className="catalog-profile-tile-count">{facetTotal}</span>
+                </button>
+                {facetCategories.map((c) => (
+                  <button
+                    key={c.slug}
+                    type="button"
+                    role="listitem"
+                    className={cx('catalog-profile-tile', category === c.slug && 'is-active')}
+                    onClick={() => selectCategory(c.slug)}
+                    aria-pressed={category === c.slug}
+                    disabled={c.count === 0 && category !== c.slug}
+                  >
+                    <span className="catalog-profile-tile-name">{c.name}</span>
+                    <span className="catalog-profile-tile-count">{c.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {quickFindEnabled && showTagFilters && intentTags.length > 0 ? (
+            <div className="catalog-intent-row" aria-label="Quick needs">
+              <span className="catalog-intent-label">Quick find</span>
+              <div className="catalog-intent-chips">
+                {intentTags.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    className={cx('catalog-intent-chip', tag === t.value && 'is-active')}
+                    onClick={() => selectTag(t.value)}
+                    aria-pressed={tag === t.value}
+                  >
+                    {t.value}
+                    <span>{t.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div
+            className={cx('catalog-toolbar', stickyToolbarEnabled && 'catalog-toolbar--sticky')}
+            ref={resultsRef}
+            id="catalog-results"
+          >
             <div className="catalog-toolbar-controls">
               <label className="catalog-toolbar-search">
                 <span className="sr-only">Search {itemType}s</span>
                 <input
                   className="catalog-toolbar-input"
-                  placeholder="Search catalogue…"
+                  placeholder={`Search ${itemType}s…`}
                   value={searchDraft}
                   onChange={(e) => setSearchDraft(e.target.value)}
                 />
               </label>
-              {filters.includes('category') || categories.length > 0 ? (
-                <select
-                  className="catalog-toolbar-select"
-                  value={category}
-                  onChange={(e) => setFilterParam('category', e.target.value)}
-                  aria-label="Filter by category"
+              {facetRailEnabled && (showCategoryFilters || showTagFilters) ? (
+                <button
+                  type="button"
+                  className="catalog-toolbar-filters-btn"
+                  onClick={() => setMobileFiltersOpen((open) => !open)}
+                  aria-expanded={mobileFiltersOpen}
                 >
-                  <option value="">All categories</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.slug}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              ) : null}
-              {filters.includes('tags') || tags.length > 0 ? (
-                <select
-                  className="catalog-toolbar-select"
-                  value={tag}
-                  onChange={(e) => setFilterParam('tag', e.target.value)}
-                  aria-label="Filter by tag"
-                >
-                  <option value="">All tags</option>
-                  {tags.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                  Filters
+                </button>
               ) : null}
               <select
                 className="catalog-toolbar-select"
                 value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
-                onChange={(e) => setFilterParam('sort', e.target.value)}
+                onChange={(e) => setFilterParam('sort', e.target.value, { scroll: false })}
                 aria-label="Sort catalog"
               >
                 <option value="featured">Sort: Featured</option>
@@ -474,14 +649,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                 <option value="title">Sort: Title A–Z</option>
               </select>
               {hasActiveFilters ? (
-                <button
-                  type="button"
-                  className="catalog-toolbar-clear"
-                  onClick={() => {
-                    setSearchDraft('');
-                    router.replace(pathname, { scroll: false });
-                  }}
-                >
+                <button type="button" className="catalog-toolbar-clear" onClick={clearFilters}>
                   Clear
                 </button>
               ) : null}
@@ -504,91 +672,232 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                     ) : null}
                   </span>
                 ) : (
-                  <span className="catalog-toolbar-scope">all {itemType}s</span>
+                  <span className="catalog-toolbar-scope">all {itemType}s by group</span>
                 )}
                 <span className="catalog-toolbar-count">
                   {loading ? '…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
                 </span>
               </p>
             </div>
+
+            {hasActiveFilters ? (
+              <div className="catalog-filter-chips" aria-label="Active filters">
+                {activeCategoryName ? (
+                  <button
+                    type="button"
+                    className="catalog-filter-chip"
+                    onClick={() => setFilterParam('category', '')}
+                  >
+                    {activeCategoryName}
+                    <span aria-hidden>×</span>
+                  </button>
+                ) : null}
+                {tag ? (
+                  <button type="button" className="catalog-filter-chip" onClick={() => setFilterParam('tag', '')}>
+                    {tag}
+                    <span aria-hidden>×</span>
+                  </button>
+                ) : null}
+                {q ? (
+                  <button
+                    type="button"
+                    className="catalog-filter-chip"
+                    onClick={() => {
+                      setSearchDraft('');
+                      setFilterParam('q', '', { scroll: false });
+                    }}
+                  >
+                    “{q}”
+                    <span aria-hidden>×</span>
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
-          {error ? <p style={{ color: '#c9540f' }}>{error}</p> : null}
-          {loading && !items.length && showSkeleton ? (
-            <CatalogLoadingSkeleton layout={layout} columns={Math.min(gridColumns, 3)} />
-          ) : null}
-          {loading && !items.length && !showSkeleton ? <p>Loading…</p> : null}
+          <div
+            className={cx(
+              'catalog-discovery',
+              facetRailEnabled && (showCategoryFilters || showTagFilters) && 'catalog-discovery--with-facets',
+              mobileFiltersOpen && 'catalog-discovery--filters-open'
+            )}
+          >
+            {facetRailEnabled && (showCategoryFilters || showTagFilters) ? (
+            <aside className="catalog-facet-rail" aria-label="Refine catalogue">
+              <div className="catalog-facet-rail-panel">
+                <div className="catalog-facet-rail-top">
+                  <h3>Refine</h3>
+                  <button
+                    type="button"
+                    className="catalog-facet-close"
+                    onClick={() => setMobileFiltersOpen(false)}
+                  >
+                    Done
+                  </button>
+                </div>
 
-          {!loading && items.length === 0 ? (
-            <div className="catalog-empty">
-              <h3>No matches in this view</h3>
-              <p>
-                Try clearing filters, browsing all {itemType}s, or ask an engineer for a tailored recommendation.
-              </p>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-                <button type="button" className="btn btn-ghost-dark" onClick={() => router.replace(pathname)}>
-                  Clear filters
-                </button>
-                <Link href="/contact?consult=1&consult_subject=Request%20a%20Quote" className="btn btn-primary">
-                  Request a quote →
-                </Link>
+                {showCategoryFilters ? (
+                  <div className="catalog-facet-group">
+                    <h4>Profiles</h4>
+                    <ul>
+                      <li>
+                        <button
+                          type="button"
+                          className={cx(!category && 'is-active')}
+                          onClick={() => selectCategory('')}
+                        >
+                          <span>All</span>
+                          <span>{facetTotal}</span>
+                        </button>
+                      </li>
+                      {facetCategories.map((c) => (
+                        <li key={c.slug}>
+                          <button
+                            type="button"
+                            className={cx(category === c.slug && 'is-active')}
+                            onClick={() => selectCategory(c.slug)}
+                            disabled={c.count === 0 && category !== c.slug}
+                          >
+                            <span>{c.name}</span>
+                            <span>{c.count}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {showTagFilters && facetTags.length > 0 ? (
+                  <div className="catalog-facet-group">
+                    <h4>Needs &amp; tags</h4>
+                    <ul>
+                      {facetTags.map((t) => (
+                        <li key={t.value}>
+                          <button
+                            type="button"
+                            className={cx(tag === t.value && 'is-active')}
+                            onClick={() => selectTag(t.value)}
+                            disabled={t.count === 0 && tag !== t.value}
+                          >
+                            <span>{t.value}</span>
+                            <span>{t.count}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
-            </div>
-          ) : null}
+            </aside>
+            ) : null}
 
-          {items.length > 0 ? (
-            <div
-              className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
-              style={
-                layout === 'list'
-                  ? { display: 'grid', gap: '1rem' }
-                  : { gridTemplateColumns: `repeat(${Math.min(gridColumns, columns)}, 1fr)` }
-              }
-            >
-              {items.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={cx(
-                    'catalog-card',
-                    layout === 'list' ? 'catalog-card--list' : 'catalog-card--tile',
-                    revealEnabled && 'reveal'
-                  )}
-                  onClick={() => openItem(item)}
-                  style={{
-                    transitionDelay: revealEnabled ? `${index * 60}ms` : undefined,
-                  }}
-                >
-                  {hasField(cardFields, 'primary_image', DEFAULT_CARD) ? (
-                    <CatalogCardMedia item={item} />
-                  ) : null}
-                  <div className="catalog-card-body">
-                    {hasField(cardFields, 'category', DEFAULT_CARD) ? (
-                      <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
-                    ) : null}
-                    {hasField(cardFields, 'title', DEFAULT_CARD) ? <h5>{item.title}</h5> : null}
-                    {hasField(cardFields, 'price_label', DEFAULT_CARD) && item.price_label ? (
-                      <div className="catalog-card-stat">{item.price_label}</div>
-                    ) : null}
-                    {hasField(cardFields, 'summary', DEFAULT_CARD) ? <p>{item.summary}</p> : null}
-                    {hasField(cardFields, 'tags', DEFAULT_CARD) && item.tags_json?.length ? (
-                      <p className="catalog-card-tags">{item.tags_json.join(' · ')}</p>
-                    ) : null}
-                    <span className="catalog-card-link">Quick view →</span>
-                    <Link
-                      href={catalogPublicPath(itemType, item.slug)}
-                      className="catalog-card-page-link"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {caseStudyLabel(itemType)} page →
+            <div className="catalog-discovery-results">
+              {error ? <p style={{ color: '#c9540f' }}>{error}</p> : null}
+              {loading && !items.length && showSkeleton ? (
+                <CatalogLoadingSkeleton layout={layout} columns={Math.min(gridColumns, 3)} />
+              ) : null}
+              {loading && !items.length && !showSkeleton ? <p>Loading…</p> : null}
+
+              {!loading && items.length === 0 ? (
+                <div className="catalog-empty">
+                  <h3>No matches in this view</h3>
+                  <p>
+                    Try another profile, a Quick find tag, or ask an engineer for a tailored recommendation.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+                    <button type="button" className="btn btn-ghost-dark" onClick={clearFilters}>
+                      Clear filters
+                    </button>
+                    <Link href="/contact?consult=1&consult_subject=Request%20a%20Quote" className="btn btn-primary">
+                      Request a quote →
                     </Link>
                   </div>
-                </button>
-              ))}
+                </div>
+              ) : null}
+
+              {!loading && useGroupedView && groupedSections.length > 0 ? (
+                <div className="catalog-grouped">
+                  {groupedSections.map((section) => {
+                    const preview = section.items.slice(0, groupPreviewCount);
+                    const remaining = section.items.length - preview.length;
+                    return (
+                      <section key={section.slug} className="catalog-group">
+                        <div className="catalog-group-head">
+                          <div>
+                            <h3>{section.name}</h3>
+                            <p>
+                              {section.items.length}{' '}
+                              {section.items.length === 1 ? itemType : `${itemType}s`}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="catalog-group-view-all"
+                            onClick={() => selectCategory(section.slug === '_other' ? '' : section.slug)}
+                          >
+                            {remaining > 0
+                              ? `View all ${section.items.length} →`
+                              : `Open ${section.name} →`}
+                          </button>
+                        </div>
+                        <div
+                          className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
+                          style={
+                            layout === 'list'
+                              ? { display: 'grid', gap: '1rem' }
+                              : {
+                                  gridTemplateColumns: `repeat(${Math.min(gridColumns, preview.length || 1)}, 1fr)`,
+                                }
+                          }
+                        >
+                          {preview.map((item, index) => (
+                            <CatalogItemCard
+                              key={item.id}
+                              item={item}
+                              itemType={itemType}
+                              cardFields={cardFields}
+                              layout={layout}
+                              revealEnabled={revealEnabled}
+                              delayMs={index * 60}
+                              onOpen={(next) => void openItem(next)}
+                            />
+                          ))}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {!loading && !useGroupedView && items.length > 0 ? (
+                <div className={layout === 'list' ? 'catalog-list' : 'proj-grid'} style={gridStyle}>
+                  {items.map((item, index) => (
+                    <CatalogItemCard
+                      key={item.id}
+                      item={item}
+                      itemType={itemType}
+                      cardFields={cardFields}
+                      layout={layout}
+                      revealEnabled={revealEnabled}
+                      delayMs={index * 60}
+                      onOpen={(next) => void openItem(next)}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
-          ) : null}
+          </div>
         </div>
       </section>
+
+      {mobileFiltersOpen && facetRailEnabled ? (
+        <button
+          type="button"
+          className="catalog-facet-backdrop"
+          aria-label="Close filters"
+          onClick={() => setMobileFiltersOpen(false)}
+        />
+      ) : null}
 
       {active ? (
         <CatalogDetailModal

@@ -128,7 +128,7 @@ function CatalogAppearancePreview({
                 <span>{settings.hero_variant}</span>
                 <span>{settings.loading_skeleton_enabled ? 'skeleton on' : 'skeleton off'}</span>
               </div>
-              {settings.hero_variant === 'standard' ? (
+              {settings.hero_variant === 'standard' && settings.hero_standard_panel_enabled !== 0 ? (
                 <div className="catalog-hero-standard-panel">
                   <span className="catalog-hero-kicker">{type}</span>
                   <h2>{active.title}</h2>
@@ -271,9 +271,16 @@ export default function CatalogSettingsPage() {
         hero_lead: settings.hero_lead || null,
         visual_style: settings.visual_style,
         hero_variant: settings.hero_variant,
+        hero_standard_panel_enabled: !!settings.hero_standard_panel_enabled,
         loading_skeleton_enabled: !!settings.loading_skeleton_enabled,
         reveal_animation_enabled: !!settings.reveal_animation_enabled,
         premium_borders_enabled: !!settings.premium_borders_enabled,
+        discovery_profile_rail_enabled: !!settings.discovery_profile_rail_enabled,
+        discovery_quick_find_enabled: !!settings.discovery_quick_find_enabled,
+        discovery_facet_rail_enabled: !!settings.discovery_facet_rail_enabled,
+        discovery_grouped_results_enabled: !!settings.discovery_grouped_results_enabled,
+        discovery_sticky_toolbar_enabled: !!settings.discovery_sticky_toolbar_enabled,
+        discovery_group_preview_count: settings.discovery_group_preview_count || 4,
       }),
     });
     const data = await res.json();
@@ -321,7 +328,7 @@ export default function CatalogSettingsPage() {
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <h2 style={{ marginTop: 0 }}>Listing settings · {type}</h2>
         <p style={{ color: 'var(--admin-muted)', marginTop: 0 }}>
-          Controls public /{type}s layout, hero spotlight, filters, search fields, card contents, and detail modal sections.
+          Controls public /{type}s layout, hero spotlight, discovery filters, search fields, card contents, and detail modal sections.
         </p>
         {settings ? (
           <form onSubmit={saveSettings} className="admin-form-grid">
@@ -429,6 +436,7 @@ export default function CatalogSettingsPage() {
                       ['loading_skeleton_enabled', 'Skeleton loading'],
                       ['reveal_animation_enabled', 'Reveal animation'],
                       ['premium_borders_enabled', 'Premium borders'],
+                      ['hero_standard_panel_enabled', 'Standard hero panel'],
                     ].map(([key, label]) => (
                       <label
                         key={key}
@@ -440,11 +448,23 @@ export default function CatalogSettingsPage() {
                           borderRadius: 999,
                           padding: '0.45rem 0.8rem',
                           background: '#fff',
+                          opacity:
+                            key === 'hero_standard_panel_enabled' && settings.hero_variant !== 'standard'
+                              ? 0.55
+                              : 1,
                         }}
+                        title={
+                          key === 'hero_standard_panel_enabled' && settings.hero_variant !== 'standard'
+                            ? 'Applies when Hero variant is set to standard'
+                            : undefined
+                        }
                       >
                         <input
                           type="checkbox"
                           checked={Boolean(settings[key as keyof CatalogPageSettings])}
+                          disabled={
+                            key === 'hero_standard_panel_enabled' && settings.hero_variant !== 'standard'
+                          }
                           onChange={(e) =>
                             setSettings({
                               ...settings,
@@ -456,6 +476,10 @@ export default function CatalogSettingsPage() {
                       </label>
                     ))}
                   </div>
+                  <p style={{ margin: '0.45rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
+                    Standard hero panel controls the compact active-item card inside the standard hero variant
+                    (<code>.catalog-hero-standard-panel</code>).
+                  </p>
                 </div>
                 <div className="admin-field full">
                   <label>Selected spotlight items</label>
@@ -578,6 +602,72 @@ export default function CatalogSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
               />
             </div>
+
+            <div className="full" style={{ border: '1px solid var(--admin-border)', borderRadius: 12, padding: '1rem' }}>
+              <h3 style={{ margin: '0 0 0.3rem' }}>Discovery experience</h3>
+              <p style={{ color: 'var(--admin-muted)', margin: '0 0 0.9rem', fontSize: '0.9rem' }}>
+                One-click profile browsing on public /{type}s. Toggle each element independently; category/tag
+                filters below still control which dimensions are available.
+              </p>
+              <div className="admin-field full" style={{ marginBottom: '0.75rem' }}>
+                <label>Discovery toggles</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  {[
+                    ['discovery_profile_rail_enabled', 'Shop by profile rail'],
+                    ['discovery_quick_find_enabled', 'Quick find chips'],
+                    ['discovery_facet_rail_enabled', 'Refine facet rail'],
+                    ['discovery_grouped_results_enabled', 'Grouped results (All view)'],
+                    ['discovery_sticky_toolbar_enabled', 'Sticky search toolbar'],
+                  ].map(([key, label]) => (
+                    <label
+                      key={key}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        border: '1px solid var(--admin-border)',
+                        borderRadius: 999,
+                        padding: '0.45rem 0.8rem',
+                        background: '#fff',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(settings[key as keyof CatalogPageSettings])}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            [key]: e.target.checked ? 1 : 0,
+                          } as CatalogPageSettings)
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="admin-field" style={{ maxWidth: 220 }}>
+                <label>Group preview count</label>
+                <input
+                  className="admin-input"
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={settings.discovery_group_preview_count || 4}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      discovery_group_preview_count: Number(e.target.value) || 4,
+                    })
+                  }
+                  disabled={!settings.discovery_grouped_results_enabled}
+                />
+                <p style={{ margin: '0.35rem 0 0', color: 'var(--admin-muted)', fontSize: '0.78rem' }}>
+                  Cards shown per category before “View all”.
+                </p>
+              </div>
+            </div>
+
             <ChipGroup
               label="Filters"
               options={FILTER_OPTS}

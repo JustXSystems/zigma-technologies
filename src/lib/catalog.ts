@@ -9,12 +9,13 @@ import {
   type CatalogCategory,
   type CatalogCaseStudy,
   type CatalogPageSettings,
+  type CatalogFacets,
   type FormDefinition,
   type FormField,
   type Enquiry,
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
-import { ensureCatalogBackgroundColumn } from '@/lib/schema-ensure';
+import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns } from '@/lib/schema-ensure';
 
 function mapItem(row: RowDataPacket): CatalogItem {
   return {
@@ -404,7 +405,70 @@ export async function listCategories(itemType?: CatalogItemType, admin = false) 
   return rows as CatalogCategory[];
 }
 
+/**
+ * Amazon-style facet counts: each dimension ignores its own active filter
+ * so shoppers always see truthful one-click options for the other filters.
+ */
+export async function getCatalogFacets(opts: {
+  itemType: CatalogItemType;
+  q?: string;
+  category?: string;
+  tag?: string;
+  searchFields?: string[] | null;
+}): Promise<CatalogFacets> {
+  const base = {
+    itemType: opts.itemType,
+    q: opts.q,
+    searchFields: opts.searchFields,
+    sort: 'featured' as const,
+  };
+
+  const [categories, forTotal, forCategoryCounts, forTagCounts] = await Promise.all([
+    listCategories(opts.itemType),
+    listCatalogItems({ ...base, category: opts.category, tag: opts.tag }),
+    listCatalogItems({ ...base, tag: opts.tag }),
+    listCatalogItems({ ...base, category: opts.category }),
+  ]);
+
+  const categoryCountMap = new Map<string, number>();
+  for (const item of forCategoryCounts) {
+    const slug = item.category_slug || '_uncategorized';
+    categoryCountMap.set(slug, (categoryCountMap.get(slug) || 0) + 1);
+  }
+
+  const facetCategories = categories.map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    count: categoryCountMap.get(c.slug) || 0,
+    sort_order: c.sort_order,
+  }));
+
+  const tagCountMap = new Map<string, number>();
+  for (const item of forTagCounts) {
+    for (const raw of item.tags_json || []) {
+      const value = String(raw).trim();
+      if (!value) continue;
+      tagCountMap.set(value, (tagCountMap.get(value) || 0) + 1);
+    }
+  }
+
+  const tags = Array.from(tagCountMap.entries())
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+
+  return {
+    total: forTotal.length,
+    categories: facetCategories,
+    tags,
+  };
+}
+
 export async function getPageSettings(itemType: CatalogItemType) {
+  try {
+    await ensureCatalogDiscoveryColumns();
+  } catch {
+    /* column ensure best-effort */
+  }
   const [rows] = await pool.query<RowDataPacket[]>(
     'SELECT * FROM catalog_page_settings WHERE item_type = ? LIMIT 1',
     [itemType]
@@ -428,9 +492,19 @@ export async function getPageSettings(itemType: CatalogItemType) {
     hero_lead: row.hero_lead ?? null,
     visual_style: row.visual_style ?? 'premium',
     hero_variant: row.hero_variant ?? 'spotlight',
+    hero_standard_panel_enabled: Number(row.hero_standard_panel_enabled ?? 1),
     loading_skeleton_enabled: Number(row.loading_skeleton_enabled ?? 1),
     reveal_animation_enabled: Number(row.reveal_animation_enabled ?? 1),
     premium_borders_enabled: Number(row.premium_borders_enabled ?? 1),
+    discovery_profile_rail_enabled: Number(row.discovery_profile_rail_enabled ?? 1),
+    discovery_quick_find_enabled: Number(row.discovery_quick_find_enabled ?? 1),
+    discovery_facet_rail_enabled: Number(row.discovery_facet_rail_enabled ?? 1),
+    discovery_grouped_results_enabled: Number(row.discovery_grouped_results_enabled ?? 1),
+    discovery_sticky_toolbar_enabled: Number(row.discovery_sticky_toolbar_enabled ?? 1),
+    discovery_group_preview_count: Math.min(
+      12,
+      Math.max(1, Number(row.discovery_group_preview_count ?? 4) || 4)
+    ),
   } satisfies CatalogPageSettings;
 }
 
@@ -438,6 +512,11 @@ export async function updatePageSettings(
   itemType: CatalogItemType,
   input: Partial<Omit<CatalogPageSettings, 'id' | 'item_type'>>
 ) {
+  try {
+    await ensureCatalogDiscoveryColumns();
+  } catch {
+    /* column ensure best-effort */
+  }
   const fields: string[] = [];
   const params: unknown[] = [];
   const map: Record<string, unknown> = {
@@ -459,12 +538,52 @@ export async function updatePageSettings(
     hero_lead: input.hero_lead,
     visual_style: input.visual_style,
     hero_variant: input.hero_variant,
+    hero_standard_panel_enabled:
+      input.hero_standard_panel_enabled === undefined
+        ? undefined
+        : input.hero_standard_panel_enabled
+          ? 1
+          : 0,
     loading_skeleton_enabled:
       input.loading_skeleton_enabled === undefined ? undefined : input.loading_skeleton_enabled ? 1 : 0,
     reveal_animation_enabled:
       input.reveal_animation_enabled === undefined ? undefined : input.reveal_animation_enabled ? 1 : 0,
     premium_borders_enabled:
       input.premium_borders_enabled === undefined ? undefined : input.premium_borders_enabled ? 1 : 0,
+    discovery_profile_rail_enabled:
+      input.discovery_profile_rail_enabled === undefined
+        ? undefined
+        : input.discovery_profile_rail_enabled
+          ? 1
+          : 0,
+    discovery_quick_find_enabled:
+      input.discovery_quick_find_enabled === undefined
+        ? undefined
+        : input.discovery_quick_find_enabled
+          ? 1
+          : 0,
+    discovery_facet_rail_enabled:
+      input.discovery_facet_rail_enabled === undefined
+        ? undefined
+        : input.discovery_facet_rail_enabled
+          ? 1
+          : 0,
+    discovery_grouped_results_enabled:
+      input.discovery_grouped_results_enabled === undefined
+        ? undefined
+        : input.discovery_grouped_results_enabled
+          ? 1
+          : 0,
+    discovery_sticky_toolbar_enabled:
+      input.discovery_sticky_toolbar_enabled === undefined
+        ? undefined
+        : input.discovery_sticky_toolbar_enabled
+          ? 1
+          : 0,
+    discovery_group_preview_count:
+      input.discovery_group_preview_count === undefined
+        ? undefined
+        : Math.min(12, Math.max(1, Number(input.discovery_group_preview_count) || 4)),
   };
   for (const [key, value] of Object.entries(map)) {
     if (value !== undefined) {

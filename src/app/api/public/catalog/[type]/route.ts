@@ -1,5 +1,5 @@
 import { jsonError, jsonOk } from '@/lib/api';
-import { getPageSettings, listCatalogItems, listCatalogItemsByIds, listCategories } from '@/lib/catalog';
+import { getCatalogFacets, getPageSettings, listCatalogItems, listCatalogItemsByIds, listCategories } from '@/lib/catalog';
 import type { CatalogItemType } from '@/lib/types';
 
 type Ctx = { params: Promise<{ type: string }> };
@@ -22,7 +22,7 @@ export async function GET(request: Request, ctx: Ctx) {
 
     const settings = await getPageSettings(itemType);
     // Always honor deep-link filters from the menu (?category=&tag=), even if filter UI toggles are off.
-    const [items, categories, heroItems] = await Promise.all([
+    const [items, categories, heroItems, facets] = await Promise.all([
       listCatalogItems({
         itemType,
         q,
@@ -37,18 +37,18 @@ export async function GET(request: Request, ctx: Ctx) {
       settings?.hero_item_ids_json?.length
         ? listCatalogItemsByIds(itemType, settings.hero_item_ids_json)
         : listCatalogItems({ itemType, featuredOnly: true, limit: 4 }),
+      getCatalogFacets({
+        itemType,
+        q,
+        category,
+        tag,
+        searchFields: settings?.search_fields_json,
+      }),
     ]);
 
-    const tags = Array.from(
-      new Set(
-        items
-          .flatMap((item) => item.tags_json || [])
-          .map((t) => String(t).trim())
-          .filter(Boolean)
-      )
-    ).sort((a, b) => a.localeCompare(b));
+    const tags = facets.tags.map((t) => t.value);
 
-    return jsonOk({ items, categories, settings, tags, heroItems });
+    return jsonOk({ items, categories, settings, tags, facets, heroItems });
   } catch (error) {
     console.error(error);
     return jsonError('Failed to load catalog', 500);

@@ -73,6 +73,25 @@ export type CatalogCategory = {
   enabled: number;
 };
 
+/** Facet counts for catalog discovery (profile rail + filter rail). */
+export type CatalogFacetCategory = {
+  slug: string;
+  name: string;
+  count: number;
+  sort_order: number;
+};
+
+export type CatalogFacetTag = {
+  value: string;
+  count: number;
+};
+
+export type CatalogFacets = {
+  total: number;
+  categories: CatalogFacetCategory[];
+  tags: CatalogFacetTag[];
+};
+
 export type CatalogPageSettings = {
   id: number;
   item_type: CatalogItemType;
@@ -90,9 +109,23 @@ export type CatalogPageSettings = {
   hero_lead: string | null;
   visual_style: 'classic' | 'premium' | 'glass' | 'minimal' | 'bold-corporate';
   hero_variant: 'standard' | 'spotlight';
+  /** When hero_variant is standard, show/hide the compact active-item panel. */
+  hero_standard_panel_enabled: number;
   loading_skeleton_enabled: number;
   reveal_animation_enabled: number;
   premium_borders_enabled: number;
+  /** Shop-by-profile category tiles */
+  discovery_profile_rail_enabled: number;
+  /** Quick-find intent/tag chips */
+  discovery_quick_find_enabled: number;
+  /** Left Refine facet rail (Filters drawer on mobile) */
+  discovery_facet_rail_enabled: number;
+  /** Group unfiltered results by category */
+  discovery_grouped_results_enabled: number;
+  /** Sticky search/filter toolbar */
+  discovery_sticky_toolbar_enabled: number;
+  /** Cards shown per group before “View all” */
+  discovery_group_preview_count: number;
 };
 
 export type FormField = {

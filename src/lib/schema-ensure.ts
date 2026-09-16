@@ -2,6 +2,7 @@ import type { RowDataPacket } from 'mysql2';
 import pool, { isDbUnavailableError } from '@/lib/db';
 
 let backgroundColumnReady: Promise<void> | null = null;
+let discoveryColumnsReady: Promise<void> | null = null;
 
 /**
  * Idempotent: ensure catalog_items.background_image_url exists.
@@ -39,4 +40,68 @@ export function ensureCatalogBackgroundColumn(): Promise<void> {
     });
   }
   return backgroundColumnReady;
+}
+
+const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
+  {
+    name: 'hero_standard_panel_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_variant`,
+  },
+  {
+    name: 'discovery_profile_rail_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_profile_rail_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER premium_borders_enabled`,
+  },
+  {
+    name: 'discovery_quick_find_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_quick_find_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER discovery_profile_rail_enabled`,
+  },
+  {
+    name: 'discovery_facet_rail_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_facet_rail_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER discovery_quick_find_enabled`,
+  },
+  {
+    name: 'discovery_grouped_results_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_grouped_results_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER discovery_facet_rail_enabled`,
+  },
+  {
+    name: 'discovery_sticky_toolbar_enabled',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_sticky_toolbar_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER discovery_grouped_results_enabled`,
+  },
+  {
+    name: 'discovery_group_preview_count',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN discovery_group_preview_count TINYINT UNSIGNED NOT NULL DEFAULT 4 AFTER discovery_sticky_toolbar_enabled`,
+  },
+];
+
+/** Idempotent: ensure catalog discovery + standard-panel columns exist. */
+export function ensureCatalogDiscoveryColumns(): Promise<void> {
+  if (!discoveryColumnsReady) {
+    discoveryColumnsReady = (async () => {
+      try {
+        for (const col of DISCOVERY_COLUMNS) {
+          const [rows] = await pool.query<RowDataPacket[]>(
+            `SELECT COUNT(*) AS c
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'catalog_page_settings'
+               AND COLUMN_NAME = ?`,
+            [col.name]
+          );
+          if (Number(rows[0]?.c || 0) > 0) continue;
+          await pool.query(col.ddl);
+          console.info(`[schema] added catalog_page_settings.${col.name}`);
+        }
+      } catch (err) {
+        if (isDbUnavailableError(err)) throw err;
+        console.error(
+          '[schema] could not ensure catalog discovery columns — run scripts/migrate-catalog-discovery.sql',
+          err
+        );
+      }
+    })().catch((err) => {
+      discoveryColumnsReady = null;
+      throw err;
+    });
+  }
+  return discoveryColumnsReady;
 }
