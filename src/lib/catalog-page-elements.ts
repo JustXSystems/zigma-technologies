@@ -25,7 +25,9 @@ export const DEFAULT_TOOLBAR_ELEMENTS = [
 export type HeroElement = (typeof DEFAULT_HERO_ELEMENTS)[number];
 export type ToolbarElement = (typeof DEFAULT_TOOLBAR_ELEMENTS)[number];
 
-/** Resolve visible hero pieces (JSON list, with legacy bool-column fallback). */
+/** Resolve visible hero pieces (JSON list, with legacy bool-column fallback).
+ * Content chips (eyebrow, title, lead, meta, kicker, price, tags, actions, dots) apply to every
+ * hero_variant and visual_style. standard_panel / spotlight only gate the featured-item shell. */
 export function resolveHeroElements(settings: CatalogPageSettings | null | undefined): string[] {
   if (settings?.hero_elements_json?.length) return [...settings.hero_elements_json];
   let list: string[] = [...DEFAULT_HERO_ELEMENTS];

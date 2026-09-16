@@ -113,7 +113,8 @@ export type CatalogPageSettings = {
   hero_standard_panel_enabled: number;
   /** Show/hide the hero meta row (highlights / autoplay / type). */
   hero_meta_enabled: number;
-  /** Explicit hero UI pieces (eyebrow, title, lead, meta, standard_panel, spotlight, kicker, price, tags, actions, dots). */
+  /** Explicit hero UI pieces. Content chips apply to all variants/styles;
+   * standard_panel / spotlight only gate the featured-item shell for that layout. */
   hero_elements_json: string[] | null;
   /** Toolbar pieces (search, sort, result_meta, filter_chips, clear). */
   toolbar_elements_json: string[] | null;

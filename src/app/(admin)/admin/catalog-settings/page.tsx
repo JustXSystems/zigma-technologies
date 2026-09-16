@@ -101,6 +101,9 @@ function CatalogAppearancePreview({
   const previewItems = (orderedSelected.length ? orderedSelected : items).slice(0, 2);
   const active = previewItems[0];
   const heroEls = new Set(resolveHeroElements(settings));
+  const variant = settings.hero_variant;
+  const showFeaturedPanel =
+    variant === 'standard' ? heroEls.has('standard_panel') : heroEls.has('spotlight');
 
   if (!active) {
     return (
@@ -110,6 +113,34 @@ function CatalogAppearancePreview({
       </div>
     );
   }
+
+  const featuredBody = (
+    <>
+      {heroEls.has('kicker') || heroEls.has('price') ? (
+        <div className="catalog-hero-spotlight-top">
+          {heroEls.has('kicker') ? <span className="catalog-hero-kicker">{type}</span> : <span />}
+          {heroEls.has('price') ? <span className="catalog-hero-price">Preview</span> : null}
+        </div>
+      ) : null}
+      <h2>{active.title}</h2>
+      <p>
+        {variant === 'spotlight'
+          ? 'Premium spotlight card showing how the active catalog item will be framed on the public page.'
+          : 'Previewing the standard hero variant with compact active-item messaging.'}
+      </p>
+      {heroEls.has('tags') ? (
+        <div className="catalog-hero-tags">
+          <span className="catalog-hero-tag">interactive</span>
+          <span className="catalog-hero-tag">premium</span>
+        </div>
+      ) : null}
+      {heroEls.has('actions') ? (
+        <div className="catalog-hero-actions">
+          <span className="btn btn-primary">{variant === 'spotlight' ? 'View spotlight' : 'View details'}</span>
+        </div>
+      ) : null}
+    </>
+  );
 
   return (
     <div className="admin-field full">
@@ -156,36 +187,23 @@ function CatalogAppearancePreview({
                   <span>{settings.loading_skeleton_enabled ? 'skeleton on' : 'skeleton off'}</span>
                 </div>
               ) : null}
-              {settings.hero_variant === 'standard' && heroEls.has('standard_panel') ? (
-                <div className="catalog-hero-standard-panel">
-                  {heroEls.has('kicker') ? <span className="catalog-hero-kicker">{type}</span> : null}
-                  <h2>{active.title}</h2>
-                  <p>Previewing the standard hero variant with compact active-item messaging.</p>
-                  {heroEls.has('actions') ? (
-                    <div className="catalog-hero-actions">
-                      <span className="btn btn-primary">View details</span>
-                    </div>
-                  ) : null}
+              {variant === 'standard' && showFeaturedPanel ? (
+                <div className="catalog-hero-standard-panel">{featuredBody}</div>
+              ) : null}
+              {heroEls.has('dots') && variant === 'standard' ? (
+                <div className="catalog-hero-standard-dots" aria-hidden="true">
+                  <button type="button" className="active" />
+                  <button type="button" />
                 </div>
               ) : null}
             </div>
-            {settings.hero_variant === 'spotlight' && heroEls.has('spotlight') ? (
+            {variant === 'spotlight' && showFeaturedPanel ? (
               <div className="catalog-hero-spotlight">
-                <div className="catalog-hero-spotlight-top">
-                  {heroEls.has('kicker') ? <span className="catalog-hero-kicker">{type}</span> : null}
-                  {heroEls.has('price') ? <span className="catalog-hero-price">Preview</span> : null}
-                </div>
-                <h2>{active.title}</h2>
-                <p>Premium spotlight card showing how the active catalog item will be framed on the public page.</p>
-                {heroEls.has('tags') ? (
-                  <div className="catalog-hero-tags">
-                    <span className="catalog-hero-tag">interactive</span>
-                    <span className="catalog-hero-tag">premium</span>
-                  </div>
-                ) : null}
-                {heroEls.has('actions') ? (
-                  <div className="catalog-hero-actions">
-                    <span className="btn btn-primary">View spotlight</span>
+                {featuredBody}
+                {heroEls.has('dots') ? (
+                  <div className="catalog-hero-dots" aria-hidden="true">
+                    <button type="button" className="active" />
+                    <button type="button" />
                   </div>
                 ) : null}
               </div>
@@ -515,9 +533,11 @@ export default function CatalogSettingsPage() {
                 className="admin-field full"
                 style={{ margin: '-0.35rem 0 0.5rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}
               >
-                <code>standard_panel</code> applies to the standard variant; <code>spotlight</code> to the spotlight card.{' '}
-                <code>meta</code> is <code>.catalog-hero-meta</code>; <code>kicker</code>, <code>price</code>,{' '}
-                <code>tags</code>, <code>actions</code>, and <code>dots</code> control pieces inside those panels.
+                These toggles apply to <strong>every</strong> hero variant and visual style. Use{' '}
+                <code>standard_panel</code> / <code>spotlight</code> only to show or hide the featured-item shell for
+                that layout; <code>eyebrow</code>, <code>title</code>, <code>lead</code>, <code>meta</code>,{' '}
+                <code>kicker</code>, <code>price</code>, <code>tags</code>, <code>actions</code>, and <code>dots</code>{' '}
+                always follow the chips regardless of style preset.
               </p>
               <div className="admin-field full">
                 <label>Curated appearance toggles</label>

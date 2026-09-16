@@ -99,6 +99,10 @@ function CatalogHero({
     return () => window.clearInterval(timer);
   }, [autoplayMs, heroEnabled, slides.length]);
 
+  const heroEyebrow = settings?.hero_eyebrow?.trim() || eyebrow;
+  const heroTitle = settings?.hero_title?.trim() || title;
+  const heroLead = settings?.hero_lead?.trim() || lead;
+
   if (!heroEnabled) {
     return (
       <section className="page-hero" style={{ minHeight: 'auto', padding: '10rem 0 4rem' }}>
@@ -110,9 +114,9 @@ function CatalogHero({
         </div>
         <div className="container">
           <div className="section-head">
-            <div className="eyebrow">{eyebrow}</div>
-            <h1>{title}</h1>
-            <p className="lead">{lead}</p>
+            {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
+            {heroHas(settings, 'title') ? <h1>{heroTitle}</h1> : null}
+            {heroHas(settings, 'lead') ? <p className="lead">{heroLead}</p> : null}
           </div>
         </div>
       </section>
@@ -120,11 +124,74 @@ function CatalogHero({
   }
 
   const active = slides[current] || slides[0];
-  const heroEyebrow = settings?.hero_eyebrow?.trim() || eyebrow;
-  const heroTitle = settings?.hero_title?.trim() || title;
-  const heroLead = settings?.hero_lead?.trim() || lead;
   const variant = settings?.hero_variant || 'spotlight';
   const revealEnabled = settings?.reveal_animation_enabled !== 0;
+  /** Featured-item shell: standard_panel / spotlight both honor the same content chips. */
+  const showFeaturedPanel =
+    variant === 'standard' ? heroHas(settings, 'standard_panel') : heroHas(settings, 'spotlight');
+  const showDots = heroHas(settings, 'dots') && slides.length > 1;
+
+  function renderFeaturedBody(mode: 'standard' | 'spotlight') {
+    const showKicker = heroHas(settings, 'kicker');
+    const showPrice = heroHas(settings, 'price') && !!active.price_label;
+    return (
+      <>
+        {showKicker || showPrice ? (
+          <div className="catalog-hero-spotlight-top">
+            {showKicker ? (
+              <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
+            ) : (
+              <span />
+            )}
+            {showPrice ? <span className="catalog-hero-price">{active.price_label}</span> : null}
+          </div>
+        ) : null}
+        <h2>{active.title}</h2>
+        <p>{active.summary || active.description || `Explore this ${itemType} in more detail.`}</p>
+        {heroHas(settings, 'tags') && active.tags_json?.length ? (
+          <div className="catalog-hero-tags">
+            {active.tags_json.slice(0, 4).map((tagValue) => (
+              <span key={tagValue} className="catalog-hero-tag">
+                {tagValue}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {heroHas(settings, 'actions') ? (
+          <div className="catalog-hero-actions">
+            <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
+              {mode === 'spotlight' ? 'View spotlight' : 'View details'}
+            </button>
+            {mode === 'spotlight' ? (
+              <Link href={catalogPublicPath(itemType, active.slug)} className="btn btn-ghost-dark">
+                Full {caseStudyLabel(itemType).toLowerCase()}
+              </Link>
+            ) : null}
+            <a href="/contact" className="btn btn-ghost-dark">
+              {mode === 'spotlight' ? 'Talk to sales' : 'Contact team'}
+            </a>
+          </div>
+        ) : null}
+      </>
+    );
+  }
+
+  function renderDots(className: string) {
+    if (!showDots) return null;
+    return (
+      <div className={className} aria-label="Spotlight items">
+        {slides.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            className={index === current ? 'active' : ''}
+            aria-label={`Show ${item.title}`}
+            onClick={() => setCurrent(index)}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <section className={cx('page-hero catalog-hero', `catalog-hero--${variant}`)}>
@@ -147,92 +214,19 @@ function CatalogHero({
               <span>{itemType}s</span>
             </div>
           ) : null}
-          {variant === 'standard' && heroHas(settings, 'standard_panel') ? (
-            <div className="catalog-hero-standard-panel">
-              {heroHas(settings, 'kicker') ? (
-                <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
-              ) : null}
-              <h2>{active.title}</h2>
-              <p>{active.summary || active.description || `Explore this ${itemType} in more detail.`}</p>
-              {heroHas(settings, 'actions') ? (
-                <div className="catalog-hero-actions">
-                  <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
-                    View details
-                  </button>
-                  <a href="/contact" className="btn btn-ghost-dark">
-                    Contact team
-                  </a>
-                </div>
-              ) : null}
-            </div>
+          {variant === 'standard' && showFeaturedPanel ? (
+            <div className="catalog-hero-standard-panel">{renderFeaturedBody('standard')}</div>
           ) : null}
+          {variant === 'standard' ? renderDots('catalog-hero-standard-dots') : null}
         </div>
 
-        {variant === 'spotlight' && heroHas(settings, 'spotlight') ? (
-        <div className={cx('catalog-hero-spotlight', revealEnabled && 'reveal')}>
-          <div className="catalog-hero-spotlight-top">
-            {heroHas(settings, 'kicker') ? (
-              <span className="catalog-hero-kicker">{active.category_name || active.item_type}</span>
-            ) : null}
-            {heroHas(settings, 'price') && active.price_label ? (
-              <span className="catalog-hero-price">{active.price_label}</span>
-            ) : null}
-          </div>
-          <h2>{active.title}</h2>
-          <p>{active.summary || active.description || `Explore this ${itemType} in more detail.`}</p>
-          {heroHas(settings, 'tags') && active.tags_json?.length ? (
-            <div className="catalog-hero-tags">
-              {active.tags_json.slice(0, 4).map((tagValue) => (
-                <span key={tagValue} className="catalog-hero-tag">
-                  {tagValue}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          {heroHas(settings, 'actions') ? (
-            <div className="catalog-hero-actions">
-              <button type="button" className="btn btn-primary" onClick={() => onOpenItem(active)}>
-                View spotlight
-              </button>
-              <Link href={catalogPublicPath(itemType, active.slug)} className="btn btn-ghost-dark">
-                Full {caseStudyLabel(itemType).toLowerCase()}
-              </Link>
-              <a href="/contact" className="btn btn-ghost-dark">
-                Talk to sales
-              </a>
-            </div>
-          ) : null}
-          {heroHas(settings, 'dots') && slides.length > 1 ? (
-            <div className="catalog-hero-dots" aria-label="Spotlight items">
-              {slides.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={index === current ? 'active' : ''}
-                  aria-label={`Show ${item.title}`}
-                  onClick={() => setCurrent(index)}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-        ) : null}
-        {heroHas(settings, 'dots') &&
-        slides.length > 1 &&
-        variant === 'standard' &&
-        heroHas(settings, 'standard_panel') ? (
-          <div className="catalog-hero-standard-dots" aria-label="Spotlight items">
-            {slides.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                className={index === current ? 'active' : ''}
-                aria-label={`Show ${item.title}`}
-                onClick={() => setCurrent(index)}
-              />
-            ))}
+        {variant === 'spotlight' && showFeaturedPanel ? (
+          <div className={cx('catalog-hero-spotlight', revealEnabled && 'reveal')}>
+            {renderFeaturedBody('spotlight')}
+            {renderDots('catalog-hero-dots')}
           </div>
         ) : null}
+        {variant === 'spotlight' && !showFeaturedPanel ? renderDots('catalog-hero-dots') : null}
       </div>
     </section>
   );

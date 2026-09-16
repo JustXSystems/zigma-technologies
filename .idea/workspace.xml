@@ -7,18 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link">
-      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminCollapsible.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminFloatingActions.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#5 Admin Page realign and floating Save Button to access easily">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/theme/ThemeStudio.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/theme/ThemeStudio.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/theme/TokenEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/theme/TokenEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog-page-elements.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-page-elements.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000012353178" />
-      <entry key="MS500" value="1.0356932669699226" />
-      <entry key="S2" value="3.54274995917636" />
-      <entry key="S5" value="11.183421691279115" />
-      <entry key="S10" value="22.84906411857381" />
-      <entry key="S30" value="62.72912031761215" />
-      <entry key="S60" value="108.64657500200512" />
-      <entry key="M2" value="162.05250809715145" />
-      <entry key="M5" value="229.12639646842956" />
-      <entry key="M10" value="275.9330356269045" />
-      <entry key="M15" value="308.3372079776374" />
-      <entry key="M30" value="401.6631157696234" />
-      <entry key="H1" value="545.4500738951663" />
-      <entry key="H2" value="707.7618105840885" />
-      <entry key="H4" value="891.201773177559" />
-      <entry key="D1" value="1505.5824860793803" />
-      <entry key="W1" value="8988.231103837166" />
+      <entry key="MS100" value="1.0321353392414405" />
+      <entry key="MS500" value="2.345518802720442" />
+      <entry key="S2" value="4.8549695820676195" />
+      <entry key="S5" value="6.238415471482305" />
+      <entry key="S10" value="7.585711422576338" />
+      <entry key="S30" value="14.02074675614352" />
+      <entry key="S60" value="21.310427615631927" />
+      <entry key="M2" value="28.15286782036909" />
+      <entry key="M5" value="34.170268605016375" />
+      <entry key="M10" value="39.35992294630187" />
+      <entry key="M15" value="51.56689643247958" />
+      <entry key="M30" value="123.91710188905886" />
+      <entry key="H1" value="290.4752438950061" />
+      <entry key="H2" value="519.891855314359" />
+      <entry key="H4" value="773.9264822997602" />
+      <entry key="D1" value="1497.667029834507" />
+      <entry key="W1" value="8986.817369148568" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -94,33 +88,33 @@
       <entry key="S60" value="0.0" />
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
-      <entry key="M10" value="1.99298992227297E-310" />
-      <entry key="M15" value="3.411955841520913E-207" />
-      <entry key="M30" value="5.84119494754362E-104" />
-      <entry key="H1" value="2.4168564184791785E-52" />
-      <entry key="H2" value="1.5546242049058332E-26" />
-      <entry key="H4" value="1.2468457021453614E-13" />
-      <entry key="D1" value="0.007181410150519109" />
-      <entry key="W1" value="0.766003136357743" />
+      <entry key="M10" value="1.896650609863E-312" />
+      <entry key="M15" value="1.5322332766635865E-208" />
+      <entry key="M30" value="1.2378341070852682E-104" />
+      <entry key="H1" value="1.1125799328971154E-52" />
+      <entry key="H2" value="1.0547890466330574E-26" />
+      <entry key="H4" value="1.0270292335998503E-13" />
+      <entry key="D1" value="0.006952986935915956" />
+      <entry key="W1" value="0.7624740611300631" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9726549485977156" />
-      <entry key="MS500" value="1.029906144211731" />
-      <entry key="S2" value="3.537283515813551" />
-      <entry key="S5" value="11.176343624663549" />
-      <entry key="S10" value="22.841740315831643" />
-      <entry key="S30" value="62.72234590816162" />
-      <entry key="S60" value="108.64066868949467" />
-      <entry key="M2" value="162.04806720662705" />
-      <entry key="M5" value="229.1238473125155" />
-      <entry key="M10" value="275.93147867891486" />
-      <entry key="M15" value="308.3360358943802" />
-      <entry key="M30" value="401.6623288844277" />
-      <entry key="H1" value="545.4495193278232" />
-      <entry key="H2" value="707.7614348079812" />
-      <entry key="H4" value="891.2015216967835" />
-      <entry key="D1" value="1505.589587890916" />
-      <entry key="W1" value="8988.996980680131" />
+      <entry key="MS100" value="0.9770654583448876" />
+      <entry key="MS500" value="2.324129729900689" />
+      <entry key="S2" value="4.844383168346079" />
+      <entry key="S5" value="6.2330287261698745" />
+      <entry key="S10" value="7.582529649315015" />
+      <entry key="S30" value="14.018998667379922" />
+      <entry key="S60" value="21.309164347259276" />
+      <entry key="M2" value="28.152052136842055" />
+      <entry key="M5" value="34.16987673508019" />
+      <entry key="M10" value="39.35969772192646" />
+      <entry key="M15" value="51.566699699945126" />
+      <entry key="M30" value="123.91686094970851" />
+      <entry key="H1" value="290.4749509221625" />
+      <entry key="H2" value="519.8915813594541" />
+      <entry key="H4" value="773.9262656163693" />
+      <entry key="D1" value="1497.6739041593223" />
+      <entry key="W1" value="8987.57971727011" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -272,7 +266,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Product/Services/Project background image set" />
     <MESSAGE value="GitHub deployment changes for PreProd and Production" />
     <MESSAGE value="inventory items can set background image now" />
     <MESSAGE value="inventory items background image issue fixed" />
@@ -297,7 +290,8 @@
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-standard-panel" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-meta" />
     <MESSAGE value="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link" />
-    <option name="LAST_COMMIT_MESSAGE" value="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link" />
+    <MESSAGE value="#5 Admin Page realign and floating Save Button to access easily" />
+    <option name="LAST_COMMIT_MESSAGE" value="#5 Admin Page realign and floating Save Button to access easily" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
