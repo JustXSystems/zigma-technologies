@@ -20,6 +20,10 @@
     --font-body:'Inter', sans-serif;
     --font-mono:'IBM Plex Mono', monospace;
     --section-pad: 9rem;
+    --logo-chip-h: 42px;
+    --logo-chip-h-mobile: 32px;
+    --logo-word-size: 1.2rem;
+    --logo-word-size-mobile: 1rem;
   }
 
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -80,7 +84,7 @@
   .btn-sm{padding:0.65rem 1.2rem;font-size:0.82rem;}
 
   /* ---------- LOGO ---------- */
-  .logo{display:flex;align-items:center;gap:0.65rem;font-family:var(--font-display);font-weight:700;font-size:1.2rem;color:var(--white);}
+  .logo{display:flex;align-items:center;gap:0.65rem;font-family:var(--font-display);font-weight:700;font-size:var(--logo-word-size,1.2rem);color:var(--white);}
   .logo-chip{
     background:var(--white);
     padding:0;
@@ -90,12 +94,12 @@
     border:0.3px solid var(--white);
     flex-shrink:0;
   }
-  .logo-chip img{height:42px;width:auto;display:block;margin:0 auto;}
+  .logo-chip img{height:var(--logo-chip-h,42px);width:auto;display:block;margin:0 auto;}
   .footer-logo .logo-chip{border-radius:3.68px;border:0.24px solid var(--white);}
-  .footer-logo .logo-chip img{height:33.6px;}
+  .footer-logo .logo-chip img{height:calc(var(--logo-chip-h,42px) * 0.8);}
   .logo.footer-logo{display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;color:var(--white);}
-  .logo-word small{display:block;font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;color:#8FA3C2;font-weight:500;margin-top:1px;}
-  .footer-logo .logo-word{font-size:1.5rem;}
+  .logo-word small{display:block;font-family:var(--font-mono);font-size:0.6em;letter-spacing:0.1em;color:#8FA3C2;font-weight:500;margin-top:1px;}
+  .footer-logo .logo-word{font-size:calc(var(--logo-word-size,1.2rem) * 1.25);}
 
   /* ---------- HEADER ---------- */
   header{
@@ -534,6 +538,10 @@
   }
   @media (max-width:760px){
     :root{--section-pad:5rem;}
+    .logo-chip img{height:var(--logo-chip-h-mobile);}
+    .footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}
+    .logo{font-size:var(--logo-word-size-mobile);}
+    .footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}
     .nav-links, .header-right .btn{display:none;}
     .menu-toggle{display:block;}
     .stat-grid{grid-template-columns:repeat(2,1fr);row-gap:1.6rem;}

@@ -11,13 +11,33 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
   {
     id: 'brand',
     title: 'Brand & identity',
-    description: 'Company name, logo, and footer blurb.',
+    description: 'Company name, logo, logo sizes (desktop/mobile), and footer blurb.',
     defaultOpen: true,
     fields: [
       { key: 'companyName', label: 'Company name' },
       { key: 'tagline', label: 'Logo tagline' },
       { key: 'logoUrl', label: 'Logo image URL', hint: 'Used in header, footer, and ecosystem mark', full: true },
       { key: 'logoAlt', label: 'Logo alt text', hint: 'Accessible name for the logo image sitewide' },
+      {
+        key: 'logoChipHeight',
+        label: 'Logo chip height (desktop)',
+        hint: 'CSS size for .logo-chip image, e.g. 42px',
+      },
+      {
+        key: 'logoChipHeightMobile',
+        label: 'Logo chip height (mobile)',
+        hint: '≤760px screens — e.g. 28px or 32px to shrink',
+      },
+      {
+        key: 'logoWordSize',
+        label: 'Logo word size (desktop)',
+        hint: 'CSS size for company name, e.g. 1.2rem',
+      },
+      {
+        key: 'logoWordSizeMobile',
+        label: 'Logo word size (mobile)',
+        hint: '≤760px screens — e.g. 0.95rem or 1rem to shrink',
+      },
       { key: 'footerBlurb', label: 'Footer blurb', full: true, multiline: true },
     ],
   },

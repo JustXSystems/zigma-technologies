@@ -27,6 +27,14 @@ export type SiteSettings = {
   logoUrl: string;
   /** Alt text for the logo image (header, footer, ecosystem mark) */
   logoAlt: string;
+  /** Header logo-chip image height (e.g. 42px) */
+  logoChipHeight: string;
+  /** Header logo-chip image height on mobile ≤760px */
+  logoChipHeightMobile: string;
+  /** Header logo-word / brand name size (e.g. 1.2rem) */
+  logoWordSize: string;
+  /** Header logo-word size on mobile ≤760px */
+  logoWordSizeMobile: string;
   facebookUrl: string;
   linkedinUrl: string;
   privacyUrl: string;
@@ -80,6 +88,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   visitorAutoReplyEnabled: 'true',
   logoUrl: '/assets/images/zigma-technologies-logo.png',
   logoAlt: 'Zigma Technologies logo',
+  logoChipHeight: '42px',
+  logoChipHeightMobile: '32px',
+  logoWordSize: '1.2rem',
+  logoWordSizeMobile: '1rem',
   facebookUrl: '',
   linkedinUrl: '',
   privacyUrl: '/privacy',
@@ -131,6 +143,22 @@ export function logoAltText(settings: SiteSettings) {
   if (alt) return alt;
   const name = settings.companyName?.trim();
   return name ? `${name} logo` : DEFAULT_SITE_SETTINGS.logoAlt;
+}
+
+/** Allow only CSS length values (px/rem/em) for logo sizing injection. */
+export function sanitizeCssSize(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (/^\d+(\.\d+)?(px|rem|em)$/i.test(trimmed)) return trimmed;
+  return fallback;
+}
+
+/** Inline :root vars so header/footer logo-chip and logo-word sizes follow Site Settings. */
+export function logoSizingCss(settings: SiteSettings): string {
+  const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
+  const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
+  const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
+  const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
+  return `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};}`;
 }
 
 export const DEFAULT_FAVICON = '/assets/images/zigma.png';

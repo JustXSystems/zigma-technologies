@@ -5,6 +5,7 @@ import OrganizationJsonLd from '@/components/OrganizationJsonLd';
 import CookieConsent from '@/components/CookieConsent';
 import SiteProviders from '@/components/SiteProviders';
 import { loadSiteShell } from '@/lib/site-shell';
+import { logoSizingCss } from '@/lib/site-settings';
 import {
   ConsultationModalHost,
   PwaRegister,
@@ -24,6 +25,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       headerNav={shell.headerNav}
       footerColumns={shell.footerColumns}
     >
+      <style dangerouslySetInnerHTML={{ __html: logoSizingCss(shell.settings) }} />
       <ThemePreviewBridge />
       <OrganizationJsonLd />
       <SiteSeo />
