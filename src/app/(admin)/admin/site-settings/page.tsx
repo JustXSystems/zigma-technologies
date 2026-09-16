@@ -1,44 +1,63 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/site-settings';
+import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 
-type FieldDef = { key: keyof SiteSettings; label: string; hint?: string; full?: boolean; multiline?: boolean };
+type FieldDef = {
+  key: keyof SiteSettings;
+  label: string;
+  hint?: string;
+  full?: boolean;
+  multiline?: boolean;
+  placeholder?: string;
+};
 
 const SECTIONS: Array<{ id: string; title: string; description: string; defaultOpen?: boolean; fields: FieldDef[] }> = [
   {
     id: 'brand',
     title: 'Brand & identity',
-    description: 'Company name, logo, logo sizes (desktop/mobile), and footer blurb.',
+    description: 'Company name, logo image, and footer blurb.',
     defaultOpen: true,
     fields: [
       { key: 'companyName', label: 'Company name' },
       { key: 'tagline', label: 'Logo tagline' },
       { key: 'logoUrl', label: 'Logo image URL', hint: 'Used in header, footer, and ecosystem mark', full: true },
       { key: 'logoAlt', label: 'Logo alt text', hint: 'Accessible name for the logo image sitewide' },
+      { key: 'footerBlurb', label: 'Footer blurb', full: true, multiline: true },
+    ],
+  },
+  {
+    id: 'logo-sizes',
+    title: 'Logo sizes',
+    description: 'Control header logo-chip and logo-word size on desktop and mobile (≤760px). Use CSS lengths: px, rem, or em.',
+    defaultOpen: true,
+    fields: [
       {
         key: 'logoChipHeight',
         label: 'Logo chip height (desktop)',
-        hint: 'CSS size for .logo-chip image, e.g. 42px',
+        hint: 'Image height inside .logo-chip',
+        placeholder: DEFAULT_SITE_SETTINGS.logoChipHeight,
       },
       {
         key: 'logoChipHeightMobile',
         label: 'Logo chip height (mobile)',
-        hint: '≤760px screens — e.g. 28px or 32px to shrink',
+        hint: 'Applied at max-width 760px',
+        placeholder: DEFAULT_SITE_SETTINGS.logoChipHeightMobile,
       },
       {
         key: 'logoWordSize',
         label: 'Logo word size (desktop)',
-        hint: 'CSS size for company name, e.g. 1.2rem',
+        hint: 'Company name (.logo / .logo-word) font size',
+        placeholder: DEFAULT_SITE_SETTINGS.logoWordSize,
       },
       {
         key: 'logoWordSizeMobile',
         label: 'Logo word size (mobile)',
-        hint: '≤760px screens — e.g. 0.95rem or 1rem to shrink',
+        hint: 'Applied at max-width 760px',
+        placeholder: DEFAULT_SITE_SETTINGS.logoWordSizeMobile,
       },
-      { key: 'footerBlurb', label: 'Footer blurb', full: true, multiline: true },
     ],
   },
   {
@@ -191,7 +210,7 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
 ];
 
 export default function SiteSettingsPage() {
-  const [settings, setSettings] = useState<SiteSettings>({ ...DEFAULT_SITE_SETTINGS });
+  const [settings, setSettings] = useState<SiteSettings>(() => mergeSiteSettings(DEFAULT_SITE_SETTINGS));
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
@@ -201,7 +220,7 @@ export default function SiteSettingsPage() {
       .then(async (r) => {
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Failed to load');
-        setSettings(data.settings);
+        setSettings(mergeSiteSettings(data.settings));
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -212,14 +231,15 @@ export default function SiteSettingsPage() {
     setError('');
     setMessage('');
     try {
+      const payload = mergeSiteSettings(settings);
       const res = await fetch('/api/admin/site-settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
-      setSettings(data.settings);
+      setSettings(mergeSiteSettings(data.settings));
       setMessage('Site settings saved. Header/footer will pick them up on refresh.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed');
@@ -228,25 +248,51 @@ export default function SiteSettingsPage() {
     }
   }
 
+  function resetLogoSizes() {
+    setSettings((prev) =>
+      mergeSiteSettings({
+        ...prev,
+        logoChipHeight: DEFAULT_SITE_SETTINGS.logoChipHeight,
+        logoChipHeightMobile: DEFAULT_SITE_SETTINGS.logoChipHeightMobile,
+        logoWordSize: DEFAULT_SITE_SETTINGS.logoWordSize,
+        logoWordSizeMobile: DEFAULT_SITE_SETTINGS.logoWordSizeMobile,
+      })
+    );
+    setMessage('Logo sizes reset to defaults — click Save settings to publish.');
+  }
+
   function renderField(field: FieldDef) {
     const multiline = field.multiline || field.key === 'footerBlurb' || field.key === 'defaultMetaDescription';
+    const value = settings[field.key] ?? DEFAULT_SITE_SETTINGS[field.key] ?? '';
+    const placeholder = field.placeholder || DEFAULT_SITE_SETTINGS[field.key] || undefined;
     return (
       <div key={field.key} className={`admin-field${field.full || multiline ? ' full' : ''}`}>
-        <label>{field.label}</label>
+        <label htmlFor={`site-setting-${field.key}`}>{field.label}</label>
         {multiline ? (
           <textarea
+            id={`site-setting-${field.key}`}
             className="admin-textarea"
-            value={settings[field.key]}
+            value={value}
+            placeholder={placeholder}
             onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
           />
         ) : (
           <input
+            id={`site-setting-${field.key}`}
             className="admin-input"
-            value={settings[field.key]}
+            value={value}
+            placeholder={placeholder}
             onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
           />
         )}
-        {field.hint ? <small style={{ color: 'var(--admin-muted)' }}>{field.hint}</small> : null}
+        {field.hint ? (
+          <small style={{ color: 'var(--admin-muted)' }}>
+            {field.hint}
+            {field.placeholder ? ` · default ${field.placeholder}` : null}
+          </small>
+        ) : field.placeholder ? (
+          <small style={{ color: 'var(--admin-muted)' }}>Default: {field.placeholder}</small>
+        ) : null}
       </div>
     );
   }
@@ -279,6 +325,13 @@ export default function SiteSettingsPage() {
             title={section.title}
             description={section.description}
             defaultOpen={section.defaultOpen ?? false}
+            badge={
+              section.id === 'logo-sizes' ? (
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={resetLogoSizes}>
+                  Reset logo sizes
+                </button>
+              ) : undefined
+            }
           >
             <div className="admin-form-grid">{section.fields.map(renderField)}</div>
           </AdminCollapsible>
