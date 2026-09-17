@@ -2578,47 +2578,13 @@
   color: #fff;
   border-color: var(--admin-sidebar);
 }
-.logo-font-search {
-  max-width: none;
-  width: 100%;
-}
-.logo-font-windows {
-  display: grid;
-  gap: 0.55rem;
-}
 .logo-font-select {
   width: 100%;
-  min-height: 220px;
-  height: 220px;
-  padding: 0.35rem;
-  font-size: 0.95rem;
-  line-height: 1.45;
-  overflow: auto;
-}
-.logo-font-select option {
-  padding: 0.35rem 0.45rem;
-}
-.logo-font-live-sample {
-  display: grid;
-  gap: 0.25rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid var(--admin-border);
-  border-radius: 8px;
-  background: #fff;
-}
-.logo-font-live-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--admin-muted);
-  font-family: var(--admin-font) !important;
-}
-.logo-font-live-text {
-  font-size: 1.15rem;
+  min-height: 38px;
+  height: auto;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.92rem;
   line-height: 1.35;
-  color: var(--admin-text);
-  overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {

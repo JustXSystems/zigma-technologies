@@ -242,11 +242,13 @@ export default function SiteSettingsPage() {
         logoWordSizeMobile: DEFAULT_SITE_SETTINGS.logoWordSizeMobile,
         logoWordWeight: DEFAULT_SITE_SETTINGS.logoWordWeight,
         logoWordStyle: DEFAULT_SITE_SETTINGS.logoWordStyle,
+        logoWordLetterSpacing: DEFAULT_SITE_SETTINGS.logoWordLetterSpacing,
         logoTaglineFont: DEFAULT_SITE_SETTINGS.logoTaglineFont,
         logoTaglineSize: DEFAULT_SITE_SETTINGS.logoTaglineSize,
         logoTaglineSizeMobile: DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile,
         logoTaglineWeight: DEFAULT_SITE_SETTINGS.logoTaglineWeight,
         logoTaglineStyle: DEFAULT_SITE_SETTINGS.logoTaglineStyle,
+        logoTaglineLetterSpacing: DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing,
       })
     );
     setMessage('Logo chip & word type reset to defaults — click Save settings to publish.');

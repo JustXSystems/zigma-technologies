@@ -41,6 +41,8 @@ export type SiteSettings = {
   logoWordWeight: string;
   /** Company name font-style (normal | italic | oblique) */
   logoWordStyle: string;
+  /** Company name letter-spacing (e.g. 0, 0.02em, 1px) */
+  logoWordLetterSpacing: string;
   /** Logo tagline (small) font-family */
   logoTaglineFont: string;
   /** Logo tagline font-size (e.g. 0.6em) */
@@ -51,6 +53,8 @@ export type SiteSettings = {
   logoTaglineWeight: string;
   /** Logo tagline font-style (normal | italic | oblique) */
   logoTaglineStyle: string;
+  /** Logo tagline letter-spacing (e.g. 0.1em) */
+  logoTaglineLetterSpacing: string;
   facebookUrl: string;
   linkedinUrl: string;
   privacyUrl: string;
@@ -111,11 +115,13 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   logoWordSizeMobile: '1rem',
   logoWordWeight: '700',
   logoWordStyle: 'normal',
+  logoWordLetterSpacing: '0',
   logoTaglineFont: 'var(--font-mono)',
   logoTaglineSize: '0.6em',
   logoTaglineSizeMobile: '0.6em',
   logoTaglineWeight: '500',
   logoTaglineStyle: 'normal',
+  logoTaglineLetterSpacing: '0.1em',
   facebookUrl: '',
   linkedinUrl: '',
   privacyUrl: '/privacy',
@@ -219,6 +225,14 @@ export function sanitizeCssFontStyle(value: string | undefined, fallback: string
   return fallback;
 }
 
+/** Allow CSS letter-spacing: normal, 0, or length (px/rem/em). */
+export function sanitizeCssLetterSpacing(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (/^(normal|0)$/i.test(trimmed)) return trimmed;
+  if (/^-?\d+(\.\d+)?(px|rem|em)$/i.test(trimmed)) return trimmed;
+  return fallback;
+}
+
 /** Inline :root vars so header/footer logo-chip and logo-word type follow Site Settings. */
 export function logoSizingCss(settings: SiteSettings): string {
   const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
@@ -228,13 +242,21 @@ export function logoSizingCss(settings: SiteSettings): string {
   const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
   const wordWeight = sanitizeCssFontWeight(settings.logoWordWeight, DEFAULT_SITE_SETTINGS.logoWordWeight);
   const wordStyle = sanitizeCssFontStyle(settings.logoWordStyle, DEFAULT_SITE_SETTINGS.logoWordStyle);
+  const wordTracking = sanitizeCssLetterSpacing(
+    settings.logoWordLetterSpacing,
+    DEFAULT_SITE_SETTINGS.logoWordLetterSpacing
+  );
   const tagFont = sanitizeCssFontFamily(settings.logoTaglineFont, DEFAULT_SITE_SETTINGS.logoTaglineFont);
   const tagSize = sanitizeCssSize(settings.logoTaglineSize, DEFAULT_SITE_SETTINGS.logoTaglineSize);
   const tagSizeMobile = sanitizeCssSize(settings.logoTaglineSizeMobile, DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile);
   const tagWeight = sanitizeCssFontWeight(settings.logoTaglineWeight, DEFAULT_SITE_SETTINGS.logoTaglineWeight);
   const tagStyle = sanitizeCssFontStyle(settings.logoTaglineStyle, DEFAULT_SITE_SETTINGS.logoTaglineStyle);
+  const tagTracking = sanitizeCssLetterSpacing(
+    settings.logoTaglineLetterSpacing,
+    DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing
+  );
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
     `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}.logo-word small,header .logo-word small,footer .footer-logo .logo-word small,.footer-logo .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}}`,
   ].join('');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   detectAvailableFonts,
   findFontEntry,
@@ -18,54 +18,29 @@ type Props = {
 
 export default function LogoFontPicker({ id, label, value, onChange, hint }: Props) {
   const [fonts, setFonts] = useState<LogoFontEntry[]>([]);
-  const [source, setSource] = useState<'local-api' | 'canvas' | 'catalog' | 'loading'>('loading');
-  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true);
   const [customMode, setCustomMode] = useState(false);
-  const [error, setError] = useState('');
-
-  async function loadFonts() {
-    setSource('loading');
-    setError('');
-    try {
-      const result = await detectAvailableFonts();
-      setFonts(result.fonts);
-      setSource(result.source);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not list fonts');
-      setSource('catalog');
-    }
-  }
 
   useEffect(() => {
-    void loadFonts();
+    let cancelled = false;
+    void detectAvailableFonts().then((result) => {
+      if (cancelled) return;
+      setFonts(result.fonts);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (!fonts.length || !value.trim()) return;
-    const matched = findFontEntry(value, fonts);
-    setCustomMode(!matched);
+    setCustomMode(!findFontEntry(value, fonts));
   }, [fonts, value]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return fonts;
-    return fonts.filter(
-      (f) => f.family.toLowerCase().includes(q) || f.css.toLowerCase().includes(q)
-    );
-  }, [fonts, query]);
-
   const matched = findFontEntry(value, fonts);
-  const previewCss = resolveLogoFontCss(value, 'var(--font-display)');
   const selectValue = matched?.css || '';
-
-  const sourceLabel =
-    source === 'loading'
-      ? 'Detecting installed fonts…'
-      : source === 'local-api'
-        ? `${fonts.filter((f) => !f.siteToken).length} fonts from this PC`
-        : source === 'canvas'
-          ? `${fonts.filter((f) => !f.siteToken).length} fonts available on this PC`
-          : `${fonts.filter((f) => !f.siteToken).length} common fonts`;
+  const previewCss = resolveLogoFontCss(value, 'var(--font-display)');
 
   return (
     <div className="admin-field full logo-font-picker">
@@ -86,9 +61,6 @@ export default function LogoFontPicker({ id, label, value, onChange, hint }: Pro
           >
             Custom CSS
           </button>
-          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => void loadFonts()}>
-            Refresh fonts
-          </button>
         </div>
       </div>
 
@@ -101,62 +73,39 @@ export default function LogoFontPicker({ id, label, value, onChange, hint }: Pro
           onChange={(e) => onChange(e.target.value)}
         />
       ) : (
-        <div className="logo-font-windows">
-          <input
-            className="admin-input logo-font-search"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search fonts…"
-            aria-label={`Search ${label}`}
-          />
-          <select
-            id={id}
-            className="admin-input logo-font-select"
-            size={12}
-            value={selectValue}
-            disabled={source === 'loading'}
-            onChange={(e) => {
-              const next = e.target.value;
-              if (next) onChange(next);
-            }}
-            style={{ fontFamily: previewCss }}
-          >
-            {!matched && value.trim() ? (
-              <option value="">Current: {value} (not in list — pick one or use Custom CSS)</option>
-            ) : null}
-            {filtered.map((font) => (
-              <option
-                key={`${font.siteToken ? 'token' : 'face'}-${font.family}-${font.css}`}
-                value={font.css}
-                style={{ fontFamily: font.siteToken ? resolveLogoFontCss(font.css, font.css) : font.css }}
-              >
-                {font.siteToken ? `${font.family} (${font.css})` : font.family}
-              </option>
-            ))}
-          </select>
-          <div className="logo-font-live-sample" style={{ fontFamily: previewCss }}>
-            <span className="logo-font-live-label">Sample</span>
-            <span className="logo-font-live-text">
-              {matched?.family || primaryLabel(value) || 'Font'} — The quick brown fox jumps over the lazy dog 0123456789
-            </span>
-          </div>
-        </div>
+        <select
+          id={id}
+          className="admin-input logo-font-select"
+          value={selectValue}
+          disabled={loading}
+          onChange={(e) => {
+            const next = e.target.value;
+            if (next) onChange(next);
+          }}
+          style={{ fontFamily: previewCss }}
+        >
+          {loading ? <option value="">Loading fonts…</option> : null}
+          {!loading && !matched && value.trim() ? (
+            <option value="">Current: {value} (pick a listed font or use Custom CSS)</option>
+          ) : null}
+          {fonts.map((font) => (
+            <option
+              key={`${font.siteToken ? 'token' : 'face'}-${font.family}-${font.css}`}
+              value={font.css}
+              style={{ fontFamily: font.siteToken ? resolveLogoFontCss(font.css, font.css) : font.css }}
+            >
+              {font.siteToken ? `${font.family}` : font.family}
+            </option>
+          ))}
+        </select>
       )}
 
-      <small style={{ color: 'var(--admin-muted)' }}>
-        {hint ? `${hint} · ` : null}
-        {sourceLabel}
-        {matched ? ` · ${matched.family}` : value?.trim() ? ` · ${value}` : null}
-        {error ? ` · ${error}` : null}
-      </small>
+      {hint ? (
+        <small style={{ color: 'var(--admin-muted)' }}>
+          {hint}
+          {matched ? ` · ${matched.family}` : value?.trim() ? ` · ${value}` : null}
+        </small>
+      ) : null}
     </div>
   );
-}
-
-function primaryLabel(css: string): string {
-  const m = css.trim().match(/^'([^']+)'|^"([^"]+)"|^([a-zA-Z][\w-]*)|^var\(--([^)]+)\)/);
-  if (!m) return css;
-  if (m[4]) return `var(--${m[4]})`;
-  return m[1] || m[2] || m[3] || css;
 }

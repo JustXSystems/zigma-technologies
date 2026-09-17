@@ -130,7 +130,7 @@ export default function LogoTypeEditor({ settings, onChange }: Props) {
             label="Font"
             value={settings.logoWordFont}
             onChange={(v) => set('logoWordFont', v)}
-            hint="Installed fonts on this PC (Windows-style list). System fonts render on the live site without extra loading."
+            hint="Fonts installed on this PC — changes update the preview above"
           />
           <SizeField
             id="logoWordSize"
@@ -159,6 +159,14 @@ export default function LogoTypeEditor({ settings, onChange }: Props) {
             value={settings.logoWordStyle}
             options={LOGO_STYLE_OPTIONS}
             onChange={(v) => set('logoWordStyle', v)}
+          />
+          <SizeField
+            id="logoWordLetterSpacing"
+            label="Letter spacing"
+            hint="e.g. 0, 0.02em, 1px"
+            value={settings.logoWordLetterSpacing}
+            placeholder={DEFAULT_SITE_SETTINGS.logoWordLetterSpacing}
+            onChange={(v) => set('logoWordLetterSpacing', v)}
           />
         </div>
       </div>
@@ -201,6 +209,14 @@ export default function LogoTypeEditor({ settings, onChange }: Props) {
             value={settings.logoTaglineStyle}
             options={LOGO_STYLE_OPTIONS}
             onChange={(v) => set('logoTaglineStyle', v)}
+          />
+          <SizeField
+            id="logoTaglineLetterSpacing"
+            label="Letter spacing"
+            hint="e.g. 0.1em, 2px"
+            value={settings.logoTaglineLetterSpacing}
+            placeholder={DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing}
+            onChange={(v) => set('logoTaglineLetterSpacing', v)}
           />
         </div>
       </div>

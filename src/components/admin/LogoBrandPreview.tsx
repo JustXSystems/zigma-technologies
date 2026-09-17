@@ -8,6 +8,7 @@ import {
   sanitizeCssFontFamily,
   sanitizeCssFontStyle,
   sanitizeCssFontWeight,
+  sanitizeCssLetterSpacing,
   sanitizeCssSize,
   sanitizeTaglineHtml,
   type SiteSettings,
@@ -51,9 +52,17 @@ function previewLogoVars(settings: SiteSettings, viewport: Viewport): CSSPropert
     ['--logo-word-font' as string]: sanitizeCssFontFamily(settings.logoWordFont, DEFAULT_SITE_SETTINGS.logoWordFont),
     ['--logo-word-weight' as string]: sanitizeCssFontWeight(settings.logoWordWeight, DEFAULT_SITE_SETTINGS.logoWordWeight),
     ['--logo-word-style' as string]: sanitizeCssFontStyle(settings.logoWordStyle, DEFAULT_SITE_SETTINGS.logoWordStyle),
+    ['--logo-word-letter-spacing' as string]: sanitizeCssLetterSpacing(
+      settings.logoWordLetterSpacing,
+      DEFAULT_SITE_SETTINGS.logoWordLetterSpacing
+    ),
     ['--logo-tagline-font' as string]: sanitizeCssFontFamily(settings.logoTaglineFont, DEFAULT_SITE_SETTINGS.logoTaglineFont),
     ['--logo-tagline-weight' as string]: sanitizeCssFontWeight(settings.logoTaglineWeight, DEFAULT_SITE_SETTINGS.logoTaglineWeight),
     ['--logo-tagline-style' as string]: sanitizeCssFontStyle(settings.logoTaglineStyle, DEFAULT_SITE_SETTINGS.logoTaglineStyle),
+    ['--logo-tagline-letter-spacing' as string]: sanitizeCssLetterSpacing(
+      settings.logoTaglineLetterSpacing,
+      DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing
+    ),
     ['--chrome-text' as string]: '1.125rem',
     ['--font-display' as string]: "'Space Grotesk', sans-serif",
     ['--font-body' as string]: "'Inter', sans-serif",

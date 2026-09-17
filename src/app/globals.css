@@ -43,11 +43,13 @@
     --logo-word-size-mobile: 1rem;
     --logo-word-weight: 700;
     --logo-word-style: normal;
+    --logo-word-letter-spacing: 0;
     --logo-tagline-font: var(--font-mono);
     --logo-tagline-size: 0.6em;
     --logo-tagline-size-mobile: 0.6em;
     --logo-tagline-weight: 500;
     --logo-tagline-style: normal;
+    --logo-tagline-letter-spacing: 0.1em;
   }
 
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -167,6 +169,7 @@
     font-family:var(--logo-word-font);
     font-weight:var(--logo-word-weight);
     font-style:var(--logo-word-style);
+    letter-spacing:var(--logo-word-letter-spacing, 0);
   }
   .logo-word small{
     display:block;
@@ -174,7 +177,7 @@
     font-size:var(--logo-tagline-size);
     font-weight:var(--logo-tagline-weight);
     font-style:var(--logo-tagline-style);
-    letter-spacing:0.1em;
+    letter-spacing:var(--logo-tagline-letter-spacing, 0.1em);
     color:#8FA3C2;
     margin-top:1px;
   }
