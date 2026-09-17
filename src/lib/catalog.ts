@@ -174,8 +174,10 @@ export async function listCatalogItems(opts: {
   }
 
   if (opts.tag) {
-    where.push('CAST(i.tags_json AS CHAR) LIKE ?');
-    params.push(`%${opts.tag}%`);
+    // Exact array membership — substring LIKE falsely matched partial tags and
+    // drifted facet counts away from the result list.
+    where.push(`JSON_CONTAINS(i.tags_json, JSON_QUOTE(?), '$')`);
+    params.push(opts.tag);
   }
 
   if (opts.q) {

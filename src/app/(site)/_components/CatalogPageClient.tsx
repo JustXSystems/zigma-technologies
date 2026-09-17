@@ -520,6 +520,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const [error, setError] = useState('');
   const [active, setActive] = useState<CatalogItem | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  /** Mirrors URL query so rapid Refine / Quick find clicks do not clobber each other. */
+  const queryRef = useRef(new URLSearchParams(searchParams.toString()));
 
   const filters = settings?.filters_json || ['category', 'tags'];
   const cardFields = resolveCardFields(settings?.card_fields_json);
@@ -553,22 +555,43 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
     });
   }, []);
 
-  const setFilterParam = useCallback(
-    (key: 'q' | 'category' | 'tag' | 'sort', value: string, opts?: { scroll?: boolean }) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value && !(key === 'sort' && value === 'featured')) params.set(key, value);
-      else if (key === 'sort' && value === 'featured') params.delete(key);
-      else if (!value) params.delete(key);
-      else params.set(key, value);
+  useEffect(() => {
+    queryRef.current = new URLSearchParams(searchParams.toString());
+  }, [searchParams]);
+
+  const applyFilterParams = useCallback(
+    (
+      patch: Partial<Record<'q' | 'category' | 'tag' | 'sort', string>>,
+      opts?: { scroll?: boolean }
+    ) => {
+      const params = new URLSearchParams(queryRef.current.toString());
+      let shouldScroll = false;
+      (Object.entries(patch) as Array<['q' | 'category' | 'tag' | 'sort', string | undefined]>).forEach(
+        ([key, value]) => {
+          if (value === undefined) return;
+          if (value && !(key === 'sort' && value === 'featured')) params.set(key, value);
+          else params.delete(key);
+          if (opts?.scroll !== false && key !== 'sort' && key !== 'q') shouldScroll = true;
+        }
+      );
+      queryRef.current = params;
       const next = params.toString();
       router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
-      if (opts?.scroll !== false && key !== 'sort' && key !== 'q') scrollToResults();
+      if (shouldScroll) scrollToResults();
     },
-    [pathname, router, searchParams, scrollToResults]
+    [pathname, router, scrollToResults]
+  );
+
+  const setFilterParam = useCallback(
+    (key: 'q' | 'category' | 'tag' | 'sort', value: string, opts?: { scroll?: boolean }) => {
+      applyFilterParams({ [key]: value }, opts);
+    },
+    [applyFilterParams]
   );
 
   const clearFilters = useCallback(() => {
     setSearchDraft('');
+    queryRef.current = new URLSearchParams();
     router.replace(pathname, { scroll: false });
     scrollToResults();
   }, [pathname, router, scrollToResults]);
@@ -671,9 +694,13 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   );
 
   /**
-   * Facet counts come from the API on every q/category/tag change (Amazon-style:
-   * each dimension ignores its own filter). Reconcile the active option against
-   * the currently displayed result list so the badge always matches the grid.
+   * Shared facet model for Refine + Quick find.
+   *
+   * API facets are Amazon-style: each dimension ignores its own active filter so
+   * a button's count = how many results you get after choosing it. Once loaded,
+   * pin the active option to items.length so the badge always matches the grid.
+   * Both UIs read the same visible lists; Quick find is a capped view that still
+   * always includes the active tag.
    */
   const facetCategories = useMemo(() => {
     const base = facets?.categories?.length
@@ -684,15 +711,34 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   }, [facets, categories, category, items.length, loading]);
 
   const facetTags = useMemo(() => {
-    const base = facets?.tags || [];
+    let base = facets?.tags || [];
+    if (tag && !base.some((t) => t.value === tag)) {
+      base = [...base, { value: tag, count: loading ? 0 : items.length }];
+    }
     if (!tag || loading) return base;
     return base.map((t) => (t.value === tag ? { ...t, count: items.length } : t));
   }, [facets, tag, items.length, loading]);
 
-  // Refine + Quick find: only offer filters that still match items (keep active choice visible).
-  const visibleFacetCategories = facetCategories.filter((c) => c.count > 0 || c.slug === category);
-  const visibleFacetTags = facetTags.filter((t) => t.count > 0 || t.value === tag);
-  const intentTags = visibleFacetTags.slice(0, INTENT_CHIP_LIMIT);
+  const visibleFacetCategories = useMemo(
+    () => facetCategories.filter((c) => c.count > 0 || c.slug === category),
+    [facetCategories, category]
+  );
+
+  const visibleFacetTags = useMemo(
+    () => facetTags.filter((t) => t.count > 0 || t.value === tag),
+    [facetTags, tag]
+  );
+
+  /** Same source as Refine tags — top chips, forcing the active tag into the row. */
+  const intentTags = useMemo(() => {
+    if (visibleFacetTags.length <= INTENT_CHIP_LIMIT) return visibleFacetTags;
+    const top = visibleFacetTags.slice(0, INTENT_CHIP_LIMIT);
+    if (!tag || top.some((t) => t.value === tag)) return top;
+    const active = visibleFacetTags.find((t) => t.value === tag);
+    if (!active) return top;
+    return [...top.slice(0, INTENT_CHIP_LIMIT - 1), active];
+  }, [visibleFacetTags, tag]);
+
   /** Always mirrors the result grid once loaded; facets.total while the request is in flight. */
   const facetResultTotal = loading ? (facets?.total ?? items.length) : items.length;
   /** Profiles “All” = q+tag scope (any category), not the currently narrowed result total. */
