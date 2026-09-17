@@ -595,7 +595,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     }
                   />
                   <small style={{ color: 'var(--admin-muted)' }}>
-                    Marquee uses two opposite-scrolling rows, pauses on hover/keyboard focus, and respects reduced-motion.
+                    Single-line marquee pauses on hover/keyboard focus and respects reduced-motion.
                   </small>
                 </div>
               </div>

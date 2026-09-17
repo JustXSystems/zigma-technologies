@@ -691,12 +691,10 @@ function IndustryItem({
 
 function IndustriesMarqueeRow({
   items,
-  direction,
   industriesEnabled,
   durationSec,
 }: {
   items: string[];
-  direction: 'ltr' | 'rtl';
   industriesEnabled: boolean;
   durationSec: number;
 }) {
@@ -705,7 +703,7 @@ function IndustriesMarqueeRow({
   return (
     <div className="ind-marquee-wrap">
       <div
-        className={`ind-marquee-track ind-marquee-track--${direction}`}
+        className="ind-marquee-track"
         style={{ ['--ind-marquee-duration' as string]: `${durationSec}s` }}
       >
         {loop.map((label, i) => {
@@ -713,7 +711,7 @@ function IndustriesMarqueeRow({
           const href = industriesEnabled ? industryHrefForLabel(label) : null;
           return (
             <IndustryItem
-              key={`${direction}-${label}-${i}`}
+              key={`${label}-${i}`}
               label={label}
               href={href}
               clone={clone}
@@ -736,11 +734,7 @@ function IndustriesSection({
   const industriesEnabled = copy.features.industriesEnabled;
   const items = (content.items as string[]) || [];
   const layout = String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee';
-  const mid = Math.ceil(items.length / 2);
-  const rowA = items.slice(0, mid);
-  const rowB = items.slice(mid);
-  const durationA = Math.max(28, Math.round(rowA.length * 3.2));
-  const durationB = Math.max(32, Math.round(rowB.length * 3.6));
+  const durationSec = Math.max(36, Math.round(items.length * 2.8));
 
   return (
     <section
@@ -771,16 +765,9 @@ function IndustriesSection({
       {layout === 'marquee' ? (
         <div className="ind-marquee" aria-label="Industries we serve">
           <IndustriesMarqueeRow
-            items={rowA}
-            direction="ltr"
+            items={items}
             industriesEnabled={industriesEnabled}
-            durationSec={durationA}
-          />
-          <IndustriesMarqueeRow
-            items={rowB}
-            direction="rtl"
-            industriesEnabled={industriesEnabled}
-            durationSec={durationB}
+            durationSec={durationSec}
           />
         </div>
       ) : null}
