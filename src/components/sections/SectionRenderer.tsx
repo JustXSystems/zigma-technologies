@@ -21,6 +21,37 @@ function hrefOf(value: unknown, fallback = '#'): string {
   return appHref(String(value ?? fallback));
 }
 
+function contrastTextForHex(hex: string): string {
+  const raw = hex.replace('#', '');
+  if (raw.length !== 6) return '#ffffff';
+  const r = parseInt(raw.slice(0, 2), 16);
+  const g = parseInt(raw.slice(2, 4), 16);
+  const b = parseInt(raw.slice(4, 6), 16);
+  if ([r, g, b].some((n) => Number.isNaN(n))) return '#ffffff';
+  // Relative luminance — dark text on light backgrounds
+  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luma > 0.55 ? '#0A1628' : '#ffffff';
+}
+
+type TimelineCta = { label: string; href: string; position?: string; color?: string };
+
+function resolveTimelineCtas(content: Record<string, unknown>): TimelineCta[] {
+  if (Array.isArray(content.ctas)) {
+    return (content.ctas as TimelineCta[]).filter((c) => c && String(c.label || '').trim());
+  }
+  if (content.cta) {
+    return [
+      {
+        label: String(content.cta),
+        href: String(content.ctaHref || '#'),
+        position: String(content.ctaAlign || 'left'),
+        color: '',
+      },
+    ];
+  }
+  return [];
+}
+
 type Slide = {
   theme: string;
   eyebrow: string;
@@ -423,11 +454,38 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
             </div>
           ))}
         </div>
-        {content.cta ? (
-          <a href={hrefOf(content.ctaHref)} className="btn btn-ghost btn-sm mt-2">
-            {String(content.cta)}
-          </a>
-        ) : null}
+        {(() => {
+          const ctas = resolveTimelineCtas(content);
+          if (!ctas.length) return null;
+          return (
+            <div className="timeline-ctas mt-2">
+              {ctas.map((cta, i) => {
+                const position =
+                  cta.position === 'center' || cta.position === 'right' ? cta.position : 'left';
+                const customColor = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '';
+                return (
+                  <div key={`${cta.label}-${i}`} className={`timeline-cta-row timeline-cta-row--${position}`}>
+                    <a
+                      href={hrefOf(cta.href)}
+                      className={`btn btn-sm ${customColor ? 'timeline-cta-custom' : 'btn-ghost'}`}
+                      style={
+                        customColor
+                          ? {
+                              background: customColor,
+                              color: contrastTextForHex(customColor),
+                              borderColor: customColor,
+                            }
+                          : undefined
+                      }
+                    >
+                      {cta.label}
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
     </section>
   );

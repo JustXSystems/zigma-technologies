@@ -297,8 +297,9 @@ export const HOMEPAGE_SEED_SECTIONS = [
         { year: 'Today', title: '1,000+ Projects', body: 'Pan-India service footprint and a new phase of expansion into large-scale industrial solar.', now: true },
         { year: "What's Next", title: 'Future Vision', body: "Scaling engineering capacity to serve India's next decade of industrial energy demand.", next: true },
       ],
-      cta: 'Read Our Full Story →',
-      ctaHref: '/#legacy',
+      ctas: [
+        { label: 'Read Our Full Story →', href: '/#legacy', position: 'left', color: '' },
+      ],
     },
   },
   {

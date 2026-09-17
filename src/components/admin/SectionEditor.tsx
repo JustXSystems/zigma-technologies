@@ -76,6 +76,31 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
   const cards = (content.cards as Array<{ index: string; title: string; desc: string; tint: string }>) || [];
   const slides = (content.slides as Array<Record<string, unknown>>) || [];
   const ctaFields = content as Record<string, string>;
+  type TimelineCta = { label: string; href: string; position?: string; color?: string };
+  const timelineCtas: TimelineCta[] = (() => {
+    if (Array.isArray(content.ctas)) return content.ctas as TimelineCta[];
+    if (content.cta) {
+      return [
+        {
+          label: String(content.cta),
+          href: String(content.ctaHref || '#'),
+          position: String(content.ctaAlign || 'left'),
+          color: '',
+        },
+      ];
+    }
+    return [];
+  })();
+
+  function setTimelineCtas(next: TimelineCta[]) {
+    setContent((prev) => {
+      const nextContent = { ...prev, ctas: next };
+      delete nextContent.cta;
+      delete nextContent.ctaHref;
+      delete nextContent.ctaAlign;
+      return nextContent;
+    });
+  }
 
   return (
     <div className="admin-modal-backdrop" onClick={onClose}>
@@ -831,35 +856,157 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
 
             {section.type === 'timeline' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>Timeline items (one per line: Year | Title | Body | now?)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 180 }}
-                  value={((content.items as Array<{ year: string; title: string; body: string; now?: boolean; next?: boolean }>) || [])
-                    .map((i) => `${i.year} | ${i.title} | ${i.body}${i.now ? ' | now' : i.next ? ' | next' : ''}`)
-                    .join('\n')}
-                  onChange={(e) =>
-                    setField(
-                      'items',
-                      e.target.value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean)
-                        .map((line) => {
-                          const parts = line.split('|').map((p) => p.trim());
-                          const flag = (parts[3] || '').toLowerCase();
-                          return {
-                            year: parts[0] || '',
-                            title: parts[1] || '',
-                            body: parts[2] || '',
-                            now: flag === 'now',
-                            next: flag === 'next',
-                          };
-                        })
-                    )
-                  }
-                />
+              <div style={{ marginTop: '0.8rem' }}>
+                <div className="admin-field full">
+                  <label>Timeline items (one per line: Year | Title | Body | now?)</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 180 }}
+                    value={((content.items as Array<{ year: string; title: string; body: string; now?: boolean; next?: boolean }>) || [])
+                      .map((i) => `${i.year} | ${i.title} | ${i.body}${i.now ? ' | now' : i.next ? ' | next' : ''}`)
+                      .join('\n')}
+                    onChange={(e) =>
+                      setField(
+                        'items',
+                        e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean)
+                          .map((line) => {
+                            const parts = line.split('|').map((p) => p.trim());
+                            const flag = (parts[3] || '').toLowerCase();
+                            return {
+                              year: parts[0] || '',
+                              title: parts[1] || '',
+                              body: parts[2] || '',
+                              now: flag === 'now',
+                              next: flag === 'next',
+                            };
+                          })
+                      )
+                    }
+                  />
+                </div>
+
+                <div style={{ marginTop: '1rem' }}>
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <strong>CTA buttons</strong>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() =>
+                        setTimelineCtas([
+                          ...timelineCtas,
+                          { label: 'Learn more →', href: '#', position: 'left', color: '' },
+                        ])
+                      }
+                    >
+                      Add CTA
+                    </button>
+                  </div>
+                  {timelineCtas.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No CTA buttons yet. Add one to show a call-to-action under the timeline.
+                    </p>
+                  ) : null}
+                  {timelineCtas.map((cta, idx) => {
+                    const colorValue = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '#ffffff';
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          border: '1px solid var(--admin-border, #e5e7eb)',
+                          borderRadius: 8,
+                          padding: '0.8rem',
+                          marginBottom: '0.7rem',
+                        }}
+                      >
+                        <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                          <strong>CTA {idx + 1}</strong>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() => setTimelineCtas(timelineCtas.filter((_, i) => i !== idx))}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="admin-form-grid">
+                          <Field label="Label">
+                            <input
+                              className="admin-input"
+                              value={cta.label || ''}
+                              onChange={(e) => {
+                                const next = [...timelineCtas];
+                                next[idx] = { ...next[idx], label: e.target.value };
+                                setTimelineCtas(next);
+                              }}
+                            />
+                          </Field>
+                          <Field label="Href">
+                            <input
+                              className="admin-input"
+                              value={cta.href || ''}
+                              onChange={(e) => {
+                                const next = [...timelineCtas];
+                                next[idx] = { ...next[idx], href: e.target.value };
+                                setTimelineCtas(next);
+                              }}
+                              placeholder="/contact"
+                            />
+                          </Field>
+                          <Field label="Position">
+                            <select
+                              className="admin-select"
+                              value={cta.position === 'center' || cta.position === 'right' ? cta.position : 'left'}
+                              onChange={(e) => {
+                                const next = [...timelineCtas];
+                                next[idx] = { ...next[idx], position: e.target.value };
+                                setTimelineCtas(next);
+                              }}
+                            >
+                              <option value="left">Left</option>
+                              <option value="center">Center</option>
+                              <option value="right">Right</option>
+                            </select>
+                          </Field>
+                          <Field label="Button color">
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <input
+                                type="color"
+                                value={colorValue}
+                                onChange={(e) => {
+                                  const next = [...timelineCtas];
+                                  next[idx] = { ...next[idx], color: e.target.value };
+                                  setTimelineCtas(next);
+                                }}
+                                aria-label={`CTA ${idx + 1} button color`}
+                                style={{
+                                  width: 44,
+                                  height: 34,
+                                  padding: 0,
+                                  border: '1px solid var(--admin-border)',
+                                  borderRadius: 6,
+                                  background: 'transparent',
+                                }}
+                              />
+                              <input
+                                className="admin-input"
+                                value={cta.color || ''}
+                                onChange={(e) => {
+                                  const next = [...timelineCtas];
+                                  next[idx] = { ...next[idx], color: e.target.value };
+                                  setTimelineCtas(next);
+                                }}
+                                placeholder="Theme default"
+                              />
+                            </div>
+                          </Field>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ) : null}
 
