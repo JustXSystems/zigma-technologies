@@ -2459,6 +2459,12 @@
   font-size: 0.75rem;
   color: var(--admin-muted);
 }
+.logo-brand-preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
 .logo-brand-preview-toggle {
   display: inline-flex;
   border: 1px solid var(--admin-border);
@@ -2480,55 +2486,53 @@
   background: var(--admin-sidebar);
   color: #fff;
 }
-.logo-brand-preview-stage {
-  padding: 1.25rem 1.1rem 1.4rem;
+
+/*
+ * Preview frame reuses live site .logo / .logo-chip / .logo-word rules from globals.css.
+ * Isolate admin chrome so rem/em and colors match the public header/footer.
+ */
+.logo-preview-frame {
+  padding: 1.35rem 1.25rem 1.5rem;
   background:
     radial-gradient(ellipse 80% 60% at 20% 0%, rgba(0, 212, 255, 0.08), transparent 55%),
     linear-gradient(180deg, #0a1628 0%, #0f1f3d 100%);
+  font-size: var(--chrome-text, 1.125rem);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  color: #fff;
 }
-.logo-brand-preview-stage.is-mobile {
+.logo-preview-frame.is-mobile {
   display: flex;
   justify-content: center;
 }
-.logo-brand-preview-stage.is-mobile .logo-brand-preview-chrome {
+.logo-preview-frame.is-mobile .logo-preview-chrome {
   width: min(100%, 360px);
   padding: 1rem 1.1rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
 }
-.logo-brand-preview-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: #fff;
-  line-height: 1.15;
+.logo-preview-frame .logo {
+  pointer-events: none;
+  cursor: default;
+  text-decoration: none;
 }
-.logo-brand-preview-chip {
-  background: #fff;
-  padding: 0;
-  border-radius: 4.6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  border: 0.3px solid #fff;
-  flex-shrink: 0;
+/* Mirror header chrome sizing (globals.css: header .logo / header .logo-word small) */
+.logo-preview-frame:not(.is-footer) .logo {
+  font-size: var(--logo-word-size);
 }
-.logo-brand-preview-chip img {
-  width: auto;
-  display: block;
-  margin: 0 auto;
+.logo-preview-frame:not(.is-footer) .logo-word small {
+  font-size: var(--logo-tagline-size);
 }
-.logo-brand-preview-word {
-  display: block;
-  min-width: 0;
+/* Mirror footer chrome sizing */
+.logo-preview-frame.is-footer .footer-logo .logo-word {
+  font-size: calc(var(--logo-word-size) * 1.25);
 }
-.logo-brand-preview-word small {
-  display: block;
-  letter-spacing: 0.1em;
-  color: #8fa3c2;
-  margin-top: 1px;
+.logo-preview-frame.is-footer .footer-logo .logo-word small {
+  font-size: var(--logo-tagline-size);
+}
+.logo-preview-frame.is-footer .footer-logo .logo-chip img {
+  height: calc(var(--logo-chip-h) * 0.8);
 }
 
 .logo-type-editor {

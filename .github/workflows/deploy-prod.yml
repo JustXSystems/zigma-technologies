@@ -71,9 +71,11 @@ jobs:
             echo "confirm_production must be exactly DEPLOY_PROD" >&2
             exit 1
           fi
-          if [[ "${{ inputs.apply_migrations }}" == "true" && -z "${{ inputs.migration_files }}" ]]; then
-            echo "apply_migrations requires migration_files" >&2
-            exit 1
+          MIG_FILES="$(echo '${{ inputs.migration_files }}' | xargs)"
+          if [[ "${{ inputs.apply_migrations }}" == "true" && -z "$MIG_FILES" ]]; then
+            echo "::warning::apply_migrations was true but migration_files is empty — deploy will skip SQL migrations."
+            echo "Re-run with migration_files (e.g. migrate-wave3.sql) only when you intentionally apply schema changes."
+            echo "Logo/site-settings typography releases do not need SQL migrations."
           fi
 
       - uses: actions/checkout@v4

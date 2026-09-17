@@ -7,7 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#10 provide logo and words preview in admin while editing? Can give advanced font picker">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/LogoBrandPreview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/LogoBrandPreview.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,23 +59,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3486609091916475" />
-      <entry key="MS500" value="2.8763483255785305" />
-      <entry key="S2" value="5.735574917536086" />
-      <entry key="S5" value="9.344659011176654" />
-      <entry key="S10" value="15.939956587184527" />
-      <entry key="S30" value="38.138725769331955" />
-      <entry key="S60" value="54.105936603239854" />
-      <entry key="M2" value="69.69948880156925" />
-      <entry key="M5" value="101.7126174229609" />
-      <entry key="M10" value="138.8104885020655" />
-      <entry key="M15" value="172.93076571004573" />
-      <entry key="M30" value="278.58647145042966" />
-      <entry key="H1" value="447.27844035115805" />
-      <entry key="H2" value="661.5412318092724" />
-      <entry key="H4" value="1015.6852444268172" />
-      <entry key="D1" value="3323.144689597459" />
-      <entry key="W1" value="11507.465247930812" />
+      <entry key="MS100" value="1.5630382451704092" />
+      <entry key="MS500" value="3.7185276994414864" />
+      <entry key="S2" value="6.213889707111355" />
+      <entry key="S5" value="7.613689600761342" />
+      <entry key="S10" value="10.878059894727294" />
+      <entry key="S30" value="35.87111240915081" />
+      <entry key="S60" value="59.81986281511587" />
+      <entry key="M2" value="79.74494638407492" />
+      <entry key="M5" value="106.8542543287002" />
+      <entry key="M10" value="149.85270916995682" />
+      <entry key="M15" value="190.71067235183529" />
+      <entry key="M30" value="305.97546713171914" />
+      <entry key="H1" value="489.4993421090204" />
+      <entry key="H2" value="724.653895509901" />
+      <entry key="H4" value="1093.863286269765" />
+      <entry key="D1" value="3425.1698535800883" />
+      <entry key="W1" value="11624.148720026411" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -83,32 +88,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="2.5880513925020874E-237" />
-      <entry key="M30" value="5.0872894477333E-119" />
-      <entry key="H1" value="7.132523710254261E-60" />
-      <entry key="H2" value="2.6706785112127623E-30" />
-      <entry key="H4" value="1.6342210717350847E-15" />
-      <entry key="D1" value="0.0034870599464519366" />
-      <entry key="W1" value="0.6908902659076851" />
+      <entry key="M15" value="1.1230116800257227E-237" />
+      <entry key="M30" value="3.351136643029677E-119" />
+      <entry key="H1" value="5.788900278144439E-60" />
+      <entry key="H2" value="2.4060133578481867E-30" />
+      <entry key="H4" value="1.5511329272275338E-15" />
+      <entry key="D1" value="0.0034568652319033775" />
+      <entry key="W1" value="0.6900324385211442" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3101548573150783" />
-      <entry key="MS500" value="2.858940267429203" />
-      <entry key="S2" value="5.726989784480336" />
-      <entry key="S5" value="9.339027375895899" />
-      <entry key="S10" value="15.935113613173137" />
-      <entry key="S30" value="38.13480427545681" />
-      <entry key="S60" value="54.10313673096564" />
-      <entry key="M2" value="69.69766706783322" />
-      <entry key="M5" value="101.71152723268855" />
-      <entry key="M10" value="138.80972000945349" />
-      <entry key="M15" value="172.9300718727783" />
-      <entry key="M30" value="278.58568504895646" />
-      <entry key="H1" value="447.2775899320875" />
-      <entry key="H2" value="661.5405201827263" />
-      <entry key="H4" value="1015.6847230568378" />
-      <entry key="D1" value="3323.147971101465" />
-      <entry key="W1" value="11508.155995321678" />
+      <entry key="MS100" value="1.5011073944218611" />
+      <entry key="MS500" value="3.681858447061258" />
+      <entry key="S2" value="6.198201174557988" />
+      <entry key="S5" value="7.6061121388629545" />
+      <entry key="S10" value="10.87311420029984" />
+      <entry key="S30" value="35.86684134477552" />
+      <entry key="S60" value="59.81650975350807" />
+      <entry key="M2" value="79.74276882434657" />
+      <entry key="M5" value="106.85310875918803" />
+      <entry key="M10" value="149.85190530589642" />
+      <entry key="M15" value="190.70996437338155" />
+      <entry key="M30" value="305.97473493620373" />
+      <entry key="H1" value="489.49854164766856" />
+      <entry key="H2" value="724.6531984230531" />
+      <entry key="H4" value="1093.862763191379" />
+      <entry key="D1" value="3425.1731019345066" />
+      <entry key="W1" value="11624.838609090095" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -260,7 +265,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed" />
     <MESSAGE value="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again." />
     <MESSAGE value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-standard-panel" />
@@ -285,7 +289,8 @@
     <MESSAGE value="#7 In catalog-facet-rail, catalog-facet-group items must be dynamically recalculated for every refinement/selection, always result/count of each button should be accurate as per the result items displayed&#10;   catalog-intent-row can move to catalog-results section.&#10;   realign them properly for less space consumption but must looks elegant, advanced, corporate style" />
     <MESSAGE value="#9 Lagacy section issues fixed" />
     <MESSAGE value="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
-    <option name="LAST_COMMIT_MESSAGE" value="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
+    <MESSAGE value="#10 provide logo and words preview in admin while editing? Can give advanced font picker" />
+    <option name="LAST_COMMIT_MESSAGE" value="#10 provide logo and words preview in admin while editing? Can give advanced font picker" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
