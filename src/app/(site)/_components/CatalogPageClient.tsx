@@ -654,15 +654,33 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
     revealEnabled && 'catalog-reveal-enabled'
   );
 
-  const facetCategories = facets?.categories?.length
-    ? facets.categories
-    : categories.map((c) => ({ slug: c.slug, name: c.name, count: 0, sort_order: c.sort_order }));
-  const facetTags = facets?.tags || [];
+  /**
+   * Facet counts come from the API on every q/category/tag change (Amazon-style:
+   * each dimension ignores its own filter). Reconcile the active option against
+   * the currently displayed result list so the badge always matches the grid.
+   */
+  const facetCategories = useMemo(() => {
+    const base = facets?.categories?.length
+      ? facets.categories
+      : categories.map((c) => ({ slug: c.slug, name: c.name, count: 0, sort_order: c.sort_order }));
+    if (!category || loading) return base;
+    return base.map((c) => (c.slug === category ? { ...c, count: items.length } : c));
+  }, [facets, categories, category, items.length, loading]);
+
+  const facetTags = useMemo(() => {
+    const base = facets?.tags || [];
+    if (!tag || loading) return base;
+    return base.map((t) => (t.value === tag ? { ...t, count: items.length } : t));
+  }, [facets, tag, items.length, loading]);
+
   // Refine + Quick find: only offer filters that still match items (keep active choice visible).
   const visibleFacetCategories = facetCategories.filter((c) => c.count > 0 || c.slug === category);
   const visibleFacetTags = facetTags.filter((t) => t.count > 0 || t.value === tag);
   const intentTags = visibleFacetTags.slice(0, INTENT_CHIP_LIMIT);
-  const facetTotal = facets?.total ?? items.length;
+  /** Always mirrors the result grid once loaded; facets.total while the request is in flight. */
+  const facetResultTotal = loading ? (facets?.total ?? items.length) : items.length;
+  /** Profiles “All” = q+tag scope (any category), not the currently narrowed result total. */
+  const facetCategoryAllCount = facets?.categoryAllCount ?? facetResultTotal;
 
   const activeCategoryName =
     facetCategories.find((c) => c.slug === category)?.name ||
@@ -738,7 +756,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   aria-pressed={!category}
                 >
                   <span className="catalog-profile-tile-name">All {itemType}s</span>
-                  <span className="catalog-profile-tile-count">{facetTotal}</span>
+                  <span className="catalog-profile-tile-count">{facetCategoryAllCount}</span>
                 </button>
                 {visibleFacetCategories.map((c) => (
                   <button
@@ -751,26 +769,6 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                   >
                     <span className="catalog-profile-tile-name">{c.name}</span>
                     <span className="catalog-profile-tile-count">{c.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {quickFindEnabled && showTagFilters && intentTags.length > 0 ? (
-            <div className="catalog-intent-row" aria-label="Quick needs">
-              <span className="catalog-intent-label">Quick find</span>
-              <div className="catalog-intent-chips">
-                {intentTags.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    className={cx('catalog-intent-chip', tag === t.value && 'is-active')}
-                    onClick={() => selectTag(t.value)}
-                    aria-pressed={tag === t.value}
-                  >
-                    {t.value}
-                    <span>{t.count}</span>
                   </button>
                 ))}
               </div>
@@ -917,7 +915,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                           onClick={() => selectCategory('')}
                         >
                           <span>All</span>
-                          <span>{facetTotal}</span>
+                          <span>{facetCategoryAllCount}</span>
                         </button>
                       </li>
                       {visibleFacetCategories.map((c) => (
@@ -960,6 +958,26 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
             ) : null}
 
             <div className="catalog-discovery-results">
+              {quickFindEnabled && showTagFilters && intentTags.length > 0 ? (
+                <div className="catalog-intent-row" aria-label="Quick needs">
+                  <span className="catalog-intent-label">Quick find</span>
+                  <div className="catalog-intent-chips">
+                    {intentTags.map((t) => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        className={cx('catalog-intent-chip', tag === t.value && 'is-active')}
+                        onClick={() => selectTag(t.value)}
+                        aria-pressed={tag === t.value}
+                      >
+                        {t.value}
+                        <span>{t.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               {error ? <p style={{ color: '#c9540f' }}>{error}</p> : null}
               {loading && !items.length && showSkeleton ? (
                 <CatalogLoadingSkeleton layout={layout} columns={Math.min(gridColumns, 3)} />

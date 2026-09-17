@@ -155,7 +155,13 @@ export type CatalogFacetTag = {
 };
 
 export type CatalogFacets = {
+  /** Items matching every active filter (same set as the result list). */
   total: number;
+  /**
+   * Items matching q + tag (any category). Used for the Profiles “All” control
+   * so its count stays truthful while a category is selected.
+   */
+  categoryAllCount: number;
   categories: CatalogFacetCategory[];
   tags: CatalogFacetTag[];
 };

@@ -582,6 +582,7 @@ export async function getCatalogFacets(opts: {
 
   return {
     total: forTotal.length,
+    categoryAllCount: forCategoryCounts.length,
     categories: facetCategories,
     tags,
   };

@@ -7,12 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#8 Industries section in home page - display it rotating marque">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#9 Legacy section in homepage - CTA buttons to be configurable in admin">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/homepage-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/homepage-seed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.612375995612166" />
-      <entry key="MS500" value="3.296563053282085" />
-      <entry key="S2" value="5.288449653480627" />
-      <entry key="S5" value="8.691336933708932" />
-      <entry key="S10" value="13.92851018294202" />
-      <entry key="S30" value="26.863115211875563" />
-      <entry key="S60" value="38.20816386776923" />
-      <entry key="M2" value="55.620427832230156" />
-      <entry key="M5" value="80.45366989672887" />
-      <entry key="M10" value="93.97796603290249" />
-      <entry key="M15" value="101.25469437011874" />
-      <entry key="M30" value="128.86027784244607" />
-      <entry key="H1" value="188.9534178288235" />
-      <entry key="H2" value="299.933210119662" />
-      <entry key="H4" value="603.6317985593671" />
-      <entry key="D1" value="2821.650303779261" />
-      <entry key="W1" value="10934.408462475943" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.000002537315304" />
+      <entry key="S5" value="1.0347802303242875" />
+      <entry key="S10" value="2.1539641595048273" />
+      <entry key="S30" value="20.57223128939417" />
+      <entry key="S60" value="52.495156584654595" />
+      <entry key="M2" value="98.58752862388123" />
+      <entry key="M5" value="164.50833111179406" />
+      <entry key="M10" value="214.5921224452826" />
+      <entry key="M15" value="244.33305897718117" />
+      <entry key="M30" value="300.4337521071666" />
+      <entry key="H1" value="377.864139980047" />
+      <entry key="H2" value="499.9574811985024" />
+      <entry key="H4" value="804.3574471423439" />
+      <entry key="D1" value="3032.0037531903718" />
+      <entry key="W1" value="11158.959608492558" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,32 +89,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="2.7541831892025865E-235" />
-      <entry key="M30" value="5.24803123961968E-118" />
-      <entry key="H1" value="2.2908581884569496E-59" />
-      <entry key="H2" value="4.7862910363419866E-30" />
-      <entry key="H4" value="2.1877593643962883E-15" />
-      <entry key="D1" value="0.003660784840573402" />
-      <entry key="W1" value="0.6957055573753226" />
+      <entry key="M15" value="9.447754681743349E-236" />
+      <entry key="M30" value="3.0737200070505254E-118" />
+      <entry key="H1" value="1.7532027854902803E-59" />
+      <entry key="H2" value="4.1871264436247144E-30" />
+      <entry key="H4" value="2.046246916617381E-15" />
+      <entry key="D1" value="0.003620211570728215" />
+      <entry key="W1" value="0.6945987668579978" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5677489833847855" />
-      <entry key="MS500" value="3.275245043890816" />
-      <entry key="S2" value="5.279278257696583" />
-      <entry key="S5" value="8.676944583462005" />
-      <entry key="S10" value="13.89560720698058" />
-      <entry key="S30" value="26.82605263921681" />
-      <entry key="S60" value="38.180991263671075" />
-      <entry key="M2" value="55.60109035708084" />
-      <entry key="M5" value="80.44248552581993" />
-      <entry key="M10" value="93.97139682555235" />
-      <entry key="M15" value="101.25003958940222" />
-      <entry key="M30" value="128.85773366582563" />
-      <entry key="H1" value="188.952012732254" />
-      <entry key="H2" value="299.93241605644414" />
-      <entry key="H4" value="603.631308103032" />
-      <entry key="D1" value="2821.653779515912" />
-      <entry key="W1" value="10935.104028469745" />
+      <entry key="MS100" value="0.9659363289248456" />
+      <entry key="MS500" value="0.9930924954370359" />
+      <entry key="S2" value="0.9982711655869674" />
+      <entry key="S5" value="1.034063928535719" />
+      <entry key="S10" value="2.153237945226394" />
+      <entry key="S30" value="20.570003468196443" />
+      <entry key="S60" value="52.49229461882732" />
+      <entry key="M2" value="98.58476582159933" />
+      <entry key="M5" value="164.5060075128684" />
+      <entry key="M10" value="214.58964636569016" />
+      <entry key="M15" value="244.3306313270961" />
+      <entry key="M30" value="300.43181307282936" />
+      <entry key="H1" value="377.86283109409845" />
+      <entry key="H2" value="499.9566673881578" />
+      <entry key="H4" value="804.3569282298158" />
+      <entry key="D1" value="3032.007180289384" />
+      <entry key="W1" value="11159.6540664707" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -266,7 +266,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Include SQL migrations in release tarball so VPS apply can ensure schema.&#10;&#10;Previously only *.sh/*.mjs were packed, so migrate-*.sql never reached PreProd." />
     <MESSAGE value="background_image_url issue" />
     <MESSAGE value="prod background_image_url issue" />
     <MESSAGE value="poweredByPrefix added to admin to edit" />
@@ -291,7 +290,8 @@
     <MESSAGE value="#6 deploy error fixed" />
     <MESSAGE value="#7 Display filters only non-zero item" />
     <MESSAGE value="#8 Industries section in home page - display it rotating marque" />
-    <option name="LAST_COMMIT_MESSAGE" value="#8 Industries section in home page - display it rotating marque" />
+    <MESSAGE value="#9 Legacy section in homepage - CTA buttons to be configurable in admin" />
+    <option name="LAST_COMMIT_MESSAGE" value="#9 Legacy section in homepage - CTA buttons to be configurable in admin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
