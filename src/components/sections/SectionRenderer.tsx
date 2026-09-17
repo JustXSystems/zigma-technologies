@@ -457,31 +457,51 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
         {(() => {
           const ctas = resolveTimelineCtas(content);
           if (!ctas.length) return null;
-          const align =
-            ctas[0]?.position === 'center' || ctas[0]?.position === 'right' ? ctas[0].position : 'left';
+
+          const slots = {
+            left: [] as TimelineCta[],
+            center: [] as TimelineCta[],
+            right: [] as TimelineCta[],
+          };
+          ctas.forEach((cta) => {
+            const pos =
+              cta.position === 'center' || cta.position === 'right' ? cta.position : 'left';
+            slots[pos].push(cta);
+          });
+
+          function renderCta(cta: TimelineCta, i: number) {
+            const customColor = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '';
+            return (
+              <a
+                key={`${cta.position || 'left'}-${cta.label}-${i}`}
+                href={hrefOf(cta.href)}
+                className={`btn btn-sm ${customColor ? 'timeline-cta-custom' : 'btn-ghost'}`}
+                style={
+                  customColor
+                    ? {
+                        background: customColor,
+                        color: contrastTextForHex(customColor),
+                        borderColor: customColor,
+                      }
+                    : undefined
+                }
+              >
+                {cta.label}
+              </a>
+            );
+          }
+
           return (
-            <div className={`timeline-ctas timeline-ctas--${align} mt-2`}>
-              {ctas.map((cta, i) => {
-                const customColor = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '';
-                return (
-                  <a
-                    key={`${cta.label}-${i}`}
-                    href={hrefOf(cta.href)}
-                    className={`btn btn-sm ${customColor ? 'timeline-cta-custom' : 'btn-ghost'}`}
-                    style={
-                      customColor
-                        ? {
-                            background: customColor,
-                            color: contrastTextForHex(customColor),
-                            borderColor: customColor,
-                          }
-                        : undefined
-                    }
-                  >
-                    {cta.label}
-                  </a>
-                );
-              })}
+            <div className="timeline-ctas mt-2" role="group" aria-label="Legacy section actions">
+              <div className="timeline-ctas-slot timeline-ctas-slot--left">
+                {slots.left.map((cta, i) => renderCta(cta, i))}
+              </div>
+              <div className="timeline-ctas-slot timeline-ctas-slot--center">
+                {slots.center.map((cta, i) => renderCta(cta, i))}
+              </div>
+              <div className="timeline-ctas-slot timeline-ctas-slot--right">
+                {slots.right.map((cta, i) => renderCta(cta, i))}
+              </div>
             </div>
           );
         })()}
