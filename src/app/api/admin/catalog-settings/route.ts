@@ -36,6 +36,7 @@ const putSchema = z.object({
   visual_style: z.enum(['classic', 'premium', 'glass', 'minimal', 'bold-corporate']).optional(),
   card_style: z.enum(['overlay', 'marketplace']).optional(),
   card_body_bg_color: z.string().max(32).nullable().optional(),
+  card_media_bg_color: z.string().max(32).nullable().optional(),
   card_media_fit_percent: z.number().int().min(70).max(100).optional(),
   card_media_inset: z.enum(['none', 'snug', 'roomy']).optional(),
   hero_variant: z.enum(['standard', 'spotlight']).optional(),

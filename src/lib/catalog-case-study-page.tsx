@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCatalogItemBySlug, listCatalogItems } from '@/lib/catalog';
+import { getCatalogItemBySlug, getPageSettings, listCatalogItems } from '@/lib/catalog';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import CatalogCaseStudyView from '@/components/catalog/CatalogCaseStudyView';
 import type { CatalogItemType } from '@/lib/types';
@@ -30,11 +30,15 @@ export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug
   const item = await getCatalogItemBySlug(itemType, slug);
   if (!item) notFound();
 
-  const relatedItems = await listCatalogItems({
-    itemType,
-    category: item.category_slug || undefined,
-    limit: 4,
-  });
+  const [relatedItems, settings] = await Promise.all([
+    listCatalogItems({
+      itemType,
+      category: item.category_slug || undefined,
+      limit: 4,
+    }),
+    getPageSettings(itemType),
+  ]);
+  const mediaBgColor = settings?.card_media_bg_color || '#ffffff';
   const related = relatedItems.filter((rel) => rel.id !== item.id).slice(0, 3);
   if (!related.length) {
     const fallback = await listCatalogItems({ itemType, limit: 4 });
@@ -43,11 +47,14 @@ export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug
         item={item}
         itemType={itemType}
         related={fallback.filter((rel) => rel.id !== item.id).slice(0, 3)}
+        mediaBgColor={mediaBgColor}
       />
     );
   }
 
-  return <CatalogCaseStudyView item={item} itemType={itemType} related={related} />;
+  return (
+    <CatalogCaseStudyView item={item} itemType={itemType} related={related} mediaBgColor={mediaBgColor} />
+  );
 }
 
 export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNullable<Awaited<ReturnType<typeof getCatalogItemBySlug>>>) {

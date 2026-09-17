@@ -125,10 +125,20 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET @col_exists := (
   SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'card_media_bg_color'
+);
+SET @sql := IF(@col_exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN card_media_bg_color VARCHAR(32) NULL DEFAULT ''#ffffff'' AFTER card_body_bg_color',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'card_media_fit_percent'
 );
 SET @sql := IF(@col_exists = 0,
-  'ALTER TABLE catalog_page_settings ADD COLUMN card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94 AFTER card_body_bg_color',
+  'ALTER TABLE catalog_page_settings ADD COLUMN card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94 AFTER card_media_bg_color',
   'SELECT 1'
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

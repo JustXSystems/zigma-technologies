@@ -7,53 +7,21 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#12 New Menu style like Justxsystems">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#11 Heading levels are now admin-configurable without breaking layout.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/careers.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/careers.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/certifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/certifications.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/contact.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/contact.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/offline.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/offline.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/hi/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/hi/locations/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/kn/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/kn/locations/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/not-found.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/not-found.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/partner/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/partner/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/partner/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/partner/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/thank-you/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/thank-you/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/register/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/register/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CallbackRequestModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CallbackRequestModal.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/InnerCtaBand.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InnerCtaBand.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/SocialProofStrip.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SocialProofStrip.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/TestimonialsStrip.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TestimonialsStrip.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyEnquiry.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyEnquiry.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/industries/IndustryLandingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/industries/IndustryLandingView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/locations/LocationLandingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/locations/LocationLandingView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/locations/LocationServiceLandingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/locations/LocationServiceLandingView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/CareersApplySection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/CareersApplySection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/EnquiryFormSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/EnquiryFormSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/tools/SolutionFinderClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tools/SolutionFinderClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ztools/ZtoolsMockTool.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsMockTool.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/resources.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/resources.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/theme-tokens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/theme-tokens.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,23 +69,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.000292736972464" />
-      <entry key="S2" value="1.4475469269121912" />
-      <entry key="S5" value="5.907941054813385" />
-      <entry key="S10" value="16.757186412958756" />
-      <entry key="S30" value="56.646066140042954" />
-      <entry key="S60" value="93.79566560934492" />
-      <entry key="M2" value="132.87205142476623" />
-      <entry key="M5" value="205.23895284016933" />
-      <entry key="M10" value="279.86780929197516" />
-      <entry key="M15" value="334.28301956191797" />
-      <entry key="M30" value="463.12489718161606" />
-      <entry key="H1" value="650.348362275831" />
-      <entry key="H2" value="915.0168952162867" />
-      <entry key="H4" value="1345.7568668535157" />
-      <entry key="D1" value="4026.1070286937697" />
-      <entry key="W1" value="12570.655915603607" />
+      <entry key="MS100" value="1.1277561395492126" />
+      <entry key="MS500" value="2.7550701101785258" />
+      <entry key="S2" value="4.233403986896038" />
+      <entry key="S5" value="4.874155744136935" />
+      <entry key="S10" value="6.76840812430258" />
+      <entry key="S30" value="18.93302508550207" />
+      <entry key="S60" value="33.15467503556684" />
+      <entry key="M2" value="49.51444785963937" />
+      <entry key="M5" value="84.87946123011095" />
+      <entry key="M10" value="129.28017925415202" />
+      <entry key="M15" value="171.41904747311705" />
+      <entry key="M30" value="305.29258565290814" />
+      <entry key="H1" value="538.046000853693" />
+      <entry key="H2" value="868.201173380391" />
+      <entry key="H4" value="1353.9678010134135" />
+      <entry key="D1" value="4127.936076106643" />
+      <entry key="W1" value="12728.839894744999" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -130,32 +98,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="2.778469168078939E-246" />
-      <entry key="M30" value="1.666874070851964E-123" />
-      <entry key="H1" value="4.082736913949028E-62" />
-      <entry key="H2" value="2.020578361249228E-31" />
-      <entry key="H4" value="4.495084383320813E-16" />
-      <entry key="D1" value="0.0028120988788796456" />
-      <entry key="W1" value="0.6699804014093634" />
+      <entry key="M15" value="2.4040949584093088E-247" />
+      <entry key="M30" value="4.903157103753668E-124" />
+      <entry key="H1" value="2.2143073643363883E-62" />
+      <entry key="H2" value="1.488054892917649E-31" />
+      <entry key="H4" value="3.8575314554361197E-16" />
+      <entry key="D1" value="0.002741316573765923" />
+      <entry key="W1" value="0.6675448823244997" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9726549474122855" />
-      <entry key="MS500" value="0.9947611161067111" />
-      <entry key="S2" value="1.4454238520535037" />
-      <entry key="S5" value="5.9040316506501505" />
-      <entry key="S10" value="16.75159469970333" />
-      <entry key="S30" value="56.639942495010125" />
-      <entry key="S60" value="93.79065482312778" />
-      <entry key="M2" value="132.86852334294963" />
-      <entry key="M5" value="205.23677052964902" />
-      <entry key="M10" value="279.8663097579708" />
-      <entry key="M15" value="334.281809408495" />
-      <entry key="M30" value="463.1240217974925" />
-      <entry key="H1" value="650.347720247622" />
-      <entry key="H2" value="915.0164080980447" />
-      <entry key="H4" value="1345.7564552262943" />
-      <entry key="D1" value="4026.1096187230005" />
-      <entry key="W1" value="12571.325749030948" />
+      <entry key="MS100" value="1.1036383392221667" />
+      <entry key="MS500" value="2.7403348297792025" />
+      <entry key="S2" value="4.227365186414171" />
+      <entry key="S5" value="4.871341215153731" />
+      <entry key="S10" value="6.766455652090831" />
+      <entry key="S30" value="18.9311667537936" />
+      <entry key="S60" value="33.15301041238562" />
+      <entry key="M2" value="49.513182726570115" />
+      <entry key="M5" value="84.87855887275316" />
+      <entry key="M10" value="129.27947571903994" />
+      <entry key="M15" value="171.41842081738992" />
+      <entry key="M30" value="305.29201583393075" />
+      <entry key="H1" value="538.0454807307582" />
+      <entry key="H2" value="868.2007243141625" />
+      <entry key="H4" value="1353.9674014526868" />
+      <entry key="D1" value="4127.938593058601" />
+      <entry key="W1" value="12729.507292057053" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -307,7 +275,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#5 Hero element toggles now apply across all hero variants and visual style presets." />
     <MESSAGE value="#6 Company logo name and subtitle resize in desktop and mobile" />
     <MESSAGE value="#6 Logo tagline now accepts and renders limited HTML" />
     <MESSAGE value="#6 while selecting the background image, also need to customization to select shading style.&#10;   for the actual catalog image selection, also need to apply fit to available space as checkbox, and fix percentage for each catalog item. in /admin/Inventory - media" />
@@ -332,7 +299,8 @@
     <MESSAGE value="#8 single line Marquee" />
     <MESSAGE value="#11 Reducing the Header Size" />
     <MESSAGE value="#12 New Menu style like Justxsystems" />
-    <option name="LAST_COMMIT_MESSAGE" value="#12 New Menu style like Justxsystems" />
+    <MESSAGE value="#11 Heading levels are now admin-configurable without breaking layout." />
+    <option name="LAST_COMMIT_MESSAGE" value="#11 Heading levels are now admin-configurable without breaking layout." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

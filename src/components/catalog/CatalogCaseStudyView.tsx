@@ -21,6 +21,8 @@ type Props = {
   itemType: CatalogItemType;
   related?: CatalogItem[];
   whatsapp?: string;
+  /** Page-level Card media background — matches listing catalog-card-media */
+  mediaBgColor?: string | null;
 };
 
 function MetricCard({ label, value }: { label: string; value: string }) {
@@ -44,6 +46,7 @@ export default function CatalogCaseStudyView({
   itemType,
   related = [],
   whatsapp = DEFAULT_SITE_SETTINGS.whatsapp,
+  mediaBgColor = '#ffffff',
 }: Props) {
   const cs = item.case_study_json;
   const showCaseStudy = hasCaseStudyContent(item);
@@ -329,6 +332,7 @@ export default function CatalogCaseStudyView({
                   backgroundFitPercent={item.background_fit_percent}
                   mediaFitToSpace={item.media_fit_to_space}
                   mediaFitPercent={item.media_fit_percent}
+                  mediaBgColor={mediaBgColor}
                 />
               </div>
             ) : null}

@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   visual_style ENUM('classic','premium','glass','minimal','bold-corporate') NOT NULL DEFAULT 'premium',
   card_style ENUM('overlay','marketplace') NOT NULL DEFAULT 'marketplace',
   card_body_bg_color VARCHAR(32) NULL DEFAULT '#ffffff',
+  card_media_bg_color VARCHAR(32) NULL DEFAULT '#ffffff',
   card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94,
   card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug',
   hero_variant ENUM('standard','spotlight') NOT NULL DEFAULT 'spotlight',

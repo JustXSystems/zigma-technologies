@@ -201,6 +201,7 @@ function CatalogAppearancePreview({
   settings: CatalogPageSettings;
   items: Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>;
 }) {
+  const [open, setOpen] = useState(false);
   const selectedIds = settings.hero_item_ids_json || [];
   const orderedSelected = selectedIds
     .map((id) => items.find((item) => item.id === id))
@@ -215,8 +216,21 @@ function CatalogAppearancePreview({
   if (!active) {
     return (
       <div className="admin-field full">
-        <label>Live preview</label>
-        <div className="admin-empty">Create or seed some {type}s to preview the selected style.</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+          <label style={{ margin: 0 }}>Live preview</label>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setOpen((v) => !v)}>
+            {open ? 'Hide' : 'Show'}
+          </button>
+        </div>
+        {open ? (
+          <div className="admin-empty" style={{ marginTop: '0.65rem' }}>
+            Create or seed some {type}s to preview the selected style.
+          </div>
+        ) : (
+          <p style={{ margin: '0.45rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+            Hidden by default — open to preview hero and card styling.
+          </p>
+        )}
       </div>
     );
   }
@@ -251,12 +265,28 @@ function CatalogAppearancePreview({
 
   return (
     <div className="admin-field full">
-      <label>Live preview</label>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+        <label style={{ margin: 0 }}>Live preview</label>
+        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setOpen((v) => !v)}>
+          {open ? 'Hide' : 'Show'}
+        </button>
+      </div>
+      {!open ? (
+        <p style={{ margin: '0.45rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+          Hidden by default — open to preview hero and card styling.
+        </p>
+      ) : (
       <div
         className={`catalog-page catalog-style-${settings.visual_style} ${
           settings.premium_borders_enabled ? 'catalog-premium-borders' : ''
         }`}
-        style={{ border: '1px solid var(--admin-border)', borderRadius: 16, overflow: 'hidden', background: '#eef2f6' }}
+        style={{
+          border: '1px solid var(--admin-border)',
+          borderRadius: 16,
+          overflow: 'hidden',
+          background: '#eef2f6',
+          marginTop: '0.65rem',
+        }}
       >
         <div
           className={`page-hero catalog-hero catalog-hero--${settings.hero_variant}`}
@@ -339,6 +369,7 @@ function CatalogAppearancePreview({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -373,6 +404,7 @@ export default function CatalogSettingsPage() {
       ...settingsData.settings,
       card_style: settingsData.settings?.card_style || 'marketplace',
       card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
+      card_media_bg_color: settingsData.settings?.card_media_bg_color || '#ffffff',
       card_media_fit_percent: normalizeCardMediaFitPercent(settingsData.settings?.card_media_fit_percent),
       card_media_inset: normalizeCardMediaInset(settingsData.settings?.card_media_inset),
       card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
@@ -451,6 +483,7 @@ export default function CatalogSettingsPage() {
           visual_style: settings.visual_style,
           card_style: settings.card_style || 'marketplace',
           card_body_bg_color: settings.card_body_bg_color || '#ffffff',
+          card_media_bg_color: settings.card_media_bg_color || '#ffffff',
           card_media_fit_percent: normalizeCardMediaFitPercent(settings.card_media_fit_percent),
           card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
           hero_variant: settings.hero_variant,
@@ -479,6 +512,7 @@ export default function CatalogSettingsPage() {
         ...data.settings,
         card_style: data.settings?.card_style || 'marketplace',
         card_body_bg_color: data.settings?.card_body_bg_color || '#ffffff',
+        card_media_bg_color: data.settings?.card_media_bg_color || '#ffffff',
         card_media_fit_percent: normalizeCardMediaFitPercent(data.settings?.card_media_fit_percent),
         card_media_inset: normalizeCardMediaInset(data.settings?.card_media_inset),
         card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
@@ -842,7 +876,28 @@ export default function CatalogSettingsPage() {
                   />
                 </div>
                 <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Used under the product image for Marketplace cards (title/price panel).
+                  Title/price panel under the product image (Marketplace cards).
+                </p>
+              </div>
+              <div className="admin-field">
+                <label>Card media background</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={/^#[0-9A-Fa-f]{6}$/.test(settings.card_media_bg_color || '') ? settings.card_media_bg_color! : '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, card_media_bg_color: e.target.value })}
+                    aria-label="Card media background color"
+                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
+                  />
+                  <input
+                    className="admin-input"
+                    value={settings.card_media_bg_color || '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, card_media_bg_color: e.target.value })}
+                    placeholder="#ffffff"
+                  />
+                </div>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                  Shared fill for listing cards and the detail gallery (behind the product image). Item background images still layer on top.
                 </p>
               </div>
               <div className="admin-field full">

@@ -2301,7 +2301,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .catalog-page .catalog-card-media{
   position:absolute;
   inset:0;
-  background-color:var(--navy-950);
+  background-color:var(--catalog-card-media-bg, var(--navy-950));
   background-image:linear-gradient(135deg,var(--navy-900),var(--navy-950));
   background-size:cover;
   background-position:center;
@@ -2312,6 +2312,10 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   --catalog-media-inset:0.35rem;
   padding:var(--catalog-media-inset);
   box-sizing:border-box;
+}
+/* Page-level media fill color: suppress decorative gradient unless a product bg image is set */
+.catalog-page .catalog-card-media--solid-bg:not(.catalog-card-media--has-bg){
+  background-image:none;
 }
 .catalog-page .catalog-card-media--has-bg{
   background-image:var(--catalog-card-bg);
@@ -2403,7 +2407,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   aspect-ratio:1 / 1;
   min-height:0;
   flex:0 0 auto;
-  background-color:#fff;
+  background-color:var(--catalog-card-media-bg, #fff);
   overflow:hidden;
   display:flex;
   align-items:center;
@@ -3048,20 +3052,27 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .catalog-detail-msg{margin:0.8rem 0 0;font-size:0.86rem;color:#c9540f;}
 .catalog-detail-msg--ok{color:#2e8b57;}
 
-/* Catalog media gallery */
-.catalog-gallery--empty{background-color:#f4f6f9;min-height:240px;border-radius:12px;}
+/* Catalog media gallery — media fill shares --catalog-card-media-bg with listing cards */
+.catalog-gallery--empty{
+  background-color:var(--catalog-card-media-bg, #ffffff);
+  min-height:240px;border-radius:12px;
+}
 .catalog-gallery-main{
   /* Use background-color (not background shorthand) so inline background-image is not reset. */
-  position:relative;border-radius:12px;overflow:hidden;background-color:#0f1720;
+  position:relative;border-radius:12px;overflow:hidden;
+  background-color:var(--catalog-card-media-bg, #ffffff);
   background-size:cover;background-position:center;background-repeat:no-repeat;
 }
-.catalog-gallery-media{width:100%;max-height:420px;display:block;object-fit:cover;background:#000;}
+.catalog-gallery-media{
+  width:100%;max-height:420px;display:block;object-fit:cover;
+  background-color:var(--catalog-card-media-bg, #ffffff);
+}
 /* Gallery background must stay visible around the foreground media (not covered by a full-bleed photo). */
 .catalog-gallery--has-bg .catalog-gallery-main,
 .catalog-gallery--fit .catalog-gallery-main{
   display:flex;align-items:center;justify-content:center;
   min-height:280px;padding:1.35rem;box-sizing:border-box;
-  background-color:#0f1720;
+  background-color:var(--catalog-card-media-bg, #ffffff);
   background-size:cover;background-position:center;background-repeat:no-repeat;
   --catalog-media-fit:78%;
   position:relative;
@@ -3074,7 +3085,8 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   position:relative;z-index:1;
   width:auto;max-width:var(--catalog-media-fit);height:auto;
   max-height:min(44vh,var(--catalog-media-fit));
-  object-fit:contain;background:rgba(255,255,255,0.04);
+  object-fit:contain;
+  background-color:var(--catalog-card-media-bg, #ffffff);
   border-radius:10px;box-shadow:none;
 }
 .catalog-gallery--cover .catalog-gallery-media,
@@ -3110,7 +3122,8 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .catalog-gallery--product-shade-none.catalog-gallery--product-fit .catalog-gallery-media,
 .catalog-gallery--shade-none.catalog-gallery--fit .catalog-gallery-media{box-shadow:none;}
 .catalog-gallery--has-bg.catalog-gallery--empty{
-  min-height:320px;background-size:cover;background-position:center;background-color:#0f1720;
+  min-height:320px;background-size:cover;background-position:center;
+  background-color:var(--catalog-card-media-bg, #ffffff);
 }
 .catalog-gallery--detail.catalog-gallery--product-fit .catalog-gallery-main,
 .catalog-gallery--detail.catalog-gallery--fit .catalog-gallery-main,

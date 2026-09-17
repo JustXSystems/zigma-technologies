@@ -101,6 +101,7 @@ function CatalogCardMedia({
   showProduct = true,
   mediaFitPercent = DEFAULT_CARD_MEDIA_FIT_PERCENT,
   mediaInset = DEFAULT_CARD_MEDIA_INSET,
+  mediaBgColor = '#ffffff',
 }: {
   item: CatalogItem;
   cardStyle?: 'overlay' | 'marketplace';
@@ -109,6 +110,8 @@ function CatalogCardMedia({
   /** Page-level listing fill; ignores per-item inventory % on cards */
   mediaFitPercent?: number;
   mediaInset?: CatalogCardMediaInset;
+  /** Solid fill behind product / background imagery */
+  mediaBgColor?: string;
 }) {
   const bgCss =
     showBackground && item.background_image_url?.trim()
@@ -128,8 +131,11 @@ function CatalogCardMedia({
   const marketplace = cardStyle === 'marketplace';
   const useProductFit = !!bgCss ? (marketplace ? true : productFit) : marketplace;
   const inset = normalizeCardMediaInset(mediaInset);
+  const solidMediaBg = mediaBgColor?.trim() || '#ffffff';
 
   const style = {
+    ['--catalog-card-media-bg']: solidMediaBg,
+    backgroundColor: solidMediaBg,
     // Inline backgroundImage like the popup gallery so CSS resets cannot hide it.
     ...(bgCss
       ? ({
@@ -152,6 +158,7 @@ function CatalogCardMedia({
     <div
       className={cx(
         'catalog-card-media',
+        'catalog-card-media--solid-bg',
         bgCss && 'catalog-card-media--has-bg',
         bgCss ? (bgFit ? 'catalog-card-media--bg-fit' : 'catalog-card-media--bg-cover') : null,
         bgCss && `catalog-card-media--bg-shade-${bgShadow}`,
@@ -382,6 +389,7 @@ function CatalogItemCard({
   layout,
   cardStyle = 'marketplace',
   cardBodyBg = '#ffffff',
+  cardMediaBg = '#ffffff',
   mediaFitPercent = DEFAULT_CARD_MEDIA_FIT_PERCENT,
   mediaInset = DEFAULT_CARD_MEDIA_INSET,
   revealEnabled,
@@ -394,6 +402,7 @@ function CatalogItemCard({
   layout: 'grid' | 'list';
   cardStyle?: 'overlay' | 'marketplace';
   cardBodyBg?: string;
+  cardMediaBg?: string;
   mediaFitPercent?: number;
   mediaInset?: CatalogCardMediaInset;
   revealEnabled: boolean;
@@ -420,6 +429,7 @@ function CatalogItemCard({
         ...(marketplace
           ? ({ ['--catalog-card-body-bg']: cardBodyBg || '#ffffff' } as CSSProperties)
           : null),
+        ['--catalog-card-media-bg']: cardMediaBg || '#ffffff',
       }}
     >
       {showMedia ? (
@@ -430,6 +440,7 @@ function CatalogItemCard({
           showProduct={showProduct}
           mediaFitPercent={mediaFitPercent}
           mediaInset={mediaInset}
+          mediaBgColor={cardMediaBg}
         />
       ) : null}
       {showBody ? (
@@ -511,6 +522,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const cardFields = resolveCardFields(settings?.card_fields_json);
   const cardStyle = settings?.card_style === 'overlay' ? 'overlay' : 'marketplace';
   const cardBodyBg = settings?.card_body_bg_color || '#ffffff';
+  const cardMediaBg = settings?.card_media_bg_color || '#ffffff';
   const cardMediaFitPercent = normalizeCardMediaFitPercent(settings?.card_media_fit_percent);
   const cardMediaInset = normalizeCardMediaInset(settings?.card_media_inset);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
@@ -1046,6 +1058,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                               layout={layout}
                               cardStyle={cardStyle}
                               cardBodyBg={cardBodyBg}
+                              cardMediaBg={cardMediaBg}
                               mediaFitPercent={cardMediaFitPercent}
                               mediaInset={cardMediaInset}
                               revealEnabled={revealEnabled}
@@ -1071,6 +1084,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                       layout={layout}
                       cardStyle={cardStyle}
                       cardBodyBg={cardBodyBg}
+                      cardMediaBg={cardMediaBg}
                       mediaFitPercent={cardMediaFitPercent}
                       mediaInset={cardMediaInset}
                       revealEnabled={revealEnabled}
@@ -1099,6 +1113,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
           item={active}
           itemType={itemType}
           modalFields={modalFields}
+          mediaBgColor={cardMediaBg}
           onClose={() => setActive(null)}
         />
       ) : null}

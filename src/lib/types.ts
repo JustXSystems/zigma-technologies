@@ -190,6 +190,8 @@ export type CatalogPageSettings = {
   card_style: 'overlay' | 'marketplace';
   /** Body panel background for marketplace (and optional overlay body tint) */
   card_body_bg_color: string | null;
+  /** Media frame fill behind product/background imagery on listing cards */
+  card_media_bg_color: string | null;
   /**
    * Listing-card product image size (% of media frame). Page-level override for
    * catalog cards only — inventory fit still controls the detail popup.

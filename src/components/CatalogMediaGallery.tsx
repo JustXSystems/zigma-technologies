@@ -17,6 +17,8 @@ type Props = {
   /** Fallback product fit when active media lacks values */
   mediaFitToSpace?: boolean | null;
   mediaFitPercent?: number | null;
+  /** Same page-level fill as catalog-card-media (Card media background) */
+  mediaBgColor?: string | null;
 };
 
 export default function CatalogMediaGallery({
@@ -30,6 +32,7 @@ export default function CatalogMediaGallery({
   backgroundFitPercent = 100,
   mediaFitToSpace = true,
   mediaFitPercent = DEFAULT_MEDIA_FIT_PERCENT,
+  mediaBgColor = '#ffffff',
 }: Props) {
   const sorted = useMemo(
     () =>
@@ -53,6 +56,7 @@ export default function CatalogMediaGallery({
   const bgShadow = backgroundShadingStyle || 'medium';
   const bgFit = backgroundFitToSpace === true;
   const bgPct = Math.min(100, Math.max(20, Number(backgroundFitPercent) || 100));
+  const solidMediaBg = mediaBgColor?.trim() || '#ffffff';
 
   const productFit =
     active?.fit_to_space !== undefined && active?.fit_to_space !== null
@@ -85,7 +89,13 @@ export default function CatalogMediaGallery({
     .filter(Boolean)
     .join(' ');
 
+  const mediaSurfaceStyle = {
+    ['--catalog-card-media-bg']: solidMediaBg,
+    backgroundColor: solidMediaBg,
+  } as CSSProperties;
+
   const mainStyle = {
+    ...mediaSurfaceStyle,
     ...(bgCss
       ? {
           backgroundImage: `url("${bgCss}")`,
@@ -96,14 +106,14 @@ export default function CatalogMediaGallery({
       : null),
     ...(bgFit ? ({ ['--catalog-bg-fit']: `${bgPct}%`, backgroundSize: `${bgPct}% auto` } as CSSProperties) : null),
     ...(useProductFit ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties) : null),
-  } as CSSProperties | undefined;
+  } as CSSProperties;
 
   if (!sorted.length) {
     return <div className={`${rootClass} catalog-gallery--empty`} style={mainStyle} aria-hidden="true" />;
   }
 
   return (
-    <div className={rootClass}>
+    <div className={rootClass} style={{ ['--catalog-card-media-bg']: solidMediaBg } as CSSProperties}>
       <div className="catalog-gallery-main" style={mainStyle}>
         {active?.kind === 'video' ? (
           <video
@@ -112,6 +122,7 @@ export default function CatalogMediaGallery({
             controls
             playsInline
             className="catalog-gallery-media"
+            style={mediaSurfaceStyle}
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
@@ -120,6 +131,7 @@ export default function CatalogMediaGallery({
             src={publicMediaUrl(active?.url || '')}
             alt={active?.alt || title || ''}
             className="catalog-gallery-media"
+            style={mediaSurfaceStyle}
           />
         )}
       </div>

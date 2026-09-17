@@ -40,9 +40,17 @@ type Props = {
   itemType: CatalogItemType;
   modalFields: string[];
   onClose: () => void;
+  /** Page-level Card media background — matches listing catalog-card-media */
+  mediaBgColor?: string | null;
 };
 
-export default function CatalogDetailModal({ item, itemType, modalFields, onClose }: Props) {
+export default function CatalogDetailModal({
+  item,
+  itemType,
+  modalFields,
+  onClose,
+  mediaBgColor = '#ffffff',
+}: Props) {
   const titleId = useId();
   const copy = useSiteCopy();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -205,6 +213,7 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
                   backgroundFitPercent={item.background_fit_percent}
                   mediaFitToSpace={item.media_fit_to_space}
                   mediaFitPercent={item.media_fit_percent}
+                  mediaBgColor={mediaBgColor}
                 />
               </aside>
             ) : null}
