@@ -722,11 +722,10 @@
   .timeline-item.tl-active h5{color:var(--cyan);}
   .timeline-item.tl-active p{color:#C7D2E3;}
   .timeline-item.tl-active{transform:translateY(-4px);}
-  .timeline-ctas{display:flex;flex-direction:column;gap:0.75rem;}
-  .timeline-cta-row{display:flex;width:100%;}
-  .timeline-cta-row--left{justify-content:flex-start;}
-  .timeline-cta-row--center{justify-content:center;}
-  .timeline-cta-row--right{justify-content:flex-end;}
+  .timeline-ctas{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:0.75rem;}
+  .timeline-ctas--left{justify-content:flex-start;}
+  .timeline-ctas--center{justify-content:center;}
+  .timeline-ctas--right{justify-content:flex-end;}
   .timeline-cta-custom{border:1.5px solid transparent;}
   .timeline-cta-custom:hover{filter:brightness(1.08);transform:translateY(-2px);}
 

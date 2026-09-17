@@ -7,9 +7,8 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#7 In catalog-facet-rail, catalog-facet-group items must be dynamically recalculated for every refinement/selection, always result/count of each button should be accurate as per the result items displayed&#10;   catalog-intent-row can move to catalog-results section.&#10;   realign them properly for less space consumption but must looks elegant, advanced, corporate style">
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#9 Lagacy section issues fixed">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,23 +56,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2450540047077436" />
-      <entry key="MS500" value="3.3183128720814206" />
-      <entry key="S2" value="7.806989412354637" />
-      <entry key="S5" value="12.980782657014096" />
-      <entry key="S10" value="19.843596094355583" />
-      <entry key="S30" value="32.10724124023814" />
-      <entry key="S60" value="37.66124781305387" />
-      <entry key="M2" value="48.059813051809876" />
-      <entry key="M5" value="101.50585379896383" />
-      <entry key="M10" value="171.73693155155334" />
-      <entry key="M15" value="217.06720218186268" />
-      <entry key="M30" value="296.9639559818657" />
-      <entry key="H1" value="390.7751112404433" />
-      <entry key="H2" value="522.9725540417799" />
-      <entry key="H4" value="831.3157003319108" />
-      <entry key="D1" value="3065.216324447879" />
-      <entry key="W1" value="11197.281230317778" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000154053754" />
+      <entry key="S2" value="1.0144589839772056" />
+      <entry key="S5" value="1.7549322400580656" />
+      <entry key="S10" value="5.557541811432833" />
+      <entry key="S30" value="22.33989694046371" />
+      <entry key="S60" value="34.7104333682023" />
+      <entry key="M2" value="43.88780851320448" />
+      <entry key="M5" value="52.615937572030425" />
+      <entry key="M10" value="75.93283634049189" />
+      <entry key="M15" value="112.67667080250347" />
+      <entry key="M30" value="225.63347652062885" />
+      <entry key="H1" value="382.8500521292827" />
+      <entry key="H2" value="573.3950746874492" />
+      <entry key="H4" value="911.3851557312846" />
+      <entry key="D1" value="3191.19300581537" />
+      <entry key="W1" value="11356.266970837383" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,32 +85,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="6.71120867211177E-236" />
-      <entry key="M30" value="2.5906000602391884E-118" />
-      <entry key="H1" value="1.6095341127914893E-59" />
-      <entry key="H2" value="4.0118999399179344E-30" />
-      <entry key="H4" value="2.002972775664572E-15" />
-      <entry key="D1" value="0.003607337585861428" />
-      <entry key="W1" value="0.6942453576538956" />
+      <entry key="M15" value="8.332379151024247E-237" />
+      <entry key="M30" value="9.128186649616437E-119" />
+      <entry key="H1" value="9.55415441031675E-60" />
+      <entry key="H2" value="3.0909795227914262E-30" />
+      <entry key="H4" value="1.7581181766012849E-15" />
+      <entry key="D1" value="0.0035297907155371878" />
+      <entry key="W1" value="0.6920934241576272" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.202547422670835" />
-      <entry key="MS500" value="3.2972604692529166" />
-      <entry key="S2" value="7.795722777130074" />
-      <entry key="S5" value="12.973410473947775" />
-      <entry key="S10" value="19.837899200774586" />
-      <entry key="S30" value="32.104118040187764" />
-      <entry key="S60" value="37.6594056887348" />
-      <entry key="M2" value="48.05860922271786" />
-      <entry key="M5" value="101.5046036011084" />
-      <entry key="M10" value="171.73523682391942" />
-      <entry key="M15" value="217.0653353448615" />
-      <entry key="M30" value="296.9622501276556" />
-      <entry key="H1" value="390.7738737124764" />
-      <entry key="H2" value="522.971756312087" />
-      <entry key="H4" value="831.3151833986358" />
-      <entry key="D1" value="3065.219737859608" />
-      <entry key="W1" value="11197.97533474403" />
+      <entry key="MS100" value="0.9726549474122855" />
+      <entry key="MS500" value="0.9944701839509831" />
+      <entry key="S2" value="1.0130450824129937" />
+      <entry key="S5" value="1.7538534999197561" />
+      <entry key="S10" value="5.555734443607337" />
+      <entry key="S30" value="22.337399085374035" />
+      <entry key="S60" value="34.708465032195214" />
+      <entry key="M2" value="43.88655328752598" />
+      <entry key="M5" value="52.615328457806775" />
+      <entry key="M10" value="75.93233359188149" />
+      <entry key="M15" value="112.67604992617056" />
+      <entry key="M30" value="225.6325658485604" />
+      <entry key="H1" value="382.84911075749653" />
+      <entry key="H2" value="573.3943390725202" />
+      <entry key="H4" value="911.3846363532653" />
+      <entry key="D1" value="3191.196334124883" />
+      <entry key="W1" value="11356.958922071866" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -263,7 +262,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="prod background_image_url issue" />
     <MESSAGE value="poweredByPrefix added to admin to edit" />
     <MESSAGE value="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed" />
     <MESSAGE value="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again." />
@@ -288,7 +286,8 @@
     <MESSAGE value="#8 Industries section in home page - display it rotating marque" />
     <MESSAGE value="#9 Legacy section in homepage - CTA buttons to be configurable in admin" />
     <MESSAGE value="#7 In catalog-facet-rail, catalog-facet-group items must be dynamically recalculated for every refinement/selection, always result/count of each button should be accurate as per the result items displayed&#10;   catalog-intent-row can move to catalog-results section.&#10;   realign them properly for less space consumption but must looks elegant, advanced, corporate style" />
-    <option name="LAST_COMMIT_MESSAGE" value="#7 In catalog-facet-rail, catalog-facet-group items must be dynamically recalculated for every refinement/selection, always result/count of each button should be accurate as per the result items displayed&#10;   catalog-intent-row can move to catalog-results section.&#10;   realign them properly for less space consumption but must looks elegant, advanced, corporate style" />
+    <MESSAGE value="#9 Lagacy section issues fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="#9 Lagacy section issues fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

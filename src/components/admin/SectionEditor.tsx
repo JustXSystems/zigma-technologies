@@ -890,7 +890,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     <div>
                       <strong>CTA buttons</strong>
                       <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                        Multiple buttons with position (left / center / right) and color.
+                        Buttons show on one line. Position (from the first CTA) aligns the group: left / center / right.
                       </div>
                     </div>
                     <button

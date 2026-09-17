@@ -457,30 +457,29 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
         {(() => {
           const ctas = resolveTimelineCtas(content);
           if (!ctas.length) return null;
+          const align =
+            ctas[0]?.position === 'center' || ctas[0]?.position === 'right' ? ctas[0].position : 'left';
           return (
-            <div className="timeline-ctas mt-2">
+            <div className={`timeline-ctas timeline-ctas--${align} mt-2`}>
               {ctas.map((cta, i) => {
-                const position =
-                  cta.position === 'center' || cta.position === 'right' ? cta.position : 'left';
                 const customColor = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '';
                 return (
-                  <div key={`${cta.label}-${i}`} className={`timeline-cta-row timeline-cta-row--${position}`}>
-                    <a
-                      href={hrefOf(cta.href)}
-                      className={`btn btn-sm ${customColor ? 'timeline-cta-custom' : 'btn-ghost'}`}
-                      style={
-                        customColor
-                          ? {
-                              background: customColor,
-                              color: contrastTextForHex(customColor),
-                              borderColor: customColor,
-                            }
-                          : undefined
-                      }
-                    >
-                      {cta.label}
-                    </a>
-                  </div>
+                  <a
+                    key={`${cta.label}-${i}`}
+                    href={hrefOf(cta.href)}
+                    className={`btn btn-sm ${customColor ? 'timeline-cta-custom' : 'btn-ghost'}`}
+                    style={
+                      customColor
+                        ? {
+                            background: customColor,
+                            color: contrastTextForHex(customColor),
+                            borderColor: customColor,
+                          }
+                        : undefined
+                    }
+                  >
+                    {cta.label}
+                  </a>
                 );
               })}
             </div>
