@@ -31,10 +31,26 @@ export type SiteSettings = {
   logoChipHeight: string;
   /** Header logo-chip image height on mobile ≤760px */
   logoChipHeightMobile: string;
+  /** Company name (.logo-word) font-family */
+  logoWordFont: string;
   /** Header logo-word / brand name size (e.g. 1.2rem) */
   logoWordSize: string;
   /** Header logo-word size on mobile ≤760px */
   logoWordSizeMobile: string;
+  /** Company name font-weight (e.g. 700, bold) */
+  logoWordWeight: string;
+  /** Company name font-style (normal | italic | oblique) */
+  logoWordStyle: string;
+  /** Logo tagline (small) font-family */
+  logoTaglineFont: string;
+  /** Logo tagline font-size (e.g. 0.6em) */
+  logoTaglineSize: string;
+  /** Logo tagline font-size on mobile ≤760px */
+  logoTaglineSizeMobile: string;
+  /** Logo tagline font-weight (e.g. 500) */
+  logoTaglineWeight: string;
+  /** Logo tagline font-style (normal | italic | oblique) */
+  logoTaglineStyle: string;
   facebookUrl: string;
   linkedinUrl: string;
   privacyUrl: string;
@@ -90,8 +106,16 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   logoAlt: 'Zigma Technologies logo',
   logoChipHeight: '42px',
   logoChipHeightMobile: '32px',
+  logoWordFont: 'var(--font-display)',
   logoWordSize: '1.2rem',
   logoWordSizeMobile: '1rem',
+  logoWordWeight: '700',
+  logoWordStyle: 'normal',
+  logoTaglineFont: 'var(--font-mono)',
+  logoTaglineSize: '0.6em',
+  logoTaglineSizeMobile: '0.6em',
+  logoTaglineWeight: '500',
+  logoTaglineStyle: 'normal',
   facebookUrl: '',
   linkedinUrl: '',
   privacyUrl: '/privacy',
@@ -168,16 +192,51 @@ export function sanitizeCssSize(value: string | undefined, fallback: string): st
   return fallback;
 }
 
-/** Inline :root vars so header/footer logo-chip and logo-word sizes follow Site Settings. */
+/** Allow safe font-family stacks (CSS vars, named families, generics). */
+export function sanitizeCssFontFamily(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (
+    /^(var\(--[a-zA-Z0-9-]+\)|'[^']{1,64}'|"[^"]{1,64}"|[a-zA-Z][\w\s-]{0,63})(\s*,\s*(var\(--[a-zA-Z0-9-]+\)|'[^']{1,64}'|"[^"]{1,64}"|[a-zA-Z][\w\s-]{0,63}|sans-serif|serif|monospace|cursive|fantasy|system-ui))*$/i.test(
+      trimmed
+    )
+  ) {
+    return trimmed;
+  }
+  return fallback;
+}
+
+/** Allow CSS font-weight keywords or 100–900. */
+export function sanitizeCssFontWeight(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (/^(normal|bold|bolder|lighter|[1-9]00)$/i.test(trimmed)) return trimmed;
+  return fallback;
+}
+
+/** Allow CSS font-style keywords. */
+export function sanitizeCssFontStyle(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (/^(normal|italic|oblique)$/i.test(trimmed)) return trimmed;
+  return fallback;
+}
+
+/** Inline :root vars so header/footer logo-chip and logo-word type follow Site Settings. */
 export function logoSizingCss(settings: SiteSettings): string {
   const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
   const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
+  const wordFont = sanitizeCssFontFamily(settings.logoWordFont, DEFAULT_SITE_SETTINGS.logoWordFont);
   const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
   const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
+  const wordWeight = sanitizeCssFontWeight(settings.logoWordWeight, DEFAULT_SITE_SETTINGS.logoWordWeight);
+  const wordStyle = sanitizeCssFontStyle(settings.logoWordStyle, DEFAULT_SITE_SETTINGS.logoWordStyle);
+  const tagFont = sanitizeCssFontFamily(settings.logoTaglineFont, DEFAULT_SITE_SETTINGS.logoTaglineFont);
+  const tagSize = sanitizeCssSize(settings.logoTaglineSize, DEFAULT_SITE_SETTINGS.logoTaglineSize);
+  const tagSizeMobile = sanitizeCssSize(settings.logoTaglineSizeMobile, DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile);
+  const tagWeight = sanitizeCssFontWeight(settings.logoTaglineWeight, DEFAULT_SITE_SETTINGS.logoTaglineWeight);
+  const tagStyle = sanitizeCssFontStyle(settings.logoTaglineStyle, DEFAULT_SITE_SETTINGS.logoTaglineStyle);
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
-    `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}}`,
+    `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}.logo-word small,header .logo-word small,footer .footer-logo .logo-word small,.footer-logo .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}}`,
   ].join('');
 }
 

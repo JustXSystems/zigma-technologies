@@ -174,7 +174,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Set thank-you booking URL, WhatsApp number, header CTA',
     ],
     how: [
-      'Edit company profile, logo URL, logo alt, Logo sizes section (chip/word desktop + mobile)',
+      'Edit company profile, logo URL, logo alt, Logo chip & word type (font/size/weight/style for name + tagline, chip height)',
       'Footer blurb, copyright, Powered by credit, social and legal links',
       'Enquiry notify emails (comma-separated), visitor auto-reply toggle',
       'Analytics IDs, consent requirement, CRM webhook URL/secret',

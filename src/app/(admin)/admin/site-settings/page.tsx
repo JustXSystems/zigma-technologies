@@ -35,8 +35,9 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
   },
   {
     id: 'logo-sizes',
-    title: 'Logo sizes',
-    description: 'Control header logo-chip and logo-word size on desktop and mobile (≤760px). Use CSS lengths: px, rem, or em.',
+    title: 'Logo chip & word type',
+    description:
+      'Logo image height plus company name and tagline type (font, size, weight, style) on desktop and mobile (≤760px). Sizes: px, rem, or em. Fonts: var(--font-display), var(--font-body), var(--font-mono), or a CSS stack.',
     defaultOpen: true,
     fields: [
       {
@@ -52,16 +53,66 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
         placeholder: DEFAULT_SITE_SETTINGS.logoChipHeightMobile,
       },
       {
+        key: 'logoWordFont',
+        label: 'Company name font',
+        hint: 'e.g. var(--font-display) or "Space Grotesk", sans-serif',
+        placeholder: DEFAULT_SITE_SETTINGS.logoWordFont,
+        full: true,
+      },
+      {
         key: 'logoWordSize',
-        label: 'Logo word size (desktop)',
-        hint: 'Company name (.logo / .logo-word) font size',
+        label: 'Company name size (desktop)',
+        hint: 'Logo-word / brand name font size',
         placeholder: DEFAULT_SITE_SETTINGS.logoWordSize,
       },
       {
         key: 'logoWordSizeMobile',
-        label: 'Logo word size (mobile)',
+        label: 'Company name size (mobile)',
         hint: 'Applied at max-width 760px',
         placeholder: DEFAULT_SITE_SETTINGS.logoWordSizeMobile,
+      },
+      {
+        key: 'logoWordWeight',
+        label: 'Company name weight',
+        hint: '100–900, normal, or bold',
+        placeholder: DEFAULT_SITE_SETTINGS.logoWordWeight,
+      },
+      {
+        key: 'logoWordStyle',
+        label: 'Company name style',
+        hint: 'normal, italic, or oblique',
+        placeholder: DEFAULT_SITE_SETTINGS.logoWordStyle,
+      },
+      {
+        key: 'logoTaglineFont',
+        label: 'Tagline font',
+        hint: 'e.g. var(--font-mono) or "IBM Plex Mono", monospace',
+        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineFont,
+        full: true,
+      },
+      {
+        key: 'logoTaglineSize',
+        label: 'Tagline size (desktop)',
+        hint: 'Often relative to company name (e.g. 0.6em)',
+        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineSize,
+      },
+      {
+        key: 'logoTaglineSizeMobile',
+        label: 'Tagline size (mobile)',
+        hint: 'Applied at max-width 760px',
+        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile,
+      },
+      {
+        key: 'logoTaglineWeight',
+        label: 'Tagline weight',
+        hint: '100–900, normal, or bold',
+        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineWeight,
+      },
+      {
+        key: 'logoTaglineStyle',
+        label: 'Tagline style',
+        hint: 'normal, italic, or oblique',
+        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineStyle,
       },
     ],
   },
@@ -259,11 +310,19 @@ export default function SiteSettingsPage() {
         ...prev,
         logoChipHeight: DEFAULT_SITE_SETTINGS.logoChipHeight,
         logoChipHeightMobile: DEFAULT_SITE_SETTINGS.logoChipHeightMobile,
+        logoWordFont: DEFAULT_SITE_SETTINGS.logoWordFont,
         logoWordSize: DEFAULT_SITE_SETTINGS.logoWordSize,
         logoWordSizeMobile: DEFAULT_SITE_SETTINGS.logoWordSizeMobile,
+        logoWordWeight: DEFAULT_SITE_SETTINGS.logoWordWeight,
+        logoWordStyle: DEFAULT_SITE_SETTINGS.logoWordStyle,
+        logoTaglineFont: DEFAULT_SITE_SETTINGS.logoTaglineFont,
+        logoTaglineSize: DEFAULT_SITE_SETTINGS.logoTaglineSize,
+        logoTaglineSizeMobile: DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile,
+        logoTaglineWeight: DEFAULT_SITE_SETTINGS.logoTaglineWeight,
+        logoTaglineStyle: DEFAULT_SITE_SETTINGS.logoTaglineStyle,
       })
     );
-    setMessage('Logo sizes reset to defaults — click Save settings to publish.');
+    setMessage('Logo chip & word type reset to defaults — click Save settings to publish.');
   }
 
   function renderField(field: FieldDef) {
@@ -333,7 +392,7 @@ export default function SiteSettingsPage() {
             badge={
               section.id === 'logo-sizes' ? (
                 <button type="button" className="admin-btn admin-btn-secondary" onClick={resetLogoSizes}>
-                  Reset logo sizes
+                  Reset logo type
                 </button>
               ) : undefined
             }

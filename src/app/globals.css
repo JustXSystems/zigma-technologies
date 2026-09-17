@@ -38,8 +38,16 @@
     --text-eyebrow: 0.9rem;
     --logo-chip-h: 42px;
     --logo-chip-h-mobile: 32px;
+    --logo-word-font: var(--font-display);
     --logo-word-size: 1.2rem;
     --logo-word-size-mobile: 1rem;
+    --logo-word-weight: 700;
+    --logo-word-style: normal;
+    --logo-tagline-font: var(--font-mono);
+    --logo-tagline-size: 0.6em;
+    --logo-tagline-size-mobile: 0.6em;
+    --logo-tagline-weight: 500;
+    --logo-tagline-style: normal;
   }
 
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -141,7 +149,7 @@
   .btn-sm{padding:0.72rem 1.3rem;font-size:0.9rem;}
 
   /* ---------- LOGO ---------- */
-  .logo{display:flex;align-items:center;gap:0.65rem;font-family:var(--font-display);font-weight:700;font-size:var(--logo-word-size);color:var(--white);}
+  .logo{display:flex;align-items:center;gap:0.65rem;font-size:var(--logo-word-size);color:var(--white);}
   .logo-chip{
     background:var(--white);
     padding:0;
@@ -155,7 +163,21 @@
   .footer-logo .logo-chip{border-radius:3.68px;border:0.24px solid var(--white);}
   .footer-logo .logo-chip img{height:calc(var(--logo-chip-h) * 0.8);}
   .logo.footer-logo{display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;color:var(--white);}
-  .logo-word small{display:block;font-family:var(--font-mono);font-size:0.6em;letter-spacing:0.1em;color:#8FA3C2;font-weight:500;margin-top:1px;}
+  .logo-word{
+    font-family:var(--logo-word-font);
+    font-weight:var(--logo-word-weight);
+    font-style:var(--logo-word-style);
+  }
+  .logo-word small{
+    display:block;
+    font-family:var(--logo-tagline-font);
+    font-size:var(--logo-tagline-size);
+    font-weight:var(--logo-tagline-weight);
+    font-style:var(--logo-tagline-style);
+    letter-spacing:0.1em;
+    color:#8FA3C2;
+    margin-top:1px;
+  }
   .footer-logo .logo-word{font-size:calc(var(--logo-word-size) * 1.25);}
 
   /* ---------- HEADER ---------- */
@@ -978,7 +1000,7 @@
   .foot-meta span{display:block;}
   .foot-meta .foot-hours{margin-top:0.35rem;color:#9FB0CB;}
   .footer-logo .logo-word{font-size:calc(var(--logo-word-size) * 1.25);letter-spacing:-0.01em;}
-  .footer-logo .logo-word small{font-size:0.6em;color:#8FA3C2;}
+  .footer-logo .logo-word small{font-size:var(--logo-tagline-size);color:#8FA3C2;}
   .footer-tagline{
     font-size:0.95rem;
     line-height:1.6;
@@ -1099,6 +1121,11 @@
     header .logo{font-size:var(--logo-word-size-mobile);}
     .footer-logo .logo-word,
     footer .footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}
+    .logo-word small,
+    header .logo-word small,
+    footer .footer-logo .logo-word small,
+    .footer-logo .logo-word small,
+    .page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}
     .nav-links, .header-right .btn{display:none;}
     .menu-toggle{display:block;}
     .stat-grid{grid-template-columns:repeat(2,1fr);row-gap:1.6rem;}
@@ -1240,7 +1267,7 @@
 .page-shell .container{max-width:1400px;}
 .page-shell .eyebrow{color:var(--orange);}
 .page-shell .logo{font-size:var(--logo-word-size);}
-.page-shell .logo-word small{font-size:0.54em;}
+.page-shell .logo-word small{font-size:var(--logo-tagline-size);}
 
 /* Header */
 .page-shell header{background:var(--navy-950);color:var(--white);padding:0.9rem 0;flex-shrink:0;}
@@ -3932,7 +3959,7 @@ footer{
   font-size:var(--chrome-text);
 }
 header .logo{font-size:var(--logo-word-size);}
-header .logo-word small{font-size:0.6em;}
+header .logo-word small{font-size:var(--logo-tagline-size);}
 header .nav-links > li > a,
 header .nav-links > li > .nav-parent,
 header .nav-links a{font-size:0.92em;}
@@ -3944,7 +3971,7 @@ header .header-menu-chip,
 header .header-menu-chip-label{font-size:0.9em;}
 header .header-icon-links a{font-size:0.92em;}
 footer .footer-logo .logo-word{font-size:calc(var(--logo-word-size) * 1.25);}
-footer .footer-logo .logo-word small{font-size:0.6em;}
+footer .footer-logo .logo-word small{font-size:var(--logo-tagline-size);}
 footer .footer-tagline{font-size:0.9em;}
 footer .foot-grid h6,
 footer .foot-col h6{font-size:0.8em;}
@@ -3961,6 +3988,9 @@ footer .foot-powered{font-size:0.8em;}
   header .logo{font-size:var(--logo-word-size-mobile);}
   .page-shell .logo{font-size:var(--logo-word-size-mobile);}
   footer .footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}
+  header .logo-word small,
+  footer .footer-logo .logo-word small,
+  .page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}
   header .nav-links > li > a,
   header .nav-links > li > .nav-parent{font-size:1.05em;}
   header .nav-links .mega-col h5{font-size:0.9em;}
