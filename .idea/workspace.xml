@@ -7,21 +7,8 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#11 Heading levels are now admin-configurable without breaking layout.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#13 Product, Services, Project card Background color to be set in admin">
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogMediaGallery.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,23 +56,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1277561395492126" />
-      <entry key="MS500" value="2.7550701101785258" />
-      <entry key="S2" value="4.233403986896038" />
-      <entry key="S5" value="4.874155744136935" />
-      <entry key="S10" value="6.76840812430258" />
-      <entry key="S30" value="18.93302508550207" />
-      <entry key="S60" value="33.15467503556684" />
-      <entry key="M2" value="49.51444785963937" />
-      <entry key="M5" value="84.87946123011095" />
-      <entry key="M10" value="129.28017925415202" />
-      <entry key="M15" value="171.41904747311705" />
-      <entry key="M30" value="305.29258565290814" />
-      <entry key="H1" value="538.046000853693" />
-      <entry key="H2" value="868.201173380391" />
-      <entry key="H4" value="1353.9678010134135" />
-      <entry key="D1" value="4127.936076106643" />
-      <entry key="W1" value="12728.839894744999" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0000000000010667" />
+      <entry key="S30" value="1.0010226534381543" />
+      <entry key="S60" value="1.2436682878879934" />
+      <entry key="M2" value="5.244817847702929" />
+      <entry key="M5" value="32.772651666515856" />
+      <entry key="M10" value="80.09651870898834" />
+      <entry key="M15" value="124.54050148823643" />
+      <entry key="M30" value="260.1739801984433" />
+      <entry key="H1" value="496.74344263621026" />
+      <entry key="H2" value="834.3724778249017" />
+      <entry key="H4" value="1327.5319942686726" />
+      <entry key="D1" value="4114.875984232831" />
+      <entry key="W1" value="12723.637194180132" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -98,32 +85,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="2.4040949584093088E-247" />
-      <entry key="M30" value="4.903157103753668E-124" />
-      <entry key="H1" value="2.2143073643363883E-62" />
-      <entry key="H2" value="1.488054892917649E-31" />
-      <entry key="H4" value="3.8575314554361197E-16" />
-      <entry key="D1" value="0.002741316573765923" />
-      <entry key="W1" value="0.6675448823244997" />
+      <entry key="M15" value="1.732614322418311E-247" />
+      <entry key="M30" value="4.16246840518711E-124" />
+      <entry key="H1" value="2.0402128333062952E-62" />
+      <entry key="H2" value="1.428360190325284E-31" />
+      <entry key="H4" value="3.7793652778919495E-16" />
+      <entry key="D1" value="0.0027319794226638387" />
+      <entry key="W1" value="0.6672195910133585" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1036383392221667" />
-      <entry key="MS500" value="2.7403348297792025" />
-      <entry key="S2" value="4.227365186414171" />
-      <entry key="S5" value="4.871341215153731" />
-      <entry key="S10" value="6.766455652090831" />
-      <entry key="S30" value="18.9311667537936" />
-      <entry key="S60" value="33.15301041238562" />
-      <entry key="M2" value="49.513182726570115" />
-      <entry key="M5" value="84.87855887275316" />
-      <entry key="M10" value="129.27947571903994" />
-      <entry key="M15" value="171.41842081738992" />
-      <entry key="M30" value="305.29201583393075" />
-      <entry key="H1" value="538.0454807307582" />
-      <entry key="H2" value="868.2007243141625" />
-      <entry key="H4" value="1353.9674014526868" />
-      <entry key="D1" value="4127.938593058601" />
-      <entry key="W1" value="12729.507292057053" />
+      <entry key="MS100" value="0.9395227492140118" />
+      <entry key="MS500" value="0.9876008614453725" />
+      <entry key="S2" value="0.9968856972203758" />
+      <entry key="S5" value="0.9987531130852756" />
+      <entry key="S10" value="0.9993763620815768" />
+      <entry key="S30" value="1.0008146305264518" />
+      <entry key="S60" value="1.2435520871679773" />
+      <entry key="M2" value="5.244657404582508" />
+      <entry key="M5" value="32.77229309583229" />
+      <entry key="M10" value="80.09607787324404" />
+      <entry key="M15" value="124.54004293041497" />
+      <entry key="M30" value="260.17349299265777" />
+      <entry key="H1" value="496.74296167380976" />
+      <entry key="H2" value="834.372045906948" />
+      <entry key="H4" value="1327.5316023711337" />
+      <entry key="D1" value="4114.878492539639" />
+      <entry key="W1" value="12724.30426626247" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -275,7 +262,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 Company logo name and subtitle resize in desktop and mobile" />
     <MESSAGE value="#6 Logo tagline now accepts and renders limited HTML" />
     <MESSAGE value="#6 while selecting the background image, also need to customization to select shading style.&#10;   for the actual catalog image selection, also need to apply fit to available space as checkbox, and fix percentage for each catalog item. in /admin/Inventory - media" />
     <MESSAGE value="#6 The Media modal is now a compact studio layout with a live preview" />
@@ -300,7 +286,8 @@
     <MESSAGE value="#11 Reducing the Header Size" />
     <MESSAGE value="#12 New Menu style like Justxsystems" />
     <MESSAGE value="#11 Heading levels are now admin-configurable without breaking layout." />
-    <option name="LAST_COMMIT_MESSAGE" value="#11 Heading levels are now admin-configurable without breaking layout." />
+    <MESSAGE value="#13 Product, Services, Project card Background color to be set in admin" />
+    <option name="LAST_COMMIT_MESSAGE" value="#13 Product, Services, Project card Background color to be set in admin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

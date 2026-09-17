@@ -424,13 +424,15 @@ function CatalogItemCard({
         revealEnabled && 'reveal'
       )}
       onClick={() => onOpen(item)}
-      style={{
-        transitionDelay: revealEnabled && delayMs != null ? `${delayMs}ms` : undefined,
-        ...(marketplace
-          ? ({ ['--catalog-card-body-bg']: cardBodyBg || '#ffffff' } as CSSProperties)
-          : null),
-        ['--catalog-card-media-bg']: cardMediaBg || '#ffffff',
-      }}
+      style={
+        {
+          transitionDelay: revealEnabled && delayMs != null ? `${delayMs}ms` : undefined,
+          ...(marketplace
+            ? ({ ['--catalog-card-body-bg']: cardBodyBg || '#ffffff' } as CSSProperties)
+            : null),
+          ['--catalog-card-media-bg']: cardMediaBg || '#ffffff',
+        } as CSSProperties
+      }
     >
       {showMedia ? (
         <CatalogCardMedia
