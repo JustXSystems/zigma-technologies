@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from 'react';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import LogoBrandPreview from '@/components/admin/LogoBrandPreview';
+import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -37,84 +39,9 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
     id: 'logo-sizes',
     title: 'Logo chip & word type',
     description:
-      'Logo image height plus company name and tagline type (font, size, weight, style) on desktop and mobile (≤760px). Sizes: px, rem, or em. Fonts: var(--font-display), var(--font-body), var(--font-mono), or a CSS stack.',
+      'Logo image height plus company name and tagline type. Use the live preview above while editing. Browse fonts or enter a custom CSS stack.',
     defaultOpen: true,
-    fields: [
-      {
-        key: 'logoChipHeight',
-        label: 'Logo chip height (desktop)',
-        hint: 'Image height inside .logo-chip',
-        placeholder: DEFAULT_SITE_SETTINGS.logoChipHeight,
-      },
-      {
-        key: 'logoChipHeightMobile',
-        label: 'Logo chip height (mobile)',
-        hint: 'Applied at max-width 760px',
-        placeholder: DEFAULT_SITE_SETTINGS.logoChipHeightMobile,
-      },
-      {
-        key: 'logoWordFont',
-        label: 'Company name font',
-        hint: 'e.g. var(--font-display) or "Space Grotesk", sans-serif',
-        placeholder: DEFAULT_SITE_SETTINGS.logoWordFont,
-        full: true,
-      },
-      {
-        key: 'logoWordSize',
-        label: 'Company name size (desktop)',
-        hint: 'Logo-word / brand name font size',
-        placeholder: DEFAULT_SITE_SETTINGS.logoWordSize,
-      },
-      {
-        key: 'logoWordSizeMobile',
-        label: 'Company name size (mobile)',
-        hint: 'Applied at max-width 760px',
-        placeholder: DEFAULT_SITE_SETTINGS.logoWordSizeMobile,
-      },
-      {
-        key: 'logoWordWeight',
-        label: 'Company name weight',
-        hint: '100–900, normal, or bold',
-        placeholder: DEFAULT_SITE_SETTINGS.logoWordWeight,
-      },
-      {
-        key: 'logoWordStyle',
-        label: 'Company name style',
-        hint: 'normal, italic, or oblique',
-        placeholder: DEFAULT_SITE_SETTINGS.logoWordStyle,
-      },
-      {
-        key: 'logoTaglineFont',
-        label: 'Tagline font',
-        hint: 'e.g. var(--font-mono) or "IBM Plex Mono", monospace',
-        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineFont,
-        full: true,
-      },
-      {
-        key: 'logoTaglineSize',
-        label: 'Tagline size (desktop)',
-        hint: 'Often relative to company name (e.g. 0.6em)',
-        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineSize,
-      },
-      {
-        key: 'logoTaglineSizeMobile',
-        label: 'Tagline size (mobile)',
-        hint: 'Applied at max-width 760px',
-        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile,
-      },
-      {
-        key: 'logoTaglineWeight',
-        label: 'Tagline weight',
-        hint: '100–900, normal, or bold',
-        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineWeight,
-      },
-      {
-        key: 'logoTaglineStyle',
-        label: 'Tagline style',
-        hint: 'normal, italic, or oblique',
-        placeholder: DEFAULT_SITE_SETTINGS.logoTaglineStyle,
-      },
-    ],
+    fields: [],
   },
   {
     id: 'contact',
@@ -325,6 +252,10 @@ export default function SiteSettingsPage() {
     setMessage('Logo chip & word type reset to defaults — click Save settings to publish.');
   }
 
+  function patchSettings(patch: Partial<SiteSettings>) {
+    setSettings((prev) => ({ ...prev, ...patch }));
+  }
+
   function renderField(field: FieldDef) {
     const multiline = field.multiline || field.key === 'footerBlurb' || field.key === 'defaultMetaDescription';
     const value = settings[field.key] ?? DEFAULT_SITE_SETTINGS[field.key] ?? '';
@@ -377,6 +308,8 @@ export default function SiteSettingsPage() {
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
+      <LogoBrandPreview settings={settings} />
+
       <form
         onSubmit={(e) => {
           void save(e);
@@ -397,7 +330,11 @@ export default function SiteSettingsPage() {
               ) : undefined
             }
           >
-            <div className="admin-form-grid">{section.fields.map(renderField)}</div>
+            {section.id === 'logo-sizes' ? (
+              <LogoTypeEditor settings={settings} onChange={patchSettings} />
+            ) : (
+              <div className="admin-form-grid">{section.fields.map(renderField)}</div>
+            )}
           </AdminCollapsible>
         ))}
       </form>

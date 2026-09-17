@@ -7,10 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#9 Lagacy section issues fixed">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3537000387194" />
-      <entry key="MS500" value="3.362435664680772" />
-      <entry key="S2" value="6.626143969585639" />
-      <entry key="S5" value="8.819464343058701" />
-      <entry key="S10" value="12.559476846892997" />
-      <entry key="S30" value="29.845992151265854" />
-      <entry key="S60" value="46.63698940211784" />
-      <entry key="M2" value="62.3839544376468" />
-      <entry key="M5" value="80.8905556527252" />
-      <entry key="M10" value="104.70479262778434" />
-      <entry key="M15" value="134.54248745238715" />
-      <entry key="M30" value="237.3452569906823" />
-      <entry key="H1" value="400.63611675087213" />
-      <entry key="H2" value="606.5115007530966" />
-      <entry key="H4" value="954.8549731787523" />
-      <entry key="D1" value="3252.782537636461" />
-      <entry key="W1" value="11430.809685717526" />
+      <entry key="MS100" value="1.3486609091916475" />
+      <entry key="MS500" value="2.8763483255785305" />
+      <entry key="S2" value="5.735574917536086" />
+      <entry key="S5" value="9.344659011176654" />
+      <entry key="S10" value="15.939956587184527" />
+      <entry key="S30" value="38.138725769331955" />
+      <entry key="S60" value="54.105936603239854" />
+      <entry key="M2" value="69.69948880156925" />
+      <entry key="M5" value="101.7126174229609" />
+      <entry key="M10" value="138.8104885020655" />
+      <entry key="M15" value="172.93076571004573" />
+      <entry key="M30" value="278.58647145042966" />
+      <entry key="H1" value="447.27844035115805" />
+      <entry key="H2" value="661.5412318092724" />
+      <entry key="H4" value="1015.6852444268172" />
+      <entry key="D1" value="3323.144689597459" />
+      <entry key="W1" value="11507.465247930812" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,32 +83,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="3.7574503578163566E-237" />
-      <entry key="M30" value="6.129804530175527E-119" />
-      <entry key="H1" value="7.829306821281343E-60" />
-      <entry key="H2" value="2.7980898522528988E-30" />
-      <entry key="H4" value="1.6727491899108498E-15" />
-      <entry key="D1" value="0.00350062898029503" />
-      <entry key="W1" value="0.6912736882535399" />
+      <entry key="M15" value="2.5880513925020874E-237" />
+      <entry key="M30" value="5.0872894477333E-119" />
+      <entry key="H1" value="7.132523710254261E-60" />
+      <entry key="H2" value="2.6706785112127623E-30" />
+      <entry key="H4" value="1.6342210717350847E-15" />
+      <entry key="D1" value="0.0034870599464519366" />
+      <entry key="W1" value="0.6908902659076851" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.300471581561572" />
-      <entry key="MS500" value="3.3358434820390106" />
-      <entry key="S2" value="6.612909980351312" />
-      <entry key="S5" value="8.812359235685765" />
-      <entry key="S10" value="12.554442930769017" />
-      <entry key="S30" value="29.842303193083712" />
-      <entry key="S60" value="46.63421166895309" />
-      <entry key="M2" value="62.38212971454537" />
-      <entry key="M5" value="80.88961821178133" />
-      <entry key="M10" value="104.70416822561093" />
-      <entry key="M15" value="134.54188520623933" />
-      <entry key="M30" value="237.34448043333543" />
-      <entry key="H1" value="400.63526182052664" />
-      <entry key="H2" value="606.5107928351182" />
-      <entry key="H4" value="954.8544579528592" />
-      <entry key="D1" value="3252.7858349286835" />
-      <entry key="W1" value="11431.500816881431" />
+      <entry key="MS100" value="1.3101548573150783" />
+      <entry key="MS500" value="2.858940267429203" />
+      <entry key="S2" value="5.726989784480336" />
+      <entry key="S5" value="9.339027375895899" />
+      <entry key="S10" value="15.935113613173137" />
+      <entry key="S30" value="38.13480427545681" />
+      <entry key="S60" value="54.10313673096564" />
+      <entry key="M2" value="69.69766706783322" />
+      <entry key="M5" value="101.71152723268855" />
+      <entry key="M10" value="138.80972000945349" />
+      <entry key="M15" value="172.9300718727783" />
+      <entry key="M30" value="278.58568504895646" />
+      <entry key="H1" value="447.2775899320875" />
+      <entry key="H2" value="661.5405201827263" />
+      <entry key="H4" value="1015.6847230568378" />
+      <entry key="D1" value="3323.147971101465" />
+      <entry key="W1" value="11508.155995321678" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -263,7 +260,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="poweredByPrefix added to admin to edit" />
     <MESSAGE value="#1 The mega menu was offset with translateY(0.8rem) on hover, so the pointer left the menu item in that gap and the submenu closed" />
     <MESSAGE value="#3 Two catalog UI fixes:&#10;   1. Popup catalog-gallery-media — Removed the inset frame box-shadow. Also hardened gallery background so background-image isn’t wiped by the background shorthand (inline size/position included).&#10;   2. catalog-card image — Cards used next/image with fill on a position: absolute media layer; this Next version only paints fill when the parent is relative or display: block. Switched to a plain &lt;img&gt; with cover sizing (same pattern as hub cards), so thumbnails show correctly again." />
     <MESSAGE value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
@@ -288,7 +284,8 @@
     <MESSAGE value="#9 Legacy section in homepage - CTA buttons to be configurable in admin" />
     <MESSAGE value="#7 In catalog-facet-rail, catalog-facet-group items must be dynamically recalculated for every refinement/selection, always result/count of each button should be accurate as per the result items displayed&#10;   catalog-intent-row can move to catalog-results section.&#10;   realign them properly for less space consumption but must looks elegant, advanced, corporate style" />
     <MESSAGE value="#9 Lagacy section issues fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#9 Lagacy section issues fixed" />
+    <MESSAGE value="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
+    <option name="LAST_COMMIT_MESSAGE" value="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
