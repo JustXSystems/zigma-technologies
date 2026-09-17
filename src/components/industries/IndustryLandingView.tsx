@@ -3,6 +3,7 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import type { CatalogItem } from '@/lib/types';
 import type { IndustryDef } from '@/lib/industries';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   industry: IndustryDef;
@@ -53,7 +54,7 @@ export default function IndustryLandingView({ industry, items }: Props) {
           <div className="container">
             <div className="section-head">
               <div className="eyebrow eyebrow-cyan">Relevant solutions</div>
-              <h2>Products, projects &amp; services for {industry.name}</h2>
+              <SiteHeading role="section">Products, projects &amp; services for {industry.name}</SiteHeading>
               <p>Curated from the live catalog for this sector’s typical load and uptime profile.</p>
             </div>
             <div className="hub-grid">
@@ -89,7 +90,7 @@ export default function IndustryLandingView({ industry, items }: Props) {
         <div className="container" style={{ maxWidth: 860 }}>
           <div className="section-head">
             <div className="eyebrow eyebrow-orange">FAQ</div>
-            <h2>Common questions for {industry.name}</h2>
+            <SiteHeading role="section">Common questions for {industry.name}</SiteHeading>
           </div>
           <div className="industry-faq">
             {industry.faqs.map((f) => (

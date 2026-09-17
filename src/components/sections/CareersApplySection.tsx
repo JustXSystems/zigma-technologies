@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import HoneypotField from '@/components/HoneypotField';
+import SiteHeading from '@/components/SiteHeading';
 
 const DEFAULT_ROLES = [
   'Solar Design Engineer',
@@ -99,7 +100,7 @@ export default function CareersApplySection({
       <div className="container">
         <div className="section-head center reveal">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || 'APPLY ONLINE')}</div>
-          <h2>{String(content.title || 'Ready to Apply?')}</h2>
+          <SiteHeading role="section">{String(content.title || 'Ready to Apply?')}</SiteHeading>
           {content.body ? <p>{String(content.body)}</p> : null}
         </div>
 

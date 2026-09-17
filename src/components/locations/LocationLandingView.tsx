@@ -4,6 +4,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import type { LocationDef } from '@/lib/locations';
 import type { CatalogItem } from '@/lib/types';
 import { getSiteCopy } from '@/lib/site-content';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   location: LocationDef;
@@ -59,7 +60,7 @@ export default async function LocationLandingView({ location, items }: Props) {
         <div className="container">
           <div className="section-head">
             <div className="eyebrow eyebrow-cyan">Local strengths</div>
-            <h2>Why teams in {location.name} work with Zigma</h2>
+            <SiteHeading role="section">Why teams in {location.name} work with Zigma</SiteHeading>
           </div>
           <ul className="highlight-grid">
             {location.highlights.map((h) => (
@@ -77,7 +78,7 @@ export default async function LocationLandingView({ location, items }: Props) {
           <div className="container">
             <div className="section-head">
               <div className="eyebrow eyebrow-orange">Relevant work</div>
-              <h2>Projects &amp; products near your use-case</h2>
+              <SiteHeading role="section">Projects &amp; products near your use-case</SiteHeading>
             </div>
             <div className="hub-grid">
               {items.map((item) => {
@@ -112,7 +113,7 @@ export default async function LocationLandingView({ location, items }: Props) {
         <div className="container">
           <div className="section-head">
             <div className="eyebrow eyebrow-cyan">Service matrix</div>
-            <h2>Services in {location.name}</h2>
+            <SiteHeading role="section">Services in {location.name}</SiteHeading>
             <p>City × service landings for SEO and faster routing to the right engineering desk.</p>
           </div>
           <div className="service-chip-rail">

@@ -6,6 +6,7 @@ import VisitTailorBar from '@/components/VisitTailorBar';
 import { getThemeSettings } from '@/lib/cms';
 import { getLocationDefsCms, getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
+import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
@@ -61,7 +62,7 @@ export default async function LocationsIndexPage() {
           <VisitTailorBar context="locations" />
           <div className="section-head" style={{ marginTop: '2.25rem' }}>
             <div className="eyebrow eyebrow-cyan">Service cities</div>
-            <h2>Choose your city desk</h2>
+            <SiteHeading role="section">Choose your city desk</SiteHeading>
             <p>Local strengths, service matrix pages, and relevant catalog proof for each market.</p>
           </div>
           <div className="hub-grid">

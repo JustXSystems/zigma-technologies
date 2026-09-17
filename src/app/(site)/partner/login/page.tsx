@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import SiteHeading from '@/components/SiteHeading';
 
 export default function PartnerLoginPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function PartnerLoginPage() {
   return (
     <main id="main-content" className="section section-light" style={{ paddingTop: '8rem', minHeight: '70vh' }}>
       <div className="container" style={{ maxWidth: 420 }}>
-        <h1>Partner portal</h1>
+        <SiteHeading role="pageHero">Partner portal</SiteHeading>
         <p className="lead">Sign in for price lists and channel documents.</p>
         <form onSubmit={onSubmit} className="calc-tool">
           <label>

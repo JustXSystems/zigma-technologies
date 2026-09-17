@@ -3,6 +3,7 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import type { ResourcePost } from '@/lib/resources';
 import type { SiteCopy } from '@/lib/site-copy';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   post: ResourcePost;
@@ -208,7 +209,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
           <div className="container">
             <div className="section-head">
               <div className="eyebrow eyebrow-orange">Related guides</div>
-              <h2>Keep learning</h2>
+              <SiteHeading role="section">Keep learning</SiteHeading>
               <p>More practical notes from the Zigma engineering desk.</p>
             </div>
             <div className="hub-grid">

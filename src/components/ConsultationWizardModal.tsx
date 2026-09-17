@@ -9,6 +9,7 @@ import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import type { FormField } from '@/lib/types';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   preselectedSubject?: string | null;
@@ -252,7 +253,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
         <div className="consult-modal-head">
           <div className="consult-modal-title">
             <span className="consult-badge">{c.badge}</span>
-            <h2>{c.title}</h2>
+            <SiteHeading role="section">{c.title}</SiteHeading>
             <p>
               {step === 0 ? c.step0Lead : step === 1 ? c.step1Lead : c.step2Lead}
             </p>

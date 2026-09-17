@@ -7,6 +7,7 @@ import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/site-settings';
+import SiteHeading from '@/components/SiteHeading';
 
 type SideItem = { label: string; value: string; href?: string | null; icon?: string };
 type Office = { title: string; lines: string };
@@ -157,7 +158,7 @@ export default function EnquiryFormSection({
       <div className="container">
         <div className="section-head center reveal">
           {content.eyebrow ? <div className="eyebrow eyebrow-orange">{String(content.eyebrow)}</div> : null}
-          {content.title ? <h2>{String(content.title)}</h2> : null}
+          {content.title ? <SiteHeading role="section">{String(content.title)}</SiteHeading> : null}
           {content.body ? <p>{String(content.body)}</p> : null}
         </div>
 

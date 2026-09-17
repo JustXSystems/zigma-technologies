@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   eyebrow?: string;
@@ -25,7 +26,7 @@ export default function InnerCtaBand({
       <div className="container inner-cta-band-inner">
         <div>
           <div className="eyebrow eyebrow-cyan">{eyebrow}</div>
-          <h2>{title}</h2>
+          <SiteHeading role="section">{title}</SiteHeading>
           {lead ? <p>{lead}</p> : null}
         </div>
         <div className="inner-cta-band-actions">

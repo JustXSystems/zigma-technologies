@@ -42,7 +42,7 @@ export default async function KannadaLocationPage({ params }: Props) {
         <span className="sep">/</span>
         <span className="current">{loc.name}</span>
       </nav>
-      <h1>{kn?.title || loc.name}</h1>
+      <h3>{kn?.title || loc.name}</h3>
       <p className="lead">{kn?.lead || loc.lead}</p>
       <p>
         <Link href={`/locations/${slug}`} className="btn btn-ghost-dark">

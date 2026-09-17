@@ -1,6 +1,7 @@
 import { listTestimonials, testimonialsJsonLd, type SiteTestimonial } from '@/lib/testimonials';
 import { getThemeSettings } from '@/lib/cms';
 import { mergeSiteSettings } from '@/lib/site-settings';
+import SiteHeading from '@/components/SiteHeading';
 
 export default async function TestimonialsStrip({ title = 'What clients say' }: { title?: string }) {
   let items: SiteTestimonial[] = [];
@@ -23,7 +24,7 @@ export default async function TestimonialsStrip({ title = 'What clients say' }: 
       <div className="container">
         <div className="section-head center">
           <div className="eyebrow eyebrow-orange">Reviews</div>
-          <h2>{title}</h2>
+          <SiteHeading role="section">{title}</SiteHeading>
         </div>
         <div className="testimonials-grid">
           {items.slice(0, 3).map((t) => (

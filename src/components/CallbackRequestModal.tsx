@@ -7,6 +7,7 @@ import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { useSiteCopy } from '@/lib/use-site-copy';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = { onClose: () => void };
 
@@ -84,7 +85,7 @@ export default function CallbackRequestModal({ onClose }: Props) {
         <div className="consult-modal-head">
           <div className="consult-modal-title">
             <span className="consult-badge">Callback</span>
-            <h2>Request a call from an engineer</h2>
+            <SiteHeading role="section">Request a call from an engineer</SiteHeading>
             <p>Share a number and preferred window — we will call you back.</p>
           </div>
           <button type="button" className="consult-close" onClick={onClose} aria-label={copy.a11y.close}>

@@ -15,6 +15,7 @@ import { focusApplyRole } from '@/lib/careers-apply';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import type { CatalogItem } from '@/lib/types';
 import { appHref } from '@/lib/base-path';
+import SiteHeading from '@/components/SiteHeading';
 
 /** CMS / section links must go through basePath on subdirectory deploys. */
 function hrefOf(value: unknown, fallback = '#'): string {
@@ -121,7 +122,7 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
             <div className="container">
               <div className="slide-content">
                 <div className="eyebrow">{slide.eyebrow}</div>
-                <h1>{slide.title}</h1>
+                <SiteHeading role="pageHero">{slide.title}</SiteHeading>
                 <p className="lead">{slide.lead}</p>
                 <a href={hrefOf(slide.ctaHref)} className="slide-cta">
                   {slide.cta}
@@ -167,7 +168,7 @@ function EcoSection({ content }: { content: Record<string, unknown> }) {
           </div>
           <div className="eco-text">
             <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
-            <h2>{String(content.title || '')}</h2>
+            <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
             <p>{String(content.body || '')}</p>
             <div className="cap-checklist">
               {groups.map((g) => (
@@ -283,7 +284,7 @@ function WhySection({ content, sectionKey }: { content: Record<string, unknown>;
       <div className="container">
         <div className="section-head reveal">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
           <p>{String(content.body || '')}</p>
         </div>
         <div className="why-grid">
@@ -433,7 +434,7 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
       <div className="container">
         <div className="section-head">
           <div className="eyebrow eyebrow-cyan">{String(content.eyebrow || '')}</div>
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
         </div>
         <div className="timeline-scroller" ref={scrollerRef}>
           <div className="timeline-runner" ref={runnerRef} id="timelineRunner" />
@@ -589,7 +590,7 @@ function ProjectsTeaserSection({
       <div className="container">
         <div className="section-head">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
-          <h2>{String(content.title || 'Featured projects')}</h2>
+          <SiteHeading role="section">{String(content.title || 'Featured projects')}</SiteHeading>
         </div>
         <div className="proj-grid projects-teaser-grid">
           {items.map((item) => {
@@ -744,7 +745,7 @@ function IndustriesSection({
       <div className="container">
         <div className="section-head center">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
           {content.linkLabel && industriesEnabled ? (
             <p>
               <a href={hrefOf(content.linkHref, '/industries')} className="link-orange-dim">
@@ -792,7 +793,7 @@ function CtaSection({ content, sectionKey }: { content: Record<string, unknown>;
   return (
     <section className="cta-band" id={sectionKey || 'contact'}>
       <div className="container">
-        <h2>{String(content.title || '')}</h2>
+        <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
         <p>{String(content.body || '')}</p>
         <div className="cta-actions">
           {content.primaryCta ? (
@@ -815,7 +816,7 @@ function RichTextSection({ content, sectionKey }: { content: Record<string, unkn
   return (
     <section className="section section-light" id={sectionKey || undefined}>
       <div className="container">
-        {content.title ? <h2 style={{ marginBottom: '1rem' }}>{String(content.title)}</h2> : null}
+        {content.title ? <SiteHeading role="section" style={{ marginBottom: '1rem' }}>{String(content.title)}</SiteHeading> : null}
         <div dangerouslySetInnerHTML={{ __html: String(content.html || content.body || '') }} />
       </div>
     </section>
@@ -842,7 +843,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
           <span className="current">{crumb}</span>
         </div>
         {content.eyebrow ? <div className="eyebrow">{String(content.eyebrow)}</div> : null}
-        <h1>{String(content.title || '')}</h1>
+        <SiteHeading role="pageHero">{String(content.title || '')}</SiteHeading>
         {content.leadEmphasis ? <p className="lead lead-emphasis">{String(content.leadEmphasis)}</p> : null}
         {content.lead ? <p className="lead">{String(content.lead)}</p> : null}
         {content.leadAccent ? <p className="lead lead-accent">{String(content.leadAccent)}</p> : null}
@@ -946,7 +947,7 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
       <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-orange'}`}>
         {String(content.eyebrow || '')}
       </div>
-      <h2>{String(content.title || '')}</h2>
+      <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
       <p className="split-desc">{String(content.body || '')}</p>
       {feats.length ? (
         <div className="split-feat-grid">
@@ -1007,7 +1008,7 @@ function TestimonialsSection({ content }: { content: Record<string, unknown> }) 
       <div className="container">
         <div className="section-head center">
           <div className="eyebrow eyebrow-cyan">{String(content.eyebrow || 'TESTIMONIALS')}</div>
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
         </div>
         <div className="testi-wrap">
           {items.map((item, i) => (
@@ -1044,7 +1045,7 @@ function PartnersSection({ content }: { content: Record<string, unknown> }) {
       <div className="container">
         <div className="section-head center">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
         </div>
       </div>
       {logos.length ? (
@@ -1073,7 +1074,7 @@ function CertTeaserSection({ content }: { content: Record<string, unknown> }) {
     <section className="cert-teaser">
       <div className="container">
         <div className="eyebrow">{String(content.eyebrow || 'CERTIFICATIONS')}</div>
-        <h3>{String(content.title || '')}</h3>
+        <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
         <p>{String(content.body || '')}</p>
         {content.cta ? (
           <a href={hrefOf(content.ctaHref, '/certifications')} className="btn-certs">
@@ -1090,7 +1091,7 @@ function CertHeroSection({ content }: { content: Record<string, unknown> }) {
     <section className="cert-hero">
       <div className="container">
         <div className="eyebrow">{String(content.eyebrow || 'CERTIFICATIONS')}</div>
-        <h1>{String(content.title || '')}</h1>
+        <SiteHeading role="pageHero">{String(content.title || '')}</SiteHeading>
         {content.sub ? <div className="sub">{String(content.sub)}</div> : null}
         <p>{String(content.lead || content.body || '')}</p>
         {content.tagline ? <div className="cert-tagline">{String(content.tagline)}</div> : null}
@@ -1134,7 +1135,7 @@ function FeatureGridSection({
           {content.eyebrow ? (
             <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-orange'}`}>{String(content.eyebrow)}</div>
           ) : null}
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
           {content.body ? <p>{String(content.body)}</p> : null}
         </div>
         <div className="feat-grid">
@@ -1238,7 +1239,7 @@ function LocationsSection({ content, sectionKey }: { content: Record<string, unk
             <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-orange'}`}>
               {String(content.eyebrow || 'LOCATIONS')}
             </div>
-            <h2>{String(content.title || '')}</h2>
+            <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
             <p className="split-desc">{String(content.body || '')}</p>
             <div className="loc-grid">
               {locations.map((loc) => (
@@ -1302,7 +1303,7 @@ function JobListSection({ content, sectionKey }: { content: Record<string, unkno
       <div className="container">
         <div className="section-head reveal">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || 'CURRENT OPENINGS')}</div>
-          <h2>{String(content.title || '')}</h2>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
           {content.body ? <p>{String(content.body)}</p> : null}
         </div>
         <div className="job-list">
@@ -1341,7 +1342,7 @@ function InternshipSection({ content, sectionKey }: { content: Record<string, un
         <div className="split-layout img-right">
           <div className="split-content reveal">
             <div className="eyebrow eyebrow-orange">{String(content.eyebrow || 'INTERNSHIP PROGRAM')}</div>
-            <h2>{String(content.title || '')}</h2>
+            <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
             <p className="split-desc">{String(content.body || '')}</p>
           </div>
           <div className="reveal">
@@ -1437,7 +1438,7 @@ function ComparisonTableSection({
         {content.eyebrow ? (
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow)}</div>
         ) : null}
-        {content.title ? <h2 className="comparison-title">{String(content.title)}</h2> : null}
+        {content.title ? <SiteHeading role="section" className="comparison-title">{String(content.title)}</SiteHeading> : null}
         {content.body ? <p className="comparison-lead">{String(content.body)}</p> : null}
 
         <div className="ctbl-wrap">

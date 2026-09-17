@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import SiteHeading from '@/components/SiteHeading';
 
 type Doc = {
   id: number;
@@ -44,7 +45,7 @@ export default function PartnerPortalPage() {
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
-            <h1>Partner documents</h1>
+            <SiteHeading role="pageHero">Partner documents</SiteHeading>
             <p className="lead">{name ? `Welcome, ${name}` : 'Loading…'}</p>
           </div>
           <button type="button" className="btn btn-ghost-dark" onClick={logout}>
@@ -55,7 +56,7 @@ export default function PartnerPortalPage() {
         <div className="press-list" style={{ marginTop: '2rem' }}>
           {docs.map((d) => (
             <article key={d.id} className="press-card">
-              <h2>{d.title}</h2>
+              <h3>{d.title}</h3>
               {d.description ? <p>{d.description}</p> : null}
               <p className="meta">{d.doc_type}</p>
               <a className="link" href={d.file_url} target="_blank" rel="noopener noreferrer">

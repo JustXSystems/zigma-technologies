@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ZtoolsPortalBrand from '@/components/ztools/ZtoolsPortalBrand';
 import ZtoolsShell from '@/components/ztools/ZtoolsShell';
+import SiteHeading from '@/components/SiteHeading';
 
 type ToolOption = {
   id: number;
@@ -79,7 +80,7 @@ export default function ZtoolsRegisterPage() {
     <ZtoolsShell>
       <div className="container ztools-auth-card ztools-auth-card--wide">
         <ZtoolsPortalBrand layout="centered" />
-        <h1>Register for ZTools</h1>
+        <SiteHeading role="pageHero">Register for ZTools</SiteHeading>
         <p className="ztools-lead">
           Create an account, choose the tools you need, and wait for admin approval before signing in.
         </p>

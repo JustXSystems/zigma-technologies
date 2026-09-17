@@ -7,6 +7,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import { trackEvent } from '@/lib/analytics';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import type { ToolNeedOption } from '@/lib/site-copy';
+import SiteHeading from '@/components/SiteHeading';
 
 type Need = ToolNeedOption['id'];
 type Scale = 'small' | 'medium' | 'large';
@@ -96,7 +97,7 @@ export default function SolutionFinderClient() {
       <section className="hub-section hub-section--soft">
         <div className="container" style={{ maxWidth: 960 }}>
           <div className="finder-panel">
-            <h2>{t.needStepTitle}</h2>
+            <SiteHeading role="section">{t.needStepTitle}</SiteHeading>
             <div className="consult-options">
               {t.needOptions.map((opt) => (
                 <button
@@ -116,7 +117,7 @@ export default function SolutionFinderClient() {
 
             {need ? (
               <>
-                <h2 style={{ marginTop: '2rem' }}>{t.scaleStepTitle}</h2>
+                <SiteHeading role="section" style={{ marginTop: '2rem' }}>{t.scaleStepTitle}</SiteHeading>
                 <div className="service-chip-rail" style={{ marginTop: '0.85rem' }}>
                   {(
                     [
@@ -141,7 +142,7 @@ export default function SolutionFinderClient() {
             {result ? (
               <article className="thank-you-card" style={{ marginTop: '2rem' }}>
                 <div className="eyebrow eyebrow-cyan">{t.recommendedEyebrow}</div>
-                <h2>{result.title}</h2>
+                <SiteHeading role="section">{result.title}</SiteHeading>
                 <p>{result.why}</p>
                 <div className="thank-you-actions" style={{ marginTop: '1rem' }}>
                   <Link

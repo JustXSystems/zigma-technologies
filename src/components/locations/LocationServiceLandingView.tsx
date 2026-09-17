@@ -6,6 +6,7 @@ import type { ServiceSeoDef } from '@/lib/location-services';
 import type { CatalogItem } from '@/lib/types';
 import { SERVICE_SEO_DEFS } from '@/lib/location-services';
 import { getSiteCopy } from '@/lib/site-content';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   location: LocationDef;
@@ -60,7 +61,7 @@ export default async function LocationServiceLandingView({ location, service, it
         <div className="container">
           <div className="section-head">
             <div className="eyebrow eyebrow-cyan">Also available in {location.name}</div>
-            <h2>Related services</h2>
+            <SiteHeading role="section">Related services</SiteHeading>
           </div>
           <div className="service-chip-rail">
             {SERVICE_SEO_DEFS.map((s) => (
@@ -81,7 +82,7 @@ export default async function LocationServiceLandingView({ location, service, it
           <div className="container">
             <div className="section-head">
               <div className="eyebrow eyebrow-orange">Catalogue</div>
-              <h2>{service.name} options</h2>
+              <SiteHeading role="section">{service.name} options</SiteHeading>
             </div>
             <div className="hub-grid">
               {items.map((item) => {

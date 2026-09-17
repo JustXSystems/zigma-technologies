@@ -6,6 +6,7 @@ import VisitTailorBar from '@/components/VisitTailorBar';
 import { getIndustryDefsCms, getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
 import { getThemeSettings } from '@/lib/cms';
+import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
@@ -61,7 +62,7 @@ export default async function IndustriesIndexPage() {
           <VisitTailorBar context="industries" />
           <div className="section-head" style={{ marginTop: '2.25rem' }}>
             <div className="eyebrow eyebrow-cyan">Sector pathways</div>
-            <h2>Pick your operating environment</h2>
+            <SiteHeading role="section">Pick your operating environment</SiteHeading>
             <p>Each landing maps catalog solutions, proof, and a direct consultation path.</p>
           </div>
           <div className="hub-grid">

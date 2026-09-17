@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import SiteHeading from '@/components/SiteHeading';
 import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
@@ -47,9 +48,9 @@ export default async function PressIndexPage() {
             <div className="press-list">
               {posts.map((post) => (
                 <article key={post.id} className="press-card">
-                  <h2>
+                  <SiteHeading role="section">
                     <Link href={`/press/${post.slug}`}>{post.title}</Link>
-                  </h2>
+                  </SiteHeading>
                   {post.excerpt ? <p>{post.excerpt}</p> : null}
                   <p className="meta">
                     {post.published_at ? new Date(post.published_at).toLocaleDateString('en-IN') : ''}

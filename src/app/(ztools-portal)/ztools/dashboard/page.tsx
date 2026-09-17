@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ZtoolsPortalBrand from '@/components/ztools/ZtoolsPortalBrand';
 import ZtoolsShell from '@/components/ztools/ZtoolsShell';
+import SiteHeading from '@/components/SiteHeading';
 
 type ToolCard = {
   slug: string;
@@ -53,7 +54,7 @@ export default function ZtoolsDashboardPage() {
         <div className="ztools-dashboard-hero">
           <ZtoolsPortalBrand layout="centered" />
           <div className="ztools-dashboard-head">
-            <h1>Welcome, {user?.name}</h1>
+            <SiteHeading role="pageHero">Welcome, {user?.name}</SiteHeading>
             <p>Your approved tools open on the live Zigma website.</p>
           </div>
         </div>
@@ -74,7 +75,7 @@ export default function ZtoolsDashboardPage() {
                   {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 >
                   <span className="ztools-tool-card-icon" aria-hidden>{toolIcon(tool.icon)}</span>
-                  <h2>{tool.name}</h2>
+                  <h3>{tool.name}</h3>
                   {tool.description ? <p>{tool.description}</p> : null}
                   <span className="ztools-tool-card-cta">Open on zigma-technologies.com →</span>
                 </Link>

@@ -6,6 +6,7 @@ import type { CatalogItem, CatalogItemType, FormField } from '@/lib/types';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   item: CatalogItem;
@@ -67,7 +68,7 @@ export default function CatalogCaseStudyEnquiry({ item, itemType }: Props) {
         <div className="case-study-enquiry-grid">
           <div>
             <div className="eyebrow eyebrow-orange">Enquire</div>
-            <h2>Discuss a similar scope for your facility</h2>
+            <SiteHeading role="section">Discuss a similar scope for your facility</SiteHeading>
             <p>
               Share your requirements and our engineering team will respond with feasibility, timelines, and commercial
               options.

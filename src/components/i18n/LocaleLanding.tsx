@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { LocaleCopy } from '@/lib/site-copy';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   locale: 'hi' | 'kn';
@@ -19,7 +20,7 @@ export default function LocaleLanding({ locale, copy, toolsEnabled }: Props) {
         </div>
         <div className="container">
           <div className="eyebrow">{copy.langName}</div>
-          <h1>{copy.title}</h1>
+          <SiteHeading role="pageHero">{copy.title}</SiteHeading>
           <p className="lead">{copy.lead}</p>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
             <Link href="/products?category=ups-systems" className="btn btn-ghost-dark">

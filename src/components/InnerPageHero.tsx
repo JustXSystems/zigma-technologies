@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import SiteHeading from '@/components/SiteHeading';
 
 export type InnerBreadcrumb = { label: string; href?: string };
 
@@ -56,7 +57,7 @@ export default function InnerPageHero({
           </nav>
         ) : null}
         <div className={`eyebrow${accent === 'cyan' ? ' eyebrow-cyan' : ' eyebrow-orange'}`}>{eyebrow}</div>
-        <h1>{title}</h1>
+        <SiteHeading role="pageHero">{title}</SiteHeading>
         {lead ? <p className="lead">{lead}</p> : null}
         {actions ? <div className="page-hero-actions">{actions}</div> : null}
         {children}

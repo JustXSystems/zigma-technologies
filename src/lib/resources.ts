@@ -214,7 +214,7 @@ const RESOURCE_SEEDS: Array<{
     meta_title: 'UPS Sizing Guide | Zigma Technologies',
     meta_description: 'Practical UPS sizing checklist for industrial plants, server rooms, and commercial facilities in India.',
     body_html: `<p>Correct UPS sizing protects critical loads without overspending on oversized hardware. Start with measured load (kW), apply a power-factor conversion to kVA, then add headroom for growth and inrush.</p>
-<h2>Sizing checklist</h2>
+<h3>Sizing checklist</h3>
 <ul>
 <li>List critical vs non-critical loads with measured kW</li>
 <li>Note single-phase vs three-phase distribution</li>
@@ -233,14 +233,14 @@ const RESOURCE_SEEDS: Array<{
     meta_title: 'Solar O&M Checklist | Zigma Technologies',
     meta_description: 'Monthly and quarterly solar O&M checklist covering cleaning, IV curves, string health, and inverter alarms.',
     body_html: `<p>Commercial solar underperforms quietly when soiling, loose terminations, or inverter faults go unnoticed. A disciplined O&amp;M rhythm protects yield and warranty compliance.</p>
-<h2>Monthly inspection rhythm</h2>
+<h3>Monthly inspection rhythm</h3>
 <ul>
 <li>Visual inspection of modules, mounting, and cable routing</li>
 <li>String current spot-checks against baseline</li>
 <li>Inverter alarm and event log review</li>
 <li>Vegetation, soiling, and drainage notes</li>
 </ul>
-<h2>Quarterly engineering checks</h2>
+<h3>Quarterly engineering checks</h3>
 <ul>
 <li>Torque verification on critical joints</li>
 <li>Thermal imaging for hotspot detection</li>
@@ -258,7 +258,7 @@ const RESOURCE_SEEDS: Array<{
     meta_title: 'BESS Peak Shaving Guide | Zigma Technologies',
     meta_description: 'Learn when battery energy storage systems reduce demand charges and improve solar self-consumption.',
     body_html: `<p>Peak shaving uses stored energy during short high-demand windows that drive tariff spikes. Pairing BESS with an energy management system (EMS) automates charge/discharge against your load profile.</p>
-<h2>When BESS pays back</h2>
+<h3>When BESS pays back</h3>
 <ul>
 <li>Factories with sharp process peaks and high demand charges</li>
 <li>Campuses adding EV charging without upgrading transformer capacity</li>

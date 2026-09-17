@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ZtoolsPortalBrand from '@/components/ztools/ZtoolsPortalBrand';
 import ZtoolsShell from '@/components/ztools/ZtoolsShell';
+import SiteHeading from '@/components/SiteHeading';
 
 export default function ZtoolsLoginPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function ZtoolsLoginPage() {
     <ZtoolsShell>
       <div className="container ztools-auth-card">
         <ZtoolsPortalBrand layout="centered" />
-        <h1>Sign in to ZTools</h1>
+        <SiteHeading role="pageHero">Sign in to ZTools</SiteHeading>
         <p className="ztools-lead">
           Access quotation, ROI, and engineering calculators assigned to your account.
         </p>

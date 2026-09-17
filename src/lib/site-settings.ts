@@ -46,6 +46,35 @@ export function sanitizeNavMenuStyle(value: string | undefined): NavMenuStyleId 
   return 'classic';
 }
 
+/** Public heading tag levels (Site Settings). Default h3 keeps the compact public look. */
+export const HEADING_LEVELS = [
+  {
+    id: 'h1',
+    label: 'H1 — largest',
+    description: 'Maximum emphasis. Best for a single page hero when you want more presence.',
+  },
+  {
+    id: 'h2',
+    label: 'H2 — large',
+    description: 'Strong section emphasis without matching the old full-bleed hero scale.',
+  },
+  {
+    id: 'h3',
+    label: 'H3 — compact (default)',
+    description: 'Current denser public-site scale. Recommended for most pages.',
+  },
+] as const;
+
+export type HeadingLevelId = (typeof HEADING_LEVELS)[number]['id'];
+
+export type HeadingRole = 'pageHero' | 'section';
+
+export function sanitizeHeadingLevel(value: string | undefined, fallback: HeadingLevelId = 'h3'): HeadingLevelId {
+  const trimmed = value?.trim().toLowerCase() || '';
+  if (trimmed === 'h1' || trimmed === 'h2' || trimmed === 'h3') return trimmed;
+  return fallback;
+}
+
 export type SiteSettings = {
   companyName: string;
   tagline: string;
@@ -66,6 +95,16 @@ export type SiteSettings = {
    * classic | corporate | elegant | rail | lumen | mosaic | ribbon
    */
   navMenuStyle: string;
+  /**
+   * HTML tag for page heroes / primary titles (slides, page-hero, catalog heroes).
+   * h1 | h2 | h3 — size follows --text-h1/h2/h3.
+   */
+  headingPageHero: string;
+  /**
+   * HTML tag for section titles (section-head, eco, split, CTA bands, etc.).
+   * h1 | h2 | h3 — size follows --text-h1/h2/h3.
+   */
+  headingSection: string;
   copyright: string;
   /** Footer credit: show/hide (true/false) */
   poweredByEnabled: string;
@@ -149,6 +188,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   headerCtaLabelB: 'Get a Quote',
   ctaVariantBPercent: '50',
   navMenuStyle: 'classic',
+  headingPageHero: 'h3',
+  headingSection: 'h3',
   copyright: '© 2026 Zigma Technologies. All rights reserved.',
   poweredByEnabled: 'true',
   poweredByPrefix: 'Powered by',
@@ -207,7 +248,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 
 export function mergeSiteSettings(raw: unknown): SiteSettings {
   const input = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
-  return {
+  const merged = {
     ...DEFAULT_SITE_SETTINGS,
     ...Object.fromEntries(
       Object.keys(DEFAULT_SITE_SETTINGS).map((key) => {
@@ -216,6 +257,17 @@ export function mergeSiteSettings(raw: unknown): SiteSettings {
       })
     ),
   } as SiteSettings;
+  merged.navMenuStyle = sanitizeNavMenuStyle(merged.navMenuStyle);
+  merged.headingPageHero = sanitizeHeadingLevel(merged.headingPageHero, 'h3');
+  merged.headingSection = sanitizeHeadingLevel(merged.headingSection, 'h3');
+  return merged;
+}
+
+/** Resolve the HTML heading tag for a public heading role from site settings. */
+export function headingTagForRole(settings: Pick<SiteSettings, 'headingPageHero' | 'headingSection'>, role: HeadingRole): HeadingLevelId {
+  return role === 'pageHero'
+    ? sanitizeHeadingLevel(settings.headingPageHero, 'h3')
+    : sanitizeHeadingLevel(settings.headingSection, 'h3');
 }
 
 export function telHref(phone: string) {

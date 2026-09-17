@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import SiteHeading from '@/components/SiteHeading';
 
 type MockToolProps = {
   title: string;
@@ -13,7 +14,7 @@ export default function ZtoolsMockTool({ title, description, children }: MockToo
     <div className="ztools-tool-page">
       <div className="ztools-tool-head">
         <LinkBack />
-        <h1>{title}</h1>
+        <SiteHeading role="pageHero">{title}</SiteHeading>
         <p>{description}</p>
         <span className="ztools-mock-badge">Sample tool — replace with production workflow</span>
       </div>

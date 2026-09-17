@@ -5,6 +5,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import { getThemeSettings } from '@/lib/cms';
 import { getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
+import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
@@ -71,7 +72,7 @@ export default async function SlaPage() {
         <div className="container">
           <div className="section-head">
             <div className="eyebrow eyebrow-orange">Commitments</div>
-            <h2>What we publish — and manage to</h2>
+            <SiteHeading role="section">What we publish — and manage to</SiteHeading>
             <p>Clear targets for enquiry handling, emergency UPS support, AMC, and solar O&amp;M.</p>
           </div>
           {metrics.length ? (

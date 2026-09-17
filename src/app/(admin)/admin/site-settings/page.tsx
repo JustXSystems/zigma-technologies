@@ -7,6 +7,7 @@ import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import LogoBrandPreview from '@/components/admin/LogoBrandPreview';
 import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
 import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
+import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -79,6 +80,14 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
     title: 'Navigation menu style',
     description:
       'Choose how the public header and mega-menu look. Classic keeps today’s panels; Corporate matches a JustX-style compact dropdown. Also includes Lumen, Mosaic, and Ribbon modern variants.',
+    defaultOpen: true,
+    fields: [],
+  },
+  {
+    id: 'heading-levels',
+    title: 'Public heading levels',
+    description:
+      'Control whether page heroes and section titles render as H1, H2, or H3. Defaults to H3 (compact). Raise a role to H2/H1 for more emphasis — type size follows the theme tokens.',
     defaultOpen: true,
     fields: [],
   },
@@ -345,6 +354,8 @@ export default function SiteSettingsPage() {
               <LogoTypeEditor settings={settings} onChange={patchSettings} />
             ) : section.id === 'nav-menu-style' ? (
               <NavMenuStylePicker settings={settings} onChange={patchSettings} />
+            ) : section.id === 'heading-levels' ? (
+              <HeadingLevelPicker settings={settings} onChange={patchSettings} />
             ) : (
               <div className="admin-form-grid">{section.fields.map(renderField)}</div>
             )}

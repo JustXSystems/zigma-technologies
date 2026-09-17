@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SiteHeading from '@/components/SiteHeading';
 import { getSiteCopy } from '@/lib/site-content';
 
 const DEFAULT_LOGOS = [
@@ -26,7 +27,7 @@ export default async function SocialProofStrip({ title, showCertLink = true }: P
           <div className="social-proof-head">
             <div className="social-proof-copy">
               <div className="eyebrow eyebrow-cyan">TRUSTED PARTNERS</div>
-              <h2 className="social-proof-title">{heading}</h2>
+              <SiteHeading role="section" className="social-proof-title">{heading}</SiteHeading>
               {copy.socialProof.subtitle ? (
                 <p className="social-proof-subtitle">{copy.socialProof.subtitle}</p>
               ) : null}

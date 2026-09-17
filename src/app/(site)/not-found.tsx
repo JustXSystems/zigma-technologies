@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SiteHeading from '@/components/SiteHeading';
 
 export default function NotFound() {
   return (
@@ -17,7 +18,7 @@ export default function NotFound() {
         <p className="eyebrow eyebrow-orange" style={{ marginBottom: '0.75rem' }}>
           404
         </p>
-        <h1 style={{ marginBottom: '0.75rem' }}>Page not found</h1>
+        <SiteHeading role="pageHero" style={{ marginBottom: '0.75rem' }}>Page not found</SiteHeading>
         <p style={{ color: 'var(--graphite-500)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
           The page you requested may have moved or no longer exists. Try the homepage or contact our team for help.
         </p>

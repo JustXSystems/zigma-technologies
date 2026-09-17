@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import SiteHeading from '@/components/SiteHeading';
 import { getThemeSettings } from '@/lib/cms';
 import { getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
@@ -28,17 +29,17 @@ export default async function CookiesPage() {
         </div>
         <div className="container">
           <div className="eyebrow">{c.pageEyebrow}</div>
-          <h1>{c.pageTitle}</h1>
+          <SiteHeading role="pageHero">{c.pageTitle}</SiteHeading>
           <p className="lead">{c.pageLead}</p>
         </div>
       </section>
       <section className="section section-light">
         <div className="container" style={{ maxWidth: 820 }}>
-          <h2>{c.necessaryHeading}</h2>
+          <h3>{c.necessaryHeading}</h3>
           <p>{c.necessaryBody}</p>
-          <h2>{c.analyticsHeading}</h2>
+          <h3>{c.analyticsHeading}</h3>
           <p>{c.analyticsBody}</p>
-          <h2>{c.marketingHeading}</h2>
+          <h3>{c.marketingHeading}</h3>
           <p>{c.marketingBody}</p>
           <p>
             {c.manageHint}{' '}

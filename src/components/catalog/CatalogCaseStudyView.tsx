@@ -14,6 +14,7 @@ import {
 import { getBrochureUrl } from '@/lib/catalog-brochure';
 import { catalogWhatsAppMessage, whatsappHref } from '@/lib/whatsapp';
 import { DEFAULT_SITE_SETTINGS } from '@/lib/site-settings';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   item: CatalogItem;
@@ -80,7 +81,7 @@ export default function CatalogCaseStudyView({
           <div className="case-study-hero-grid">
             <div>
               <div className="eyebrow eyebrow-orange">{caseStudyLabel(itemType)}</div>
-              <h1>{item.title}</h1>
+              <SiteHeading role="pageHero">{item.title}</SiteHeading>
               <p className="lead">{item.summary || item.description}</p>
               <div className="case-study-hero-meta">
                 {cs?.client_sector ? <span>{cs.client_sector}</span> : null}
@@ -170,7 +171,7 @@ export default function CatalogCaseStudyView({
       <section className="section section-light">
         <div className="container case-study-content-grid">
           <div>
-            <h2 className="case-study-section-title">Overview</h2>
+            <SiteHeading role="section" className="case-study-section-title">Overview</SiteHeading>
             <p className="case-study-lead">{item.description || item.summary}</p>
 
             {showCaseStudy ? (
@@ -354,7 +355,7 @@ export default function CatalogCaseStudyView({
           <div className="container">
             <div className="section-head">
               <div className="eyebrow eyebrow-cyan">Related work</div>
-              <h2>More {CATALOG_TYPE_LABEL[itemType].toLowerCase()}s</h2>
+              <SiteHeading role="section">More {CATALOG_TYPE_LABEL[itemType].toLowerCase()}s</SiteHeading>
             </div>
             <div className="proj-grid">
               {related.map((rel) => (

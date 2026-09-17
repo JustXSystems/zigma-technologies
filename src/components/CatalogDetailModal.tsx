@@ -9,6 +9,7 @@ import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { useSiteCopy } from '@/lib/use-site-copy';
+import SiteHeading from '@/components/SiteHeading';
 
 const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
 
@@ -211,9 +212,9 @@ export default function CatalogDetailModal({ item, itemType, modalFields, onClos
             <div className="catalog-detail-content-col">
               <div className="catalog-detail-scroll">
                 {hasField(modalFields, 'title', DEFAULT_MODAL) ? (
-                  <h2 id={titleId} className="catalog-detail-title">
+                  <SiteHeading role="section" id={titleId} className="catalog-detail-title">
                     {item.title}
-                  </h2>
+                  </SiteHeading>
                 ) : null}
 
                 {(hasField(modalFields, 'price_label', DEFAULT_MODAL) && item.price_label) || highlight ? (

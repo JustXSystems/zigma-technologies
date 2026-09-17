@@ -39,10 +39,10 @@ export const THEME_TOKEN_META: ThemeTokenMeta[] = [
 
   { key: '--text-base', label: 'Body size', group: 'typography', type: 'size' },
   { key: '--text-lead', label: 'Lead', group: 'typography', type: 'text' },
-  { key: '--text-h1', label: 'Heading 1', group: 'typography', type: 'text' },
-  { key: '--text-h2', label: 'Heading 2', group: 'typography', type: 'text' },
-  { key: '--text-h3', label: 'Heading 3', group: 'typography', type: 'text' },
-  { key: '--text-h4', label: 'Heading 4', group: 'typography', type: 'text' },
+  { key: '--text-h1', label: 'Heading 1 size', group: 'typography', type: 'text' },
+  { key: '--text-h2', label: 'Heading 2 size', group: 'typography', type: 'text' },
+  { key: '--text-h3', label: 'Heading 3 size', group: 'typography', type: 'text' },
+  { key: '--text-h4', label: 'Heading 4 size', group: 'typography', type: 'text' },
   { key: '--text-eyebrow', label: 'Eyebrow', group: 'typography', type: 'size' },
 
   { key: '--section-pad', label: 'Section padding', group: 'layout', type: 'size' },

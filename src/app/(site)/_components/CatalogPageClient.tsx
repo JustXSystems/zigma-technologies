@@ -24,6 +24,7 @@ import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { Suspense } from 'react';
 import { publicMediaUrl } from '@/lib/media-url';
 import { heroHas, toolbarHas } from '@/lib/catalog-page-elements';
+import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
   itemType: CatalogItemType;
@@ -223,7 +224,7 @@ function CatalogHero({
         <div className="container">
           <div className="section-head">
             {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
-            {heroHas(settings, 'title') ? <h1>{heroTitle}</h1> : null}
+            {heroHas(settings, 'title') ? <SiteHeading role="pageHero">{heroTitle}</SiteHeading> : null}
             {heroHas(settings, 'lead') ? <p className="lead">{heroLead}</p> : null}
           </div>
         </div>
@@ -254,7 +255,7 @@ function CatalogHero({
             {showPrice ? <span className="catalog-hero-price">{active.price_label}</span> : null}
           </div>
         ) : null}
-        <h2>{active.title}</h2>
+        <SiteHeading role="section">{active.title}</SiteHeading>
         <p>{active.summary || active.description || `Explore this ${itemType} in more detail.`}</p>
         {heroHas(settings, 'tags') && active.tags_json?.length ? (
           <div className="catalog-hero-tags">
@@ -313,7 +314,7 @@ function CatalogHero({
       <div className={cx('container catalog-hero-layout', variant === 'standard' && 'catalog-hero-layout--standard')}>
         <div className={cx('catalog-hero-copy', revealEnabled && 'reveal')}>
           {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
-          {heroHas(settings, 'title') ? <h1>{heroTitle}</h1> : null}
+          {heroHas(settings, 'title') ? <SiteHeading role="pageHero">{heroTitle}</SiteHeading> : null}
           {heroHas(settings, 'lead') ? <p className="lead">{heroLead}</p> : null}
           {heroHas(settings, 'meta') ? (
             <div className="catalog-hero-meta">

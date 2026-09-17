@@ -8,6 +8,7 @@ import { trackEvent } from '@/lib/analytics';
 import { DEFAULT_SITE_SETTINGS, telHref, type SiteSettings } from '@/lib/site-settings';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { whatsappHref } from '@/lib/whatsapp';
+import SiteHeading from '@/components/SiteHeading';
 
 function ThankYouInner() {
   const params = useSearchParams();
@@ -67,7 +68,7 @@ function ThankYouInner() {
       <section className="hub-section hub-section--soft">
         <div className="container thank-you-grid">
           <article className="thank-you-card">
-            <h2>{copy.thankYou.nextTitle}</h2>
+            <SiteHeading role="section">{copy.thankYou.nextTitle}</SiteHeading>
             <ol>
               {copy.thankYou.nextSteps.map((step) => (
                 <li key={step}>{step}</li>
@@ -75,7 +76,7 @@ function ThankYouInner() {
             </ol>
           </article>
           <article className="thank-you-card">
-            <h2>{copy.thankYou.talkTitle}</h2>
+            <SiteHeading role="section">{copy.thankYou.talkTitle}</SiteHeading>
             <div className="thank-you-actions">
               <a
                 href={telHref(site.phone)}
