@@ -7,10 +7,9 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#10 logo issue fixed">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#9 right align setting is not reflecting after making single line.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,23 +57,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.162625014275519" />
-      <entry key="MS500" value="2.526218372916862" />
-      <entry key="S2" value="5.42976883164477" />
-      <entry key="S5" value="9.589372670436761" />
-      <entry key="S10" value="16.76304775857613" />
-      <entry key="S30" value="43.531266998556106" />
-      <entry key="S60" value="77.69874769867162" />
-      <entry key="M2" value="120.45995145512282" />
-      <entry key="M5" value="180.63285736247562" />
-      <entry key="M10" value="222.75670759876786" />
-      <entry key="M15" value="243.8128161452325" />
-      <entry key="M30" value="280.0053911472404" />
-      <entry key="H1" value="339.28931893312824" />
-      <entry key="H2" value="502.37881558257754" />
-      <entry key="H4" value="873.8695011821633" />
-      <entry key="D1" value="3406.235092660467" />
-      <entry key="W1" value="11816.91886494153" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000000002494442" />
+      <entry key="S10" value="1.0000854957701024" />
+      <entry key="S30" value="1.749316316890465" />
+      <entry key="S60" value="11.194031240793562" />
+      <entry key="M2" value="44.632355023294366" />
+      <entry key="M5" value="121.33255556259381" />
+      <entry key="M10" value="182.8126028989762" />
+      <entry key="M15" value="213.93742283438874" />
+      <entry key="M30" value="262.6761398294418" />
+      <entry key="H1" value="328.9963823343159" />
+      <entry key="H2" value="494.94745318823186" />
+      <entry key="H4" value="867.5054503208636" />
+      <entry key="D1" value="3402.4341814529002" />
+      <entry key="W1" value="11815.5380932304" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -87,32 +86,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="3.479900235887315E-243" />
-      <entry key="M30" value="5.899067922889994E-122" />
-      <entry key="H1" value="2.4287996876833544E-61" />
-      <entry key="H2" value="4.928285389142071E-31" />
-      <entry key="H4" value="7.020174776534081E-16" />
-      <entry key="D1" value="0.003028997627810798" />
-      <entry key="W1" value="0.677129698956977" />
+      <entry key="M15" value="3.03922082385215E-243" />
+      <entry key="M30" value="5.512912863316313E-122" />
+      <entry key="H1" value="2.3479592976278415E-61" />
+      <entry key="H2" value="4.845574576484834E-31" />
+      <entry key="H4" value="6.961016144679239E-16" />
+      <entry key="D1" value="0.003024728413190121" />
+      <entry key="W1" value="0.6769932766585363" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1230299383668623" />
-      <entry key="MS500" value="2.508993435208708" />
-      <entry key="S2" value="5.420654836256207" />
-      <entry key="S5" value="9.583022820690985" />
-      <entry key="S10" value="16.757475173309658" />
-      <entry key="S30" value="43.52639851983583" />
-      <entry key="S60" value="77.69440125332103" />
-      <entry key="M2" value="120.45657777118619" />
-      <entry key="M5" value="180.63080531564802" />
-      <entry key="M10" value="222.75542421673356" />
-      <entry key="M15" value="243.81187369256713" />
-      <entry key="M30" value="280.0048465048159" />
-      <entry key="H1" value="339.28897516477326" />
-      <entry key="H2" value="502.37850066281953" />
-      <entry key="H4" value="873.8691723681158" />
-      <entry key="D1" value="3406.2379225509844" />
-      <entry key="W1" value="11817.595851573491" />
+      <entry key="MS100" value="0.9526379980439373" />
+      <entry key="MS500" value="0.9903428719330246" />
+      <entry key="S2" value="0.9975769252644544" />
+      <entry key="S5" value="0.9990300648881825" />
+      <entry key="S10" value="0.9996003820140732" />
+      <entry key="S30" value="1.7490707930912306" />
+      <entry key="S60" value="11.193380125749087" />
+      <entry key="M2" value="44.63109259289566" />
+      <entry key="M5" value="121.33117237310904" />
+      <entry key="M10" value="182.81154732406713" />
+      <entry key="M15" value="213.93659433869468" />
+      <entry key="M30" value="262.6756281439331" />
+      <entry key="H1" value="328.99604866019286" />
+      <entry key="H2" value="494.94714287984084" />
+      <entry key="H4" value="867.5051239407677" />
+      <entry key="D1" value="3402.4370072986762" />
+      <entry key="W1" value="11816.214943460862" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -264,7 +263,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#4 Product, Services, Project Pages Hero and Catalog filter controls from admin" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-standard-panel" />
     <MESSAGE value="#4 show/hide switch in admin for catalog-hero-meta" />
     <MESSAGE value="#4 Hero elements (show/hide chips)&#10;   eyebrow · title · lead · meta · standard_panel · spotlight · kicker · price · tags · actions · dots&#10;   Toolbar elements&#10;   search · sort · result_meta · filter_chips · clear&#10;   Also expanded&#10;   Card fields now include quick_view and case_study_link" />
@@ -289,7 +287,8 @@
     <MESSAGE value="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
     <MESSAGE value="#10 provide logo and words preview in admin while editing? Can give advanced font picker" />
     <MESSAGE value="#10 logo issue fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#10 logo issue fixed" />
+    <MESSAGE value="#9 right align setting is not reflecting after making single line." />
+    <option name="LAST_COMMIT_MESSAGE" value="#9 right align setting is not reflecting after making single line." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

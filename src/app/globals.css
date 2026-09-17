@@ -208,7 +208,7 @@
     flex:0 1 auto;
   }
   .nav-links{display:flex;gap:2rem;flex-wrap:nowrap;align-items:center;}
-  .header-right{margin-left:auto;flex:0 0 auto;}
+  .header-right{flex:0 0 auto;}
   .nav-links > li{position:relative;}
   .nav-links > li > a,
   .nav-links > li > .nav-parent{
