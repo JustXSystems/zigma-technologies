@@ -7,12 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#13 build issue fixed">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/theme-tokens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/theme-tokens.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2094887560985483" />
-      <entry key="MS500" value="3.181343679743604" />
-      <entry key="S2" value="6.0459624305915085" />
-      <entry key="S5" value="9.500294824960916" />
-      <entry key="S10" value="13.607614457037394" />
-      <entry key="S30" value="20.073956761110455" />
-      <entry key="S60" value="22.70911984001625" />
-      <entry key="M2" value="24.261571504651627" />
-      <entry key="M5" value="25.280712520039785" />
-      <entry key="M10" value="25.638179546809553" />
-      <entry key="M15" value="25.857221358937526" />
-      <entry key="M30" value="33.165916078132724" />
-      <entry key="H1" value="108.918497592774" />
-      <entry key="H2" value="367.21280375324574" />
-      <entry key="H4" value="875.6409283792783" />
-      <entry key="D1" value="3848.541944307447" />
-      <entry key="W1" value="12619.693573301804" />
+      <entry key="MS100" value="1.0000842883504542" />
+      <entry key="MS500" value="1.3600727382633022" />
+      <entry key="S2" value="3.149455737325953" />
+      <entry key="S5" value="4.2457304220447805" />
+      <entry key="S10" value="5.559745603761172" />
+      <entry key="S30" value="11.511451180855005" />
+      <entry key="S60" value="18.52967692434737" />
+      <entry key="M2" value="26.033138207030515" />
+      <entry key="M5" value="33.29566120850325" />
+      <entry key="M10" value="36.429824880945255" />
+      <entry key="M15" value="37.649402355403616" />
+      <entry key="M30" value="40.47722348833754" />
+      <entry key="H1" value="63.28626513650003" />
+      <entry key="H2" value="210.8700927666527" />
+      <entry key="H4" value="637.3719393484012" />
+      <entry key="D1" value="3651.188815338404" />
+      <entry key="W1" value="12545.978295110164" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,32 +87,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.2737680680155665E-250" />
-      <entry key="M30" value="1.1286133385776571E-125" />
-      <entry key="H1" value="3.359484095181605E-63" />
-      <entry key="H2" value="5.796105671208255E-32" />
-      <entry key="H4" value="2.407510264028801E-16" />
-      <entry key="D1" value="0.002534169367782561" />
-      <entry key="W1" value="0.6600938358929662" />
+      <entry key="M15" value="2.755713269655454E-253" />
+      <entry key="M30" value="5.249488803355156E-127" />
+      <entry key="H1" value="7.245335605309047E-64" />
+      <entry key="H2" value="2.6917161078591247E-32" />
+      <entry key="H4" value="1.6406450280149073E-16" />
+      <entry key="D1" value="0.0023772601858622674" />
+      <entry key="W1" value="0.6540939274733127" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0931751333385074" />
-      <entry key="MS500" value="3.1351460412219527" />
-      <entry key="S2" value="6.025607748540609" />
-      <entry key="S5" value="9.486711495196435" />
-      <entry key="S10" value="13.59705785977935" />
-      <entry key="S30" value="20.06827153869511" />
-      <entry key="S60" value="22.705815290556547" />
-      <entry key="M2" value="24.259781123353587" />
-      <entry key="M5" value="25.27995981269523" />
-      <entry key="M10" value="25.637796781833174" />
-      <entry key="M15" value="25.85696438228493" />
-      <entry key="M30" value="33.16577353076279" />
-      <entry key="H1" value="108.91835293379509" />
-      <entry key="H2" value="367.212595233977" />
-      <entry key="H4" value="875.6406618831838" />
-      <entry key="D1" value="3848.5442681460713" />
-      <entry key="W1" value="12620.353520795466" />
+      <entry key="MS100" value="0.959343968982012" />
+      <entry key="MS500" value="1.3481054334439486" />
+      <entry key="S2" value="3.1419533874740804" />
+      <entry key="S5" value="4.241656545577264" />
+      <entry key="S10" value="5.5570942640612655" />
+      <entry key="S30" value="11.509539408084965" />
+      <entry key="S60" value="18.528016160840373" />
+      <entry key="M2" value="26.031887492114773" />
+      <entry key="M5" value="33.29498641877512" />
+      <entry key="M10" value="36.42944838625284" />
+      <entry key="M15" value="37.649140780937074" />
+      <entry key="M30" value="40.47707999184388" />
+      <entry key="H1" value="63.286163112674615" />
+      <entry key="H2" value="210.8699596823855" />
+      <entry key="H4" value="637.3717393598405" />
+      <entry key="D1" value="3651.1909921870238" />
+      <entry key="W1" value="12546.63224358108" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -266,7 +264,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 while selecting the background image, also need to customization to select shading style.&#10;   for the actual catalog image selection, also need to apply fit to available space as checkbox, and fix percentage for each catalog item. in /admin/Inventory - media" />
     <MESSAGE value="#6 The Media modal is now a compact studio layout with a live preview" />
     <MESSAGE value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
     <MESSAGE value="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal" />
@@ -291,7 +288,8 @@
     <MESSAGE value="#11 Heading levels are now admin-configurable without breaking layout." />
     <MESSAGE value="#13 Product, Services, Project card Background color to be set in admin" />
     <MESSAGE value="#13 build issue fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#13 build issue fixed" />
+    <MESSAGE value="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes." />
+    <option name="LAST_COMMIT_MESSAGE" value="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

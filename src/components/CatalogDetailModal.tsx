@@ -279,33 +279,33 @@ export default function CatalogDetailModal({
                   </div>
                 ) : null}
               </div>
-
-              {showEnquiry ? (
-                <footer className="catalog-detail-footer">
-                  <div className="catalog-detail-footer-copy">
-                    <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
-                    <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
-                  </div>
-                  <div className="catalog-detail-footer-actions">
-                    <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
-                      View full {caseStudyLabel(itemType).toLowerCase()}
-                    </Link>
-                    <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
-                      Request a quote
-                    </button>
-                    <a href="/contact" className="btn btn-ghost-dark">
-                      Contact us
-                    </a>
-                  </div>
-                </footer>
-              ) : (
-                <footer className="catalog-detail-footer catalog-detail-footer--simple">
-                  <button type="button" className="btn btn-ghost-dark" onClick={handleClose}>
-                    Close
-                  </button>
-                </footer>
-              )}
             </div>
+
+            {showEnquiry ? (
+              <footer className="catalog-detail-footer">
+                <div className="catalog-detail-footer-copy">
+                  <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
+                  <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
+                </div>
+                <div className="catalog-detail-footer-actions">
+                  <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
+                    View full {caseStudyLabel(itemType).toLowerCase()}
+                  </Link>
+                  <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
+                    Request a quote
+                  </button>
+                  <a href="/contact" className="btn btn-ghost-dark">
+                    Contact us
+                  </a>
+                </div>
+              </footer>
+            ) : (
+              <footer className="catalog-detail-footer catalog-detail-footer--simple">
+                <button type="button" className="btn btn-ghost-dark" onClick={handleClose}>
+                  Close
+                </button>
+              </footer>
+            )}
           </div>
         </div>
 
