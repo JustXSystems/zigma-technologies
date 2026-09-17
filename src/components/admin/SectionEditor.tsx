@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CmsSection } from '@/lib/cms-types';
 import MediaPicker from '@/components/admin/MediaPicker';
 
@@ -25,14 +26,46 @@ function Field({
   );
 }
 
+type TimelineCta = { label: string; href: string; position?: string; color?: string };
+
+function migrateTimelineContent(raw: Record<string, unknown>): Record<string, unknown> {
+  if (Array.isArray(raw.ctas)) return raw;
+  const { cta, ctaHref, ctaAlign, ...rest } = raw;
+  if (cta) {
+    return {
+      ...rest,
+      ctas: [
+        {
+          label: String(cta),
+          href: String(ctaHref || '#'),
+          position: String(ctaAlign || 'left'),
+          color: '',
+        } satisfies TimelineCta,
+      ],
+    };
+  }
+  return { ...raw, ctas: [] };
+}
+
 export default function SectionEditor({ section, onClose, onSaved }: Props) {
   const [title, setTitle] = useState(section.title || '');
   const [sectionKey, setSectionKey] = useState(section.section_key || '');
-  const [content, setContent] = useState<Record<string, unknown>>({ ...(section.content_json || {}) });
+  const [content, setContent] = useState<Record<string, unknown>>(() => {
+    const raw = { ...(section.content_json || {}) };
+    return section.type === 'timeline' ? migrateTimelineContent(raw) : raw;
+  });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
   const [customCss, setCustomCss] = useState(String((section.style_json as { css?: string })?.css || ''));
   const [jsonMode, setJsonMode] = useState(false);
-  const [jsonText, setJsonText] = useState(JSON.stringify(section.content_json || {}, null, 2));
+  const [jsonText, setJsonText] = useState(() =>
+    JSON.stringify(
+      section.type === 'timeline'
+        ? migrateTimelineContent({ ...(section.content_json || {}) })
+        : section.content_json || {},
+      null,
+      2
+    )
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -48,6 +81,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
       let content_json = content;
       if (jsonMode) {
         content_json = JSON.parse(jsonText || '{}');
+      }
+      if (section.type === 'timeline') {
+        content_json = migrateTimelineContent(content_json);
       }
       const res = await fetch(`/api/admin/sections/${section.id}`, {
         method: 'PATCH',
@@ -76,33 +112,16 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
   const cards = (content.cards as Array<{ index: string; title: string; desc: string; tint: string }>) || [];
   const slides = (content.slides as Array<Record<string, unknown>>) || [];
   const ctaFields = content as Record<string, string>;
-  type TimelineCta = { label: string; href: string; position?: string; color?: string };
-  const timelineCtas: TimelineCta[] = (() => {
-    if (Array.isArray(content.ctas)) return content.ctas as TimelineCta[];
-    if (content.cta) {
-      return [
-        {
-          label: String(content.cta),
-          href: String(content.ctaHref || '#'),
-          position: String(content.ctaAlign || 'left'),
-          color: '',
-        },
-      ];
-    }
-    return [];
-  })();
+  const timelineCtas = (Array.isArray(content.ctas) ? content.ctas : []) as TimelineCta[];
 
   function setTimelineCtas(next: TimelineCta[]) {
     setContent((prev) => {
-      const nextContent = { ...prev, ctas: next };
-      delete nextContent.cta;
-      delete nextContent.ctaHref;
-      delete nextContent.ctaAlign;
-      return nextContent;
+      const { cta: _cta, ctaHref: _ctaHref, ctaAlign: _ctaAlign, ...rest } = prev;
+      return { ...rest, ctas: next };
     });
   }
 
-  return (
+  return createPortal(
     <div className="admin-modal-backdrop" onClick={onClose}>
       <form className="admin-modal" style={{ width: 'min(920px, 100%)' }} onClick={(e) => e.stopPropagation()} onSubmit={save}>
         <div className="admin-toolbar" style={{ marginBottom: '0.75rem' }}>
@@ -202,7 +221,8 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 ) : null}
                 {section.type !== 'logo_marquee' &&
                 section.type !== 'testimonials' &&
-                section.type !== 'cert_cta' ? (
+                section.type !== 'cert_cta' &&
+                section.type !== 'timeline' ? (
                   <div className="admin-field full">
                     <label>
                       {section.type === 'page_hero' || section.type === 'cert_hero' ? 'Lead' : 'Body'}
@@ -857,40 +877,22 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
 
             {section.type === 'timeline' ? (
               <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-field full">
-                  <label>Timeline items (one per line: Year | Title | Body | now?)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 180 }}
-                    value={((content.items as Array<{ year: string; title: string; body: string; now?: boolean; next?: boolean }>) || [])
-                      .map((i) => `${i.year} | ${i.title} | ${i.body}${i.now ? ' | now' : i.next ? ' | next' : ''}`)
-                      .join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'items',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const parts = line.split('|').map((p) => p.trim());
-                            const flag = (parts[3] || '').toLowerCase();
-                            return {
-                              year: parts[0] || '',
-                              title: parts[1] || '',
-                              body: parts[2] || '',
-                              now: flag === 'now',
-                              next: flag === 'next',
-                            };
-                          })
-                      )
-                    }
-                  />
-                </div>
-
-                <div style={{ marginTop: '1rem' }}>
+                <div
+                  style={{
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    marginBottom: '1rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
                   <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                    <strong>CTA buttons</strong>
+                    <div>
+                      <strong>CTA buttons</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        Multiple buttons with position (left / center / right) and color.
+                      </div>
+                    </div>
                     <button
                       type="button"
                       className="admin-btn admin-btn-secondary"
@@ -910,7 +912,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     </p>
                   ) : null}
                   {timelineCtas.map((cta, idx) => {
-                    const colorValue = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '#ffffff';
+                    const colorValue = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '#ea580c';
                     return (
                       <div
                         key={idx}
@@ -919,6 +921,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                           borderRadius: 8,
                           padding: '0.8rem',
                           marginBottom: '0.7rem',
+                          background: '#fff',
                         }}
                       >
                         <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
@@ -998,7 +1001,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                                   next[idx] = { ...next[idx], color: e.target.value };
                                   setTimelineCtas(next);
                                 }}
-                                placeholder="Theme default"
+                                placeholder="Theme default (empty)"
                               />
                             </div>
                           </Field>
@@ -1006,6 +1009,37 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                       </div>
                     );
                   })}
+                </div>
+
+                <div className="admin-field full">
+                  <label>Timeline items (one per line: Year | Title | Body | now?)</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 140 }}
+                    value={((content.items as Array<{ year: string; title: string; body: string; now?: boolean; next?: boolean }>) || [])
+                      .map((i) => `${i.year} | ${i.title} | ${i.body}${i.now ? ' | now' : i.next ? ' | next' : ''}`)
+                      .join('\n')}
+                    onChange={(e) =>
+                      setField(
+                        'items',
+                        e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean)
+                          .map((line) => {
+                            const parts = line.split('|').map((p) => p.trim());
+                            const flag = (parts[3] || '').toLowerCase();
+                            return {
+                              year: parts[0] || '',
+                              title: parts[1] || '',
+                              body: parts[2] || '',
+                              now: flag === 'now',
+                              next: flag === 'next',
+                            };
+                          })
+                      )
+                    }
+                  />
                 </div>
               </div>
             ) : null}
@@ -1422,6 +1456,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
           </div>
         )}
       </form>
-    </div>
+    </div>,
+    document.body
   );
 }

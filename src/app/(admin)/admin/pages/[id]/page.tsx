@@ -344,6 +344,7 @@ export default function AdminPageSectionsPage() {
 
       {editing ? (
         <SectionEditor
+          key={editing.id}
           section={editing}
           onClose={() => setEditing(null)}
           onSaved={async () => {
