@@ -169,6 +169,7 @@ function CatalogCardMedia({
           : null,
         bgCss && `catalog-card-media--product-shade-${productShadow}`,
         marketplace && 'catalog-card-media--marketplace',
+        productPct >= 100 && 'catalog-card-media--fill-full',
         `catalog-card-media--inset-${inset}`
       )}
       style={style}

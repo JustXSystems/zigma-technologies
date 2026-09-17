@@ -936,7 +936,7 @@ export default function CatalogSettingsPage() {
                   />
                 </div>
                 <p style={{ margin: '0.3rem 0 0', fontSize: '0.75rem', color: 'var(--admin-muted)', whiteSpace: 'nowrap' }}>
-                  Listing cards only (higher = less empty space). Popup still uses Inventory fit %.
+                  Listing cards only (100% = edge-to-edge cover). Popup still uses Inventory fit %.
                 </p>
               </div>
               <div className="admin-field full">
