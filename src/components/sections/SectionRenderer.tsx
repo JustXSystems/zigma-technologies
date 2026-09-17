@@ -572,6 +572,82 @@ function ProjectsTeaserSection({
   );
 }
 
+function IndustryItem({
+  label,
+  href,
+  clone = false,
+}: {
+  label: string;
+  href: string | null;
+  clone?: boolean;
+}) {
+  const inner = (
+    <>
+      <svg
+        className="ind-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: indIconFor(label) }}
+      />
+      <span>{label}</span>
+    </>
+  );
+  const cloneProps = clone
+    ? ({ 'aria-hidden': true, tabIndex: -1, 'data-marquee-clone': 'true' } as const)
+    : {};
+  if (href) {
+    return (
+      <a className="ind-item" href={hrefOf(href)} {...cloneProps}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <div className="ind-item" {...cloneProps}>
+      {inner}
+    </div>
+  );
+}
+
+function IndustriesMarqueeRow({
+  items,
+  direction,
+  industriesEnabled,
+  durationSec,
+}: {
+  items: string[];
+  direction: 'ltr' | 'rtl';
+  industriesEnabled: boolean;
+  durationSec: number;
+}) {
+  if (!items.length) return null;
+  const loop = [...items, ...items];
+  return (
+    <div className="ind-marquee-wrap">
+      <div
+        className={`ind-marquee-track ind-marquee-track--${direction}`}
+        style={{ ['--ind-marquee-duration' as string]: `${durationSec}s` }}
+      >
+        {loop.map((label, i) => {
+          const clone = i >= items.length;
+          const href = industriesEnabled ? industryHrefForLabel(label) : null;
+          return (
+            <IndustryItem
+              key={`${direction}-${label}-${i}`}
+              label={label}
+              href={href}
+              clone={clone}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function IndustriesSection({
   content,
   sectionKey,
@@ -582,8 +658,18 @@ function IndustriesSection({
   const copy = useSiteCopy();
   const industriesEnabled = copy.features.industriesEnabled;
   const items = (content.items as string[]) || [];
+  const layout = String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee';
+  const mid = Math.ceil(items.length / 2);
+  const rowA = items.slice(0, mid);
+  const rowB = items.slice(mid);
+  const durationA = Math.max(28, Math.round(rowA.length * 3.2));
+  const durationB = Math.max(32, Math.round(rowB.length * 3.6));
+
   return (
-    <section className="section section-gray" id={sectionKey || 'industries'}>
+    <section
+      className={`section section-gray${layout === 'marquee' ? ' industries-section--marquee' : ''}`}
+      id={sectionKey || 'industries'}
+    >
       <div className="container">
         <div className="section-head center">
           <div className="eyebrow eyebrow-orange">{String(content.eyebrow || '')}</div>
@@ -596,34 +682,31 @@ function IndustriesSection({
             </p>
           ) : null}
         </div>
-        <div className="ind-grid">
-          {items.map((label) => {
-            const href = industriesEnabled ? industryHrefForLabel(label) : null;
-            const inner = (
-              <>
-                <svg
-                  className="ind-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  dangerouslySetInnerHTML={{ __html: indIconFor(label) }}
-                />
-                <span>{label}</span>
-              </>
-            );
-            return href ? (
-              <a className="ind-item" key={label} href={hrefOf(href)}>
-                {inner}
-              </a>
-            ) : (
-              <div className="ind-item" key={label}>
-                {inner}
-              </div>
-            );
-          })}
-        </div>
+        {layout === 'grid' ? (
+          <div className="ind-grid">
+            {items.map((label) => {
+              const href = industriesEnabled ? industryHrefForLabel(label) : null;
+              return <IndustryItem key={label} label={label} href={href} />;
+            })}
+          </div>
+        ) : null}
       </div>
+      {layout === 'marquee' ? (
+        <div className="ind-marquee" aria-label="Industries we serve">
+          <IndustriesMarqueeRow
+            items={rowA}
+            direction="ltr"
+            industriesEnabled={industriesEnabled}
+            durationSec={durationA}
+          />
+          <IndustriesMarqueeRow
+            items={rowB}
+            direction="rtl"
+            industriesEnabled={industriesEnabled}
+            durationSec={durationB}
+          />
+        </div>
+      ) : null}
     </section>
   );
 }

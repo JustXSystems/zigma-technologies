@@ -504,22 +504,55 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
 
             {section.type === 'industries' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>Industry labels (one per line)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 200 }}
-                  value={((content.items as string[]) || []).join('\n')}
-                  onChange={(e) =>
-                    setField(
-                      'items',
-                      e.target.value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                />
+              <div style={{ marginTop: '0.8rem' }}>
+                <div className="admin-form-grid">
+                  <Field label="Display layout">
+                    <select
+                      className="admin-input"
+                      value={String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee'}
+                      onChange={(e) => setField('layout', e.target.value)}
+                    >
+                      <option value="marquee">Rotating marquee</option>
+                      <option value="grid">Tabular grid</option>
+                    </select>
+                  </Field>
+                  <Field label="Hub link label">
+                    <input
+                      className="admin-input"
+                      value={String(content.linkLabel || '')}
+                      onChange={(e) => setField('linkLabel', e.target.value)}
+                      placeholder="See All Industries We Serve →"
+                    />
+                  </Field>
+                  <Field label="Hub link URL">
+                    <input
+                      className="admin-input"
+                      value={String(content.linkHref || '')}
+                      onChange={(e) => setField('linkHref', e.target.value)}
+                      placeholder="/industries"
+                    />
+                  </Field>
+                </div>
+                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                  <label>Industry labels (one per line)</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 200 }}
+                    value={((content.items as string[]) || []).join('\n')}
+                    onChange={(e) =>
+                      setField(
+                        'items',
+                        e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                  />
+                  <small style={{ color: 'var(--admin-muted)' }}>
+                    Marquee uses two opposite-scrolling rows, pauses on hover/keyboard focus, and respects reduced-motion.
+                  </small>
+                </div>
               </div>
             ) : null}
 

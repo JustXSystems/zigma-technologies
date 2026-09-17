@@ -37,7 +37,7 @@ export const SECTION_TYPES = [
   { type: 'split', label: 'Split feature block' },
   { type: 'timeline', label: 'Legacy timeline' },
   { type: 'projects_teaser', label: 'Projects teaser' },
-  { type: 'industries', label: 'Industries grid' },
+  { type: 'industries', label: 'Industries (grid / marquee)' },
   { type: 'testimonials', label: 'Testimonials' },
   { type: 'partners', label: 'Partners marquee' },
   { type: 'logo_marquee', label: 'Logo / brand marquee' },

@@ -321,6 +321,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
     content_json: {
       eyebrow: 'INDUSTRIES',
       title: 'Engineering that understands your industry.',
+      layout: 'marquee',
       linkLabel: 'See All Industries We Serve →',
       linkHref: '/industries',
       items: [
