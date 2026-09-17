@@ -26,6 +26,64 @@ function Field({
   );
 }
 
+const HEX6 = /^#[0-9A-Fa-f]{6}$/;
+
+function ColorPickerField({
+  label,
+  value,
+  fallback,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  fallback: string;
+  onChange: (next: string) => void;
+  hint?: string;
+}) {
+  const pickerValue = HEX6.test(value) ? value : fallback;
+  return (
+    <Field label={label}>
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <input
+          type="color"
+          value={pickerValue}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+          style={{
+            width: 44,
+            height: 34,
+            padding: 0,
+            border: '1px solid var(--admin-border)',
+            borderRadius: 6,
+            background: 'transparent',
+          }}
+        />
+        <input
+          className="admin-input"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={fallback}
+        />
+        {value ? (
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={() => onChange('')}
+            title="Clear to use tone preset"
+            style={{ padding: '0.35rem 0.65rem', whiteSpace: 'nowrap' }}
+          >
+            Clear
+          </button>
+        ) : null}
+      </div>
+      {hint ? (
+        <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>{hint}</p>
+      ) : null}
+    </Field>
+  );
+}
+
 type TimelineCta = { label: string; href: string; position?: string; color?: string };
 
 function migrateTimelineContent(raw: Record<string, unknown>): Record<string, unknown> {
@@ -314,6 +372,22 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     <option value="ice">ice</option>
                   </select>
                 </Field>
+                <ColorPickerField
+                  label="Section background"
+                  value={String(content.sectionBg || '')}
+                  fallback={
+                    content.tone === 'gray' ? '#F4F6F9' : content.tone === 'ice' ? '#F0F8FC' : '#FFFFFF'
+                  }
+                  onChange={(next) => setField('sectionBg', next)}
+                  hint="Overrides Tone when set. Clear to use the Tone preset."
+                />
+                <ColorPickerField
+                  label="Feature card background"
+                  value={String(content.featCardBg || '')}
+                  fallback="#FFFFFF"
+                  onChange={(next) => setField('featCardBg', next)}
+                  hint="Applies to all feature cards in this split block."
+                />
                 <Field label="Eyebrow class">
                   <input className="admin-input" value={String(content.eyebrowClass || 'eyebrow-orange')} onChange={(e) => setField('eyebrowClass', e.target.value)} />
                 </Field>

@@ -928,6 +928,14 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
   const feats =
     (content.features as Array<{ title: string; body: string; icon?: string }>) || [];
   const imgLeft = content.imagePosition !== 'right';
+  const customSectionBg =
+    typeof content.sectionBg === 'string' && content.sectionBg.trim()
+      ? content.sectionBg.trim()
+      : '';
+  const customFeatCardBg =
+    typeof content.featCardBg === 'string' && content.featCardBg.trim()
+      ? content.featCardBg.trim()
+      : '';
   const sectionClass =
     content.tone === 'gray'
       ? 'section-gray'
@@ -952,7 +960,11 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
       {feats.length ? (
         <div className="split-feat-grid">
           {feats.map((f, i) => (
-            <div className="feat-card" key={`${f.title}-${i}`}>
+            <div
+              className="feat-card"
+              key={`${f.title}-${i}`}
+              style={customFeatCardBg ? { background: customFeatCardBg } : undefined}
+            >
               <div className="feat-icon-wrap">
                 <svg
                   className="feat-icon"
@@ -978,7 +990,11 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
   );
 
   return (
-    <section className={`section ${sectionClass}`} id={sectionKey || undefined}>
+    <section
+      className={`section split-section ${sectionClass}`}
+      id={sectionKey || undefined}
+      style={customSectionBg ? { background: customSectionBg } : undefined}
+    >
       <div className="container">
         <div className={`split-layout ${imgLeft ? 'img-left' : 'img-right'}`}>
           {imgLeft ? imageBlock : null}

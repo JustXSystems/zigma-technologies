@@ -7,11 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#15 can move catalog-detail-footer to catalog-detail-layout as next row spannig accross catalog-detail-media-col and catalog-detail-content-col">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#16 Card image fill admin-field full is set to 100, still I see card listing catalog-card-media is having more empty space, can please check and fix to have card image to consume full area (full height, full width) of catalog-card-media">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.6201251410084103" />
-      <entry key="MS500" value="2.4732692870396265" />
-      <entry key="S2" value="6.0418504104074175" />
-      <entry key="S5" value="10.182868188898613" />
-      <entry key="S10" value="13.175667323177828" />
-      <entry key="S30" value="17.852565671384056" />
-      <entry key="S60" value="25.840884984616885" />
-      <entry key="M2" value="42.35410856878518" />
-      <entry key="M5" value="75.68871172458913" />
-      <entry key="M10" value="103.07578271401644" />
-      <entry key="M15" value="117.12452028423643" />
-      <entry key="M30" value="136.34775066250916" />
-      <entry key="H1" value="166.03848236241186" />
-      <entry key="H2" value="308.1706913902093" />
-      <entry key="H4" value="725.6521499544699" />
-      <entry key="D1" value="3741.3888117718316" />
-      <entry key="W1" value="12650.874100118106" />
+      <entry key="MS100" value="1.6481272551752784" />
+      <entry key="MS500" value="4.148235011503543" />
+      <entry key="S2" value="6.765503347126901" />
+      <entry key="S5" value="9.560688729843964" />
+      <entry key="S10" value="16.55799448873212" />
+      <entry key="S30" value="47.12234252653587" />
+      <entry key="S60" value="75.06410325986813" />
+      <entry key="M2" value="106.9719269744908" />
+      <entry key="M5" value="148.3742496672354" />
+      <entry key="M10" value="183.15738027737206" />
+      <entry key="M15" value="209.14471267698823" />
+      <entry key="M30" value="257.6794967643888" />
+      <entry key="H1" value="311.1255910369212" />
+      <entry key="H2" value="455.7826259033415" />
+      <entry key="H4" value="864.5613694624212" />
+      <entry key="D1" value="3887.550429571057" />
+      <entry key="W1" value="12822.226280878825" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -88,32 +89,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.296358438265914E-253" />
-      <entry key="M30" value="3.600497796507805E-127" />
-      <entry key="H1" value="6.0004148160842344E-64" />
-      <entry key="H2" value="2.44957441529821E-32" />
-      <entry key="H4" value="1.5651116303257535E-16" />
-      <entry key="D1" value="0.0023586590417374164" />
-      <entry key="W1" value="0.653360316164208" />
+      <entry key="M15" value="3.6932547222555126E-254" />
+      <entry key="M30" value="1.9217842548670828E-127" />
+      <entry key="H1" value="4.383815980247541E-64" />
+      <entry key="H2" value="2.093756428108828E-32" />
+      <entry key="H4" value="1.4469818340876096E-16" />
+      <entry key="D1" value="0.002328009736030364" />
+      <entry key="W1" value="0.6521406482434317" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5500219993854853" />
-      <entry key="MS500" value="2.4515873926392473" />
-      <entry key="S2" value="6.028825455697227" />
-      <entry key="S5" value="10.17408447876733" />
-      <entry key="S10" value="13.169983660546215" />
-      <entry key="S30" value="17.850027748587138" />
-      <entry key="S60" value="25.839094254403463" />
-      <entry key="M2" value="42.352657366174114" />
-      <entry key="M5" value="75.68764612692291" />
-      <entry key="M10" value="103.075028379328" />
-      <entry key="M15" value="117.12393691212401" />
-      <entry key="M30" value="136.34740024139995" />
-      <entry key="H1" value="166.0382658535208" />
-      <entry key="H2" value="308.17050269126645" />
-      <entry key="H4" value="725.651924975219" />
-      <entry key="D1" value="3741.390965830749" />
-      <entry key="W1" value="12651.527314317054" />
+      <entry key="MS100" value="1.5871343001856424" />
+      <entry key="MS500" value="4.119347166778029" />
+      <entry key="S2" value="6.754046122355798" />
+      <entry key="S5" value="9.554281930323386" />
+      <entry key="S10" value="16.55242162132746" />
+      <entry key="S30" value="47.11704210854942" />
+      <entry key="S60" value="75.05986352006839" />
+      <entry key="M2" value="106.96887988098888" />
+      <entry key="M5" value="148.37253817819627" />
+      <entry key="M10" value="183.15629808757816" />
+      <entry key="M15" value="209.1438684921584" />
+      <entry key="M30" value="257.6789525346996" />
+      <entry key="H1" value="311.1252493512254" />
+      <entry key="H2" value="455.78237158254433" />
+      <entry key="H4" value="864.5611146219838" />
+      <entry key="D1" value="3887.552547786467" />
+      <entry key="W1" value="12822.878274559642" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -265,7 +266,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
     <MESSAGE value="#6 Marketplace catalog cards are wired end-to-end.&#10;   Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card style: Marketplace (Amazon-like) or Overlay&#10;   •&#10;   Card body background: color picker + hex (saved per catalog type)&#10;   Public cards (Marketplace)&#10;   •&#10;   Image sits above; body sits below with your chosen background&#10;   •&#10;   Media is clean like the popup — no gray wash or product drop-shadow&#10;   •&#10;   Overlay mode keeps the previous cinematic text-over-media look&#10;   Default is Marketplace. Save catalog settings once so PreProd picks up the new columns via schema self-heal" />
     <MESSAGE value="#6 Marketplace cards now use the same inventory presentation as the popup:&#10;   •&#10;   Background image + background shadow (soft / medium / strong / bottom / none)&#10;   •&#10;   Product image shadow when a background is set&#10;   •&#10;   Fit percent still applied as before&#10;   Cards no longer strip those classes or force box-shadow: none, so Inventory settings show on catalog-card-media the same way they do in the detail gallery." />
     <MESSAGE value="#6 In Admin → Catalog settings → Layout and listing fields, use Catalog card fields checkboxes:&#10;   •&#10;   Media: product image&#10;   •&#10;   Card body: category, title, price/stat, description, tags, availability, lead time, quick view, detail-page link&#10;   Unchecked fields are hidden on public cards. Save settings after changing toggles." />
@@ -290,7 +290,8 @@
     <MESSAGE value="#13 build issue fixed" />
     <MESSAGE value="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes." />
     <MESSAGE value="#15 can move catalog-detail-footer to catalog-detail-layout as next row spannig accross catalog-detail-media-col and catalog-detail-content-col" />
-    <option name="LAST_COMMIT_MESSAGE" value="#15 can move catalog-detail-footer to catalog-detail-layout as next row spannig accross catalog-detail-media-col and catalog-detail-content-col" />
+    <MESSAGE value="#16 Card image fill admin-field full is set to 100, still I see card listing catalog-card-media is having more empty space, can please check and fix to have card image to consume full area (full height, full width) of catalog-card-media" />
+    <option name="LAST_COMMIT_MESSAGE" value="#16 Card image fill admin-field full is set to 100, still I see card listing catalog-card-media is having more empty space, can please check and fix to have card image to consume full area (full height, full width) of catalog-card-media" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

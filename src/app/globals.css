@@ -1030,32 +1030,23 @@
   .why-card.tint-6{background:#F5F8FE;}
 
   /* ---------- SPLIT SERVICE SECTIONS (GENERATE / PROTECT / MAINTAIN) ---------- */
-  .split-layout{display:grid;gap:3.5rem;align-items:center;}
+  .split-section{padding:5.5rem 0;}
+  .split-layout{display:grid;gap:2.25rem;align-items:stretch;}
   .split-layout.img-left{grid-template-columns:9fr 11fr;}
   .split-layout.img-right{grid-template-columns:11fr 9fr;}
-  .split-img-wrap{position:relative;height:100%;min-height:460px;border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -25px rgba(10,22,40,0.3);}
+  .split-img-wrap{position:relative;height:100%;min-height:320px;border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -25px rgba(10,22,40,0.3);}
   .split-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-  .split-content .eyebrow{margin-bottom:0.9rem;font-size:var(--text-eyebrow-lg);}
-  .split-content :is(h1,h2,h3){margin-bottom:1.1rem;}
-  .split-content > p.split-desc{margin-bottom:2.4rem;max-width:600px;color:var(--graphite-500);font-size:1.12rem;line-height:1.7;}
+  .split-content{display:flex;flex-direction:column;justify-content:center;min-width:0;}
+  .split-content .eyebrow{margin-bottom:0.55rem;font-size:var(--text-eyebrow-lg);}
+  .split-content :is(h1,h2,h3){margin-bottom:0.75rem;}
+  .split-content > p.split-desc{margin-bottom:1.35rem;max-width:600px;color:var(--graphite-500);font-size:1.05rem;line-height:1.6;}
 
-  /* ---------- GENERATE & PROTECT — trimmed height to fit better, kept identical to each other ---------- */
-  #generate,#protect{padding:5.5rem 0;}
-  #generate .split-img-wrap,#protect .split-img-wrap{min-height:380px;}
-  #generate .split-layout,#protect .split-layout{gap:2.5rem;}
-  #generate .split-content .eyebrow,#protect .split-content .eyebrow{margin-bottom:0.6rem;}
-  #generate .split-content :is(h1,h2,h3),#protect .split-content :is(h1,h2,h3){margin-bottom:0.8rem;}
-  #generate .split-desc,#protect .split-desc{margin-bottom:1.6rem;}
-  #generate .split-feat-grid,#protect .split-feat-grid{gap:1rem;margin-bottom:1.6rem;}
-  #generate .split-feat-grid .feat-card,#protect .split-feat-grid .feat-card{padding:1.2rem;}
-  #generate .split-feat-grid .feat-icon-wrap,#protect .split-feat-grid .feat-icon-wrap{margin-bottom:0.7rem;}
-
-  .split-feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.3rem;margin-bottom:2.4rem;}
-  .split-feat-grid .feat-card{padding:1.5rem;}
-  .split-feat-grid .feat-card h5{font-size:0.98rem;margin-bottom:0.5rem;}
-  .split-feat-grid .feat-card p{font-size:0.84rem;margin-bottom:0;}
-  .split-feat-grid .feat-icon-wrap{width:42px;height:42px;margin-bottom:1rem;}
-  .split-feat-grid .feat-icon{width:22px;height:22px;}
+  .split-feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.9rem;margin-bottom:1.35rem;}
+  .split-feat-grid .feat-card{padding:1.1rem 1.15rem;}
+  .split-feat-grid .feat-card h5{font-size:0.95rem;margin-bottom:0.35rem;}
+  .split-feat-grid .feat-card p{font-size:0.82rem;margin-bottom:0;line-height:1.5;}
+  .split-feat-grid .feat-icon-wrap{width:38px;height:38px;margin-bottom:0.65rem;}
+  .split-feat-grid .feat-icon{width:20px;height:20px;}
   .btn.btn-hover-lift{transition:transform .2s ease, box-shadow .2s ease;}
   .btn.btn-hover-lift:hover{transform:translateY(-2px);box-shadow:0 14px 28px -12px rgba(255,109,26,0.45);}
   .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease, transform .7s ease;}
@@ -1491,8 +1482,10 @@
     .eco-grid{grid-template-columns:1fr;gap:3rem;}
     .eco-visual{max-width:420px;margin:0 auto;}
     .tag-dock{max-width:80%;bottom:6.6rem;right:1.6rem;}
-    .split-layout.img-left,.split-layout.img-right{grid-template-columns:1fr;gap:2.4rem;}
-    .split-img-wrap{min-height:320px;order:-1;}
+    .split-layout.img-left,.split-layout.img-right{grid-template-columns:1fr;gap:1.75rem;}
+    .split-img-wrap{min-height:240px;max-height:360px;order:-1;}
+    .split-img-wrap.map-wrap{max-height:none;min-height:280px;}
+    .split-section{padding:4.25rem 0;}
   }
   @media (max-width:760px){
     :root{--section-pad:5rem;--header-h:62px;}
