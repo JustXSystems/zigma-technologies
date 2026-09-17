@@ -43,7 +43,7 @@ export const THEME_TOKEN_META: ThemeTokenMeta[] = [
   { key: '--text-h2', label: 'Heading 2 size', group: 'typography', type: 'text' },
   { key: '--text-h3', label: 'Heading 3 size', group: 'typography', type: 'text' },
   { key: '--text-h4', label: 'Heading 4 size', group: 'typography', type: 'text' },
-  { key: '--text-eyebrow', label: 'Eyebrow', group: 'typography', type: 'size' },
+  /* Eyebrow sizes are edited in Site Settings → Eyebrow font sizes (injected via logoSizingCss). */
 
   { key: '--section-pad', label: 'Section padding', group: 'layout', type: 'size' },
   { key: '--header-h', label: 'Header height', group: 'layout', type: 'size' },
@@ -77,6 +77,8 @@ export const DEFAULT_THEME_TOKENS: Record<string, string> = {
   '--text-h3': 'clamp(1.35rem, 2.4vw, 1.75rem)',
   '--text-h4': 'clamp(1.15rem, 1.8vw, 1.35rem)',
   '--text-eyebrow': '0.9rem',
+  '--text-eyebrow-md': '1.15rem',
+  '--text-eyebrow-lg': '1.44rem',
 };
 
 export const CSS_OVERRIDE_MAX_BYTES = 2_000_000;

@@ -36,6 +36,8 @@
     --text-h3: clamp(1.35rem, 2.4vw, 1.75rem);
     --text-h4: clamp(1.15rem, 1.8vw, 1.35rem);
     --text-eyebrow: 0.9rem;
+    --text-eyebrow-md: 1.15rem;
+    --text-eyebrow-lg: 1.44rem;
     --logo-chip-h: 42px;
     --logo-chip-h-mobile: 32px;
     --logo-word-font: var(--font-display);
@@ -98,7 +100,7 @@
   }
   p{font-size:1em;line-height:1.65;}
   .container{max-width:1600px;margin:0 auto;padding:0 3rem;}
-  .eyebrow-lg{font-size:1.44rem;}
+  .eyebrow-lg{font-size:var(--text-eyebrow-lg);}
   .eyebrow{
     font-family:var(--font-mono);
     font-size:var(--text-eyebrow);
@@ -962,7 +964,7 @@
   .eco-pulse{animation:nodepulse 2.6s ease-in-out infinite;}
   @keyframes nodepulse{0%,100%{opacity:0.75;}50%{opacity:1;}}
 
-  .eco-text .eyebrow{margin-bottom:1.2rem;font-size:1.05rem;}
+  .eco-text .eyebrow{margin-bottom:1.2rem;font-size:var(--text-eyebrow-md);}
   .eco-text :is(h1,h2,h3){margin-bottom:1.3rem;letter-spacing:-0.025em;}
   .eco-text > p{color:#C5D0E0;font-size:var(--text-lead);margin-bottom:2.2rem;max-width:600px;line-height:1.65;}
   .cap-checklist{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem 2.2rem;margin-bottom:2.4rem;}
@@ -1003,7 +1005,7 @@
   /* ---------- WHY ZIGMA ---------- */
   .why-section{padding:6.75rem 0;} /* section height reduced 25% (from 9rem) */
   .why-section .section-head{margin-bottom:3rem;max-width:920px;} /* scaled down 25% to match */
-  .why-section .eyebrow{font-size:1.44rem;}
+  .why-section .eyebrow{font-size:var(--text-eyebrow-lg);}
   .why-section .section-head p{font-size:1.18rem;line-height:1.6;max-width:900px;}
   .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.7rem;}
   .why-card{position:relative;background:var(--white);padding:2.6rem 2.2rem;border-radius:10px;overflow:hidden;box-shadow:0 14px 34px -10px rgba(10,22,40,0.34);}
@@ -1033,7 +1035,7 @@
   .split-layout.img-right{grid-template-columns:11fr 9fr;}
   .split-img-wrap{position:relative;height:100%;min-height:460px;border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -25px rgba(10,22,40,0.3);}
   .split-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-  .split-content .eyebrow{margin-bottom:0.9rem;font-size:1.44rem;}
+  .split-content .eyebrow{margin-bottom:0.9rem;font-size:var(--text-eyebrow-lg);}
   .split-content :is(h1,h2,h3){margin-bottom:1.1rem;}
   .split-content > p.split-desc{margin-bottom:2.4rem;max-width:600px;color:var(--graphite-500);font-size:1.12rem;line-height:1.7;}
 
@@ -1288,7 +1290,7 @@
 
   /* ---------- PARTNERS MARQUEE ---------- */
   .partners-section{padding:7.2rem 0;} /* 20% less than default 9rem section padding */
-  .partners-section .eyebrow{font-size:1.15rem;} /* 60% larger than base 0.72rem eyebrow */
+  .partners-section .eyebrow{font-size:var(--text-eyebrow-md);} /* mid scale above base eyebrow */
   .partners-section .section-head{margin-bottom:3.2rem;}
   .partner-marquee-wrap{
     overflow:hidden;width:100%;padding:1.92rem 0; /* 20% less than original 2.4rem */
@@ -1871,8 +1873,8 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .breadcrumb a:hover{color:var(--white);}
 .breadcrumb .sep{opacity:0.5;}
 .breadcrumb .current{color:var(--cyan);}
-.page-hero .eyebrow{color:var(--orange);margin-bottom:1.1rem;position:relative;z-index:1;font-size:1.15rem;letter-spacing:0.1em;}
-#life-at-zigma .section-head .eyebrow,#why-join-us .section-head .eyebrow,#current-openings .section-head .eyebrow,#employee-benefits .section-head .eyebrow,#how-we-help .section-head .eyebrow,.contact-form-section .section-head .eyebrow{font-size:1.44rem;}
+.page-hero .eyebrow{color:var(--orange);margin-bottom:1.1rem;position:relative;z-index:1;font-size:var(--text-eyebrow-md);letter-spacing:0.1em;}
+#life-at-zigma .section-head .eyebrow,#why-join-us .section-head .eyebrow,#current-openings .section-head .eyebrow,#employee-benefits .section-head .eyebrow,#how-we-help .section-head .eyebrow,.contact-form-section .section-head .eyebrow{font-size:var(--text-eyebrow-lg);}
 .page-hero :is(h1,h2,h3){
   max-width:900px;
   position:relative;z-index:1;
@@ -2718,7 +2720,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .program-point .pp-value{font-weight:600;font-size:0.92rem;color:var(--graphite-800);margin-top:0.15rem;}
 
 /* ---------- APPLY ONLINE (reuse cf-grid pattern from contact form) ---------- */
-#apply .section-head .eyebrow{font-size:1.44rem;}
+#apply .section-head .eyebrow{font-size:var(--text-eyebrow-lg);}
 
 /* ---------- EMPLOYEE BENEFITS — 2x3 grid, pastel blue cards ---------- */
 #employee-benefits .feat-grid{grid-template-columns:repeat(3,1fr);}

@@ -105,6 +105,12 @@ export type SiteSettings = {
    * h1 | h2 | h3 — size follows --text-h1/h2/h3.
    */
   headingSection: string;
+  /** Base .eyebrow font-size (e.g. 0.9rem) → --text-eyebrow */
+  eyebrowSize: string;
+  /** Large section eyebrows (.eyebrow-lg, why/split/careers) → --text-eyebrow-lg */
+  eyebrowSizeLg: string;
+  /** Medium eyebrows (page heroes, partners) → --text-eyebrow-md */
+  eyebrowSizeMd: string;
   copyright: string;
   /** Footer credit: show/hide (true/false) */
   poweredByEnabled: string;
@@ -190,6 +196,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   navMenuStyle: 'classic',
   headingPageHero: 'h3',
   headingSection: 'h3',
+  eyebrowSize: '0.9rem',
+  eyebrowSizeLg: '1.44rem',
+  eyebrowSizeMd: '1.15rem',
   copyright: '© 2026 Zigma Technologies. All rights reserved.',
   poweredByEnabled: 'true',
   poweredByPrefix: 'Powered by',
@@ -339,7 +348,7 @@ export function sanitizeCssLetterSpacing(value: string | undefined, fallback: st
   return fallback;
 }
 
-/** Inline :root vars so header/footer logo-chip and logo-word type follow Site Settings. */
+/** Inline :root vars so header/footer logo-chip, logo-word type, and eyebrow sizes follow Site Settings. */
 export function logoSizingCss(settings: SiteSettings): string {
   const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
   const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
@@ -361,8 +370,11 @@ export function logoSizingCss(settings: SiteSettings): string {
     settings.logoTaglineLetterSpacing,
     DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing
   );
+  const eyebrow = sanitizeCssSize(settings.eyebrowSize, DEFAULT_SITE_SETTINGS.eyebrowSize);
+  const eyebrowLg = sanitizeCssSize(settings.eyebrowSizeLg, DEFAULT_SITE_SETTINGS.eyebrowSizeLg);
+  const eyebrowMd = sanitizeCssSize(settings.eyebrowSizeMd, DEFAULT_SITE_SETTINGS.eyebrowSizeMd);
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
     `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}.logo-word small,header .logo-word small,footer .footer-logo .logo-word small,.footer-logo .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}}`,
   ].join('');

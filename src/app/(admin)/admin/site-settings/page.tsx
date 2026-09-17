@@ -8,6 +8,7 @@ import LogoBrandPreview from '@/components/admin/LogoBrandPreview';
 import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
 import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
 import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
+import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -88,6 +89,14 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
     title: 'Public heading levels',
     description:
       'Control whether page heroes and section titles render as H1, H2, or H3. Defaults to H3 (compact). Raise a role to H2/H1 for more emphasis — type size follows the theme tokens.',
+    defaultOpen: true,
+    fields: [],
+  },
+  {
+    id: 'eyebrow-sizes',
+    title: 'Eyebrow font sizes',
+    description:
+      'Uppercase mono labels above section titles. Base, medium (heroes), and large (.eyebrow-lg / section heads) sizes map to --text-eyebrow CSS variables.',
     defaultOpen: true,
     fields: [],
   },
@@ -272,6 +281,18 @@ export default function SiteSettingsPage() {
     setMessage('Logo chip & word type reset to defaults — click Save settings to publish.');
   }
 
+  function resetEyebrowSizes() {
+    setSettings((prev) =>
+      mergeSiteSettings({
+        ...prev,
+        eyebrowSize: DEFAULT_SITE_SETTINGS.eyebrowSize,
+        eyebrowSizeMd: DEFAULT_SITE_SETTINGS.eyebrowSizeMd,
+        eyebrowSizeLg: DEFAULT_SITE_SETTINGS.eyebrowSizeLg,
+      })
+    );
+    setMessage('Eyebrow sizes reset to defaults — click Save settings to publish.');
+  }
+
   function patchSettings(patch: Partial<SiteSettings>) {
     setSettings((prev) => ({ ...prev, ...patch }));
   }
@@ -347,6 +368,10 @@ export default function SiteSettingsPage() {
                 <button type="button" className="admin-btn admin-btn-secondary" onClick={resetLogoSizes}>
                   Reset logo type
                 </button>
+              ) : section.id === 'eyebrow-sizes' ? (
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={resetEyebrowSizes}>
+                  Reset eyebrows
+                </button>
               ) : undefined
             }
           >
@@ -356,6 +381,8 @@ export default function SiteSettingsPage() {
               <NavMenuStylePicker settings={settings} onChange={patchSettings} />
             ) : section.id === 'heading-levels' ? (
               <HeadingLevelPicker settings={settings} onChange={patchSettings} />
+            ) : section.id === 'eyebrow-sizes' ? (
+              <EyebrowSizeEditor settings={settings} onChange={patchSettings} />
             ) : (
               <div className="admin-form-grid">{section.fields.map(renderField)}</div>
             )}

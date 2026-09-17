@@ -7,8 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#13 Product, Services, Project card Background color to be set in admin">
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#13 build issue fixed">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/theme-tokens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/theme-tokens.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0000000000010667" />
-      <entry key="S30" value="1.0010226534381543" />
-      <entry key="S60" value="1.2436682878879934" />
-      <entry key="M2" value="5.244817847702929" />
-      <entry key="M5" value="32.772651666515856" />
-      <entry key="M10" value="80.09651870898834" />
-      <entry key="M15" value="124.54050148823643" />
-      <entry key="M30" value="260.1739801984433" />
-      <entry key="H1" value="496.74344263621026" />
-      <entry key="H2" value="834.3724778249017" />
-      <entry key="H4" value="1327.5319942686726" />
-      <entry key="D1" value="4114.875984232831" />
-      <entry key="W1" value="12723.637194180132" />
+      <entry key="MS100" value="1.2094887560985483" />
+      <entry key="MS500" value="3.181343679743604" />
+      <entry key="S2" value="6.0459624305915085" />
+      <entry key="S5" value="9.500294824960916" />
+      <entry key="S10" value="13.607614457037394" />
+      <entry key="S30" value="20.073956761110455" />
+      <entry key="S60" value="22.70911984001625" />
+      <entry key="M2" value="24.261571504651627" />
+      <entry key="M5" value="25.280712520039785" />
+      <entry key="M10" value="25.638179546809553" />
+      <entry key="M15" value="25.857221358937526" />
+      <entry key="M30" value="33.165916078132724" />
+      <entry key="H1" value="108.918497592774" />
+      <entry key="H2" value="367.21280375324574" />
+      <entry key="H4" value="875.6409283792783" />
+      <entry key="D1" value="3848.541944307447" />
+      <entry key="W1" value="12619.693573301804" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -85,32 +89,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.732614322418311E-247" />
-      <entry key="M30" value="4.16246840518711E-124" />
-      <entry key="H1" value="2.0402128333062952E-62" />
-      <entry key="H2" value="1.428360190325284E-31" />
-      <entry key="H4" value="3.7793652778919495E-16" />
-      <entry key="D1" value="0.0027319794226638387" />
-      <entry key="W1" value="0.6672195910133585" />
+      <entry key="M15" value="1.2737680680155665E-250" />
+      <entry key="M30" value="1.1286133385776571E-125" />
+      <entry key="H1" value="3.359484095181605E-63" />
+      <entry key="H2" value="5.796105671208255E-32" />
+      <entry key="H4" value="2.407510264028801E-16" />
+      <entry key="D1" value="0.002534169367782561" />
+      <entry key="W1" value="0.6600938358929662" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9395227492140118" />
-      <entry key="MS500" value="0.9876008614453725" />
-      <entry key="S2" value="0.9968856972203758" />
-      <entry key="S5" value="0.9987531130852756" />
-      <entry key="S10" value="0.9993763620815768" />
-      <entry key="S30" value="1.0008146305264518" />
-      <entry key="S60" value="1.2435520871679773" />
-      <entry key="M2" value="5.244657404582508" />
-      <entry key="M5" value="32.77229309583229" />
-      <entry key="M10" value="80.09607787324404" />
-      <entry key="M15" value="124.54004293041497" />
-      <entry key="M30" value="260.17349299265777" />
-      <entry key="H1" value="496.74296167380976" />
-      <entry key="H2" value="834.372045906948" />
-      <entry key="H4" value="1327.5316023711337" />
-      <entry key="D1" value="4114.878492539639" />
-      <entry key="W1" value="12724.30426626247" />
+      <entry key="MS100" value="1.0931751333385074" />
+      <entry key="MS500" value="3.1351460412219527" />
+      <entry key="S2" value="6.025607748540609" />
+      <entry key="S5" value="9.486711495196435" />
+      <entry key="S10" value="13.59705785977935" />
+      <entry key="S30" value="20.06827153869511" />
+      <entry key="S60" value="22.705815290556547" />
+      <entry key="M2" value="24.259781123353587" />
+      <entry key="M5" value="25.27995981269523" />
+      <entry key="M10" value="25.637796781833174" />
+      <entry key="M15" value="25.85696438228493" />
+      <entry key="M30" value="33.16577353076279" />
+      <entry key="H1" value="108.91835293379509" />
+      <entry key="H2" value="367.212595233977" />
+      <entry key="H4" value="875.6406618831838" />
+      <entry key="D1" value="3848.5442681460713" />
+      <entry key="W1" value="12620.353520795466" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -262,7 +266,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 Logo tagline now accepts and renders limited HTML" />
     <MESSAGE value="#6 while selecting the background image, also need to customization to select shading style.&#10;   for the actual catalog image selection, also need to apply fit to available space as checkbox, and fix percentage for each catalog item. in /admin/Inventory - media" />
     <MESSAGE value="#6 The Media modal is now a compact studio layout with a live preview" />
     <MESSAGE value="#6 Shadow and Fit are now independent for background vs each attached image, and public cards no longer use a gray wash." />
@@ -287,7 +290,8 @@
     <MESSAGE value="#12 New Menu style like Justxsystems" />
     <MESSAGE value="#11 Heading levels are now admin-configurable without breaking layout." />
     <MESSAGE value="#13 Product, Services, Project card Background color to be set in admin" />
-    <option name="LAST_COMMIT_MESSAGE" value="#13 Product, Services, Project card Background color to be set in admin" />
+    <MESSAGE value="#13 build issue fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="#13 build issue fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
