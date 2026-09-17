@@ -6,6 +6,7 @@ import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import LogoBrandPreview from '@/components/admin/LogoBrandPreview';
 import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
+import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -72,6 +73,14 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
       { key: 'ctaVariantBPercent', label: 'Variant B percent 0–100', hint: 'e.g. 50 shows B half the time' },
       { key: 'headerCtaHref', label: 'Header CTA href' },
     ],
+  },
+  {
+    id: 'nav-menu-style',
+    title: 'Navigation menu style',
+    description:
+      'Choose how the public header and mega-menu look. Classic keeps today’s panels; Corporate matches a JustX-style compact dropdown. Also includes Lumen, Mosaic, and Ribbon modern variants.',
+    defaultOpen: true,
+    fields: [],
   },
   {
     id: 'footer-legal',
@@ -334,6 +343,8 @@ export default function SiteSettingsPage() {
           >
             {section.id === 'logo-sizes' ? (
               <LogoTypeEditor settings={settings} onChange={patchSettings} />
+            ) : section.id === 'nav-menu-style' ? (
+              <NavMenuStylePicker settings={settings} onChange={patchSettings} />
             ) : (
               <div className="admin-form-grid">{section.fields.map(renderField)}</div>
             )}

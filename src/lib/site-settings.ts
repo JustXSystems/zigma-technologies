@@ -1,3 +1,51 @@
+/** Public header mega-menu visual styles (admin Site Settings). */
+export const NAV_MENU_STYLES = [
+  {
+    id: 'classic',
+    label: 'Classic mega',
+    description: 'Current wide multi-column mega panels with cyan section labels.',
+  },
+  {
+    id: 'corporate',
+    label: 'Corporate compact',
+    description:
+      'JustX-inspired: uppercase top links, tight grouped dropdowns, and soft row hover fills.',
+  },
+  {
+    id: 'elegant',
+    label: 'Elegant glass',
+    description: 'Frosted panel, underline accents on parents, and refined column hierarchy.',
+  },
+  {
+    id: 'rail',
+    label: 'Enterprise rail',
+    description: 'Divided columns with a top accent rail — dense, boardroom-ready navigation.',
+  },
+  {
+    id: 'lumen',
+    label: 'Lumen glow',
+    description: 'Ambient brand glow, soft pill top links, and luminous hover states — modern premium.',
+  },
+  {
+    id: 'mosaic',
+    label: 'Mosaic tiles',
+    description: 'Each submenu link is a lifted tile card — scannable, product-platform feel.',
+  },
+  {
+    id: 'ribbon',
+    label: 'Wide ribbon',
+    description: 'Near full-bleed mega strip under the nav — bold, editorial, enterprise showcase.',
+  },
+] as const;
+
+export type NavMenuStyleId = (typeof NAV_MENU_STYLES)[number]['id'];
+
+export function sanitizeNavMenuStyle(value: string | undefined): NavMenuStyleId {
+  const trimmed = value?.trim().toLowerCase() || '';
+  if (NAV_MENU_STYLES.some((s) => s.id === trimmed)) return trimmed as NavMenuStyleId;
+  return 'classic';
+}
+
 export type SiteSettings = {
   companyName: string;
   tagline: string;
@@ -13,6 +61,11 @@ export type SiteSettings = {
   headerCtaLabelB: string;
   /** Percent 0–100 to show variant B */
   ctaVariantBPercent: string;
+  /**
+   * Public header / mega-menu visual style:
+   * classic | corporate | elegant | rail | lumen | mosaic | ribbon
+   */
+  navMenuStyle: string;
   copyright: string;
   /** Footer credit: show/hide (true/false) */
   poweredByEnabled: string;
@@ -95,6 +148,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   headerCtaHref: '/contact#contact-form',
   headerCtaLabelB: 'Get a Quote',
   ctaVariantBPercent: '50',
+  navMenuStyle: 'classic',
   copyright: '© 2026 Zigma Technologies. All rights reserved.',
   poweredByEnabled: 'true',
   poweredByPrefix: 'Powered by',

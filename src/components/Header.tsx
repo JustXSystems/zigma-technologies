@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
-import { ctaLabelForVariant, pickCtaVariant, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
+import { ctaLabelForVariant, pickCtaVariant, logoAltText, sanitizeTaglineHtml, sanitizeNavMenuStyle } from '@/lib/site-settings';
 import SiteSearchForm from '@/components/SiteSearchForm';
 import HeaderIconMenus from '@/components/HeaderIconMenus';
 import { trackEvent } from '@/lib/analytics';
@@ -140,6 +140,7 @@ export default function Header() {
     () => filterNavForFeatures(shellNav?.length ? shellNav : DEFAULT_NAV, copy.features),
     [shellNav, copy.features]
   );
+  const navMenuStyle = sanitizeNavMenuStyle(site.navMenuStyle);
 
   const current =
     pathname === '/contact'
@@ -276,7 +277,7 @@ export default function Header() {
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <header id="siteHeader" ref={headerRef} className={scrolled ? 'scrolled' : ''}>
+      <header id="siteHeader" ref={headerRef} className={scrolled ? 'scrolled' : ''} data-nav-style={navMenuStyle}>
         <div className="container nav-wrap">
           <a href={current === 'home' ? '#home' : appHref('/')} className="logo">
             <span className="logo-chip">
@@ -334,7 +335,7 @@ export default function Header() {
                               <a
                                 key={linkIdx}
                                 href={resolveHref(link)}
-                                className={link.className}
+                                className={['mega-link', link.className].filter(Boolean).join(' ')}
                                 onClick={onNavLeafClick}
                               >
                                 {link.label}
