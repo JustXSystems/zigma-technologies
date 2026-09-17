@@ -130,7 +130,7 @@ export default function LogoTypeEditor({ settings, onChange }: Props) {
             label="Font"
             value={settings.logoWordFont}
             onChange={(v) => set('logoWordFont', v)}
-            hint="Site tokens use theme fonts; Browse loads Google Fonts for preview"
+            hint="Installed fonts on this PC (Windows-style list). System fonts render on the live site without extra loading."
           />
           <SizeField
             id="logoWordSize"
@@ -171,7 +171,7 @@ export default function LogoTypeEditor({ settings, onChange }: Props) {
             label="Font"
             value={settings.logoTaglineFont}
             onChange={(v) => set('logoTaglineFont', v)}
-            hint="Often a mono or condensed face under the company name"
+            hint="Same local font list as company name"
           />
           <SizeField
             id="logoTaglineSize"

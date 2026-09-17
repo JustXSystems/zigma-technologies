@@ -39,7 +39,7 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
     id: 'logo-sizes',
     title: 'Logo chip & word type',
     description:
-      'Logo image height plus company name and tagline type. Use the live preview above while editing. Browse fonts or enter a custom CSS stack.',
+      'Logo image height plus company name and tagline type. Preview uses live site CSS. Pick any font installed on this PC (Windows-style list).',
     defaultOpen: true,
     fields: [],
   },

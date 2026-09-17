@@ -2578,90 +2578,52 @@
   color: #fff;
   border-color: var(--admin-sidebar);
 }
-.logo-font-picker-toolbar {
+.logo-font-search {
+  max-width: none;
+  width: 100%;
+}
+.logo-font-windows {
   display: grid;
   gap: 0.55rem;
-  margin-bottom: 0.55rem;
 }
-.logo-font-cats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-.logo-font-cat {
-  border: 1px solid var(--admin-border);
-  background: #fff;
-  color: var(--admin-text-secondary);
-  border-radius: 999px;
-  padding: 0.28rem 0.7rem;
-  font: inherit;
-  font-size: 0.74rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.logo-font-cat.is-active {
-  background: var(--admin-accent-soft);
-  border-color: rgba(194, 65, 12, 0.35);
-  color: var(--admin-accent);
-}
-.logo-font-search {
-  max-width: 280px;
-}
-.logo-font-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  gap: 0.45rem;
-  max-height: 260px;
+.logo-font-select {
+  width: 100%;
+  min-height: 220px;
+  height: 220px;
+  padding: 0.35rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
   overflow: auto;
-  padding: 0.15rem;
 }
-.logo-font-option {
+.logo-font-select option {
+  padding: 0.35rem 0.45rem;
+}
+.logo-font-live-sample {
   display: grid;
-  gap: 0.35rem;
-  text-align: left;
+  gap: 0.25rem;
+  padding: 0.75rem 0.85rem;
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   background: #fff;
-  padding: 0.55rem 0.65rem;
-  cursor: pointer;
-  min-height: 72px;
 }
-.logo-font-option:hover {
-  border-color: var(--admin-border-strong);
-}
-.logo-font-option.is-selected {
-  border-color: rgba(194, 65, 12, 0.55);
-  box-shadow: 0 0 0 1px rgba(194, 65, 12, 0.12);
-  background: var(--admin-accent-soft);
-}
-.logo-font-option-label {
+.logo-font-live-label {
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--admin-muted);
+  font-family: var(--admin-font) !important;
 }
-.logo-font-option-sample {
-  font-size: 1.05rem;
-  line-height: 1.2;
+.logo-font-live-text {
+  font-size: 1.15rem;
+  line-height: 1.35;
   color: var(--admin-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.logo-font-empty {
-  margin: 0.5rem 0;
-  grid-column: 1 / -1;
-  color: var(--admin-muted);
-  font-size: 0.82rem;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {
   .logo-brand-preview {
     position: static;
-  }
-  .logo-font-search {
-    max-width: none;
   }
 }
 
