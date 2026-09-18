@@ -7,10 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#20 Popup new look">
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#20 Popup settings new look" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.7404200167674782" />
-      <entry key="MS500" value="4.411447509049793" />
-      <entry key="S2" value="9.04604949756154" />
-      <entry key="S5" value="15.215283405970549" />
-      <entry key="S10" value="23.052728612785863" />
-      <entry key="S30" value="45.15172879254276" />
-      <entry key="S60" value="62.02947590435396" />
-      <entry key="M2" value="77.65775759840727" />
-      <entry key="M5" value="111.44154352419723" />
-      <entry key="M10" value="162.50261668895772" />
-      <entry key="M15" value="212.20260320807247" />
-      <entry key="M30" value="346.20687529296987" />
-      <entry key="H1" value="532.5103801112342" />
-      <entry key="H2" value="748.2183909599303" />
-      <entry key="H4" value="1083.942152336442" />
-      <entry key="D1" value="4353.3115950809415" />
-      <entry key="W1" value="14171.51709729511" />
+      <entry key="MS100" value="1.0000000000019074" />
+      <entry key="MS500" value="1.0081737200572967" />
+      <entry key="S2" value="2.162605046672237" />
+      <entry key="S5" value="5.256425543971049" />
+      <entry key="S10" value="8.9256057135091" />
+      <entry key="S30" value="20.312634674246926" />
+      <entry key="S60" value="28.651153665984015" />
+      <entry key="M2" value="36.55255982669526" />
+      <entry key="M5" value="63.86288637606976" />
+      <entry key="M10" value="117.24187559931487" />
+      <entry key="M15" value="169.70467085484708" />
+      <entry key="M30" value="311.19571839376613" />
+      <entry key="H1" value="511.92112115744976" />
+      <entry key="H2" value="745.2019425631964" />
+      <entry key="H4" value="1093.1199938193001" />
+      <entry key="D1" value="4373.412968216454" />
+      <entry key="W1" value="14203.848273396481" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,32 +83,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.3084020606589764E-271" />
-      <entry key="M30" value="3.617184071427453E-136" />
-      <entry key="H1" value="1.901889605478725E-68" />
-      <entry key="H2" value="1.379090136821554E-34" />
-      <entry key="H4" value="1.1743466851266849E-17" />
-      <entry key="D1" value="0.0015318174061963127" />
-      <entry key="W1" value="0.6142893908023676" />
+      <entry key="M15" value="7.888328253215274E-272" />
+      <entry key="M30" value="2.8086167864652716E-136" />
+      <entry key="H1" value="1.6758928326315245E-68" />
+      <entry key="H2" value="1.2945627959397417E-34" />
+      <entry key="H4" value="1.1377885550414754E-17" />
+      <entry key="D1" value="0.0015237645745363334" />
+      <entry key="W1" value="0.6138270128074552" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.6750948430341634" />
-      <entry key="MS500" value="4.374525706228218" />
-      <entry key="S2" value="9.027730489103355" />
-      <entry key="S5" value="15.203459229218758" />
-      <entry key="S10" value="23.043957923758025" />
-      <entry key="S30" value="45.14609899768037" />
-      <entry key="S60" value="62.02562622707509" />
-      <entry key="M2" value="77.65535888149176" />
-      <entry key="M5" value="111.44018778682464" />
-      <entry key="M10" value="162.50162121694711" />
-      <entry key="M15" value="212.2017096854726" />
-      <entry key="M30" value="346.2060898473329" />
-      <entry key="H1" value="532.5097397647689" />
-      <entry key="H2" value="748.2179216793409" />
-      <entry key="H4" value="1083.9418013096683" />
-      <entry key="D1" value="4353.312887307157" />
-      <entry key="W1" value="14172.13123124151" />
+      <entry key="MS100" value="0.9592641193271046" />
+      <entry key="MS500" value="0.9998203434998251" />
+      <entry key="S2" value="2.1580944298221616" />
+      <entry key="S5" value="5.252085220510426" />
+      <entry key="S10" value="8.921955018672715" />
+      <entry key="S30" value="20.309923228184978" />
+      <entry key="S60" value="28.649255177397347" />
+      <entry key="M2" value="36.55135662246733" />
+      <entry key="M5" value="63.86206938938131" />
+      <entry key="M10" value="117.24113843021706" />
+      <entry key="M15" value="169.70394878991166" />
+      <entry key="M30" value="311.19501552238245" />
+      <entry key="H1" value="511.9205100670058" />
+      <entry key="H2" value="745.2014785441897" />
+      <entry key="H4" value="1093.119641948261" />
+      <entry key="D1" value="4373.414251684449" />
+      <entry key="W1" value="14204.461944801113" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -263,7 +260,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#10 Company name and tagline - separate font, font size, font style to be made configurable in admin" />
     <MESSAGE value="#10 provide logo and words preview in admin while editing? Can give advanced font picker" />
     <MESSAGE value="#10 logo issue fixed" />
     <MESSAGE value="#9 right align setting is not reflecting after making single line." />
@@ -288,7 +284,8 @@
     <MESSAGE value="#20 Provide configurable shadow preset for catalog-gallery-main in admin for catalog-detail-panel popup" />
     <MESSAGE value="#20 Popup preview made live preview" />
     <MESSAGE value="#20 Popup new look" />
-    <option name="LAST_COMMIT_MESSAGE" value="#20 Popup new look" />
+    <MESSAGE value="#20 Popup settings new look" />
+    <option name="LAST_COMMIT_MESSAGE" value="#20 Popup settings new look" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

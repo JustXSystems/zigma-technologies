@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import type {
@@ -44,69 +44,249 @@ const TRUST_ITEMS = [
   {
     title: 'Reliable Performance',
     blurb: 'Built for critical uptime',
-    icon: 'gear' as const,
+    icon: 'shield' as const,
   },
   {
     title: 'Energy Efficient',
     blurb: 'Optimized lifetime cost',
-    icon: 'leaf' as const,
+    icon: 'bolt' as const,
   },
 ] as const;
 
-function TrustIcon({ name }: { name: 'headset' | 'gear' | 'leaf' }) {
+type TrustIconName = (typeof TRUST_ITEMS)[number]['icon'];
+type SpecIconName =
+  | 'bolt'
+  | 'chip'
+  | 'gauge'
+  | 'ruler'
+  | 'layers'
+  | 'thermometer'
+  | 'weight'
+  | 'clock'
+  | 'drop'
+  | 'wifi'
+  | 'box'
+  | 'cog';
+
+const ICON_PROPS = {
+  width: 22,
+  height: 22,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  'aria-hidden': true as const,
+};
+
+function IconShell({
+  children,
+  size = 22,
+}: {
+  children: ReactNode;
+  size?: number;
+}) {
+  return (
+    <svg
+      {...ICON_PROPS}
+      width={size}
+      height={size}
+      stroke="currentColor"
+      strokeWidth="1.65"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function TrustIcon({ name }: { name: TrustIconName }) {
   if (name === 'headset') {
     return (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-        <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
-        <path d="M4 14a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2zM17 11h1a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-1v-4z" />
-      </svg>
+      <IconShell>
+        <path d="M4 14v-1.5a8 8 0 0 1 16 0V14" />
+        <path d="M4 14a2.2 2.2 0 0 0 2.2 2.2H7.5V12H6.2A2.2 2.2 0 0 0 4 14.2Z" fill="currentColor" fillOpacity="0.14" />
+        <path d="M20 14a2.2 2.2 0 0 1-2.2 2.2H16.5V12h1.3A2.2 2.2 0 0 1 20 14.2Z" fill="currentColor" fillOpacity="0.14" />
+        <path d="M4 14a2.2 2.2 0 0 0 2.2 2.2H7.5V12H6.2A2.2 2.2 0 0 0 4 14.2ZM20 14a2.2 2.2 0 0 1-2.2 2.2H16.5V12h1.3A2.2 2.2 0 0 1 20 14.2Z" />
+        <path d="M12 18.5a2 2 0 0 0 2 2h1.2" />
+        <circle cx="15.5" cy="20.5" r="1.1" fill="currentColor" stroke="none" />
+      </IconShell>
     );
   }
-  if (name === 'leaf') {
+  if (name === 'bolt') {
     return (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-        <path d="M5 19c8 0 14-8 14-14-6 0-14 6-14 14z" />
-        <path d="M5 19c3-3 7-5 11-6" />
-      </svg>
+      <IconShell>
+        <path d="M13 2 4.8 13.2h6.4L11 22l8.2-11.2h-6.4L13 2Z" fill="currentColor" fillOpacity="0.14" />
+        <path d="M13 2 4.8 13.2h6.4L11 22l8.2-11.2h-6.4L13 2Z" />
+      </IconShell>
     );
   }
   return (
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" />
-    </svg>
+    <IconShell>
+      <path
+        d="M12 3.2 5.2 6.1v4.4c0 4.55 3.05 7.85 6.8 8.7 3.75-.85 6.8-4.15 6.8-8.7V6.1L12 3.2Z"
+        fill="currentColor"
+        fillOpacity="0.14"
+      />
+      <path d="M12 3.2 5.2 6.1v4.4c0 4.55 3.05 7.85 6.8 8.7 3.75-.85 6.8-4.15 6.8-8.7V6.1L12 3.2Z" />
+      <path d="m9.1 12.1 1.9 1.9 3.9-3.9" />
+    </IconShell>
   );
 }
 
 function MetricIcon({ kind }: { kind: 'investment' | 'highlight' }) {
   if (kind === 'investment') {
     return (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-        <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
-      </svg>
+      <IconShell size={20}>
+        <path d="M4 19V10.5" />
+        <path d="M10 19V6" />
+        <path d="M16 19v-5" />
+        <path d="M3 19h18" />
+        <circle cx="4" cy="10.5" r="1.35" fill="currentColor" stroke="none" />
+        <circle cx="10" cy="6" r="1.35" fill="currentColor" stroke="none" />
+        <circle cx="16" cy="14" r="1.35" fill="currentColor" stroke="none" />
+        <path d="m14.2 8.2 3.3-3.3 2.3 2.3" />
+        <path d="M17.5 4.9H20v2.5" />
+      </IconShell>
     );
   }
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-      <path d="M12 3 4 7v5c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V7l-8-4z" />
-      <path d="M9 12l2 2 4-4" />
+    <IconShell size={20}>
+      <path
+        d="M12 3.2 5.2 6.1v4.4c0 4.55 3.05 7.85 6.8 8.7 3.75-.85 6.8-4.15 6.8-8.7V6.1L12 3.2Z"
+        fill="currentColor"
+        fillOpacity="0.16"
+      />
+      <path d="M12 3.2 5.2 6.1v4.4c0 4.55 3.05 7.85 6.8 8.7 3.75-.85 6.8-4.15 6.8-8.7V6.1L12 3.2Z" />
+      <path d="m9.05 12.05 1.95 1.95 3.95-3.95" />
+    </IconShell>
+  );
+}
+
+function resolveSpecIcon(key: string, index: number): SpecIconName {
+  const k = key.toLowerCase();
+  if (/(power|watt|kw|kva|amp|volt|current|electr)/.test(k)) return 'bolt';
+  if (/(temp|thermal|heat|cool|°|celsius|fahrenheit)/.test(k)) return 'thermometer';
+  if (/(size|dimens|height|width|depth|mm|cm|inch|length)/.test(k)) return 'ruler';
+  if (/(weight|mass|kg|lb)/.test(k)) return 'weight';
+  if (/(efficien|uptime|perf|rating|ip\s?\d|class)/.test(k)) return 'gauge';
+  if (/(cpu|chip|board|processor|memory|ram|storage)/.test(k)) return 'chip';
+  if (/(time|lead|delivery|hour|week|day)/.test(k)) return 'clock';
+  if (/(humid|water|fluid|oil|coolant)/.test(k)) return 'drop';
+  if (/(network|wifi|wireless|connect|iot|ethernet)/.test(k)) return 'wifi';
+  if (/(phase|layer|stage|tier|level)/.test(k)) return 'layers';
+  if (/(pack|unit|model|sku|form|enclos)/.test(k)) return 'box';
+  const cycle: SpecIconName[] = ['bolt', 'chip', 'gauge', 'ruler', 'layers', 'cog', 'box', 'clock'];
+  return cycle[index % cycle.length];
+}
+
+function SpecIcon({ name }: { name: SpecIconName }) {
+  const common = (
+    <>
+      {name === 'bolt' ? (
+        <>
+          <path d="M13 2 5 13h6l-1 9 8-11h-6l1-9Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M13 2 5 13h6l-1 9 8-11h-6l1-9Z" />
+        </>
+      ) : null}
+      {name === 'chip' ? (
+        <>
+          <rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" fillOpacity="0.12" />
+          <rect x="7" y="7" width="10" height="10" rx="1.5" />
+          <path d="M10.5 10.5h3v3h-3z" />
+          <path d="M9 4v3M12 4v3M15 4v3M9 17v3M12 17v3M15 17v3M4 9h3M4 12h3M4 15h3M17 9h3M17 12h3M17 15h3" />
+        </>
+      ) : null}
+      {name === 'gauge' ? (
+        <>
+          <path d="M5.5 16.5a7.5 7.5 0 1 1 13 0" fill="currentColor" fillOpacity="0.1" />
+          <path d="M5.5 16.5a7.5 7.5 0 1 1 13 0" />
+          <path d="M12 16.5 15.2 10.8" />
+          <circle cx="12" cy="16.5" r="1.2" fill="currentColor" stroke="none" />
+        </>
+      ) : null}
+      {name === 'ruler' ? (
+        <>
+          <path d="M4.5 15.5 15.5 4.5l4 4L8.5 19.5z" fill="currentColor" fillOpacity="0.1" />
+          <path d="M4.5 15.5 15.5 4.5l4 4L8.5 19.5z" />
+          <path d="m8 12 1.2-1.2M10.2 9.8 11.4 8.6M12.4 7.6 13.6 6.4" />
+        </>
+      ) : null}
+      {name === 'layers' ? (
+        <>
+          <path d="m12 3.5 8 4.2-8 4.2-8-4.2 8-4.2Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="m12 3.5 8 4.2-8 4.2-8-4.2 8-4.2Z" />
+          <path d="m4 12.2 8 4.2 8-4.2" />
+          <path d="m4 16.2 8 4.2 8-4.2" />
+        </>
+      ) : null}
+      {name === 'thermometer' ? (
+        <>
+          <path d="M10 14.2V6.5a2 2 0 1 1 4 0v7.7" />
+          <circle cx="12" cy="17.2" r="3.2" fill="currentColor" fillOpacity="0.14" />
+          <circle cx="12" cy="17.2" r="3.2" />
+          <path d="M12 14.5v2" />
+        </>
+      ) : null}
+      {name === 'weight' ? (
+        <>
+          <path d="M7.2 8.5h9.6l1.7 11H5.5l1.7-11Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M7.2 8.5h9.6l1.7 11H5.5l1.7-11Z" />
+          <path d="M10 8.5a2 2 0 0 1 4 0" />
+        </>
+      ) : null}
+      {name === 'clock' ? (
+        <>
+          <circle cx="12" cy="12" r="8" fill="currentColor" fillOpacity="0.1" />
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8v4.5l3 1.8" />
+        </>
+      ) : null}
+      {name === 'drop' ? (
+        <>
+          <path d="M12 3.5c3.5 4.2 5.5 7.1 5.5 9.6a5.5 5.5 0 1 1-11 0c0-2.5 2-5.4 5.5-9.6Z" fill="currentColor" fillOpacity="0.12" />
+          <path d="M12 3.5c3.5 4.2 5.5 7.1 5.5 9.6a5.5 5.5 0 1 1-11 0c0-2.5 2-5.4 5.5-9.6Z" />
+        </>
+      ) : null}
+      {name === 'wifi' ? (
+        <>
+          <path d="M5 9.2a10.5 10.5 0 0 1 14 0" />
+          <path d="M7.8 12.2a6.6 6.6 0 0 1 8.4 0" />
+          <path d="M10.5 15.1a3 3 0 0 1 3 0" />
+          <circle cx="12" cy="18" r="1.15" fill="currentColor" stroke="none" />
+        </>
+      ) : null}
+      {name === 'box' ? (
+        <>
+          <path d="M12 3.4 20 7.5v9L12 20.6 4 16.5v-9L12 3.4Z" fill="currentColor" fillOpacity="0.1" />
+          <path d="M12 3.4 20 7.5v9L12 20.6 4 16.5v-9L12 3.4Z" />
+          <path d="M12 12.1 20 7.5M12 12.1 4 7.5M12 12.1v8.5" />
+        </>
+      ) : null}
+      {name === 'cog' ? (
+        <>
+          <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.14" />
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 3.2v2.1M12 18.7v2.1M4.8 7.1l1.8 1.1M17.4 15.8l1.8 1.1M4.8 16.9l1.8-1.1M17.4 8.2l1.8-1.1M3.2 12h2.1M18.7 12h2.1" />
+        </>
+      ) : null}
+    </>
+  );
+  return <IconShell size={18}>{common}</IconShell>;
+}
+
+function CtaArrowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
     </svg>
   );
 }
 
-function SpecIcon({ index }: { index: number }) {
-  if (index % 2 === 0) {
-    return (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-        <path d="M8 4h8l3 4v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8l3-4z" />
-        <path d="M8 4v4h8V4" />
-      </svg>
-    );
-  }
+function QuoteIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" />
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M8.5 17H6.2A2.2 2.2 0 0 1 4 14.8V12a7 7 0 0 1 7-7h.5" />
+      <path d="M19.5 17h-2.3A2.2 2.2 0 0 1 15 14.8V12a7 7 0 0 1 7-7h.5" />
     </svg>
   );
 }
@@ -347,7 +527,7 @@ export default function CatalogDetailModal({
           {has('cta_profile') ? (
             <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary catalog-detail-showcase-primary">
               View full {caseStudyLabel(itemType).toLowerCase()}
-              <span aria-hidden="true"> →</span>
+              <CtaArrowIcon />
             </Link>
           ) : null}
           {has('cta_quote') ? (
@@ -356,13 +536,14 @@ export default function CatalogDetailModal({
               className="btn catalog-detail-showcase-secondary"
               onClick={() => setEnquiryOpen(true)}
             >
+              <QuoteIcon />
               Request a quote
             </button>
           ) : null}
         </div>
         {has('cta_contact') ? (
           <a href="/contact" className="catalog-detail-showcase-contact">
-            Contact our team <span aria-hidden="true">→</span>
+            Contact our team <CtaArrowIcon />
           </a>
         ) : null}
       </div>
@@ -463,17 +644,20 @@ export default function CatalogDetailModal({
         <h3 className="catalog-detail-section-title">Technical specifications</h3>
         {isShowcase ? (
           <div className="catalog-detail-spec-cards">
-            {specEntries.map(([k, v], idx) => (
-              <div key={k} className="catalog-detail-spec-card">
-                <span className="catalog-detail-spec-icon">
-                  <SpecIcon index={idx} />
-                </span>
-                <div>
-                  <span className="catalog-detail-spec-key">{k}</span>
-                  <span className="catalog-detail-spec-val">{v}</span>
+            {specEntries.map(([k, v], idx) => {
+              const iconName = resolveSpecIcon(k, idx);
+              return (
+                <div key={k} className="catalog-detail-spec-card">
+                  <span className={`catalog-detail-spec-icon catalog-detail-spec-icon--${iconName}`}>
+                    <SpecIcon name={iconName} />
+                  </span>
+                  <div>
+                    <span className="catalog-detail-spec-key">{k}</span>
+                    <span className="catalog-detail-spec-val">{v}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <dl className="catalog-detail-spec-list">
