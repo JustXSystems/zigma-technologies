@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { withBasePath } from '@/lib/base-path';
 
 /** Registers the lightweight PWA service worker once on the public site. */
 export default function PwaRegister() {
@@ -15,7 +16,7 @@ export default function PwaRegister() {
       return;
     }
 
-    void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+    void navigator.serviceWorker.register(withBasePath('/sw.js')).catch(() => undefined);
   }, []);
   return null;
 }
