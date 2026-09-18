@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Link from 'next/link';
 
 export default function AccountPage() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -91,9 +92,9 @@ export default function AccountPage() {
       <div className="admin-card">
         <p style={{ margin: 0, color: 'var(--admin-muted)' }}>
           Manage additional admins and editors under{' '}
-          <a href="/admin/users" style={{ color: 'var(--admin-accent)' }}>
+          <Link href="/admin/users" style={{ color: 'var(--admin-accent)' }}>
             Users
-          </a>
+          </Link>
           .
         </p>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback, useRef, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type {
@@ -21,7 +21,6 @@ import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
-import { Suspense } from 'react';
 import { publicMediaUrl } from '@/lib/media-url';
 import { heroHas, toolbarHas, resolveDetailElements } from '@/lib/catalog-page-elements';
 import SiteHeading from '@/components/SiteHeading';
@@ -284,9 +283,9 @@ function CatalogHero({
                 Full {caseStudyLabel(itemType).toLowerCase()}
               </Link>
             ) : null}
-            <a href="/contact" className="btn btn-ghost-dark">
+            <Link href="/contact" className="btn btn-ghost-dark">
               {mode === 'spotlight' ? 'Talk to sales' : 'Contact team'}
-            </a>
+            </Link>
           </div>
         ) : null}
       </>

@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 
 type AdminRole = {
   id: number;
@@ -154,7 +155,7 @@ export default function UsersPage() {
         <h2 style={{ marginTop: 0 }}>Admin users</h2>
         <p style={{ color: 'var(--admin-muted)' }}>
           Assign a role to control which admin screens each user can access. Full admins always see every screen.
-          Manage role definitions on the <a href="/admin/roles">Roles</a> page.
+          Manage role definitions on the <Link href="/admin/roles">Roles</Link> page.
         </p>
         {error ? <div className="admin-error">{error}</div> : null}
         {message ? <div className="admin-success">{message}</div> : null}

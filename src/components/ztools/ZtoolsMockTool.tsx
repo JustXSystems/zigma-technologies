@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import SiteHeading from '@/components/SiteHeading';
 
 type MockToolProps = {
@@ -25,9 +26,9 @@ export default function ZtoolsMockTool({ title, description, children }: MockToo
 
 function LinkBack() {
   return (
-    <a href="/ztools/dashboard" className="ztools-back-link">
+    <Link href="/ztools/dashboard" className="ztools-back-link">
       ← Back to tools
-    </a>
+    </Link>
   );
 }
 

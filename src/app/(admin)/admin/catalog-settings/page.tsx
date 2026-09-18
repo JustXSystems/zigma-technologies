@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
 import {
   slugify,
@@ -43,7 +43,6 @@ import {
 } from '@/lib/admin-catalog-settings-guides';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
-type SettingsSection = SettingsSectionId;
 
 const FILTER_OPTS = ['category', 'tags'] as const;
 const SEARCH_OPTS = ['title', 'summary', 'description', 'tags', 'price_label'] as const;
@@ -71,6 +70,20 @@ const CARD_FIELD_OPTS: Array<{ id: string; label: string; group: 'media' | 'body
   { id: 'quick_view', label: 'Quick view', group: 'body' },
   { id: 'case_study_link', label: 'Detail page link', group: 'body' },
 ];
+const DEFAULT_MODAL_FIELDS = [
+  'title',
+  'summary',
+  'description',
+  'category',
+  'price_label',
+  'tags',
+  'specs',
+  'media',
+  'enquiry',
+] as const;
+const MODAL_OPTS = DEFAULT_MODAL_FIELDS;
+const VISUAL_STYLE_OPTS = ['classic', 'premium', 'glass', 'minimal', 'bold-corporate'] as const;
+const HERO_VARIANT_OPTS = ['standard', 'spotlight'] as const;
 
 function normalizeAdminCardFields(fields: string[] | null | undefined): string[] {
   if (!fields?.length) return [...DEFAULT_CARD_FIELDS];
@@ -82,11 +95,26 @@ function normalizeAdminCardFields(fields: string[] | null | undefined): string[]
   else next.push('background_image');
   return next;
 }
-const MODAL_OPTS = ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'] as const;
-const VISUAL_STYLE_OPTS = ['classic', 'premium', 'glass', 'minimal', 'bold-corporate'] as const;
-const HERO_VARIANT_OPTS = ['standard', 'spotlight'] as const;
-const HERO_ELEMENT_OPTS = DEFAULT_HERO_ELEMENTS;
-const TOOLBAR_ELEMENT_OPTS = DEFAULT_TOOLBAR_ELEMENTS;
+
+/** Normalize API settings into the shape the admin form edits. */
+function hydratePageSettings(raw: CatalogPageSettings | null | undefined): CatalogPageSettings {
+  return {
+    ...raw!,
+    card_style: raw?.card_style || 'marketplace',
+    card_body_bg_color: raw?.card_body_bg_color || '#ffffff',
+    card_media_bg_color: raw?.card_media_bg_color || '#ffffff',
+    listing_bg_color: raw?.listing_bg_color || '#ffffff',
+    marketplace_hover_border_color: raw?.marketplace_hover_border_color || '#FF6B1A',
+    card_media_fit_percent: normalizeCardMediaFitPercent(raw?.card_media_fit_percent),
+    card_media_inset: normalizeCardMediaInset(raw?.card_media_inset),
+    detail_layout: normalizeDetailLayout(raw?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
+    detail_gallery_shadow: normalizeShadowStyle(raw?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
+    detail_template: normalizeDetailTemplate(raw?.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
+    detail_elements_json: resolveDetailElements(raw),
+    card_fields_json: normalizeAdminCardFields(raw?.card_fields_json),
+    modal_fields_json: raw?.modal_fields_json?.length ? raw.modal_fields_json : [...DEFAULT_MODAL_FIELDS],
+  };
+}
 
 function toggleInList(list: string[] | null | undefined, value: string, on: boolean) {
   const base = [...(list || [])];
@@ -203,7 +231,7 @@ function LabelWithHelp({
   );
 }
 
-function sectionMeta(id: SettingsSection) {
+function sectionMeta(id: SettingsSectionId) {
   return CATALOG_SETTINGS_SECTIONS.find((s) => s.id === id)!;
 }
 
@@ -553,8 +581,7 @@ export default function CatalogSettingsPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
-  const [section, setSection] = useState<SettingsSection>('hero');
-  const previewSettings = useMemo(() => settings, [settings]);
+  const [section, setSection] = useState<SettingsSectionId>('hero');
 
   async function load() {
     const [catsRes, settingsRes, itemsRes] = await Promise.all([
@@ -569,28 +596,7 @@ export default function CatalogSettingsPage() {
     if (!settingsRes.ok) throw new Error(settingsData.error || 'Failed settings');
     if (!itemsRes.ok) throw new Error(itemsData.error || 'Failed items');
     setCategories(catsData.categories);
-    setSettings({
-      ...settingsData.settings,
-      card_style: settingsData.settings?.card_style || 'marketplace',
-      card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
-      card_media_bg_color: settingsData.settings?.card_media_bg_color || '#ffffff',
-      listing_bg_color: settingsData.settings?.listing_bg_color || '#ffffff',
-      marketplace_hover_border_color: settingsData.settings?.marketplace_hover_border_color || '#FF6B1A',
-      card_media_fit_percent: normalizeCardMediaFitPercent(settingsData.settings?.card_media_fit_percent),
-      card_media_inset: normalizeCardMediaInset(settingsData.settings?.card_media_inset),
-      detail_layout: normalizeDetailLayout(settingsData.settings?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
-      detail_gallery_shadow: normalizeShadowStyle(
-        settingsData.settings?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW
-      ),
-      detail_template: normalizeDetailTemplate(
-        settingsData.settings?.detail_template ?? DEFAULT_DETAIL_TEMPLATE
-      ),
-      detail_elements_json: resolveDetailElements(settingsData.settings),
-      card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
-      modal_fields_json: settingsData.settings?.modal_fields_json?.length
-        ? settingsData.settings.modal_fields_json
-        : ['title', 'summary', 'description', 'category', 'price_label', 'tags', 'specs', 'media', 'enquiry'],
-    });
+    setSettings(hydratePageSettings(settingsData.settings));
     setItems(itemsData.items || []);
   }
 
@@ -642,6 +648,7 @@ export default function CatalogSettingsPage() {
     setError('');
     setMessage('');
     try {
+      const heroElements = resolveHeroElements(settings);
       const res = await fetch('/api/admin/catalog-settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -672,10 +679,10 @@ export default function CatalogSettingsPage() {
           detail_template: normalizeDetailTemplate(settings.detail_template),
           detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
-          hero_elements_json: resolveHeroElements(settings),
+          hero_elements_json: heroElements,
           toolbar_elements_json: resolveToolbarElements(settings),
-          hero_standard_panel_enabled: resolveHeroElements(settings).includes('standard_panel'),
-          hero_meta_enabled: resolveHeroElements(settings).includes('meta'),
+          hero_standard_panel_enabled: heroElements.includes('standard_panel'),
+          hero_meta_enabled: heroElements.includes('meta'),
           loading_skeleton_enabled: !!settings.loading_skeleton_enabled,
           reveal_animation_enabled: !!settings.reveal_animation_enabled,
           premium_borders_enabled: !!settings.premium_borders_enabled,
@@ -693,21 +700,7 @@ export default function CatalogSettingsPage() {
         return;
       }
       setMessage('Catalog page settings saved. Public listing updates on next load.');
-      setSettings({
-        ...data.settings,
-        card_style: data.settings?.card_style || 'marketplace',
-        card_body_bg_color: data.settings?.card_body_bg_color || '#ffffff',
-        card_media_bg_color: data.settings?.card_media_bg_color || '#ffffff',
-        listing_bg_color: data.settings?.listing_bg_color || '#ffffff',
-        marketplace_hover_border_color: data.settings?.marketplace_hover_border_color || '#FF6B1A',
-        card_media_fit_percent: normalizeCardMediaFitPercent(data.settings?.card_media_fit_percent),
-        card_media_inset: normalizeCardMediaInset(data.settings?.card_media_inset),
-        detail_layout: normalizeDetailLayout(data.settings?.detail_layout),
-        detail_gallery_shadow: normalizeShadowStyle(data.settings?.detail_gallery_shadow),
-        detail_template: normalizeDetailTemplate(data.settings?.detail_template),
-        detail_elements_json: resolveDetailElements(data.settings),
-        card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
-      });
+      setSettings(hydratePageSettings(data.settings));
     } finally {
       setSaving(false);
     }
@@ -917,7 +910,7 @@ export default function CatalogSettingsPage() {
                 <SettingsBlock blockId="hero_elements">
                   <ChipGroup
                     label="Hero elements"
-                    options={HERO_ELEMENT_OPTS}
+                    options={DEFAULT_HERO_ELEMENTS}
                     values={resolveHeroElements(settings)}
                     optionLabels={HERO_ELEMENT_LABELS}
                     onChange={(hero_elements_json) =>
@@ -1042,8 +1035,8 @@ export default function CatalogSettingsPage() {
                     <h3 className="admin-settings-section-title">Live preview</h3>
                     <HelpTip text="Optional check that hero style and elements roughly match what you configured. Hidden by default — open only when needed." label="Help: Live preview" />
                   </div>
-                  {previewSettings ? (
-                    <CatalogAppearancePreview type={type} settings={previewSettings} items={items} />
+                  {settings ? (
+                    <CatalogAppearancePreview type={type} settings={settings} items={items} />
                   ) : null}
                 </div>
               </div>
@@ -1454,7 +1447,7 @@ export default function CatalogSettingsPage() {
                     </div>
                     <ChipGroup
                       label="Toolbar elements"
-                      options={TOOLBAR_ELEMENT_OPTS}
+                      options={DEFAULT_TOOLBAR_ELEMENTS}
                       values={resolveToolbarElements(settings)}
                       optionLabels={TOOLBAR_ELEMENT_LABELS}
                       onChange={(toolbar_elements_json) => setSettings({ ...settings, toolbar_elements_json })}

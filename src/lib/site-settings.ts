@@ -382,11 +382,6 @@ export function logoSizingCss(settings: SiteSettings): string {
 
 export const DEFAULT_FAVICON = '/assets/images/zigma.png';
 
-/** Browser tab / PWA icon — always the square white-Z mark (readable at 16–32px). */
-export function faviconSrc(_settings?: Pick<SiteSettings, 'logoUrl'>) {
-  return DEFAULT_FAVICON;
-}
-
 /**
  * A/B pick from session storage. Client-only — never call during SSR or in a
  * useState initializer, or the header CTA label will hydrate-mismatch.

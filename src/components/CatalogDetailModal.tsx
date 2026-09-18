@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import type {
@@ -330,7 +330,11 @@ export default function CatalogDetailModal({
   const copy = useSiteCopy();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [fields, setFields] = useState<FormField[]>([]);
   const [formId, setFormId] = useState<number | null>(null);
@@ -383,7 +387,6 @@ export default function CatalogDetailModal({
   }, [onClose]);
 
   useEffect(() => {
-    setMounted(true);
     const url = new URL(window.location.href);
     url.searchParams.set('item', item.slug);
     window.history.replaceState({}, '', url);
@@ -542,9 +545,9 @@ export default function CatalogDetailModal({
           ) : null}
         </div>
         {has('cta_contact') ? (
-          <a href="/contact" className="catalog-detail-showcase-contact">
+          <Link href="/contact" className="catalog-detail-showcase-contact">
             Contact our team <CtaArrowIcon />
-          </a>
+          </Link>
         ) : null}
       </div>
     ) : null;
@@ -572,9 +575,9 @@ export default function CatalogDetailModal({
             </button>
           ) : null}
           {has('cta_contact') ? (
-            <a href="/contact" className="btn btn-ghost-dark">
+            <Link href="/contact" className="btn btn-ghost-dark">
               Contact us
-            </a>
+            </Link>
           ) : null}
         </div>
       </footer>
