@@ -1919,6 +1919,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 /* Catalog listing: modest gap under hero (no overlap) */
 .catalog-page .catalog-listing{
   padding:1.75rem 0 4.5rem;
+  background:var(--catalog-listing-bg, var(--white));
 }
 .catalog-page .catalog-listing > .container{
   position:relative;
@@ -2426,7 +2427,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .catalog-page .catalog-card--tile.catalog-card--marketplace:hover{
   transform:translateY(-3px);
   box-shadow:0 2px 4px rgba(15,23,42,0.08),0 16px 32px -18px rgba(15,23,42,0.35);
-  border-color:rgba(255,107,26,0.35);
+  border-color:var(--catalog-marketplace-hover-border, rgba(255,107,26,0.35));
 }
 .catalog-page .catalog-card--tile.catalog-card--marketplace .catalog-card-media{
   position:relative;

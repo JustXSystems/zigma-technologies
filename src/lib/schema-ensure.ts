@@ -172,8 +172,16 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_bg_color VARCHAR(32) NULL DEFAULT '#ffffff' AFTER card_body_bg_color`,
   },
   {
+    name: 'listing_bg_color',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN listing_bg_color VARCHAR(32) NULL DEFAULT '#ffffff' AFTER card_media_bg_color`,
+  },
+  {
+    name: 'marketplace_hover_border_color',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN marketplace_hover_border_color VARCHAR(32) NULL DEFAULT '#FF6B1A' AFTER listing_bg_color`,
+  },
+  {
     name: 'card_media_fit_percent',
-    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94 AFTER card_media_bg_color`,
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94 AFTER marketplace_hover_border_color`,
   },
   {
     name: 'card_media_inset',

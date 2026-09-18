@@ -528,6 +528,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const cardStyle = settings?.card_style === 'overlay' ? 'overlay' : 'marketplace';
   const cardBodyBg = settings?.card_body_bg_color || '#ffffff';
   const cardMediaBg = settings?.card_media_bg_color || '#ffffff';
+  const listingBg = settings?.listing_bg_color || '#ffffff';
+  const marketplaceHoverBorder = settings?.marketplace_hover_border_color || '#FF6B1A';
   const cardMediaFitPercent = normalizeCardMediaFitPercent(settings?.card_media_fit_percent);
   const cardMediaInset = normalizeCardMediaInset(settings?.card_media_inset);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
@@ -809,7 +811,15 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
         onOpenItem={(item) => void openItem(item)}
       />
 
-      <section className="section section-light catalog-listing">
+      <section
+        className="section section-light catalog-listing"
+        style={
+          {
+            ['--catalog-listing-bg']: listingBg,
+            ['--catalog-marketplace-hover-border']: marketplaceHoverBorder,
+          } as CSSProperties
+        }
+      >
         <div className="container">
           {profileRailEnabled && showCategoryFilters ? (
             <div className="catalog-profile-rail" aria-label={`${itemType} profiles`}>

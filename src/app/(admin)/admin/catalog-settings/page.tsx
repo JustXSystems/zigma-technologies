@@ -405,6 +405,8 @@ export default function CatalogSettingsPage() {
       card_style: settingsData.settings?.card_style || 'marketplace',
       card_body_bg_color: settingsData.settings?.card_body_bg_color || '#ffffff',
       card_media_bg_color: settingsData.settings?.card_media_bg_color || '#ffffff',
+      listing_bg_color: settingsData.settings?.listing_bg_color || '#ffffff',
+      marketplace_hover_border_color: settingsData.settings?.marketplace_hover_border_color || '#FF6B1A',
       card_media_fit_percent: normalizeCardMediaFitPercent(settingsData.settings?.card_media_fit_percent),
       card_media_inset: normalizeCardMediaInset(settingsData.settings?.card_media_inset),
       card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
@@ -484,6 +486,8 @@ export default function CatalogSettingsPage() {
           card_style: settings.card_style || 'marketplace',
           card_body_bg_color: settings.card_body_bg_color || '#ffffff',
           card_media_bg_color: settings.card_media_bg_color || '#ffffff',
+          listing_bg_color: settings.listing_bg_color || '#ffffff',
+          marketplace_hover_border_color: settings.marketplace_hover_border_color || '#FF6B1A',
           card_media_fit_percent: normalizeCardMediaFitPercent(settings.card_media_fit_percent),
           card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
           hero_variant: settings.hero_variant,
@@ -513,6 +517,8 @@ export default function CatalogSettingsPage() {
         card_style: data.settings?.card_style || 'marketplace',
         card_body_bg_color: data.settings?.card_body_bg_color || '#ffffff',
         card_media_bg_color: data.settings?.card_media_bg_color || '#ffffff',
+        listing_bg_color: data.settings?.listing_bg_color || '#ffffff',
+        marketplace_hover_border_color: data.settings?.marketplace_hover_border_color || '#FF6B1A',
         card_media_fit_percent: normalizeCardMediaFitPercent(data.settings?.card_media_fit_percent),
         card_media_inset: normalizeCardMediaInset(data.settings?.card_media_inset),
         card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
@@ -898,6 +904,52 @@ export default function CatalogSettingsPage() {
                 </div>
                 <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
                   Shared fill for listing cards and the detail gallery (behind the product image). Item background images still layer on top.
+                </p>
+              </div>
+              <div className="admin-field">
+                <label>Listing background</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={/^#[0-9A-Fa-f]{6}$/.test(settings.listing_bg_color || '') ? settings.listing_bg_color! : '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, listing_bg_color: e.target.value })}
+                    aria-label="Catalog listing background color"
+                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
+                  />
+                  <input
+                    className="admin-input"
+                    value={settings.listing_bg_color || '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, listing_bg_color: e.target.value })}
+                    placeholder="#ffffff"
+                  />
+                </div>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                  Background for the catalog listing section below the hero.
+                </p>
+              </div>
+              <div className="admin-field">
+                <label>Marketplace card hover border</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={
+                      /^#[0-9A-Fa-f]{6}$/.test(settings.marketplace_hover_border_color || '')
+                        ? settings.marketplace_hover_border_color!
+                        : '#FF6B1A'
+                    }
+                    onChange={(e) => setSettings({ ...settings, marketplace_hover_border_color: e.target.value })}
+                    aria-label="Marketplace card hover border color"
+                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
+                  />
+                  <input
+                    className="admin-input"
+                    value={settings.marketplace_hover_border_color || '#FF6B1A'}
+                    onChange={(e) => setSettings({ ...settings, marketplace_hover_border_color: e.target.value })}
+                    placeholder="#FF6B1A"
+                  />
+                </div>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                  Border color when hovering Marketplace-style listing cards.
                 </p>
               </div>
               <div className="admin-field full">

@@ -192,6 +192,10 @@ export type CatalogPageSettings = {
   card_body_bg_color: string | null;
   /** Media frame fill behind product/background imagery on listing cards */
   card_media_bg_color: string | null;
+  /** Background for the catalog listing section (.catalog-listing) */
+  listing_bg_color: string | null;
+  /** Border color on marketplace card hover */
+  marketplace_hover_border_color: string | null;
   /**
    * Listing-card product image size (% of media frame). Page-level override for
    * catalog cards only — inventory fit still controls the detail popup.

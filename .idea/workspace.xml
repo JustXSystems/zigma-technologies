@@ -7,7 +7,18 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#17 CSP stylesheet block and the startTime error" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="File upload error display if any">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,23 +65,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1952458207602328" />
-      <entry key="MS500" value="2.8032302668931726" />
-      <entry key="S2" value="5.965673745045881" />
-      <entry key="S5" value="11.775056036659063" />
-      <entry key="S10" value="19.588853948540848" />
-      <entry key="S30" value="33.73277454226143" />
-      <entry key="S60" value="40.22215421899452" />
-      <entry key="M2" value="44.26486555234459" />
-      <entry key="M5" value="47.01348283375176" />
-      <entry key="M10" value="48.11027643773951" />
-      <entry key="M15" value="49.26050897762085" />
-      <entry key="M30" value="56.78149827732828" />
-      <entry key="H1" value="96.75816867830656" />
-      <entry key="H2" value="269.2065987633454" />
-      <entry key="H4" value="711.8264705722911" />
-      <entry key="D1" value="4022.5514548605624" />
-      <entry key="W1" value="13335.6408102462" />
+      <entry key="MS100" value="1.473028823362798" />
+      <entry key="MS500" value="1.860949188338904" />
+      <entry key="S2" value="1.9632618943624838" />
+      <entry key="S5" value="1.985515812637058" />
+      <entry key="S10" value="2.0369201707568996" />
+      <entry key="S30" value="5.371009702691476" />
+      <entry key="S60" value="16.098981446369397" />
+      <entry key="M2" value="35.55696900093726" />
+      <entry key="M5" value="76.3186317344784" />
+      <entry key="M10" value="113.594518590689" />
+      <entry key="M15" value="135.96808462388546" />
+      <entry key="M30" value="173.44712820760674" />
+      <entry key="H1" value="226.26777553057377" />
+      <entry key="H2" value="388.61790133804277" />
+      <entry key="H4" value="815.3509372263792" />
+      <entry key="D1" value="4130.827591372446" />
+      <entry key="W1" value="13481.138207760026" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -83,32 +94,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="5.033231614094316E-261" />
-      <entry key="M30" value="7.094527196433679E-131" />
-      <entry key="H1" value="8.422901635680414E-66" />
-      <entry key="H2" value="2.902223567487422E-33" />
-      <entry key="H4" value="5.387228942216374E-17" />
-      <entry key="D1" value="0.0019745517381711403" />
-      <entry key="W1" value="0.6369783333923863" />
+      <entry key="M15" value="9.333359176631281E-262" />
+      <entry key="M30" value="3.055054692903254E-131" />
+      <entry key="H1" value="5.527254918043606E-66" />
+      <entry key="H2" value="2.351011467016476E-33" />
+      <entry key="H4" value="4.848722993836421E-17" />
+      <entry key="D1" value="0.001940195567430316" />
+      <entry key="W1" value="0.635383099391698" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1316234799814715" />
-      <entry key="MS500" value="2.7729036854034743" />
-      <entry key="S2" value="5.948539276806965" />
-      <entry key="S5" value="11.760810830096457" />
-      <entry key="S10" value="19.57634740064706" />
-      <entry key="S30" value="33.725045394966514" />
-      <entry key="S60" value="40.21742781288452" />
-      <entry key="M2" value="44.262228284516326" />
-      <entry key="M5" value="47.01235249418495" />
-      <entry key="M10" value="48.10969567406083" />
-      <entry key="M15" value="49.260109115813854" />
-      <entry key="M30" value="56.78125718735889" />
-      <entry key="H1" value="96.75797648010183" />
-      <entry key="H2" value="269.2063860098607" />
-      <entry key="H4" value="711.8262240032279" />
-      <entry key="D1" value="4022.5532075209994" />
-      <entry key="W1" value="13336.277638069503" />
+      <entry key="MS100" value="1.4067766547892504" />
+      <entry key="MS500" value="1.8431704384872383" />
+      <entry key="S2" value="1.9585175832941593" />
+      <entry key="S5" value="1.9835921211767014" />
+      <entry key="S10" value="2.0359355673793456" />
+      <entry key="S30" value="5.370172585838969" />
+      <entry key="S60" value="16.09771352324159" />
+      <entry key="M2" value="35.55556020153295" />
+      <entry key="M5" value="76.31741419986427" />
+      <entry key="M10" value="113.59359190047732" />
+      <entry key="M15" value="135.96732885476962" />
+      <entry key="M30" value="173.44662106438497" />
+      <entry key="H1" value="226.26742801367377" />
+      <entry key="H2" value="388.6176126849285" />
+      <entry key="H4" value="815.3506556493727" />
+      <entry key="D1" value="4130.829303377394" />
+      <entry key="W1" value="13481.773439269351" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -260,7 +271,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 Marketplace CSS was wiping background-image, so the inventory background never showed on cards.&#10;   Now:&#10;   •&#10;   Background + product image both render in catalog-card-media (same as popup), with shadow/fit settings&#10;   •&#10;   Admin Media row: Product image | Background image (compact, single-line, no-wrap)&#10;   •&#10;   Uncheck either to hide that layer; save catalog settings after changing" />
     <MESSAGE value="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing." />
     <MESSAGE value="#6 deploy error fixed" />
     <MESSAGE value="#7 Display filters only non-zero item" />
@@ -285,7 +295,8 @@
     <MESSAGE value="#17 Split feature block taking more empty spaces, can fix this for optimized space utilization , also please provide color picker for feat-card background and section background" />
     <MESSAGE value="#17 refine filters catalog-facet-group list items can it be sort in alphabatically" />
     <MESSAGE value="#17 CSP stylesheet block and the startTime error" />
-    <option name="LAST_COMMIT_MESSAGE" value="#17 CSP stylesheet block and the startTime error" />
+    <MESSAGE value="File upload error display if any" />
+    <option name="LAST_COMMIT_MESSAGE" value="File upload error display if any" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

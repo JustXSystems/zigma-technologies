@@ -621,6 +621,8 @@ export async function getPageSettings(itemType: CatalogItemType) {
     card_style: row.card_style === 'overlay' ? 'overlay' : 'marketplace',
     card_body_bg_color: row.card_body_bg_color || '#ffffff',
     card_media_bg_color: row.card_media_bg_color || '#ffffff',
+    listing_bg_color: row.listing_bg_color || '#ffffff',
+    marketplace_hover_border_color: row.marketplace_hover_border_color || '#FF6B1A',
     card_media_fit_percent: normalizeCardMediaFitPercent(row.card_media_fit_percent),
     card_media_inset: normalizeCardMediaInset(row.card_media_inset),
     hero_variant: row.hero_variant ?? 'spotlight',
@@ -675,6 +677,8 @@ export async function updatePageSettings(
     card_style: input.card_style,
     card_body_bg_color: input.card_body_bg_color,
     card_media_bg_color: input.card_media_bg_color,
+    listing_bg_color: input.listing_bg_color,
+    marketplace_hover_border_color: input.marketplace_hover_border_color,
     card_media_fit_percent:
       input.card_media_fit_percent !== undefined
         ? normalizeCardMediaFitPercent(input.card_media_fit_percent)
