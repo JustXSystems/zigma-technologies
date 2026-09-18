@@ -36,10 +36,80 @@ const TYPE_LABEL: Record<CatalogItemType, string> = {
 };
 
 const TRUST_ITEMS = [
-  { title: 'Expert support', blurb: 'Engineering guidance from scope to commissioning' },
-  { title: 'Reliable delivery', blurb: 'Proven systems for critical environments' },
-  { title: 'Efficient design', blurb: 'Right-sized solutions with lower lifetime cost' },
+  {
+    title: 'Expert Support',
+    blurb: 'Dedicated engineering guidance',
+    icon: 'headset' as const,
+  },
+  {
+    title: 'Reliable Performance',
+    blurb: 'Built for critical uptime',
+    icon: 'gear' as const,
+  },
+  {
+    title: 'Energy Efficient',
+    blurb: 'Optimized lifetime cost',
+    icon: 'leaf' as const,
+  },
 ] as const;
+
+function TrustIcon({ name }: { name: 'headset' | 'gear' | 'leaf' }) {
+  if (name === 'headset') {
+    return (
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+        <path d="M4 14a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2zM17 11h1a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-1v-4z" />
+      </svg>
+    );
+  }
+  if (name === 'leaf') {
+    return (
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        <path d="M5 19c8 0 14-8 14-14-6 0-14 6-14 14z" />
+        <path d="M5 19c3-3 7-5 11-6" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" />
+    </svg>
+  );
+}
+
+function MetricIcon({ kind }: { kind: 'investment' | 'highlight' }) {
+  if (kind === 'investment') {
+    return (
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M12 3 4 7v5c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V7l-8-4z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  );
+}
+
+function SpecIcon({ index }: { index: number }) {
+  if (index % 2 === 0) {
+    return (
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        <path d="M8 4h8l3 4v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8l3-4z" />
+        <path d="M8 4v4h8V4" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" />
+    </svg>
+  );
+}
 
 function splitSpecs(specs: Record<string, string> | null | undefined) {
   if (!specs) return { highlight: null as { key: string; value: string } | null, rest: [] as [string, string][] };
@@ -93,10 +163,7 @@ export default function CatalogDetailModal({
     if (detailElements?.length) return detailElements;
     if (modalFields?.length) {
       // Legacy modal_fields → element bridge
-      const base = DEFAULT_DETAIL_ELEMENTS.filter((e) =>
-        (['chrome', 'copy_link', 'badge', 'ref', 'trust'] as const).includes(e as 'chrome')
-      );
-      const mapped = new Set(base);
+      const mapped = new Set<typeof DEFAULT_DETAIL_ELEMENTS[number]>(['close', 'trust']);
       const bridge: Record<string, typeof DEFAULT_DETAIL_ELEMENTS[number][]> = {
         title: ['title'],
         summary: ['tagline'],
@@ -105,7 +172,7 @@ export default function CatalogDetailModal({
         price_label: ['price'],
         tags: ['tags'],
         specs: ['specs', 'highlight'],
-        media: ['media'],
+        media: ['media', 'gallery_dots'],
         enquiry: ['enquiry', 'cta_copy', 'cta_profile', 'cta_quote', 'cta_contact'],
       };
       for (const f of modalFields) for (const el of bridge[f] || []) mapped.add(el);
@@ -213,6 +280,8 @@ export default function CatalogDetailModal({
 
   if (!mounted) return null;
 
+  const isShowcase = template === 'showcase';
+
   const gallery = showMedia ? (
     <CatalogMediaGallery
       media={item.media || []}
@@ -226,12 +295,16 @@ export default function CatalogDetailModal({
       mediaFitToSpace={item.media_fit_to_space}
       mediaFitPercent={item.media_fit_percent}
       mediaBgColor={mediaBgColor}
+      navStyle={isShowcase && has('gallery_dots') ? 'dots' : 'thumbs'}
+      showThumbs={isShowcase ? has('gallery_dots') : true}
     />
   ) : null;
 
+  const showClose = has('close');
+
   const actions = (
     <>
-      {has('copy_link') ? (
+      {has('copy_link') && !isShowcase ? (
         <button type="button" className="catalog-detail-icon-btn" onClick={copyLink} aria-label={copy.a11y.copyLink}>
           {copied ? (
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
@@ -245,42 +318,58 @@ export default function CatalogDetailModal({
           )}
         </button>
       ) : null}
-      <button
-        ref={closeRef}
-        type="button"
-        className="catalog-detail-close"
-        onClick={handleClose}
-        aria-label={copy.a11y.close}
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-      </button>
+      {showClose ? (
+        <button
+          ref={closeRef}
+          type="button"
+          className="catalog-detail-close"
+          onClick={handleClose}
+          aria-label={copy.a11y.close}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      ) : null}
     </>
   );
 
-  const footerActions = (
-    <div className="catalog-detail-footer-actions">
-      {has('cta_profile') ? (
-        <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
-          View full {caseStudyLabel(itemType).toLowerCase()}
-        </Link>
-      ) : null}
-      {has('cta_quote') && showEnquiry ? (
-        <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
-          Request a quote
-        </button>
-      ) : null}
-      {has('cta_contact') ? (
-        <a href="/contact" className="btn btn-ghost-dark">
-          Contact us
-        </a>
-      ) : null}
-    </div>
-  );
+  const showcaseCta =
+    showAnyCta || showEnquiry ? (
+      <div className="catalog-detail-showcase-cta">
+        {has('cta_copy') ? (
+          <div className="catalog-detail-showcase-cta-copy">
+            <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
+            <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
+          </div>
+        ) : null}
+        <div className="catalog-detail-showcase-cta-actions">
+          {has('cta_profile') ? (
+            <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary catalog-detail-showcase-primary">
+              View full {caseStudyLabel(itemType).toLowerCase()}
+              <span aria-hidden="true"> →</span>
+            </Link>
+          ) : null}
+          {has('cta_quote') ? (
+            <button
+              type="button"
+              className="btn catalog-detail-showcase-secondary"
+              onClick={() => setEnquiryOpen(true)}
+            >
+              Request a quote
+            </button>
+          ) : null}
+        </div>
+        {has('cta_contact') ? (
+          <a href="/contact" className="catalog-detail-showcase-contact">
+            Contact our team <span aria-hidden="true">→</span>
+          </a>
+        ) : null}
+      </div>
+    ) : null;
 
   const detailFooter =
-    showAnyCta || showEnquiry ? (
+    isShowcase ? null : showAnyCta || showEnquiry ? (
       <footer className="catalog-detail-footer">
         {has('cta_copy') ? (
           <div className="catalog-detail-footer-copy">
@@ -290,7 +379,23 @@ export default function CatalogDetailModal({
         ) : (
           <div />
         )}
-        {footerActions}
+        <div className="catalog-detail-footer-actions">
+          {has('cta_profile') ? (
+            <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
+              View full {caseStudyLabel(itemType).toLowerCase()}
+            </Link>
+          ) : null}
+          {has('cta_quote') ? (
+            <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
+              Request a quote
+            </button>
+          ) : null}
+          {has('cta_contact') ? (
+            <a href="/contact" className="btn btn-ghost-dark">
+              Contact us
+            </a>
+          ) : null}
+        </div>
       </footer>
     ) : (
       <footer className="catalog-detail-footer catalog-detail-footer--simple">
@@ -302,17 +407,33 @@ export default function CatalogDetailModal({
 
   const metricsBlock =
     (has('price') && item.price_label) || (has('highlight') && highlight) ? (
-      <div className="catalog-detail-metrics">
+      <div className={`catalog-detail-metrics${isShowcase ? ' catalog-detail-metrics--cards' : ''}`}>
         {has('price') && item.price_label ? (
           <div className="catalog-detail-metric catalog-detail-metric--primary">
-            <span className="catalog-detail-metric-label">Investment</span>
-            <span className="catalog-detail-metric-value">{item.price_label}</span>
+            {isShowcase ? (
+              <span className="catalog-detail-metric-icon catalog-detail-metric-icon--orange">
+                <MetricIcon kind="investment" />
+              </span>
+            ) : null}
+            <div>
+              <span className="catalog-detail-metric-label">Investment</span>
+              <span className="catalog-detail-metric-value">{item.price_label}</span>
+            </div>
           </div>
         ) : null}
         {has('highlight') && highlight ? (
-          <div className="catalog-detail-metric">
-            <span className="catalog-detail-metric-label">{highlight.key}</span>
-            <span className="catalog-detail-metric-value">{highlight.value}</span>
+          <div className="catalog-detail-metric catalog-detail-metric--highlight">
+            {isShowcase ? (
+              <span className="catalog-detail-metric-icon catalog-detail-metric-icon--blue">
+                <MetricIcon kind="highlight" />
+              </span>
+            ) : null}
+            <div>
+              <span className="catalog-detail-metric-label">
+                {isShowcase ? 'Highlight' : highlight.key}
+              </span>
+              <span className="catalog-detail-metric-value">{highlight.value}</span>
+            </div>
           </div>
         ) : null}
       </div>
@@ -340,22 +461,44 @@ export default function CatalogDetailModal({
     has('specs') && specEntries.length ? (
       <div className="catalog-detail-section">
         <h3 className="catalog-detail-section-title">Technical specifications</h3>
-        <dl className="catalog-detail-spec-list">
-          {specEntries.map(([k, v]) => (
-            <div key={k} className="catalog-detail-spec-row">
-              <dt className="catalog-detail-spec-key">{k}</dt>
-              <dd className="catalog-detail-spec-val">{v}</dd>
-            </div>
-          ))}
-        </dl>
+        {isShowcase ? (
+          <div className="catalog-detail-spec-cards">
+            {specEntries.map(([k, v], idx) => (
+              <div key={k} className="catalog-detail-spec-card">
+                <span className="catalog-detail-spec-icon">
+                  <SpecIcon index={idx} />
+                </span>
+                <div>
+                  <span className="catalog-detail-spec-key">{k}</span>
+                  <span className="catalog-detail-spec-val">{v}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <dl className="catalog-detail-spec-list">
+            {specEntries.map(([k, v]) => (
+              <div key={k} className="catalog-detail-spec-row">
+                <dt className="catalog-detail-spec-key">{k}</dt>
+                <dd className="catalog-detail-spec-val">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </div>
     ) : null;
 
   const trustBlock = has('trust') ? (
-    <div className="catalog-detail-trust" aria-label="Assurances">
+    <div className={`catalog-detail-trust${isShowcase ? ' catalog-detail-trust--bar' : ''}`} aria-label="Assurances">
       {TRUST_ITEMS.map((t) => (
         <div key={t.title} className="catalog-detail-trust-item">
-          <span className="catalog-detail-trust-mark" aria-hidden="true" />
+          {isShowcase ? (
+            <span className="catalog-detail-trust-icon">
+              <TrustIcon name={t.icon} />
+            </span>
+          ) : (
+            <span className="catalog-detail-trust-mark" aria-hidden="true" />
+          )}
           <div>
             <strong>{t.title}</strong>
             <span>{t.blurb}</span>
@@ -366,7 +509,7 @@ export default function CatalogDetailModal({
   ) : null;
 
   const enquiryOverlay =
-    showEnquiry && enquiryOpen ? (
+    (showEnquiry || has('cta_quote')) && enquiryOpen ? (
       <div className="catalog-detail-enquiry-backdrop" onClick={() => setEnquiryOpen(false)} role="presentation">
         <aside className="catalog-detail-enquiry" onClick={(e) => e.stopPropagation()} aria-label="Enquiry form">
           <div className="catalog-detail-enquiry-head">
@@ -460,7 +603,7 @@ export default function CatalogDetailModal({
 
   const contentBody = (
     <div className="catalog-detail-scroll">
-      {showInlineMeta && (has('badge') || has('ref')) ? (
+      {showInlineMeta && !isShowcase && (has('badge') || has('ref')) ? (
         <div className="catalog-detail-eyebrow-row">
           {has('badge') ? (
             <span className="catalog-detail-badge catalog-detail-badge--ink">
@@ -483,7 +626,7 @@ export default function CatalogDetailModal({
       {overviewBlock}
       {tagsBlock}
       {specsBlock}
-      {trustBlock}
+      {!isShowcase ? trustBlock : null}
     </div>
   );
 
@@ -516,16 +659,23 @@ export default function CatalogDetailModal({
           </header>
         ) : null}
 
-        {!showChromeBar ? <div className="catalog-detail-float-actions">{actions}</div> : null}
+        {!showChromeBar && (showClose || (has('copy_link') && !isShowcase)) ? (
+          <div className="catalog-detail-float-actions">{actions}</div>
+        ) : null}
 
         <div className="catalog-detail-body">
           <div className={`catalog-detail-layout${showMedia ? '' : ' catalog-detail-layout--no-media'}`}>
             {showMedia ? (
               <aside className="catalog-detail-media-col">
                 <div className="catalog-detail-media-stage">{gallery}</div>
+                {isShowcase ? showcaseCta : null}
               </aside>
             ) : null}
-            <div className="catalog-detail-content-col">{contentBody}</div>
+            <div className="catalog-detail-content-col">
+              {contentBody}
+              {isShowcase ? trustBlock : null}
+              {isShowcase && !showMedia ? showcaseCta : null}
+            </div>
           </div>
         </div>
 

@@ -26,6 +26,8 @@ type Props = {
   mediaBgColor?: string | null;
   /** When false, hide the thumbnail strip (admin live preview drives selection). */
   showThumbs?: boolean;
+  /** Thumbnail strip vs carousel dots (Showcase template). */
+  navStyle?: 'thumbs' | 'dots';
 };
 
 export default function CatalogMediaGallery({
@@ -42,6 +44,7 @@ export default function CatalogMediaGallery({
   mediaFitPercent = DEFAULT_MEDIA_FIT_PERCENT,
   mediaBgColor = '#ffffff',
   showThumbs = true,
+  navStyle = 'thumbs',
 }: Props) {
   const sorted = useMemo(
     () =>
@@ -151,31 +154,50 @@ export default function CatalogMediaGallery({
       </div>
 
       {showThumbs && sorted.length > 1 ? (
-        <div className="catalog-gallery-thumbs">
-          {sorted.map((m) => {
-            const selected = m.id === active?.id;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                className={`catalog-gallery-thumb${selected ? ' is-active' : ''}`}
-                onClick={() => setActiveId(m.id)}
-                aria-label={`View ${m.kind} ${m.alt || title || ''}`}
-                aria-pressed={selected}
-              >
-                {m.kind === 'video' ? (
-                  <>
-                    <video src={publicMediaUrl(m.url)} muted className="catalog-gallery-thumb-media" />
-                    <span className="catalog-gallery-thumb-play">▶</span>
-                  </>
-                ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={publicMediaUrl(m.url)} alt={m.alt || ''} className="catalog-gallery-thumb-media" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+        navStyle === 'dots' ? (
+          <div className="catalog-gallery-dots" role="tablist" aria-label="Gallery slides">
+            {sorted.map((m, idx) => {
+              const selected = m.id === active?.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="tab"
+                  className={`catalog-gallery-dot${selected ? ' is-active' : ''}`}
+                  aria-label={`Slide ${idx + 1}`}
+                  aria-selected={selected}
+                  onClick={() => setActiveId(m.id)}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="catalog-gallery-thumbs">
+            {sorted.map((m) => {
+              const selected = m.id === active?.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  className={`catalog-gallery-thumb${selected ? ' is-active' : ''}`}
+                  onClick={() => setActiveId(m.id)}
+                  aria-label={`View ${m.kind} ${m.alt || title || ''}`}
+                  aria-pressed={selected}
+                >
+                  {m.kind === 'video' ? (
+                    <>
+                      <video src={publicMediaUrl(m.url)} muted className="catalog-gallery-thumb-media" />
+                      <span className="catalog-gallery-thumb-play">▶</span>
+                    </>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={publicMediaUrl(m.url)} alt={m.alt || ''} className="catalog-gallery-thumb-media" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )
       ) : null}
     </div>
   );

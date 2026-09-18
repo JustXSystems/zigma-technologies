@@ -1150,7 +1150,7 @@ export default function CatalogSettingsPage() {
               <div className="admin-field full">
                 <label>Popup components</label>
                 <p style={{ margin: '0 0 0.55rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Toggle each piece of the Quick view popup independently. Works for Classic and Vitrine templates.
+                  Toggle each piece of the Quick view popup independently — Classic, Vitrine, Lumen, Horizon, and Showcase.
                 </p>
                 {(['chrome', 'content', 'cta'] as const).map((group) => {
                   const opts = CATALOG_DETAIL_ELEMENT_OPTIONS.filter((o) => o.group === group);
@@ -1248,7 +1248,7 @@ export default function CatalogSettingsPage() {
                   })}
                 </div>
                 <p style={{ margin: '0.35rem 0 0', fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
-                  Composition presets apply to the Classic template. Vitrine, Lumen, and Horizon use their own stage proportions.
+                  Composition presets apply to the Classic template. Other templates use their own stage proportions.
                 </p>
               </div>
               <div className="admin-field">

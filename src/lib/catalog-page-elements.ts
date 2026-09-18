@@ -66,12 +66,21 @@ export function toolbarHas(
  */
 export function resolveDetailElements(settings: CatalogPageSettings | null | undefined): string[] {
   if (settings?.detail_elements_json?.length) {
-    return normalizeDetailElements(settings.detail_elements_json);
+    const raw = settings.detail_elements_json.map((v) =>
+      typeof v === 'string' ? v.trim().toLowerCase() : ''
+    );
+    let list = normalizeDetailElements(raw);
+    // Soft-migrate configs saved before close / gallery_dots existed.
+    if (!raw.includes('close') && !raw.includes('gallery_dots')) {
+      if (!list.includes('close')) list = ['close', ...list];
+      if (list.includes('media') && !list.includes('gallery_dots')) list = [...list, 'gallery_dots'];
+    }
+    return list;
   }
   const fields = settings?.modal_fields_json;
   if (!fields?.length) return [...DEFAULT_DETAIL_ELEMENTS];
 
-  const mapped = new Set<CatalogDetailElement>(['chrome', 'copy_link', 'badge', 'ref', 'trust']);
+  const mapped = new Set<CatalogDetailElement>(['close', 'gallery_dots']);
   const map: Record<string, CatalogDetailElement[]> = {
     title: ['title'],
     summary: ['tagline'],
@@ -80,12 +89,14 @@ export function resolveDetailElements(settings: CatalogPageSettings | null | und
     price_label: ['price'],
     tags: ['tags'],
     specs: ['specs', 'highlight'],
-    media: ['media'],
+    media: ['media', 'gallery_dots'],
     enquiry: ['enquiry', 'cta_copy', 'cta_profile', 'cta_quote', 'cta_contact'],
   };
   for (const f of fields) {
     for (const el of map[f] || []) mapped.add(el);
   }
+  // Legacy modal fields also kept trust/chrome affordances.
+  mapped.add('trust');
   return [...mapped];
 }
 

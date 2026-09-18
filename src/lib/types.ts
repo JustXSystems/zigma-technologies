@@ -62,7 +62,13 @@ export const CATALOG_DETAIL_LAYOUT_OPTIONS: Array<{
 ];
 
 /** Visual template for the Quick-view popup shell */
-export const CATALOG_DETAIL_TEMPLATE_VALUES = ['classic', 'vitrine', 'lumen', 'horizon'] as const;
+export const CATALOG_DETAIL_TEMPLATE_VALUES = [
+  'classic',
+  'vitrine',
+  'lumen',
+  'horizon',
+  'showcase',
+] as const;
 export type CatalogDetailTemplate = (typeof CATALOG_DETAIL_TEMPLATE_VALUES)[number];
 export const DEFAULT_DETAIL_TEMPLATE: CatalogDetailTemplate = 'classic';
 
@@ -71,6 +77,7 @@ export const CATALOG_DETAIL_MODERN_TEMPLATES: readonly CatalogDetailTemplate[] =
   'vitrine',
   'lumen',
   'horizon',
+  'showcase',
 ];
 
 export const CATALOG_DETAIL_TEMPLATE_OPTIONS: Array<{
@@ -98,6 +105,11 @@ export const CATALOG_DETAIL_TEMPLATE_OPTIONS: Array<{
     label: 'Horizon',
     hint: 'Immersive media canvas with frosted glass content sheet — ultra-modern',
   },
+  {
+    value: 'showcase',
+    label: 'Showcase',
+    hint: 'Reference match: media + CTA left, icon cards + trust strip right, gallery dots',
+  },
 ];
 
 export function isModernDetailTemplate(template: CatalogDetailTemplate): boolean {
@@ -106,11 +118,9 @@ export function isModernDetailTemplate(template: CatalogDetailTemplate): boolean
 
 /** Toggleable pieces inside catalog-detail-panel */
 export const CATALOG_DETAIL_ELEMENT_VALUES = [
-  'chrome',
-  'badge',
-  'ref',
-  'copy_link',
+  'close',
   'media',
+  'gallery_dots',
   'title',
   'tagline',
   'price',
@@ -124,21 +134,22 @@ export const CATALOG_DETAIL_ELEMENT_VALUES = [
   'cta_quote',
   'cta_contact',
   'enquiry',
-] as const;
-export type CatalogDetailElement = (typeof CATALOG_DETAIL_ELEMENT_VALUES)[number];
-
-export const DEFAULT_DETAIL_ELEMENTS: CatalogDetailElement[] = [
   'chrome',
   'badge',
   'ref',
   'copy_link',
+] as const;
+export type CatalogDetailElement = (typeof CATALOG_DETAIL_ELEMENT_VALUES)[number];
+
+export const DEFAULT_DETAIL_ELEMENTS: CatalogDetailElement[] = [
+  'close',
   'media',
+  'gallery_dots',
   'title',
   'tagline',
   'price',
   'highlight',
   'overview',
-  'tags',
   'specs',
   'trust',
   'cta_copy',
@@ -153,19 +164,21 @@ export const CATALOG_DETAIL_ELEMENT_OPTIONS: Array<{
   label: string;
   group: 'chrome' | 'content' | 'cta';
 }> = [
-  { id: 'chrome', label: 'Header chrome', group: 'chrome' },
+  { id: 'close', label: 'Close (X)', group: 'chrome' },
+  { id: 'chrome', label: 'Header chrome (Classic)', group: 'chrome' },
   { id: 'badge', label: 'Category badge', group: 'chrome' },
   { id: 'ref', label: 'Reference slug', group: 'chrome' },
   { id: 'copy_link', label: 'Copy link', group: 'chrome' },
   { id: 'media', label: 'Media gallery', group: 'content' },
+  { id: 'gallery_dots', label: 'Gallery dots (Showcase)', group: 'content' },
   { id: 'title', label: 'Title', group: 'content' },
   { id: 'tagline', label: 'Tagline (summary)', group: 'content' },
-  { id: 'price', label: 'Investment / price', group: 'content' },
-  { id: 'highlight', label: 'Highlight metric', group: 'content' },
+  { id: 'price', label: 'Investment card', group: 'content' },
+  { id: 'highlight', label: 'Highlight card', group: 'content' },
   { id: 'overview', label: 'Overview', group: 'content' },
   { id: 'tags', label: 'Tags', group: 'content' },
-  { id: 'specs', label: 'Specifications', group: 'content' },
-  { id: 'trust', label: 'Trust / assurance strip', group: 'content' },
+  { id: 'specs', label: 'Spec cards', group: 'content' },
+  { id: 'trust', label: 'Trust strip', group: 'content' },
   { id: 'cta_copy', label: 'CTA intro copy', group: 'cta' },
   { id: 'cta_profile', label: 'View full profile', group: 'cta' },
   { id: 'cta_quote', label: 'Request a quote', group: 'cta' },
