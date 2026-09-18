@@ -125,6 +125,8 @@ function InventoryInner() {
   const [previewMediaBg, setPreviewMediaBg] = useState('#ffffff');
   const [previewDetailShadow, setPreviewDetailShadow] = useState<CatalogShadowStyle>(DEFAULT_DETAIL_GALLERY_SHADOW);
   const [previewSurface, setPreviewSurface] = useState<'detail' | 'card'>('detail');
+  const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null);
+  const [editorTab, setEditorTab] = useState<'basics' | 'commerce' | 'case'>('basics');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -157,6 +159,7 @@ function InventoryInner() {
 
   function openCreate() {
     setEditor(emptyEditor());
+    setEditorTab('basics');
     setEditorOpen(true);
   }
 
@@ -183,6 +186,7 @@ function InventoryInner() {
       enabled: !!item.enabled,
       ...caseStudyToEditor(item.case_study_json),
     });
+    setEditorTab('basics');
     setEditorOpen(true);
   }
 
@@ -378,6 +382,7 @@ function InventoryInner() {
     setMediaItem(item);
     setMediaMsg('');
     setAttachUrl('');
+    setSelectedMediaId(null);
     if (opts?.resetBackground !== false && (switching || !mediaItem)) {
       setBackgroundUrl(item.background_image_url || '');
       setBackgroundShading(item.background_shading_style || 'medium');
@@ -402,6 +407,7 @@ function InventoryInner() {
         setAttachFitToSpace(primary.fit_to_space !== false);
         setAttachFitPercent(primary.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
         setAttachShadow(primary.shadow_style || 'medium');
+        setSelectedMediaId(primary.id);
       }
     } else setError(data.error || 'Failed to load media');
 
@@ -411,6 +417,27 @@ function InventoryInner() {
       setPreviewMediaBg(s?.card_media_bg_color || '#ffffff');
       setPreviewDetailShadow(normalizeShadowStyle(s?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW));
     }
+  }
+
+  function focusMedia(m: CatalogMedia) {
+    setSelectedMediaId(m.id);
+    setAttachUrl(m.url);
+    if (m.kind !== 'video') {
+      setAttachFitToSpace(m.fit_to_space !== false);
+      setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+      setAttachShadow(m.shadow_style || 'medium');
+    }
+  }
+
+  function productPresentationDirty() {
+    if (!selectedMediaId) return false;
+    const m = itemMedia.find((x) => x.id === selectedMediaId);
+    if (!m || m.kind === 'video') return false;
+    return (
+      attachFitToSpace !== (m.fit_to_space !== false) ||
+      attachFitPercent !== (m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT) ||
+      attachShadow !== (m.shadow_style || 'medium')
+    );
   }
 
   function mediaPresentationDirty(item: CatalogItem) {
@@ -731,99 +758,145 @@ function InventoryInner() {
       {editorOpen ? (
         <div className="admin-modal-backdrop" onClick={() => setEditorOpen(false)}>
           <form
-            className="admin-modal"
+            className="admin-modal admin-modal--lg"
             onClick={(e) => e.stopPropagation()}
             onSubmit={saveItem}
           >
-            <h2>{editor.id ? `Edit ${type}` : `New ${type}`}</h2>
-            <div className="admin-form-grid">
-              <div className="admin-field">
-                <label>Title</label>
-                <input className="admin-input" value={editor.title} onChange={(e) => setEditor({ ...editor, title: e.target.value })} required />
+            <div className="admin-modal-header">
+              <div className="admin-modal-header-text">
+                <h2>{editor.id ? `Edit ${type}` : `New ${type}`}</h2>
+                <p>Core fields, commerce details, and optional case-study page content.</p>
               </div>
-              <div className="admin-field">
-                <label>Slug</label>
-                <input className="admin-input" value={editor.slug} onChange={(e) => setEditor({ ...editor, slug: e.target.value })} placeholder="auto from title" />
-              </div>
-              <div className="admin-field full">
-                <label>Summary</label>
-                <textarea className="admin-textarea" value={editor.summary} onChange={(e) => setEditor({ ...editor, summary: e.target.value })} />
-              </div>
-              <div className="admin-field full">
-                <label>Description</label>
-                <textarea className="admin-textarea" value={editor.description} onChange={(e) => setEditor({ ...editor, description: e.target.value })} />
-              </div>
-              <div className="admin-field">
-                <label>Category</label>
-                <select className="admin-select" value={editor.category_id} onChange={(e) => setEditor({ ...editor, category_id: e.target.value })}>
-                  <option value="">None</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="admin-field">
-                <label>Price label</label>
-                <input className="admin-input" value={editor.price_label} onChange={(e) => setEditor({ ...editor, price_label: e.target.value })} placeholder="e.g. On request" />
-              </div>
-              <div className="admin-field">
-                <label>Availability</label>
-                <input
-                  className="admin-input"
-                  value={editor.availability_label}
-                  onChange={(e) => setEditor({ ...editor, availability_label: e.target.value })}
-                  placeholder="e.g. In stock / Made to order"
-                />
-              </div>
-              <div className="admin-field">
-                <label>Lead time</label>
-                <input
-                  className="admin-input"
-                  value={editor.lead_time_label}
-                  onChange={(e) => setEditor({ ...editor, lead_time_label: e.target.value })}
-                  placeholder="e.g. 2–4 weeks"
-                />
-              </div>
-              <div className="admin-field">
-                <label>Brochure / PDF URL</label>
-                <input
-                  className="admin-input"
-                  value={editor.brochure_url}
-                  onChange={(e) => setEditor({ ...editor, brochure_url: e.target.value })}
-                  placeholder="/assets/uploads/documents/… or https://…"
-                />
-              </div>
-              <div className="admin-field">
-                <label>Tags (comma separated)</label>
-                <input className="admin-input" value={editor.tags} onChange={(e) => setEditor({ ...editor, tags: e.target.value })} />
-              </div>
-              <div className="admin-field">
-                <label>Status</label>
-                <select className="admin-select" value={editor.status} onChange={(e) => setEditor({ ...editor, status: e.target.value as 'draft' | 'published' })}>
-                  <option value="draft">draft</option>
-                  <option value="published">published</option>
-                </select>
-              </div>
-              <div className="admin-field full">
-                <label>Specs (one per line: Key: Value)</label>
-                <textarea className="admin-textarea" value={editor.specs} onChange={(e) => setEditor({ ...editor, specs: e.target.value })} />
-              </div>
-              <div className="full" style={{ borderTop: '1px solid var(--admin-border)', paddingTop: '1rem' }}>
-                <h3 style={{ marginTop: 0 }}>Case study / profile</h3>
-                <p style={{ color: 'var(--admin-muted)', marginTop: 0, fontSize: '0.88rem' }}>
-                  Powers the premium public detail page at /{type}s/&lt;slug&gt; with challenge, solution, scope, outcomes, and testimonial.
-                </p>
+              <button type="button" className="admin-modal-close" onClick={() => setEditorOpen(false)} aria-label="Close">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="admin-modal-tabs" role="tablist">
+              {(
+                [
+                  { id: 'basics', label: 'Basics' },
+                  { id: 'commerce', label: 'Commerce' },
+                  { id: 'case', label: 'Case study' },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  className={`admin-modal-tab${editorTab === tab.id ? ' is-active' : ''}`}
+                  aria-selected={editorTab === tab.id}
+                  onClick={() => setEditorTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div className="admin-modal-body">
+              {editorTab === 'basics' ? (
                 <div className="admin-form-grid">
                   <div className="admin-field">
+                    <label>Title</label>
+                    <input className="admin-input" value={editor.title} onChange={(e) => setEditor({ ...editor, title: e.target.value })} required />
+                  </div>
+                  <div className="admin-field">
+                    <label>Slug</label>
+                    <input className="admin-input" value={editor.slug} onChange={(e) => setEditor({ ...editor, slug: e.target.value })} placeholder="auto from title" />
+                  </div>
+                  <div className="admin-field full">
+                    <label>Summary</label>
+                    <textarea className="admin-textarea" value={editor.summary} onChange={(e) => setEditor({ ...editor, summary: e.target.value })} />
+                  </div>
+                  <div className="admin-field full">
+                    <label>Description</label>
+                    <textarea className="admin-textarea" value={editor.description} onChange={(e) => setEditor({ ...editor, description: e.target.value })} />
+                  </div>
+                  <div className="admin-field">
+                    <label>Category</label>
+                    <select className="admin-select" value={editor.category_id} onChange={(e) => setEditor({ ...editor, category_id: e.target.value })}>
+                      <option value="">None</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="admin-field">
+                    <label>Status</label>
+                    <select className="admin-select" value={editor.status} onChange={(e) => setEditor({ ...editor, status: e.target.value as 'draft' | 'published' })}>
+                      <option value="draft">draft</option>
+                      <option value="published">published</option>
+                    </select>
+                  </div>
+                  <div className="admin-field">
+                    <label>Tags (comma separated)</label>
+                    <input className="admin-input" value={editor.tags} onChange={(e) => setEditor({ ...editor, tags: e.target.value })} />
+                  </div>
+                  <div className="admin-field">
+                    <label>
+                      <input type="checkbox" checked={editor.featured} onChange={(e) => setEditor({ ...editor, featured: e.target.checked })} /> Featured
+                    </label>
+                  </div>
+                  <div className="admin-field">
+                    <label>
+                      <input type="checkbox" checked={editor.enabled} onChange={(e) => setEditor({ ...editor, enabled: e.target.checked })} /> Enabled
+                    </label>
+                  </div>
+                  <div className="admin-field full">
+                    <label>Specs (one per line: Key: Value)</label>
+                    <textarea className="admin-textarea" value={editor.specs} onChange={(e) => setEditor({ ...editor, specs: e.target.value })} />
+                  </div>
+                </div>
+              ) : null}
+
+              {editorTab === 'commerce' ? (
+                <div className="admin-form-grid">
+                  <div className="admin-field">
+                    <label>Price label</label>
+                    <input className="admin-input" value={editor.price_label} onChange={(e) => setEditor({ ...editor, price_label: e.target.value })} placeholder="e.g. On request" />
+                  </div>
+                  <div className="admin-field">
+                    <label>Availability</label>
+                    <input
+                      className="admin-input"
+                      value={editor.availability_label}
+                      onChange={(e) => setEditor({ ...editor, availability_label: e.target.value })}
+                      placeholder="e.g. In stock / Made to order"
+                    />
+                  </div>
+                  <div className="admin-field">
+                    <label>Lead time</label>
+                    <input
+                      className="admin-input"
+                      value={editor.lead_time_label}
+                      onChange={(e) => setEditor({ ...editor, lead_time_label: e.target.value })}
+                      placeholder="e.g. 2–4 weeks"
+                    />
+                  </div>
+                  <div className="admin-field">
+                    <label>Brochure / PDF URL</label>
+                    <input
+                      className="admin-input"
+                      value={editor.brochure_url}
+                      onChange={(e) => setEditor({ ...editor, brochure_url: e.target.value })}
+                      placeholder="/assets/uploads/documents/… or https://…"
+                    />
+                  </div>
+                </div>
+              ) : null}
+
+              {editorTab === 'case' ? (
+                <div className="admin-form-grid">
+                  <div className="admin-field full">
                     <label>
                       <input
                         type="checkbox"
                         checked={editor.case_study_enabled}
                         onChange={(e) => setEditor({ ...editor, case_study_enabled: e.target.checked })}
                       />{' '}
-                      Enable case study page
+                      Enable case study page at /{type}s/&lt;slug&gt;
                     </label>
                   </div>
                   <div className="admin-field">
@@ -908,19 +981,9 @@ function InventoryInner() {
                     />
                   </div>
                 </div>
-              </div>
-              <div className="admin-field">
-                <label>
-                  <input type="checkbox" checked={editor.featured} onChange={(e) => setEditor({ ...editor, featured: e.target.checked })} /> Featured
-                </label>
-              </div>
-              <div className="admin-field">
-                <label>
-                  <input type="checkbox" checked={editor.enabled} onChange={(e) => setEditor({ ...editor, enabled: e.target.checked })} /> Enabled
-                </label>
-              </div>
+              ) : null}
             </div>
-            <div className="admin-modal-actions">
+            <div className="admin-modal-footer">
               <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setEditorOpen(false)}>
                 Cancel
               </button>
@@ -934,254 +997,266 @@ function InventoryInner() {
 
       {mediaItem ? (
         <div className="admin-modal-backdrop" onClick={() => setMediaItem(null)}>
-          <div className="admin-modal" style={{ width: 'min(1080px, 100%)' }} onClick={(e) => e.stopPropagation()}>
-            <h2>Media · {mediaItem.title}</h2>
-            <p className="admin-media-lead">
-              Separate shadow &amp; fit for background frame and each attached image. Listing cards use the background
-              frame shadow; Quick view gallery frame shadow is configured in Catalog settings (overrides for
-              <code> .catalog-gallery-main</code>).
-            </p>
-            {mediaMsg ? <div className="admin-success">{mediaMsg}</div> : null}
-
-            <div className="admin-media-studio">
-              <div className="admin-media-panel">
-                <div className="admin-media-panel-head">
-                  <h3>Background / frame</h3>
-                  <span>Listing card shadow · Own fit</span>
-                </div>
-
-                <MediaPicker
-                  value={backgroundUrl}
-                  onChange={setBackgroundUrl}
-                  label="Background image"
-                  compact
-                />
-
-                <div className="admin-media-inline">
-                  <label htmlFor="bg-shadow">
-                    Frame shadow
-                    <select
-                      id="bg-shadow"
-                      className="admin-select"
-                      value={backgroundShading}
-                      onChange={(e) => setBackgroundShading(e.target.value as CatalogShadowStyle)}
-                      style={{ minWidth: 140 }}
-                      title="Listing card media frame. Quick view uses Catalog settings → gallery frame shadow."
-                    >
-                      {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={backgroundFitToSpace}
-                      onChange={(e) => setBackgroundFitToSpace(e.target.checked)}
-                    />
-                    Fit to space
-                  </label>
-                  <label>
-                    Fit %
-                    <input
-                      className="admin-input"
-                      type="number"
-                      min={20}
-                      max={100}
-                      step={1}
-                      disabled={!backgroundFitToSpace}
-                      value={backgroundFitPercent}
-                      onChange={(e) => {
-                        const n = Number(e.target.value);
-                        if (!Number.isFinite(n)) return;
-                        setBackgroundFitPercent(Math.min(100, Math.max(20, Math.round(n))));
-                      }}
-                      style={{ width: 64 }}
-                    />
-                  </label>
-                  <div className="admin-media-actions" style={{ marginTop: 0 }}>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-primary"
-                      disabled={savingBackground || !mediaPresentationDirty(mediaItem)}
-                      onClick={() => saveMediaPresentation(backgroundUrl.trim() || null)}
-                    >
-                      {savingBackground ? 'Saving…' : 'Save'}
-                    </button>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary"
-                      disabled={savingBackground || (!backgroundUrl && !mediaItem.background_image_url)}
-                      onClick={() => {
-                        setBackgroundUrl('');
-                        void saveMediaPresentation(null);
-                      }}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--admin-border)', margin: '0.75rem 0 0.55rem' }} />
-
-                <div className="admin-media-panel-head" style={{ borderBottom: 'none', marginBottom: '0.35rem', paddingBottom: 0 }}>
-                  <h3>Attached image</h3>
-                  <span>Own shadow · Own fit</span>
-                </div>
-
-                <MediaPicker
-                  value={attachUrl}
-                  onChange={setAttachUrl}
-                  label="Attach from library / URL"
-                  compact
-                />
-
-                <div className="admin-media-inline">
-                  <label htmlFor="attach-shadow">
-                    Shadow
-                    <select
-                      id="attach-shadow"
-                      className="admin-select"
-                      value={attachShadow}
-                      onChange={(e) => setAttachShadow(e.target.value as CatalogShadowStyle)}
-                      style={{ minWidth: 140 }}
-                    >
-                      {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={attachFitToSpace}
-                      onChange={(e) => setAttachFitToSpace(e.target.checked)}
-                    />
-                    Fit to space
-                  </label>
-                  <label>
-                    Fit %
-                    <input
-                      className="admin-input"
-                      type="number"
-                      min={20}
-                      max={100}
-                      step={1}
-                      disabled={!attachFitToSpace}
-                      value={attachFitPercent}
-                      onChange={(e) => {
-                        const n = Number(e.target.value);
-                        if (!Number.isFinite(n)) return;
-                        setAttachFitPercent(Math.min(100, Math.max(20, Math.round(n))));
-                      }}
-                      style={{ width: 64 }}
-                    />
-                  </label>
-                  <label className="admin-btn admin-btn-primary" style={{ cursor: 'pointer', margin: 0 }}>
-                    Upload
-                    <input
-                      type="file"
-                      accept="image/*,video/mp4,video/webm,.svg"
-                      multiple
-                      hidden
-                      onChange={async (e) => {
-                        const files = e.target.files;
-                        if (!files?.length || !mediaItem) return;
-                        try {
-                          await uploadMedia(files, mediaItem.id, itemMedia.length === 0);
-                          await openMedia(mediaItem, { resetBackground: false });
-                          setMediaMsg(`Uploaded ${files.length} file(s).`);
-                        } catch (err) {
-                          setError(err instanceof Error ? err.message : 'Upload failed');
-                        } finally {
-                          e.target.value = '';
-                        }
-                      }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-secondary"
-                    disabled={!attachUrl}
-                    onClick={() => attachLibraryMedia(attachUrl)}
-                  >
-                    Attach
-                  </button>
-                </div>
+          <div className="admin-modal admin-modal--wide" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <div className="admin-modal-header-text">
+                <h2>Media · {mediaItem.title}</h2>
+                <p>
+                  Frame controls the listing card. Product controls the Quick view image. Preview updates live.
+                </p>
               </div>
-
-              <MediaPresentationPreview
-                title={mediaItem.title}
-                surface={previewSurface}
-                onSurfaceChange={setPreviewSurface}
-                backgroundUrl={backgroundUrl}
-                backgroundShadow={backgroundShading}
-                backgroundFit={backgroundFitToSpace}
-                backgroundFitPercent={backgroundFitPercent}
-                productUrl={attachUrl}
-                productShadow={attachShadow}
-                productFit={attachFitToSpace}
-                productFitPercent={attachFitPercent}
-                mediaList={itemMedia}
-                mediaBgColor={previewMediaBg}
-                detailGalleryShadow={previewDetailShadow}
-                onSelectMedia={(m) => {
-                  if (m.kind === 'video') {
-                    setAttachUrl(m.url);
-                    return;
-                  }
-                  setAttachUrl(m.url);
-                  setAttachFitToSpace(m.fit_to_space !== false);
-                  setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
-                  setAttachShadow(m.shadow_style || 'medium');
-                }}
-              />
+              <button type="button" className="admin-modal-close" onClick={() => setMediaItem(null)} aria-label="Close">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            {itemMedia.length === 0 ? (
-              <p className="admin-empty">No media attached yet.</p>
-            ) : (
-              <div className="admin-media-list">
-                {itemMedia.map((m, idx) => (
-                  <AttachedMediaCard
-                    key={m.id}
-                    media={m}
-                    index={idx}
-                    total={itemMedia.length}
-                    saving={savingMediaFitId === m.id}
-                    onSetPrimary={() => setPrimaryMedia(m.id)}
-                    onMove={(dir) => moveMedia(m.id, dir)}
-                    onRemove={() => removeMedia(m.id)}
-                    onSaveFit={(fitToSpace, fitPercent, shadowStyle) =>
-                      saveAttachedMediaFit(m.id, fitToSpace, fitPercent, shadowStyle)
-                    }
-                    onLiveChange={(draft) => {
-                      setAttachUrl(draft.url);
-                      setAttachFitToSpace(draft.fitToSpace);
-                      setAttachFitPercent(draft.fitPercent);
-                      setAttachShadow(draft.shadowStyle);
-                    }}
-                    onPreview={() => {
-                      if (m.kind === 'video') {
-                        setAttachUrl(m.url);
-                        return;
-                      }
-                      setAttachUrl(m.url);
-                      setAttachFitToSpace(m.fit_to_space !== false);
-                      setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
-                      setAttachShadow(m.shadow_style || 'medium');
-                    }}
+            <div className="admin-modal-body admin-modal-body--flush">
+              {mediaMsg ? <div className="admin-success" style={{ margin: '0.85rem 1.15rem 0' }}>{mediaMsg}</div> : null}
+
+              <div className="admin-media-studio">
+                <div className="admin-media-controls">
+                  <section className="admin-media-block">
+                    <div className="admin-media-block-head">
+                      <h3>Frame</h3>
+                      <span>Listing card</span>
+                    </div>
+                    <MediaPicker value={backgroundUrl} onChange={setBackgroundUrl} label="Background image" compact />
+                    <div className="admin-media-controls-grid">
+                      <div className="admin-field">
+                        <label htmlFor="bg-shadow">Shadow</label>
+                        <select
+                          id="bg-shadow"
+                          className="admin-select"
+                          value={backgroundShading}
+                          onChange={(e) => setBackgroundShading(e.target.value as CatalogShadowStyle)}
+                        >
+                          {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="admin-field">
+                        <label htmlFor="bg-fit-pct">Fit %</label>
+                        <input
+                          id="bg-fit-pct"
+                          className="admin-input"
+                          type="number"
+                          min={20}
+                          max={100}
+                          step={1}
+                          disabled={!backgroundFitToSpace}
+                          value={backgroundFitPercent}
+                          onChange={(e) => {
+                            const n = Number(e.target.value);
+                            if (!Number.isFinite(n)) return;
+                            setBackgroundFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="admin-media-fit-row">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={backgroundFitToSpace}
+                          onChange={(e) => setBackgroundFitToSpace(e.target.checked)}
+                        />
+                        Fit to space
+                      </label>
+                    </div>
+                    <div className="admin-media-block-actions">
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-primary"
+                        disabled={savingBackground || !mediaPresentationDirty(mediaItem)}
+                        onClick={() => saveMediaPresentation(backgroundUrl.trim() || null)}
+                      >
+                        {savingBackground ? 'Saving…' : 'Save frame'}
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        disabled={savingBackground || (!backgroundUrl && !mediaItem.background_image_url)}
+                        onClick={() => {
+                          setBackgroundUrl('');
+                          void saveMediaPresentation(null);
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </section>
+
+                  <section className="admin-media-block">
+                    <div className="admin-media-block-head">
+                      <h3>Product</h3>
+                      <span>{selectedMediaId ? 'Editing selected' : 'Attach new'}</span>
+                    </div>
+                    <MediaPicker
+                      value={attachUrl}
+                      onChange={(url) => {
+                        setAttachUrl(url);
+                        const match = itemMedia.find((m) => m.url === url);
+                        setSelectedMediaId(match?.id ?? null);
+                        if (match && match.kind !== 'video') {
+                          setAttachFitToSpace(match.fit_to_space !== false);
+                          setAttachFitPercent(match.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+                          setAttachShadow(match.shadow_style || 'medium');
+                        }
+                      }}
+                      label="Image or URL"
+                      compact
+                    />
+                    <div className="admin-media-controls-grid">
+                      <div className="admin-field">
+                        <label htmlFor="attach-shadow">Shadow</label>
+                        <select
+                          id="attach-shadow"
+                          className="admin-select"
+                          value={attachShadow}
+                          onChange={(e) => setAttachShadow(e.target.value as CatalogShadowStyle)}
+                        >
+                          {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="admin-field">
+                        <label htmlFor="attach-fit-pct">Fit %</label>
+                        <input
+                          id="attach-fit-pct"
+                          className="admin-input"
+                          type="number"
+                          min={20}
+                          max={100}
+                          step={1}
+                          disabled={!attachFitToSpace}
+                          value={attachFitPercent}
+                          onChange={(e) => {
+                            const n = Number(e.target.value);
+                            if (!Number.isFinite(n)) return;
+                            setAttachFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="admin-media-fit-row">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={attachFitToSpace}
+                          onChange={(e) => setAttachFitToSpace(e.target.checked)}
+                        />
+                        Fit to space
+                      </label>
+                    </div>
+                    <div className="admin-media-block-actions">
+                      {selectedMediaId ? (
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-primary"
+                          disabled={!productPresentationDirty() || savingMediaFitId === selectedMediaId}
+                          onClick={() =>
+                            saveAttachedMediaFit(selectedMediaId, attachFitToSpace, attachFitPercent, attachShadow)
+                          }
+                        >
+                          {savingMediaFitId === selectedMediaId ? 'Saving…' : 'Save product'}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-primary"
+                          disabled={!attachUrl}
+                          onClick={() => attachLibraryMedia(attachUrl)}
+                        >
+                          Attach
+                        </button>
+                      )}
+                      <label className="admin-btn admin-btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+                        Upload
+                        <input
+                          type="file"
+                          accept="image/*,video/mp4,video/webm,.svg"
+                          multiple
+                          hidden
+                          onChange={async (e) => {
+                            const files = e.target.files;
+                            if (!files?.length || !mediaItem) return;
+                            try {
+                              await uploadMedia(files, mediaItem.id, itemMedia.length === 0);
+                              await openMedia(mediaItem, { resetBackground: false });
+                              setMediaMsg(`Uploaded ${files.length} file(s).`);
+                            } catch (err) {
+                              setError(err instanceof Error ? err.message : 'Upload failed');
+                            } finally {
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </section>
+                </div>
+
+                <div className="admin-media-preview-pane">
+                  <MediaPresentationPreview
+                    title={mediaItem.title}
+                    surface={previewSurface}
+                    onSurfaceChange={setPreviewSurface}
+                    backgroundUrl={backgroundUrl}
+                    backgroundShadow={backgroundShading}
+                    backgroundFit={backgroundFitToSpace}
+                    backgroundFitPercent={backgroundFitPercent}
+                    productUrl={attachUrl}
+                    productShadow={attachShadow}
+                    productFit={attachFitToSpace}
+                    productFitPercent={attachFitPercent}
+                    mediaList={itemMedia}
+                    mediaBgColor={previewMediaBg}
+                    detailGalleryShadow={previewDetailShadow}
+                    onSelectMedia={focusMedia}
                   />
-                ))}
+                </div>
               </div>
-            )}
-            <div className="admin-modal-actions">
+
+              <div className="admin-media-assets">
+                <div className="admin-media-assets-head">
+                  <h3>Attached</h3>
+                  <span>
+                    {itemMedia.length === 0
+                      ? 'None yet — upload or attach above'
+                      : `${itemMedia.length} asset${itemMedia.length === 1 ? '' : 's'} · click to edit`}
+                  </span>
+                </div>
+                {itemMedia.length === 0 ? null : (
+                  <div className="admin-media-list">
+                    {itemMedia.map((m, idx) => (
+                      <AttachedMediaCard
+                        key={m.id}
+                        media={m}
+                        index={idx}
+                        total={itemMedia.length}
+                        selected={selectedMediaId === m.id}
+                        onSelect={() => focusMedia(m)}
+                        onSetPrimary={() => setPrimaryMedia(m.id)}
+                        onMove={(dir) => moveMedia(m.id, dir)}
+                        onRemove={() => removeMedia(m.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="admin-modal-footer">
               <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setMediaItem(null)}>
-                Close
+                Done
               </button>
             </div>
           </div>
@@ -1428,145 +1503,51 @@ function AttachedMediaCard({
   media: m,
   index: idx,
   total,
-  saving,
+  selected,
+  onSelect,
   onSetPrimary,
   onMove,
   onRemove,
-  onSaveFit,
-  onLiveChange,
-  onPreview,
 }: {
   media: CatalogMedia;
   index: number;
   total: number;
-  saving: boolean;
+  selected: boolean;
+  onSelect: () => void;
   onSetPrimary: () => void;
   onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
-  onSaveFit: (fitToSpace: boolean, fitPercent: number, shadowStyle: CatalogShadowStyle) => void;
-  onLiveChange: (draft: {
-    url: string;
-    fitToSpace: boolean;
-    fitPercent: number;
-    shadowStyle: CatalogShadowStyle;
-  }) => void;
-  onPreview: () => void;
 }) {
-  const [fitToSpace, setFitToSpace] = useState(m.fit_to_space !== false);
-  const [fitPercent, setFitPercent] = useState(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
-  const [shadowStyle, setShadowStyle] = useState<CatalogShadowStyle>(m.shadow_style || 'medium');
-
-  useEffect(() => {
-    setFitToSpace(m.fit_to_space !== false);
-    setFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
-    setShadowStyle(m.shadow_style || 'medium');
-  }, [m.id, m.fit_to_space, m.fit_percent, m.shadow_style]);
-
-  function pushLive(next: {
-    fitToSpace?: boolean;
-    fitPercent?: number;
-    shadowStyle?: CatalogShadowStyle;
-  }) {
-    if (m.kind === 'video') return;
-    onLiveChange({
-      url: m.url,
-      fitToSpace: next.fitToSpace ?? fitToSpace,
-      fitPercent: next.fitPercent ?? fitPercent,
-      shadowStyle: next.shadowStyle ?? shadowStyle,
-    });
-  }
-
-  const dirty =
-    fitToSpace !== (m.fit_to_space !== false) ||
-    fitPercent !== (m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT) ||
-    shadowStyle !== (m.shadow_style || 'medium');
-
   return (
-    <div className={`admin-media-card${m.is_primary ? ' is-primary' : ''}`}>
+    <div
+      className={`admin-media-card${m.is_primary ? ' is-primary' : ''}${selected ? ' is-selected' : ''}`}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       {m.kind === 'video' ? (
-        <video src={m.url} muted className="admin-media-card-thumb" />
+        <video src={publicMediaUrl(m.url)} muted className="admin-media-card-thumb" />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={m.url} alt={m.alt || ''} className="admin-media-card-thumb" />
+        <img src={publicMediaUrl(m.url)} alt={m.alt || ''} className="admin-media-card-thumb" />
       )}
       <div className="admin-media-card-meta">
-        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span className="admin-badge" style={{ fontSize: '0.65rem' }}>{m.kind}</span>
-          {m.is_primary ? (
-            <span style={{ fontSize: '0.7rem', color: 'var(--admin-accent)', fontWeight: 700 }}>★ Thumbnail</span>
-          ) : null}
-        </div>
-        <code title={m.url}>{m.url}</code>
-        {m.kind !== 'video' ? (
-          <div className="admin-media-card-fit">
-            <label>
-              Shadow
-              <select
-                className="admin-select"
-                value={shadowStyle}
-                onChange={(e) => {
-                  const next = e.target.value as CatalogShadowStyle;
-                  setShadowStyle(next);
-                  pushLive({ shadowStyle: next });
-                }}
-                style={{ minWidth: 110, minHeight: 28, padding: '0.15rem 0.35rem', fontSize: '0.75rem' }}
-              >
-                {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={fitToSpace}
-                onChange={(e) => {
-                  const next = e.target.checked;
-                  setFitToSpace(next);
-                  pushLive({ fitToSpace: next });
-                }}
-              />{' '}
-              Fit
-            </label>
-            <label>
-              %
-              <input
-                className="admin-input"
-                type="number"
-                min={20}
-                max={100}
-                step={1}
-                disabled={!fitToSpace}
-                value={fitPercent}
-                onChange={(e) => {
-                  const n = Number(e.target.value);
-                  if (!Number.isFinite(n)) return;
-                  const next = Math.min(100, Math.max(20, Math.round(n)));
-                  setFitPercent(next);
-                  pushLive({ fitPercent: next });
-                }}
-              />
-            </label>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              disabled={!dirty || saving}
-              onClick={() => onSaveFit(fitToSpace, fitPercent, shadowStyle)}
-            >
-              {saving ? '…' : 'Save'}
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={onPreview}>
-              Focus
-            </button>
-          </div>
-        ) : null}
+        <strong>
+          {m.kind === 'video' ? 'Video' : 'Image'}
+          {m.is_primary ? ' · Thumbnail' : ''}
+        </strong>
+        <span>{selected ? 'Editing in Product panel' : 'Click to edit presentation'}</span>
       </div>
-      <div className="admin-media-card-actions">
+      <div className="admin-media-card-actions" onClick={(e) => e.stopPropagation()}>
         {m.kind !== 'video' && !m.is_primary ? (
-          <button type="button" className="admin-btn admin-btn-secondary" onClick={onSetPrimary}>
-            ★ Thumb
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={onSetPrimary} title="Set as thumbnail">
+            ★
           </button>
         ) : null}
         <button type="button" className="admin-btn admin-btn-secondary" disabled={idx === 0} onClick={() => onMove(-1)}>
@@ -1581,7 +1562,7 @@ function AttachedMediaCard({
           ↓
         </button>
         <button type="button" className="admin-btn admin-btn-danger" onClick={onRemove}>
-          Remove
+          ✕
         </button>
       </div>
     </div>
