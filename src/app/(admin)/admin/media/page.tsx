@@ -38,18 +38,25 @@ export default function MediaPage() {
 
   async function load(q = query) {
     setLoading(true);
-    const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
-    const res = await fetch(`/api/admin/media${qs}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to load media');
-    setAssets(data.assets || []);
-    setLoading(false);
+    try {
+      const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+      const res = await fetch(`/api/admin/media${qs}`);
+      let data: { error?: string; assets?: Asset[] } = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(res.ok ? 'Failed to load media' : `Failed to load media (${res.status})`);
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to load media');
+      setAssets(data.assets || []);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     load().catch((e) => {
-      setError(e.message);
-      setLoading(false);
+      setError(e instanceof Error ? e.message : 'Failed to load media');
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -60,16 +67,25 @@ export default function MediaPage() {
     if (!file) return;
     setError('');
     setMessage('');
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await fetch('/api/admin/media', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Upload failed');
-      return;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/media', { method: 'POST', body: fd });
+      let data: { error?: string; path?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(res.ok ? 'Upload failed' : `Upload failed (${res.status})`);
+      }
+      if (!res.ok) {
+        setError(data.error || 'Upload failed');
+        return;
+      }
+      setMessage(`Uploaded: ${data.path}`);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed');
     }
-    setMessage(`Uploaded: ${data.path}`);
-    await load();
   }
 
   async function copyPath(path: string) {
@@ -148,7 +164,12 @@ export default function MediaPage() {
               type="file"
               accept="image/*,video/mp4,video/webm,.svg"
               hidden
-              onChange={(e) => onUpload(e.target.files?.[0])}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                void onUpload(file).finally(() => {
+                  e.target.value = '';
+                });
+              }}
             />
           </label>
           <input

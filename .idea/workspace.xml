@@ -7,9 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#17 refine filters catalog-facet-group list items can it be sort in alphabatically">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#17 CSP stylesheet block and the startTime error" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2134116654393217" />
-      <entry key="MS500" value="2.9587100973191474" />
-      <entry key="S2" value="6.14989291378411" />
-      <entry key="S5" value="10.012361403263162" />
-      <entry key="S10" value="16.06341482772426" />
-      <entry key="S30" value="31.12694295019879" />
-      <entry key="S60" value="40.38654074495366" />
-      <entry key="M2" value="47.30557691152162" />
-      <entry key="M5" value="52.689672522221876" />
-      <entry key="M10" value="54.762839102453995" />
-      <entry key="M15" value="55.557254277011545" />
-      <entry key="M30" value="62.5267736721246" />
-      <entry key="H1" value="132.9851906479091" />
-      <entry key="H2" value="366.9460194130815" />
-      <entry key="H4" value="855.518783714576" />
-      <entry key="D1" value="4146.164894770486" />
-      <entry key="W1" value="13367.59759393477" />
+      <entry key="MS100" value="1.1952458207602328" />
+      <entry key="MS500" value="2.8032302668931726" />
+      <entry key="S2" value="5.965673745045881" />
+      <entry key="S5" value="11.775056036659063" />
+      <entry key="S10" value="19.588853948540848" />
+      <entry key="S30" value="33.73277454226143" />
+      <entry key="S60" value="40.22215421899452" />
+      <entry key="M2" value="44.26486555234459" />
+      <entry key="M5" value="47.01348283375176" />
+      <entry key="M10" value="48.11027643773951" />
+      <entry key="M15" value="49.26050897762085" />
+      <entry key="M30" value="56.78149827732828" />
+      <entry key="H1" value="96.75816867830656" />
+      <entry key="H2" value="269.2065987633454" />
+      <entry key="H4" value="711.8264705722911" />
+      <entry key="D1" value="4022.5514548605624" />
+      <entry key="W1" value="13335.6408102462" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -85,32 +83,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="2.9831432194017196E-259" />
-      <entry key="M30" value="5.4618158330369926E-130" />
-      <entry key="H1" value="2.337052809210317E-65" />
-      <entry key="H2" value="4.834307405627036E-33" />
-      <entry key="H4" value="6.952918384239964E-17" />
-      <entry key="D1" value="0.002060323744713799" />
-      <entry key="W1" value="0.6408594546799434" />
+      <entry key="M15" value="5.033231614094316E-261" />
+      <entry key="M30" value="7.094527196433679E-131" />
+      <entry key="H1" value="8.422901635680414E-66" />
+      <entry key="H2" value="2.902223567487422E-33" />
+      <entry key="H4" value="5.387228942216374E-17" />
+      <entry key="D1" value="0.0019745517381711403" />
+      <entry key="W1" value="0.6369783333923863" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1272081328541548" />
-      <entry key="MS500" value="2.919113349414754" />
-      <entry key="S2" value="6.128792210214545" />
-      <entry key="S5" value="9.998136638719508" />
-      <entry key="S10" value="16.051082109102914" />
-      <entry key="S30" value="31.117680206452903" />
-      <entry key="S60" value="40.380099521057105" />
-      <entry key="M2" value="47.30161841897682" />
-      <entry key="M5" value="52.687845182667566" />
-      <entry key="M10" value="54.76187692979156" />
-      <entry key="M15" value="55.55660105152419" />
-      <entry key="M30" value="62.52642634160787" />
-      <entry key="H1" value="132.9849303334829" />
-      <entry key="H2" value="366.94574712445313" />
-      <entry key="H4" value="855.5184973232988" />
-      <entry key="D1" value="4146.166727857873" />
-      <entry key="W1" value="13368.238302553807" />
+      <entry key="MS100" value="1.1316234799814715" />
+      <entry key="MS500" value="2.7729036854034743" />
+      <entry key="S2" value="5.948539276806965" />
+      <entry key="S5" value="11.760810830096457" />
+      <entry key="S10" value="19.57634740064706" />
+      <entry key="S30" value="33.725045394966514" />
+      <entry key="S60" value="40.21742781288452" />
+      <entry key="M2" value="44.262228284516326" />
+      <entry key="M5" value="47.01235249418495" />
+      <entry key="M10" value="48.10969567406083" />
+      <entry key="M15" value="49.260109115813854" />
+      <entry key="M30" value="56.78125718735889" />
+      <entry key="H1" value="96.75797648010183" />
+      <entry key="H2" value="269.2063860098607" />
+      <entry key="H4" value="711.8262240032279" />
+      <entry key="D1" value="4022.5532075209994" />
+      <entry key="W1" value="13336.277638069503" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -262,7 +260,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 In Admin → Catalog settings → Layout and listing fields, use Catalog card fields checkboxes:&#10;   •&#10;   Media: product image&#10;   •&#10;   Card body: category, title, price/stat, description, tags, availability, lead time, quick view, detail-page link&#10;   Unchecked fields are hidden on public cards. Save settings after changing toggles." />
     <MESSAGE value="#6 Marketplace CSS was wiping background-image, so the inventory background never showed on cards.&#10;   Now:&#10;   •&#10;   Background + product image both render in catalog-card-media (same as popup), with shadow/fit settings&#10;   •&#10;   Admin Media row: Product image | Background image (compact, single-line, no-wrap)&#10;   •&#10;   Uncheck either to hide that layer; save catalog settings after changing" />
     <MESSAGE value="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing." />
     <MESSAGE value="#6 deploy error fixed" />
@@ -287,7 +284,8 @@
     <MESSAGE value="#16 Card image fill admin-field full is set to 100, still I see card listing catalog-card-media is having more empty space, can please check and fix to have card image to consume full area (full height, full width) of catalog-card-media" />
     <MESSAGE value="#17 Split feature block taking more empty spaces, can fix this for optimized space utilization , also please provide color picker for feat-card background and section background" />
     <MESSAGE value="#17 refine filters catalog-facet-group list items can it be sort in alphabatically" />
-    <option name="LAST_COMMIT_MESSAGE" value="#17 refine filters catalog-facet-group list items can it be sort in alphabatically" />
+    <MESSAGE value="#17 CSP stylesheet block and the startTime error" />
+    <option name="LAST_COMMIT_MESSAGE" value="#17 CSP stylesheet block and the startTime error" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
