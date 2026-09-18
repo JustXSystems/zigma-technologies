@@ -7,9 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Catalog Settings page redeign">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Every Catalog Settings area now has self-serve guidance">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.46866426877981" />
-      <entry key="MS500" value="3.153839713607915" />
-      <entry key="S2" value="6.227795839654234" />
-      <entry key="S5" value="8.72217671994466" />
-      <entry key="S10" value="10.985432459703025" />
-      <entry key="S30" value="18.798930947328124" />
-      <entry key="S60" value="42.07623243355906" />
-      <entry key="M2" value="87.99700024400381" />
-      <entry key="M5" value="154.10517620130165" />
-      <entry key="M10" value="208.09002253715775" />
-      <entry key="M15" value="256.2869695947461" />
-      <entry key="M30" value="398.3955806307899" />
-      <entry key="H1" value="627.5404283850602" />
-      <entry key="H2" value="910.3096027783077" />
-      <entry key="H4" value="1298.1059450462953" />
-      <entry key="D1" value="4617.999615474005" />
-      <entry key="W1" value="14488.58653773032" />
+      <entry key="MS100" value="1.496546247718518" />
+      <entry key="MS500" value="1.8693445600957639" />
+      <entry key="S2" value="1.9720129348458793" />
+      <entry key="S5" value="2.455367164826315" />
+      <entry key="S10" value="4.936870938470104" />
+      <entry key="S30" value="22.47500102443361" />
+      <entry key="S60" value="41.939614943650895" />
+      <entry key="M2" value="60.056857834211584" />
+      <entry key="M5" value="88.70111500465497" />
+      <entry key="M10" value="142.96278393572587" />
+      <entry key="M15" value="197.38855898381513" />
+      <entry key="M30" value="351.3254918593056" />
+      <entry key="H1" value="599.2581356750829" />
+      <entry key="H2" value="910.0036151848858" />
+      <entry key="H4" value="1321.683435748211" />
+      <entry key="D1" value="4667.120130208894" />
+      <entry key="W1" value="14559.112545095817" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,32 +87,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="1.5734068932980203E-272" />
-      <entry key="M30" value="1.2543551703157543E-136" />
-      <entry key="H1" value="1.119979986569383E-68" />
-      <entry key="H2" value="1.0582910689263358E-34" />
-      <entry key="H4" value="1.0287327490470937E-17" />
-      <entry key="D1" value="0.0014983894504977566" />
-      <entry key="W1" value="0.6123561949252396" />
+      <entry key="M15" value="6.9950067997075904E-273" />
+      <entry key="M30" value="8.363615725095758E-137" />
+      <entry key="H1" value="9.145280599903487E-69" />
+      <entry key="H2" value="9.563096046732122E-35" />
+      <entry key="H4" value="9.779108367869906E-18" />
+      <entry key="D1" value="0.0014857901980123995" />
+      <entry key="W1" value="0.6116179566655662" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4253539677994906" />
-      <entry key="MS500" value="3.1328925927518947" />
-      <entry key="S2" value="6.2156064096730725" />
-      <entry key="S5" value="8.712389780283846" />
-      <entry key="S10" value="10.977864484262673" />
-      <entry key="S30" value="18.794535324959696" />
-      <entry key="S60" value="42.07234241264911" />
-      <entry key="M2" value="87.9935274931773" />
-      <entry key="M5" value="154.1029288222102" />
-      <entry key="M10" value="208.08855274672172" />
-      <entry key="M15" value="256.2857831967265" />
-      <entry key="M30" value="398.3946662802755" />
-      <entry key="H1" value="627.5396918936079" />
-      <entry key="H2" value="910.3090509872171" />
-      <entry key="H4" value="1298.105538354434" />
-      <entry key="D1" value="4618.00086246864" />
-      <entry key="W1" value="14489.198736524144" />
+      <entry key="MS100" value="1.4489044933872683" />
+      <entry key="MS500" value="1.857629726750598" />
+      <entry key="S2" value="1.9689316495691498" />
+      <entry key="S5" value="2.4537721086395354" />
+      <entry key="S10" value="4.935127419773276" />
+      <entry key="S30" value="22.47218926609235" />
+      <entry key="S60" value="41.93698670995516" />
+      <entry key="M2" value="60.05497765110253" />
+      <entry key="M5" value="88.6999788177836" />
+      <entry key="M10" value="142.96184103638547" />
+      <entry key="M15" value="197.38768445348808" />
+      <entry key="M30" value="351.3247040459844" />
+      <entry key="H1" value="599.2574440294239" />
+      <entry key="H2" value="910.0030711391782" />
+      <entry key="H4" value="1321.68302635906" />
+      <entry key="D1" value="4667.121362909529" />
+      <entry key="W1" value="14559.724005296797" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -263,7 +264,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#9 right align setting is not reflecting after making single line." />
     <MESSAGE value="#10 menu aligment issue" />
     <MESSAGE value="#8 single line Marquee" />
     <MESSAGE value="#11 Reducing the Header Size" />
@@ -288,7 +288,8 @@
     <MESSAGE value="#20 Popup settings new look" />
     <MESSAGE value="Showcase icons are upgraded" />
     <MESSAGE value="Catalog Settings page redeign" />
-    <option name="LAST_COMMIT_MESSAGE" value="Catalog Settings page redeign" />
+    <MESSAGE value="Every Catalog Settings area now has self-serve guidance" />
+    <option name="LAST_COMMIT_MESSAGE" value="Every Catalog Settings area now has self-serve guidance" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

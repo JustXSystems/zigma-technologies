@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { FormEvent, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
 import {
   slugify,
@@ -98,32 +98,108 @@ function toggleInList(list: string[] | null | undefined, value: string, on: bool
   return base;
 }
 
-function FieldHint({ children }: { children: ReactNode }) {
-  return <p className="admin-hint">{children}</p>;
-}
+function HelpTip({
+  guide,
+  text,
+  label = 'Help',
+  align = 'start',
+}: {
+  guide?: SettingsGuide;
+  text?: string;
+  label?: string;
+  align?: 'start' | 'end';
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const tipId = useId();
 
-function GuideBlock({ guide }: { guide: SettingsGuide }) {
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onDoc);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  if (!guide && !text) return null;
+
   return (
-    <dl className="admin-guide">
-      <div className="admin-guide-row">
-        <dt>Purpose</dt>
-        <dd>{guide.purpose}</dd>
-      </div>
-      <div className="admin-guide-row">
-        <dt>When</dt>
-        <dd>{guide.when}</dd>
-      </div>
-      <div className="admin-guide-row">
-        <dt>How</dt>
-        <dd>{guide.how}</dd>
-      </div>
-      {guide.tip ? (
-        <div className="admin-guide-row admin-guide-row--tip">
-          <dt>Tip</dt>
-          <dd>{guide.tip}</dd>
+    <span
+      ref={rootRef}
+      className={`admin-help${align === 'end' ? ' admin-help--end' : ''}${open ? ' is-open' : ''}`}
+    >
+      <button
+        type="button"
+        className="admin-help-trigger"
+        aria-label={label}
+        aria-expanded={open}
+        aria-controls={tipId}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 10.5V17" />
+          <circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+      {open ? (
+        <div id={tipId} className="admin-help-panel" role="note">
+          {guide ? (
+            <>
+              <p>
+                <span className="admin-help-kicker">Purpose</span>
+                {guide.purpose}
+              </p>
+              <p>
+                <span className="admin-help-kicker">When</span>
+                {guide.when}
+              </p>
+              <p>
+                <span className="admin-help-kicker">How</span>
+                {guide.how}
+              </p>
+              {guide.tip ? (
+                <p>
+                  <span className="admin-help-kicker admin-help-kicker--tip">Tip</span>
+                  {guide.tip}
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p>{text}</p>
+          )}
         </div>
       ) : null}
-    </dl>
+    </span>
+  );
+}
+
+function LabelWithHelp({
+  children,
+  help,
+  htmlFor,
+}: {
+  children: ReactNode;
+  help?: string;
+  htmlFor?: string;
+}) {
+  return (
+    <label htmlFor={htmlFor}>
+      {children}
+      {help ? <HelpTip text={help} label={`Help: ${typeof children === 'string' ? children : 'field'}`} /> : null}
+    </label>
   );
 }
 
@@ -141,8 +217,10 @@ function SettingsBlock({
   const block = CATALOG_SETTINGS_BLOCKS[blockId];
   return (
     <div className="admin-settings-section">
-      <h3 className="admin-settings-section-title">{block.title}</h3>
-      <GuideBlock guide={block.guide} />
+      <div className="admin-help-title-row">
+        <h3 className="admin-settings-section-title">{block.title}</h3>
+        <HelpTip guide={block.guide} label={`Help: ${block.title}`} />
+      </div>
       {children}
     </div>
   );
@@ -166,9 +244,8 @@ function ChipGroup({
   const set = new Set(values || []);
   return (
     <div className="admin-field full">
-      <label>{label}</label>
-      {hint ? <FieldHint>{hint}</FieldHint> : null}
-      <div className="admin-chips" style={{ marginTop: hint ? '0.45rem' : 0 }}>
+      <LabelWithHelp help={hint}>{label}</LabelWithHelp>
+      <div className="admin-chips" style={{ marginTop: '0.45rem' }}>
         {options.map((opt) => (
           <label key={opt} className={`admin-chip${set.has(opt) ? ' is-on' : ''}`}>
             <input
@@ -230,12 +307,11 @@ function ColorField({
   const hex = /^#[0-9A-Fa-f]{6}$/.test(value || '') ? value! : fallback;
   return (
     <div className="admin-field">
-      <label>{label}</label>
+      <LabelWithHelp help={hint}>{label}</LabelWithHelp>
       <div className="admin-color-field">
         <input type="color" value={hex} onChange={(e) => onChange(e.target.value)} aria-label={label} />
         <input className="admin-input" value={value || fallback} onChange={(e) => onChange(e.target.value)} placeholder={fallback} />
       </div>
-      {hint ? <FieldHint>{hint}</FieldHint> : null}
     </div>
   );
 }
@@ -273,7 +349,9 @@ function CardFieldsChecklist({
 
   return (
     <div className="admin-field full">
-      <label>Catalog card fields</label>
+      <LabelWithHelp help="Choose which fields appear on each listing card. Keep Product image + Title + one CTA as a minimum.">
+        Catalog card fields
+      </LabelWithHelp>
       <div style={{ display: 'grid', gap: '0.65rem', marginTop: '0.35rem' }}>
         {renderGroup('Media', media)}
         {renderGroup('Card body', body)}
@@ -686,8 +764,9 @@ export default function CatalogSettingsPage() {
             </button>
           ))}
         </div>
-        <p className="admin-hint" style={{ marginTop: '0.85rem', maxWidth: '40rem' }}>
-          Type switcher loads a separate settings profile. Saving products does not change projects or services.
+        <p className="admin-hint" style={{ marginTop: '0.85rem', display: 'inline-flex', alignItems: 'center' }}>
+          Catalog type
+          <HelpTip text="Each type (products, projects, services) has its own settings profile. Saving products does not change projects or services." label="Help: Catalog type" />
         </p>
       </header>
 
@@ -717,9 +796,13 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>{sectionMeta('hero').title}</h2>
-                  <p>{sectionMeta('hero').summary}</p>
-                  <GuideBlock guide={sectionMeta('hero').guide} />
+                  <div className="admin-settings-panel-head-copy">
+                    <h2>
+                      {sectionMeta('hero').title}
+                      <HelpTip guide={sectionMeta('hero').guide} label="Help: Hero spotlight" />
+                    </h2>
+                    <p>{sectionMeta('hero').summary}</p>
+                  </div>
                 </div>
                 <label className="admin-enable-switch" title="Master switch for the public page hero banner">
                   <input
@@ -734,7 +817,9 @@ export default function CatalogSettingsPage() {
                 <SettingsBlock blockId="hero_presentation">
                   <div className="admin-form-grid">
                     <div className="admin-field">
-                      <label>Visual style</label>
+                      <LabelWithHelp help="Overall catalog page mood (hero + cards chrome). Try premium or glass for a richer look.">
+                        Visual style
+                      </LabelWithHelp>
                       <select
                         className="admin-select"
                         value={settings.visual_style}
@@ -751,10 +836,9 @@ export default function CatalogSettingsPage() {
                           </option>
                         ))}
                       </select>
-                      <FieldHint>Overall catalog page mood (hero + cards chrome). Try premium or glass for a richer look.</FieldHint>
                     </div>
                     <div className="admin-field">
-                      <label>Hero variant</label>
+                      <LabelWithHelp help="standard = compact copy + optional panel. spotlight = large featured card beside the headline.">Hero variant</LabelWithHelp>
                       <select
                         className="admin-select"
                         value={settings.hero_variant}
@@ -771,13 +855,10 @@ export default function CatalogSettingsPage() {
                           </option>
                         ))}
                       </select>
-                      <FieldHint>
-                        <strong>standard</strong> = compact copy + optional panel. <strong>spotlight</strong> = large
-                        featured card beside the headline.
-                      </FieldHint>
+
                     </div>
                     <div className="admin-field">
-                      <label>Hero eyebrow</label>
+                      <LabelWithHelp help="Small label above the title (e.g. “Product Spotlight”). Keep short.">Hero eyebrow</LabelWithHelp>
                       <input
                         className="admin-input"
                         value={settings.hero_eyebrow || ''}
@@ -790,10 +871,10 @@ export default function CatalogSettingsPage() {
                               : 'Service Spotlight'
                         }
                       />
-                      <FieldHint>Small label above the title (e.g. “Product Spotlight”). Keep short.</FieldHint>
+
                     </div>
                     <div className="admin-field">
-                      <label>Rotation interval (ms)</label>
+                      <LabelWithHelp help="Time between slides when multiple spotlight items are selected. 5000–8000 ms feels natural.">Rotation interval (ms)</LabelWithHelp>
                       <input
                         className="admin-input"
                         type="number"
@@ -805,20 +886,22 @@ export default function CatalogSettingsPage() {
                           setSettings({ ...settings, hero_autoplay_ms: Number(e.target.value) || 6000 })
                         }
                       />
-                      <FieldHint>Time between slides when multiple spotlight items are selected. 5000–8000 ms feels natural.</FieldHint>
+
                     </div>
                     <div className="admin-field full">
-                      <label>Hero title</label>
+                      <LabelWithHelp help={`Main headline on the public /${type}s page. Leave blank only if you hide the title element.`}>
+                        Hero title
+                      </LabelWithHelp>
                       <input
                         className="admin-input"
                         value={settings.hero_title || ''}
                         onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
                         placeholder={`Headline for /${type}s`}
                       />
-                      <FieldHint>Main headline on the public /{type}s page. Leave blank only if you hide the title element.</FieldHint>
+
                     </div>
                     <div className="admin-field full">
-                      <label>Hero lead</label>
+                      <LabelWithHelp help="One or two sentences under the title. Explain who the catalog is for.">Hero lead</LabelWithHelp>
                       <textarea
                         className="admin-input"
                         value={settings.hero_lead || ''}
@@ -826,7 +909,7 @@ export default function CatalogSettingsPage() {
                         rows={3}
                         placeholder="Supporting copy shown above the spotlight card."
                       />
-                      <FieldHint>One or two sentences under the title. Explain who the catalog is for.</FieldHint>
+
                     </div>
                   </div>
                 </SettingsBlock>
@@ -848,7 +931,13 @@ export default function CatalogSettingsPage() {
                     hint="Toggle visibility of each hero piece. Blue chips are currently shown on the public page."
                   />
                   <div style={{ marginTop: '0.85rem' }}>
-                    <div className="admin-chip-group-label">Motion & borders</div>
+                    <div className="admin-chip-group-label" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      Motion & borders
+                      <HelpTip
+                        text="These affect the listing experience under the hero as well as hero polish."
+                        label="Help: Motion & borders"
+                      />
+                    </div>
                     <div className="admin-chips" style={{ marginTop: '0.4rem' }}>
                       {(
                         [
@@ -876,7 +965,6 @@ export default function CatalogSettingsPage() {
                         </label>
                       ))}
                     </div>
-                    <FieldHint>These affect the listing experience under the hero as well as hero polish.</FieldHint>
                   </div>
                 </SettingsBlock>
 
@@ -950,11 +1038,10 @@ export default function CatalogSettingsPage() {
                 </SettingsBlock>
 
                 <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Live preview</h3>
-                  <p className="admin-settings-section-desc">
-                    Optional check that hero style and elements roughly match what you configured. Open only when needed —
-                    it is hidden by default to keep this page light.
-                  </p>
+                  <div className="admin-help-title-row">
+                    <h3 className="admin-settings-section-title">Live preview</h3>
+                    <HelpTip text="Optional check that hero style and elements roughly match what you configured. Hidden by default — open only when needed." label="Help: Live preview" />
+                  </div>
                   {previewSettings ? (
                     <CatalogAppearancePreview type={type} settings={previewSettings} items={items} />
                   ) : null}
@@ -967,16 +1054,20 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>{sectionMeta('listing').title}</h2>
-                  <p>{sectionMeta('listing').summary}</p>
-                  <GuideBlock guide={sectionMeta('listing').guide} />
+                  <div className="admin-settings-panel-head-copy">
+                    <h2>
+                      {sectionMeta('listing').title}
+                      <HelpTip guide={sectionMeta('listing').guide} label="Help: Listing & cards" />
+                    </h2>
+                    <p>{sectionMeta('listing').summary}</p>
+                  </div>
                 </div>
               </div>
               <div className="admin-settings-panel-body">
                 <SettingsBlock blockId="listing_layout">
                   <div className="admin-form-grid">
                     <div className="admin-field">
-                      <label>Card style</label>
+                      <LabelWithHelp help="Marketplace is clearest for products. Overlay suits bold photography-led catalogs.">Card style</LabelWithHelp>
                       <select
                         className="admin-select"
                         value={settings.card_style || 'marketplace'}
@@ -990,10 +1081,10 @@ export default function CatalogSettingsPage() {
                         <option value="marketplace">Marketplace (image above, body below)</option>
                         <option value="overlay">Overlay (text over media)</option>
                       </select>
-                      <FieldHint>Marketplace is clearest for products. Overlay suits bold photography-led catalogs.</FieldHint>
+
                     </div>
                     <div className="admin-field">
-                      <label>Layout</label>
+                      <LabelWithHelp help="Grid for visual browse; list when summaries matter more than images.">Layout</LabelWithHelp>
                       <select
                         className="admin-select"
                         value={settings.layout}
@@ -1002,10 +1093,10 @@ export default function CatalogSettingsPage() {
                         <option value="grid">grid</option>
                         <option value="list">list</option>
                       </select>
-                      <FieldHint>Grid for visual browse; list when summaries matter more than images.</FieldHint>
+
                     </div>
                     <div className="admin-field">
-                      <label>Grid columns</label>
+                      <LabelWithHelp help="Desktop columns (1–4). Mobile still stacks. 3 is a balanced default.">Grid columns</LabelWithHelp>
                       <input
                         className="admin-input"
                         type="number"
@@ -1014,7 +1105,7 @@ export default function CatalogSettingsPage() {
                         value={settings.grid_columns}
                         onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
                       />
-                      <FieldHint>Desktop columns (1–4). Mobile still stacks. 3 is a balanced default.</FieldHint>
+
                     </div>
                   </div>
                 </SettingsBlock>
@@ -1059,6 +1150,10 @@ export default function CatalogSettingsPage() {
                     <div className="admin-field full">
                       <label>
                         Card image fill — {settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}%
+                        <HelpTip
+                          text="Listing cards only. 100% = edge-to-edge cover. Quick view product fit is set in Inventory → Media."
+                          label="Help: Card image fill"
+                        />
                       </label>
                       <div className="admin-range-row">
                         <input
@@ -1089,12 +1184,9 @@ export default function CatalogSettingsPage() {
                           }
                         />
                       </div>
-                      <FieldHint>
-                        Listing cards only. 100% = edge-to-edge cover. Quick view product fit is set in Inventory → Media.
-                      </FieldHint>
                     </div>
                     <div className="admin-field full">
-                      <label>Card media inset</label>
+                      <LabelWithHelp help="Padding around the image inside the card media area. Hover a chip for detail.">Card media inset</LabelWithHelp>
                       <div className="admin-chips" style={{ marginTop: '0.35rem' }}>
                         {CARD_MEDIA_INSET_OPTIONS.map((opt) => {
                           const active = (settings.card_media_inset || DEFAULT_CARD_MEDIA_INSET) === opt.value;
@@ -1111,7 +1203,7 @@ export default function CatalogSettingsPage() {
                           );
                         })}
                       </div>
-                      <FieldHint>Padding around the image inside the card media area. Hover a chip for detail.</FieldHint>
+
                     </div>
                   </div>
                 </SettingsBlock>
@@ -1138,9 +1230,6 @@ export default function CatalogSettingsPage() {
                       values={settings.card_fields_json}
                       onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
                     />
-                    <FieldHint>
-                      Card fields control what each listing card shows. Keep Product image + Title + one CTA as a minimum.
-                    </FieldHint>
                   </div>
                 </SettingsBlock>
               </div>
@@ -1151,9 +1240,13 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>{sectionMeta('popup').title}</h2>
-                  <p>{sectionMeta('popup').summary}</p>
-                  <GuideBlock guide={sectionMeta('popup').guide} />
+                  <div className="admin-settings-panel-head-copy">
+                    <h2>
+                      {sectionMeta('popup').title}
+                      <HelpTip guide={sectionMeta('popup').guide} label="Help: Quick view popup" />
+                    </h2>
+                    <p>{sectionMeta('popup').summary}</p>
+                  </div>
                 </div>
               </div>
               <div className="admin-settings-panel-body">
@@ -1232,7 +1325,12 @@ export default function CatalogSettingsPage() {
                 <SettingsBlock blockId="popup_shadow">
                   <div className="admin-form-grid">
                     <div className="admin-field">
-                      <label htmlFor="detail-gallery-shadow">Frame shadow</label>
+                      <LabelWithHelp
+                        htmlFor="detail-gallery-shadow"
+                        help="Applies to the Quick view main image frame only. Listing card frame shadow is set per item in Inventory → Media."
+                      >
+                        Frame shadow
+                      </LabelWithHelp>
                       <select
                         id="detail-gallery-shadow"
                         className="admin-select"
@@ -1250,20 +1348,18 @@ export default function CatalogSettingsPage() {
                           </option>
                         ))}
                       </select>
-                      <FieldHint>
-                        Applies to the Quick view main image frame only. Listing card frame shadow is set per item in
-                        Inventory → Media.
-                      </FieldHint>
                     </div>
                   </div>
                 </SettingsBlock>
 
                 <details className="admin-advanced">
-                  <summary>Advanced · legacy modal fields</summary>
-                  <FieldHint>
-                    Older field list used only when Popup components are empty. Prefer Components above for new setups.
-                    Leave legacy alone unless you are migrating an old catalog.
-                  </FieldHint>
+                  <summary>
+                    Advanced · legacy modal fields
+                    <HelpTip
+                      text="Older field list used only when Popup components are empty. Prefer Components above for new setups. Leave legacy alone unless you are migrating an old catalog."
+                      label="Help: Legacy modal fields"
+                    />
+                  </summary>
                   <ChipGroup
                     label="Modal fields (legacy)"
                     options={MODAL_OPTS}
@@ -1279,9 +1375,13 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>{sectionMeta('discovery').title}</h2>
-                  <p>{sectionMeta('discovery').summary}</p>
-                  <GuideBlock guide={sectionMeta('discovery').guide} />
+                  <div className="admin-settings-panel-head-copy">
+                    <h2>
+                      {sectionMeta('discovery').title}
+                      <HelpTip guide={sectionMeta('discovery').guide} label="Help: Discovery experience" />
+                    </h2>
+                    <p>{sectionMeta('discovery').summary}</p>
+                  </div>
                 </div>
               </div>
               <div className="admin-settings-panel-body">
@@ -1335,7 +1435,7 @@ export default function CatalogSettingsPage() {
                 <SettingsBlock blockId="discovery_toolbar">
                   <div className="admin-form-grid">
                     <div className="admin-field" style={{ maxWidth: 220 }}>
-                      <label>Group preview count</label>
+                      <LabelWithHelp help="Cards shown per category before “View all”. Only when Grouped results is on.">Group preview count</LabelWithHelp>
                       <input
                         className="admin-input"
                         type="number"
@@ -1350,7 +1450,7 @@ export default function CatalogSettingsPage() {
                         }
                         disabled={!settings.discovery_grouped_results_enabled}
                       />
-                      <FieldHint>Cards shown per category before “View all”. Only when Grouped results is on.</FieldHint>
+
                     </div>
                     <ChipGroup
                       label="Toolbar elements"
@@ -1372,19 +1472,21 @@ export default function CatalogSettingsPage() {
         <div className="admin-settings-panel">
           <div className="admin-settings-panel-head">
             <div>
-              <h2>
-                {sectionMeta('categories').title} · {type}
-              </h2>
-              <p>{sectionMeta('categories').summary}</p>
-              <GuideBlock guide={sectionMeta('categories').guide} />
+              <div className="admin-settings-panel-head-copy">
+                <h2>
+                  {sectionMeta('categories').title} · {type}
+                  <HelpTip guide={sectionMeta('categories').guide} label="Help: Categories" />
+                </h2>
+                <p>{sectionMeta('categories').summary}</p>
+              </div>
             </div>
           </div>
           <div className="admin-settings-panel-body">
             <form onSubmit={addCategory} className="admin-form-grid" style={{ marginBottom: '1rem' }}>
               <div className="admin-field">
-                <label>Name</label>
+                <LabelWithHelp help="Customer-facing label (e.g. “Industrial UPS”). Slug is generated automatically.">Name</LabelWithHelp>
                 <input className="admin-input" value={name} onChange={(e) => setName(e.target.value)} required />
-                <FieldHint>Customer-facing label (e.g. “Industrial UPS”). Slug is generated automatically.</FieldHint>
+
               </div>
               <div className="admin-field" style={{ display: 'flex', alignItems: 'end' }}>
                 <button type="submit" className="admin-btn admin-btn-primary">
@@ -1393,6 +1495,14 @@ export default function CatalogSettingsPage() {
               </div>
             </form>
             <div className="admin-table-wrap" style={{ border: '1px solid var(--admin-border)', borderRadius: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '0.65rem 0.85rem', borderBottom: '1px solid var(--admin-border)' }}>
+                <strong style={{ fontSize: '0.82rem' }}>Existing categories</strong>
+                <HelpTip
+                  text="Prefer Disable over Delete if items still use the category. Assign categories on each item in Inventory."
+                  label="Help: Category actions"
+                  align="end"
+                />
+              </div>
               <table className="admin-table">
                 <thead>
                   <tr>
@@ -1433,9 +1543,6 @@ export default function CatalogSettingsPage() {
                 </tbody>
               </table>
             </div>
-            <FieldHint>
-              Prefer Disable over Delete if items still use the category. Assign categories on each item in Inventory.
-            </FieldHint>
           </div>
         </div>
       ) : null}
