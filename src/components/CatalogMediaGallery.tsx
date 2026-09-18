@@ -24,6 +24,8 @@ type Props = {
   mediaFitPercent?: number | null;
   /** Same page-level fill as catalog-card-media (Card media background) */
   mediaBgColor?: string | null;
+  /** When false, hide the thumbnail strip (admin live preview drives selection). */
+  showThumbs?: boolean;
 };
 
 export default function CatalogMediaGallery({
@@ -39,6 +41,7 @@ export default function CatalogMediaGallery({
   mediaFitToSpace = true,
   mediaFitPercent = DEFAULT_MEDIA_FIT_PERCENT,
   mediaBgColor = '#ffffff',
+  showThumbs = true,
 }: Props) {
   const sorted = useMemo(
     () =>
@@ -84,7 +87,8 @@ export default function CatalogMediaGallery({
     )
   );
   const productShadow = normalizeShadowStyle(active?.shadow_style || 'medium');
-  const useProductFit = !!bg && productFit;
+  const useProductFit =
+    productFit && (!!bg || variant === 'detail' || frameShadowStyle != null);
 
   const rootClass = [
     'catalog-gallery',
@@ -92,8 +96,8 @@ export default function CatalogMediaGallery({
     bg ? 'catalog-gallery--has-bg' : '',
     bg ? (bgFit ? 'catalog-gallery--bg-fit' : 'catalog-gallery--bg-cover') : '',
     applyFrameShadow ? `catalog-gallery--bg-shade-${resolvedFrameShadow}` : '',
-    bg ? (useProductFit ? 'catalog-gallery--product-fit' : 'catalog-gallery--product-cover') : '',
-    bg ? `catalog-gallery--product-shade-${productShadow}` : '',
+    useProductFit ? 'catalog-gallery--product-fit catalog-gallery--fit' : bg ? 'catalog-gallery--product-cover' : '',
+    useProductFit ? `catalog-gallery--product-shade-${productShadow}` : '',
     className,
   ]
     .filter(Boolean)
@@ -146,7 +150,7 @@ export default function CatalogMediaGallery({
         )}
       </div>
 
-      {sorted.length > 1 ? (
+      {showThumbs && sorted.length > 1 ? (
         <div className="catalog-gallery-thumbs">
           {sorted.map((m) => {
             const selected = m.id === active?.id;

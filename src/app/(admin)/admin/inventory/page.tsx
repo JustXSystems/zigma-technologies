@@ -11,11 +11,14 @@ import type {
 } from '@/lib/types';
 import {
   CATALOG_SHADOW_STYLE_OPTIONS,
+  DEFAULT_DETAIL_GALLERY_SHADOW,
   DEFAULT_MEDIA_FIT_PERCENT,
+  normalizeShadowStyle,
 } from '@/lib/types';
 import { buildCaseStudyJson, caseStudyToEditor } from '@/lib/catalog-case-study';
 import { getBrochureUrl, withBrochureUrl } from '@/lib/catalog-brochure';
 import MediaPicker from '@/components/admin/MediaPicker';
+import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import { publicMediaUrl } from '@/lib/media-url';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
@@ -119,6 +122,9 @@ function InventoryInner() {
   const [mediaMsg, setMediaMsg] = useState('');
   const [savingBackground, setSavingBackground] = useState(false);
   const [savingMediaFitId, setSavingMediaFitId] = useState<number | null>(null);
+  const [previewMediaBg, setPreviewMediaBg] = useState('#ffffff');
+  const [previewDetailShadow, setPreviewDetailShadow] = useState<CatalogShadowStyle>(DEFAULT_DETAIL_GALLERY_SHADOW);
+  const [previewSurface, setPreviewSurface] = useState<'detail' | 'card'>('detail');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -381,10 +387,30 @@ function InventoryInner() {
       setAttachFitPercent(item.media_fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
       setAttachShadow('medium');
     }
-    const res = await fetch(`/api/admin/catalog/${item.id}/media`);
-    const data = await res.json();
-    if (res.ok) setItemMedia(data.media || []);
-    else setError(data.error || 'Failed to load media');
+    const [mediaRes, settingsRes] = await Promise.all([
+      fetch(`/api/admin/catalog/${item.id}/media`),
+      fetch(`/api/admin/catalog-settings?type=${type}`),
+    ]);
+    const data = await mediaRes.json();
+    if (mediaRes.ok) {
+      const media = (data.media || []) as CatalogMedia[];
+      setItemMedia(media);
+      const primary =
+        media.find((m) => m.is_primary && m.kind !== 'video') || media.find((m) => m.kind !== 'video');
+      if (primary && opts?.resetBackground !== false && (switching || !mediaItem)) {
+        setAttachUrl(primary.url);
+        setAttachFitToSpace(primary.fit_to_space !== false);
+        setAttachFitPercent(primary.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+        setAttachShadow(primary.shadow_style || 'medium');
+      }
+    } else setError(data.error || 'Failed to load media');
+
+    if (settingsRes.ok) {
+      const settingsData = await settingsRes.json();
+      const s = settingsData.settings;
+      setPreviewMediaBg(s?.card_media_bg_color || '#ffffff');
+      setPreviewDetailShadow(normalizeShadowStyle(s?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW));
+    }
   }
 
   function mediaPresentationDirty(item: CatalogItem) {
@@ -908,7 +934,7 @@ function InventoryInner() {
 
       {mediaItem ? (
         <div className="admin-modal-backdrop" onClick={() => setMediaItem(null)}>
-          <div className="admin-modal" style={{ width: 'min(960px, 100%)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal" style={{ width: 'min(1080px, 100%)' }} onClick={(e) => e.stopPropagation()}>
             <h2>Media · {mediaItem.title}</h2>
             <p className="admin-media-lead">
               Separate shadow &amp; fit for background frame and each attached image. Listing cards use the background
@@ -1089,37 +1115,30 @@ function InventoryInner() {
               </div>
 
               <MediaPresentationPreview
+                title={mediaItem.title}
+                surface={previewSurface}
+                onSurfaceChange={setPreviewSurface}
                 backgroundUrl={backgroundUrl}
-                productUrl={
-                  attachUrl ||
-                  itemMedia.find((m) => m.is_primary && m.kind !== 'video')?.url ||
-                  itemMedia.find((m) => m.kind !== 'video')?.url ||
-                  ''
-                }
                 backgroundShadow={backgroundShading}
                 backgroundFit={backgroundFitToSpace}
                 backgroundFitPercent={backgroundFitPercent}
-                productShadow={
-                  attachUrl
-                    ? attachShadow
-                    : itemMedia.find((m) => m.is_primary)?.shadow_style ||
-                      itemMedia.find((m) => m.kind !== 'video')?.shadow_style ||
-                      'medium'
-                }
-                productFit={
-                  attachUrl
-                    ? attachFitToSpace
-                    : (itemMedia.find((m) => m.is_primary)?.fit_to_space ??
-                        itemMedia.find((m) => m.kind !== 'video')?.fit_to_space) !== false
-                }
-                productFitPercent={
-                  attachUrl
-                    ? attachFitPercent
-                    : itemMedia.find((m) => m.is_primary)?.fit_percent ||
-                      itemMedia.find((m) => m.kind !== 'video')?.fit_percent ||
-                      DEFAULT_MEDIA_FIT_PERCENT
-                }
-                previewSource={attachUrl ? 'attach' : 'thumbnail'}
+                productUrl={attachUrl}
+                productShadow={attachShadow}
+                productFit={attachFitToSpace}
+                productFitPercent={attachFitPercent}
+                mediaList={itemMedia}
+                mediaBgColor={previewMediaBg}
+                detailGalleryShadow={previewDetailShadow}
+                onSelectMedia={(m) => {
+                  if (m.kind === 'video') {
+                    setAttachUrl(m.url);
+                    return;
+                  }
+                  setAttachUrl(m.url);
+                  setAttachFitToSpace(m.fit_to_space !== false);
+                  setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
+                  setAttachShadow(m.shadow_style || 'medium');
+                }}
               />
             </div>
 
@@ -1140,8 +1159,17 @@ function InventoryInner() {
                     onSaveFit={(fitToSpace, fitPercent, shadowStyle) =>
                       saveAttachedMediaFit(m.id, fitToSpace, fitPercent, shadowStyle)
                     }
+                    onLiveChange={(draft) => {
+                      setAttachUrl(draft.url);
+                      setAttachFitToSpace(draft.fitToSpace);
+                      setAttachFitPercent(draft.fitPercent);
+                      setAttachShadow(draft.shadowStyle);
+                    }}
                     onPreview={() => {
-                      if (m.kind === 'video') return;
+                      if (m.kind === 'video') {
+                        setAttachUrl(m.url);
+                        return;
+                      }
                       setAttachUrl(m.url);
                       setAttachFitToSpace(m.fit_to_space !== false);
                       setAttachFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
@@ -1164,77 +1192,234 @@ function InventoryInner() {
 }
 
 function MediaPresentationPreview({
+  title,
+  surface,
+  onSurfaceChange,
   backgroundUrl,
-  productUrl,
   backgroundShadow,
   backgroundFit,
   backgroundFitPercent,
+  productUrl,
   productShadow,
   productFit,
   productFitPercent,
-  previewSource,
+  mediaList,
+  mediaBgColor,
+  detailGalleryShadow,
+  onSelectMedia,
 }: {
+  title: string;
+  surface: 'detail' | 'card';
+  onSurfaceChange: (next: 'detail' | 'card') => void;
   backgroundUrl: string;
-  productUrl: string;
   backgroundShadow: CatalogShadowStyle;
   backgroundFit: boolean;
   backgroundFitPercent: number;
+  productUrl: string;
   productShadow: CatalogShadowStyle;
   productFit: boolean;
   productFitPercent: number;
-  previewSource: 'attach' | 'thumbnail';
+  mediaList: CatalogMedia[];
+  mediaBgColor: string;
+  detailGalleryShadow: CatalogShadowStyle;
+  onSelectMedia: (m: CatalogMedia) => void;
 }) {
-  const bg = backgroundUrl.trim() ? publicMediaUrl(backgroundUrl.trim()) : '';
-  const product = productUrl.trim() ? publicMediaUrl(productUrl.trim()) : '';
-  const useProductFit = !!bg && productFit;
+  const bg = backgroundUrl.trim();
+  const product = productUrl.trim();
   const bgPct = Math.min(100, Math.max(20, backgroundFitPercent || 100));
   const productPct = Math.min(100, Math.max(20, productFitPercent || DEFAULT_MEDIA_FIT_PERCENT));
+  const frameShadow = normalizeShadowStyle(surface === 'detail' ? detailGalleryShadow : backgroundShadow);
   const bgLabel = CATALOG_SHADOW_STYLE_OPTIONS.find((o) => o.value === backgroundShadow)?.label || backgroundShadow;
   const productLabel = CATALOG_SHADOW_STYLE_OPTIONS.find((o) => o.value === productShadow)?.label || productShadow;
+  const detailLabel =
+    CATALOG_SHADOW_STYLE_OPTIONS.find((o) => o.value === detailGalleryShadow)?.label || detailGalleryShadow;
+  const fill = mediaBgColor?.trim() || '#ffffff';
+
+  const galleryMedia = useMemo(() => {
+    const fromList = mediaList.map((m, idx) => {
+      const isActive = product ? m.url === product : !!m.is_primary;
+      return {
+        ...m,
+        is_primary: isActive ? 1 : 0,
+        sort_order: isActive ? -1 : m.sort_order ?? idx,
+        shadow_style: isActive ? productShadow : m.shadow_style || 'medium',
+        fit_to_space: isActive ? productFit : m.fit_to_space !== false,
+        fit_percent: isActive ? productPct : m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT,
+      } satisfies CatalogMedia;
+    });
+
+    if (product && !fromList.some((m) => m.url === product)) {
+      fromList.unshift({
+        id: -1,
+        item_id: 0,
+        kind: /\.(mp4|webm|mov)(\?|$)/i.test(product) ? 'video' : 'image',
+        url: product,
+        alt: title,
+        sort_order: -1,
+        is_primary: 1,
+        shadow_style: productShadow,
+        fit_to_space: productFit,
+        fit_percent: productPct,
+      });
+    }
+
+    if (!fromList.length && product) {
+      return [
+        {
+          id: -1,
+          item_id: 0,
+          kind: 'image' as const,
+          url: product,
+          alt: title,
+          sort_order: 0,
+          is_primary: 1,
+          shadow_style: productShadow,
+          fit_to_space: productFit,
+          fit_percent: productPct,
+        },
+      ];
+    }
+
+    return fromList.sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) || a.sort_order - b.sort_order);
+  }, [mediaList, product, productShadow, productFit, productPct, title]);
+
+  const active = galleryMedia.find((m) => m.url === product) || galleryMedia[0];
+  const cardBgCss = bg
+    ? encodeURI(publicMediaUrl(bg)).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+    : '';
+  const useCardProductFit = productFit;
 
   return (
-    <div
-      className={`admin-media-preview admin-media-preview--bg-shade-${backgroundShadow} admin-media-preview--product-shade-${productShadow}`}
-    >
+    <div className="admin-media-preview">
       <div className="admin-media-preview-label">
-        <span>Live preview</span>
-        <span>
-          bg {bgLabel}
-          {bg ? ` · ${backgroundFit ? `${bgPct}%` : 'cover'}` : ''}
-          {product ? ` · img ${productLabel} · ${useProductFit ? `${productPct}%` : 'cover'} · ${previewSource}` : ''}
-        </span>
+        <div className="admin-media-preview-tabs">
+          <button
+            type="button"
+            className={surface === 'detail' ? 'is-active' : ''}
+            onClick={() => onSurfaceChange('detail')}
+          >
+            Detail popup
+          </button>
+          <button
+            type="button"
+            className={surface === 'card' ? 'is-active' : ''}
+            onClick={() => onSurfaceChange('card')}
+          >
+            Listing card
+          </button>
+        </div>
+        <span className="admin-media-preview-meta">Live</span>
       </div>
+
+      <div className="admin-media-preview-stats">
+        <span>Frame {surface === 'detail' ? detailLabel : bgLabel}</span>
+        <span>
+          BG {bg ? (backgroundFit ? `${bgPct}%` : 'cover') : 'none'}
+        </span>
+        <span>
+          Product {product ? `${productLabel} · ${productFit ? `${productPct}%` : 'cover'}` : 'none'}
+        </span>
+        <span>Fill {fill}</span>
+      </div>
+
       <div
-        className={`admin-media-preview-stage${useProductFit ? ' admin-media-preview-stage--fit' : ''}`}
-        style={{
-          ...(bg
-            ? {
-                backgroundImage: `url("${encodeURI(bg).replace(/"/g, '\\"')}")`,
-                backgroundSize: backgroundFit ? `${bgPct}% auto` : 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }
-            : null),
-          ...(useProductFit ? ({ ['--preview-fit']: `${productPct}%` } as CSSProperties) : null),
-        }}
+        className={`admin-media-preview-viewport admin-media-preview-viewport--${surface} admin-media-preview--bg-shade-${frameShadow}`}
+        style={{ ['--catalog-card-media-bg']: fill } as CSSProperties}
       >
-        {product ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product}
-            alt=""
-            className={`admin-media-preview-product admin-media-preview-product--shade-${productShadow}${
-              useProductFit ? '' : ' admin-media-preview-product--cover'
-            }`}
-          />
+        {surface === 'detail' ? (
+          <div className="admin-media-preview-detail">
+            <CatalogMediaGallery
+              media={galleryMedia}
+              title={title}
+              variant="detail"
+              backgroundImageUrl={bg || null}
+              backgroundShadingStyle={backgroundShadow}
+              frameShadowStyle={detailGalleryShadow}
+              backgroundFitToSpace={backgroundFit}
+              backgroundFitPercent={bgPct}
+              mediaFitToSpace={productFit}
+              mediaFitPercent={productPct}
+              mediaBgColor={fill}
+              showThumbs={false}
+            />
+          </div>
         ) : (
-          <div className="admin-media-preview-empty">
-            {bg
-              ? 'Select or attach a product image to preview its shadow & fit.'
-              : 'Choose a background and product image to preview presentation.'}
+          <div
+            className={`admin-media-preview-card catalog-card-media${bg ? ' catalog-card-media--has-bg' : ''} catalog-card-media--bg-shade-${backgroundShadow}${
+              bg ? (productFit ? ' catalog-card-media--product-fit' : ' catalog-card-media--product-cover') : ''
+            }${productFit ? ` catalog-card-media--product-shade-${productShadow}` : ''}`}
+            style={{
+              backgroundColor: fill,
+              ...(cardBgCss
+                ? {
+                    backgroundImage: `url("${cardBgCss}")`,
+                    backgroundSize: backgroundFit ? `${bgPct}% auto` : 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  }
+                : null),
+              ...(useCardProductFit ? ({ ['--catalog-media-fit']: `${productPct}%` } as CSSProperties) : null),
+            }}
+          >
+            {active ? (
+              active.kind === 'video' ? (
+                <video
+                  src={publicMediaUrl(active.url)}
+                  muted
+                  playsInline
+                  className="admin-media-preview-card-media"
+                  style={{ backgroundColor: fill }}
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={publicMediaUrl(active.url)}
+                  alt=""
+                  className={`admin-media-preview-card-media${productFit ? ' is-fit' : ' is-cover'}`}
+                  style={{
+                    backgroundColor: fill,
+                    ...(productFit ? { maxWidth: `${productPct}%`, maxHeight: `${productPct}%` } : null),
+                  }}
+                />
+              )
+            ) : (
+              <div className="admin-media-preview-empty">
+                {bg
+                  ? 'Select or attach a product image to preview its shadow & fit.'
+                  : 'Choose a background and/or product image — preview updates live.'}
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {mediaList.length > 1 ? (
+        <div className="admin-media-preview-thumbs" role="list">
+          {mediaList.map((m) => {
+            const selected = product ? m.url === product : !!m.is_primary;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="listitem"
+                className={`admin-media-preview-thumb${selected ? ' is-active' : ''}`}
+                onClick={() => onSelectMedia(m)}
+                title={m.kind === 'video' ? 'Video' : m.alt || m.url}
+              >
+                {m.kind === 'video' ? (
+                  <>
+                    <video src={publicMediaUrl(m.url)} muted className="admin-media-preview-thumb-media" />
+                    <span className="admin-media-preview-thumb-play">▶</span>
+                  </>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={publicMediaUrl(m.url)} alt="" className="admin-media-preview-thumb-media" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1248,6 +1433,7 @@ function AttachedMediaCard({
   onMove,
   onRemove,
   onSaveFit,
+  onLiveChange,
   onPreview,
 }: {
   media: CatalogMedia;
@@ -1258,6 +1444,12 @@ function AttachedMediaCard({
   onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
   onSaveFit: (fitToSpace: boolean, fitPercent: number, shadowStyle: CatalogShadowStyle) => void;
+  onLiveChange: (draft: {
+    url: string;
+    fitToSpace: boolean;
+    fitPercent: number;
+    shadowStyle: CatalogShadowStyle;
+  }) => void;
   onPreview: () => void;
 }) {
   const [fitToSpace, setFitToSpace] = useState(m.fit_to_space !== false);
@@ -1269,6 +1461,20 @@ function AttachedMediaCard({
     setFitPercent(m.fit_percent || DEFAULT_MEDIA_FIT_PERCENT);
     setShadowStyle(m.shadow_style || 'medium');
   }, [m.id, m.fit_to_space, m.fit_percent, m.shadow_style]);
+
+  function pushLive(next: {
+    fitToSpace?: boolean;
+    fitPercent?: number;
+    shadowStyle?: CatalogShadowStyle;
+  }) {
+    if (m.kind === 'video') return;
+    onLiveChange({
+      url: m.url,
+      fitToSpace: next.fitToSpace ?? fitToSpace,
+      fitPercent: next.fitPercent ?? fitPercent,
+      shadowStyle: next.shadowStyle ?? shadowStyle,
+    });
+  }
 
   const dirty =
     fitToSpace !== (m.fit_to_space !== false) ||
@@ -1298,7 +1504,11 @@ function AttachedMediaCard({
               <select
                 className="admin-select"
                 value={shadowStyle}
-                onChange={(e) => setShadowStyle(e.target.value as CatalogShadowStyle)}
+                onChange={(e) => {
+                  const next = e.target.value as CatalogShadowStyle;
+                  setShadowStyle(next);
+                  pushLive({ shadowStyle: next });
+                }}
                 style={{ minWidth: 110, minHeight: 28, padding: '0.15rem 0.35rem', fontSize: '0.75rem' }}
               >
                 {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
@@ -1312,7 +1522,11 @@ function AttachedMediaCard({
               <input
                 type="checkbox"
                 checked={fitToSpace}
-                onChange={(e) => setFitToSpace(e.target.checked)}
+                onChange={(e) => {
+                  const next = e.target.checked;
+                  setFitToSpace(next);
+                  pushLive({ fitToSpace: next });
+                }}
               />{' '}
               Fit
             </label>
@@ -1329,7 +1543,9 @@ function AttachedMediaCard({
                 onChange={(e) => {
                   const n = Number(e.target.value);
                   if (!Number.isFinite(n)) return;
-                  setFitPercent(Math.min(100, Math.max(20, Math.round(n))));
+                  const next = Math.min(100, Math.max(20, Math.round(n)));
+                  setFitPercent(next);
+                  pushLive({ fitPercent: next });
                 }}
               />
             </label>
@@ -1342,7 +1558,7 @@ function AttachedMediaCard({
               {saving ? '…' : 'Save'}
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={onPreview}>
-              Preview
+              Focus
             </button>
           </div>
         ) : null}
