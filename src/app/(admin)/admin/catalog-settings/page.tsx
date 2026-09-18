@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
 import {
   slugify,
@@ -29,10 +29,18 @@ import {
   resolveHeroElements,
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
-import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
+type SettingsSection = 'hero' | 'listing' | 'popup' | 'discovery' | 'categories';
+
+const SETTINGS_SECTIONS: Array<{ id: SettingsSection; label: string }> = [
+  { id: 'hero', label: 'Hero' },
+  { id: 'listing', label: 'Listing' },
+  { id: 'popup', label: 'Quick view' },
+  { id: 'discovery', label: 'Discovery' },
+  { id: 'categories', label: 'Categories' },
+];
 
 const FILTER_OPTS = ['category', 'tags'] as const;
 const SEARCH_OPTS = ['title', 'summary', 'description', 'tags', 'price_label'] as const;
@@ -87,6 +95,10 @@ function toggleInList(list: string[] | null | undefined, value: string, on: bool
   return base;
 }
 
+function FieldHint({ children }: { children: ReactNode }) {
+  return <p className="admin-hint">{children}</p>;
+}
+
 function ChipGroup({
   label,
   options,
@@ -106,25 +118,10 @@ function ChipGroup({
   return (
     <div className="admin-field full">
       <label>{label}</label>
-      {hint ? (
-        <p style={{ margin: '0 0 0.55rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>{hint}</p>
-      ) : null}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
+      {hint ? <FieldHint>{hint}</FieldHint> : null}
+      <div className="admin-chips" style={{ marginTop: hint ? '0.45rem' : 0 }}>
         {options.map((opt) => (
-          <label
-            key={opt}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              border: '1px solid var(--admin-border)',
-              borderRadius: 999,
-              padding: '0.35rem 0.7rem',
-              fontSize: '0.82rem',
-              background: set.has(opt) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
-              cursor: 'pointer',
-            }}
-          >
+          <label key={opt} className={`admin-chip${set.has(opt) ? ' is-on' : ''}`}>
             <input
               type="checkbox"
               checked={set.has(opt)}
@@ -134,6 +131,62 @@ function ChipGroup({
           </label>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ToggleChips({
+  label,
+  items,
+  values,
+  onToggle,
+}: {
+  label: string;
+  items: Array<{ id: string; label: string }>;
+  values: Set<string>;
+  onToggle: (id: string, on: boolean) => void;
+}) {
+  return (
+    <div className="admin-chip-group">
+      <div className="admin-chip-group-label">{label}</div>
+      <div className="admin-chips">
+        {items.map((opt) => (
+          <label key={opt.id} className={`admin-chip${values.has(opt.id) ? ' is-on' : ''}`}>
+            <input
+              type="checkbox"
+              checked={values.has(opt.id)}
+              onChange={(e) => onToggle(opt.id, e.target.checked)}
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ColorField({
+  label,
+  value,
+  fallback,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string | null | undefined;
+  fallback: string;
+  onChange: (next: string) => void;
+  hint?: string;
+}) {
+  const hex = /^#[0-9A-Fa-f]{6}$/.test(value || '') ? value! : fallback;
+  return (
+    <div className="admin-field">
+      <label>{label}</label>
+      <div className="admin-color-field">
+        <input type="color" value={hex} onChange={(e) => onChange(e.target.value)} aria-label={label} />
+        <input className="admin-input" value={value || fallback} onChange={(e) => onChange(e.target.value)} placeholder={fallback} />
+      </div>
+      {hint ? <FieldHint>{hint}</FieldHint> : null}
     </div>
   );
 }
@@ -151,38 +204,11 @@ function CardFieldsChecklist({
 
   function renderGroup(title: string, opts: typeof CARD_FIELD_OPTS) {
     return (
-      <div style={{ marginBottom: '0.55rem' }}>
-        <div
-          style={{
-            fontSize: '0.72rem',
-            fontWeight: 600,
-            color: 'var(--admin-muted)',
-            marginBottom: '0.3rem',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {title}
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.35rem', overflowX: 'auto', paddingBottom: 2 }}>
+      <div className="admin-chip-group">
+        <div className="admin-chip-group-label">{title}</div>
+        <div className="admin-chips">
           {opts.map((opt) => (
-            <label
-              key={opt.id}
-              title={opt.label}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                border: '1px solid var(--admin-border)',
-                borderRadius: 8,
-                padding: '0.28rem 0.55rem',
-                fontSize: '0.78rem',
-                lineHeight: 1.2,
-                whiteSpace: 'nowrap',
-                flex: '0 0 auto',
-                background: set.has(opt.id) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
-                cursor: 'pointer',
-              }}
-            >
+            <label key={opt.id} className={`admin-chip${set.has(opt.id) ? ' is-on' : ''}`} title={opt.label}>
               <input
                 type="checkbox"
                 checked={set.has(opt.id)}
@@ -199,8 +225,10 @@ function CardFieldsChecklist({
   return (
     <div className="admin-field full">
       <label>Catalog card fields</label>
-      {renderGroup('Media', media)}
-      {renderGroup('Card body', body)}
+      <div style={{ display: 'grid', gap: '0.65rem', marginTop: '0.35rem' }}>
+        {renderGroup('Media', media)}
+        {renderGroup('Card body', body)}
+      </div>
     </div>
   );
 }
@@ -398,6 +426,7 @@ export default function CatalogSettingsPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [section, setSection] = useState<SettingsSection>('hero');
   const previewSettings = useMemo(() => settings, [settings]);
 
   async function load() {
@@ -570,7 +599,7 @@ export default function CatalogSettingsPage() {
     setSettings({ ...settings, hero_item_ids_json: next });
   }
   return (
-    <div className="admin-page-stack">
+    <div className="admin-settings">
       <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
         <button
           type="button"
@@ -585,207 +614,218 @@ export default function CatalogSettingsPage() {
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
-      <div className="admin-toolbar">
-        <div className="left">
+      <header className="admin-settings-masthead">
+        <h1>Catalog settings</h1>
+        <p>
+          Shape the public <code>/{type}s</code> experience — hero, listing cards, Quick view popup, and discovery
+          tools. Switch catalog type, then edit one area at a time.
+        </p>
+        <div className="admin-settings-typebar" role="tablist" aria-label="Catalog type">
           {TYPES.map((t) => (
             <button
               key={t}
               type="button"
-              className={`admin-btn ${type === t ? 'admin-btn-primary' : 'admin-btn-secondary'}`}
+              role="tab"
+              aria-selected={type === t}
+              className={`admin-settings-type${type === t ? ' is-active' : ''}`}
               onClick={() => setType(t)}
             >
               {t}s
             </button>
           ))}
         </div>
-      </div>
+      </header>
 
-      <div className="admin-card admin-page-intro">
-        <h2>Listing settings · {type}</h2>
-        <p>
-          Controls public /{type}s layout, hero spotlight, discovery filters, search fields, card contents, and detail
-          modal sections. Collapse sections you are not editing.
-        </p>
-      </div>
+      <nav className="admin-settings-nav" aria-label="Settings sections">
+        {SETTINGS_SECTIONS.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            className={`admin-settings-nav-btn${section === s.id ? ' is-active' : ''}`}
+            onClick={() => setSection(s.id)}
+          >
+            {s.label}
+          </button>
+        ))}
+      </nav>
 
-      {settings ? (
+      {!settings ? (
+        <p className="admin-empty">Loading settings…</p>
+      ) : (
         <form
           onSubmit={(e) => {
             void saveSettings(e);
           }}
-          className="admin-page-stack"
         >
-          <AdminCollapsible
-            title="Hero spotlight"
-            description={`Curate which ${type}s rotate in the public page hero. If none are selected, featured items are used automatically.`}
-            defaultOpen
-            badge={
-              <label
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 600, fontSize: '0.8rem' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={!!settings.hero_enabled}
-                  onChange={(e) => setSettings({ ...settings, hero_enabled: e.target.checked ? 1 : 0 })}
-                />
-                Enabled
-              </label>
-            }
-          >
-            <div className="admin-form-grid">
-              <div className="admin-field">
-                <label>Visual style preset</label>
-                <select
-                  className="admin-select"
-                  value={settings.visual_style}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      visual_style: e.target.value as CatalogPageSettings['visual_style'],
-                    })
-                  }
-                >
-                  {VISUAL_STYLE_OPTS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
+          {section === 'hero' ? (
+            <div className="admin-settings-panel">
+              <div className="admin-settings-panel-head">
+                <div>
+                  <h2>Hero spotlight</h2>
+                  <p>
+                    Curate which {type}s rotate in the public page hero. Leave empty to use featured items
+                    automatically.
+                  </p>
+                </div>
+                <label className="admin-enable-switch">
+                  <input
+                    type="checkbox"
+                    checked={!!settings.hero_enabled}
+                    onChange={(e) => setSettings({ ...settings, hero_enabled: e.target.checked ? 1 : 0 })}
+                  />
+                  Enabled
+                </label>
               </div>
-              <div className="admin-field">
-                <label>Hero variant</label>
-                <select
-                  className="admin-select"
-                  value={settings.hero_variant}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      hero_variant: e.target.value as CatalogPageSettings['hero_variant'],
-                    })
-                  }
-                >
-                  {HERO_VARIANT_OPTS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="admin-field">
-                <label>Hero eyebrow</label>
-                <input
-                  className="admin-input"
-                  value={settings.hero_eyebrow || ''}
-                  onChange={(e) => setSettings({ ...settings, hero_eyebrow: e.target.value })}
-                  placeholder={
-                    type === 'product' ? 'Product Spotlight' : type === 'project' ? 'Selected Projects' : 'Service Spotlight'
-                  }
-                />
-              </div>
-              <div className="admin-field">
-                <label>Rotation interval (ms)</label>
-                <input
-                  className="admin-input"
-                  type="number"
-                  min={2500}
-                  max={30000}
-                  step={500}
-                  value={settings.hero_autoplay_ms || 6000}
-                  onChange={(e) => setSettings({ ...settings, hero_autoplay_ms: Number(e.target.value) || 6000 })}
-                />
-              </div>
-              <div className="admin-field full">
-                <label>Hero title</label>
-                <input
-                  className="admin-input"
-                  value={settings.hero_title || ''}
-                  onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
-                  placeholder={`Headline for /${type}s`}
-                />
-              </div>
-              <div className="admin-field full">
-                <label>Hero lead</label>
-                <textarea
-                  className="admin-input"
-                  value={settings.hero_lead || ''}
-                  onChange={(e) => setSettings({ ...settings, hero_lead: e.target.value })}
-                  rows={3}
-                  placeholder="Supporting copy shown above the spotlight card."
-                />
-              </div>
-              <ChipGroup
-                label="Hero elements (show / hide)"
-                options={HERO_ELEMENT_OPTS}
-                values={resolveHeroElements(settings)}
-                onChange={(hero_elements_json) =>
-                  setSettings({
-                    ...settings,
-                    hero_elements_json,
-                    hero_meta_enabled: hero_elements_json.includes('meta') ? 1 : 0,
-                    hero_standard_panel_enabled: hero_elements_json.includes('standard_panel') ? 1 : 0,
-                  })
-                }
-              />
-              <p
-                className="admin-field full"
-                style={{ margin: '-0.35rem 0 0.5rem', color: 'var(--admin-muted)', fontSize: '0.82rem' }}
-              >
-                These toggles apply to <strong>every</strong> hero variant and visual style. Use{' '}
-                <code>standard_panel</code> / <code>spotlight</code> only to show or hide the featured-item shell for
-                that layout; <code>eyebrow</code>, <code>title</code>, <code>lead</code>, <code>meta</code>,{' '}
-                <code>kicker</code>, <code>price</code>, <code>tags</code>, <code>actions</code>, and <code>dots</code>{' '}
-                always follow the chips regardless of style preset.
-              </p>
-              <div className="admin-field full">
-                <label>Curated appearance toggles</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  {[
-                    ['loading_skeleton_enabled', 'Skeleton loading'],
-                    ['reveal_animation_enabled', 'Reveal animation'],
-                    ['premium_borders_enabled', 'Premium borders'],
-                  ].map(([key, label]) => (
-                    <label
-                      key={key}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        border: '1px solid var(--admin-border)',
-                        borderRadius: 999,
-                        padding: '0.45rem 0.8rem',
-                        background: '#fff',
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={Boolean(settings[key as keyof CatalogPageSettings])}
+              <div className="admin-settings-panel-body">
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Presentation</h3>
+                  <div className="admin-form-grid">
+                    <div className="admin-field">
+                      <label>Visual style</label>
+                      <select
+                        className="admin-select"
+                        value={settings.visual_style}
                         onChange={(e) =>
                           setSettings({
                             ...settings,
-                            [key]: e.target.checked ? 1 : 0,
-                          } as CatalogPageSettings)
+                            visual_style: e.target.value as CatalogPageSettings['visual_style'],
+                          })
+                        }
+                      >
+                        {VISUAL_STYLE_OPTS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="admin-field">
+                      <label>Hero variant</label>
+                      <select
+                        className="admin-select"
+                        value={settings.hero_variant}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            hero_variant: e.target.value as CatalogPageSettings['hero_variant'],
+                          })
+                        }
+                      >
+                        {HERO_VARIANT_OPTS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="admin-field">
+                      <label>Hero eyebrow</label>
+                      <input
+                        className="admin-input"
+                        value={settings.hero_eyebrow || ''}
+                        onChange={(e) => setSettings({ ...settings, hero_eyebrow: e.target.value })}
+                        placeholder={
+                          type === 'product'
+                            ? 'Product Spotlight'
+                            : type === 'project'
+                              ? 'Selected Projects'
+                              : 'Service Spotlight'
                         }
                       />
-                      {label}
-                    </label>
-                  ))}
+                    </div>
+                    <div className="admin-field">
+                      <label>Rotation interval (ms)</label>
+                      <input
+                        className="admin-input"
+                        type="number"
+                        min={2500}
+                        max={30000}
+                        step={500}
+                        value={settings.hero_autoplay_ms || 6000}
+                        onChange={(e) =>
+                          setSettings({ ...settings, hero_autoplay_ms: Number(e.target.value) || 6000 })
+                        }
+                      />
+                    </div>
+                    <div className="admin-field full">
+                      <label>Hero title</label>
+                      <input
+                        className="admin-input"
+                        value={settings.hero_title || ''}
+                        onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
+                        placeholder={`Headline for /${type}s`}
+                      />
+                    </div>
+                    <div className="admin-field full">
+                      <label>Hero lead</label>
+                      <textarea
+                        className="admin-input"
+                        value={settings.hero_lead || ''}
+                        onChange={(e) => setSettings({ ...settings, hero_lead: e.target.value })}
+                        rows={3}
+                        placeholder="Supporting copy shown above the spotlight card."
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="admin-field full">
-                <label>Selected spotlight items</label>
-                <div
-                  style={{
-                    border: '1px solid var(--admin-border)',
-                    borderRadius: 12,
-                    background: '#fff',
-                    maxHeight: 300,
-                    overflow: 'auto',
-                    padding: '0.75rem',
-                  }}
-                >
-                  {items.length ? (
-                    <div style={{ display: 'grid', gap: '0.55rem' }}>
-                      {items.map((item) => {
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Elements</h3>
+                  <p className="admin-settings-section-desc">
+                    Show or hide hero pieces for every variant and visual style.
+                  </p>
+                  <ChipGroup
+                    label="Hero elements"
+                    options={HERO_ELEMENT_OPTS}
+                    values={resolveHeroElements(settings)}
+                    onChange={(hero_elements_json) =>
+                      setSettings({
+                        ...settings,
+                        hero_elements_json,
+                        hero_meta_enabled: hero_elements_json.includes('meta') ? 1 : 0,
+                        hero_standard_panel_enabled: hero_elements_json.includes('standard_panel') ? 1 : 0,
+                      })
+                    }
+                  />
+                  <div style={{ marginTop: '0.85rem' }}>
+                    <div className="admin-chip-group-label">Appearance</div>
+                    <div className="admin-chips" style={{ marginTop: '0.4rem' }}>
+                      {(
+                        [
+                          ['loading_skeleton_enabled', 'Skeleton loading'],
+                          ['reveal_animation_enabled', 'Reveal animation'],
+                          ['premium_borders_enabled', 'Premium borders'],
+                        ] as const
+                      ).map(([key, label]) => (
+                        <label
+                          key={key}
+                          className={`admin-chip${settings[key] ? ' is-on' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={Boolean(settings[key])}
+                            onChange={(e) =>
+                              setSettings({
+                                ...settings,
+                                [key]: e.target.checked ? 1 : 0,
+                              } as CatalogPageSettings)
+                            }
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Spotlight items</h3>
+                  <p className="admin-settings-section-desc">
+                    Selection order controls slide order. Empty = featured items fallback.
+                  </p>
+                  <div className="admin-picker-list">
+                    {items.length ? (
+                      items.map((item) => {
                         const activeIds = settings.hero_item_ids_json || [];
                         const checked = activeIds.includes(item.id);
                         const idx = activeIds.indexOf(item.id);
@@ -794,16 +834,7 @@ export default function CatalogSettingsPage() {
                         return (
                           <label
                             key={item.id}
-                            style={{
-                              display: 'grid',
-                              gridTemplateColumns: 'auto 1fr auto auto',
-                              gap: '0.75rem',
-                              alignItems: 'center',
-                              border: '1px solid var(--admin-border)',
-                              borderRadius: 10,
-                              padding: '0.65rem 0.8rem',
-                              background: checked ? 'rgba(37, 99, 235, 0.06)' : '#fff',
-                            }}
+                            className={`admin-picker-row${checked ? ' is-on' : ''}`}
                           >
                             <input
                               type="checkbox"
@@ -816,22 +847,20 @@ export default function CatalogSettingsPage() {
                               }}
                             />
                             <span>
-                              <strong style={{ display: 'block' }}>{item.title}</strong>
-                              <span style={{ fontSize: '0.82rem', color: 'var(--admin-muted)' }}>
+                              <strong style={{ display: 'block', fontSize: '0.84rem' }}>{item.title}</strong>
+                              <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>
                                 {item.status}
                                 {item.featured ? ' · featured' : ''}
                               </span>
                             </span>
-                            {checked && activeIds.length > 1 ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+                            {checked ? (
+                              <div className="admin-picker-actions">
                                 <button
                                   type="button"
                                   className="admin-btn admin-btn-secondary"
-                                  style={{ padding: '0.25rem 0.55rem', minWidth: 70, opacity: canUp ? 1 : 0.5 }}
                                   disabled={!canUp}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                                  onClick={(ev) => {
+                                    ev.preventDefault();
                                     moveHeroItem(item.id, -1);
                                   }}
                                 >
@@ -840,11 +869,9 @@ export default function CatalogSettingsPage() {
                                 <button
                                   type="button"
                                   className="admin-btn admin-btn-secondary"
-                                  style={{ padding: '0.25rem 0.55rem', minWidth: 70, opacity: canDown ? 1 : 0.5 }}
                                   disabled={!canDown}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                                  onClick={(ev) => {
+                                    ev.preventDefault();
                                     moveHeroItem(item.id, 1);
                                   }}
                                 >
@@ -857,549 +884,456 @@ export default function CatalogSettingsPage() {
                             <code>#{item.id}</code>
                           </label>
                         );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="admin-empty">Create or seed some {type}s to curate hero spotlight items.</p>
-                  )}
+                      })
+                    ) : (
+                      <p className="admin-empty">Create or seed some {type}s to curate hero spotlight items.</p>
+                    )}
+                  </div>
                 </div>
-                <p style={{ margin: '0.55rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
-                  Selection order controls slide order. Leave empty to fall back to featured items automatically.
-                </p>
-              </div>
-              {previewSettings ? <CatalogAppearancePreview type={type} settings={previewSettings} items={items} /> : null}
-            </div>
-          </AdminCollapsible>
 
-          <AdminCollapsible
-            title="Layout and listing fields"
-            description="Grid layout, filters, search fields, card fields, and Quick view popup template."
-            defaultOpen={false}
-          >
-            <div className="admin-form-grid">
-              <div className="admin-field">
-                <label>Card style</label>
-                <select
-                  className="admin-select"
-                  value={settings.card_style || 'marketplace'}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      card_style: e.target.value as CatalogPageSettings['card_style'],
-                    })
-                  }
-                >
-                  <option value="marketplace">Marketplace (image above, body below — Amazon-like)</option>
-                  <option value="overlay">Overlay (text over media)</option>
-                </select>
-              </div>
-              <div className="admin-field">
-                <label>Card body background</label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input
-                    type="color"
-                    value={/^#[0-9A-Fa-f]{6}$/.test(settings.card_body_bg_color || '') ? settings.card_body_bg_color! : '#ffffff'}
-                    onChange={(e) => setSettings({ ...settings, card_body_bg_color: e.target.value })}
-                    aria-label="Card body background color"
-                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
-                  />
-                  <input
-                    className="admin-input"
-                    value={settings.card_body_bg_color || '#ffffff'}
-                    onChange={(e) => setSettings({ ...settings, card_body_bg_color: e.target.value })}
-                    placeholder="#ffffff"
-                  />
+                <div className="admin-settings-section">
+                  {previewSettings ? (
+                    <CatalogAppearancePreview type={type} settings={previewSettings} items={items} />
+                  ) : null}
                 </div>
-                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Title/price panel under the product image (Marketplace cards).
-                </p>
               </div>
-              <div className="admin-field">
-                <label>Card media background</label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input
-                    type="color"
-                    value={/^#[0-9A-Fa-f]{6}$/.test(settings.card_media_bg_color || '') ? settings.card_media_bg_color! : '#ffffff'}
-                    onChange={(e) => setSettings({ ...settings, card_media_bg_color: e.target.value })}
-                    aria-label="Card media background color"
-                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
-                  />
-                  <input
-                    className="admin-input"
-                    value={settings.card_media_bg_color || '#ffffff'}
-                    onChange={(e) => setSettings({ ...settings, card_media_bg_color: e.target.value })}
-                    placeholder="#ffffff"
-                  />
+            </div>
+          ) : null}
+
+          {section === 'listing' ? (
+            <div className="admin-settings-panel">
+              <div className="admin-settings-panel-head">
+                <div>
+                  <h2>Listing &amp; cards</h2>
+                  <p>Grid layout, card chrome, colors, filters, search, and which fields appear on each card.</p>
                 </div>
-                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Shared fill for listing cards and the detail gallery (behind the product image). Item background images still layer on top.
-                </p>
               </div>
-              <div className="admin-field">
-                <label>Listing background</label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input
-                    type="color"
-                    value={/^#[0-9A-Fa-f]{6}$/.test(settings.listing_bg_color || '') ? settings.listing_bg_color! : '#ffffff'}
-                    onChange={(e) => setSettings({ ...settings, listing_bg_color: e.target.value })}
-                    aria-label="Catalog listing background color"
-                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
-                  />
-                  <input
-                    className="admin-input"
-                    value={settings.listing_bg_color || '#ffffff'}
-                    onChange={(e) => setSettings({ ...settings, listing_bg_color: e.target.value })}
-                    placeholder="#ffffff"
-                  />
-                </div>
-                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Background for the catalog listing section below the hero.
-                </p>
-              </div>
-              <div className="admin-field">
-                <label>Marketplace card hover border</label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input
-                    type="color"
-                    value={
-                      /^#[0-9A-Fa-f]{6}$/.test(settings.marketplace_hover_border_color || '')
-                        ? settings.marketplace_hover_border_color!
-                        : '#FF6B1A'
-                    }
-                    onChange={(e) => setSettings({ ...settings, marketplace_hover_border_color: e.target.value })}
-                    aria-label="Marketplace card hover border color"
-                    style={{ width: 44, height: 34, padding: 0, border: '1px solid var(--admin-border)', borderRadius: 6, background: 'transparent' }}
-                  />
-                  <input
-                    className="admin-input"
-                    value={settings.marketplace_hover_border_color || '#FF6B1A'}
-                    onChange={(e) => setSettings({ ...settings, marketplace_hover_border_color: e.target.value })}
-                    placeholder="#FF6B1A"
-                  />
-                </div>
-                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Border color when hovering Marketplace-style listing cards.
-                </p>
-              </div>
-              <div className="admin-field full">
-                <label style={{ whiteSpace: 'nowrap' }}>
-                  Card image fill — {settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}%
-                </label>
-                <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.75rem', alignItems: 'center' }}>
-                  <input
-                    type="range"
-                    min={70}
-                    max={100}
-                    step={1}
-                    value={settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        card_media_fit_percent: normalizeCardMediaFitPercent(Number(e.target.value)),
-                      })
-                    }
-                    style={{ flex: 1, minWidth: 160 }}
-                    aria-label="Card image fill percent"
-                  />
-                  <input
-                    className="admin-input"
-                    type="number"
-                    min={70}
-                    max={100}
-                    value={settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        card_media_fit_percent: normalizeCardMediaFitPercent(Number(e.target.value)),
-                      })
-                    }
-                    style={{ width: 72 }}
-                  />
-                </div>
-                <p style={{ margin: '0.3rem 0 0', fontSize: '0.75rem', color: 'var(--admin-muted)', whiteSpace: 'nowrap' }}>
-                  Listing cards only (100% = edge-to-edge cover). Popup still uses Inventory fit %.
-                </p>
-              </div>
-              <div className="admin-field full">
-                <label>Card media inset</label>
-                <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.35rem', overflowX: 'auto' }}>
-                  {CARD_MEDIA_INSET_OPTIONS.map((opt) => {
-                    const active = (settings.card_media_inset || DEFAULT_CARD_MEDIA_INSET) === opt.value;
-                    return (
-                      <label
-                        key={opt.value}
-                        title={opt.hint}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 5,
-                          border: '1px solid var(--admin-border)',
-                          borderRadius: 8,
-                          padding: '0.28rem 0.55rem',
-                          fontSize: '0.78rem',
-                          whiteSpace: 'nowrap',
-                          flex: '0 0 auto',
-                          background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
-                          cursor: 'pointer',
-                        }}
+              <div className="admin-settings-panel-body">
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Layout</h3>
+                  <div className="admin-form-grid">
+                    <div className="admin-field">
+                      <label>Card style</label>
+                      <select
+                        className="admin-select"
+                        value={settings.card_style || 'marketplace'}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            card_style: e.target.value as CatalogPageSettings['card_style'],
+                          })
+                        }
                       >
+                        <option value="marketplace">Marketplace (image above, body below)</option>
+                        <option value="overlay">Overlay (text over media)</option>
+                      </select>
+                    </div>
+                    <div className="admin-field">
+                      <label>Layout</label>
+                      <select
+                        className="admin-select"
+                        value={settings.layout}
+                        onChange={(e) => setSettings({ ...settings, layout: e.target.value as 'grid' | 'list' })}
+                      >
+                        <option value="grid">grid</option>
+                        <option value="list">list</option>
+                      </select>
+                    </div>
+                    <div className="admin-field">
+                      <label>Grid columns</label>
+                      <input
+                        className="admin-input"
+                        type="number"
+                        min={1}
+                        max={4}
+                        value={settings.grid_columns}
+                        onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Colors</h3>
+                  <div className="admin-form-grid">
+                    <ColorField
+                      label="Card body background"
+                      value={settings.card_body_bg_color}
+                      fallback="#ffffff"
+                      onChange={(card_body_bg_color) => setSettings({ ...settings, card_body_bg_color })}
+                      hint="Title/price panel under the product image (Marketplace)."
+                    />
+                    <ColorField
+                      label="Card media background"
+                      value={settings.card_media_bg_color}
+                      fallback="#ffffff"
+                      onChange={(card_media_bg_color) => setSettings({ ...settings, card_media_bg_color })}
+                      hint="Shared fill for listing cards and the detail gallery."
+                    />
+                    <ColorField
+                      label="Listing background"
+                      value={settings.listing_bg_color}
+                      fallback="#ffffff"
+                      onChange={(listing_bg_color) => setSettings({ ...settings, listing_bg_color })}
+                      hint="Background for the catalog listing section below the hero."
+                    />
+                    <ColorField
+                      label="Marketplace hover border"
+                      value={settings.marketplace_hover_border_color}
+                      fallback="#FF6B1A"
+                      onChange={(marketplace_hover_border_color) =>
+                        setSettings({ ...settings, marketplace_hover_border_color })
+                      }
+                      hint="Border color when hovering Marketplace-style cards."
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Media fit</h3>
+                  <div className="admin-form-grid">
+                    <div className="admin-field full">
+                      <label>
+                        Card image fill — {settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}%
+                      </label>
+                      <div className="admin-range-row">
                         <input
-                          type="radio"
-                          name="card_media_inset"
-                          checked={active}
-                          onChange={() =>
+                          type="range"
+                          min={70}
+                          max={100}
+                          step={1}
+                          value={settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}
+                          onChange={(e) =>
                             setSettings({
                               ...settings,
-                              card_media_inset: opt.value,
+                              card_media_fit_percent: normalizeCardMediaFitPercent(Number(e.target.value)),
+                            })
+                          }
+                          aria-label="Card image fill percent"
+                        />
+                        <input
+                          className="admin-input"
+                          type="number"
+                          min={70}
+                          max={100}
+                          value={settings.card_media_fit_percent ?? DEFAULT_CARD_MEDIA_FIT_PERCENT}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              card_media_fit_percent: normalizeCardMediaFitPercent(Number(e.target.value)),
                             })
                           }
                         />
-                        {opt.label}
-                      </label>
-                    );
-                  })}
+                      </div>
+                      <FieldHint>Listing cards only (100% = edge-to-edge). Popup uses Inventory fit %.</FieldHint>
+                    </div>
+                    <div className="admin-field full">
+                      <label>Card media inset</label>
+                      <div className="admin-chips" style={{ marginTop: '0.35rem' }}>
+                        {CARD_MEDIA_INSET_OPTIONS.map((opt) => {
+                          const active = (settings.card_media_inset || DEFAULT_CARD_MEDIA_INSET) === opt.value;
+                          return (
+                            <label key={opt.value} className={`admin-chip${active ? ' is-on' : ''}`} title={opt.hint}>
+                              <input
+                                type="radio"
+                                name="card_media_inset"
+                                checked={active}
+                                onChange={() => setSettings({ ...settings, card_media_inset: opt.value })}
+                              />
+                              {opt.label}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Fields</h3>
+                  <div className="admin-form-grid">
+                    <ChipGroup
+                      label="Filters"
+                      options={FILTER_OPTS}
+                      values={settings.filters_json}
+                      onChange={(filters_json) => setSettings({ ...settings, filters_json })}
+                    />
+                    <ChipGroup
+                      label="Search fields"
+                      options={SEARCH_OPTS}
+                      values={settings.search_fields_json}
+                      onChange={(search_fields_json) => setSettings({ ...settings, search_fields_json })}
+                    />
+                    <CardFieldsChecklist
+                      values={settings.card_fields_json}
+                      onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="admin-field">
-                <label>Layout</label>
-                <select
-                  className="admin-select"
-                  value={settings.layout}
-                  onChange={(e) => setSettings({ ...settings, layout: e.target.value as 'grid' | 'list' })}
-                >
-                  <option value="grid">grid</option>
-                  <option value="list">list</option>
-                </select>
+            </div>
+          ) : null}
+
+          {section === 'popup' ? (
+            <div className="admin-settings-panel">
+              <div className="admin-settings-panel-head">
+                <div>
+                  <h2>Quick view popup</h2>
+                  <p>Template, visible components, Classic layout, and gallery frame shadow for the detail modal.</p>
+                </div>
               </div>
-              <div className="admin-field">
-                <label>Grid columns</label>
-                <input
-                  className="admin-input"
-                  type="number"
-                  min={1}
-                  max={4}
-                  value={settings.grid_columns}
-                  onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
-                />
-              </div>
-              <ChipGroup
-                label="Filters"
-                options={FILTER_OPTS}
-                values={settings.filters_json}
-                onChange={(filters_json) => setSettings({ ...settings, filters_json })}
-              />
-              <ChipGroup
-                label="Search fields"
-                options={SEARCH_OPTS}
-                values={settings.search_fields_json}
-                onChange={(search_fields_json) => setSettings({ ...settings, search_fields_json })}
-              />
-              <CardFieldsChecklist
-                values={settings.card_fields_json}
-                onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
-              />
-              <div className="admin-field full">
-                <label>Quick view template</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-                  {CATALOG_DETAIL_TEMPLATE_OPTIONS.map((opt) => {
-                    const active =
-                      normalizeDetailTemplate(settings.detail_template ?? DEFAULT_DETAIL_TEMPLATE) ===
-                      opt.value;
-                    return (
-                      <label
-                        key={opt.value}
-                        title={opt.hint}
-                        style={{
-                          display: 'inline-flex',
-                          flexDirection: 'column',
-                          gap: 4,
-                          border: '1px solid var(--admin-border)',
-                          borderRadius: 10,
-                          padding: '0.55rem 0.75rem',
-                          fontSize: '0.8rem',
-                          minWidth: 170,
-                          flex: '1 1 170px',
-                          background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+              <div className="admin-settings-panel-body">
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Template</h3>
+                  <p className="admin-settings-section-desc">Pick the Quick view chrome. Showcase matches the product reference layout.</p>
+                  <div className="admin-choice-grid">
+                    {CATALOG_DETAIL_TEMPLATE_OPTIONS.map((opt) => {
+                      const active =
+                        normalizeDetailTemplate(settings.detail_template ?? DEFAULT_DETAIL_TEMPLATE) === opt.value;
+                      return (
+                        <label key={opt.value} className={`admin-choice-card${active ? ' is-on' : ''}`}>
                           <input
                             type="radio"
                             name="detail_template"
                             checked={active}
                             onChange={() => setSettings({ ...settings, detail_template: opt.value })}
                           />
-                          {opt.label}
-                        </span>
-                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.72rem', lineHeight: 1.35 }}>
-                          {opt.hint}
-                        </span>
-                      </label>
-                    );
-                  })}
+                          <strong>{opt.label}</strong>
+                          <span>{opt.hint}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-              <ChipGroup
-                label="Modal fields (legacy)"
-                options={MODAL_OPTS}
-                values={settings.modal_fields_json}
-                onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
-                hint="Legacy field list. Prefer Popup components below — used only when popup components are empty."
-              />
-              <div className="admin-field full">
-                <label>Popup components</label>
-                <p style={{ margin: '0 0 0.55rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Toggle each piece of the Quick view popup independently — Classic, Vitrine, Lumen, Horizon, and Showcase.
-                </p>
-                {(['chrome', 'content', 'cta'] as const).map((group) => {
-                  const opts = CATALOG_DETAIL_ELEMENT_OPTIONS.filter((o) => o.group === group);
-                  const set = new Set(settings.detail_elements_json || DEFAULT_DETAIL_ELEMENTS);
-                  return (
-                    <div key={group} style={{ marginBottom: '0.65rem' }}>
-                      <div
-                        style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          color: 'var(--admin-muted)',
-                          marginBottom: '0.3rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em',
-                        }}
-                      >
-                        {group === 'chrome' ? 'Chrome' : group === 'content' ? 'Content' : 'Calls to action'}
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-                        {opts.map((opt) => (
-                          <label
-                            key={opt.id}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 6,
-                              border: '1px solid var(--admin-border)',
-                              borderRadius: 999,
-                              padding: '0.35rem 0.7rem',
-                              fontSize: '0.82rem',
-                              background: set.has(opt.id) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={set.has(opt.id)}
-                              onChange={(e) => {
-                                const next = new Set(settings.detail_elements_json || DEFAULT_DETAIL_ELEMENTS);
-                                if (e.target.checked) next.add(opt.id);
-                                else next.delete(opt.id);
-                                setSettings({
-                                  ...settings,
-                                  detail_elements_json: normalizeDetailElements([...next]),
-                                });
-                              }}
-                            />
-                            {opt.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="admin-field full">
-                <label>Quick view layout (Classic)</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-                  {CATALOG_DETAIL_LAYOUT_OPTIONS.map((opt) => {
-                    const active = normalizeDetailLayout(settings.detail_layout) === opt.value;
-                    return (
-                      <label
-                        key={opt.value}
-                        title={opt.hint}
-                        style={{
-                          display: 'inline-flex',
-                          flexDirection: 'column',
-                          gap: 4,
-                          border: '1px solid var(--admin-border)',
-                          borderRadius: 10,
-                          padding: '0.55rem 0.75rem',
-                          fontSize: '0.8rem',
-                          minWidth: 150,
-                          flex: '1 1 150px',
-                          background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
-                          cursor: 'pointer',
-                          opacity:
-                            normalizeDetailTemplate(settings.detail_template) !== 'classic' ? 0.55 : 1,
-                        }}
-                      >
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Components</h3>
+                  <p className="admin-settings-section-desc">
+                    Toggle each piece independently across Classic, Vitrine, Lumen, Horizon, and Showcase.
+                  </p>
+                  <div style={{ display: 'grid', gap: '0.85rem' }}>
+                    {(['chrome', 'content', 'cta'] as const).map((group) => {
+                      const opts = CATALOG_DETAIL_ELEMENT_OPTIONS.filter((o) => o.group === group);
+                      const set = new Set(settings.detail_elements_json || DEFAULT_DETAIL_ELEMENTS);
+                      return (
+                        <ToggleChips
+                          key={group}
+                          label={group === 'chrome' ? 'Chrome' : group === 'content' ? 'Content' : 'Calls to action'}
+                          items={opts.map((o) => ({ id: o.id, label: o.label }))}
+                          values={set}
+                          onToggle={(id, on) => {
+                            const next = new Set(settings.detail_elements_json || DEFAULT_DETAIL_ELEMENTS);
+                            if (on) next.add(id as (typeof DEFAULT_DETAIL_ELEMENTS)[number]);
+                            else next.delete(id as (typeof DEFAULT_DETAIL_ELEMENTS)[number]);
+                            setSettings({
+                              ...settings,
+                              detail_elements_json: normalizeDetailElements([...next]),
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Classic layout</h3>
+                  <p className="admin-settings-section-desc">
+                    Composition presets for Classic only. Other templates use their own stage proportions.
+                  </p>
+                  <div className="admin-choice-grid">
+                    {CATALOG_DETAIL_LAYOUT_OPTIONS.map((opt) => {
+                      const active = normalizeDetailLayout(settings.detail_layout) === opt.value;
+                      const dim = normalizeDetailTemplate(settings.detail_template) !== 'classic';
+                      return (
+                        <label
+                          key={opt.value}
+                          className={`admin-choice-card${active ? ' is-on' : ''}${dim ? ' is-dim' : ''}`}
+                          title={opt.hint}
+                        >
                           <input
                             type="radio"
                             name="detail_layout"
                             checked={active}
                             onChange={() => setSettings({ ...settings, detail_layout: opt.value })}
                           />
-                          {opt.label}
-                        </span>
-                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.72rem', lineHeight: 1.35 }}>
-                          {opt.hint}
-                        </span>
-                      </label>
-                    );
-                  })}
+                          <strong>{opt.label}</strong>
+                          <span>{opt.hint}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
-                <p style={{ margin: '0.35rem 0 0', fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
-                  Composition presets apply to the Classic template. Other templates use their own stage proportions.
-                </p>
-              </div>
-              <div className="admin-field">
-                <label htmlFor="detail-gallery-shadow">Quick view · gallery frame shadow</label>
-                <select
-                  id="detail-gallery-shadow"
-                  className="admin-select"
-                  value={normalizeShadowStyle(settings.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW)}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      detail_gallery_shadow: normalizeShadowStyle(e.target.value),
-                    })
-                  }
-                >
-                  {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label} — {opt.hint}
-                    </option>
-                  ))}
-                </select>
-                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Drop shadow on <code>.catalog-gallery-main</code> inside the popup.
-                </p>
-              </div>
-            </div>
-          </AdminCollapsible>
 
-          <AdminCollapsible
-            title="Discovery experience"
-            description={`One-click profile browsing on public /${type}s. Toggle each element independently.`}
-            defaultOpen={false}
-          >
-            <div className="admin-field full" style={{ marginBottom: '0.75rem' }}>
-              <label>Discovery toggles</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                {[
-                  ['discovery_profile_rail_enabled', 'Shop by profile rail'],
-                  ['discovery_quick_find_enabled', 'Quick find chips'],
-                  ['discovery_facet_rail_enabled', 'Refine facet rail'],
-                  ['discovery_grouped_results_enabled', 'Grouped results (All view)'],
-                  ['discovery_sticky_toolbar_enabled', 'Sticky search toolbar'],
-                ].map(([key, label]) => (
-                  <label
-                    key={key}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      border: '1px solid var(--admin-border)',
-                      borderRadius: 999,
-                      padding: '0.45rem 0.8rem',
-                      background: '#fff',
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={Boolean(settings[key as keyof CatalogPageSettings])}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          [key]: e.target.checked ? 1 : 0,
-                        } as CatalogPageSettings)
-                      }
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Gallery shadow</h3>
+                  <div className="admin-form-grid">
+                    <div className="admin-field">
+                      <label htmlFor="detail-gallery-shadow">Frame shadow</label>
+                      <select
+                        id="detail-gallery-shadow"
+                        className="admin-select"
+                        value={normalizeShadowStyle(settings.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW)}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            detail_gallery_shadow: normalizeShadowStyle(e.target.value),
+                          })
+                        }
+                      >
+                        {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label} — {opt.hint}
+                          </option>
+                        ))}
+                      </select>
+                      <FieldHint>
+                        Drop shadow on the Quick view gallery frame (<code>.catalog-gallery-main</code>).
+                      </FieldHint>
+                    </div>
+                  </div>
+                </div>
+
+                <details className="admin-advanced">
+                  <summary>Advanced · legacy modal fields</summary>
+                  <ChipGroup
+                    label="Modal fields (legacy)"
+                    options={MODAL_OPTS}
+                    values={settings.modal_fields_json}
+                    onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
+                    hint="Used only when popup components are empty. Prefer Components above."
+                  />
+                </details>
+              </div>
+            </div>
+          ) : null}
+
+          {section === 'discovery' ? (
+            <div className="admin-settings-panel">
+              <div className="admin-settings-panel-head">
+                <div>
+                  <h2>Discovery experience</h2>
+                  <p>Profile rail, facets, grouped results, and listing toolbar elements on public /{type}s.</p>
+                </div>
+              </div>
+              <div className="admin-settings-panel-body">
+                <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Features</h3>
+                  <div className="admin-chips">
+                    {(
+                      [
+                        ['discovery_profile_rail_enabled', 'Shop by profile rail'],
+                        ['discovery_quick_find_enabled', 'Quick find chips'],
+                        ['discovery_facet_rail_enabled', 'Refine facet rail'],
+                        ['discovery_grouped_results_enabled', 'Grouped results (All view)'],
+                        ['discovery_sticky_toolbar_enabled', 'Sticky search toolbar'],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <label key={key} className={`admin-chip${settings[key] ? ' is-on' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(settings[key])}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              [key]: e.target.checked ? 1 : 0,
+                            } as CatalogPageSettings)
+                          }
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="admin-settings-section">
+                  <div className="admin-form-grid">
+                    <div className="admin-field" style={{ maxWidth: 220 }}>
+                      <label>Group preview count</label>
+                      <input
+                        className="admin-input"
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={settings.discovery_group_preview_count || 4}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            discovery_group_preview_count: Number(e.target.value) || 4,
+                          })
+                        }
+                        disabled={!settings.discovery_grouped_results_enabled}
+                      />
+                      <FieldHint>Cards shown per category before “View all”.</FieldHint>
+                    </div>
+                    <ChipGroup
+                      label="Toolbar elements"
+                      options={TOOLBAR_ELEMENT_OPTS}
+                      values={resolveToolbarElements(settings)}
+                      onChange={(toolbar_elements_json) => setSettings({ ...settings, toolbar_elements_json })}
+                      hint="Search, sort, result count, filter chips, and Clear."
                     />
-                    {label}
-                  </label>
-                ))}
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="admin-form-grid">
-              <div className="admin-field" style={{ maxWidth: 220 }}>
-                <label>Group preview count</label>
-                <input
-                  className="admin-input"
-                  type="number"
-                  min={1}
-                  max={12}
-                  value={settings.discovery_group_preview_count || 4}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      discovery_group_preview_count: Number(e.target.value) || 4,
-                    })
-                  }
-                  disabled={!settings.discovery_grouped_results_enabled}
-                />
-                <p style={{ margin: '0.35rem 0 0', color: 'var(--admin-muted)', fontSize: '0.78rem' }}>
-                  Cards shown per category before “View all”.
-                </p>
-              </div>
-              <ChipGroup
-                label="Toolbar elements (show / hide)"
-                options={TOOLBAR_ELEMENT_OPTS}
-                values={resolveToolbarElements(settings)}
-                onChange={(toolbar_elements_json) => setSettings({ ...settings, toolbar_elements_json })}
-              />
-            </div>
-            <p style={{ margin: '0.5rem 0 0', color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
-              Controls search, sort, result count, active filter chips, and Clear inside the listing toolbar.
-            </p>
-          </AdminCollapsible>
+          ) : null}
         </form>
-      ) : (
-        <p className="admin-empty">Loading settings…</p>
       )}
 
-      <AdminCollapsible title={`Categories · ${type}`} description="Add, enable, or remove listing categories." defaultOpen={false}>
-        <form onSubmit={addCategory} className="admin-form-grid" style={{ marginBottom: '0.75rem' }}>
-          <div className="admin-field">
-            <label>Name</label>
-            <input className="admin-input" value={name} onChange={(e) => setName(e.target.value)} required />
+      {section === 'categories' ? (
+        <div className="admin-settings-panel">
+          <div className="admin-settings-panel-head">
+            <div>
+              <h2>Categories · {type}</h2>
+              <p>Add, enable, or remove listing categories for this catalog type.</p>
+            </div>
           </div>
-          <div className="admin-field" style={{ display: 'flex', alignItems: 'end' }}>
-            <button type="submit" className="admin-btn admin-btn-primary">
-              Add category
-            </button>
+          <div className="admin-settings-panel-body">
+            <form onSubmit={addCategory} className="admin-form-grid" style={{ marginBottom: '1rem' }}>
+              <div className="admin-field">
+                <label>Name</label>
+                <input className="admin-input" value={name} onChange={(e) => setName(e.target.value)} required />
+              </div>
+              <div className="admin-field" style={{ display: 'flex', alignItems: 'end' }}>
+                <button type="submit" className="admin-btn admin-btn-primary">
+                  Add category
+                </button>
+              </div>
+            </form>
+            <div className="admin-table-wrap" style={{ border: '1px solid var(--admin-border)', borderRadius: 12 }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Enabled</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map((cat) => (
+                    <tr key={cat.id}>
+                      <td>{cat.name}</td>
+                      <td>
+                        <code>{cat.slug}</code>
+                      </td>
+                      <td>{cat.enabled ? 'Yes' : 'No'}</td>
+                      <td>
+                        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggleCategory(cat)}>
+                          {cat.enabled ? 'Disable' : 'Enable'}
+                        </button>{' '}
+                        <button type="button" className="admin-btn admin-btn-danger" onClick={() => deleteCategory(cat)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </form>
-        <div className="admin-table-wrap" style={{ border: '1px solid var(--admin-border)', borderRadius: 12 }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Slug</th>
-                <th>Enabled</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map((cat) => (
-                <tr key={cat.id}>
-                  <td>{cat.name}</td>
-                  <td>
-                    <code>{cat.slug}</code>
-                  </td>
-                  <td>{cat.enabled ? 'Yes' : 'No'}</td>
-                  <td>
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggleCategory(cat)}>
-                      {cat.enabled ? 'Disable' : 'Enable'}
-                    </button>{' '}
-                    <button type="button" className="admin-btn admin-btn-danger" onClick={() => deleteCategory(cat)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-      </AdminCollapsible>
+      ) : null}
     </div>
   );
 }
