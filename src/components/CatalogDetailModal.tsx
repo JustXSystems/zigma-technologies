@@ -153,6 +153,32 @@ export default function CatalogDetailModal({
 
   if (!mounted) return null;
 
+  const detailFooter = showEnquiry ? (
+    <footer className="catalog-detail-footer">
+      <div className="catalog-detail-footer-copy">
+        <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
+        <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
+      </div>
+      <div className="catalog-detail-footer-actions">
+        <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
+          View full {caseStudyLabel(itemType).toLowerCase()}
+        </Link>
+        <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
+          Request a quote
+        </button>
+        <a href="/contact" className="btn btn-ghost-dark">
+          Contact us
+        </a>
+      </div>
+    </footer>
+  ) : (
+    <footer className="catalog-detail-footer catalog-detail-footer--simple">
+      <button type="button" className="btn btn-ghost-dark" onClick={handleClose}>
+        Close
+      </button>
+    </footer>
+  );
+
   const content = (
     <div className="catalog-detail-backdrop" onClick={handleClose} role="presentation">
       <div
@@ -215,6 +241,7 @@ export default function CatalogDetailModal({
                   mediaFitPercent={item.media_fit_percent}
                   mediaBgColor={mediaBgColor}
                 />
+                {detailFooter}
               </aside>
             ) : null}
 
@@ -279,33 +306,9 @@ export default function CatalogDetailModal({
                   </div>
                 ) : null}
               </div>
-            </div>
 
-            {showEnquiry ? (
-              <footer className="catalog-detail-footer">
-                <div className="catalog-detail-footer-copy">
-                  <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
-                  <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
-                </div>
-                <div className="catalog-detail-footer-actions">
-                  <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
-                    View full {caseStudyLabel(itemType).toLowerCase()}
-                  </Link>
-                  <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
-                    Request a quote
-                  </button>
-                  <a href="/contact" className="btn btn-ghost-dark">
-                    Contact us
-                  </a>
-                </div>
-              </footer>
-            ) : (
-              <footer className="catalog-detail-footer catalog-detail-footer--simple">
-                <button type="button" className="btn btn-ghost-dark" onClick={handleClose}>
-                  Close
-                </button>
-              </footer>
-            )}
+              {!showMedia ? detailFooter : null}
+            </div>
           </div>
         </div>
 

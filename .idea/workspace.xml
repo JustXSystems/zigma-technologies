@@ -7,17 +7,8 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="File upload error display if any">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="catalog-listing background color make  configurable in admin catalog settings with color picker&#10;Also I want.catalog-card--marketplace:hover border-color need to configurable from admin using color picker">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-discovery.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -271,7 +262,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#6 Inventory per-item Fit % (default ~78%) — that still drives the popup only.&#10;   Where to control listing cards now: Admin → Catalog settings → Layout and listing fields&#10;   •&#10;   Card image fill (70–100%, default 94%) — how large the product image is inside catalog-card-media&#10;   •&#10;   Card media inset — None / Snug / Roomy — padding around the image (default Snug)&#10;   Raise fill toward 100% and use None or Snug to cut empty margin. Save settings after changing." />
     <MESSAGE value="#6 deploy error fixed" />
     <MESSAGE value="#7 Display filters only non-zero item" />
     <MESSAGE value="#8 Industries section in home page - display it rotating marque" />
@@ -296,7 +286,8 @@
     <MESSAGE value="#17 refine filters catalog-facet-group list items can it be sort in alphabatically" />
     <MESSAGE value="#17 CSP stylesheet block and the startTime error" />
     <MESSAGE value="File upload error display if any" />
-    <option name="LAST_COMMIT_MESSAGE" value="File upload error display if any" />
+    <MESSAGE value="catalog-listing background color make  configurable in admin catalog settings with color picker&#10;Also I want.catalog-card--marketplace:hover border-color need to configurable from admin using color picker" />
+    <option name="LAST_COMMIT_MESSAGE" value="catalog-listing background color make  configurable in admin catalog settings with color picker&#10;Also I want.catalog-card--marketplace:hover border-color need to configurable from admin using color picker" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
