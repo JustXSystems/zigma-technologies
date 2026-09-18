@@ -1184,6 +1184,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
           itemType={itemType}
           modalFields={modalFields}
           mediaBgColor={cardMediaBg}
+          detailLayout={settings?.detail_layout}
+          detailGalleryShadow={settings?.detail_gallery_shadow}
           onClose={() => setActive(null)}
         />
       ) : null}

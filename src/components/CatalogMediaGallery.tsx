@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { CatalogShadowStyle, CatalogMedia } from '@/lib/types';
-import { DEFAULT_MEDIA_FIT_PERCENT } from '@/lib/types';
+import { DEFAULT_MEDIA_FIT_PERCENT, normalizeShadowStyle } from '@/lib/types';
 import { publicMediaUrl } from '@/lib/media-url';
 
 type Props = {
@@ -12,6 +12,11 @@ type Props = {
   variant?: 'default' | 'detail';
   backgroundImageUrl?: string | null;
   backgroundShadingStyle?: CatalogShadowStyle | null;
+  /**
+   * Explicit frame shadow for `.catalog-gallery-main`.
+   * When set (typical for Quick view), applies even without a background image.
+   */
+  frameShadowStyle?: CatalogShadowStyle | null;
   backgroundFitToSpace?: boolean | null;
   backgroundFitPercent?: number | null;
   /** Fallback product fit when active media lacks values */
@@ -28,6 +33,7 @@ export default function CatalogMediaGallery({
   variant = 'default',
   backgroundImageUrl,
   backgroundShadingStyle = 'medium',
+  frameShadowStyle = null,
   backgroundFitToSpace = false,
   backgroundFitPercent = 100,
   mediaFitToSpace = true,
@@ -53,7 +59,11 @@ export default function CatalogMediaGallery({
   const bgCss = bg
     ? encodeURI(bg).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\(/g, '\\(').replace(/\)/g, '\\)')
     : '';
-  const bgShadow = backgroundShadingStyle || 'medium';
+  const bgShadow = normalizeShadowStyle(backgroundShadingStyle);
+  const resolvedFrameShadow = normalizeShadowStyle(
+    frameShadowStyle ?? (bg || variant === 'detail' ? bgShadow : 'none')
+  );
+  const applyFrameShadow = Boolean(frameShadowStyle) || Boolean(bg) || variant === 'detail';
   const bgFit = backgroundFitToSpace === true;
   const bgPct = Math.min(100, Math.max(20, Number(backgroundFitPercent) || 100));
   const solidMediaBg = mediaBgColor?.trim() || '#ffffff';
@@ -73,7 +83,7 @@ export default function CatalogMediaGallery({
       ) || DEFAULT_MEDIA_FIT_PERCENT
     )
   );
-  const productShadow = active?.shadow_style || 'medium';
+  const productShadow = normalizeShadowStyle(active?.shadow_style || 'medium');
   const useProductFit = !!bg && productFit;
 
   const rootClass = [
@@ -81,7 +91,7 @@ export default function CatalogMediaGallery({
     variant === 'detail' ? 'catalog-gallery--detail' : '',
     bg ? 'catalog-gallery--has-bg' : '',
     bg ? (bgFit ? 'catalog-gallery--bg-fit' : 'catalog-gallery--bg-cover') : '',
-    bg ? `catalog-gallery--bg-shade-${bgShadow}` : '',
+    applyFrameShadow ? `catalog-gallery--bg-shade-${resolvedFrameShadow}` : '',
     bg ? (useProductFit ? 'catalog-gallery--product-fit' : 'catalog-gallery--product-cover') : '',
     bg ? `catalog-gallery--product-shade-${productShadow}` : '',
     className,

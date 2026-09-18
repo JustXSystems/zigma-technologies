@@ -3,6 +3,7 @@ import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createCatalogItem, deleteCatalogItemsByType, listCatalogItems, getPageSettings } from '@/lib/catalog';
 import type { CatalogItemType } from '@/lib/types';
+import { CATALOG_SHADOW_STYLE_VALUES } from '@/lib/types';
 
 const createSchema = z.object({
   item_type: z.enum(['project', 'product', 'service']),
@@ -17,7 +18,7 @@ const createSchema = z.object({
   availability_label: z.string().nullable().optional(),
   lead_time_label: z.string().nullable().optional(),
   background_image_url: z.string().nullable().optional(),
-  background_shading_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
+  background_shading_style: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
   background_fit_to_space: z.boolean().optional(),
   background_fit_percent: z.number().min(20).max(100).optional(),
   media_fit_to_space: z.boolean().optional(),

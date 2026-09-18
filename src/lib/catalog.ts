@@ -18,18 +18,18 @@ import {
   DEFAULT_MEDIA_FIT_PERCENT,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
+  normalizeDetailLayout,
+  normalizeShadowStyle as normalizeShadowStyleValue,
+  DEFAULT_DETAIL_GALLERY_SHADOW,
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
 
-const SHADING_VALUES = new Set<CatalogShadowStyle>(['none', 'soft', 'medium', 'strong', 'bottom']);
-
 export function normalizeBackgroundShading(value: unknown): CatalogShadowStyle {
-  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
-  return SHADING_VALUES.has(raw as CatalogShadowStyle) ? (raw as CatalogShadowStyle) : 'medium';
+  return normalizeShadowStyleValue(value);
 }
 
-export const normalizeShadowStyle = normalizeBackgroundShading;
+export const normalizeShadowStyle = normalizeShadowStyleValue;
 
 export function normalizeMediaFitPercent(value: unknown): number {
   const n = typeof value === 'number' ? value : Number(value);
@@ -625,6 +625,8 @@ export async function getPageSettings(itemType: CatalogItemType) {
     marketplace_hover_border_color: row.marketplace_hover_border_color || '#FF6B1A',
     card_media_fit_percent: normalizeCardMediaFitPercent(row.card_media_fit_percent),
     card_media_inset: normalizeCardMediaInset(row.card_media_inset),
+    detail_layout: normalizeDetailLayout(row.detail_layout),
+    detail_gallery_shadow: normalizeShadowStyle(row.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     hero_variant: row.hero_variant ?? 'spotlight',
     hero_standard_panel_enabled: Number(row.hero_standard_panel_enabled ?? 1),
     hero_meta_enabled: Number(row.hero_meta_enabled ?? 1),
@@ -685,6 +687,12 @@ export async function updatePageSettings(
         : undefined,
     card_media_inset:
       input.card_media_inset !== undefined ? normalizeCardMediaInset(input.card_media_inset) : undefined,
+    detail_layout:
+      input.detail_layout !== undefined ? normalizeDetailLayout(input.detail_layout) : undefined,
+    detail_gallery_shadow:
+      input.detail_gallery_shadow !== undefined
+        ? normalizeShadowStyle(input.detail_gallery_shadow)
+        : undefined,
     hero_variant: input.hero_variant,
     hero_standard_panel_enabled:
       input.hero_standard_panel_enabled === undefined

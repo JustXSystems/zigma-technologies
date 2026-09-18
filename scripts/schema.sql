@@ -149,6 +149,8 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   marketplace_hover_border_color VARCHAR(32) NULL DEFAULT '#FF6B1A',
   card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94,
   card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug',
+  detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage',
+  detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium',
   hero_variant ENUM('standard','spotlight') NOT NULL DEFAULT 'spotlight',
   hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1,
   hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1,

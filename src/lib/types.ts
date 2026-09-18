@@ -1,7 +1,17 @@
 export type CatalogItemType = 'project' | 'product' | 'service';
 
 /** Drop-shadow style for background frame or attached product media */
-export type CatalogShadowStyle = 'none' | 'soft' | 'medium' | 'strong' | 'bottom';
+export const CATALOG_SHADOW_STYLE_VALUES = [
+  'none',
+  'soft',
+  'medium',
+  'strong',
+  'bottom',
+  'lift',
+  'diffuse',
+  'crisp',
+] as const;
+export type CatalogShadowStyle = (typeof CATALOG_SHADOW_STYLE_VALUES)[number];
 /** @deprecated Prefer CatalogShadowStyle */
 export type CatalogBackgroundShading = CatalogShadowStyle;
 
@@ -11,14 +21,59 @@ export const CATALOG_SHADOW_STYLE_OPTIONS: Array<{
   hint: string;
 }> = [
   { value: 'none', label: 'None', hint: 'No drop shadow' },
-  { value: 'soft', label: 'Soft shadow', hint: 'Light lift' },
-  { value: 'medium', label: 'Medium shadow', hint: 'Balanced depth (default)' },
-  { value: 'strong', label: 'Strong shadow', hint: 'High contrast depth' },
-  { value: 'bottom', label: 'Ground shadow', hint: 'Shadow pooled underneath' },
+  { value: 'soft', label: 'Soft', hint: 'Light ambient lift' },
+  { value: 'medium', label: 'Medium', hint: 'Balanced depth (default)' },
+  { value: 'strong', label: 'Strong', hint: 'High-contrast depth' },
+  { value: 'bottom', label: 'Ground', hint: 'Shadow pooled underneath' },
+  { value: 'lift', label: 'Lift', hint: 'Floating product / frame' },
+  { value: 'diffuse', label: 'Diffuse', hint: 'Large soft studio bloom' },
+  { value: 'crisp', label: 'Crisp', hint: 'Tight editorial edge' },
 ];
 
 /** @deprecated Prefer CATALOG_SHADOW_STYLE_OPTIONS */
 export const CATALOG_BACKGROUND_SHADING_OPTIONS = CATALOG_SHADOW_STYLE_OPTIONS;
+
+/** Quick-view detail popup composition */
+export const CATALOG_DETAIL_LAYOUT_VALUES = ['media-stage', 'balanced', 'stacked'] as const;
+export type CatalogDetailLayout = (typeof CATALOG_DETAIL_LAYOUT_VALUES)[number];
+export const DEFAULT_DETAIL_LAYOUT: CatalogDetailLayout = 'media-stage';
+export const DEFAULT_DETAIL_GALLERY_SHADOW: CatalogShadowStyle = 'medium';
+
+export const CATALOG_DETAIL_LAYOUT_OPTIONS: Array<{
+  value: CatalogDetailLayout;
+  label: string;
+  hint: string;
+}> = [
+  {
+    value: 'media-stage',
+    label: 'Media stage',
+    hint: 'Product-first: larger sticky gallery, content scrolls beside it',
+  },
+  {
+    value: 'balanced',
+    label: 'Balanced split',
+    hint: 'Equal columns — good when copy and media share weight',
+  },
+  {
+    value: 'stacked',
+    label: 'Stacked',
+    hint: 'Gallery full-width on top, details below — mobile-native',
+  },
+];
+
+export function normalizeDetailLayout(value: unknown): CatalogDetailLayout {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return (CATALOG_DETAIL_LAYOUT_VALUES as readonly string[]).includes(raw)
+    ? (raw as CatalogDetailLayout)
+    : DEFAULT_DETAIL_LAYOUT;
+}
+
+export function normalizeShadowStyle(value: unknown): CatalogShadowStyle {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return (CATALOG_SHADOW_STYLE_VALUES as readonly string[]).includes(raw)
+    ? (raw as CatalogShadowStyle)
+    : DEFAULT_DETAIL_GALLERY_SHADOW;
+}
 
 export const DEFAULT_MEDIA_FIT_PERCENT = 78;
 /** Listing-card product fill (higher = less empty margin around the image) */
@@ -203,6 +258,16 @@ export type CatalogPageSettings = {
   card_media_fit_percent: number;
   /** Padding around the product image inside catalog-card-media */
   card_media_inset: 'none' | 'snug' | 'roomy';
+  /**
+   * Quick-view popup composition (catalog-detail-panel).
+   * media-stage = product-first sticky gallery; balanced = equal split; stacked = gallery on top.
+   */
+  detail_layout: CatalogDetailLayout;
+  /**
+   * Drop shadow on .catalog-gallery-main inside the Quick-view popup.
+   * Independent of listing-card frame shadow (item.background_shading_style).
+   */
+  detail_gallery_shadow: CatalogShadowStyle;
   hero_variant: 'standard' | 'spotlight';
   /** When hero_variant is standard, show/hide the compact active-item panel. */
   hero_standard_panel_enabled: number;

@@ -3,6 +3,7 @@ import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { getPageSettings, updatePageSettings } from '@/lib/catalog';
 import type { CatalogItemType } from '@/lib/types';
+import { CATALOG_SHADOW_STYLE_VALUES, CATALOG_DETAIL_LAYOUT_VALUES } from '@/lib/types';
 
 export async function GET(request: Request) {
   try {
@@ -41,6 +42,8 @@ const putSchema = z.object({
   marketplace_hover_border_color: z.string().max(32).nullable().optional(),
   card_media_fit_percent: z.number().int().min(70).max(100).optional(),
   card_media_inset: z.enum(['none', 'snug', 'roomy']).optional(),
+  detail_layout: z.enum(CATALOG_DETAIL_LAYOUT_VALUES).optional(),
+  detail_gallery_shadow: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
   hero_variant: z.enum(['standard', 'spotlight']).optional(),
   hero_standard_panel_enabled: z.boolean().optional(),
   hero_meta_enabled: z.boolean().optional(),

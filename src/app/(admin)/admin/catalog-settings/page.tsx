@@ -5,10 +5,16 @@ import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/li
 import {
   slugify,
   CARD_MEDIA_INSET_OPTIONS,
+  CATALOG_DETAIL_LAYOUT_OPTIONS,
+  CATALOG_SHADOW_STYLE_OPTIONS,
   DEFAULT_CARD_MEDIA_FIT_PERCENT,
   DEFAULT_CARD_MEDIA_INSET,
+  DEFAULT_DETAIL_GALLERY_SHADOW,
+  DEFAULT_DETAIL_LAYOUT,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
+  normalizeDetailLayout,
+  normalizeShadowStyle,
 } from '@/lib/types';
 import {
   DEFAULT_HERO_ELEMENTS,
@@ -409,6 +415,10 @@ export default function CatalogSettingsPage() {
       marketplace_hover_border_color: settingsData.settings?.marketplace_hover_border_color || '#FF6B1A',
       card_media_fit_percent: normalizeCardMediaFitPercent(settingsData.settings?.card_media_fit_percent),
       card_media_inset: normalizeCardMediaInset(settingsData.settings?.card_media_inset),
+      detail_layout: normalizeDetailLayout(settingsData.settings?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
+      detail_gallery_shadow: normalizeShadowStyle(
+        settingsData.settings?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW
+      ),
       card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
       modal_fields_json: settingsData.settings?.modal_fields_json?.length
         ? settingsData.settings.modal_fields_json
@@ -490,6 +500,8 @@ export default function CatalogSettingsPage() {
           marketplace_hover_border_color: settings.marketplace_hover_border_color || '#FF6B1A',
           card_media_fit_percent: normalizeCardMediaFitPercent(settings.card_media_fit_percent),
           card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
+          detail_layout: normalizeDetailLayout(settings.detail_layout),
+          detail_gallery_shadow: normalizeShadowStyle(settings.detail_gallery_shadow),
           hero_variant: settings.hero_variant,
           hero_elements_json: resolveHeroElements(settings),
           toolbar_elements_json: resolveToolbarElements(settings),
@@ -521,6 +533,8 @@ export default function CatalogSettingsPage() {
         marketplace_hover_border_color: data.settings?.marketplace_hover_border_color || '#FF6B1A',
         card_media_fit_percent: normalizeCardMediaFitPercent(data.settings?.card_media_fit_percent),
         card_media_inset: normalizeCardMediaInset(data.settings?.card_media_inset),
+        detail_layout: normalizeDetailLayout(data.settings?.detail_layout),
+        detail_gallery_shadow: normalizeShadowStyle(data.settings?.detail_gallery_shadow),
         card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
       });
     } finally {
@@ -1076,6 +1090,70 @@ export default function CatalogSettingsPage() {
                 onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
                 hint="Controls fields shown in the Quick view popup."
               />
+              <div className="admin-field full">
+                <label>Quick view layout</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                  {CATALOG_DETAIL_LAYOUT_OPTIONS.map((opt) => {
+                    const active = normalizeDetailLayout(settings.detail_layout) === opt.value;
+                    return (
+                      <label
+                        key={opt.value}
+                        title={opt.hint}
+                        style={{
+                          display: 'inline-flex',
+                          flexDirection: 'column',
+                          gap: 4,
+                          border: '1px solid var(--admin-border)',
+                          borderRadius: 10,
+                          padding: '0.55rem 0.75rem',
+                          fontSize: '0.8rem',
+                          minWidth: 150,
+                          flex: '1 1 150px',
+                          background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+                          <input
+                            type="radio"
+                            name="detail_layout"
+                            checked={active}
+                            onChange={() => setSettings({ ...settings, detail_layout: opt.value })}
+                          />
+                          {opt.label}
+                        </span>
+                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.72rem', lineHeight: 1.35 }}>
+                          {opt.hint}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="admin-field">
+                <label htmlFor="detail-gallery-shadow">Quick view · gallery frame shadow</label>
+                <select
+                  id="detail-gallery-shadow"
+                  className="admin-select"
+                  value={normalizeShadowStyle(settings.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW)}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      detail_gallery_shadow: normalizeShadowStyle(e.target.value),
+                    })
+                  }
+                >
+                  {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label} — {opt.hint}
+                    </option>
+                  ))}
+                </select>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                  Drop shadow on <code>.catalog-gallery-main</code> inside the catalog-detail-panel popup. Independent
+                  of listing-card frame shadow (set per item in Inventory → Media).
+                </p>
+              </div>
             </div>
           </AdminCollapsible>
 

@@ -911,16 +911,17 @@ function InventoryInner() {
           <div className="admin-modal" style={{ width: 'min(960px, 100%)' }} onClick={(e) => e.stopPropagation()}>
             <h2>Media · {mediaItem.title}</h2>
             <p className="admin-media-lead">
-              Separate shadow &amp; fit for background and each attached image. Applied on public catalog cards —
-              no gray wash.
+              Separate shadow &amp; fit for background frame and each attached image. Listing cards use the background
+              frame shadow; Quick view gallery frame shadow is configured in Catalog settings (overrides for
+              <code> .catalog-gallery-main</code>).
             </p>
             {mediaMsg ? <div className="admin-success">{mediaMsg}</div> : null}
 
             <div className="admin-media-studio">
               <div className="admin-media-panel">
                 <div className="admin-media-panel-head">
-                  <h3>Background</h3>
-                  <span>Own shadow · Own fit</span>
+                  <h3>Background / frame</h3>
+                  <span>Listing card shadow · Own fit</span>
                 </div>
 
                 <MediaPicker
@@ -932,13 +933,14 @@ function InventoryInner() {
 
                 <div className="admin-media-inline">
                   <label htmlFor="bg-shadow">
-                    Shadow
+                    Frame shadow
                     <select
                       id="bg-shadow"
                       className="admin-select"
                       value={backgroundShading}
                       onChange={(e) => setBackgroundShading(e.target.value as CatalogShadowStyle)}
                       style={{ minWidth: 140 }}
+                      title="Listing card media frame. Quick view uses Catalog settings → gallery frame shadow."
                     >
                       {CATALOG_SHADOW_STYLE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>

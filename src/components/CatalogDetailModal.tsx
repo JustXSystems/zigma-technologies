@@ -3,7 +3,14 @@
 import { FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import type { CatalogItem, CatalogItemType, FormField } from '@/lib/types';
+import type {
+  CatalogDetailLayout,
+  CatalogItem,
+  CatalogItemType,
+  CatalogShadowStyle,
+  FormField,
+} from '@/lib/types';
+import { DEFAULT_DETAIL_GALLERY_SHADOW, DEFAULT_DETAIL_LAYOUT, normalizeDetailLayout, normalizeShadowStyle } from '@/lib/types';
 import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
@@ -42,6 +49,10 @@ type Props = {
   onClose: () => void;
   /** Page-level Card media background — matches listing catalog-card-media */
   mediaBgColor?: string | null;
+  /** Quick-view composition preset from catalog settings */
+  detailLayout?: CatalogDetailLayout | null;
+  /** Shadow on `.catalog-gallery-main` inside this popup */
+  detailGalleryShadow?: CatalogShadowStyle | null;
 };
 
 export default function CatalogDetailModal({
@@ -50,6 +61,8 @@ export default function CatalogDetailModal({
   modalFields,
   onClose,
   mediaBgColor = '#ffffff',
+  detailLayout = DEFAULT_DETAIL_LAYOUT,
+  detailGalleryShadow = DEFAULT_DETAIL_GALLERY_SHADOW,
 }: Props) {
   const titleId = useId();
   const copy = useSiteCopy();
@@ -64,6 +77,8 @@ export default function CatalogDetailModal({
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const layout = normalizeDetailLayout(detailLayout);
+  const galleryFrameShadow = normalizeShadowStyle(detailGalleryShadow ?? item.background_shading_style);
   const { highlight, rest: specEntries } = useMemo(() => splitSpecs(item.specs_json), [item.specs_json]);
   const showMedia = hasField(modalFields, 'media', DEFAULT_MODAL);
   const showEnquiry = hasField(modalFields, 'enquiry', DEFAULT_MODAL);
@@ -183,7 +198,7 @@ export default function CatalogDetailModal({
     <div className="catalog-detail-backdrop" onClick={handleClose} role="presentation">
       <div
         ref={panelRef}
-        className="catalog-detail-panel"
+        className={`catalog-detail-panel catalog-detail-panel--${layout}${showMedia ? '' : ' catalog-detail-panel--no-media'}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -229,19 +244,21 @@ export default function CatalogDetailModal({
           <div className={`catalog-detail-layout${showMedia ? '' : ' catalog-detail-layout--no-media'}`}>
             {showMedia ? (
               <aside className="catalog-detail-media-col">
-                <CatalogMediaGallery
-                  media={item.media || []}
-                  title={item.title}
-                  variant="detail"
-                  backgroundImageUrl={item.background_image_url}
-                  backgroundShadingStyle={item.background_shading_style}
-                  backgroundFitToSpace={item.background_fit_to_space}
-                  backgroundFitPercent={item.background_fit_percent}
-                  mediaFitToSpace={item.media_fit_to_space}
-                  mediaFitPercent={item.media_fit_percent}
-                  mediaBgColor={mediaBgColor}
-                />
-                {detailFooter}
+                <div className="catalog-detail-media-stage">
+                  <CatalogMediaGallery
+                    media={item.media || []}
+                    title={item.title}
+                    variant="detail"
+                    backgroundImageUrl={item.background_image_url}
+                    backgroundShadingStyle={item.background_shading_style}
+                    frameShadowStyle={galleryFrameShadow}
+                    backgroundFitToSpace={item.background_fit_to_space}
+                    backgroundFitPercent={item.background_fit_percent}
+                    mediaFitToSpace={item.media_fit_to_space}
+                    mediaFitPercent={item.media_fit_percent}
+                    mediaBgColor={mediaBgColor}
+                  />
+                </div>
               </aside>
             ) : null}
 
@@ -295,22 +312,22 @@ export default function CatalogDetailModal({
                 {hasField(modalFields, 'specs', DEFAULT_MODAL) && specEntries.length ? (
                   <div className="catalog-detail-section">
                     <h3 className="catalog-detail-section-title">Technical specifications</h3>
-                    <div className="catalog-detail-spec-grid">
+                    <dl className="catalog-detail-spec-list">
                       {specEntries.map(([k, v]) => (
-                        <div key={k} className="catalog-detail-spec-card">
-                          <span className="catalog-detail-spec-key">{k}</span>
-                          <span className="catalog-detail-spec-val">{v}</span>
+                        <div key={k} className="catalog-detail-spec-row">
+                          <dt className="catalog-detail-spec-key">{k}</dt>
+                          <dd className="catalog-detail-spec-val">{v}</dd>
                         </div>
                       ))}
-                    </div>
+                    </dl>
                   </div>
                 ) : null}
               </div>
-
-              {!showMedia ? detailFooter : null}
             </div>
           </div>
         </div>
+
+        {detailFooter}
 
         {showEnquiry && enquiryOpen ? (
           <div className="catalog-detail-enquiry-backdrop" onClick={() => setEnquiryOpen(false)} role="presentation">

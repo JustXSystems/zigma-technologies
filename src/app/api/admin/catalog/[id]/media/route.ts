@@ -12,6 +12,7 @@ import {
   setItemMediaPrimary,
   updateItemMediaFit,
 } from '@/lib/catalog';
+import { CATALOG_SHADOW_STYLE_VALUES } from '@/lib/types';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -36,7 +37,7 @@ const postSchema = z.object({
   kind: z.enum(['image', 'video', 'svg']).optional(),
   fit_to_space: z.boolean().optional(),
   fit_percent: z.number().min(20).max(100).optional(),
-  shadow_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
+  shadow_style: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
 });
 
 export async function POST(request: Request, ctx: Ctx) {
@@ -72,7 +73,7 @@ const patchSchema = z.object({
   from_item_id: z.number().int().positive().optional(),
   fit_to_space: z.boolean().optional(),
   fit_percent: z.number().min(20).max(100).optional(),
-  shadow_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
+  shadow_style: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
 });
 
 export async function PATCH(request: Request, ctx: Ctx) {

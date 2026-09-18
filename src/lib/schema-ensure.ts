@@ -187,6 +187,14 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'card_media_inset',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug' AFTER card_media_fit_percent`,
   },
+  {
+    name: 'detail_layout',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage' AFTER card_media_inset`,
+  },
+  {
+    name: 'detail_gallery_shadow',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER detail_layout`,
+  },
 ];
 
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { deleteCatalogItem, getCatalogItemById, updateCatalogItem } from '@/lib/catalog';
+import { CATALOG_SHADOW_STYLE_VALUES } from '@/lib/types';
 
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
@@ -15,7 +16,7 @@ const updateSchema = z.object({
   availability_label: z.string().nullable().optional(),
   lead_time_label: z.string().nullable().optional(),
   background_image_url: z.string().nullable().optional(),
-  background_shading_style: z.enum(['none', 'soft', 'medium', 'strong', 'bottom']).optional(),
+  background_shading_style: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
   background_fit_to_space: z.boolean().optional(),
   background_fit_percent: z.number().min(20).max(100).optional(),
   media_fit_to_space: z.boolean().optional(),
