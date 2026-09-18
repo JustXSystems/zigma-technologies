@@ -720,21 +720,32 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   }, [facets, tag, items.length, loading]);
 
   const visibleFacetCategories = useMemo(
-    () => facetCategories.filter((c) => c.count > 0 || c.slug === category),
+    () =>
+      facetCategories
+        .filter((c) => c.count > 0 || c.slug === category)
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
     [facetCategories, category]
   );
 
   const visibleFacetTags = useMemo(
-    () => facetTags.filter((t) => t.count > 0 || t.value === tag),
+    () =>
+      facetTags
+        .filter((t) => t.count > 0 || t.value === tag)
+        .slice()
+        .sort((a, b) => a.value.localeCompare(b.value, undefined, { sensitivity: 'base' })),
     [facetTags, tag]
   );
 
-  /** Same source as Refine tags — top chips, forcing the active tag into the row. */
+  /** Same source as Refine tags — top by popularity, forcing the active tag into the row. */
   const intentTags = useMemo(() => {
-    if (visibleFacetTags.length <= INTENT_CHIP_LIMIT) return visibleFacetTags;
-    const top = visibleFacetTags.slice(0, INTENT_CHIP_LIMIT);
+    const byPopularity = [...visibleFacetTags].sort(
+      (a, b) => b.count - a.count || a.value.localeCompare(b.value, undefined, { sensitivity: 'base' })
+    );
+    if (byPopularity.length <= INTENT_CHIP_LIMIT) return byPopularity;
+    const top = byPopularity.slice(0, INTENT_CHIP_LIMIT);
     if (!tag || top.some((t) => t.value === tag)) return top;
-    const active = visibleFacetTags.find((t) => t.value === tag);
+    const active = byPopularity.find((t) => t.value === tag);
     if (!active) return top;
     return [...top.slice(0, INTENT_CHIP_LIMIT - 1), active];
   }, [visibleFacetTags, tag]);
