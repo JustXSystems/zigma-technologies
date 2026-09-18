@@ -30,17 +30,20 @@ import {
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import {
+  CATALOG_SETTINGS_BLOCKS,
+  CATALOG_SETTINGS_PAGE_INTRO,
+  CATALOG_SETTINGS_SECTIONS,
+  FILTER_LABELS,
+  HERO_ELEMENT_LABELS,
+  SEARCH_FIELD_LABELS,
+  TOOLBAR_ELEMENT_LABELS,
+  type SettingsGuide,
+  type SettingsSectionId,
+} from '@/lib/admin-catalog-settings-guides';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
-type SettingsSection = 'hero' | 'listing' | 'popup' | 'discovery' | 'categories';
-
-const SETTINGS_SECTIONS: Array<{ id: SettingsSection; label: string }> = [
-  { id: 'hero', label: 'Hero' },
-  { id: 'listing', label: 'Listing' },
-  { id: 'popup', label: 'Quick view' },
-  { id: 'discovery', label: 'Discovery' },
-  { id: 'categories', label: 'Categories' },
-];
+type SettingsSection = SettingsSectionId;
 
 const FILTER_OPTS = ['category', 'tags'] as const;
 const SEARCH_OPTS = ['title', 'summary', 'description', 'tags', 'price_label'] as const;
@@ -97,6 +100,52 @@ function toggleInList(list: string[] | null | undefined, value: string, on: bool
 
 function FieldHint({ children }: { children: ReactNode }) {
   return <p className="admin-hint">{children}</p>;
+}
+
+function GuideBlock({ guide }: { guide: SettingsGuide }) {
+  return (
+    <dl className="admin-guide">
+      <div className="admin-guide-row">
+        <dt>Purpose</dt>
+        <dd>{guide.purpose}</dd>
+      </div>
+      <div className="admin-guide-row">
+        <dt>When</dt>
+        <dd>{guide.when}</dd>
+      </div>
+      <div className="admin-guide-row">
+        <dt>How</dt>
+        <dd>{guide.how}</dd>
+      </div>
+      {guide.tip ? (
+        <div className="admin-guide-row admin-guide-row--tip">
+          <dt>Tip</dt>
+          <dd>{guide.tip}</dd>
+        </div>
+      ) : null}
+    </dl>
+  );
+}
+
+function sectionMeta(id: SettingsSection) {
+  return CATALOG_SETTINGS_SECTIONS.find((s) => s.id === id)!;
+}
+
+function SettingsBlock({
+  blockId,
+  children,
+}: {
+  blockId: keyof typeof CATALOG_SETTINGS_BLOCKS;
+  children: ReactNode;
+}) {
+  const block = CATALOG_SETTINGS_BLOCKS[blockId];
+  return (
+    <div className="admin-settings-section">
+      <h3 className="admin-settings-section-title">{block.title}</h3>
+      <GuideBlock guide={block.guide} />
+      {children}
+    </div>
+  );
 }
 
 function ChipGroup({
@@ -615,10 +664,13 @@ export default function CatalogSettingsPage() {
       {message ? <div className="admin-success">{message}</div> : null}
 
       <header className="admin-settings-masthead">
-        <h1>Catalog settings</h1>
+        <h1>{CATALOG_SETTINGS_PAGE_INTRO.title}</h1>
         <p>
-          Shape the public <code>/{type}s</code> experience — hero, listing cards, Quick view popup, and discovery
-          tools. Switch catalog type, then edit one area at a time.
+          {CATALOG_SETTINGS_PAGE_INTRO.lead} Currently editing{' '}
+          <strong>
+            <code>/{type}s</code>
+          </strong>
+          .
         </p>
         <div className="admin-settings-typebar" role="tablist" aria-label="Catalog type">
           {TYPES.map((t) => (
@@ -634,14 +686,18 @@ export default function CatalogSettingsPage() {
             </button>
           ))}
         </div>
+        <p className="admin-hint" style={{ marginTop: '0.85rem', maxWidth: '40rem' }}>
+          Type switcher loads a separate settings profile. Saving products does not change projects or services.
+        </p>
       </header>
 
       <nav className="admin-settings-nav" aria-label="Settings sections">
-        {SETTINGS_SECTIONS.map((s) => (
+        {CATALOG_SETTINGS_SECTIONS.map((s) => (
           <button
             key={s.id}
             type="button"
             className={`admin-settings-nav-btn${section === s.id ? ' is-active' : ''}`}
+            title={s.summary}
             onClick={() => setSection(s.id)}
           >
             {s.label}
@@ -661,24 +717,21 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>Hero spotlight</h2>
-                  <p>
-                    Curate which {type}s rotate in the public page hero. Leave empty to use featured items
-                    automatically.
-                  </p>
+                  <h2>{sectionMeta('hero').title}</h2>
+                  <p>{sectionMeta('hero').summary}</p>
+                  <GuideBlock guide={sectionMeta('hero').guide} />
                 </div>
-                <label className="admin-enable-switch">
+                <label className="admin-enable-switch" title="Master switch for the public page hero banner">
                   <input
                     type="checkbox"
                     checked={!!settings.hero_enabled}
                     onChange={(e) => setSettings({ ...settings, hero_enabled: e.target.checked ? 1 : 0 })}
                   />
-                  Enabled
+                  Hero enabled
                 </label>
               </div>
               <div className="admin-settings-panel-body">
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Presentation</h3>
+                <SettingsBlock blockId="hero_presentation">
                   <div className="admin-form-grid">
                     <div className="admin-field">
                       <label>Visual style</label>
@@ -698,6 +751,7 @@ export default function CatalogSettingsPage() {
                           </option>
                         ))}
                       </select>
+                      <FieldHint>Overall catalog page mood (hero + cards chrome). Try premium or glass for a richer look.</FieldHint>
                     </div>
                     <div className="admin-field">
                       <label>Hero variant</label>
@@ -717,6 +771,10 @@ export default function CatalogSettingsPage() {
                           </option>
                         ))}
                       </select>
+                      <FieldHint>
+                        <strong>standard</strong> = compact copy + optional panel. <strong>spotlight</strong> = large
+                        featured card beside the headline.
+                      </FieldHint>
                     </div>
                     <div className="admin-field">
                       <label>Hero eyebrow</label>
@@ -732,6 +790,7 @@ export default function CatalogSettingsPage() {
                               : 'Service Spotlight'
                         }
                       />
+                      <FieldHint>Small label above the title (e.g. “Product Spotlight”). Keep short.</FieldHint>
                     </div>
                     <div className="admin-field">
                       <label>Rotation interval (ms)</label>
@@ -746,6 +805,7 @@ export default function CatalogSettingsPage() {
                           setSettings({ ...settings, hero_autoplay_ms: Number(e.target.value) || 6000 })
                         }
                       />
+                      <FieldHint>Time between slides when multiple spotlight items are selected. 5000–8000 ms feels natural.</FieldHint>
                     </div>
                     <div className="admin-field full">
                       <label>Hero title</label>
@@ -755,6 +815,7 @@ export default function CatalogSettingsPage() {
                         onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
                         placeholder={`Headline for /${type}s`}
                       />
+                      <FieldHint>Main headline on the public /{type}s page. Leave blank only if you hide the title element.</FieldHint>
                     </div>
                     <div className="admin-field full">
                       <label>Hero lead</label>
@@ -765,19 +826,17 @@ export default function CatalogSettingsPage() {
                         rows={3}
                         placeholder="Supporting copy shown above the spotlight card."
                       />
+                      <FieldHint>One or two sentences under the title. Explain who the catalog is for.</FieldHint>
                     </div>
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Elements</h3>
-                  <p className="admin-settings-section-desc">
-                    Show or hide hero pieces for every variant and visual style.
-                  </p>
+                <SettingsBlock blockId="hero_elements">
                   <ChipGroup
                     label="Hero elements"
                     options={HERO_ELEMENT_OPTS}
                     values={resolveHeroElements(settings)}
+                    optionLabels={HERO_ELEMENT_LABELS}
                     onChange={(hero_elements_json) =>
                       setSettings({
                         ...settings,
@@ -786,20 +845,22 @@ export default function CatalogSettingsPage() {
                         hero_standard_panel_enabled: hero_elements_json.includes('standard_panel') ? 1 : 0,
                       })
                     }
+                    hint="Toggle visibility of each hero piece. Blue chips are currently shown on the public page."
                   />
                   <div style={{ marginTop: '0.85rem' }}>
-                    <div className="admin-chip-group-label">Appearance</div>
+                    <div className="admin-chip-group-label">Motion & borders</div>
                     <div className="admin-chips" style={{ marginTop: '0.4rem' }}>
                       {(
                         [
-                          ['loading_skeleton_enabled', 'Skeleton loading'],
-                          ['reveal_animation_enabled', 'Reveal animation'],
-                          ['premium_borders_enabled', 'Premium borders'],
+                          ['loading_skeleton_enabled', 'Skeleton loading', 'Placeholder shimmer while cards load'],
+                          ['reveal_animation_enabled', 'Reveal animation', 'Cards ease in as you scroll'],
+                          ['premium_borders_enabled', 'Premium borders', 'Stronger card outlines for a premium feel'],
                         ] as const
-                      ).map(([key, label]) => (
+                      ).map(([key, label, tip]) => (
                         <label
                           key={key}
                           className={`admin-chip${settings[key] ? ' is-on' : ''}`}
+                          title={tip}
                         >
                           <input
                             type="checkbox"
@@ -815,14 +876,11 @@ export default function CatalogSettingsPage() {
                         </label>
                       ))}
                     </div>
+                    <FieldHint>These affect the listing experience under the hero as well as hero polish.</FieldHint>
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Spotlight items</h3>
-                  <p className="admin-settings-section-desc">
-                    Selection order controls slide order. Empty = featured items fallback.
-                  </p>
+                <SettingsBlock blockId="hero_spotlight_items">
                   <div className="admin-picker-list">
                     {items.length ? (
                       items.map((item) => {
@@ -889,9 +947,14 @@ export default function CatalogSettingsPage() {
                       <p className="admin-empty">Create or seed some {type}s to curate hero spotlight items.</p>
                     )}
                   </div>
-                </div>
+                </SettingsBlock>
 
                 <div className="admin-settings-section">
+                  <h3 className="admin-settings-section-title">Live preview</h3>
+                  <p className="admin-settings-section-desc">
+                    Optional check that hero style and elements roughly match what you configured. Open only when needed —
+                    it is hidden by default to keep this page light.
+                  </p>
                   {previewSettings ? (
                     <CatalogAppearancePreview type={type} settings={previewSettings} items={items} />
                   ) : null}
@@ -904,13 +967,13 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>Listing &amp; cards</h2>
-                  <p>Grid layout, card chrome, colors, filters, search, and which fields appear on each card.</p>
+                  <h2>{sectionMeta('listing').title}</h2>
+                  <p>{sectionMeta('listing').summary}</p>
+                  <GuideBlock guide={sectionMeta('listing').guide} />
                 </div>
               </div>
               <div className="admin-settings-panel-body">
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Layout</h3>
+                <SettingsBlock blockId="listing_layout">
                   <div className="admin-form-grid">
                     <div className="admin-field">
                       <label>Card style</label>
@@ -927,6 +990,7 @@ export default function CatalogSettingsPage() {
                         <option value="marketplace">Marketplace (image above, body below)</option>
                         <option value="overlay">Overlay (text over media)</option>
                       </select>
+                      <FieldHint>Marketplace is clearest for products. Overlay suits bold photography-led catalogs.</FieldHint>
                     </div>
                     <div className="admin-field">
                       <label>Layout</label>
@@ -938,6 +1002,7 @@ export default function CatalogSettingsPage() {
                         <option value="grid">grid</option>
                         <option value="list">list</option>
                       </select>
+                      <FieldHint>Grid for visual browse; list when summaries matter more than images.</FieldHint>
                     </div>
                     <div className="admin-field">
                       <label>Grid columns</label>
@@ -949,33 +1014,33 @@ export default function CatalogSettingsPage() {
                         value={settings.grid_columns}
                         onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
                       />
+                      <FieldHint>Desktop columns (1–4). Mobile still stacks. 3 is a balanced default.</FieldHint>
                     </div>
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Colors</h3>
+                <SettingsBlock blockId="listing_colors">
                   <div className="admin-form-grid">
                     <ColorField
                       label="Card body background"
                       value={settings.card_body_bg_color}
                       fallback="#ffffff"
                       onChange={(card_body_bg_color) => setSettings({ ...settings, card_body_bg_color })}
-                      hint="Title/price panel under the product image (Marketplace)."
+                      hint="Title/price panel under the product image (Marketplace cards)."
                     />
                     <ColorField
                       label="Card media background"
                       value={settings.card_media_bg_color}
                       fallback="#ffffff"
                       onChange={(card_media_bg_color) => setSettings({ ...settings, card_media_bg_color })}
-                      hint="Shared fill for listing cards and the detail gallery."
+                      hint="Fill behind product photos on cards and in the Quick view gallery stage."
                     />
                     <ColorField
                       label="Listing background"
                       value={settings.listing_bg_color}
                       fallback="#ffffff"
                       onChange={(listing_bg_color) => setSettings({ ...settings, listing_bg_color })}
-                      hint="Background for the catalog listing section below the hero."
+                      hint="Page background behind the card grid (below the hero)."
                     />
                     <ColorField
                       label="Marketplace hover border"
@@ -984,13 +1049,12 @@ export default function CatalogSettingsPage() {
                       onChange={(marketplace_hover_border_color) =>
                         setSettings({ ...settings, marketplace_hover_border_color })
                       }
-                      hint="Border color when hovering Marketplace-style cards."
+                      hint="Accent outline when hovering Marketplace cards — usually brand orange."
                     />
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Media fit</h3>
+                <SettingsBlock blockId="listing_media">
                   <div className="admin-form-grid">
                     <div className="admin-field full">
                       <label>
@@ -1025,7 +1089,9 @@ export default function CatalogSettingsPage() {
                           }
                         />
                       </div>
-                      <FieldHint>Listing cards only (100% = edge-to-edge). Popup uses Inventory fit %.</FieldHint>
+                      <FieldHint>
+                        Listing cards only. 100% = edge-to-edge cover. Quick view product fit is set in Inventory → Media.
+                      </FieldHint>
                     </div>
                     <div className="admin-field full">
                       <label>Card media inset</label>
@@ -1045,31 +1111,38 @@ export default function CatalogSettingsPage() {
                           );
                         })}
                       </div>
+                      <FieldHint>Padding around the image inside the card media area. Hover a chip for detail.</FieldHint>
                     </div>
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Fields</h3>
+                <SettingsBlock blockId="listing_fields">
                   <div className="admin-form-grid">
                     <ChipGroup
                       label="Filters"
                       options={FILTER_OPTS}
                       values={settings.filters_json}
+                      optionLabels={FILTER_LABELS}
                       onChange={(filters_json) => setSettings({ ...settings, filters_json })}
+                      hint="Which refine options appear in discovery / filter UI. Categories must exist under Categories."
                     />
                     <ChipGroup
                       label="Search fields"
                       options={SEARCH_OPTS}
                       values={settings.search_fields_json}
+                      optionLabels={SEARCH_FIELD_LABELS}
                       onChange={(search_fields_json) => setSettings({ ...settings, search_fields_json })}
+                      hint="Which inventory text fields the catalog search box matches against."
                     />
                     <CardFieldsChecklist
                       values={settings.card_fields_json}
                       onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
                     />
+                    <FieldHint>
+                      Card fields control what each listing card shows. Keep Product image + Title + one CTA as a minimum.
+                    </FieldHint>
                   </div>
-                </div>
+                </SettingsBlock>
               </div>
             </div>
           ) : null}
@@ -1078,14 +1151,13 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>Quick view popup</h2>
-                  <p>Template, visible components, Classic layout, and gallery frame shadow for the detail modal.</p>
+                  <h2>{sectionMeta('popup').title}</h2>
+                  <p>{sectionMeta('popup').summary}</p>
+                  <GuideBlock guide={sectionMeta('popup').guide} />
                 </div>
               </div>
               <div className="admin-settings-panel-body">
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Template</h3>
-                  <p className="admin-settings-section-desc">Pick the Quick view chrome. Showcase matches the product reference layout.</p>
+                <SettingsBlock blockId="popup_template">
                   <div className="admin-choice-grid">
                     {CATALOG_DETAIL_TEMPLATE_OPTIONS.map((opt) => {
                       const active =
@@ -1104,13 +1176,9 @@ export default function CatalogSettingsPage() {
                       );
                     })}
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Components</h3>
-                  <p className="admin-settings-section-desc">
-                    Toggle each piece independently across Classic, Vitrine, Lumen, Horizon, and Showcase.
-                  </p>
+                <SettingsBlock blockId="popup_components">
                   <div style={{ display: 'grid', gap: '0.85rem' }}>
                     {(['chrome', 'content', 'cta'] as const).map((group) => {
                       const opts = CATALOG_DETAIL_ELEMENT_OPTIONS.filter((o) => o.group === group);
@@ -1134,13 +1202,9 @@ export default function CatalogSettingsPage() {
                       );
                     })}
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Classic layout</h3>
-                  <p className="admin-settings-section-desc">
-                    Composition presets for Classic only. Other templates use their own stage proportions.
-                  </p>
+                <SettingsBlock blockId="popup_classic_layout">
                   <div className="admin-choice-grid">
                     {CATALOG_DETAIL_LAYOUT_OPTIONS.map((opt) => {
                       const active = normalizeDetailLayout(settings.detail_layout) === opt.value;
@@ -1163,10 +1227,9 @@ export default function CatalogSettingsPage() {
                       );
                     })}
                   </div>
-                </div>
+                </SettingsBlock>
 
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Gallery shadow</h3>
+                <SettingsBlock blockId="popup_shadow">
                   <div className="admin-form-grid">
                     <div className="admin-field">
                       <label htmlFor="detail-gallery-shadow">Frame shadow</label>
@@ -1188,20 +1251,24 @@ export default function CatalogSettingsPage() {
                         ))}
                       </select>
                       <FieldHint>
-                        Drop shadow on the Quick view gallery frame (<code>.catalog-gallery-main</code>).
+                        Applies to the Quick view main image frame only. Listing card frame shadow is set per item in
+                        Inventory → Media.
                       </FieldHint>
                     </div>
                   </div>
-                </div>
+                </SettingsBlock>
 
                 <details className="admin-advanced">
                   <summary>Advanced · legacy modal fields</summary>
+                  <FieldHint>
+                    Older field list used only when Popup components are empty. Prefer Components above for new setups.
+                    Leave legacy alone unless you are migrating an old catalog.
+                  </FieldHint>
                   <ChipGroup
                     label="Modal fields (legacy)"
                     options={MODAL_OPTS}
                     values={settings.modal_fields_json}
                     onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
-                    hint="Used only when popup components are empty. Prefer Components above."
                   />
                 </details>
               </div>
@@ -1212,24 +1279,44 @@ export default function CatalogSettingsPage() {
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
                 <div>
-                  <h2>Discovery experience</h2>
-                  <p>Profile rail, facets, grouped results, and listing toolbar elements on public /{type}s.</p>
+                  <h2>{sectionMeta('discovery').title}</h2>
+                  <p>{sectionMeta('discovery').summary}</p>
+                  <GuideBlock guide={sectionMeta('discovery').guide} />
                 </div>
               </div>
               <div className="admin-settings-panel-body">
-                <div className="admin-settings-section">
-                  <h3 className="admin-settings-section-title">Features</h3>
+                <SettingsBlock blockId="discovery_features">
                   <div className="admin-chips">
                     {(
                       [
-                        ['discovery_profile_rail_enabled', 'Shop by profile rail'],
-                        ['discovery_quick_find_enabled', 'Quick find chips'],
-                        ['discovery_facet_rail_enabled', 'Refine facet rail'],
-                        ['discovery_grouped_results_enabled', 'Grouped results (All view)'],
-                        ['discovery_sticky_toolbar_enabled', 'Sticky search toolbar'],
+                        [
+                          'discovery_profile_rail_enabled',
+                          'Shop by profile rail',
+                          'Horizontal profiles for one-click browsing segments',
+                        ],
+                        [
+                          'discovery_quick_find_enabled',
+                          'Quick find chips',
+                          'Shortcut chips above results for common finds',
+                        ],
+                        [
+                          'discovery_facet_rail_enabled',
+                          'Refine facet rail',
+                          'Side/refine filters for category, tags, etc.',
+                        ],
+                        [
+                          'discovery_grouped_results_enabled',
+                          'Grouped results (All view)',
+                          'Show results clustered by category',
+                        ],
+                        [
+                          'discovery_sticky_toolbar_enabled',
+                          'Sticky search toolbar',
+                          'Keep search/sort visible while scrolling',
+                        ],
                       ] as const
-                    ).map(([key, label]) => (
-                      <label key={key} className={`admin-chip${settings[key] ? ' is-on' : ''}`}>
+                    ).map(([key, label, tip]) => (
+                      <label key={key} className={`admin-chip${settings[key] ? ' is-on' : ''}`} title={tip}>
                         <input
                           type="checkbox"
                           checked={Boolean(settings[key])}
@@ -1244,8 +1331,8 @@ export default function CatalogSettingsPage() {
                       </label>
                     ))}
                   </div>
-                </div>
-                <div className="admin-settings-section">
+                </SettingsBlock>
+                <SettingsBlock blockId="discovery_toolbar">
                   <div className="admin-form-grid">
                     <div className="admin-field" style={{ maxWidth: 220 }}>
                       <label>Group preview count</label>
@@ -1263,17 +1350,18 @@ export default function CatalogSettingsPage() {
                         }
                         disabled={!settings.discovery_grouped_results_enabled}
                       />
-                      <FieldHint>Cards shown per category before “View all”.</FieldHint>
+                      <FieldHint>Cards shown per category before “View all”. Only when Grouped results is on.</FieldHint>
                     </div>
                     <ChipGroup
                       label="Toolbar elements"
                       options={TOOLBAR_ELEMENT_OPTS}
                       values={resolveToolbarElements(settings)}
+                      optionLabels={TOOLBAR_ELEMENT_LABELS}
                       onChange={(toolbar_elements_json) => setSettings({ ...settings, toolbar_elements_json })}
-                      hint="Search, sort, result count, filter chips, and Clear."
+                      hint="Pieces inside the listing toolbar: search, sort, counts, active filters, clear."
                     />
                   </div>
-                </div>
+                </SettingsBlock>
               </div>
             </div>
           ) : null}
@@ -1284,8 +1372,11 @@ export default function CatalogSettingsPage() {
         <div className="admin-settings-panel">
           <div className="admin-settings-panel-head">
             <div>
-              <h2>Categories · {type}</h2>
-              <p>Add, enable, or remove listing categories for this catalog type.</p>
+              <h2>
+                {sectionMeta('categories').title} · {type}
+              </h2>
+              <p>{sectionMeta('categories').summary}</p>
+              <GuideBlock guide={sectionMeta('categories').guide} />
             </div>
           </div>
           <div className="admin-settings-panel-body">
@@ -1293,6 +1384,7 @@ export default function CatalogSettingsPage() {
               <div className="admin-field">
                 <label>Name</label>
                 <input className="admin-input" value={name} onChange={(e) => setName(e.target.value)} required />
+                <FieldHint>Customer-facing label (e.g. “Industrial UPS”). Slug is generated automatically.</FieldHint>
               </div>
               <div className="admin-field" style={{ display: 'flex', alignItems: 'end' }}>
                 <button type="submit" className="admin-btn admin-btn-primary">
@@ -1311,26 +1403,39 @@ export default function CatalogSettingsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((cat) => (
-                    <tr key={cat.id}>
-                      <td>{cat.name}</td>
-                      <td>
-                        <code>{cat.slug}</code>
-                      </td>
-                      <td>{cat.enabled ? 'Yes' : 'No'}</td>
-                      <td>
-                        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggleCategory(cat)}>
-                          {cat.enabled ? 'Disable' : 'Enable'}
-                        </button>{' '}
-                        <button type="button" className="admin-btn admin-btn-danger" onClick={() => deleteCategory(cat)}>
-                          Delete
-                        </button>
+                  {categories.length === 0 ? (
+                    <tr>
+                      <td colSpan={4}>
+                        <p className="admin-empty" style={{ margin: '0.75rem 0' }}>
+                          No categories yet. Add one above, then assign items in Inventory.
+                        </p>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    categories.map((cat) => (
+                      <tr key={cat.id}>
+                        <td>{cat.name}</td>
+                        <td>
+                          <code>{cat.slug}</code>
+                        </td>
+                        <td>{cat.enabled ? 'Yes' : 'No'}</td>
+                        <td>
+                          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggleCategory(cat)}>
+                            {cat.enabled ? 'Disable' : 'Enable'}
+                          </button>{' '}
+                          <button type="button" className="admin-btn admin-btn-danger" onClick={() => deleteCategory(cat)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
+            <FieldHint>
+              Prefer Disable over Delete if items still use the category. Assign categories on each item in Inventory.
+            </FieldHint>
           </div>
         </div>
       ) : null}
