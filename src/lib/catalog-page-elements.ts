@@ -1,4 +1,9 @@
 import type { CatalogPageSettings } from '@/lib/types';
+import {
+  DEFAULT_DETAIL_ELEMENTS,
+  normalizeDetailElements,
+  type CatalogDetailElement,
+} from '@/lib/types';
 
 export const DEFAULT_HERO_ELEMENTS = [
   'eyebrow',
@@ -53,4 +58,45 @@ export function toolbarHas(
   name: ToolbarElement | string
 ): boolean {
   return resolveToolbarElements(settings).includes(name);
+}
+
+/**
+ * Resolve Quick-view popup components.
+ * Prefers detail_elements_json; falls back to legacy modal_fields_json mapping.
+ */
+export function resolveDetailElements(settings: CatalogPageSettings | null | undefined): string[] {
+  if (settings?.detail_elements_json?.length) {
+    return normalizeDetailElements(settings.detail_elements_json);
+  }
+  const fields = settings?.modal_fields_json;
+  if (!fields?.length) return [...DEFAULT_DETAIL_ELEMENTS];
+
+  const mapped = new Set<CatalogDetailElement>(['chrome', 'copy_link', 'badge', 'ref', 'trust']);
+  const map: Record<string, CatalogDetailElement[]> = {
+    title: ['title'],
+    summary: ['tagline'],
+    description: ['overview'],
+    category: ['badge'],
+    price_label: ['price'],
+    tags: ['tags'],
+    specs: ['specs', 'highlight'],
+    media: ['media'],
+    enquiry: ['enquiry', 'cta_copy', 'cta_profile', 'cta_quote', 'cta_contact'],
+  };
+  for (const f of fields) {
+    for (const el of map[f] || []) mapped.add(el);
+  }
+  return [...mapped];
+}
+
+export function detailHas(
+  settings: CatalogPageSettings | null | undefined,
+  name: CatalogDetailElement | string
+): boolean {
+  return resolveDetailElements(settings).includes(name);
+}
+
+export function detailHasFromList(elements: string[] | null | undefined, name: string): boolean {
+  const list = elements?.length ? elements : DEFAULT_DETAIL_ELEMENTS;
+  return list.includes(name);
 }

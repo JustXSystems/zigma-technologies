@@ -5,12 +5,23 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import type {
   CatalogDetailLayout,
+  CatalogDetailTemplate,
   CatalogItem,
   CatalogItemType,
   CatalogShadowStyle,
   FormField,
 } from '@/lib/types';
-import { DEFAULT_DETAIL_GALLERY_SHADOW, DEFAULT_DETAIL_LAYOUT, normalizeDetailLayout, normalizeShadowStyle } from '@/lib/types';
+import {
+  DEFAULT_DETAIL_ELEMENTS,
+  DEFAULT_DETAIL_GALLERY_SHADOW,
+  DEFAULT_DETAIL_LAYOUT,
+  DEFAULT_DETAIL_TEMPLATE,
+  isModernDetailTemplate,
+  normalizeDetailLayout,
+  normalizeDetailTemplate,
+  normalizeShadowStyle,
+} from '@/lib/types';
+import { detailHasFromList } from '@/lib/catalog-page-elements';
 import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
@@ -18,18 +29,17 @@ import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import SiteHeading from '@/components/SiteHeading';
 
-const DEFAULT_MODAL = ['title', 'description', 'specs', 'media', 'enquiry'];
-
 const TYPE_LABEL: Record<CatalogItemType, string> = {
   project: 'Project',
   product: 'Product',
   service: 'Service',
 };
 
-function hasField(fields: string[] | null | undefined, name: string, fallback = DEFAULT_MODAL) {
-  const list = fields == null ? fallback : fields;
-  return list.includes(name);
-}
+const TRUST_ITEMS = [
+  { title: 'Expert support', blurb: 'Engineering guidance from scope to commissioning' },
+  { title: 'Reliable delivery', blurb: 'Proven systems for critical environments' },
+  { title: 'Efficient design', blurb: 'Right-sized solutions with lower lifetime cost' },
+] as const;
 
 function splitSpecs(specs: Record<string, string> | null | undefined) {
   if (!specs) return { highlight: null as { key: string; value: string } | null, rest: [] as [string, string][] };
@@ -45,24 +55,26 @@ function splitSpecs(specs: Record<string, string> | null | undefined) {
 type Props = {
   item: CatalogItem;
   itemType: CatalogItemType;
-  modalFields: string[];
+  /** @deprecated Prefer detailElements — kept for legacy callers */
+  modalFields?: string[];
+  detailElements?: string[] | null;
   onClose: () => void;
-  /** Page-level Card media background — matches listing catalog-card-media */
   mediaBgColor?: string | null;
-  /** Quick-view composition preset from catalog settings */
   detailLayout?: CatalogDetailLayout | null;
-  /** Shadow on `.catalog-gallery-main` inside this popup */
   detailGalleryShadow?: CatalogShadowStyle | null;
+  detailTemplate?: CatalogDetailTemplate | null;
 };
 
 export default function CatalogDetailModal({
   item,
   itemType,
   modalFields,
+  detailElements,
   onClose,
   mediaBgColor = '#ffffff',
   detailLayout = DEFAULT_DETAIL_LAYOUT,
   detailGalleryShadow = DEFAULT_DETAIL_GALLERY_SHADOW,
+  detailTemplate = DEFAULT_DETAIL_TEMPLATE,
 }: Props) {
   const titleId = useId();
   const copy = useSiteCopy();
@@ -77,11 +89,44 @@ export default function CatalogDetailModal({
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const elements = useMemo(() => {
+    if (detailElements?.length) return detailElements;
+    if (modalFields?.length) {
+      // Legacy modal_fields → element bridge
+      const base = DEFAULT_DETAIL_ELEMENTS.filter((e) =>
+        (['chrome', 'copy_link', 'badge', 'ref', 'trust'] as const).includes(e as 'chrome')
+      );
+      const mapped = new Set(base);
+      const bridge: Record<string, typeof DEFAULT_DETAIL_ELEMENTS[number][]> = {
+        title: ['title'],
+        summary: ['tagline'],
+        description: ['overview'],
+        category: ['badge'],
+        price_label: ['price'],
+        tags: ['tags'],
+        specs: ['specs', 'highlight'],
+        media: ['media'],
+        enquiry: ['enquiry', 'cta_copy', 'cta_profile', 'cta_quote', 'cta_contact'],
+      };
+      for (const f of modalFields) for (const el of bridge[f] || []) mapped.add(el);
+      return [...mapped];
+    }
+    return [...DEFAULT_DETAIL_ELEMENTS];
+  }, [detailElements, modalFields]);
+
+  const has = useCallback((name: string) => detailHasFromList(elements, name), [elements]);
+
+  const showMedia = has('media');
+  const showEnquiry = has('enquiry');
+  const showAnyCta = has('cta_copy') || has('cta_profile') || has('cta_quote') || has('cta_contact');
+  const tagline = item.summary?.trim() || '';
+  const template = normalizeDetailTemplate(detailTemplate);
   const layout = normalizeDetailLayout(detailLayout);
   const galleryFrameShadow = normalizeShadowStyle(detailGalleryShadow ?? item.background_shading_style);
   const { highlight, rest: specEntries } = useMemo(() => splitSpecs(item.specs_json), [item.specs_json]);
-  const showMedia = hasField(modalFields, 'media', DEFAULT_MODAL);
-  const showEnquiry = hasField(modalFields, 'enquiry', DEFAULT_MODAL);
+  const isModern = isModernDetailTemplate(template);
+  const showChromeBar = has('chrome') && !isModern;
+  const showInlineMeta = !showChromeBar;
 
   const handleClose = useCallback(() => {
     const url = new URL(window.location.href);
@@ -168,263 +213,324 @@ export default function CatalogDetailModal({
 
   if (!mounted) return null;
 
-  const detailFooter = showEnquiry ? (
-    <footer className="catalog-detail-footer">
-      <div className="catalog-detail-footer-copy">
-        <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
-        <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
-      </div>
-      <div className="catalog-detail-footer-actions">
+  const gallery = showMedia ? (
+    <CatalogMediaGallery
+      media={item.media || []}
+      title={item.title}
+      variant="detail"
+      backgroundImageUrl={item.background_image_url}
+      backgroundShadingStyle={item.background_shading_style}
+      frameShadowStyle={galleryFrameShadow}
+      backgroundFitToSpace={item.background_fit_to_space}
+      backgroundFitPercent={item.background_fit_percent}
+      mediaFitToSpace={item.media_fit_to_space}
+      mediaFitPercent={item.media_fit_percent}
+      mediaBgColor={mediaBgColor}
+    />
+  ) : null;
+
+  const actions = (
+    <>
+      {has('copy_link') ? (
+        <button type="button" className="catalog-detail-icon-btn" onClick={copyLink} aria-label={copy.a11y.copyLink}>
+          {copied ? (
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+          )}
+        </button>
+      ) : null}
+      <button
+        ref={closeRef}
+        type="button"
+        className="catalog-detail-close"
+        onClick={handleClose}
+        aria-label={copy.a11y.close}
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </>
+  );
+
+  const footerActions = (
+    <div className="catalog-detail-footer-actions">
+      {has('cta_profile') ? (
         <Link href={catalogPublicPath(itemType, item.slug)} className="btn btn-primary">
           View full {caseStudyLabel(itemType).toLowerCase()}
         </Link>
+      ) : null}
+      {has('cta_quote') && showEnquiry ? (
         <button type="button" className="btn btn-ghost-dark" onClick={() => setEnquiryOpen(true)}>
           Request a quote
         </button>
+      ) : null}
+      {has('cta_contact') ? (
         <a href="/contact" className="btn btn-ghost-dark">
           Contact us
         </a>
+      ) : null}
+    </div>
+  );
+
+  const detailFooter =
+    showAnyCta || showEnquiry ? (
+      <footer className="catalog-detail-footer">
+        {has('cta_copy') ? (
+          <div className="catalog-detail-footer-copy">
+            <strong>Interested in this {TYPE_LABEL[itemType].toLowerCase()}?</strong>
+            <span>Speak with our engineering team for scope, timelines, and commercial details.</span>
+          </div>
+        ) : (
+          <div />
+        )}
+        {footerActions}
+      </footer>
+    ) : (
+      <footer className="catalog-detail-footer catalog-detail-footer--simple">
+        <button type="button" className="btn btn-ghost-dark" onClick={handleClose}>
+          Close
+        </button>
+      </footer>
+    );
+
+  const metricsBlock =
+    (has('price') && item.price_label) || (has('highlight') && highlight) ? (
+      <div className="catalog-detail-metrics">
+        {has('price') && item.price_label ? (
+          <div className="catalog-detail-metric catalog-detail-metric--primary">
+            <span className="catalog-detail-metric-label">Investment</span>
+            <span className="catalog-detail-metric-value">{item.price_label}</span>
+          </div>
+        ) : null}
+        {has('highlight') && highlight ? (
+          <div className="catalog-detail-metric">
+            <span className="catalog-detail-metric-label">{highlight.key}</span>
+            <span className="catalog-detail-metric-value">{highlight.value}</span>
+          </div>
+        ) : null}
       </div>
-    </footer>
-  ) : (
-    <footer className="catalog-detail-footer catalog-detail-footer--simple">
-      <button type="button" className="btn btn-ghost-dark" onClick={handleClose}>
-        Close
-      </button>
-    </footer>
+    ) : null;
+
+  const overviewBlock = has('overview') ? (
+    <div className="catalog-detail-section">
+      <h3 className="catalog-detail-section-title">Overview</h3>
+      <p className="catalog-detail-lead">{item.description || item.summary}</p>
+    </div>
+  ) : null;
+
+  const tagsBlock =
+    has('tags') && item.tags_json?.length ? (
+      <div className="catalog-detail-tags">
+        {item.tags_json.map((t) => (
+          <span key={t} className="catalog-detail-tag">
+            {t}
+          </span>
+        ))}
+      </div>
+    ) : null;
+
+  const specsBlock =
+    has('specs') && specEntries.length ? (
+      <div className="catalog-detail-section">
+        <h3 className="catalog-detail-section-title">Technical specifications</h3>
+        <dl className="catalog-detail-spec-list">
+          {specEntries.map(([k, v]) => (
+            <div key={k} className="catalog-detail-spec-row">
+              <dt className="catalog-detail-spec-key">{k}</dt>
+              <dd className="catalog-detail-spec-val">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    ) : null;
+
+  const trustBlock = has('trust') ? (
+    <div className="catalog-detail-trust" aria-label="Assurances">
+      {TRUST_ITEMS.map((t) => (
+        <div key={t.title} className="catalog-detail-trust-item">
+          <span className="catalog-detail-trust-mark" aria-hidden="true" />
+          <div>
+            <strong>{t.title}</strong>
+            <span>{t.blurb}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : null;
+
+  const enquiryOverlay =
+    showEnquiry && enquiryOpen ? (
+      <div className="catalog-detail-enquiry-backdrop" onClick={() => setEnquiryOpen(false)} role="presentation">
+        <aside className="catalog-detail-enquiry" onClick={(e) => e.stopPropagation()} aria-label="Enquiry form">
+          <div className="catalog-detail-enquiry-head">
+            <div>
+              <p className="catalog-detail-enquiry-eyebrow">Enquiry</p>
+              <h3>{item.title}</h3>
+            </div>
+            <button
+              type="button"
+              className="catalog-detail-icon-btn catalog-detail-icon-btn--dark"
+              onClick={() => setEnquiryOpen(false)}
+              aria-label={copy.a11y.closeEnquiry}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <form className="catalog-detail-enquiry-form" onSubmit={submitEnquiry}>
+            <HoneypotField />
+            {fields.map((field) => (
+              <div key={field.id} className="catalog-detail-field">
+                <label htmlFor={`cdf-${field.id}`}>
+                  {field.label}
+                  {field.required ? ' *' : ''}
+                </label>
+                {field.field_type === 'textarea' ? (
+                  <textarea
+                    id={`cdf-${field.id}`}
+                    required={!!field.required}
+                    value={payload[field.field_name] || ''}
+                    onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
+                    placeholder={field.placeholder || ''}
+                    rows={4}
+                  />
+                ) : field.field_type === 'select' ? (
+                  <select
+                    id={`cdf-${field.id}`}
+                    required={!!field.required}
+                    value={payload[field.field_name] || ''}
+                    onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
+                  >
+                    <option value="">{field.placeholder || 'Select…'}</option>
+                    {(field.options_json || []).map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    id={`cdf-${field.id}`}
+                    type={
+                      field.field_type === 'number'
+                        ? 'number'
+                        : field.field_type === 'checkbox'
+                          ? 'checkbox'
+                          : field.field_type === 'email'
+                            ? 'email'
+                            : field.field_type === 'tel'
+                              ? 'tel'
+                              : 'text'
+                    }
+                    required={!!field.required}
+                    value={field.field_type === 'checkbox' ? undefined : payload[field.field_name] || ''}
+                    checked={field.field_type === 'checkbox' ? payload[field.field_name] === '1' : undefined}
+                    placeholder={field.field_type === 'checkbox' ? undefined : field.placeholder || ''}
+                    onChange={(e) =>
+                      setPayload({
+                        ...payload,
+                        [field.field_name]:
+                          field.field_type === 'checkbox' ? (e.target.checked ? '1' : '0') : e.target.value,
+                      })
+                    }
+                  />
+                )}
+              </div>
+            ))}
+            <button type="submit" className="btn btn-primary catalog-detail-submit" disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit enquiry'}
+            </button>
+            {submitMsg ? (
+              <p className={`catalog-detail-msg${submitMsg.startsWith('Thank') ? ' catalog-detail-msg--ok' : ''}`}>
+                {submitMsg}
+              </p>
+            ) : null}
+          </form>
+        </aside>
+      </div>
+    ) : null;
+
+  const contentBody = (
+    <div className="catalog-detail-scroll">
+      {showInlineMeta && (has('badge') || has('ref')) ? (
+        <div className="catalog-detail-eyebrow-row">
+          {has('badge') ? (
+            <span className="catalog-detail-badge catalog-detail-badge--ink">
+              {item.category_name || TYPE_LABEL[itemType]}
+            </span>
+          ) : null}
+          {has('ref') ? <span className="catalog-detail-ref catalog-detail-ref--ink">Ref · {item.slug}</span> : null}
+        </div>
+      ) : null}
+
+      {has('title') ? (
+        <SiteHeading role="section" id={titleId} className="catalog-detail-title">
+          {item.title}
+        </SiteHeading>
+      ) : null}
+
+      {has('tagline') && tagline ? <p className="catalog-detail-tagline">{tagline}</p> : null}
+
+      {metricsBlock}
+      {overviewBlock}
+      {tagsBlock}
+      {specsBlock}
+      {trustBlock}
+    </div>
   );
 
   const content = (
     <div className="catalog-detail-backdrop" onClick={handleClose} role="presentation">
       <div
         ref={panelRef}
-        className={`catalog-detail-panel catalog-detail-panel--${layout}${showMedia ? '' : ' catalog-detail-panel--no-media'}`}
+        className={[
+          'catalog-detail-panel',
+          `catalog-detail-panel--${template}`,
+          isModern ? 'catalog-detail-panel--media-stage' : `catalog-detail-panel--${layout}`,
+          showMedia ? '' : 'catalog-detail-panel--no-media',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="catalog-detail-header">
-          <div className="catalog-detail-header-meta">
-            {hasField(modalFields, 'category', [...DEFAULT_MODAL, 'category']) ? (
-              <span className="catalog-detail-badge">{item.category_name || TYPE_LABEL[itemType]}</span>
-            ) : (
-              <span className="catalog-detail-badge">{TYPE_LABEL[itemType]}</span>
-            )}
-            <span className="catalog-detail-ref">Ref · {item.slug}</span>
-          </div>
-          <div className="catalog-detail-header-actions">
-            <button type="button" className="catalog-detail-icon-btn" onClick={copyLink} aria-label={copy.a11y.copyLink}>
-              {copied ? (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              )}
-            </button>
-            <button
-              ref={closeRef}
-              type="button"
-              className="catalog-detail-close"
-              onClick={handleClose}
-              aria-label={copy.a11y.close}
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </header>
+        {showChromeBar ? (
+          <header className="catalog-detail-header">
+            <div className="catalog-detail-header-meta">
+              {has('badge') ? (
+                <span className="catalog-detail-badge">{item.category_name || TYPE_LABEL[itemType]}</span>
+              ) : null}
+              {has('ref') ? <span className="catalog-detail-ref">Ref · {item.slug}</span> : null}
+            </div>
+            <div className="catalog-detail-header-actions">{actions}</div>
+          </header>
+        ) : null}
+
+        {!showChromeBar ? <div className="catalog-detail-float-actions">{actions}</div> : null}
 
         <div className="catalog-detail-body">
           <div className={`catalog-detail-layout${showMedia ? '' : ' catalog-detail-layout--no-media'}`}>
             {showMedia ? (
               <aside className="catalog-detail-media-col">
-                <div className="catalog-detail-media-stage">
-                  <CatalogMediaGallery
-                    media={item.media || []}
-                    title={item.title}
-                    variant="detail"
-                    backgroundImageUrl={item.background_image_url}
-                    backgroundShadingStyle={item.background_shading_style}
-                    frameShadowStyle={galleryFrameShadow}
-                    backgroundFitToSpace={item.background_fit_to_space}
-                    backgroundFitPercent={item.background_fit_percent}
-                    mediaFitToSpace={item.media_fit_to_space}
-                    mediaFitPercent={item.media_fit_percent}
-                    mediaBgColor={mediaBgColor}
-                  />
-                </div>
+                <div className="catalog-detail-media-stage">{gallery}</div>
               </aside>
             ) : null}
-
-            <div className="catalog-detail-content-col">
-              <div className="catalog-detail-scroll">
-                {hasField(modalFields, 'title', DEFAULT_MODAL) ? (
-                  <SiteHeading role="section" id={titleId} className="catalog-detail-title">
-                    {item.title}
-                  </SiteHeading>
-                ) : null}
-
-                {(hasField(modalFields, 'price_label', DEFAULT_MODAL) && item.price_label) || highlight ? (
-                  <div className="catalog-detail-metrics">
-                    {hasField(modalFields, 'price_label', DEFAULT_MODAL) && item.price_label ? (
-                      <div className="catalog-detail-metric catalog-detail-metric--primary">
-                        <span className="catalog-detail-metric-label">Investment</span>
-                        <span className="catalog-detail-metric-value">{item.price_label}</span>
-                      </div>
-                    ) : null}
-                    {highlight ? (
-                      <div className="catalog-detail-metric">
-                        <span className="catalog-detail-metric-label">{highlight.key}</span>
-                        <span className="catalog-detail-metric-value">{highlight.value}</span>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {hasField(modalFields, 'description', DEFAULT_MODAL) ? (
-                  <div className="catalog-detail-section">
-                    <h3 className="catalog-detail-section-title">Overview</h3>
-                    <p className="catalog-detail-lead">{item.description || item.summary}</p>
-                  </div>
-                ) : hasField(modalFields, 'summary', DEFAULT_MODAL) ? (
-                  <div className="catalog-detail-section">
-                    <h3 className="catalog-detail-section-title">Overview</h3>
-                    <p className="catalog-detail-lead">{item.summary}</p>
-                  </div>
-                ) : null}
-
-                {hasField(modalFields, 'tags', DEFAULT_MODAL) && item.tags_json?.length ? (
-                  <div className="catalog-detail-tags">
-                    {item.tags_json.map((t) => (
-                      <span key={t} className="catalog-detail-tag">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
-                {hasField(modalFields, 'specs', DEFAULT_MODAL) && specEntries.length ? (
-                  <div className="catalog-detail-section">
-                    <h3 className="catalog-detail-section-title">Technical specifications</h3>
-                    <dl className="catalog-detail-spec-list">
-                      {specEntries.map(([k, v]) => (
-                        <div key={k} className="catalog-detail-spec-row">
-                          <dt className="catalog-detail-spec-key">{k}</dt>
-                          <dd className="catalog-detail-spec-val">{v}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
-                ) : null}
-              </div>
-            </div>
+            <div className="catalog-detail-content-col">{contentBody}</div>
           </div>
         </div>
 
         {detailFooter}
-
-        {showEnquiry && enquiryOpen ? (
-          <div className="catalog-detail-enquiry-backdrop" onClick={() => setEnquiryOpen(false)} role="presentation">
-            <aside
-              className="catalog-detail-enquiry"
-              onClick={(e) => e.stopPropagation()}
-              aria-label="Enquiry form"
-            >
-              <div className="catalog-detail-enquiry-head">
-                <div>
-                  <p className="catalog-detail-enquiry-eyebrow">Enquiry</p>
-                  <h3>{item.title}</h3>
-                </div>
-                <button
-                  type="button"
-                  className="catalog-detail-icon-btn catalog-detail-icon-btn--dark"
-                  onClick={() => setEnquiryOpen(false)}
-                  aria-label={copy.a11y.closeEnquiry}
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <form className="catalog-detail-enquiry-form" onSubmit={submitEnquiry}>
-                <HoneypotField />
-                {fields.map((field) => (
-                  <div key={field.id} className="catalog-detail-field">
-                    <label htmlFor={`cdf-${field.id}`}>
-                      {field.label}
-                      {field.required ? ' *' : ''}
-                    </label>
-                    {field.field_type === 'textarea' ? (
-                      <textarea
-                        id={`cdf-${field.id}`}
-                        required={!!field.required}
-                        value={payload[field.field_name] || ''}
-                        onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
-                        placeholder={field.placeholder || ''}
-                        rows={4}
-                      />
-                    ) : field.field_type === 'select' ? (
-                      <select
-                        id={`cdf-${field.id}`}
-                        required={!!field.required}
-                        value={payload[field.field_name] || ''}
-                        onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
-                      >
-                        <option value="">{field.placeholder || 'Select…'}</option>
-                        {(field.options_json || []).map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        id={`cdf-${field.id}`}
-                        type={
-                          field.field_type === 'number'
-                            ? 'number'
-                            : field.field_type === 'checkbox'
-                              ? 'checkbox'
-                              : field.field_type === 'email'
-                                ? 'email'
-                                : field.field_type === 'tel'
-                                  ? 'tel'
-                                  : 'text'
-                        }
-                        required={!!field.required}
-                        value={field.field_type === 'checkbox' ? undefined : payload[field.field_name] || ''}
-                        checked={field.field_type === 'checkbox' ? payload[field.field_name] === '1' : undefined}
-                        placeholder={field.field_type === 'checkbox' ? undefined : field.placeholder || ''}
-                        onChange={(e) =>
-                          setPayload({
-                            ...payload,
-                            [field.field_name]:
-                              field.field_type === 'checkbox' ? (e.target.checked ? '1' : '0') : e.target.value,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                ))}
-                <button type="submit" className="btn btn-primary catalog-detail-submit" disabled={submitting}>
-                  {submitting ? 'Submitting…' : 'Submit enquiry'}
-                </button>
-                {submitMsg ? (
-                  <p className={`catalog-detail-msg${submitMsg.startsWith('Thank') ? ' catalog-detail-msg--ok' : ''}`}>
-                    {submitMsg}
-                  </p>
-                ) : null}
-              </form>
-            </aside>
-          </div>
-        ) : null}
+        {enquiryOverlay}
       </div>
     </div>
   );

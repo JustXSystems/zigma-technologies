@@ -61,11 +61,139 @@ export const CATALOG_DETAIL_LAYOUT_OPTIONS: Array<{
   },
 ];
 
+/** Visual template for the Quick-view popup shell */
+export const CATALOG_DETAIL_TEMPLATE_VALUES = ['classic', 'vitrine', 'lumen', 'horizon'] as const;
+export type CatalogDetailTemplate = (typeof CATALOG_DETAIL_TEMPLATE_VALUES)[number];
+export const DEFAULT_DETAIL_TEMPLATE: CatalogDetailTemplate = 'classic';
+
+/** Templates that use floating chrome instead of the navy header bar */
+export const CATALOG_DETAIL_MODERN_TEMPLATES: readonly CatalogDetailTemplate[] = [
+  'vitrine',
+  'lumen',
+  'horizon',
+];
+
+export const CATALOG_DETAIL_TEMPLATE_OPTIONS: Array<{
+  value: CatalogDetailTemplate;
+  label: string;
+  hint: string;
+}> = [
+  {
+    value: 'classic',
+    label: 'Classic',
+    hint: 'Navy chrome header, split stage, panel CTA rail — current system',
+  },
+  {
+    value: 'vitrine',
+    label: 'Vitrine',
+    hint: 'Bright editorial: floating chrome, soft stage, refined specs, trust strip',
+  },
+  {
+    value: 'lumen',
+    label: 'Lumen',
+    hint: 'Futuristic dark theater — cinematic media, neon accents, night-mode content',
+  },
+  {
+    value: 'horizon',
+    label: 'Horizon',
+    hint: 'Immersive media canvas with frosted glass content sheet — ultra-modern',
+  },
+];
+
+export function isModernDetailTemplate(template: CatalogDetailTemplate): boolean {
+  return (CATALOG_DETAIL_MODERN_TEMPLATES as readonly string[]).includes(template);
+}
+
+/** Toggleable pieces inside catalog-detail-panel */
+export const CATALOG_DETAIL_ELEMENT_VALUES = [
+  'chrome',
+  'badge',
+  'ref',
+  'copy_link',
+  'media',
+  'title',
+  'tagline',
+  'price',
+  'highlight',
+  'overview',
+  'tags',
+  'specs',
+  'trust',
+  'cta_copy',
+  'cta_profile',
+  'cta_quote',
+  'cta_contact',
+  'enquiry',
+] as const;
+export type CatalogDetailElement = (typeof CATALOG_DETAIL_ELEMENT_VALUES)[number];
+
+export const DEFAULT_DETAIL_ELEMENTS: CatalogDetailElement[] = [
+  'chrome',
+  'badge',
+  'ref',
+  'copy_link',
+  'media',
+  'title',
+  'tagline',
+  'price',
+  'highlight',
+  'overview',
+  'tags',
+  'specs',
+  'trust',
+  'cta_copy',
+  'cta_profile',
+  'cta_quote',
+  'cta_contact',
+  'enquiry',
+];
+
+export const CATALOG_DETAIL_ELEMENT_OPTIONS: Array<{
+  id: CatalogDetailElement;
+  label: string;
+  group: 'chrome' | 'content' | 'cta';
+}> = [
+  { id: 'chrome', label: 'Header chrome', group: 'chrome' },
+  { id: 'badge', label: 'Category badge', group: 'chrome' },
+  { id: 'ref', label: 'Reference slug', group: 'chrome' },
+  { id: 'copy_link', label: 'Copy link', group: 'chrome' },
+  { id: 'media', label: 'Media gallery', group: 'content' },
+  { id: 'title', label: 'Title', group: 'content' },
+  { id: 'tagline', label: 'Tagline (summary)', group: 'content' },
+  { id: 'price', label: 'Investment / price', group: 'content' },
+  { id: 'highlight', label: 'Highlight metric', group: 'content' },
+  { id: 'overview', label: 'Overview', group: 'content' },
+  { id: 'tags', label: 'Tags', group: 'content' },
+  { id: 'specs', label: 'Specifications', group: 'content' },
+  { id: 'trust', label: 'Trust / assurance strip', group: 'content' },
+  { id: 'cta_copy', label: 'CTA intro copy', group: 'cta' },
+  { id: 'cta_profile', label: 'View full profile', group: 'cta' },
+  { id: 'cta_quote', label: 'Request a quote', group: 'cta' },
+  { id: 'cta_contact', label: 'Contact link', group: 'cta' },
+  { id: 'enquiry', label: 'Enquiry drawer', group: 'cta' },
+];
+
 export function normalizeDetailLayout(value: unknown): CatalogDetailLayout {
   const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
   return (CATALOG_DETAIL_LAYOUT_VALUES as readonly string[]).includes(raw)
     ? (raw as CatalogDetailLayout)
     : DEFAULT_DETAIL_LAYOUT;
+}
+
+export function normalizeDetailTemplate(value: unknown): CatalogDetailTemplate {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return (CATALOG_DETAIL_TEMPLATE_VALUES as readonly string[]).includes(raw)
+    ? (raw as CatalogDetailTemplate)
+    : DEFAULT_DETAIL_TEMPLATE;
+}
+
+export function normalizeDetailElements(value: unknown): CatalogDetailElement[] {
+  if (!Array.isArray(value) || !value.length) return [...DEFAULT_DETAIL_ELEMENTS];
+  const allowed = new Set<string>(CATALOG_DETAIL_ELEMENT_VALUES);
+  const next = value
+    .map((v) => (typeof v === 'string' ? v.trim().toLowerCase() : ''))
+    .filter((v): v is CatalogDetailElement => allowed.has(v));
+  return next.length ? next : [...DEFAULT_DETAIL_ELEMENTS];
 }
 
 export function normalizeShadowStyle(value: unknown): CatalogShadowStyle {
@@ -261,6 +389,7 @@ export type CatalogPageSettings = {
   /**
    * Quick-view popup composition (catalog-detail-panel).
    * media-stage = product-first sticky gallery; balanced = equal split; stacked = gallery on top.
+   * Applies to Classic template; Vitrine uses its own stage proportions.
    */
   detail_layout: CatalogDetailLayout;
   /**
@@ -268,6 +397,10 @@ export type CatalogPageSettings = {
    * Independent of listing-card frame shadow (item.background_shading_style).
    */
   detail_gallery_shadow: CatalogShadowStyle;
+  /** Visual shell for Quick view: classic (current) or vitrine (advanced modern) */
+  detail_template: CatalogDetailTemplate;
+  /** Toggleable UI pieces inside the Quick-view popup */
+  detail_elements_json: string[] | null;
   hero_variant: 'standard' | 'spotlight';
   /** When hero_variant is standard, show/hide the compact active-item panel. */
   hero_standard_panel_enabled: number;

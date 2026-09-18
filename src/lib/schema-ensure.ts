@@ -195,6 +195,14 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'detail_gallery_shadow',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER detail_layout`,
   },
+  {
+    name: 'detail_template',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_template VARCHAR(20) NOT NULL DEFAULT 'classic' AFTER detail_gallery_shadow`,
+  },
+  {
+    name: 'detail_elements_json',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_elements_json JSON NULL AFTER detail_template`,
+  },
 ];
 
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */

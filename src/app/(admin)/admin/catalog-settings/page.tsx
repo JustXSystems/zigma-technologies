@@ -5,20 +5,27 @@ import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/li
 import {
   slugify,
   CARD_MEDIA_INSET_OPTIONS,
+  CATALOG_DETAIL_ELEMENT_OPTIONS,
   CATALOG_DETAIL_LAYOUT_OPTIONS,
+  CATALOG_DETAIL_TEMPLATE_OPTIONS,
   CATALOG_SHADOW_STYLE_OPTIONS,
   DEFAULT_CARD_MEDIA_FIT_PERCENT,
   DEFAULT_CARD_MEDIA_INSET,
+  DEFAULT_DETAIL_ELEMENTS,
   DEFAULT_DETAIL_GALLERY_SHADOW,
   DEFAULT_DETAIL_LAYOUT,
+  DEFAULT_DETAIL_TEMPLATE,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
+  normalizeDetailElements,
   normalizeDetailLayout,
+  normalizeDetailTemplate,
   normalizeShadowStyle,
 } from '@/lib/types';
 import {
   DEFAULT_HERO_ELEMENTS,
   DEFAULT_TOOLBAR_ELEMENTS,
+  resolveDetailElements,
   resolveHeroElements,
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
@@ -419,6 +426,10 @@ export default function CatalogSettingsPage() {
       detail_gallery_shadow: normalizeShadowStyle(
         settingsData.settings?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW
       ),
+      detail_template: normalizeDetailTemplate(
+        settingsData.settings?.detail_template ?? DEFAULT_DETAIL_TEMPLATE
+      ),
+      detail_elements_json: resolveDetailElements(settingsData.settings),
       card_fields_json: normalizeAdminCardFields(settingsData.settings?.card_fields_json),
       modal_fields_json: settingsData.settings?.modal_fields_json?.length
         ? settingsData.settings.modal_fields_json
@@ -502,6 +513,8 @@ export default function CatalogSettingsPage() {
           card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
           detail_layout: normalizeDetailLayout(settings.detail_layout),
           detail_gallery_shadow: normalizeShadowStyle(settings.detail_gallery_shadow),
+          detail_template: normalizeDetailTemplate(settings.detail_template),
+          detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
           hero_elements_json: resolveHeroElements(settings),
           toolbar_elements_json: resolveToolbarElements(settings),
@@ -535,6 +548,8 @@ export default function CatalogSettingsPage() {
         card_media_inset: normalizeCardMediaInset(data.settings?.card_media_inset),
         detail_layout: normalizeDetailLayout(data.settings?.detail_layout),
         detail_gallery_shadow: normalizeShadowStyle(data.settings?.detail_gallery_shadow),
+        detail_template: normalizeDetailTemplate(data.settings?.detail_template),
+        detail_elements_json: resolveDetailElements(data.settings),
         card_fields_json: normalizeAdminCardFields(data.settings?.card_fields_json),
       });
     } finally {
@@ -858,7 +873,7 @@ export default function CatalogSettingsPage() {
 
           <AdminCollapsible
             title="Layout and listing fields"
-            description="Grid layout, filters, search fields, card and modal contents."
+            description="Grid layout, filters, search fields, card fields, and Quick view popup template."
             defaultOpen={false}
           >
             <div className="admin-form-grid">
@@ -1083,15 +1098,116 @@ export default function CatalogSettingsPage() {
                 values={settings.card_fields_json}
                 onChange={(card_fields_json) => setSettings({ ...settings, card_fields_json })}
               />
+              <div className="admin-field full">
+                <label>Quick view template</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                  {CATALOG_DETAIL_TEMPLATE_OPTIONS.map((opt) => {
+                    const active =
+                      normalizeDetailTemplate(settings.detail_template ?? DEFAULT_DETAIL_TEMPLATE) ===
+                      opt.value;
+                    return (
+                      <label
+                        key={opt.value}
+                        title={opt.hint}
+                        style={{
+                          display: 'inline-flex',
+                          flexDirection: 'column',
+                          gap: 4,
+                          border: '1px solid var(--admin-border)',
+                          borderRadius: 10,
+                          padding: '0.55rem 0.75rem',
+                          fontSize: '0.8rem',
+                          minWidth: 170,
+                          flex: '1 1 170px',
+                          background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+                          <input
+                            type="radio"
+                            name="detail_template"
+                            checked={active}
+                            onChange={() => setSettings({ ...settings, detail_template: opt.value })}
+                          />
+                          {opt.label}
+                        </span>
+                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.72rem', lineHeight: 1.35 }}>
+                          {opt.hint}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
               <ChipGroup
-                label="Modal fields"
+                label="Modal fields (legacy)"
                 options={MODAL_OPTS}
                 values={settings.modal_fields_json}
                 onChange={(modal_fields_json) => setSettings({ ...settings, modal_fields_json })}
-                hint="Controls fields shown in the Quick view popup."
+                hint="Legacy field list. Prefer Popup components below — used only when popup components are empty."
               />
               <div className="admin-field full">
-                <label>Quick view layout</label>
+                <label>Popup components</label>
+                <p style={{ margin: '0 0 0.55rem', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                  Toggle each piece of the Quick view popup independently. Works for Classic and Vitrine templates.
+                </p>
+                {(['chrome', 'content', 'cta'] as const).map((group) => {
+                  const opts = CATALOG_DETAIL_ELEMENT_OPTIONS.filter((o) => o.group === group);
+                  const set = new Set(settings.detail_elements_json || DEFAULT_DETAIL_ELEMENTS);
+                  return (
+                    <div key={group} style={{ marginBottom: '0.65rem' }}>
+                      <div
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          color: 'var(--admin-muted)',
+                          marginBottom: '0.3rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                        }}
+                      >
+                        {group === 'chrome' ? 'Chrome' : group === 'content' ? 'Content' : 'Calls to action'}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                        {opts.map((opt) => (
+                          <label
+                            key={opt.id}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              border: '1px solid var(--admin-border)',
+                              borderRadius: 999,
+                              padding: '0.35rem 0.7rem',
+                              fontSize: '0.82rem',
+                              background: set.has(opt.id) ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={set.has(opt.id)}
+                              onChange={(e) => {
+                                const next = new Set(settings.detail_elements_json || DEFAULT_DETAIL_ELEMENTS);
+                                if (e.target.checked) next.add(opt.id);
+                                else next.delete(opt.id);
+                                setSettings({
+                                  ...settings,
+                                  detail_elements_json: normalizeDetailElements([...next]),
+                                });
+                              }}
+                            />
+                            {opt.label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="admin-field full">
+                <label>Quick view layout (Classic)</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
                   {CATALOG_DETAIL_LAYOUT_OPTIONS.map((opt) => {
                     const active = normalizeDetailLayout(settings.detail_layout) === opt.value;
@@ -1111,6 +1227,8 @@ export default function CatalogSettingsPage() {
                           flex: '1 1 150px',
                           background: active ? 'rgba(37, 99, 235, 0.08)' : '#fff',
                           cursor: 'pointer',
+                          opacity:
+                            normalizeDetailTemplate(settings.detail_template) !== 'classic' ? 0.55 : 1,
                         }}
                       >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
@@ -1129,6 +1247,9 @@ export default function CatalogSettingsPage() {
                     );
                   })}
                 </div>
+                <p style={{ margin: '0.35rem 0 0', fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                  Composition presets apply to the Classic template. Vitrine, Lumen, and Horizon use their own stage proportions.
+                </p>
               </div>
               <div className="admin-field">
                 <label htmlFor="detail-gallery-shadow">Quick view · gallery frame shadow</label>
@@ -1150,8 +1271,7 @@ export default function CatalogSettingsPage() {
                   ))}
                 </select>
                 <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                  Drop shadow on <code>.catalog-gallery-main</code> inside the catalog-detail-panel popup. Independent
-                  of listing-card frame shadow (set per item in Inventory → Media).
+                  Drop shadow on <code>.catalog-gallery-main</code> inside the popup.
                 </p>
               </div>
             </div>

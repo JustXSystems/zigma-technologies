@@ -23,7 +23,7 @@ import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { Suspense } from 'react';
 import { publicMediaUrl } from '@/lib/media-url';
-import { heroHas, toolbarHas } from '@/lib/catalog-page-elements';
+import { heroHas, toolbarHas, resolveDetailElements } from '@/lib/catalog-page-elements';
 import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
@@ -533,6 +533,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const cardMediaFitPercent = normalizeCardMediaFitPercent(settings?.card_media_fit_percent);
   const cardMediaInset = normalizeCardMediaInset(settings?.card_media_inset);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
+  const detailElements = resolveDetailElements(settings);
   const layout = settings?.layout || 'grid';
   const gridColumns = Number(settings?.grid_columns || 3);
   const revealEnabled = settings?.reveal_animation_enabled !== 0;
@@ -1183,9 +1184,11 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
           item={active}
           itemType={itemType}
           modalFields={modalFields}
+          detailElements={detailElements}
           mediaBgColor={cardMediaBg}
           detailLayout={settings?.detail_layout}
           detailGalleryShadow={settings?.detail_gallery_shadow}
+          detailTemplate={settings?.detail_template}
           onClose={() => setActive(null)}
         />
       ) : null}

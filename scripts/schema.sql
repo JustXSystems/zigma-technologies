@@ -151,6 +151,8 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug',
   detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage',
   detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium',
+  detail_template VARCHAR(20) NOT NULL DEFAULT 'classic',
+  detail_elements_json JSON NULL,
   hero_variant ENUM('standard','spotlight') NOT NULL DEFAULT 'spotlight',
   hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1,
   hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1,

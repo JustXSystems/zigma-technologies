@@ -19,8 +19,11 @@ import {
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
   normalizeDetailLayout,
+  normalizeDetailTemplate,
+  normalizeDetailElements,
   normalizeShadowStyle as normalizeShadowStyleValue,
   DEFAULT_DETAIL_GALLERY_SHADOW,
+  DEFAULT_DETAIL_TEMPLATE,
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
@@ -627,6 +630,8 @@ export async function getPageSettings(itemType: CatalogItemType) {
     card_media_inset: normalizeCardMediaInset(row.card_media_inset),
     detail_layout: normalizeDetailLayout(row.detail_layout),
     detail_gallery_shadow: normalizeShadowStyle(row.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
+    detail_template: normalizeDetailTemplate(row.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
+    detail_elements_json: parseJsonField<string[] | null>(row.detail_elements_json, null),
     hero_variant: row.hero_variant ?? 'spotlight',
     hero_standard_panel_enabled: Number(row.hero_standard_panel_enabled ?? 1),
     hero_meta_enabled: Number(row.hero_meta_enabled ?? 1),
@@ -692,6 +697,12 @@ export async function updatePageSettings(
     detail_gallery_shadow:
       input.detail_gallery_shadow !== undefined
         ? normalizeShadowStyle(input.detail_gallery_shadow)
+        : undefined,
+    detail_template:
+      input.detail_template !== undefined ? normalizeDetailTemplate(input.detail_template) : undefined,
+    detail_elements_json:
+      input.detail_elements_json !== undefined
+        ? JSON.stringify(normalizeDetailElements(input.detail_elements_json))
         : undefined,
     hero_variant: input.hero_variant,
     hero_standard_panel_enabled:
