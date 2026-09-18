@@ -116,6 +116,7 @@ const DEFAULT_NAV: NavItem[] = [
       },
     ],
   },
+  { label: 'Industries', href: '/industries' },
   { label: 'Projects', href: '/projects' },
   { label: 'Products', href: '/products' },
   { label: 'Services', href: '/services' },
@@ -149,13 +150,15 @@ export default function Header() {
         ? 'careers'
         : pathname === '/certifications'
           ? 'certifications'
-          : pathname === '/projects'
-            ? 'projects'
-            : pathname === '/products'
-              ? 'products'
-              : pathname === '/services'
-                ? 'services'
-                : 'home';
+          : pathname === '/industries' || pathname.startsWith('/industries/')
+            ? 'industries'
+            : pathname === '/projects'
+              ? 'projects'
+              : pathname === '/products'
+                ? 'products'
+                : pathname === '/services'
+                  ? 'services'
+                  : 'home';
 
   const setBodyNavOpen = useCallback((open: boolean) => {
     document.body.classList.toggle('nav-open', open);
@@ -254,6 +257,7 @@ export default function Header() {
     if (path === '/contact' && current === 'contact') return true;
     if (path === '/certifications' && current === 'certifications') return true;
     if (path === '/careers' && current === 'careers') return true;
+    if (path === '/industries' && current === 'industries') return true;
     if (path === '/projects' && current === 'projects') return true;
     if (path === '/products' && current === 'products') return true;
     if (path === '/services' && current === 'services') return true;

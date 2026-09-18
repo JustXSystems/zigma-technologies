@@ -23,6 +23,7 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
       { label: 'Careers', href: '/careers' },
       { label: 'Certifications', href: '/certifications' },
       { label: 'Case studies', href: '/projects' },
+      { label: 'Industries', href: '/industries' },
       { label: 'Locations', href: '/locations' },
       { label: 'Press', href: '/press' },
     ],

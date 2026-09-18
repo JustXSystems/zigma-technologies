@@ -589,7 +589,7 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     solutionFinderEnabled: false,
     searchEnabled: false,
     resourcesEnabled: false,
-    industriesEnabled: false,
+    industriesEnabled: true,
     partnersEnabled: true,
     localesEnabled: true,
   },
