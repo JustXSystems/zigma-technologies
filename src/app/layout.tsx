@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import BasePathBootstrap from "@/components/BasePathBootstrap";
 import { basePathFetchPatchScript, withBasePath } from "@/lib/base-path";
 import "./globals.css";
@@ -8,6 +8,12 @@ const OG_IMAGE = `${SITE_URL}/assets/images/zigma-technologies-logo.png`;
 const TITLE = 'Zigma Technologies | Solar EPC, UPS, BESS & EV Charging in India';
 const DESCRIPTION =
   'Zigma Technologies delivers end-to-end Solar EPC, UPS & Power Continuity, BESS, EV Charging Infrastructure, and Industrial Engineering solutions across India. 20+ years of engineering excellence, installation, AMC and 24×7 support.';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

@@ -7,16 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Every Catalog Settings area now has self-serve guidance">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="code cleanup">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/account/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ztools/ZtoolsMockTool.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ztools/ZtoolsMockTool.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/use-site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/use-site-copy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/use-scroll-reveal.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/use-scroll-reveal.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0086934946891148" />
-      <entry key="MS500" value="1.8524970140586894" />
-      <entry key="S2" value="3.6195944564275293" />
-      <entry key="S5" value="4.366235810747501" />
-      <entry key="S10" value="4.667499993606151" />
-      <entry key="S30" value="4.885483479691907" />
-      <entry key="S60" value="4.942907104179122" />
-      <entry key="M2" value="5.084104474582952" />
-      <entry key="M5" value="7.511652593709685" />
-      <entry key="M10" value="12.098027832406492" />
-      <entry key="M15" value="15.026987396097505" />
-      <entry key="M30" value="19.233242891888253" />
-      <entry key="H1" value="30.36437965705805" />
-      <entry key="H2" value="131.94533354212552" />
-      <entry key="H4" value="480.73685267115764" />
-      <entry key="D1" value="3934.292631515875" />
-      <entry key="W1" value="14220.26739880137" />
+      <entry key="MS100" value="1.6739512966540377" />
+      <entry key="MS500" value="3.739782324294481" />
+      <entry key="S2" value="6.6044985810654735" />
+      <entry key="S5" value="13.207826583185973" />
+      <entry key="S10" value="24.736201440322816" />
+      <entry key="S30" value="60.573020091374254" />
+      <entry key="S60" value="86.23743662999794" />
+      <entry key="M2" value="105.6774293335739" />
+      <entry key="M5" value="120.48118866788293" />
+      <entry key="M10" value="126.05946931266043" />
+      <entry key="M15" value="127.99809540277057" />
+      <entry key="M30" value="129.9779363410686" />
+      <entry key="H1" value="130.98362632996597" />
+      <entry key="H2" value="131.4945792465112" />
+      <entry key="H4" value="134.41350259248554" />
+      <entry key="D1" value="1786.9722492575545" />
+      <entry key="W1" value="12698.901630772614" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -93,32 +89,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="2.8776608436843495E-280" />
-      <entry key="M30" value="1.6963669543126765E-140" />
-      <entry key="H1" value="1.3024465264696857E-70" />
-      <entry key="H2" value="1.1412477936318315E-35" />
-      <entry key="H4" value="3.3782359208176733E-18" />
-      <entry key="D1" value="0.001244579399980371" />
-      <entry key="W1" value="0.5963339435873742" />
+      <entry key="M15" value="2.113154E-316" />
+      <entry key="M30" value="1.4536691882053588E-158" />
+      <entry key="H1" value="1.2056820427482492E-79" />
+      <entry key="H2" value="3.47229325194186E-40" />
+      <entry key="H4" value="1.8634090404575247E-20" />
+      <entry key="D1" value="5.231492962950817E-4" />
+      <entry key="W1" value="0.5268882766804504" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9542605036358963" />
-      <entry key="MS500" value="1.8312849287315331" />
-      <entry key="S2" value="3.6087553502033574" />
-      <entry key="S5" value="4.360948499353552" />
-      <entry key="S10" value="4.664663483317238" />
-      <entry key="S30" value="4.884491373879263" />
-      <entry key="S60" value="4.942404897173965" />
-      <entry key="M2" value="5.08384492387289" />
-      <entry key="M5" value="7.511489122941873" />
-      <entry key="M10" value="12.097889684905493" />
-      <entry key="M15" value="15.026871274959737" />
-      <entry key="M30" value="19.233167712376957" />
-      <entry key="H1" value="30.364326825492586" />
-      <entry key="H2" value="131.94524557037326" />
-      <entry key="H4" value="480.73669930813503" />
-      <entry key="D1" value="3934.293662044021" />
-      <entry key="W1" value="14220.863578637205" />
+      <entry key="MS100" value="1.6074051222234524" />
+      <entry key="MS500" value="3.7092998195839564" />
+      <entry key="S2" value="6.59068939529776" />
+      <entry key="S5" value="13.197295261416969" />
+      <entry key="S10" value="24.72603104407827" />
+      <entry key="S30" value="60.5633042283101" />
+      <entry key="S60" value="86.22997377965626" />
+      <entry key="M2" value="105.67265178656267" />
+      <entry key="M5" value="120.47894823144445" />
+      <entry key="M10" value="126.05828597877786" />
+      <entry key="M15" value="127.99729180674281" />
+      <entry key="M30" value="129.9775270116891" />
+      <entry key="H1" value="130.98341974831177" />
+      <entry key="H2" value="131.4944754692965" />
+      <entry key="H4" value="134.4134497257072" />
+      <entry key="D1" value="1786.9726735947697" />
+      <entry key="W1" value="12699.428381601341" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -270,7 +266,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#10 menu aligment issue" />
     <MESSAGE value="#8 single line Marquee" />
     <MESSAGE value="#11 Reducing the Header Size" />
     <MESSAGE value="#12 New Menu style like Justxsystems" />
@@ -295,7 +290,8 @@
     <MESSAGE value="Showcase icons are upgraded" />
     <MESSAGE value="Catalog Settings page redeign" />
     <MESSAGE value="Every Catalog Settings area now has self-serve guidance" />
-    <option name="LAST_COMMIT_MESSAGE" value="Every Catalog Settings area now has self-serve guidance" />
+    <MESSAGE value="code cleanup" />
+    <option name="LAST_COMMIT_MESSAGE" value="code cleanup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
