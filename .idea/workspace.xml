@@ -7,8 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue">
-      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other.">
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -57,23 +56,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3868912488628182" />
-      <entry key="MS500" value="1.8615131273832088" />
-      <entry key="S2" value="3.1551295955452514" />
-      <entry key="S5" value="5.731445506847248" />
-      <entry key="S10" value="11.35565259108714" />
-      <entry key="S30" value="24.650541921414625" />
-      <entry key="S60" value="31.16590935038956" />
-      <entry key="M2" value="35.36228737166868" />
-      <entry key="M5" value="45.98952743526592" />
-      <entry key="M10" value="71.43420617649318" />
-      <entry key="M15" value="91.1136064105362" />
-      <entry key="M30" value="122.33863556373929" />
-      <entry key="H1" value="144.2965785832474" />
-      <entry key="H2" value="157.34736282295526" />
-      <entry key="H4" value="166.9806411335209" />
-      <entry key="D1" value="1810.2021985875276" />
-      <entry key="W1" value="12721.814133737722" />
+      <entry key="MS100" value="1.4021668546224748" />
+      <entry key="MS500" value="3.3758101144904042" />
+      <entry key="S2" value="8.36821181820455" />
+      <entry key="S5" value="14.68911376021618" />
+      <entry key="S10" value="22.5596486501479" />
+      <entry key="S30" value="43.46859232885398" />
+      <entry key="S60" value="55.920790758161694" />
+      <entry key="M2" value="64.42238742616595" />
+      <entry key="M5" value="70.48638949265906" />
+      <entry key="M10" value="72.69297847436135" />
+      <entry key="M15" value="73.45058203580588" />
+      <entry key="M30" value="74.22085390206499" />
+      <entry key="H1" value="75.08357347869358" />
+      <entry key="H2" value="83.83401311200731" />
+      <entry key="H4" value="114.90416424927908" />
+      <entry key="D1" value="1501.5664873229775" />
+      <entry key="W1" value="12371.265652468885" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,32 +85,32 @@
       <entry key="M2" value="0.0" />
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
-      <entry key="M15" value="8.5503816E-317" />
-      <entry key="M30" value="9.246829284429497E-159" />
-      <entry key="H1" value="9.616043513020817E-80" />
-      <entry key="H2" value="3.100974606961435E-40" />
-      <entry key="H4" value="1.7609584342243536E-20" />
-      <entry key="D1" value="5.182418288506477E-4" />
-      <entry key="W1" value="0.5261793441196668" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="1.0031105275178541E-163" />
+      <entry key="H1" value="3.167192017415453E-82" />
+      <entry key="H2" value="1.7796606467006728E-41" />
+      <entry key="H4" value="4.218602430616818E-21" />
+      <entry key="D1" value="4.084156532809638E-4" />
+      <entry key="W1" value="0.5085785847402455" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3120790711692973" />
-      <entry key="MS500" value="1.8410578146955154" />
-      <entry key="S2" value="3.146955185930038" />
-      <entry key="S5" value="5.725652274430396" />
-      <entry key="S10" value="11.349993538835985" />
-      <entry key="S30" value="24.646503566154472" />
-      <entry key="S60" value="31.163364481660576" />
-      <entry key="M2" value="35.36084506578165" />
-      <entry key="M5" value="45.988759617249656" />
-      <entry key="M10" value="71.43358399226464" />
-      <entry key="M15" value="91.11306771644188" />
-      <entry key="M30" value="122.33826751202233" />
-      <entry key="H1" value="144.29635975517306" />
-      <entry key="H2" value="157.34724305269" />
-      <entry key="H4" value="166.98057761362838" />
-      <entry key="D1" value="1810.2026166822393" />
-      <entry key="W1" value="12722.340175495645" />
+      <entry key="MS100" value="1.3630533626676813" />
+      <entry key="MS500" value="3.3539117715305777" />
+      <entry key="S2" value="8.352807558022505" />
+      <entry key="S5" value="14.677659211973943" />
+      <entry key="S10" value="22.55029987527746" />
+      <entry key="S30" value="43.46184916468479" />
+      <entry key="S60" value="55.91626847374103" />
+      <entry key="M2" value="64.41972435796104" />
+      <entry key="M5" value="70.48520814705812" />
+      <entry key="M10" value="72.69236654225998" />
+      <entry key="M15" value="73.45016920474774" />
+      <entry key="M30" value="74.22064500526356" />
+      <entry key="H1" value="75.08346768478413" />
+      <entry key="H2" value="83.83395354413551" />
+      <entry key="H4" value="114.90412264563996" />
+      <entry key="D1" value="1501.5668124114902" />
+      <entry key="W1" value="12371.774097440506" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
