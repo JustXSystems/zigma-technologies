@@ -855,14 +855,13 @@ export default function CatalogDetailModal({
             {showMedia ? (
               <aside className="catalog-detail-media-col">
                 <div className="catalog-detail-media-stage">{gallery}</div>
-                {isShowcase ? showcaseCta : null}
               </aside>
             ) : null}
             <div className="catalog-detail-content-col">
               {contentBody}
               {isShowcase ? trustBlock : null}
-              {isShowcase && !showMedia ? showcaseCta : null}
             </div>
+            {isShowcase ? showcaseCta : null}
           </div>
         </div>
 

@@ -7,8 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4021668546224748" />
-      <entry key="MS500" value="3.3758101144904042" />
-      <entry key="S2" value="8.36821181820455" />
-      <entry key="S5" value="14.68911376021618" />
-      <entry key="S10" value="22.5596486501479" />
-      <entry key="S30" value="43.46859232885398" />
-      <entry key="S60" value="55.920790758161694" />
-      <entry key="M2" value="64.42238742616595" />
-      <entry key="M5" value="70.48638949265906" />
-      <entry key="M10" value="72.69297847436135" />
-      <entry key="M15" value="73.45058203580588" />
-      <entry key="M30" value="74.22085390206499" />
-      <entry key="H1" value="75.08357347869358" />
-      <entry key="H2" value="83.83401311200731" />
-      <entry key="H4" value="114.90416424927908" />
-      <entry key="D1" value="1501.5664873229775" />
-      <entry key="W1" value="12371.265652468885" />
+      <entry key="MS100" value="1.21099372516584" />
+      <entry key="MS500" value="3.5685424778348485" />
+      <entry key="S2" value="10.207659783742299" />
+      <entry key="S5" value="16.235912086920607" />
+      <entry key="S10" value="21.131778562568833" />
+      <entry key="S30" value="30.96157989633287" />
+      <entry key="S60" value="39.640728225334946" />
+      <entry key="M2" value="50.82184627207773" />
+      <entry key="M5" value="64.29096702276442" />
+      <entry key="M10" value="70.8853446515883" />
+      <entry key="M15" value="73.40367863610615" />
+      <entry key="M30" value="76.1037180388289" />
+      <entry key="H1" value="77.55312029303727" />
+      <entry key="H2" value="79.83920196766653" />
+      <entry key="H4" value="94.41370207413222" />
+      <entry key="D1" value="1157.5659920379546" />
+      <entry key="W1" value="11879.193600953973" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,31 +88,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.0031105275178541E-163" />
-      <entry key="H1" value="3.167192017415453E-82" />
-      <entry key="H2" value="1.7796606467006728E-41" />
-      <entry key="H4" value="4.218602430616818E-21" />
-      <entry key="D1" value="4.084156532809638E-4" />
-      <entry key="W1" value="0.5085785847402455" />
+      <entry key="M30" value="1.2736765118148952E-170" />
+      <entry key="H1" value="1.1285727764814738E-85" />
+      <entry key="H2" value="3.3594237251072274E-43" />
+      <entry key="H4" value="5.796053592937496E-22" />
+      <entry key="D1" value="2.9337944175553154E-4" />
+      <entry key="W1" value="0.48510237105705056" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3630533626676813" />
-      <entry key="MS500" value="3.3539117715305777" />
-      <entry key="S2" value="8.352807558022505" />
-      <entry key="S5" value="14.677659211973943" />
-      <entry key="S10" value="22.55029987527746" />
-      <entry key="S30" value="43.46184916468479" />
-      <entry key="S60" value="55.91626847374103" />
-      <entry key="M2" value="64.41972435796104" />
-      <entry key="M5" value="70.48520814705812" />
-      <entry key="M10" value="72.69236654225998" />
-      <entry key="M15" value="73.45016920474774" />
-      <entry key="M30" value="74.22064500526356" />
-      <entry key="H1" value="75.08346768478413" />
-      <entry key="H2" value="83.83395354413551" />
-      <entry key="H4" value="114.90412264563996" />
-      <entry key="D1" value="1501.5668124114902" />
-      <entry key="W1" value="12371.774097440506" />
+      <entry key="MS100" value="1.1683551418674332" />
+      <entry key="MS500" value="3.5412106482821164" />
+      <entry key="S2" value="10.186943048699577" />
+      <entry key="S5" value="16.222333377752577" />
+      <entry key="S10" value="21.12276442119894" />
+      <entry key="S30" value="30.95703078675056" />
+      <entry key="S60" value="39.63771327897989" />
+      <entry key="M2" value="50.81982178691005" />
+      <entry key="M5" value="64.28989772558913" />
+      <entry key="M10" value="70.88474542909344" />
+      <entry key="M15" value="73.40326263165227" />
+      <entry key="M30" value="76.1035011575624" />
+      <entry key="H1" value="77.5530094713973" />
+      <entry key="H2" value="79.83914484925248" />
+      <entry key="H4" value="94.41366820854589" />
+      <entry key="D1" value="1157.566220847599" />
+      <entry key="W1" value="11879.678575205753" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -262,8 +264,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#11 Reducing the Header Size" />
-    <MESSAGE value="#12 New Menu style like Justxsystems" />
     <MESSAGE value="#11 Heading levels are now admin-configurable without breaking layout." />
     <MESSAGE value="#13 Product, Services, Project card Background color to be set in admin" />
     <MESSAGE value="#13 build issue fixed" />
@@ -287,7 +287,9 @@
     <MESSAGE value="Every Catalog Settings area now has self-serve guidance" />
     <MESSAGE value="code cleanup" />
     <MESSAGE value="#21 Mobile view rendering issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue" />
+    <MESSAGE value="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other." />
+    <MESSAGE value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
