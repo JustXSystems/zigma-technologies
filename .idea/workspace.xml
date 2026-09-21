@@ -7,10 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.6064731328937665" />
-      <entry key="MS500" value="4.138530911402404" />
-      <entry key="S2" value="9.15171961563434" />
-      <entry key="S5" value="12.832860384516028" />
-      <entry key="S10" value="17.494192013312315" />
-      <entry key="S30" value="39.47597962289033" />
-      <entry key="S60" value="65.75568748278052" />
-      <entry key="M2" value="96.05658267848496" />
-      <entry key="M5" value="129.15008960290223" />
-      <entry key="M10" value="145.16119971378717" />
-      <entry key="M15" value="153.54230207238962" />
-      <entry key="M30" value="180.9577458489348" />
-      <entry key="H1" value="231.38353162294317" />
-      <entry key="H2" value="285.80863588496055" />
-      <entry key="H4" value="336.3940617364842" />
-      <entry key="D1" value="1392.7946397665828" />
-      <entry key="W1" value="12090.992448197345" />
+      <entry key="MS100" value="1.0779502818805515" />
+      <entry key="MS500" value="2.5592452747221444" />
+      <entry key="S2" value="5.68828261110482" />
+      <entry key="S5" value="8.968690890986307" />
+      <entry key="S10" value="12.973778354596298" />
+      <entry key="S30" value="25.05552022180649" />
+      <entry key="S60" value="40.72444030947587" />
+      <entry key="M2" value="63.37515926257026" />
+      <entry key="M5" value="91.00066764152518" />
+      <entry key="M10" value="104.47655167758776" />
+      <entry key="M15" value="109.6113933779319" />
+      <entry key="M30" value="115.1616696684386" />
+      <entry key="H1" value="121.92389573391914" />
+      <entry key="H2" value="156.68927525429908" />
+      <entry key="H4" value="241.6034492878644" />
+      <entry key="D1" value="1296.022085364062" />
+      <entry key="W1" value="11922.012234298762" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -88,31 +88,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.1290803161540497E-171" />
-      <entry key="H1" value="3.3601790371262086E-86" />
-      <entry key="H2" value="1.8330791137116194E-43" />
-      <entry key="H4" value="4.281447318107906E-22" />
-      <entry key="D1" value="2.789369491502389E-4" />
-      <entry key="W1" value="0.4816166028557854" />
+      <entry key="M30" value="3.240451718530614E-175" />
+      <entry key="H1" value="5.692496568757131E-88" />
+      <entry key="H2" value="2.3858953390197963E-44" />
+      <entry key="H4" value="1.5446343706845713E-22" />
+      <entry key="D1" value="2.3534874937513142E-4" />
+      <entry key="W1" value="0.47006663714844993" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5472903659704362" />
-      <entry key="MS500" value="4.106518247599019" />
-      <entry key="S2" value="9.133282637973762" />
-      <entry key="S5" value="12.822024266907695" />
-      <entry key="S10" value="17.486285584912213" />
-      <entry key="S30" value="39.46974764217352" />
-      <entry key="S60" value="65.75052568217261" />
-      <entry key="M2" value="96.05282530781176" />
-      <entry key="M5" value="129.1480661197743" />
-      <entry key="M10" value="145.16006099106892" />
-      <entry key="M15" value="153.5415003402094" />
-      <entry key="M30" value="180.95727981037214" />
-      <entry key="H1" value="231.38323926132213" />
-      <entry key="H2" value="285.80845740133753" />
-      <entry key="H4" value="336.39395675663815" />
-      <entry key="D1" value="1392.794842887358" />
-      <entry key="W1" value="12091.473935510503" />
+      <entry key="MS100" value="1.0350185066331776" />
+      <entry key="MS500" value="2.5404446055903014" />
+      <entry key="S2" value="5.677705731976115" />
+      <entry key="S5" value="8.961823783337948" />
+      <entry key="S10" value="12.968655723757381" />
+      <entry key="S30" value="25.051955975864434" />
+      <entry key="S60" value="40.721224783701636" />
+      <entry key="M2" value="63.37248084868567" />
+      <entry key="M5" value="90.99907775516478" />
+      <entry key="M10" value="104.47563134347945" />
+      <entry key="M15" value="109.61074808298724" />
+      <entry key="M30" value="115.16132992701014" />
+      <entry key="H1" value="121.92371651985704" />
+      <entry key="H2" value="156.68916375003252" />
+      <entry key="H4" value="241.60336698797997" />
+      <entry key="D1" value="1296.0222492992825" />
+      <entry key="W1" value="11922.482173682254" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -264,7 +264,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#13 Product, Services, Project card Background color to be set in admin" />
     <MESSAGE value="#13 build issue fixed" />
     <MESSAGE value="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes." />
     <MESSAGE value="#15 can move catalog-detail-footer to catalog-detail-layout as next row spannig accross catalog-detail-media-col and catalog-detail-content-col" />
@@ -289,7 +288,8 @@
     <MESSAGE value="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other." />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping" />
-    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping" />
+    <MESSAGE value="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest." />
+    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

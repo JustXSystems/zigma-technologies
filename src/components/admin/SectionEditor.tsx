@@ -105,25 +105,49 @@ function migrateTimelineContent(raw: Record<string, unknown>): Record<string, un
   return { ...raw, ctas: [] };
 }
 
+type SplitCta = { label: string; href: string; position?: string; type?: 'primary' | 'secondary' };
+
+function migrateSplitContent(raw: Record<string, unknown>): Record<string, unknown> {
+  if (Array.isArray(raw.ctas)) return raw;
+  const { cta, ctaHref, ...rest } = raw;
+  if (cta) {
+    return {
+      ...rest,
+      ctas: [
+        {
+          label: String(cta),
+          href: String(ctaHref || '#'),
+          position: 'left',
+          type: 'primary',
+        } satisfies SplitCta,
+      ],
+    };
+  }
+  return { ...rest, ctas: [] };
+}
+
 export default function SectionEditor({ section, onClose, onSaved }: Props) {
   const [title, setTitle] = useState(section.title || '');
   const [sectionKey, setSectionKey] = useState(section.section_key || '');
   const [content, setContent] = useState<Record<string, unknown>>(() => {
     const raw = { ...(section.content_json || {}) };
-    return section.type === 'timeline' ? migrateTimelineContent(raw) : raw;
+    if (section.type === 'timeline') return migrateTimelineContent(raw);
+    if (section.type === 'split') return migrateSplitContent(raw);
+    return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
   const [customCss, setCustomCss] = useState(String((section.style_json as { css?: string })?.css || ''));
   const [jsonMode, setJsonMode] = useState(false);
-  const [jsonText, setJsonText] = useState(() =>
-    JSON.stringify(
+  const [jsonText, setJsonText] = useState(() => {
+    const raw = { ...(section.content_json || {}) };
+    const migrated =
       section.type === 'timeline'
-        ? migrateTimelineContent({ ...(section.content_json || {}) })
-        : section.content_json || {},
-      null,
-      2
-    )
-  );
+        ? migrateTimelineContent(raw)
+        : section.type === 'split'
+          ? migrateSplitContent(raw)
+          : raw;
+    return JSON.stringify(migrated, null, 2);
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -142,6 +166,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
       }
       if (section.type === 'timeline') {
         content_json = migrateTimelineContent(content_json);
+      }
+      if (section.type === 'split') {
+        content_json = migrateSplitContent(content_json);
       }
       const res = await fetch(`/api/admin/sections/${section.id}`, {
         method: 'PATCH',
@@ -171,10 +198,18 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
   const slides = (content.slides as Array<Record<string, unknown>>) || [];
   const ctaFields = content as Record<string, string>;
   const timelineCtas = (Array.isArray(content.ctas) ? content.ctas : []) as TimelineCta[];
+  const splitCtas = (Array.isArray(content.ctas) ? content.ctas : []) as SplitCta[];
 
   function setTimelineCtas(next: TimelineCta[]) {
     setContent((prev) => {
       const { cta: _cta, ctaHref: _ctaHref, ctaAlign: _ctaAlign, ...rest } = prev;
+      return { ...rest, ctas: next };
+    });
+  }
+
+  function setSplitCtas(next: SplitCta[]) {
+    setContent((prev) => {
+      const { cta: _cta, ctaHref: _ctaHref, ...rest } = prev;
       return { ...rest, ctas: next };
     });
   }
@@ -391,12 +426,121 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 <Field label="Eyebrow class">
                   <input className="admin-input" value={String(content.eyebrowClass || 'eyebrow-orange')} onChange={(e) => setField('eyebrowClass', e.target.value)} />
                 </Field>
-                <Field label="CTA label">
-                  <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
-                </Field>
-                <Field label="CTA href">
-                  <input className="admin-input" value={String(content.ctaHref || '')} onChange={(e) => setField('ctaHref', e.target.value)} />
-                </Field>
+                <div
+                  className="full"
+                  style={{
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <div>
+                      <strong>CTA buttons</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        One line with left / center / right slots. Each button&apos;s Position places it in that slot.
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() =>
+                        setSplitCtas([
+                          ...splitCtas,
+                          { label: 'Learn more →', href: '/contact', position: 'left', type: 'primary' },
+                        ])
+                      }
+                    >
+                      Add CTA
+                    </button>
+                  </div>
+                  {splitCtas.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No CTA buttons yet. Add one to show a call-to-action under the feature cards.
+                    </p>
+                  ) : null}
+                  {splitCtas.map((cta, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                        background: '#fff',
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong>CTA {idx + 1}</strong>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-danger"
+                          onClick={() => setSplitCtas(splitCtas.filter((_, i) => i !== idx))}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Label">
+                          <input
+                            className="admin-input"
+                            value={cta.label || ''}
+                            onChange={(e) => {
+                              const next = [...splitCtas];
+                              next[idx] = { ...next[idx], label: e.target.value };
+                              setSplitCtas(next);
+                            }}
+                          />
+                        </Field>
+                        <Field label="Href">
+                          <input
+                            className="admin-input"
+                            value={cta.href || ''}
+                            onChange={(e) => {
+                              const next = [...splitCtas];
+                              next[idx] = { ...next[idx], href: e.target.value };
+                              setSplitCtas(next);
+                            }}
+                            placeholder="/contact"
+                          />
+                        </Field>
+                        <Field label="Position">
+                          <select
+                            className="admin-select"
+                            value={cta.position === 'center' || cta.position === 'right' ? cta.position : 'left'}
+                            onChange={(e) => {
+                              const next = [...splitCtas];
+                              next[idx] = { ...next[idx], position: e.target.value };
+                              setSplitCtas(next);
+                            }}
+                          >
+                            <option value="left">Left</option>
+                            <option value="center">Center</option>
+                            <option value="right">Right</option>
+                          </select>
+                        </Field>
+                        <Field label="Type">
+                          <select
+                            className="admin-select"
+                            value={cta.type === 'secondary' ? 'secondary' : 'primary'}
+                            onChange={(e) => {
+                              const next = [...splitCtas];
+                              next[idx] = {
+                                ...next[idx],
+                                type: e.target.value === 'secondary' ? 'secondary' : 'primary',
+                              };
+                              setSplitCtas(next);
+                            }}
+                          >
+                            <option value="primary">Primary</option>
+                            <option value="secondary">Secondary</option>
+                          </select>
+                        </Field>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <div className="admin-field full">
                   <label>Features (one per line: Title | Body)</label>
                   <textarea

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { CmsSection } from '@/lib/cms-types';
 import EnquiryFormSection from '@/components/sections/EnquiryFormSection';
 import CareersApplySection from '@/components/sections/CareersApplySection';
@@ -35,6 +35,11 @@ function contrastTextForHex(hex: string): string {
 }
 
 type TimelineCta = { label: string; href: string; position?: string; color?: string };
+type SplitCta = { label: string; href: string; position?: string; type?: 'primary' | 'secondary' };
+
+function ctaPosition(position?: string): 'left' | 'center' | 'right' {
+  return position === 'center' || position === 'right' ? position : 'left';
+}
 
 function resolveTimelineCtas(content: Record<string, unknown>): TimelineCta[] {
   if (Array.isArray(content.ctas)) {
@@ -51,6 +56,60 @@ function resolveTimelineCtas(content: Record<string, unknown>): TimelineCta[] {
     ];
   }
   return [];
+}
+
+function resolveSplitCtas(content: Record<string, unknown>): SplitCta[] {
+  if (Array.isArray(content.ctas)) {
+    return (content.ctas as SplitCta[]).filter((c) => c && String(c.label || '').trim());
+  }
+  if (content.cta) {
+    return [
+      {
+        label: String(content.cta),
+        href: String(content.ctaHref || '#'),
+        position: 'left',
+        type: 'primary',
+      },
+    ];
+  }
+  return [];
+}
+
+function PositionedCtaRow<T extends { label: string; position?: string }>({
+  ctas,
+  renderCta,
+  ariaLabel,
+  className,
+}: {
+  ctas: T[];
+  renderCta: (cta: T, i: number) => ReactNode;
+  ariaLabel: string;
+  className?: string;
+}) {
+  if (!ctas.length) return null;
+
+  const slots = {
+    left: [] as T[],
+    center: [] as T[],
+    right: [] as T[],
+  };
+  ctas.forEach((cta) => {
+    slots[ctaPosition(cta.position)].push(cta);
+  });
+
+  return (
+    <div className={className || 'timeline-ctas'} role="group" aria-label={ariaLabel}>
+      <div className="timeline-ctas-slot timeline-ctas-slot--left">
+        {slots.left.map((cta, i) => renderCta(cta, i))}
+      </div>
+      <div className="timeline-ctas-slot timeline-ctas-slot--center">
+        {slots.center.map((cta, i) => renderCta(cta, i))}
+      </div>
+      <div className="timeline-ctas-slot timeline-ctas-slot--right">
+        {slots.right.map((cta, i) => renderCta(cta, i))}
+      </div>
+    </div>
+  );
 }
 
 type Slide = {
@@ -455,22 +514,11 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
             </div>
           ))}
         </div>
-        {(() => {
-          const ctas = resolveTimelineCtas(content);
-          if (!ctas.length) return null;
-
-          const slots = {
-            left: [] as TimelineCta[],
-            center: [] as TimelineCta[],
-            right: [] as TimelineCta[],
-          };
-          ctas.forEach((cta) => {
-            const pos =
-              cta.position === 'center' || cta.position === 'right' ? cta.position : 'left';
-            slots[pos].push(cta);
-          });
-
-          function renderCta(cta: TimelineCta, i: number) {
+        <PositionedCtaRow
+          ctas={resolveTimelineCtas(content)}
+          className="timeline-ctas mt-2"
+          ariaLabel="Legacy section actions"
+          renderCta={(cta, i) => {
             const customColor = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '';
             return (
               <a
@@ -490,22 +538,8 @@ function TimelineSection({ content, sectionKey }: { content: Record<string, unkn
                 {cta.label}
               </a>
             );
-          }
-
-          return (
-            <div className="timeline-ctas mt-2" role="group" aria-label="Legacy section actions">
-              <div className="timeline-ctas-slot timeline-ctas-slot--left">
-                {slots.left.map((cta, i) => renderCta(cta, i))}
-              </div>
-              <div className="timeline-ctas-slot timeline-ctas-slot--center">
-                {slots.center.map((cta, i) => renderCta(cta, i))}
-              </div>
-              <div className="timeline-ctas-slot timeline-ctas-slot--right">
-                {slots.right.map((cta, i) => renderCta(cta, i))}
-              </div>
-            </div>
-          );
-        })()}
+          }}
+        />
       </div>
     </section>
   );
@@ -981,11 +1015,20 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
           ))}
         </div>
       ) : null}
-      {content.cta ? (
-        <a href={hrefOf(content.ctaHref)} className="btn btn-primary btn-sm btn-hover-lift">
-          {String(content.cta)}
-        </a>
-      ) : null}
+      <PositionedCtaRow
+        ctas={resolveSplitCtas(content)}
+        className="timeline-ctas mt-2"
+        ariaLabel="Split section actions"
+        renderCta={(cta, i) => (
+          <a
+            key={`${cta.position || 'left'}-${cta.label}-${i}`}
+            href={hrefOf(cta.href)}
+            className={`btn btn-sm btn-hover-lift ${cta.type === 'secondary' ? 'btn-ghost-dark' : 'btn-primary'}`}
+          >
+            {cta.label}
+          </a>
+        )}
+      />
     </div>
   );
 
