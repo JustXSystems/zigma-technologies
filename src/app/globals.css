@@ -3200,7 +3200,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .catalog-detail-panel--media-stage .catalog-detail-media-col{
   position:relative;
 }
-.catalog-detail-panel--media-stage .catalog-detail-media-stage{
+.catalog-detail-panel--media-stage:not(.catalog-detail-panel--showcase) .catalog-detail-media-stage{
   position:sticky;top:0;
 }
 .catalog-detail-panel--stacked .catalog-detail-media-col{
@@ -3475,54 +3475,71 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   box-shadow:0 28px 64px rgba(7,18,33,0.28);
 }
 .catalog-detail-panel--showcase .catalog-detail-layout{
+  display:grid;
   grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);
-  grid-template-rows:minmax(0,1fr) auto;
+  grid-template-rows:minmax(0,1fr) auto auto;
   grid-template-areas:
     "media content"
+    "trust content"
     "cta content";
+  align-content:stretch;
 }
-.catalog-detail-panel--showcase .catalog-detail-media-col{
+.catalog-detail-panel--showcase .catalog-detail-media-stage,
+.catalog-detail-panel--showcase.catalog-detail-panel--media-stage .catalog-detail-media-stage{
   grid-area:media;
+  position:static;
+  top:auto;
   background:#f7f9fc;
   border-right:1px solid var(--gray-200);
   padding:1.35rem 1.25rem 1.25rem;
-  gap:0;
-  display:flex;flex-direction:column;
   min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
 }
-.catalog-detail-panel--showcase .catalog-detail-content-col{
+.catalog-detail-panel--showcase .catalog-detail-scroll{
   grid-area:content;
-  display:flex;flex-direction:column;min-height:0;overflow:hidden;
+  min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:1.55rem 1.6rem 1rem;
+}
+.catalog-detail-panel--showcase .catalog-detail-trust--bar{
+  grid-area:trust;
+  flex-shrink:0;
+  margin:0;padding:0.95rem 1.35rem;
+  border-top:none;
+  border-right:1px solid var(--gray-200);
+  background:#eef5fa;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0.85rem;
 }
 .catalog-detail-panel--showcase .catalog-detail-showcase-cta{
   grid-area:cta;
-  margin-top:0;
+  margin:0;
   padding:0 1.25rem 1.25rem;
   border-top:none;
+  border-right:1px solid var(--gray-200);
   background:#f7f9fc;
 }
 .catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-layout{
   grid-template-columns:1fr;
-  grid-template-rows:minmax(0,1fr) auto;
+  grid-template-rows:minmax(0,1fr) auto auto;
   grid-template-areas:
     "content"
+    "trust"
     "cta";
 }
+.catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-scroll{
+  border-right:none;
+}
+.catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-trust--bar,
 .catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-showcase-cta{
+  border-right:none;
   background:var(--white);
+}
+.catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-showcase-cta{
   padding:1rem 1.55rem 1.25rem;
   border-top:1px solid var(--gray-200);
-}
-.catalog-detail-panel--showcase .catalog-detail-scroll{
-  flex:1;min-height:0;padding:1.55rem 1.6rem 1rem;
-}
-.catalog-detail-panel--showcase .catalog-detail-trust--bar{
-  flex-shrink:0;
-  margin:0;padding:0.95rem 1.35rem;
-  border-top:none;
-  background:#eef5fa;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:0.85rem;
 }
 .catalog-detail-panel--showcase .catalog-detail-title{
   font-size:clamp(1.55rem,1.25rem + 0.8vw,2rem);
@@ -3971,8 +3988,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   .catalog-detail-panel--stacked .catalog-detail-layout,
   .catalog-detail-panel--vitrine .catalog-detail-layout,
   .catalog-detail-panel--lumen .catalog-detail-layout,
-  .catalog-detail-panel--horizon .catalog-detail-layout,
-  .catalog-detail-panel--showcase .catalog-detail-layout{
+  .catalog-detail-panel--horizon .catalog-detail-layout{
     grid-template-columns:1fr;
     grid-template-rows:auto auto;
     overflow:auto;
@@ -3984,8 +4000,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   .catalog-detail-media-col,
   .catalog-detail-panel--vitrine .catalog-detail-media-col,
   .catalog-detail-panel--lumen .catalog-detail-media-col,
-  .catalog-detail-panel--horizon .catalog-detail-media-col,
-  .catalog-detail-panel--showcase .catalog-detail-media-col{
+  .catalog-detail-panel--horizon .catalog-detail-media-col{
     border-right:none;
     border-bottom:1px solid var(--gray-200);
     overflow:visible;
@@ -3993,14 +4008,13 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
     min-height:0 !important;
     padding:0.95rem 0.95rem 0.75rem;
   }
-  .catalog-detail-panel--media-stage .catalog-detail-media-stage,
+  .catalog-detail-panel--media-stage:not(.catalog-detail-panel--showcase) .catalog-detail-media-stage,
   .catalog-detail-panel--stacked .catalog-detail-media-stage{
     position:static;
   }
   .catalog-detail-content-col,
   .catalog-detail-panel--stacked .catalog-detail-content-col,
-  .catalog-detail-panel--horizon .catalog-detail-content-col,
-  .catalog-detail-panel--showcase .catalog-detail-content-col{
+  .catalog-detail-panel--horizon .catalog-detail-content-col{
     overflow:visible !important;
     min-height:0;
     margin:0;
@@ -4024,8 +4038,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   .catalog-detail-panel--stacked .catalog-detail-scroll,
   .catalog-detail-panel--vitrine .catalog-detail-scroll,
   .catalog-detail-panel--lumen .catalog-detail-scroll,
-  .catalog-detail-panel--horizon .catalog-detail-scroll,
-  .catalog-detail-panel--showcase .catalog-detail-scroll{
+  .catalog-detail-panel--horizon .catalog-detail-scroll{
     overflow:visible !important;
     flex:none;
     min-height:0;
@@ -4036,7 +4049,6 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   }
   .catalog-detail-panel--vitrine .catalog-detail-float-actions,
   .catalog-detail-panel--horizon .catalog-detail-float-actions,
-  .catalog-detail-panel--showcase .catalog-detail-float-actions,
   .catalog-detail-panel--lumen .catalog-detail-float-actions{
     top:0.55rem;right:0.55rem;
   }
@@ -4085,13 +4097,9 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
     padding:1rem 1rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
   }
   .catalog-detail-trust,
-  .catalog-detail-trust--bar,
-  .catalog-detail-panel--showcase .catalog-detail-trust--bar{
+  .catalog-detail-trust--bar{
     grid-template-columns:1fr;
     gap:0.65rem;
-  }
-  .catalog-detail-panel--showcase .catalog-detail-trust--bar{
-    padding:0.85rem 1rem;
   }
   .catalog-detail-panel--vitrine,
   .catalog-detail-panel--lumen,
@@ -4109,39 +4117,93 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
     min-height:0 !important;
     padding:0.95rem;
   }
-  .catalog-detail-panel--showcase .catalog-detail-metrics--cards,
-  .catalog-detail-panel--showcase .catalog-detail-spec-cards{
-    grid-template-columns:1fr;
+
+  /*
+   * Showcase mobile: single column in DOM order —
+   * media-stage → scroll → trust → CTA. Clear grid placement so nothing stacks.
+   */
+  .catalog-detail-panel--showcase .catalog-detail-body{
+    overflow:hidden;
   }
-  /* Showcase: stack gallery → details → CTA (no side-column overlap) */
   .catalog-detail-panel--showcase .catalog-detail-layout,
   .catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-layout{
-    display:flex;
-    flex-direction:column;
-    grid-template-columns:none;
-    grid-template-rows:none;
-    grid-template-areas:none;
+    display:flex !important;
+    flex-direction:column !important;
+    flex-wrap:nowrap !important;
+    align-items:stretch !important;
+    justify-content:flex-start !important;
+    gap:0 !important;
+    grid:none !important;
+    grid-template:none !important;
+    grid-template-columns:none !important;
+    grid-template-rows:none !important;
+    grid-template-areas:none !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    flex:1 1 auto;
+    min-height:0;
+    height:auto;
+    max-height:100%;
+    position:relative;
   }
-  .catalog-detail-panel--showcase .catalog-detail-media-col{
-    order:1;
-    border-right:none;
-    border-bottom:1px solid var(--gray-200);
-    padding:0.95rem 0.95rem 0.5rem;
+  .catalog-detail-panel--showcase .catalog-detail-layout > *{
+    grid-area:auto !important;
+    grid-column:auto !important;
+    grid-row:auto !important;
+    position:static !important;
+    inset:auto !important;
+    float:none !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    height:auto !important;
+    max-height:none !important;
+    margin:0 !important;
+    flex:0 0 auto !important;
+    align-self:stretch !important;
+    transform:none !important;
+    z-index:auto !important;
+  }
+  .catalog-detail-panel--showcase .catalog-detail-media-stage,
+  .catalog-detail-panel--showcase.catalog-detail-panel--media-stage .catalog-detail-media-stage{
+    order:1 !important;
+    padding:0.95rem 0.95rem 0.65rem;
     background:#f7f9fc;
+    border-right:none !important;
+    border-bottom:1px solid var(--gray-200);
+    overflow:visible !important;
   }
-  .catalog-detail-panel--showcase .catalog-detail-content-col{
-    order:2;
+  .catalog-detail-panel--showcase .catalog-detail-scroll{
+    order:2 !important;
+    padding:1.15rem 1rem 1rem;
+    overflow:visible !important;
+    background:#fff;
+  }
+  .catalog-detail-panel--showcase .catalog-detail-trust--bar{
+    order:3 !important;
+    padding:0.85rem 1rem;
+    border-right:none !important;
+    grid-template-columns:1fr;
   }
   .catalog-detail-panel--showcase .catalog-detail-showcase-cta,
   .catalog-detail-panel--showcase.catalog-detail-panel--no-media .catalog-detail-showcase-cta{
-    order:3;
-    margin:0;
+    order:4 !important;
     padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
     border-top:1px solid var(--gray-200);
+    border-right:none !important;
     background:#fff;
-    position:relative;
-    z-index:2;
-    flex-shrink:0;
+  }
+  .catalog-detail-panel--showcase .catalog-detail-float-actions{
+    position:absolute;
+    top:0.55rem;
+    right:0.55rem;
+    z-index:6;
+  }
+  .catalog-detail-panel--showcase .catalog-detail-metrics--cards,
+  .catalog-detail-panel--showcase .catalog-detail-spec-cards{
+    grid-template-columns:1fr;
   }
   .catalog-detail-showcase-cta-actions{
     display:grid;grid-template-columns:1fr;gap:0.5rem;
@@ -4149,6 +4211,11 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   .catalog-detail-showcase-primary,
   .catalog-detail-showcase-secondary{
     width:100%;justify-content:center;white-space:normal;text-align:center;
+  }
+  .catalog-detail-panel--showcase .catalog-gallery--detail .catalog-gallery-main,
+  .catalog-detail-panel--showcase .catalog-gallery--detail.catalog-gallery--has-bg .catalog-gallery-main,
+  .catalog-detail-panel--showcase .catalog-gallery--detail.catalog-gallery--product-fit .catalog-gallery-main{
+    min-height:0 !important;
   }
   /* Keep gallery compact so content is reachable without endless scroll */
   .catalog-gallery--detail .catalog-gallery-media,
@@ -4164,11 +4231,6 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
     min-height:0;
     max-height:none;
     padding:0.75rem;
-  }
-  .catalog-detail-panel--showcase .catalog-gallery--detail .catalog-gallery-main,
-  .catalog-detail-panel--showcase .catalog-gallery--detail.catalog-gallery--has-bg .catalog-gallery-main,
-  .catalog-detail-panel--showcase .catalog-gallery--detail.catalog-gallery--product-fit .catalog-gallery-main{
-    min-height:0;
   }
 }
 

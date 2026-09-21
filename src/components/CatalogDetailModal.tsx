@@ -852,16 +852,23 @@ export default function CatalogDetailModal({
 
         <div className="catalog-detail-body">
           <div className={`catalog-detail-layout${showMedia ? '' : ' catalog-detail-layout--no-media'}`}>
-            {showMedia ? (
-              <aside className="catalog-detail-media-col">
-                <div className="catalog-detail-media-stage">{gallery}</div>
-              </aside>
-            ) : null}
-            <div className="catalog-detail-content-col">
-              {contentBody}
-              {isShowcase ? trustBlock : null}
-            </div>
-            {isShowcase ? showcaseCta : null}
+            {isShowcase ? (
+              <>
+                {showMedia ? <div className="catalog-detail-media-stage">{gallery}</div> : null}
+                {contentBody}
+                {trustBlock}
+                {showcaseCta}
+              </>
+            ) : (
+              <>
+                {showMedia ? (
+                  <aside className="catalog-detail-media-col">
+                    <div className="catalog-detail-media-stage">{gallery}</div>
+                  </aside>
+                ) : null}
+                <div className="catalog-detail-content-col">{contentBody}</div>
+              </>
+            )}
           </div>
         </div>
 

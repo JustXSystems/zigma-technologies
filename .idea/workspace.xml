@@ -7,7 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
@@ -58,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.21099372516584" />
-      <entry key="MS500" value="3.5685424778348485" />
-      <entry key="S2" value="10.207659783742299" />
-      <entry key="S5" value="16.235912086920607" />
-      <entry key="S10" value="21.131778562568833" />
-      <entry key="S30" value="30.96157989633287" />
-      <entry key="S60" value="39.640728225334946" />
-      <entry key="M2" value="50.82184627207773" />
-      <entry key="M5" value="64.29096702276442" />
-      <entry key="M10" value="70.8853446515883" />
-      <entry key="M15" value="73.40367863610615" />
-      <entry key="M30" value="76.1037180388289" />
-      <entry key="H1" value="77.55312029303727" />
-      <entry key="H2" value="79.83920196766653" />
-      <entry key="H4" value="94.41370207413222" />
-      <entry key="D1" value="1157.5659920379546" />
-      <entry key="W1" value="11879.193600953973" />
+      <entry key="MS100" value="1.6064731328937665" />
+      <entry key="MS500" value="4.138530911402404" />
+      <entry key="S2" value="9.15171961563434" />
+      <entry key="S5" value="12.832860384516028" />
+      <entry key="S10" value="17.494192013312315" />
+      <entry key="S30" value="39.47597962289033" />
+      <entry key="S60" value="65.75568748278052" />
+      <entry key="M2" value="96.05658267848496" />
+      <entry key="M5" value="129.15008960290223" />
+      <entry key="M10" value="145.16119971378717" />
+      <entry key="M15" value="153.54230207238962" />
+      <entry key="M30" value="180.9577458489348" />
+      <entry key="H1" value="231.38353162294317" />
+      <entry key="H2" value="285.80863588496055" />
+      <entry key="H4" value="336.3940617364842" />
+      <entry key="D1" value="1392.7946397665828" />
+      <entry key="W1" value="12090.992448197345" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -88,31 +88,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.2736765118148952E-170" />
-      <entry key="H1" value="1.1285727764814738E-85" />
-      <entry key="H2" value="3.3594237251072274E-43" />
-      <entry key="H4" value="5.796053592937496E-22" />
-      <entry key="D1" value="2.9337944175553154E-4" />
-      <entry key="W1" value="0.48510237105705056" />
+      <entry key="M30" value="1.1290803161540497E-171" />
+      <entry key="H1" value="3.3601790371262086E-86" />
+      <entry key="H2" value="1.8330791137116194E-43" />
+      <entry key="H4" value="4.281447318107906E-22" />
+      <entry key="D1" value="2.789369491502389E-4" />
+      <entry key="W1" value="0.4816166028557854" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1683551418674332" />
-      <entry key="MS500" value="3.5412106482821164" />
-      <entry key="S2" value="10.186943048699577" />
-      <entry key="S5" value="16.222333377752577" />
-      <entry key="S10" value="21.12276442119894" />
-      <entry key="S30" value="30.95703078675056" />
-      <entry key="S60" value="39.63771327897989" />
-      <entry key="M2" value="50.81982178691005" />
-      <entry key="M5" value="64.28989772558913" />
-      <entry key="M10" value="70.88474542909344" />
-      <entry key="M15" value="73.40326263165227" />
-      <entry key="M30" value="76.1035011575624" />
-      <entry key="H1" value="77.5530094713973" />
-      <entry key="H2" value="79.83914484925248" />
-      <entry key="H4" value="94.41366820854589" />
-      <entry key="D1" value="1157.566220847599" />
-      <entry key="W1" value="11879.678575205753" />
+      <entry key="MS100" value="1.5472903659704362" />
+      <entry key="MS500" value="4.106518247599019" />
+      <entry key="S2" value="9.133282637973762" />
+      <entry key="S5" value="12.822024266907695" />
+      <entry key="S10" value="17.486285584912213" />
+      <entry key="S30" value="39.46974764217352" />
+      <entry key="S60" value="65.75052568217261" />
+      <entry key="M2" value="96.05282530781176" />
+      <entry key="M5" value="129.1480661197743" />
+      <entry key="M10" value="145.16006099106892" />
+      <entry key="M15" value="153.5415003402094" />
+      <entry key="M30" value="180.95727981037214" />
+      <entry key="H1" value="231.38323926132213" />
+      <entry key="H2" value="285.80845740133753" />
+      <entry key="H4" value="336.39395675663815" />
+      <entry key="D1" value="1392.794842887358" />
+      <entry key="W1" value="12091.473935510503" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -264,7 +264,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#11 Heading levels are now admin-configurable without breaking layout." />
     <MESSAGE value="#13 Product, Services, Project card Background color to be set in admin" />
     <MESSAGE value="#13 build issue fixed" />
     <MESSAGE value="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes." />
@@ -289,7 +288,8 @@
     <MESSAGE value="#21 Mobile view rendering issue" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other." />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
+    <MESSAGE value="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping" />
+    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
