@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { FooterColumn } from '@/lib/nav-tree';
 import { telHref, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
@@ -50,21 +50,43 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
   },
 ];
 
-export default function Footer() {
+type FooterProps = {
+  /** Layout SSR payload — preferred over context so footer nav always matches Admin → Navigation (footer). */
+  initialFooterColumns?: FooterColumn[] | null;
+};
+
+export default function Footer({ initialFooterColumns = null }: FooterProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { settings: site, footerColumns: shellColumns } = useSiteShell();
+  const { settings: site, footerColumns: contextColumns } = useSiteShell();
+  const shellColumns = initialFooterColumns ?? contextColumns;
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
+  const [liveColumns, setLiveColumns] = useState<FooterColumn[] | null>(null);
   const copy = useSiteCopy();
-  const footerColumns = useMemo(
-    () =>
-      filterFooterColumnsForFeatures(
-        shellColumns?.length ? shellColumns : DEFAULT_COLUMNS,
-        copy.features
-      ),
-    [shellColumns, copy.features]
-  );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(appHref('/api/public/nav?location=footer&format=columns'));
+        const data = await res.json().catch(() => ({}));
+        if (cancelled || !res.ok || !Array.isArray(data.columns) || !data.columns.length) return;
+        setLiveColumns(data.columns as FooterColumn[]);
+      } catch {
+        /* keep SSR / shell columns */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const footerColumns = useMemo(() => {
+    const fromCms = liveColumns?.length ? liveColumns : shellColumns?.length ? shellColumns : null;
+    if (fromCms?.length) return fromCms;
+    return filterFooterColumnsForFeatures(DEFAULT_COLUMNS, copy.features);
+  }, [liveColumns, shellColumns, copy.features]);
 
   const current = useMemo(() =>
     pathname === '/contact'

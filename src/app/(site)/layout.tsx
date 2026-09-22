@@ -32,7 +32,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header />
       <ConsultationModalHost />
       {children}
-      <Footer />
+      <Footer initialFooterColumns={shell.footerColumns} />
       <CookieConsent settings={shell.settings} />
       <PwaRegister />
     </SiteProviders>

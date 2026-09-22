@@ -8,8 +8,14 @@ export type FlatNavRow = {
   href: string | null;
   parent_id: number | null;
   sort_order: number;
+  /** When false, row is omitted from public link lists (column headers may still show if children are enabled). */
+  enabled?: boolean;
   meta_json?: Record<string, unknown> | null;
 };
+
+function rowIsEnabled(row: FlatNavRow): boolean {
+  return row.enabled !== false;
+}
 
 /** “Learn more” / mega-secondary rows — redundant once column headers are links. */
 export function isMegaLearnMoreLink(link: { label?: string; className?: string }): boolean {
@@ -31,7 +37,7 @@ export function buildNavTree(rows: FlatNavRow[]): NavItem[] {
     list.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
   }
 
-  const roots = byParent.get(null) || [];
+  const roots = (byParent.get(null) || []).filter(rowIsEnabled);
   return roots.map((root) => {
     const meta = root.meta_json || {};
     const children = byParent.get(root.id) || [];
@@ -44,10 +50,11 @@ export function buildNavTree(rows: FlatNavRow[]): NavItem[] {
         label: root.label,
         href: root.href || undefined,
         megaClass: typeof meta.megaClass === 'string' ? meta.megaClass : undefined,
-        mega: children.map((col) => ({
+        mega: children.filter(rowIsEnabled).map((col) => ({
           heading: col.label,
           headingHref: col.href || undefined,
           links: (byParent.get(col.id) || [])
+            .filter(rowIsEnabled)
             .map((link) => ({
               label: link.label,
               href: link.href || undefined,
@@ -86,15 +93,20 @@ export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
     list.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
   }
 
-  return (byParent.get(null) || []).map((col) => ({
-    heading: col.label,
-    links: (byParent.get(col.id) || []).map((link) => ({
-      label: link.label,
-      href: link.href || '#',
-      className:
-        typeof (link.meta_json || {}).className === 'string'
-          ? String((link.meta_json || {}).className)
-          : undefined,
-    })),
-  }));
+  return (byParent.get(null) || [])
+    .map((col) => {
+      const childRows = (byParent.get(col.id) || []).filter(rowIsEnabled);
+      return {
+        heading: col.label,
+        links: childRows.map((link) => ({
+          label: link.label,
+          href: link.href || '#',
+          className:
+            typeof (link.meta_json || {}).className === 'string'
+              ? String((link.meta_json || {}).className)
+              : undefined,
+        })),
+      };
+    })
+    .filter((col) => col.links.length > 0);
 }
