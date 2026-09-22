@@ -81,14 +81,13 @@ export const getPublicNavRows = cache(async (location: 'header' | 'footer'): Pro
   }
 });
 
-export async function resolvePublicFooterColumns(): Promise<FooterColumn[] | null> {
+export async function resolvePublicFooterColumns(): Promise<FooterColumn[]> {
   try {
     const rows = await loadAllNavRowsForLocation('footer');
-    if (!rows.length) return null;
-    const columns = buildFooterColumns(rows);
-    return columns.length ? columns : null;
+    if (!rows.length) return [];
+    return buildFooterColumns(rows);
   } catch (err) {
-    if (isDbUnavailableError(err)) return null;
+    if (isDbUnavailableError(err)) return [];
     throw err;
   }
 }

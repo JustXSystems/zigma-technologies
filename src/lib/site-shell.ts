@@ -11,7 +11,7 @@ export type SiteShellData = {
   settings: SiteSettings;
   copy: SiteCopy;
   headerNav: NavItem[] | null;
-  footerColumns: FooterColumn[] | null;
+  footerColumns: FooterColumn[];
 };
 
 /** Single cached fetch for layout chrome — avoids duplicate DB/API round-trips per request. */
@@ -33,7 +33,7 @@ export const loadSiteShell = cache(async (): Promise<SiteShellData> => {
         settings: mergeSiteSettings(undefined),
         copy: mergeSiteCopy(undefined),
         headerNav: null,
-        footerColumns: null,
+        footerColumns: [],
       };
     }
     throw err;

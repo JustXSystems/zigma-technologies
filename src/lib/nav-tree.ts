@@ -81,6 +81,46 @@ export type FooterColumn = {
   links: Array<{ label: string; href: string; className?: string }>;
 };
 
+function hasEnabledDescendant(
+  parentId: number,
+  byParent: Map<number | null, FlatNavRow[]>
+): boolean {
+  for (const child of byParent.get(parentId) || []) {
+    if (rowIsEnabled(child)) return true;
+    if (hasEnabledDescendant(child.id, byParent)) return true;
+  }
+  return false;
+}
+
+/** Collect every enabled link under a footer column (any nesting depth). */
+function flattenEnabledFooterLinks(
+  parentId: number,
+  byParent: Map<number | null, FlatNavRow[]>,
+  out: FlatNavRow[]
+) {
+  for (const child of byParent.get(parentId) || []) {
+    if (!rowIsEnabled(child)) continue;
+    const nested = byParent.get(child.id) || [];
+    if (nested.length) {
+      if (child.href) out.push(child);
+      flattenEnabledFooterLinks(child.id, byParent, out);
+    } else {
+      out.push(child);
+    }
+  }
+}
+
+function mapFooterLink(link: FlatNavRow) {
+  return {
+    label: link.label,
+    href: link.href || '#',
+    className:
+      typeof (link.meta_json || {}).className === 'string'
+        ? String((link.meta_json || {}).className)
+        : undefined,
+  };
+}
+
 export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
   const byParent = new Map<number | null, FlatNavRow[]>();
   for (const row of rows) {
@@ -93,20 +133,19 @@ export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
     list.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
   }
 
-  return (byParent.get(null) || [])
-    .map((col) => {
-      const childRows = (byParent.get(col.id) || []).filter(rowIsEnabled);
-      return {
-        heading: col.label,
-        links: childRows.map((link) => ({
-          label: link.label,
-          href: link.href || '#',
-          className:
-            typeof (link.meta_json || {}).className === 'string'
-              ? String((link.meta_json || {}).className)
-              : undefined,
-        })),
-      };
-    })
-    .filter((col) => col.links.length > 0);
+  const topLevel = (byParent.get(null) || []).filter(
+    (col) => rowIsEnabled(col) || hasEnabledDescendant(col.id, byParent)
+  );
+
+  return topLevel.map((col) => {
+    const linkRows: FlatNavRow[] = [];
+    flattenEnabledFooterLinks(col.id, byParent, linkRows);
+    if (!linkRows.length && rowIsEnabled(col) && col.href) {
+      linkRows.push(col);
+    }
+    return {
+      heading: col.label,
+      links: linkRows.map(mapFooterLink),
+    };
+  });
 }

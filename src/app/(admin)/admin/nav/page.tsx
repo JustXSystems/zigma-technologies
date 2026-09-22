@@ -236,7 +236,7 @@ export default function NavAdminPage() {
 
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <p style={{ marginTop: 0, color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
-          Nested items: top-level mega parents → column children → link grandchildren. Footer uses column (top level, no parent) → links (parent = that column). Footer links always publish as edited; feature toggles in Site copy only affect built-in defaults, not CMS footer rows.
+          Nested items: top-level mega parents → column children → link grandchildren. Footer uses column (top level, no parent) → links (parent = that column; deeper nesting is flattened). Only <strong>Enabled</strong> rows appear on the site. The public footer uses this footer list only — no default links are added.
         </p>
         <form onSubmit={addItem} className="admin-form-grid">
           <div className="admin-field">

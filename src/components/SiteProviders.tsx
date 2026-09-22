@@ -10,14 +10,14 @@ type SiteShellContextValue = {
   settings: SiteSettings;
   copy: SiteCopy;
   headerNav: NavItem[] | null;
-  footerColumns: FooterColumn[] | null;
+  footerColumns: FooterColumn[];
 };
 
 const SiteShellContext = createContext<SiteShellContextValue>({
   settings: DEFAULT_SITE_SETTINGS,
   copy: DEFAULT_SITE_COPY,
   headerNav: null,
-  footerColumns: null,
+  footerColumns: [],
 });
 
 export function useSiteShell() {
@@ -29,7 +29,7 @@ type Props = {
   settings: SiteSettings;
   copy: SiteCopy;
   headerNav: NavItem[] | null;
-  footerColumns: FooterColumn[] | null;
+  footerColumns: FooterColumn[];
 };
 
 export default function SiteProviders({ children, settings, copy, headerNav, footerColumns }: Props) {
