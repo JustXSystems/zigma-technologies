@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { buildFooterColumns } from '@/lib/nav-tree';
 
 type NavRow = {
   id: number;
@@ -9,9 +10,41 @@ type NavRow = {
   href: string | null;
   parent_id: number | null;
   sort_order: number;
-  enabled: number;
+  enabled: number | boolean;
   meta_json?: Record<string, unknown>;
 };
+
+function isEnabled(item: NavRow) {
+  return Number(item.enabled) === 1 || item.enabled === true;
+}
+
+/** Depth-first order (column → children) so header/footer trees are readable. */
+function treeOrdered(items: NavRow[]): NavRow[] {
+  const byParent = new Map<number | null, NavRow[]>();
+  for (const item of items) {
+    const key = item.parent_id ?? null;
+    const list = byParent.get(key) || [];
+    list.push(item);
+    byParent.set(key, list);
+  }
+  for (const list of byParent.values()) {
+    list.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
+  }
+  const out: NavRow[] = [];
+  const walk = (parentId: number | null) => {
+    for (const child of byParent.get(parentId) || []) {
+      out.push(child);
+      walk(child.id);
+    }
+  };
+  walk(null);
+  // Any rows whose parent is missing (orphans) — append so they stay visible
+  const seen = new Set(out.map((i) => i.id));
+  for (const item of items) {
+    if (!seen.has(item.id)) out.push(item);
+  }
+  return out;
+}
 
 export default function NavAdminPage() {
   const [items, setItems] = useState<NavRow[]>([]);
@@ -39,6 +72,8 @@ export default function NavAdminPage() {
     load().catch((e) => setError(e.message));
   }, [location]);
 
+  const orderedItems = useMemo(() => treeOrdered(items), [items]);
+
   const labelById = useMemo(() => Object.fromEntries(items.map((i) => [i.id, i.label])), [items]);
 
   const depthById = useMemo(() => {
@@ -59,6 +94,21 @@ export default function NavAdminPage() {
     return map;
   }, [items]);
 
+  const footerPreview = useMemo(() => {
+    if (location !== 'footer') return null;
+    return buildFooterColumns(
+      items.map((i) => ({
+        id: Number(i.id),
+        label: i.label,
+        href: i.href,
+        parent_id: i.parent_id == null ? null : Number(i.parent_id),
+        sort_order: Number(i.sort_order),
+        enabled: isEnabled(i),
+        meta_json: i.meta_json || {},
+      }))
+    );
+  }, [items, location]);
+
   async function persistOrder(next: NavRow[]) {
     const ordered_ids = next.map((i) => i.id);
     setItems(next);
@@ -77,18 +127,15 @@ export default function NavAdminPage() {
 
   async function moveSibling(item: NavRow, direction: -1 | 1) {
     setError('');
-    const siblings = items.filter((i) => (i.parent_id || null) === (item.parent_id || null));
+    const tree = treeOrdered(items);
+    const siblings = tree.filter((i) => (i.parent_id || null) === (item.parent_id || null));
     const idx = siblings.findIndex((i) => i.id === item.id);
     const swapWith = siblings[idx + direction];
     if (!swapWith) return;
 
-    const next = [...items];
-    const a = next.findIndex((i) => i.id === item.id);
-    const b = next.findIndex((i) => i.id === swapWith.id);
-    const tmpOrder = next[a].sort_order;
-    next[a] = { ...next[a], sort_order: next[b].sort_order };
-    next[b] = { ...next[b], sort_order: tmpOrder };
-    // Keep relative list order stable: swap positions in array too
+    const a = tree.findIndex((i) => i.id === item.id);
+    const b = tree.findIndex((i) => i.id === swapWith.id);
+    const next = [...tree];
     const tmp = next[a];
     next[a] = next[b];
     next[b] = tmp;
@@ -98,6 +145,15 @@ export default function NavAdminPage() {
   async function addItem(e: FormEvent) {
     e.preventDefault();
     setError('');
+    const isTop = !parentId;
+    const meta_json =
+      location === 'footer'
+        ? isTop
+          ? { kind: 'column' }
+          : { kind: 'link' }
+        : parentId
+          ? { kind: 'link' }
+          : {};
     const res = await fetch('/api/admin/nav', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -108,7 +164,7 @@ export default function NavAdminPage() {
         parent_id: parentId ? Number(parentId) : null,
         sort_order: items.length,
         enabled: true,
-        meta_json: parentId ? { kind: 'link' } : {},
+        meta_json,
       }),
     });
     const data = await res.json();
@@ -143,7 +199,7 @@ export default function NavAdminPage() {
     await fetch(`/api/admin/nav/${item.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled: !item.enabled }),
+      body: JSON.stringify({ enabled: !isEnabled(item) }),
     });
     await load();
   }
@@ -202,6 +258,9 @@ export default function NavAdminPage() {
     await load();
   }
 
+  const enabledCount = items.filter(isEnabled).length;
+  const previewLinkCount = footerPreview?.reduce((n, c) => n + c.links.length, 0) ?? 0;
+
   return (
     <div>
       {error ? <div className="admin-error">{error}</div> : null}
@@ -236,7 +295,10 @@ export default function NavAdminPage() {
 
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <p style={{ marginTop: 0, color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
-          Nested items: top-level mega parents → column children → link grandchildren. Footer uses column (top level, no parent) → links (parent = that column; deeper nesting is flattened). Only <strong>Enabled</strong> rows appear on the site. The public footer uses this footer list only — no default links are added.
+          Nested items: top-level mega parents → column children → link grandchildren. Footer: each{' '}
+          <strong>top-level</strong> row is a column heading; every <strong>child</strong> (any depth) is a
+          public link. Only <strong>Enabled</strong> rows publish. The site footer uses this list only — nothing
+          else is merged in. To load the full seed defaults: Clear Footer → Seed footer tree.
         </p>
         <form onSubmit={addItem} className="admin-form-grid">
           <div className="admin-field">
@@ -245,15 +307,20 @@ export default function NavAdminPage() {
           </div>
           <div className="admin-field">
             <label>Href</label>
-            <input className="admin-input" value={href} onChange={(e) => setHref(e.target.value)} placeholder="/projects or /#why" />
+            <input
+              className="admin-input"
+              value={href}
+              onChange={(e) => setHref(e.target.value)}
+              placeholder="/projects or /#why"
+            />
           </div>
           <div className="admin-field">
             <label>Parent</label>
             <select className="admin-select" value={parentId} onChange={(e) => setParentId(e.target.value)}>
-              <option value="">Top level</option>
-              {items.map((item) => (
+              <option value="">Top level (footer = column)</option>
+              {orderedItems.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.parent_id ? `↳ ${item.label}` : item.label} (#{item.id})
+                  {'—'.repeat(depthById[item.id] || 0)} {item.label} (#{item.id})
                 </option>
               ))}
             </select>
@@ -265,6 +332,49 @@ export default function NavAdminPage() {
           </div>
         </form>
       </div>
+
+      {footerPreview ? (
+        <div className="admin-card" style={{ marginBottom: '1rem' }}>
+          <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Public footer preview (exact site output)</h3>
+          <p style={{ color: 'var(--admin-muted)', fontSize: '0.85rem', marginTop: 0 }}>
+            Admin rows: {items.length} total / {enabledCount} enabled → site publishes{' '}
+            <strong>
+              {footerPreview.length} columns, {previewLinkCount} links
+            </strong>{' '}
+            (column headings are not counted as links).
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '1rem',
+            }}
+          >
+            {footerPreview.map((col) => (
+              <div key={col.id}>
+                <div style={{ fontWeight: 700, marginBottom: '0.4rem' }}>
+                  {col.heading}{' '}
+                  <span style={{ color: 'var(--admin-muted)', fontWeight: 500 }}>({col.links.length})</span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.88rem' }}>
+                  {col.links.map((link) => (
+                    <li key={link.id}>
+                      {link.label}{' '}
+                      <code style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>{link.href}</code>
+                    </li>
+                  ))}
+                  {!col.links.length ? (
+                    <li style={{ color: 'var(--admin-muted)' }}>(no enabled child links)</li>
+                  ) : null}
+                </ul>
+              </div>
+            ))}
+            {!footerPreview.length ? (
+              <p style={{ color: 'var(--admin-muted)' }}>No footer columns — add top-level items or Seed footer tree.</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className="admin-table-wrap admin-card" style={{ padding: 0 }}>
         <table className="admin-table">
@@ -279,14 +389,14 @@ export default function NavAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 ? (
+            {orderedItems.length === 0 ? (
               <tr>
                 <td colSpan={6} className="admin-empty">
                   No {location} links. Seed the tree or add manually.
                 </td>
               </tr>
             ) : (
-              items.map((item) => (
+              orderedItems.map((item) => (
                 <tr key={item.id}>
                   <td>
                     <div style={{ display: 'flex', gap: '0.25rem' }}>
@@ -317,20 +427,22 @@ export default function NavAdminPage() {
                     {(depthById[item.id] || 0) > 0 ? '↳ ' : ''}
                     {item.label}
                     {item.meta_json?.kind ? (
-                      <div style={{ color: 'var(--admin-muted)', fontSize: '0.75rem' }}>{String(item.meta_json.kind)}</div>
+                      <div style={{ color: 'var(--admin-muted)', fontSize: '0.75rem' }}>
+                        {String(item.meta_json.kind)}
+                      </div>
                     ) : null}
                   </td>
-                  <td>{item.parent_id ? labelById[item.parent_id] || item.parent_id : '—'}</td>
+                  <td>{item.parent_id ? labelById[item.parent_id] || `#${item.parent_id}` : '—'}</td>
                   <td>
                     <code>{item.href || '—'}</code>
                   </td>
-                  <td>{item.enabled ? 'Yes' : 'No'}</td>
+                  <td>{isEnabled(item) ? 'Yes' : 'No'}</td>
                   <td>
                     <button type="button" className="admin-btn admin-btn-secondary" onClick={() => openEdit(item)}>
                       Edit
                     </button>{' '}
                     <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggle(item)}>
-                      {item.enabled ? 'Disable' : 'Enable'}
+                      {isEnabled(item) ? 'Disable' : 'Enable'}
                     </button>{' '}
                     <button type="button" className="admin-btn admin-btn-danger" onClick={() => remove(item)}>
                       Delete
@@ -360,7 +472,7 @@ export default function NavAdminPage() {
                 <label>Parent</label>
                 <select className="admin-select" value={editParentId} onChange={(e) => setEditParentId(e.target.value)}>
                   <option value="">Top level</option>
-                  {items
+                  {orderedItems
                     .filter((i) => i.id !== editing.id)
                     .map((item) => (
                       <option key={item.id} value={item.id}>

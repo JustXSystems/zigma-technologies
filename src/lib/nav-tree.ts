@@ -77,51 +77,12 @@ export function buildNavTree(rows: FlatNavRow[]): NavItem[] {
 }
 
 export type FooterColumn = {
+  id: number;
   heading: string;
-  links: Array<{ label: string; href: string; className?: string }>;
+  links: Array<{ id: number; label: string; href: string; className?: string }>;
 };
 
-function hasEnabledDescendant(
-  parentId: number,
-  byParent: Map<number | null, FlatNavRow[]>
-): boolean {
-  for (const child of byParent.get(parentId) || []) {
-    if (rowIsEnabled(child)) return true;
-    if (hasEnabledDescendant(child.id, byParent)) return true;
-  }
-  return false;
-}
-
-/** Collect every enabled link under a footer column (any nesting depth). */
-function flattenEnabledFooterLinks(
-  parentId: number,
-  byParent: Map<number | null, FlatNavRow[]>,
-  out: FlatNavRow[]
-) {
-  for (const child of byParent.get(parentId) || []) {
-    if (!rowIsEnabled(child)) continue;
-    const nested = byParent.get(child.id) || [];
-    if (nested.length) {
-      if (child.href) out.push(child);
-      flattenEnabledFooterLinks(child.id, byParent, out);
-    } else {
-      out.push(child);
-    }
-  }
-}
-
-function mapFooterLink(link: FlatNavRow) {
-  return {
-    label: link.label,
-    href: link.href || '#',
-    className:
-      typeof (link.meta_json || {}).className === 'string'
-        ? String((link.meta_json || {}).className)
-        : undefined,
-  };
-}
-
-export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
+function groupByParent(rows: FlatNavRow[]) {
   const byParent = new Map<number | null, FlatNavRow[]>();
   for (const row of rows) {
     const key = row.parent_id ?? null;
@@ -132,20 +93,90 @@ export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
   for (const list of byParent.values()) {
     list.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
   }
+  return byParent;
+}
+
+function hasEnabledDescendant(parentId: number, byParent: Map<number | null, FlatNavRow[]>): boolean {
+  for (const child of byParent.get(parentId) || []) {
+    if (rowIsEnabled(child)) return true;
+    if (hasEnabledDescendant(child.id, byParent)) return true;
+  }
+  return false;
+}
+
+/** Every enabled descendant in tree order — 1:1 with Admin → Footer child rows (no skipping). */
+function collectEnabledDescendants(
+  parentId: number,
+  byParent: Map<number | null, FlatNavRow[]>,
+  out: FlatNavRow[]
+) {
+  for (const child of byParent.get(parentId) || []) {
+    if (!rowIsEnabled(child)) continue;
+    out.push(child);
+    collectEnabledDescendants(child.id, byParent, out);
+  }
+}
+
+function mapFooterLink(link: FlatNavRow) {
+  return {
+    id: link.id,
+    label: link.label,
+    href: link.href || '#',
+    className:
+      typeof (link.meta_json || {}).className === 'string'
+        ? String((link.meta_json || {}).className)
+        : undefined,
+  };
+}
+
+/**
+ * Public footer columns = Admin → Navigation (footer) only.
+ * - Top-level rows → column headings
+ * - Every enabled descendant → one link (tree order)
+ * - Orphans (parent missing) → extra column so nothing is silently dropped
+ */
+export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const byParent = groupByParent(rows);
 
   const topLevel = (byParent.get(null) || []).filter(
     (col) => rowIsEnabled(col) || hasEnabledDescendant(col.id, byParent)
   );
 
-  return topLevel.map((col) => {
-    const linkRows: FlatNavRow[] = [];
-    flattenEnabledFooterLinks(col.id, byParent, linkRows);
-    if (!linkRows.length && rowIsEnabled(col) && col.href) {
-      linkRows.push(col);
+  const claimed = new Set<number>();
+  const columns: FooterColumn[] = topLevel.map((col) => {
+    const descendants: FlatNavRow[] = [];
+    collectEnabledDescendants(col.id, byParent, descendants);
+    for (const d of descendants) claimed.add(d.id);
+
+    // Lone top-level row with an href and no children → single link column
+    if (!descendants.length && rowIsEnabled(col) && col.href) {
+      claimed.add(col.id);
+      return { id: col.id, heading: col.label, links: [mapFooterLink(col)] };
     }
+
     return {
+      id: col.id,
       heading: col.label,
-      links: linkRows.map(mapFooterLink),
+      links: descendants.map(mapFooterLink),
     };
   });
+
+  const orphans = rows.filter(
+    (r) =>
+      rowIsEnabled(r) &&
+      r.parent_id != null &&
+      !claimed.has(r.id) &&
+      !byId.has(r.parent_id)
+  );
+  if (orphans.length) {
+    orphans.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
+    columns.push({
+      id: -1,
+      heading: 'More',
+      links: orphans.map(mapFooterLink),
+    });
+  }
+
+  return columns;
 }

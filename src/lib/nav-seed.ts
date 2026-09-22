@@ -143,6 +143,7 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
       { label: 'Industries', href: '/industries' },
       { label: 'Locations', href: '/locations' },
       { label: 'Press', href: '/press' },
+      { label: 'Resources', href: '/resources' },
     ],
   },
   {
@@ -164,7 +165,11 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
     children: [
       { label: '+91 95901 37444', href: 'tel:+919590137444' },
       { label: 'info@zigma-technologies.com', href: 'mailto:info@zigma-technologies.com' },
-      { label: 'Emergency Call: +91 9590137666 →', href: 'tel:+919590137666', meta_json: { className: 'foot-emergency' } },
+      {
+        label: 'Emergency Call: +91 9590137666 →',
+        href: 'tel:+919590137666',
+        meta_json: { className: 'foot-emergency' },
+      },
     ],
   },
 ];
