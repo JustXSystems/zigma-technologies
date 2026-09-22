@@ -70,6 +70,19 @@ export default function AdminPagesPage() {
     await load();
   }
 
+  async function seedIndustries() {
+    setSeedMsg('');
+    setError('');
+    const res = await fetch('/api/admin/pages/seed-industries', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || 'Seed failed');
+      return;
+    }
+    setSeedMsg(data.message);
+    await load();
+  }
+
   async function openPreview(page: CmsPage) {
     setError('');
     const res = await fetch(`/api/admin/pages/${page.id}/preview`, { method: 'POST' });
@@ -130,6 +143,9 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('terms')}>
               Seed terms
+            </button>
+            <button type="button" className="admin-btn admin-btn-secondary" onClick={seedIndustries}>
+              Seed industries
             </button>
           </div>
         </div>

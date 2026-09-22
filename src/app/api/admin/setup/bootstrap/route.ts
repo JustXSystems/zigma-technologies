@@ -182,6 +182,16 @@ export async function POST(request: Request) {
       });
     }
 
+    if (action === 'seed-industries' || action === 'bootstrap') {
+      await run('seed-industries', async () => {
+        const mod = await import('@/app/api/admin/pages/seed-industries/route');
+        const res = await mod.POST();
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Industries seed failed');
+        return data;
+      });
+    }
+
     if (!results.length) return jsonError('Unknown action', 400);
 
     return jsonOk({

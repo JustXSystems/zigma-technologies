@@ -57,9 +57,9 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Preview → signed URL (?preview=1&token=…) valid 12 hours',
       'Set status Published when ready; draft pages stay hidden on public site',
     ],
-    publicRoutes: ['/', '/contact', '/careers', '/certifications', '/privacy', '/terms', '/{custom-slug}', 'GET /api/public/pages/[slug]'],
+    publicRoutes: ['/', '/contact', '/careers', '/certifications', '/privacy', '/terms', '/industries', '/{custom-slug}', 'GET /api/public/pages/[slug]'],
     dbTables: ['pages', 'page_sections'],
-    seeds: ['Seed homepage', 'Seed inner pages (contact, careers, certifications, privacy, terms)', 'Seed industries stubs', 'Dashboard bootstrap'],
+    seeds: ['Seed homepage', 'Seed inner pages (contact, careers, certifications, privacy, terms)', 'Seed industries (hub + landing stubs)', 'Dashboard bootstrap'],
   },
   {
     id: 'inventory',

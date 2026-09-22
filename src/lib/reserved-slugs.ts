@@ -27,14 +27,13 @@ export const RESERVED_SITE_SLUGS = new Set([
   'uploads',
 ]);
 
-/** Slugs that must never be used for a custom CMS page (catalog + system). Dedicated CMS pages may still use home/contact/careers/certifications. */
+/** Slugs that must never be used for a custom CMS page (catalog + system). Dedicated CMS pages may still use home/contact/careers/certifications/industries. */
 export const BLOCKED_CUSTOM_PAGE_SLUGS = new Set([
   'admin',
   'api',
   'assets',
   'cookies',
   'hi',
-  'industries',
   'kn',
   'locations',
   'newsletter',

@@ -6,9 +6,14 @@ export async function POST() {
   try {
     await requireSession();
     const result = await seedIndustryPages();
+    const hubPart = result.hubSeeded
+      ? 'Hub /industries seeded.'
+      : result.hubSkipped
+        ? 'Hub /industries already had sections.'
+        : '';
     return jsonOk({
       ...result,
-      message: `Industry CMS stubs: ${result.created} created, ${result.skipped} already had sections.`,
+      message: `${hubPart} Industry landing stubs: ${result.created} created, ${result.skipped} already had sections.`.trim(),
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);

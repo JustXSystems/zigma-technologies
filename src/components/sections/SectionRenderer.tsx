@@ -6,9 +6,14 @@ import EnquiryFormSection from '@/components/sections/EnquiryFormSection';
 import CareersApplySection from '@/components/sections/CareersApplySection';
 import CertMarquee, { normalizeCertItems } from '@/components/sections/CertMarquee';
 import EcoVisual from '@/components/sections/EcoVisual';
+import InnerCtaBand from '@/components/InnerCtaBand';
+import InnerPageHero from '@/components/InnerPageHero';
+import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
 import { featIconFor } from '@/lib/feat-icons';
 import { indIconFor } from '@/lib/ind-icons';
+import { INDUSTRY_DEFS } from '@/lib/industries';
+import { INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
 import { statIconFor } from '@/lib/stat-icons';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { focusApplyRole } from '@/lib/careers-apply';
@@ -16,6 +21,7 @@ import { useSiteCopy } from '@/lib/use-site-copy';
 import type { CatalogItem } from '@/lib/types';
 import { appHref } from '@/lib/base-path';
 import SiteHeading from '@/components/SiteHeading';
+import Link from 'next/link';
 
 /** CMS / section links must go through basePath on subdirectory deploys. */
 function hrefOf(value: unknown, fallback = '#'): string {
@@ -824,6 +830,35 @@ function industryHrefForLabel(label: string): string | null {
 }
 
 function CtaSection({ content, sectionKey }: { content: Record<string, unknown>; sectionKey?: string | null }) {
+  const copy = useSiteCopy();
+  const variant = String(content.variant || '');
+  let secondaryHref = content.secondaryHref ? hrefOf(content.secondaryHref) : undefined;
+  let secondaryLabel = content.secondaryCta ? String(content.secondaryCta) : undefined;
+  if (
+    secondaryHref &&
+    (secondaryHref === '/tools/solution-finder' || secondaryHref.endsWith('/tools/solution-finder')) &&
+    !copy.features.solutionFinderEnabled
+  ) {
+    secondaryHref = hrefOf('/projects');
+    secondaryLabel = 'View case studies';
+  }
+
+  if (variant === 'inner' || content.eyebrow) {
+    return (
+      <div id={sectionKey || undefined}>
+        <InnerCtaBand
+          eyebrow={content.eyebrow ? String(content.eyebrow) : undefined}
+          title={String(content.title || '')}
+          lead={content.body ? String(content.body) : undefined}
+          primaryHref={hrefOf(content.primaryHref, '/contact')}
+          primaryLabel={String(content.primaryCta || 'Contact us')}
+          secondaryHref={secondaryLabel ? secondaryHref : undefined}
+          secondaryLabel={secondaryLabel}
+        />
+      </div>
+    );
+  }
+
   return (
     <section className="cta-band" id={sectionKey || 'contact'}>
       <div className="container">
@@ -835,9 +870,9 @@ function CtaSection({ content, sectionKey }: { content: Record<string, unknown>;
               {String(content.primaryCta)}
             </a>
           ) : null}
-          {content.secondaryCta ? (
-            <a href={hrefOf(content.secondaryHref)} className="btn btn-ghost">
-              {String(content.secondaryCta)}
+          {secondaryLabel && secondaryHref ? (
+            <a href={secondaryHref} className="btn btn-ghost">
+              {secondaryLabel}
             </a>
           ) : null}
         </div>
@@ -859,6 +894,52 @@ function RichTextSection({ content, sectionKey }: { content: Record<string, unkn
 
 function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   const crumb = String(content.breadcrumb || content.title || '');
+  const proofRail = Array.isArray(content.proofRail)
+    ? (content.proofRail as unknown[]).map((x) => String(x)).filter(Boolean)
+    : [];
+  const hasActions = Boolean(content.primaryCta || content.secondaryCta);
+  const useInner =
+    hasActions || proofRail.length > 0 || String(content.variant || '') === 'inner';
+
+  if (useInner) {
+    return (
+      <InnerPageHero
+        eyebrow={String(content.eyebrow || '')}
+        title={String(content.title || '')}
+        lead={content.lead ? String(content.lead) : undefined}
+        image={String(content.image || '/assets/images/city-skyline-with-solar-panels-and-indus.jpg')}
+        breadcrumb={[
+          { label: 'Home', href: '/' },
+          { label: crumb },
+        ]}
+        actions={
+          hasActions ? (
+            <>
+              {content.primaryCta ? (
+                <a href={hrefOf(content.primaryHref)} className="btn btn-primary">
+                  {String(content.primaryCta)}
+                </a>
+              ) : null}
+              {content.secondaryCta ? (
+                <a href={hrefOf(content.secondaryHref)} className="btn btn-ghost">
+                  {String(content.secondaryCta)}
+                </a>
+              ) : null}
+            </>
+          ) : undefined
+        }
+      >
+        {proofRail.length ? (
+          <div className="proof-rail">
+            {proofRail.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        ) : null}
+      </InnerPageHero>
+    );
+  }
+
   return (
     <section className="page-hero">
       <div className="hero-bg">
@@ -872,7 +953,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
       <div className="grid-overlay"></div>
       <div className="container">
         <div className="breadcrumb">
-          <a href={hrefOf("/")}>Home</a>
+          <a href={hrefOf('/')}>Home</a>
           <span className="sep">/</span>
           <span className="current">{crumb}</span>
         </div>
@@ -881,6 +962,77 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
         {content.leadEmphasis ? <p className="lead lead-emphasis">{String(content.leadEmphasis)}</p> : null}
         {content.lead ? <p className="lead">{String(content.lead)}</p> : null}
         {content.leadAccent ? <p className="lead lead-accent">{String(content.leadAccent)}</p> : null}
+      </div>
+    </section>
+  );
+}
+
+type IndustryHubCard = {
+  key?: string;
+  eyebrow?: string;
+  name: string;
+  lead?: string;
+  image?: string;
+  href?: string;
+};
+
+function IndustryHubSection({
+  content,
+  sectionKey,
+}: {
+  content: Record<string, unknown>;
+  sectionKey?: string | null;
+}) {
+  const stored = Array.isArray(content.cards) ? (content.cards as IndustryHubCard[]) : [];
+  const cards: IndustryHubCard[] =
+    stored.length > 0
+      ? stored
+      : INDUSTRY_DEFS.map((ind) => ({
+          key: ind.key,
+          eyebrow: ind.eyebrow,
+          name: ind.name,
+          lead: ind.lead,
+          image: INDUSTRY_HUB_IMAGES[ind.key],
+          href: `/industries/${ind.key}`,
+        }));
+
+  return (
+    <section className="hub-section hub-section--soft" id={sectionKey || 'sector-pathways'}>
+      <div className="container">
+        {content.showVisitTailor !== false ? <VisitTailorBar context="industries" /> : null}
+        <div className="section-head" style={{ marginTop: content.showVisitTailor !== false ? '2.25rem' : undefined }}>
+          <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-cyan'}`}>
+            {String(content.eyebrow || 'Sector pathways')}
+          </div>
+          <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
+          {content.body ? <p>{String(content.body)}</p> : null}
+        </div>
+        <div className="hub-grid">
+          {cards.map((card) => {
+            const href = card.href || (card.key ? `/industries/${card.key}` : '/industries');
+            return (
+              <Link key={card.key || card.name} href={hrefOf(href)} className="hub-card">
+                <div className="hub-card-media">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      card.image ||
+                      INDUSTRY_HUB_IMAGES[card.key || ''] ||
+                      '/assets/images/city-skyline-with-solar-panels-and-indus.jpg'
+                    }
+                    alt=""
+                  />
+                </div>
+                <div className="hub-card-body">
+                  {card.eyebrow ? <div className="eyebrow">{card.eyebrow}</div> : null}
+                  <h3>{card.name}</h3>
+                  {card.lead ? <p>{card.lead}</p> : null}
+                  <span className="hub-card-link">View industry page →</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -1562,8 +1714,13 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
     .filter(Boolean)
     .join('\n');
 
+  const bodyClass = sections
+    .filter((s) => s.enabled && s.type === 'page_hero')
+    .map((s) => String((s.content_json as { bodyClass?: string })?.bodyClass || '').trim())
+    .find(Boolean);
+
   return (
-    <main id="main-content">
+    <main id="main-content" className={bodyClass || undefined}>
       {scopedCss ? <style dangerouslySetInnerHTML={{ __html: scopedCss }} /> : null}
       {sections
         .filter((s) => s.enabled)
@@ -1601,6 +1758,8 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
               return wrap(<ProjectsTeaserSection key={key} content={content} sectionKey={section.section_key} />);
             case 'industries':
               return wrap(<IndustriesSection key={key} content={content} sectionKey={section.section_key} />);
+            case 'industry_hub':
+              return wrap(<IndustryHubSection key={key} content={content} sectionKey={section.section_key} />);
             case 'testimonials':
               return wrap(<TestimonialsSection key={key} content={content} />);
             case 'partners':

@@ -281,6 +281,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
               section.type === 'timeline' ||
               section.type === 'projects_teaser' ||
               section.type === 'industries' ||
+              section.type === 'industry_hub' ||
               section.type === 'split' ||
               section.type === 'rich_text' ||
               section.type === 'enquiry_form' ||
@@ -350,6 +351,35 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 <Field label="Body class">
                   <input className="admin-input" value={String(content.bodyClass || '')} onChange={(e) => setField('bodyClass', e.target.value)} placeholder="contact-page" />
                 </Field>
+                <Field label="Primary CTA label">
+                  <input className="admin-input" value={String(content.primaryCta || '')} onChange={(e) => setField('primaryCta', e.target.value)} />
+                </Field>
+                <Field label="Primary CTA href">
+                  <input className="admin-input" value={String(content.primaryHref || '')} onChange={(e) => setField('primaryHref', e.target.value)} />
+                </Field>
+                <Field label="Secondary CTA label">
+                  <input className="admin-input" value={String(content.secondaryCta || '')} onChange={(e) => setField('secondaryCta', e.target.value)} />
+                </Field>
+                <Field label="Secondary CTA href">
+                  <input className="admin-input" value={String(content.secondaryHref || '')} onChange={(e) => setField('secondaryHref', e.target.value)} />
+                </Field>
+                <div className="admin-field full">
+                  <label>Proof rail (one per line)</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 100 }}
+                    value={((content.proofRail as string[]) || []).join('\n')}
+                    onChange={(e) =>
+                      setField(
+                        'proofRail',
+                        e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                  />
+                </div>
               </div>
             ) : null}
 
@@ -374,6 +404,19 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
 
             {section.type === 'cta' ? (
               <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                <Field label="Layout variant">
+                  <select
+                    className="admin-input"
+                    value={String(content.variant || '') === 'inner' ? 'inner' : 'band'}
+                    onChange={(e) => setField('variant', e.target.value === 'inner' ? 'inner' : '')}
+                  >
+                    <option value="band">Classic CTA band</option>
+                    <option value="inner">Inner page CTA</option>
+                  </select>
+                </Field>
+                <Field label="Eyebrow (inner)">
+                  <input className="admin-input" value={String(content.eyebrow || '')} onChange={(e) => setField('eyebrow', e.target.value)} placeholder="Next step" />
+                </Field>
                 <Field label="Primary CTA label">
                   <input className="admin-input" value={ctaFields.primaryCta || ''} onChange={(e) => setField('primaryCta', e.target.value)} />
                 </Field>
@@ -814,6 +857,69 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                   />
                   <small style={{ color: 'var(--admin-muted)' }}>
                     Single-line marquee pauses on hover/keyboard focus and respects reduced-motion.
+                  </small>
+                </div>
+              </div>
+            ) : null}
+
+            {section.type === 'industry_hub' ? (
+              <div style={{ marginTop: '0.8rem' }}>
+                <div className="admin-form-grid">
+                  <Field label="Eyebrow class">
+                    <input
+                      className="admin-input"
+                      value={String(content.eyebrowClass || 'eyebrow-cyan')}
+                      onChange={(e) => setField('eyebrowClass', e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Show visit tailor bar">
+                    <select
+                      className="admin-input"
+                      value={content.showVisitTailor === false ? 'no' : 'yes'}
+                      onChange={(e) => setField('showVisitTailor', e.target.value === 'yes')}
+                    >
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </Field>
+                </div>
+                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                  <label>Industry cards (one per line: key | eyebrow | name | lead | image | href)</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 220, fontFamily: 'var(--admin-mono)' }}
+                    value={((content.cards as Array<Record<string, string>>) || [])
+                      .map((c) =>
+                        [c.key, c.eyebrow, c.name, c.lead, c.image, c.href]
+                          .map((p) => String(p || ''))
+                          .join(' | ')
+                      )
+                      .join('\n')}
+                    onChange={(e) =>
+                      setField(
+                        'cards',
+                        e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean)
+                          .map((line) => {
+                            const [key, eyebrow, name, lead, image, href] = line
+                              .split('|')
+                              .map((p) => p.trim());
+                            return {
+                              key: key || '',
+                              eyebrow: eyebrow || '',
+                              name: name || key || '',
+                              lead: lead || '',
+                              image: image || '',
+                              href: href || (key ? `/industries/${key}` : '/industries'),
+                            };
+                          })
+                      )
+                    }
+                  />
+                  <small style={{ color: 'var(--admin-muted)' }}>
+                    Leave cards empty to fall back to live industry definitions from Site Copy.
                   </small>
                 </div>
               </div>
