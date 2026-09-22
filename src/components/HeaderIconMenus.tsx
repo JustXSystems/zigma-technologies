@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { DEFAULT_SITE_SETTINGS, telHref, type SiteSettings } from '@/lib/site-settings';
+import {
+  parseHeaderTalk,
+  type HeaderTalkDisplay,
+  type HeaderTalkIcon,
+  type HeaderTalkItem,
+} from '@/lib/header-talk';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { whatsappHref } from '@/lib/whatsapp';
 import { trackEvent } from '@/lib/analytics';
@@ -65,6 +71,80 @@ function IconEmergency() {
   );
 }
 
+function IconLink() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M10 13a5 5 0 007.07 0l1.41-1.41a5 5 0 00-7.07-7.07L10 5.93" />
+      <path d="M14 11a5 5 0 00-7.07 0L5.52 12.4a5 5 0 007.07 7.07L14 18.07" />
+    </svg>
+  );
+}
+
+function IconCert() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="8" r="5" />
+      <path d="M8.5 13.5L7 22l5-2.5L17 22l-1.5-8.5" />
+    </svg>
+  );
+}
+
+function IconCase() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" />
+    </svg>
+  );
+}
+
+function IconSla() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function IconPress() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 4h12a2 2 0 012 2v14H6a2 2 0 01-2-2V4z" />
+      <path d="M18 6h2a2 2 0 012 2v10a2 2 0 01-2 2h-2" />
+      <path d="M8 8h6M8 12h6M8 16h4" />
+    </svg>
+  );
+}
+
+function talkIcon(icon: HeaderTalkIcon): ReactNode {
+  switch (icon) {
+    case 'support':
+      return <IconSupport />;
+    case 'call':
+      return <IconCall />;
+    case 'whatsapp':
+      return <IconWa />;
+    case 'callback':
+      return <IconCallback />;
+    case 'finder':
+      return <IconFinder />;
+    case 'emergency':
+      return <IconEmergency />;
+    case 'cert':
+      return <IconCert />;
+    case 'case':
+      return <IconCase />;
+    case 'sla':
+      return <IconSla />;
+    case 'press':
+      return <IconPress />;
+    case 'link':
+    default:
+      return <IconLink />;
+  }
+}
+
 function MenuChip({
   className,
   href,
@@ -74,6 +154,8 @@ function MenuChip({
   onClick,
   external,
   asButton,
+  desktopDisplay,
+  mobileDisplay,
 }: {
   className: string;
   href?: string;
@@ -83,7 +165,11 @@ function MenuChip({
   onClick?: () => void;
   external?: boolean;
   asButton?: boolean;
+  desktopDisplay: HeaderTalkDisplay;
+  mobileDisplay: HeaderTalkDisplay;
 }) {
+  if (desktopDisplay === 'off' && mobileDisplay === 'off') return null;
+
   const inner = (
     <>
       <span className="header-menu-chip-icon" aria-hidden>
@@ -93,9 +179,17 @@ function MenuChip({
     </>
   );
 
+  const props = {
+    className: `header-menu-chip ${className}`,
+    title,
+    'data-desktop': desktopDisplay,
+    'data-mobile': mobileDisplay,
+    onClick,
+  } as const;
+
   if (asButton) {
     return (
-      <button type="button" className={`header-menu-chip ${className}`} title={title} onClick={onClick}>
+      <button type="button" {...props}>
         {inner}
       </button>
     );
@@ -103,20 +197,14 @@ function MenuChip({
 
   if (href?.startsWith('/') && !external) {
     return (
-      <Link href={href} className={`header-menu-chip ${className}`} title={title} onClick={onClick}>
+      <Link href={href} {...props}>
         {inner}
       </Link>
     );
   }
 
   return (
-    <a
-      className={`header-menu-chip ${className}`}
-      href={href}
-      title={title}
-      onClick={onClick}
-      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-    >
+    <a href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})} {...props}>
       {inner}
     </a>
   );
@@ -134,13 +222,81 @@ function useFineHover() {
   return fineHover;
 }
 
-/** Single header utility: Talk to us (Call / WhatsApp / Callback / Finder / Emergency). */
+function resolveItem(
+  item: HeaderTalkItem,
+  ctx: {
+    phone: string;
+    emergency: string;
+    waUrl: string;
+    solutionFinderEnabled: boolean;
+  }
+): {
+  href?: string;
+  asButton?: boolean;
+  external?: boolean;
+  title: string;
+  track?: () => void;
+  onAction?: () => void;
+} | null {
+  switch (item.action) {
+    case 'call':
+      if (!ctx.phone) return null;
+      return {
+        href: telHref(ctx.phone),
+        title: item.label,
+        track: () => trackEvent('cta_click', { channel: 'call', placement: 'header_support' }),
+      };
+    case 'whatsapp':
+      if (!ctx.waUrl) return null;
+      return {
+        href: ctx.waUrl,
+        title: item.label,
+        external: item.openInNewTab,
+        track: () => trackEvent('cta_click', { channel: 'whatsapp', placement: 'header_support' }),
+      };
+    case 'callback':
+      return {
+        asButton: true,
+        title: item.label,
+        onAction: () => trackEvent('callback_open', { placement: 'header_support' }),
+      };
+    case 'emergency':
+      if (!ctx.emergency) return null;
+      return {
+        href: telHref(ctx.emergency),
+        title: `${item.label} ${ctx.emergency}`,
+      };
+    case 'solution_finder':
+      if (!ctx.solutionFinderEnabled) return null;
+      return {
+        href: item.href?.trim() || '/tools/solution-finder',
+        title: item.label,
+        track: () => trackEvent('cta_click', { channel: 'configurator', placement: 'header_support' }),
+      };
+    case 'link': {
+      const href = item.href?.trim();
+      if (!href) return null;
+      const external = item.openInNewTab || /^https?:\/\//i.test(href);
+      return {
+        href,
+        title: item.label,
+        external,
+        track: () => trackEvent('cta_click', { channel: 'header_talk_link', placement: 'header_support' }),
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+/** Single header utility: Talk to us (configurable submenu chips). */
 export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fineHover = useFineHover();
   const copy = useSiteCopy();
+  const talk = parseHeaderTalk(site.headerTalkJson);
 
   const phone = site.phone || DEFAULT_SITE_SETTINGS.phone;
   const emergency = site.emergencyPhone || DEFAULT_SITE_SETTINGS.emergencyPhone;
@@ -180,10 +336,30 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
     };
   }, []);
 
+  if (talk.desktopDisplay === 'off' && talk.mobileDisplay === 'off') {
+    return null;
+  }
+
+  const visibleItems = talk.items
+    .map((item) => {
+      if (item.desktopDisplay === 'off' && item.mobileDisplay === 'off') return null;
+      const resolved = resolveItem(item, {
+        phone,
+        emergency,
+        waUrl,
+        solutionFinderEnabled: copy.features.solutionFinderEnabled,
+      });
+      if (!resolved) return null;
+      return { item, resolved };
+    })
+    .filter(Boolean) as Array<{ item: HeaderTalkItem; resolved: NonNullable<ReturnType<typeof resolveItem>> }>;
+
   return (
     <div className="header-icon-menus" ref={rootRef}>
       <div
         className={`header-icon-menu${open ? ' is-open' : ''}`}
+        data-desktop={talk.desktopDisplay}
+        data-mobile={talk.mobileDisplay}
         onMouseEnter={() => {
           if (fineHover) openMenu();
         }}
@@ -194,10 +370,12 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
         <button
           type="button"
           className="header-talk-btn"
+          data-desktop={talk.desktopDisplay}
+          data-mobile={talk.mobileDisplay}
           aria-expanded={open}
           aria-haspopup="true"
-          aria-label={copy.talk.buttonLabel}
-          title={copy.talk.buttonLabel}
+          aria-label={talk.buttonLabel}
+          title={talk.buttonLabel}
           onClick={() => {
             if (fineHover) return;
             setOpen((v) => !v);
@@ -207,10 +385,10 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
           }}
         >
           <span className="header-talk-btn-icon">
-            <span className="pulse-dot" aria-hidden />
+            {talk.showPulse ? <span className="pulse-dot" aria-hidden /> : null}
             <IconSupport />
           </span>
-          <span className="header-talk-btn-label">{copy.talk.buttonLabel}</span>
+          <span className="header-talk-btn-label">{talk.buttonLabel}</span>
         </button>
         <div
           className="header-icon-panel header-icon-panel--chips"
@@ -221,64 +399,26 @@ export default function HeaderIconMenus({ site, onRequestCallback }: Props) {
           }}
         >
           <div className="header-menu-chip-rail">
-            <MenuChip
-              className="header-menu-chip--call"
-              href={telHref(phone)}
-              title={copy.talk.call}
-              icon={<IconCall />}
-              label={copy.talk.call}
-              onClick={() => {
-                trackEvent('cta_click', { channel: 'call', placement: 'header_support' });
-                setOpen(false);
-              }}
-            />
-            <MenuChip
-              className="header-menu-chip--wa"
-              href={waUrl}
-              title={copy.talk.whatsapp}
-              icon={<IconWa />}
-              label={copy.talk.whatsapp}
-              external
-              onClick={() => {
-                trackEvent('cta_click', { channel: 'whatsapp', placement: 'header_support' });
-                setOpen(false);
-              }}
-            />
-            <MenuChip
-              className="header-menu-chip--callback"
-              asButton
-              title={copy.talk.callback}
-              icon={<IconCallback />}
-              label={copy.talk.callback}
-              onClick={() => {
-                trackEvent('callback_open', { placement: 'header_support' });
-                setOpen(false);
-                onRequestCallback();
-              }}
-            />
-            {copy.features.solutionFinderEnabled ? (
+            {visibleItems.map(({ item, resolved }) => (
               <MenuChip
-                className="header-menu-chip--tool"
-                href="/tools/solution-finder"
-                title={copy.talk.solutionFinder}
-                icon={<IconFinder />}
-                label={copy.talk.solutionFinder}
+                key={item.id}
+                className={`header-menu-chip--${item.style}`}
+                href={resolved.href}
+                title={resolved.title}
+                icon={talkIcon(item.icon)}
+                label={item.label}
+                asButton={resolved.asButton}
+                external={resolved.external}
+                desktopDisplay={item.desktopDisplay}
+                mobileDisplay={item.mobileDisplay}
                 onClick={() => {
-                  trackEvent('cta_click', { channel: 'configurator', placement: 'header_support' });
+                  resolved.track?.();
+                  resolved.onAction?.();
                   setOpen(false);
+                  if (item.action === 'callback') onRequestCallback();
                 }}
               />
-            ) : null}
-            {emergency ? (
-              <MenuChip
-                className="header-menu-chip--emergency"
-                href={telHref(emergency)}
-                title={`${copy.talk.emergency} ${emergency}`}
-                icon={<IconEmergency />}
-                label={copy.talk.emergency}
-                onClick={() => setOpen(false)}
-              />
-            ) : null}
+            ))}
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
 import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
 import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
+import HeaderTalkEditor from '@/components/admin/HeaderTalkEditor';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -75,6 +76,14 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
       { key: 'ctaVariantBPercent', label: 'Variant B percent 0–100', hint: 'e.g. 50 shows B half the time' },
       { key: 'headerCtaHref', label: 'Header CTA href' },
     ],
+  },
+  {
+    id: 'header-talk',
+    title: 'Talk to us (header)',
+    description:
+      'Configure the header Talk to us trigger and its submenu chips: add, edit, delete, reorder, and set desktop/mobile display (hidden, icon only, or icon + label).',
+    defaultOpen: true,
+    fields: [],
   },
   {
     id: 'nav-menu-style',
@@ -377,6 +386,8 @@ export default function SiteSettingsPage() {
           >
             {section.id === 'logo-sizes' ? (
               <LogoTypeEditor settings={settings} onChange={patchSettings} />
+            ) : section.id === 'header-talk' ? (
+              <HeaderTalkEditor settings={settings} onChange={patchSettings} />
             ) : section.id === 'nav-menu-style' ? (
               <NavMenuStylePicker settings={settings} onChange={patchSettings} />
             ) : section.id === 'heading-levels' ? (

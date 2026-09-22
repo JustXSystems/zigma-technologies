@@ -191,12 +191,13 @@ export default function SiteCopyAdminPage() {
       <div className="admin-card">
         {tab === 'chrome' ? (
           <div className="admin-form-grid">
-            <Field label="Talk button" path="talk.buttonLabel" copy={copy} onChange={setCopy} />
-            <Field label="Talk · Call" path="talk.call" copy={copy} onChange={setCopy} />
-            <Field label="Talk · WhatsApp" path="talk.whatsapp" copy={copy} onChange={setCopy} />
-            <Field label="Talk · Callback" path="talk.callback" copy={copy} onChange={setCopy} />
-            <Field label="Talk · Solution finder" path="talk.solutionFinder" copy={copy} onChange={setCopy} />
-            <Field label="Talk · Emergency" path="talk.emergency" copy={copy} onChange={setCopy} />
+            <p className="full" style={{ color: 'var(--admin-muted)', margin: 0 }}>
+              Header Talk to us trigger and submenu chips are managed in{' '}
+              <a href="/admin/site-settings">Site settings → Talk to us</a>. Labels below still power WhatsApp
+              prefill and other surfaces (sticky bar, hubs, thank-you).
+            </p>
+            <Field label="Talk · WhatsApp label (non-header)" path="talk.whatsapp" copy={copy} onChange={setCopy} />
+            <Field label="Talk · Solution finder (hubs)" path="talk.solutionFinder" copy={copy} onChange={setCopy} />
             <div className="full">
               <Field label="WhatsApp prefill" path="talk.whatsappPrefill" copy={copy} onChange={setCopy} multiline />
             </div>

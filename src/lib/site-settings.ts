@@ -91,6 +91,11 @@ export type SiteSettings = {
   /** Percent 0–100 to show variant B */
   ctaVariantBPercent: string;
   /**
+   * Header "Talk to us" trigger + submenu chips (JSON).
+   * See `parseHeaderTalk` in `@/lib/header-talk`.
+   */
+  headerTalkJson: string;
+  /**
    * Public header / mega-menu visual style:
    * classic | corporate | elegant | rail | lumen | mosaic | ribbon
    */
@@ -193,6 +198,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   headerCtaHref: '/contact#contact-form',
   headerCtaLabelB: 'Get a Quote',
   ctaVariantBPercent: '50',
+  headerTalkJson: '',
   navMenuStyle: 'classic',
   headingPageHero: 'h3',
   headingSection: 'h3',
