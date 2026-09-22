@@ -132,10 +132,12 @@ export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: Set
   listing_layout: {
     title: 'Layout',
     guide: {
-      purpose: 'Control how many cards appear per row and whether cards are marketplace or overlay style.',
-      when: 'Change when desktop density feels wrong, or when marketing wants text over the image.',
-      how: 'Marketplace = image on top, details below (recommended). Overlay = text on media. Grid columns 2–4 work best on desktop.',
-      tip: 'List layout is better for long summaries; grid is better for visual browsing.',
+      purpose:
+        'Control card composition, columns, and whether listing tiles use content-driven or equal fixed heights.',
+      when:
+        'Change when desktop density feels wrong, marketing wants text over the image, or uneven card heights look untidy.',
+      how: 'Marketplace = image on top, details below (recommended). Overlay = text on media. Grid columns 2–4 work best on desktop. Card size Auto = current behaviour; Fixed = pick a uniform height.',
+      tip: 'List layout is better for long summaries; grid is better for visual browsing. Use Fixed when you want a precise corporate lineup.',
     },
   },
   listing_colors: {

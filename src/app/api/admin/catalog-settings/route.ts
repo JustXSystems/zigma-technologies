@@ -46,6 +46,8 @@ const putSchema = z.object({
   marketplace_hover_border_color: z.string().max(32).nullable().optional(),
   card_media_fit_percent: z.number().int().min(70).max(100).optional(),
   card_media_inset: z.enum(['none', 'snug', 'roomy']).optional(),
+  card_size_mode: z.enum(['auto', 'fixed']).optional(),
+  card_fixed_height_px: z.number().int().min(280).max(720).optional(),
   detail_layout: z.enum(CATALOG_DETAIL_LAYOUT_VALUES).optional(),
   detail_gallery_shadow: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
   detail_template: z.enum(CATALOG_DETAIL_TEMPLATE_VALUES).optional(),

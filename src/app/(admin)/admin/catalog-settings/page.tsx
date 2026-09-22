@@ -11,12 +11,16 @@ import {
   CATALOG_SHADOW_STYLE_OPTIONS,
   DEFAULT_CARD_MEDIA_FIT_PERCENT,
   DEFAULT_CARD_MEDIA_INSET,
+  DEFAULT_CARD_SIZE_MODE,
+  DEFAULT_CARD_FIXED_HEIGHT_PX,
   DEFAULT_DETAIL_ELEMENTS,
   DEFAULT_DETAIL_GALLERY_SHADOW,
   DEFAULT_DETAIL_LAYOUT,
   DEFAULT_DETAIL_TEMPLATE,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
+  normalizeCardSizeMode,
+  normalizeCardFixedHeightPx,
   normalizeDetailElements,
   normalizeDetailLayout,
   normalizeDetailTemplate,
@@ -30,6 +34,7 @@ import {
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
 import {
   CATALOG_SETTINGS_BLOCKS,
   CATALOG_SETTINGS_PAGE_INTRO,
@@ -107,6 +112,8 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     marketplace_hover_border_color: raw?.marketplace_hover_border_color || '#FF6B1A',
     card_media_fit_percent: normalizeCardMediaFitPercent(raw?.card_media_fit_percent),
     card_media_inset: normalizeCardMediaInset(raw?.card_media_inset),
+    card_size_mode: normalizeCardSizeMode(raw?.card_size_mode),
+    card_fixed_height_px: normalizeCardFixedHeightPx(raw?.card_fixed_height_px),
     detail_layout: normalizeDetailLayout(raw?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
     detail_gallery_shadow: normalizeShadowStyle(raw?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     detail_template: normalizeDetailTemplate(raw?.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
@@ -674,6 +681,8 @@ export default function CatalogSettingsPage() {
           marketplace_hover_border_color: settings.marketplace_hover_border_color || '#FF6B1A',
           card_media_fit_percent: normalizeCardMediaFitPercent(settings.card_media_fit_percent),
           card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
+          card_size_mode: normalizeCardSizeMode(settings.card_size_mode),
+          card_fixed_height_px: normalizeCardFixedHeightPx(settings.card_fixed_height_px),
           detail_layout: normalizeDetailLayout(settings.detail_layout),
           detail_gallery_shadow: normalizeShadowStyle(settings.detail_gallery_shadow),
           detail_template: normalizeDetailTemplate(settings.detail_template),
@@ -1099,6 +1108,16 @@ export default function CatalogSettingsPage() {
                         onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
                       />
 
+                    </div>
+                    <div className="admin-field full">
+                      <LabelWithHelp help="Auto keeps today’s content-driven heights. Fixed locks every listing card to one height for a corporate grid.">
+                        Card size
+                      </LabelWithHelp>
+                      <CatalogCardSizePicker
+                        mode={settings.card_size_mode || DEFAULT_CARD_SIZE_MODE}
+                        heightPx={settings.card_fixed_height_px ?? DEFAULT_CARD_FIXED_HEIGHT_PX}
+                        onChange={(next) => setSettings({ ...settings, ...next })}
+                      />
                     </div>
                   </div>
                 </SettingsBlock>

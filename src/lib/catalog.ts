@@ -18,6 +18,8 @@ import {
   DEFAULT_MEDIA_FIT_PERCENT,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
+  normalizeCardSizeMode,
+  normalizeCardFixedHeightPx,
   normalizeDetailLayout,
   normalizeDetailTemplate,
   normalizeDetailElements,
@@ -628,6 +630,8 @@ export async function getPageSettings(itemType: CatalogItemType) {
     marketplace_hover_border_color: row.marketplace_hover_border_color || '#FF6B1A',
     card_media_fit_percent: normalizeCardMediaFitPercent(row.card_media_fit_percent),
     card_media_inset: normalizeCardMediaInset(row.card_media_inset),
+    card_size_mode: normalizeCardSizeMode(row.card_size_mode),
+    card_fixed_height_px: normalizeCardFixedHeightPx(row.card_fixed_height_px),
     detail_layout: normalizeDetailLayout(row.detail_layout),
     detail_gallery_shadow: normalizeShadowStyle(row.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     detail_template: normalizeDetailTemplate(row.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
@@ -692,6 +696,12 @@ export async function updatePageSettings(
         : undefined,
     card_media_inset:
       input.card_media_inset !== undefined ? normalizeCardMediaInset(input.card_media_inset) : undefined,
+    card_size_mode:
+      input.card_size_mode !== undefined ? normalizeCardSizeMode(input.card_size_mode) : undefined,
+    card_fixed_height_px:
+      input.card_fixed_height_px !== undefined
+        ? normalizeCardFixedHeightPx(input.card_fixed_height_px)
+        : undefined,
     detail_layout:
       input.detail_layout !== undefined ? normalizeDetailLayout(input.detail_layout) : undefined,
     detail_gallery_shadow:

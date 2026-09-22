@@ -10,12 +10,17 @@ import type {
   CatalogPageSettings,
   CatalogFacets,
   CatalogCardMediaInset,
+  CatalogCardSizeMode,
 } from '@/lib/types';
 import {
   DEFAULT_CARD_MEDIA_FIT_PERCENT,
   DEFAULT_CARD_MEDIA_INSET,
+  DEFAULT_CARD_SIZE_MODE,
+  DEFAULT_CARD_FIXED_HEIGHT_PX,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
+  normalizeCardSizeMode,
+  normalizeCardFixedHeightPx,
 } from '@/lib/types';
 import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
@@ -392,6 +397,8 @@ function CatalogItemCard({
   cardMediaBg = '#ffffff',
   mediaFitPercent = DEFAULT_CARD_MEDIA_FIT_PERCENT,
   mediaInset = DEFAULT_CARD_MEDIA_INSET,
+  sizeMode = DEFAULT_CARD_SIZE_MODE,
+  fixedHeightPx = DEFAULT_CARD_FIXED_HEIGHT_PX,
   revealEnabled,
   delayMs,
   onOpen,
@@ -405,6 +412,8 @@ function CatalogItemCard({
   cardMediaBg?: string;
   mediaFitPercent?: number;
   mediaInset?: CatalogCardMediaInset;
+  sizeMode?: CatalogCardSizeMode;
+  fixedHeightPx?: number;
   revealEnabled: boolean;
   delayMs?: number;
   onOpen: (item: CatalogItem) => void;
@@ -414,6 +423,7 @@ function CatalogItemCard({
   const showBackground = hasField(cardFields, 'background_image', DEFAULT_CARD);
   const showMedia = showProduct || showBackground;
   const showBody = CARD_BODY_FIELDS.some((name) => hasField(cardFields, name, DEFAULT_CARD));
+  const fixedSize = sizeMode === 'fixed';
   return (
     <button
       type="button"
@@ -421,6 +431,7 @@ function CatalogItemCard({
         'catalog-card',
         layout === 'list' ? 'catalog-card--list' : 'catalog-card--tile',
         marketplace && 'catalog-card--marketplace',
+        fixedSize && 'catalog-card--size-fixed',
         revealEnabled && 'reveal'
       )}
       onClick={() => onOpen(item)}
@@ -431,6 +442,9 @@ function CatalogItemCard({
             ? ({ ['--catalog-card-body-bg']: cardBodyBg || '#ffffff' } as CSSProperties)
             : null),
           ['--catalog-card-media-bg']: cardMediaBg || '#ffffff',
+          ...(fixedSize
+            ? ({ ['--catalog-card-fixed-h']: `${fixedHeightPx}px` } as CSSProperties)
+            : null),
         } as CSSProperties
       }
     >
@@ -531,6 +545,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const marketplaceHoverBorder = settings?.marketplace_hover_border_color || '#FF6B1A';
   const cardMediaFitPercent = normalizeCardMediaFitPercent(settings?.card_media_fit_percent);
   const cardMediaInset = normalizeCardMediaInset(settings?.card_media_inset);
+  const cardSizeMode = normalizeCardSizeMode(settings?.card_size_mode);
+  const cardFixedHeightPx = normalizeCardFixedHeightPx(settings?.card_fixed_height_px);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
   const detailElements = resolveDetailElements(settings);
   const layout = settings?.layout || 'grid';
@@ -1131,6 +1147,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                               cardMediaBg={cardMediaBg}
                               mediaFitPercent={cardMediaFitPercent}
                               mediaInset={cardMediaInset}
+                              sizeMode={cardSizeMode}
+                              fixedHeightPx={cardFixedHeightPx}
                               revealEnabled={revealEnabled}
                               delayMs={index * 60}
                               onOpen={(next) => void openItem(next)}
@@ -1157,6 +1175,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                       cardMediaBg={cardMediaBg}
                       mediaFitPercent={cardMediaFitPercent}
                       mediaInset={cardMediaInset}
+                      sizeMode={cardSizeMode}
+                      fixedHeightPx={cardFixedHeightPx}
                       revealEnabled={revealEnabled}
                       delayMs={index * 60}
                       onOpen={(next) => void openItem(next)}

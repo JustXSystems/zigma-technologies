@@ -188,8 +188,16 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug' AFTER card_media_fit_percent`,
   },
   {
+    name: 'card_size_mode',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_size_mode VARCHAR(16) NOT NULL DEFAULT 'auto' AFTER card_media_inset`,
+  },
+  {
+    name: 'card_fixed_height_px',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_fixed_height_px SMALLINT UNSIGNED NOT NULL DEFAULT 420 AFTER card_size_mode`,
+  },
+  {
     name: 'detail_layout',
-    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage' AFTER card_media_inset`,
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage' AFTER card_fixed_height_px`,
   },
   {
     name: 'detail_gallery_shadow',

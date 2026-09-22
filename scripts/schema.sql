@@ -149,6 +149,8 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   marketplace_hover_border_color VARCHAR(32) NULL DEFAULT '#FF6B1A',
   card_media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 94,
   card_media_inset VARCHAR(16) NOT NULL DEFAULT 'snug',
+  card_size_mode VARCHAR(16) NOT NULL DEFAULT 'auto',
+  card_fixed_height_px SMALLINT UNSIGNED NOT NULL DEFAULT 420,
   detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage',
   detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium',
   detail_template VARCHAR(20) NOT NULL DEFAULT 'classic',
