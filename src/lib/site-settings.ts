@@ -1,4 +1,6 @@
 /** Public header mega-menu visual styles (admin Site Settings). */
+import { ctaLabelFromConfig, parseHeaderCta } from '@/lib/header-cta';
+
 export const NAV_MENU_STYLES = [
   {
     id: 'classic',
@@ -95,6 +97,11 @@ export type SiteSettings = {
    * See `parseHeaderTalk` in `@/lib/header-talk`.
    */
   headerTalkJson: string;
+  /**
+   * Header "Request Consultation" CTA + optional submenu (JSON).
+   * See `parseHeaderCta` in `@/lib/header-cta`. Flat headerCta* fields stay in sync as legacy.
+   */
+  headerCtaJson: string;
   /**
    * Public header / mega-menu visual style:
    * classic | corporate | elegant | rail | lumen | mosaic | ribbon
@@ -199,6 +206,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   headerCtaLabelB: 'Get a Quote',
   ctaVariantBPercent: '50',
   headerTalkJson: '',
+  headerCtaJson: '',
   navMenuStyle: 'classic',
   headingPageHero: 'h3',
   headingSection: 'h3',
@@ -394,8 +402,9 @@ export const DEFAULT_FAVICON = '/assets/images/zigma.png';
  */
 export function pickCtaVariant(settings: SiteSettings): 'A' | 'B' {
   if (typeof window === 'undefined') return 'A';
-  const pct = Math.min(100, Math.max(0, Number(settings.ctaVariantBPercent) || 0));
-  if (!pct || !settings.headerCtaLabelB?.trim()) return 'A';
+  const cta = parseHeaderCta(settings.headerCtaJson, settings);
+  const pct = cta.variantBPercent;
+  if (!pct || !cta.buttonLabelB.trim()) return 'A';
   try {
     const key = 'zt_cta_variant';
     const existing = window.sessionStorage.getItem(key);
@@ -410,7 +419,5 @@ export function pickCtaVariant(settings: SiteSettings): 'A' | 'B' {
 }
 
 export function ctaLabelForVariant(settings: SiteSettings, variant: 'A' | 'B') {
-  return variant === 'B' && settings.headerCtaLabelB.trim()
-    ? settings.headerCtaLabelB.trim()
-    : settings.headerCtaLabel;
+  return ctaLabelFromConfig(parseHeaderCta(settings.headerCtaJson, settings), variant);
 }

@@ -10,6 +10,7 @@ import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
 import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
 import HeaderTalkEditor from '@/components/admin/HeaderTalkEditor';
+import HeaderCtaEditor from '@/components/admin/HeaderCtaEditor';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -67,15 +68,11 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
   },
   {
     id: 'header-cta',
-    title: 'Header CTA',
-    description: 'Primary header button labels and A/B split.',
-    defaultOpen: false,
-    fields: [
-      { key: 'headerCtaLabel', label: 'Header CTA label (variant A)' },
-      { key: 'headerCtaLabelB', label: 'Header CTA label (variant B)' },
-      { key: 'ctaVariantBPercent', label: 'Variant B percent 0–100', hint: 'e.g. 50 shows B half the time' },
-      { key: 'headerCtaHref', label: 'Header CTA href' },
-    ],
+    title: 'Request Consultation (header)',
+    description:
+      'Configure the orange header CTA: labels A/B, primary action, optional submenu chips (add/edit/delete/reorder), and desktop/mobile display (hidden, icon only, or icon + label).',
+    defaultOpen: true,
+    fields: [],
   },
   {
     id: 'header-talk',
@@ -386,6 +383,8 @@ export default function SiteSettingsPage() {
           >
             {section.id === 'logo-sizes' ? (
               <LogoTypeEditor settings={settings} onChange={patchSettings} />
+            ) : section.id === 'header-cta' ? (
+              <HeaderCtaEditor settings={settings} onChange={patchSettings} />
             ) : section.id === 'header-talk' ? (
               <HeaderTalkEditor settings={settings} onChange={patchSettings} />
             ) : section.id === 'nav-menu-style' ? (

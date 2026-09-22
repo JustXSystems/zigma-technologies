@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
-import { ctaLabelForVariant, pickCtaVariant, logoAltText, sanitizeTaglineHtml, sanitizeNavMenuStyle } from '@/lib/site-settings';
+import { logoAltText, sanitizeTaglineHtml, sanitizeNavMenuStyle } from '@/lib/site-settings';
 import SiteSearchForm from '@/components/SiteSearchForm';
 import HeaderIconMenus from '@/components/HeaderIconMenus';
-import { trackEvent } from '@/lib/analytics';
+import HeaderCtaMenus from '@/components/HeaderCtaMenus';
 import CallbackRequestModal from '@/components/CallbackRequestModal';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
@@ -125,15 +125,11 @@ const DEFAULT_NAV: NavItem[] = [
 
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const { settings: site, headerNav: shellNav } = useSiteShell();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMega, setOpenMega] = useState<string | null>(null);
   const [isMobileNav, setIsMobileNav] = useState(false);
-  // Always start with A so SSR and the first client paint match. pickCtaVariant()
-  // reads sessionStorage / Math.random() and must only run after mount.
-  const [ctaVariant, setCtaVariant] = useState<'A' | 'B'>('A');
   const [callbackOpen, setCallbackOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const copy = useSiteCopy();
@@ -182,11 +178,6 @@ export default function Header() {
   const toggleMega = useCallback((label: string) => {
     setOpenMega((prev) => (prev === label ? null : label));
   }, []);
-
-  useEffect(() => {
-    setCtaVariant(pickCtaVariant(site));
-    trackEvent('cta_variant_shown', { variant: pickCtaVariant(site), placement: 'header' });
-  }, [site]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -267,13 +258,6 @@ export default function Header() {
   const onNavLeafClick = () => {
     if (typeof window !== 'undefined' && window.matchMedia(MOBILE_NAV_MQ).matches) closeMobileNav();
     else setOpenMega(null);
-  };
-
-  const openConsultation = (subject: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('consult', '1');
-    url.searchParams.set('consult_subject', subject);
-    router.replace(`${url.pathname}?${url.searchParams.toString()}`);
   };
 
   return (
@@ -369,24 +353,7 @@ export default function Header() {
               </div>
             ) : null}
             <HeaderIconMenus site={site} onRequestCallback={() => setCallbackOpen(true)} />
-            <button
-              type="button"
-              className="header-cta-icon"
-              aria-label={ctaLabelForVariant(site, ctaVariant)}
-              title={ctaLabelForVariant(site, ctaVariant)}
-              onClick={() => {
-                trackEvent('cta_click', { channel: 'consultation', placement: 'header', variant: ctaVariant });
-                openConsultation('Request a Quote');
-              }}
-            >
-              <span className="header-cta-icon-glyph" aria-hidden>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
-                  <path d="M8 9h8M8 13h5" />
-                </svg>
-              </span>
-              <span className="header-cta-icon-label">{ctaLabelForVariant(site, ctaVariant)}</span>
-            </button>
+            <HeaderCtaMenus site={site} onRequestCallback={() => setCallbackOpen(true)} />
             <button
               className={`menu-toggle ${mobileOpen ? 'is-active' : ''}`}
               aria-label={mobileOpen ? copy.a11y.close : copy.a11y.menuToggle}
