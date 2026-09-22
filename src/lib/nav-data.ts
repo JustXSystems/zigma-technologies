@@ -5,6 +5,11 @@ import { parseJsonField } from '@/lib/types';
 import { buildFooterColumns, buildNavTree, type FlatNavRow, type FooterColumn } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
 
+function rowEnabled(row: RowDataPacket): boolean {
+  if (row.enabled == null) return true;
+  return Number(row.enabled) === 1;
+}
+
 function mapNavRow(row: RowDataPacket): FlatNavRow {
   return {
     id: Number(row.id),
@@ -12,9 +17,18 @@ function mapNavRow(row: RowDataPacket): FlatNavRow {
     href: row.href,
     parent_id: row.parent_id == null ? null : Number(row.parent_id),
     sort_order: Number(row.sort_order),
-    enabled: Number(row.enabled) === 1,
+    enabled: rowEnabled(row),
     meta_json: parseJsonField<Record<string, unknown>>(row.meta_json, {}),
   };
+}
+
+/** All rows for a location (matches Admin → Navigation list). Used to build footer columns reliably. */
+async function loadAllNavRowsForLocation(location: 'header' | 'footer'): Promise<FlatNavRow[]> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM nav_items WHERE location = ? ORDER BY sort_order ASC, id ASC`,
+    [location]
+  );
+  return rows.map(mapNavRow);
 }
 
 /** Enabled rows plus ancestor chain so column headers stay linked when only children are enabled. */
@@ -68,10 +82,15 @@ export const getPublicNavRows = cache(async (location: 'header' | 'footer'): Pro
 });
 
 export async function resolvePublicFooterColumns(): Promise<FooterColumn[] | null> {
-  const rows = await getPublicNavRows('footer');
-  if (!rows.length) return null;
-  const columns = buildFooterColumns(rows);
-  return columns.length ? columns : null;
+  try {
+    const rows = await loadAllNavRowsForLocation('footer');
+    if (!rows.length) return null;
+    const columns = buildFooterColumns(rows);
+    return columns.length ? columns : null;
+  } catch (err) {
+    if (isDbUnavailableError(err)) return null;
+    throw err;
+  }
 }
 
 export async function resolvePublicHeaderNav(): Promise<NavItem[] | null> {

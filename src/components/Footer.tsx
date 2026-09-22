@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import type { FooterColumn } from '@/lib/nav-tree';
 import { telHref, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
@@ -11,99 +10,42 @@ import { trackEvent } from '@/lib/analytics';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
-import { filterFooterColumnsForFeatures } from '@/lib/nav-features';
 import { appHref } from '@/lib/base-path';
 
-const DEFAULT_COLUMNS: FooterColumn[] = [
-  {
-    heading: 'Company',
-    links: [
-      { label: 'About Zigma', href: '/#why' },
-      { label: '20-Year Legacy', href: '/#legacy' },
-      { label: 'Careers', href: '/careers' },
-      { label: 'Certifications', href: '/certifications' },
-      { label: 'Case studies', href: '/projects' },
-      { label: 'Industries', href: '/industries' },
-      { label: 'Locations', href: '/locations' },
-      { label: 'Press', href: '/press' },
-    ],
-  },
-  {
-    heading: 'Capabilities',
-    links: [
-      { label: 'Solar Solutions', href: '/products?category=solar-solutions' },
-      { label: 'UPS Solutions', href: '/products?category=ups-systems' },
-      { label: 'BESS Systems', href: '/products?category=bess' },
-      { label: 'EV Charging', href: '/products?category=ev-charging' },
-      { label: 'AMC & O&M Support', href: '/services?category=ups-amc' },
-      { label: 'Design & Engineering', href: '/services?category=engineering-design' },
-      { label: 'Service levels', href: '/sla' },
-    ],
-  },
-  {
-    heading: 'Contact',
-    links: [
-      { label: '+91 95901 37444', href: 'tel:+919590137444' },
-      { label: 'info@zigma-technologies.com', href: 'mailto:info@zigma-technologies.com' },
-      { label: 'Emergency Call: +91 9590137666 →', href: 'tel:+919590137666', className: 'foot-emergency' },
-    ],
-  },
-];
-
 type FooterProps = {
-  /** Layout SSR payload — preferred over context so footer nav always matches Admin → Navigation (footer). */
-  initialFooterColumns?: FooterColumn[] | null;
+  /** Server-rendered CMS footer columns (Admin → Navigation → Footer). */
+  footerNav: ReactNode;
 };
 
-export default function Footer({ initialFooterColumns = null }: FooterProps) {
+export default function Footer({ footerNav }: FooterProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { settings: site, footerColumns: contextColumns } = useSiteShell();
-  const shellColumns = initialFooterColumns ?? contextColumns;
+  const { settings: site } = useSiteShell();
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
-  const [liveColumns, setLiveColumns] = useState<FooterColumn[] | null>(null);
   const copy = useSiteCopy();
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(appHref('/api/public/nav?location=footer&format=columns'));
-        const data = await res.json().catch(() => ({}));
-        if (cancelled || !res.ok || !Array.isArray(data.columns) || !data.columns.length) return;
-        setLiveColumns(data.columns as FooterColumn[]);
-      } catch {
-        /* keep SSR / shell columns */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const current = useMemo(
+    () =>
+      pathname === '/contact'
+        ? 'contact'
+        : pathname === '/careers'
+          ? 'careers'
+          : pathname === '/certifications'
+            ? 'certifications'
+            : 'home',
+    [pathname]
+  );
 
-  const footerColumns = useMemo(() => {
-    const fromCms = liveColumns?.length ? liveColumns : shellColumns?.length ? shellColumns : null;
-    if (fromCms?.length) return fromCms;
-    return filterFooterColumnsForFeatures(DEFAULT_COLUMNS, copy.features);
-  }, [liveColumns, shellColumns, copy.features]);
-
-  const current = useMemo(() =>
-    pathname === '/contact'
-      ? 'contact'
-      : pathname === '/careers'
-        ? 'careers'
-        : pathname === '/certifications'
-          ? 'certifications'
-          : 'home',
-  [pathname]);
-
-  const openConsultation = useCallback((subject: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('consult', '1');
-    url.searchParams.set('consult_subject', subject);
-    router.replace(`${url.pathname}?${url.searchParams.toString()}`);
-  }, [router]);
+  const openConsultation = useCallback(
+    (subject: string) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('consult', '1');
+      url.searchParams.set('consult_subject', subject);
+      router.replace(`${url.pathname}?${url.searchParams.toString()}`);
+    },
+    [router]
+  );
 
   const handleNewsletterSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -165,50 +107,7 @@ export default function Footer({ initialFooterColumns = null }: FooterProps) {
               )}
               {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
             </div>
-            {footerColumns.map((col) => (
-              <div key={col.heading} className="foot-col">
-                <h6>{col.heading}</h6>
-                {col.links.map((link) => (
-                  <a key={`${col.heading}-${link.label}`} href={appHref(link.href)} className={link.className}>
-                    {link.label}
-                  </a>
-                ))}
-                {col.heading.toLowerCase() === 'contact' ? (
-                  <>
-                    {(site.addressLocality || site.officeHours) ? (
-                      <div className="foot-meta">
-                        {site.addressLocality ? (
-                          <span>
-                            {[site.addressStreet, site.addressLocality, site.addressRegion]
-                              .filter(Boolean)
-                              .join(', ')}
-                          </span>
-                        ) : null}
-                        {site.officeHours ? <span className="foot-hours">{site.officeHours}</span> : null}
-                      </div>
-                    ) : null}
-                    {site.facebookUrl || site.linkedinUrl ? (
-                      <div className="social-links">
-                        {site.facebookUrl ? (
-                          <a href={site.facebookUrl} className="sl-fb" aria-label={copy.a11y.facebook} target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0022 12z" />
-                            </svg>
-                          </a>
-                        ) : null}
-                        {site.linkedinUrl ? (
-                          <a href={site.linkedinUrl} className="sl-li" aria-label={copy.a11y.linkedin} target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M4.98 3.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM3 9h4v12H3zM9 9h3.8v1.64h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.94-1.79-2.94-1.8 0-2.08 1.4-2.08 2.85V21H9z" />
-                            </svg>
-                          </a>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </>
-                ) : null}
-              </div>
-            ))}
+            {footerNav}
           </div>
           <div className="foot-bottom">
             <span>{site.copyright}</span>

@@ -1,5 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import FooterLinkColumns from '@/components/FooterLinkColumns';
+import { footerColumnsForSite } from '@/lib/footer-nav';
 import SiteSeo from '@/components/SiteSeo';
 import OrganizationJsonLd from '@/components/OrganizationJsonLd';
 import CookieConsent from '@/components/CookieConsent';
@@ -17,6 +19,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const shell = await loadSiteShell();
+  const footerColumns = footerColumnsForSite(shell.footerColumns, shell.copy.features);
 
   return (
     <SiteProviders
@@ -32,7 +35,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header />
       <ConsultationModalHost />
       {children}
-      <Footer initialFooterColumns={shell.footerColumns} />
+      <Footer
+        footerNav={<FooterLinkColumns columns={footerColumns} site={shell.settings} copy={shell.copy} />}
+      />
       <CookieConsent settings={shell.settings} />
       <PwaRegister />
     </SiteProviders>
