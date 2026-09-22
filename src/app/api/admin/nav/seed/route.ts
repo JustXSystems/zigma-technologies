@@ -3,6 +3,7 @@ import { jsonError, jsonOk, readJson } from '@/lib/api';
 import pool from '@/lib/db';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { FOOTER_NAV_SEED, HEADER_NAV_SEED, type NavSeedNode } from '@/lib/nav-seed';
+import { revalidatePublicShell } from '@/lib/revalidate-public-shell';
 
 async function insertNode(
   location: 'header' | 'footer',
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
     for (let i = 0; i < seed.length; i++) {
       await insertNode(location, seed[i], null, i);
     }
+    revalidatePublicShell();
 
     return jsonOk({
       seeded: true,

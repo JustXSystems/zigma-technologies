@@ -3,6 +3,7 @@ import type { RowDataPacket } from 'mysql2';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import pool from '@/lib/db';
+import { revalidatePublicShell } from '@/lib/revalidate-public-shell';
 
 const schema = z.object({
   label: z.string().min(1).optional(),
@@ -41,6 +42,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (fields.length) {
       params.push(Number(id));
       await pool.query(`UPDATE nav_items SET ${fields.join(', ')} WHERE id = ?`, params);
+      revalidatePublicShell();
     }
     return jsonOk({ ok: true });
   } catch (error) {
@@ -76,6 +78,7 @@ export async function DELETE(_request: Request, ctx: Ctx) {
     const ids = await collectDescendantIds(rootId);
     if (ids.length) {
       await pool.query(`DELETE FROM nav_items WHERE id IN (${ids.map(() => '?').join(',')})`, ids);
+      revalidatePublicShell();
     }
     return jsonOk({ ok: true, deleted: ids.length || 1 });
   } catch (error) {

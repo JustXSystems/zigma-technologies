@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { FooterColumn } from '@/lib/nav-tree';
 import { telHref, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
@@ -56,11 +56,14 @@ export default function Footer() {
   const { settings: site, footerColumns: shellColumns } = useSiteShell();
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
-  const [columns, setColumns] = useState<FooterColumn[]>(shellColumns || DEFAULT_COLUMNS);
   const copy = useSiteCopy();
   const footerColumns = useMemo(
-    () => filterFooterColumnsForFeatures(columns, copy.features),
-    [columns, copy.features]
+    () =>
+      filterFooterColumnsForFeatures(
+        shellColumns?.length ? shellColumns : DEFAULT_COLUMNS,
+        copy.features
+      ),
+    [shellColumns, copy.features]
   );
 
   const current = useMemo(() =>
@@ -72,10 +75,6 @@ export default function Footer() {
           ? 'certifications'
           : 'home',
   [pathname]);
-
-  useEffect(() => {
-    if (shellColumns?.length) setColumns(shellColumns);
-  }, [shellColumns]);
 
   const openConsultation = useCallback((subject: string) => {
     const url = new URL(window.location.href);

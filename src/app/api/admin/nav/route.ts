@@ -4,6 +4,7 @@ import { jsonError, jsonOk, readJson } from '@/lib/api';
 import pool from '@/lib/db';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { parseJsonField } from '@/lib/types';
+import { revalidatePublicShell } from '@/lib/revalidate-public-shell';
 
 export async function GET(request: Request) {
   try {
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
         JSON.stringify(body.meta_json || {}),
       ]
     );
+    revalidatePublicShell();
     return jsonOk({ id: result.insertId }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);

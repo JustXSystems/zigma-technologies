@@ -7,10 +7,15 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#22 Split feature block - multiple CTA">
+      <change afterPath="$PROJECT_DIR$/src/lib/revalidate-public-shell.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/nav/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/nav/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/nav/reorder/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/nav/reorder/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/nav/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/nav/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/nav/seed/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/nav/seed/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/nav-data.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-data.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,23 +63,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0779502818805515" />
-      <entry key="MS500" value="2.5592452747221444" />
-      <entry key="S2" value="5.68828261110482" />
-      <entry key="S5" value="8.968690890986307" />
-      <entry key="S10" value="12.973778354596298" />
-      <entry key="S30" value="25.05552022180649" />
-      <entry key="S60" value="40.72444030947587" />
-      <entry key="M2" value="63.37515926257026" />
-      <entry key="M5" value="91.00066764152518" />
-      <entry key="M10" value="104.47655167758776" />
-      <entry key="M15" value="109.6113933779319" />
-      <entry key="M30" value="115.1616696684386" />
-      <entry key="H1" value="121.92389573391914" />
-      <entry key="H2" value="156.68927525429908" />
-      <entry key="H4" value="241.6034492878644" />
-      <entry key="D1" value="1296.022085364062" />
-      <entry key="W1" value="11922.012234298762" />
+      <entry key="MS100" value="1.0686562529589012" />
+      <entry key="MS500" value="1.9486872315451924" />
+      <entry key="S2" value="3.364507713264656" />
+      <entry key="S5" value="5.480591548601416" />
+      <entry key="S10" value="7.903646504163445" />
+      <entry key="S30" value="17.49856112434633" />
+      <entry key="S60" value="25.438997519152295" />
+      <entry key="M2" value="31.69474418345406" />
+      <entry key="M5" value="41.72346659589294" />
+      <entry key="M10" value="59.911070720481916" />
+      <entry key="M15" value="75.37006977573895" />
+      <entry key="M30" value="111.412378807509" />
+      <entry key="H1" value="156.1318581470596" />
+      <entry key="H2" value="215.07021095430287" />
+      <entry key="H4" value="312.8329199201867" />
+      <entry key="D1" value="1372.2947385021298" />
+      <entry key="W1" value="11982.603532806957" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -88,31 +93,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="3.240451718530614E-175" />
-      <entry key="H1" value="5.692496568757131E-88" />
-      <entry key="H2" value="2.3858953390197963E-44" />
-      <entry key="H4" value="1.5446343706845713E-22" />
-      <entry key="D1" value="2.3534874937513142E-4" />
-      <entry key="W1" value="0.47006663714844993" />
+      <entry key="M30" value="5.120643974913339E-176" />
+      <entry key="H1" value="2.2628839950192362E-88" />
+      <entry key="H2" value="1.504288534496936E-44" />
+      <entry key="H4" value="1.2264944086898934E-22" />
+      <entry key="D1" value="2.264740993557582E-4" />
+      <entry key="W1" value="0.46749251688495186" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0350185066331776" />
-      <entry key="MS500" value="2.5404446055903014" />
-      <entry key="S2" value="5.677705731976115" />
-      <entry key="S5" value="8.961823783337948" />
-      <entry key="S10" value="12.968655723757381" />
-      <entry key="S30" value="25.051955975864434" />
-      <entry key="S60" value="40.721224783701636" />
-      <entry key="M2" value="63.37248084868567" />
-      <entry key="M5" value="90.99907775516478" />
-      <entry key="M10" value="104.47563134347945" />
-      <entry key="M15" value="109.61074808298724" />
-      <entry key="M30" value="115.16132992701014" />
-      <entry key="H1" value="121.92371651985704" />
-      <entry key="H2" value="156.68916375003252" />
-      <entry key="H4" value="241.60336698797997" />
-      <entry key="D1" value="1296.0222492992825" />
-      <entry key="W1" value="11922.482173682254" />
+      <entry key="MS100" value="1.0179935792541348" />
+      <entry key="MS500" value="1.9293537857962326" />
+      <entry key="S2" value="3.356029837570269" />
+      <entry key="S5" value="5.475044853131271" />
+      <entry key="S10" value="7.899623378398383" />
+      <entry key="S30" value="17.49548496796227" />
+      <entry key="S60" value="25.436723560738045" />
+      <entry key="M2" value="31.693310556920064" />
+      <entry key="M5" value="41.722605953852785" />
+      <entry key="M10" value="59.91032527819283" />
+      <entry key="M15" value="75.36940256446275" />
+      <entry key="M30" value="111.41187629512108" />
+      <entry key="H1" value="156.13151907784663" />
+      <entry key="H2" value="215.06999377046455" />
+      <entry key="H4" value="312.8327775790228" />
+      <entry key="D1" value="1372.2948829014997" />
+      <entry key="W1" value="11983.070896846117" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -264,7 +269,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#13 build issue fixed" />
     <MESSAGE value="#14 Eyebrow sizes are to be controllable in Admin → Site settings → Eyebrow font sizes." />
     <MESSAGE value="#15 can move catalog-detail-footer to catalog-detail-layout as next row spannig accross catalog-detail-media-col and catalog-detail-content-col" />
     <MESSAGE value="#16 Card image fill admin-field full is set to 100, still I see card listing catalog-card-media is having more empty space, can please check and fix to have card image to consume full area (full height, full width) of catalog-card-media" />
@@ -289,7 +293,8 @@
     <MESSAGE value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest." />
-    <option name="LAST_COMMIT_MESSAGE" value="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest." />
+    <MESSAGE value="#22 Split feature block - multiple CTA" />
+    <option name="LAST_COMMIT_MESSAGE" value="#22 Split feature block - multiple CTA" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

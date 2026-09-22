@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { reorderNavItems } from '@/lib/cms';
+import { revalidatePublicShell } from '@/lib/revalidate-public-shell';
 
 const schema = z.object({
   location: z.enum(['header', 'footer']),
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
     await requireSession();
     const body = schema.parse(await readJson(request));
     await reorderNavItems(body.location, body.ordered_ids);
+    revalidatePublicShell();
     return jsonOk({ ok: true });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);

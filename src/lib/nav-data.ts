@@ -11,11 +11,11 @@ export const getPublicNavRows = cache(async (location: 'header' | 'footer'): Pro
       [location]
     );
     return rows.map((row) => ({
-      id: row.id,
+      id: Number(row.id),
       label: row.label,
       href: row.href,
-      parent_id: row.parent_id,
-      sort_order: row.sort_order,
+      parent_id: row.parent_id == null ? null : Number(row.parent_id),
+      sort_order: Number(row.sort_order),
       meta_json: parseJsonField<Record<string, unknown>>(row.meta_json, {}),
     }));
   } catch (err) {
