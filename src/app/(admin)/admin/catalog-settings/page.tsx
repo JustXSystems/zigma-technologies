@@ -13,6 +13,7 @@ import {
   DEFAULT_CARD_MEDIA_INSET,
   DEFAULT_CARD_SIZE_MODE,
   DEFAULT_CARD_FIXED_HEIGHT_PX,
+  DEFAULT_CARD_FIXED_WIDTH_PX,
   DEFAULT_DETAIL_ELEMENTS,
   DEFAULT_DETAIL_GALLERY_SHADOW,
   DEFAULT_DETAIL_LAYOUT,
@@ -21,6 +22,7 @@ import {
   normalizeCardMediaInset,
   normalizeCardSizeMode,
   normalizeCardFixedHeightPx,
+  normalizeCardFixedWidthPx,
   normalizeDetailElements,
   normalizeDetailLayout,
   normalizeDetailTemplate,
@@ -114,6 +116,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     card_media_inset: normalizeCardMediaInset(raw?.card_media_inset),
     card_size_mode: normalizeCardSizeMode(raw?.card_size_mode),
     card_fixed_height_px: normalizeCardFixedHeightPx(raw?.card_fixed_height_px),
+    card_fixed_width_px: normalizeCardFixedWidthPx(raw?.card_fixed_width_px),
     detail_layout: normalizeDetailLayout(raw?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
     detail_gallery_shadow: normalizeShadowStyle(raw?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     detail_template: normalizeDetailTemplate(raw?.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
@@ -683,6 +686,7 @@ export default function CatalogSettingsPage() {
           card_media_inset: normalizeCardMediaInset(settings.card_media_inset),
           card_size_mode: normalizeCardSizeMode(settings.card_size_mode),
           card_fixed_height_px: normalizeCardFixedHeightPx(settings.card_fixed_height_px),
+          card_fixed_width_px: normalizeCardFixedWidthPx(settings.card_fixed_width_px),
           detail_layout: normalizeDetailLayout(settings.detail_layout),
           detail_gallery_shadow: normalizeShadowStyle(settings.detail_gallery_shadow),
           detail_template: normalizeDetailTemplate(settings.detail_template),
@@ -1110,12 +1114,13 @@ export default function CatalogSettingsPage() {
 
                     </div>
                     <div className="admin-field full">
-                      <LabelWithHelp help="Auto keeps today’s content-driven heights. Fixed locks every listing card to one height for a corporate grid.">
+                      <LabelWithHelp help="Auto keeps content-driven sizing. Custom locks width and height with the sliders below.">
                         Card size
                       </LabelWithHelp>
                       <CatalogCardSizePicker
                         mode={settings.card_size_mode || DEFAULT_CARD_SIZE_MODE}
                         heightPx={settings.card_fixed_height_px ?? DEFAULT_CARD_FIXED_HEIGHT_PX}
+                        widthPx={settings.card_fixed_width_px ?? DEFAULT_CARD_FIXED_WIDTH_PX}
                         onChange={(next) => setSettings({ ...settings, ...next })}
                       />
                     </div>

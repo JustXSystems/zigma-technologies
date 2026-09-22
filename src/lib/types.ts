@@ -243,49 +243,33 @@ export function normalizeCardMediaInset(value: unknown): CatalogCardMediaInset {
   return DEFAULT_CARD_MEDIA_INSET;
 }
 
-/** Listing-card overall size: auto = content-driven (current); fixed = equal height tiles */
-export type CatalogCardSizeMode = 'auto' | 'fixed';
+/** Listing-card overall size: auto = content-driven; custom = fixed width + height */
+export type CatalogCardSizeMode = 'auto' | 'custom';
 export const DEFAULT_CARD_SIZE_MODE: CatalogCardSizeMode = 'auto';
 export const DEFAULT_CARD_FIXED_HEIGHT_PX = 420;
+export const DEFAULT_CARD_FIXED_WIDTH_PX = 320;
 export const CARD_FIXED_HEIGHT_MIN = 280;
 export const CARD_FIXED_HEIGHT_MAX = 720;
-export const CARD_SIZE_MODE_OPTIONS: Array<{
-  value: CatalogCardSizeMode;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: 'auto',
-    label: 'Auto',
-    description: 'Cards grow with content — current marketplace / overlay behaviour.',
-  },
-  {
-    value: 'fixed',
-    label: 'Fixed',
-    description: 'Uniform card height across the grid for a precise corporate lineup.',
-  },
-];
-export const CARD_FIXED_HEIGHT_PRESETS: Array<{
-  id: string;
-  label: string;
-  height: number;
-  hint: string;
-}> = [
-  { id: 'compact', label: 'Compact', height: 360, hint: 'Dense browse grids' },
-  { id: 'standard', label: 'Standard', height: 420, hint: 'Balanced default' },
-  { id: 'comfort', label: 'Comfort', height: 480, hint: 'More media presence' },
-  { id: 'tall', label: 'Tall', height: 560, hint: 'Hero-forward tiles' },
-];
+export const CARD_FIXED_WIDTH_MIN = 180;
+export const CARD_FIXED_WIDTH_MAX = 560;
 
 export function normalizeCardSizeMode(value: unknown): CatalogCardSizeMode {
   const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
-  return raw === 'fixed' ? 'fixed' : DEFAULT_CARD_SIZE_MODE;
+  // 'fixed' kept for rows saved before the Auto/Custom rename
+  if (raw === 'custom' || raw === 'fixed') return 'custom';
+  return DEFAULT_CARD_SIZE_MODE;
 }
 
 export function normalizeCardFixedHeightPx(value: unknown): number {
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n)) return DEFAULT_CARD_FIXED_HEIGHT_PX;
   return Math.min(CARD_FIXED_HEIGHT_MAX, Math.max(CARD_FIXED_HEIGHT_MIN, Math.round(n)));
+}
+
+export function normalizeCardFixedWidthPx(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return DEFAULT_CARD_FIXED_WIDTH_PX;
+  return Math.min(CARD_FIXED_WIDTH_MAX, Math.max(CARD_FIXED_WIDTH_MIN, Math.round(n)));
 }
 
 export type CatalogCaseStudy = {
@@ -446,12 +430,14 @@ export type CatalogPageSettings = {
   card_media_inset: 'none' | 'snug' | 'roomy';
   /**
    * Listing card sizing:
-   * - auto: content-driven height (current behaviour)
-   * - fixed: equal-height cards using card_fixed_height_px
+   * - auto: content-driven size (current behaviour)
+   * - custom: fixed width + height via card_fixed_*_px
    */
   card_size_mode: CatalogCardSizeMode;
-  /** Target card height in px when card_size_mode is fixed */
+  /** Target card height in px when card_size_mode is custom */
   card_fixed_height_px: number;
+  /** Target card width in px when card_size_mode is custom */
+  card_fixed_width_px: number;
   /**
    * Quick-view popup composition (catalog-detail-panel).
    * media-stage = product-first sticky gallery; balanced = equal split; stacked = gallery on top.

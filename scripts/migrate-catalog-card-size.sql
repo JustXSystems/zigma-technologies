@@ -1,4 +1,4 @@
--- Catalog listing card size: auto (content) vs fixed equal height
+-- Catalog listing card size: auto (content) vs custom (fixed width + height)
 SET @db := DATABASE();
 
 SET @exists := (
@@ -19,6 +19,17 @@ SET @exists := (
 SET @sql := IF(
   @exists = 0,
   'ALTER TABLE catalog_page_settings ADD COLUMN card_fixed_height_px SMALLINT UNSIGNED NOT NULL DEFAULT 420 AFTER card_size_mode',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'card_fixed_width_px'
+);
+SET @sql := IF(
+  @exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN card_fixed_width_px SMALLINT UNSIGNED NOT NULL DEFAULT 320 AFTER card_fixed_height_px',
   'SELECT 1'
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

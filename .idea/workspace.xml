@@ -7,14 +7,16 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#23 Footer Navigation issues">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#24 Catalog Item Listing size fixing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-card-size.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-card-size.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/CatalogCardSizePicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/CatalogCardSizePicker.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
@@ -66,23 +68,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4181594483033457" />
-      <entry key="MS500" value="2.4508832298075234" />
-      <entry key="S2" value="2.851935279431487" />
-      <entry key="S5" value="3.6551973647837785" />
-      <entry key="S10" value="7.414151503561764" />
-      <entry key="S30" value="29.162482999587002" />
-      <entry key="S60" value="59.62261341071199" />
-      <entry key="M2" value="104.38734706802704" />
-      <entry key="M5" value="163.9171377272999" />
-      <entry key="M10" value="195.2545241858334" />
-      <entry key="M15" value="209.1861743885132" />
-      <entry key="M30" value="239.23638849198602" />
-      <entry key="H1" value="301.74532732171053" />
-      <entry key="H2" value="451.2991709278258" />
-      <entry key="H4" value="715.3501045199013" />
-      <entry key="D1" value="2087.4452808940405" />
-      <entry key="W1" value="12692.98897842413" />
+      <entry key="MS100" value="1.31031286815035" />
+      <entry key="MS500" value="3.240692214984047" />
+      <entry key="S2" value="5.978213288046334" />
+      <entry key="S5" value="7.859166643285607" />
+      <entry key="S10" value="9.725412669740642" />
+      <entry key="S30" value="23.481129089062375" />
+      <entry key="S60" value="41.65202379499942" />
+      <entry key="M2" value="68.17847126136203" />
+      <entry key="M5" value="107.39032456012784" />
+      <entry key="M10" value="135.13459672870067" />
+      <entry key="M15" value="159.05401831611545" />
+      <entry key="M30" value="228.20045910839622" />
+      <entry key="H1" value="335.9664749755288" />
+      <entry key="H2" value="514.6828955927141" />
+      <entry key="H4" value="802.5577284695476" />
+      <entry key="D1" value="2231.5500326753677" />
+      <entry key="W1" value="12844.826314378757" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -96,31 +98,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.9032460443165653E-180" />
-      <entry key="H1" value="1.3795818367595722E-90" />
-      <entry key="H2" value="1.1745560168673897E-45" />
-      <entry key="H4" value="3.4271796231112354E-23" />
-      <entry key="D1" value="1.831177416355034E-4" />
-      <entry key="W1" value="0.4535139461678712" />
+      <entry key="M30" value="5.189136977134228E-181" />
+      <entry key="H1" value="7.203566461923698E-91" />
+      <entry key="H2" value="8.48738267189759E-46" />
+      <entry key="H4" value="2.9133112899556305E-23" />
+      <entry key="D1" value="1.7822642444374786E-4" />
+      <entry key="W1" value="0.45176323581473843" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3680263920896398" />
-      <entry key="MS500" value="2.432892147521778" />
-      <entry key="S2" value="2.846673289839688" />
-      <entry key="S5" value="3.6525170757096634" />
-      <entry key="S10" value="7.411435007209979" />
-      <entry key="S30" value="29.158861536263785" />
-      <entry key="S60" value="59.6188795363612" />
-      <entry key="M2" value="104.38403628903112" />
-      <entry key="M5" value="163.9150293951229" />
-      <entry key="M10" value="195.25326123469523" />
-      <entry key="M15" value="209.18527033037887" />
-      <entry key="M30" value="239.23586932792887" />
-      <entry key="H1" value="301.7449950839097" />
-      <entry key="H2" value="451.2989096008653" />
-      <entry key="H4" value="715.3498843780427" />
-      <entry key="D1" value="2087.4453499187794" />
-      <entry key="W1" value="12693.442360258448" />
+      <entry key="MS100" value="1.237552729230544" />
+      <entry key="MS500" value="3.2020343074233755" />
+      <entry key="S2" value="5.960586448206474" />
+      <entry key="S5" value="7.850030183327854" />
+      <entry key="S10" value="9.719980874074158" />
+      <entry key="S30" value="23.477595594422528" />
+      <entry key="S60" value="41.649161730213926" />
+      <entry key="M2" value="68.17626029782959" />
+      <entry key="M5" value="107.38898522464831" />
+      <entry key="M10" value="135.13376323335265" />
+      <entry key="M15" value="159.05336385833465" />
+      <entry key="M30" value="228.19998473614766" />
+      <entry key="H1" value="335.96611932044334" />
+      <entry key="H2" value="514.6826104462976" />
+      <entry key="H4" value="802.5574916615968" />
+      <entry key="D1" value="2231.550091345257" />
+      <entry key="W1" value="12845.277944790872" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -272,7 +274,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#15 can move catalog-detail-footer to catalog-detail-layout as next row spannig accross catalog-detail-media-col and catalog-detail-content-col" />
     <MESSAGE value="#16 Card image fill admin-field full is set to 100, still I see card listing catalog-card-media is having more empty space, can please check and fix to have card image to consume full area (full height, full width) of catalog-card-media" />
     <MESSAGE value="#17 Split feature block taking more empty spaces, can fix this for optimized space utilization , also please provide color picker for feat-card background and section background" />
     <MESSAGE value="#17 refine filters catalog-facet-group list items can it be sort in alphabatically" />
@@ -297,7 +298,8 @@
     <MESSAGE value="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest." />
     <MESSAGE value="#22 Split feature block - multiple CTA" />
     <MESSAGE value="#23 Footer Navigation issues" />
-    <option name="LAST_COMMIT_MESSAGE" value="#23 Footer Navigation issues" />
+    <MESSAGE value="#24 Catalog Item Listing size fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="#24 Catalog Item Listing size fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
