@@ -3,6 +3,7 @@ import type { RowDataPacket } from 'mysql2';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import pool from '@/lib/db';
+import { normalizeNavTreeSortOrders } from '@/lib/cms';
 import { revalidatePublicShell } from '@/lib/revalidate-public-shell';
 
 const schema = z.object({
@@ -42,6 +43,15 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (fields.length) {
       params.push(Number(id));
       await pool.query(`UPDATE nav_items SET ${fields.join(', ')} WHERE id = ?`, params);
+
+      const [locRows] = await pool.query<RowDataPacket[]>(
+        `SELECT location FROM nav_items WHERE id = ? LIMIT 1`,
+        [Number(id)]
+      );
+      const loc = locRows[0]?.location === 'footer' ? 'footer' : 'header';
+      if (body.parent_id !== undefined || body.location !== undefined || body.sort_order !== undefined) {
+        await normalizeNavTreeSortOrders(loc);
+      }
       revalidatePublicShell();
     }
     return jsonOk({ ok: true });

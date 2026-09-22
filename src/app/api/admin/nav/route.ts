@@ -4,6 +4,7 @@ import { jsonError, jsonOk, readJson } from '@/lib/api';
 import pool from '@/lib/db';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { parseJsonField } from '@/lib/types';
+import { normalizeNavTreeSortOrders } from '@/lib/cms';
 import { revalidatePublicShell } from '@/lib/revalidate-public-shell';
 
 export async function GET(request: Request) {
@@ -19,6 +20,9 @@ export async function GET(request: Request) {
     return jsonOk({
       items: rows.map((row) => ({
         ...row,
+        id: Number(row.id),
+        parent_id: row.parent_id == null ? null : Number(row.parent_id),
+        sort_order: Number(row.sort_order),
         meta_json: parseJsonField(row.meta_json, {}),
       })),
     });
@@ -42,6 +46,14 @@ export async function POST(request: Request) {
   try {
     await requireSession();
     const body = createSchema.parse(await readJson(request));
+
+    const [maxRows] = await pool.query<RowDataPacket[]>(
+      `SELECT COALESCE(MAX(sort_order), -1) AS m FROM nav_items WHERE location = ?`,
+      [body.location]
+    );
+    const nextSort =
+      body.sort_order !== undefined ? body.sort_order : Number(maxRows[0]?.m ?? -1) + 1;
+
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO nav_items (location, label, href, parent_id, sort_order, enabled, meta_json)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -50,11 +62,12 @@ export async function POST(request: Request) {
         body.label,
         body.href ?? null,
         body.parent_id ?? null,
-        body.sort_order ?? 0,
+        nextSort,
         body.enabled === false ? 0 : 1,
         JSON.stringify(body.meta_json || {}),
       ]
     );
+    await normalizeNavTreeSortOrders(body.location);
     revalidatePublicShell();
     return jsonOk({ id: result.insertId }, { status: 201 });
   } catch (error) {

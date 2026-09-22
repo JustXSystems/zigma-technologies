@@ -275,6 +275,31 @@ export async function reorderNavItems(location: 'header' | 'footer', orderedIds:
   }
 }
 
+/**
+ * Rewrite sort_order to depth-first tree order (0..n-1) so flat listings never
+ * interleave children from different parents that share sibling-local indexes.
+ */
+export async function normalizeNavTreeSortOrders(location: 'header' | 'footer') {
+  const { treeOrderedNavIds } = await import('@/lib/nav-tree');
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT id, label, href, parent_id, sort_order, enabled, meta_json
+     FROM nav_items WHERE location = ? ORDER BY sort_order ASC, id ASC`,
+    [location]
+  );
+  if (!rows.length) return { updated: 0 };
+  const flat = rows.map((row) => ({
+    id: Number(row.id),
+    label: String(row.label),
+    href: (row.href as string | null) ?? null,
+    parent_id: row.parent_id == null ? null : Number(row.parent_id),
+    sort_order: Number(row.sort_order),
+    enabled: row.enabled == null ? true : Number(row.enabled) === 1,
+  }));
+  const orderedIds = treeOrderedNavIds(flat);
+  await reorderNavItems(location, orderedIds);
+  return { updated: orderedIds.length };
+}
+
 export const getThemeSettings = cache(async () => {
   try {
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM theme_settings');

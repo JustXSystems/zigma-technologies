@@ -195,6 +195,23 @@ export default function NavAdminPage() {
     await load();
   }
 
+  async function repairTreeOrder() {
+    setMessage('');
+    setError('');
+    const res = await fetch('/api/admin/nav/normalize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ location }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || 'Repair failed');
+      return;
+    }
+    setMessage(data.message || 'Tree order repaired.');
+    await load();
+  }
+
   async function toggle(item: NavRow) {
     await fetch(`/api/admin/nav/${item.id}`, {
       method: 'PATCH',
@@ -284,6 +301,9 @@ export default function NavAdminPage() {
           </button>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={repairTreeOrder}>
+            Repair tree order
+          </button>
           <button type="button" className="admin-btn admin-btn-secondary" onClick={seedDefaults}>
             Seed {location} tree
           </button>
@@ -295,10 +315,11 @@ export default function NavAdminPage() {
 
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <p style={{ marginTop: 0, color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
-          Nested items: top-level mega parents → column children → link grandchildren. Footer: each{' '}
-          <strong>top-level</strong> row is a column heading; every <strong>child</strong> (any depth) is a
-          public link. Only <strong>Enabled</strong> rows publish. The site footer uses this list only — nothing
-          else is merged in. To load the full seed defaults: Clear Footer → Seed footer tree.
+          Footer columns are grouped by <strong>Parent</strong> only (not by list order). Each{' '}
+          <strong>top-level</strong> row is a column heading; its children are that column&apos;s links. Check the
+          Parent column — e.g. Solar Solutions under Capabilities is <em>not</em> a Company link. Only{' '}
+          <strong>Enabled</strong> rows publish. Use the preview below as the exact site output. Reset:{' '}
+          Clear Footer → Seed footer tree.
         </p>
         <form onSubmit={addItem} className="admin-form-grid">
           <div className="admin-field">
@@ -382,7 +403,7 @@ export default function NavAdminPage() {
             <tr>
               <th>Order</th>
               <th>Label</th>
-              <th>Parent</th>
+              <th>Under (parent)</th>
               <th>Href</th>
               <th>Enabled</th>
               <th>Actions</th>
@@ -432,7 +453,16 @@ export default function NavAdminPage() {
                       </div>
                     ) : null}
                   </td>
-                  <td>{item.parent_id ? labelById[item.parent_id] || `#${item.parent_id}` : '—'}</td>
+                  <td>
+                    {item.parent_id ? (
+                      <span>
+                        {labelById[item.parent_id] || `#${item.parent_id}`}
+                        <div style={{ color: 'var(--admin-muted)', fontSize: '0.72rem' }}>#{item.parent_id}</div>
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--admin-muted)' }}>top-level column</span>
+                    )}
+                  </td>
                   <td>
                     <code>{item.href || '—'}</code>
                   </td>
