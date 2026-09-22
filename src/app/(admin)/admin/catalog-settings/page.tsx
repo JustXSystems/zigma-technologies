@@ -14,6 +14,7 @@ import {
   DEFAULT_CARD_SIZE_MODE,
   DEFAULT_CARD_FIXED_HEIGHT_PX,
   DEFAULT_CARD_FIXED_WIDTH_PX,
+  DEFAULT_LISTING_ALIGN,
   DEFAULT_DETAIL_ELEMENTS,
   DEFAULT_DETAIL_GALLERY_SHADOW,
   DEFAULT_DETAIL_LAYOUT,
@@ -23,6 +24,7 @@ import {
   normalizeCardSizeMode,
   normalizeCardFixedHeightPx,
   normalizeCardFixedWidthPx,
+  normalizeListingAlign,
   normalizeDetailElements,
   normalizeDetailLayout,
   normalizeDetailTemplate,
@@ -117,6 +119,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     card_size_mode: normalizeCardSizeMode(raw?.card_size_mode),
     card_fixed_height_px: normalizeCardFixedHeightPx(raw?.card_fixed_height_px),
     card_fixed_width_px: normalizeCardFixedWidthPx(raw?.card_fixed_width_px),
+    listing_align: normalizeListingAlign(raw?.listing_align),
     detail_layout: normalizeDetailLayout(raw?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
     detail_gallery_shadow: normalizeShadowStyle(raw?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     detail_template: normalizeDetailTemplate(raw?.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
@@ -687,6 +690,7 @@ export default function CatalogSettingsPage() {
           card_size_mode: normalizeCardSizeMode(settings.card_size_mode),
           card_fixed_height_px: normalizeCardFixedHeightPx(settings.card_fixed_height_px),
           card_fixed_width_px: normalizeCardFixedWidthPx(settings.card_fixed_width_px),
+          listing_align: normalizeListingAlign(settings.listing_align),
           detail_layout: normalizeDetailLayout(settings.detail_layout),
           detail_gallery_shadow: normalizeShadowStyle(settings.detail_gallery_shadow),
           detail_template: normalizeDetailTemplate(settings.detail_template),
@@ -1112,6 +1116,25 @@ export default function CatalogSettingsPage() {
                         onChange={(e) => setSettings({ ...settings, grid_columns: Number(e.target.value) })}
                       />
 
+                    </div>
+                    <div className="admin-field">
+                      <LabelWithHelp help="Aligns cards in the listing when they do not fill the full row (especially with Custom card size).">
+                        List alignment
+                      </LabelWithHelp>
+                      <select
+                        className="admin-select"
+                        value={settings.listing_align || DEFAULT_LISTING_ALIGN}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            listing_align: normalizeListingAlign(e.target.value),
+                          })
+                        }
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Centre</option>
+                        <option value="right">Right</option>
+                      </select>
                     </div>
                     <div className="admin-field full">
                       <LabelWithHelp help="Auto keeps content-driven sizing. Custom locks width and height with the sliders below.">

@@ -49,6 +49,7 @@ const putSchema = z.object({
   card_size_mode: z.enum(['auto', 'custom']).optional(),
   card_fixed_height_px: z.number().int().min(280).max(720).optional(),
   card_fixed_width_px: z.number().int().min(180).max(560).optional(),
+  listing_align: z.enum(['left', 'center', 'right']).optional(),
   detail_layout: z.enum(CATALOG_DETAIL_LAYOUT_VALUES).optional(),
   detail_gallery_shadow: z.enum(CATALOG_SHADOW_STYLE_VALUES).optional(),
   detail_template: z.enum(CATALOG_DETAIL_TEMPLATE_VALUES).optional(),

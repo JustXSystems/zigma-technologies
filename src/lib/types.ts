@@ -272,6 +272,16 @@ export function normalizeCardFixedWidthPx(value: unknown): number {
   return Math.min(CARD_FIXED_WIDTH_MAX, Math.max(CARD_FIXED_WIDTH_MIN, Math.round(n)));
 }
 
+/** How listing cards align within the grid / list track */
+export type CatalogListingAlign = 'left' | 'center' | 'right';
+export const DEFAULT_LISTING_ALIGN: CatalogListingAlign = 'left';
+
+export function normalizeListingAlign(value: unknown): CatalogListingAlign {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (raw === 'center' || raw === 'right' || raw === 'left') return raw;
+  return DEFAULT_LISTING_ALIGN;
+}
+
 export type CatalogCaseStudy = {
   enabled?: boolean;
   client_name?: string;
@@ -438,6 +448,8 @@ export type CatalogPageSettings = {
   card_fixed_height_px: number;
   /** Target card width in px when card_size_mode is custom */
   card_fixed_width_px: number;
+  /** Horizontal alignment of cards in the listing grid / list */
+  listing_align: CatalogListingAlign;
   /**
    * Quick-view popup composition (catalog-detail-panel).
    * media-stage = product-first sticky gallery; balanced = equal split; stacked = gallery on top.

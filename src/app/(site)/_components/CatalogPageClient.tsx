@@ -23,6 +23,7 @@ import {
   normalizeCardSizeMode,
   normalizeCardFixedHeightPx,
   normalizeCardFixedWidthPx,
+  normalizeListingAlign,
 } from '@/lib/types';
 import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
@@ -555,6 +556,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const cardSizeMode = normalizeCardSizeMode(settings?.card_size_mode);
   const cardFixedHeightPx = normalizeCardFixedHeightPx(settings?.card_fixed_height_px);
   const cardFixedWidthPx = normalizeCardFixedWidthPx(settings?.card_fixed_width_px);
+  const listingAlign = normalizeListingAlign(settings?.listing_align);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
   const detailElements = resolveDetailElements(settings);
   const layout = settings?.layout || 'grid';
@@ -1135,6 +1137,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                         </div>
                         <div
                           className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
+                          data-listing-align={listingAlign}
                           style={
                             layout === 'list'
                               ? { display: 'grid', gap: '1rem' }
@@ -1171,7 +1174,11 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
               ) : null}
 
               {!loading && !useGroupedView && items.length > 0 ? (
-                <div className={layout === 'list' ? 'catalog-list' : 'proj-grid'} style={gridStyle}>
+                <div
+                  className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
+                  data-listing-align={listingAlign}
+                  style={gridStyle}
+                >
                   {items.map((item, index) => (
                     <CatalogItemCard
                       key={item.id}

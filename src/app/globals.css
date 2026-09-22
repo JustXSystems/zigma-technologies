@@ -2665,7 +2665,18 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
   height:var(--catalog-card-fixed-h, 420px);
   min-height:var(--catalog-card-fixed-h, 420px);
   max-height:var(--catalog-card-fixed-h, 420px);
-  justify-self:center;
+}
+.catalog-page .proj-grid[data-listing-align="left"],
+.catalog-page .catalog-list[data-listing-align="left"]{
+  justify-items:start;
+}
+.catalog-page .proj-grid[data-listing-align="center"],
+.catalog-page .catalog-list[data-listing-align="center"]{
+  justify-items:center;
+}
+.catalog-page .proj-grid[data-listing-align="right"],
+.catalog-page .catalog-list[data-listing-align="right"]{
+  justify-items:end;
 }
 .catalog-page .catalog-card--tile.catalog-card--size-custom{
   display:flex;
@@ -2717,7 +2728,6 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 }
 .catalog-page .catalog-card--list.catalog-card--size-custom{
   align-items:stretch;
-  justify-self:stretch;
   width:100%;
   max-width:min(100%, var(--catalog-card-fixed-w, 320px));
 }

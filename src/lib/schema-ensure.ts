@@ -200,8 +200,12 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN card_fixed_width_px SMALLINT UNSIGNED NOT NULL DEFAULT 320 AFTER card_fixed_height_px`,
   },
   {
+    name: 'listing_align',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN listing_align VARCHAR(16) NOT NULL DEFAULT 'left' AFTER card_fixed_width_px`,
+  },
+  {
     name: 'detail_layout',
-    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage' AFTER card_fixed_width_px`,
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage' AFTER listing_align`,
   },
   {
     name: 'detail_gallery_shadow',

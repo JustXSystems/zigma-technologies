@@ -152,6 +152,7 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   card_size_mode VARCHAR(16) NOT NULL DEFAULT 'auto',
   card_fixed_height_px SMALLINT UNSIGNED NOT NULL DEFAULT 420,
   card_fixed_width_px SMALLINT UNSIGNED NOT NULL DEFAULT 320,
+  listing_align VARCHAR(16) NOT NULL DEFAULT 'left',
   detail_layout VARCHAR(20) NOT NULL DEFAULT 'media-stage',
   detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium',
   detail_template VARCHAR(20) NOT NULL DEFAULT 'classic',

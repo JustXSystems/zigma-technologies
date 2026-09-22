@@ -34,4 +34,15 @@ SET @sql := IF(
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+SET @exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'listing_align'
+);
+SET @sql := IF(
+  @exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN listing_align VARCHAR(16) NOT NULL DEFAULT ''left'' AFTER card_fixed_width_px',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 UPDATE catalog_page_settings;
