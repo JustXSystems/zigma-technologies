@@ -22,7 +22,7 @@ function mapNavRow(row: RowDataPacket): FlatNavRow {
   };
 }
 
-/** All rows for a location (matches Admin → Navigation list). Used to build footer columns reliably. */
+/** All rows for a location (matches Admin → Navigation list). */
 async function loadAllNavRowsForLocation(location: 'header' | 'footer'): Promise<FlatNavRow[]> {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT * FROM nav_items WHERE location = ? ORDER BY sort_order ASC, id ASC`,
@@ -31,7 +31,7 @@ async function loadAllNavRowsForLocation(location: 'header' | 'footer'): Promise
   return rows.map(mapNavRow);
 }
 
-/** Enabled rows plus ancestor chain so column headers stay linked when only children are enabled. */
+/** Enabled rows plus ancestor chain so column/mega headers stay when only children are enabled. */
 async function loadNavRowsForLocation(location: 'header' | 'footer'): Promise<FlatNavRow[]> {
   const [enabledRows] = await pool.query<RowDataPacket[]>(
     `SELECT * FROM nav_items WHERE location = ? AND enabled = 1 ORDER BY sort_order ASC, id ASC`,
@@ -81,6 +81,10 @@ export const getPublicNavRows = cache(async (location: 'header' | 'footer'): Pro
   }
 });
 
+/**
+ * Footer columns from `nav_items` where location='footer' only.
+ * Empty DB → empty footer (no seed / hardcoded fallback).
+ */
 export async function resolvePublicFooterColumns(): Promise<FooterColumn[]> {
   try {
     const rows = await loadAllNavRowsForLocation('footer');

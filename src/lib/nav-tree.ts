@@ -106,8 +106,7 @@ function hasEnabledDescendant(parentId: number, byParent: Map<number | null, Fla
 
 /**
  * Depth-first ids (roots → children). Used to keep `sort_order` globally unique so
- * flat ORDER BY sort_order never interleaves siblings from different parents
- * (e.g. Company / Capabilities / Contact all using 0,1,2…).
+ * flat ORDER BY sort_order never interleaves siblings from different parents.
  */
 export function treeOrderedNavIds(rows: FlatNavRow[]): number[] {
   const byParent = groupByParent(rows);
@@ -126,32 +125,6 @@ export function treeOrderedNavIds(rows: FlatNavRow[]): number[] {
   return out;
 }
 
-/**
- * Footer links under a column = enabled leaves in tree order under that column.
- * Intermediate (enabled) nodes that only exist to group children are not links.
- * Disabled intermediates still contribute their enabled descendants.
- */
-function collectFooterColumnLinks(
-  parentId: number,
-  byParent: Map<number | null, FlatNavRow[]>
-): FlatNavRow[] {
-  const out: FlatNavRow[] = [];
-  for (const child of byParent.get(parentId) || []) {
-    const nested = collectFooterColumnLinks(child.id, byParent);
-    if (!rowIsEnabled(child)) {
-      out.push(...nested);
-      continue;
-    }
-    if (nested.length) {
-      // Grouping node — publish its leaves only (not the group label itself).
-      out.push(...nested);
-    } else {
-      out.push(child);
-    }
-  }
-  return out;
-}
-
 function mapFooterLink(link: FlatNavRow) {
   return {
     id: link.id,
@@ -165,53 +138,29 @@ function mapFooterLink(link: FlatNavRow) {
 }
 
 /**
- * Public footer columns = Admin → Navigation (footer) only.
- * Grouping is strictly by `parent_id` (never by sort_order).
- * - Top-level rows → column headings
- * - Enabled leaf descendants under each column → links
- * - Orphans (parent missing) → extra “More” column
+ * Public footer columns = Admin → Navigation (footer) ONLY.
+ * - Top-level rows → column headings (grouped strictly by parent_id)
+ * - Direct enabled children → links (1:1 with Admin child rows under that column)
+ * - No seed, no Site Settings injection, no orphan “More” column
  */
 export function buildFooterColumns(rows: FlatNavRow[]): FooterColumn[] {
-  const byId = new Map(rows.map((r) => [r.id, r]));
   const byParent = groupByParent(rows);
 
   const topLevel = (byParent.get(null) || []).filter(
     (col) => rowIsEnabled(col) || hasEnabledDescendant(col.id, byParent)
   );
 
-  const claimed = new Set<number>();
-  const columns: FooterColumn[] = topLevel.map((col) => {
-    const links = collectFooterColumnLinks(col.id, byParent);
-    for (const d of links) claimed.add(d.id);
+  return topLevel.map((col) => {
+    const children = (byParent.get(col.id) || []).filter(rowIsEnabled);
 
-    // Lone top-level row with an href and no children → single link column
-    if (!links.length && rowIsEnabled(col) && col.href) {
-      claimed.add(col.id);
+    if (!children.length && rowIsEnabled(col) && col.href) {
       return { id: col.id, heading: col.label, links: [mapFooterLink(col)] };
     }
 
     return {
       id: col.id,
       heading: col.label,
-      links: links.map(mapFooterLink),
+      links: children.map(mapFooterLink),
     };
   });
-
-  const orphans = rows.filter(
-    (r) =>
-      rowIsEnabled(r) &&
-      r.parent_id != null &&
-      !claimed.has(r.id) &&
-      !byId.has(r.parent_id)
-  );
-  if (orphans.length) {
-    orphans.sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
-    columns.push({
-      id: -1,
-      heading: 'More',
-      links: orphans.map(mapFooterLink),
-    });
-  }
-
-  return columns;
 }

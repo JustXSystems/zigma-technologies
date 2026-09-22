@@ -1,16 +1,11 @@
 import type { FooterColumn } from '@/lib/nav-tree';
-import type { SiteCopy } from '@/lib/site-copy';
 import { appHref } from '@/lib/base-path';
 
 type Props = {
   columns: FooterColumn[];
-  copy: SiteCopy;
 };
 
-/**
- * Exact Admin → Navigation (footer) links only.
- * No address / hours / social injection — those are Site Settings, not footer nav rows.
- */
+/** Renders Admin → Navigation → Footer columns only. No extras. */
 export default function FooterLinkColumns({ columns }: Props) {
   if (!columns.length) return null;
 

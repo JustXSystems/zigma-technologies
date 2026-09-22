@@ -315,11 +315,11 @@ export default function NavAdminPage() {
 
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <p style={{ marginTop: 0, color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
-          Footer columns are grouped by <strong>Parent</strong> only (not by list order). Each{' '}
-          <strong>top-level</strong> row is a column heading; its children are that column&apos;s links. Check the
-          Parent column — e.g. Solar Solutions under Capabilities is <em>not</em> a Company link. Only{' '}
-          <strong>Enabled</strong> rows publish. Use the preview below as the exact site output. Reset:{' '}
-          Clear Footer → Seed footer tree.
+          <strong>Single source of truth:</strong> the public site footer link columns come only from this Footer
+          list (no defaults, seed merge, Site Settings, or feature filters). Each <strong>top-level</strong> row is
+          a column heading; its <strong>direct children</strong> are the links. Grouping is by{' '}
+          <strong>Under (parent)</strong> — not list position. Disable or delete a row to remove it from the site.
+          Reset: Clear Footer → Seed footer tree.
         </p>
         <form onSubmit={addItem} className="admin-form-grid">
           <div className="admin-field">

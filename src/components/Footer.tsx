@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useMemo, type ReactNode } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { telHref, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
@@ -10,17 +10,17 @@ import { trackEvent } from '@/lib/analytics';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
+import FooterLinkColumns from '@/components/FooterLinkColumns';
 import { appHref } from '@/lib/base-path';
 
-type FooterProps = {
-  /** Server-rendered CMS footer columns (Admin → Navigation → Footer). */
-  footerNav: ReactNode;
-};
-
-export default function Footer({ footerNav }: FooterProps) {
+/**
+ * Site chrome footer. Link columns come ONLY from Admin → Navigation → Footer
+ * (loaded into SiteProviders as footerColumns). No hardcoded / seed / settings merge.
+ */
+export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
-  const { settings: site } = useSiteShell();
+  const { settings: site, footerColumns } = useSiteShell();
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
   const copy = useSiteCopy();
@@ -107,7 +107,7 @@ export default function Footer({ footerNav }: FooterProps) {
               )}
               {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
             </div>
-            {footerNav}
+            <FooterLinkColumns columns={footerColumns} />
           </div>
           <div className="foot-bottom">
             <span>{site.copyright}</span>
@@ -127,9 +127,7 @@ export default function Footer({ footerNav }: FooterProps) {
               {site.privacyUrl ? <a href={appHref(site.privacyUrl)}>{copy.footer.privacy}</a> : null}
               {site.cookiePolicyUrl ? (
                 <a href={appHref(site.cookiePolicyUrl)}>{copy.footer.cookies}</a>
-              ) : (
-                <a href={appHref('/cookies')}>{copy.footer.cookies}</a>
-              )}
+              ) : null}
               {site.termsUrl ? <a href={appHref(site.termsUrl)}>{copy.footer.terms}</a> : null}
             </span>
           </div>

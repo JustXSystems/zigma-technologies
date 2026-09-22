@@ -1,6 +1,5 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import FooterLinkColumns from '@/components/FooterLinkColumns';
 import SiteSeo from '@/components/SiteSeo';
 import OrganizationJsonLd from '@/components/OrganizationJsonLd';
 import CookieConsent from '@/components/CookieConsent';
@@ -33,9 +32,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header />
       <ConsultationModalHost />
       {children}
-      <Footer
-        footerNav={<FooterLinkColumns columns={shell.footerColumns} copy={shell.copy} />}
-      />
+      <Footer />
       <CookieConsent settings={shell.settings} />
       <PwaRegister />
     </SiteProviders>

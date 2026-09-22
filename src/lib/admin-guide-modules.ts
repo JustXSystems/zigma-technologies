@@ -222,7 +222,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Seed tree (or Clear then Seed to reset)',
       'Add nested items: parents → columns → links',
       'Reorder siblings with ↑/↓; delete cascades to children',
-      'Public Header/Footer read GET /api/public/nav; fallback to built-in defaults if empty',
+      'Public Header/Footer read nav_items via loadSiteShell; Footer has NO hardcoded fallback — empty Admin Footer = empty link columns',
     ],
     publicRoutes: ['Header, Footer components', 'GET /api/public/nav'],
     dbTables: ['nav_items (location: header | footer, parent_id, meta_json)'],
