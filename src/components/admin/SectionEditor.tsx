@@ -377,7 +377,24 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                   <input className="admin-input" value={String(content.breadcrumb || '')} onChange={(e) => setField('breadcrumb', e.target.value)} />
                 </Field>
                 <div className="full">
-                  <MediaPicker value={String(content.image || '')} onChange={(path) => setField('image', path)} label="Background image" />
+                  <MediaPicker
+                    value={String(content.image || '')}
+                    onChange={(path) => setField('image', path)}
+                    label="Background media (desktop)"
+                    kinds="visual"
+                    allowUpload
+                    hint="Pick any successful media-library upload (image, SVG, or video). Used full-bleed on desktop and as the mobile fallback."
+                  />
+                </div>
+                <div className="full">
+                  <MediaPicker
+                    value={String(content.imageMobile || '')}
+                    onChange={(path) => setField('imageMobile', path)}
+                    label="Background media (mobile, optional)"
+                    kinds="visual"
+                    allowUpload
+                    hint="Optional ≤760px override. Leave blank to reuse the desktop media."
+                  />
                 </div>
                 <Field label="Body class">
                   <input className="admin-input" value={String(content.bodyClass || '')} onChange={(e) => setField('bodyClass', e.target.value)} placeholder="contact-page" />
@@ -419,6 +436,25 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 <Field label="Tagline">
                   <input className="admin-input" value={String(content.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} />
                 </Field>
+                <div className="full">
+                  <MediaPicker
+                    value={String(content.image || '')}
+                    onChange={(path) => setField('image', path)}
+                    label="Background media"
+                    kinds="visual"
+                    allowUpload
+                    hint="Optional full-bleed background from the media library (image, SVG, or video)."
+                  />
+                </div>
+                <div className="full">
+                  <MediaPicker
+                    value={String(content.imageMobile || '')}
+                    onChange={(path) => setField('imageMobile', path)}
+                    label="Background media (mobile, optional)"
+                    kinds="visual"
+                    allowUpload
+                  />
+                </div>
               </div>
             ) : null}
 
@@ -1174,6 +1210,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                           ctaHref: '#',
                           tags: [],
                           image: '/assets/images/zigma-technologies-engineers-monitoring-.jpg',
+                          imageMobile: '',
                         },
                       ])
                     }
@@ -1294,7 +1331,24 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                             next[idx] = { ...next[idx], image: path };
                             setField('slides', next);
                           }}
-                          label="Slide image"
+                          label="Slide media (desktop)"
+                          kinds="visual"
+                          allowUpload
+                          hint="Any successful media-library upload (image, SVG, or video). Renders full-bleed on desktop and mobile."
+                        />
+                      </div>
+                      <div className="full">
+                        <MediaPicker
+                          value={String(slide.imageMobile || '')}
+                          onChange={(path) => {
+                            const next = [...slides];
+                            next[idx] = { ...next[idx], imageMobile: path };
+                            setField('slides', next);
+                          }}
+                          label="Slide media (mobile, optional)"
+                          kinds="visual"
+                          allowUpload
+                          hint="Optional ≤760px override for tighter crops on phones."
                         />
                       </div>
                       <div className="admin-field full">

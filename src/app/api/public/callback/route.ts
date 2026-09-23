@@ -28,7 +28,11 @@ export async function POST(request: Request) {
       return jsonError(`Too many submissions. Please try again in ${guard.retryAfterSec} seconds.`, 429);
     }
     if (!(await verifyTurnstile(body.turnstileToken, request))) {
-      return jsonError('Captcha verification failed', 400);
+      return jsonError(
+        'Captcha verification failed. Complete the captcha and try again, or refresh if it expired.',
+        400,
+        { code: 'CAPTCHA_FAILED' }
+      );
     }
 
     const form = await getDefaultForm();

@@ -8,6 +8,7 @@ import CertMarquee, { normalizeCertItems } from '@/components/sections/CertMarqu
 import EcoVisual from '@/components/sections/EcoVisual';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
+import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
 import { featIconFor } from '@/lib/feat-icons';
@@ -131,6 +132,7 @@ type Slide = {
   ctaHref: string;
   tags: string[];
   image: string;
+  imageMobile?: string;
   numeral?: string;
   iconHtml?: string;
 };
@@ -166,13 +168,12 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
         return (
           <div key={i} className={`slide ${slide.theme} ${i === current ? 'active' : ''}`} data-index={i}>
             <div className="slide-bg">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="slide-img"
+              <HeroBackgroundMedia
                 src={slide.image}
+                mobileSrc={slide.imageMobile}
+                className="slide-img"
+                eager={i === 0}
                 alt=""
-                loading={i === 0 ? 'eager' : 'lazy'}
-                fetchPriority={i === 0 ? 'high' : undefined}
               />
               <div className="slide-scrim"></div>
               <div className="grid-overlay"></div>
@@ -904,6 +905,9 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   const hasActions = Boolean(content.primaryCta || content.secondaryCta);
   const useInner =
     hasActions || proofRail.length > 0 || String(content.variant || '') === 'inner';
+  const image =
+    String(content.image || '') || '/assets/images/engineers-reviewing-electrical-design-dr.jpg';
+  const imageMobile = String(content.imageMobile || '') || undefined;
 
   if (useInner) {
     return (
@@ -912,6 +916,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
         title={String(content.title || '')}
         lead={content.lead ? String(content.lead) : undefined}
         image={String(content.image || '/assets/images/city-skyline-with-solar-panels-and-indus.jpg')}
+        imageMobile={imageMobile}
         breadcrumb={[
           { label: 'Home', href: '/' },
           { label: crumb },
@@ -947,10 +952,12 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   return (
     <section className="page-hero">
       <div className="hero-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={String(content.image || '/assets/images/engineers-reviewing-electrical-design-dr.jpg')}
+        <HeroBackgroundMedia
+          src={image}
+          mobileSrc={imageMobile}
           alt={String(content.imageAlt || '')}
+          className="hero-bg-media"
+          eager
         />
       </div>
       <div className="hero-overlay"></div>
@@ -1435,8 +1442,17 @@ function CertTeaserSection({ content }: { content: Record<string, unknown> }) {
 }
 
 function CertHeroSection({ content }: { content: Record<string, unknown> }) {
+  const image = String(content.image || '').trim();
+  const imageMobile = String(content.imageMobile || '').trim() || undefined;
   return (
-    <section className="cert-hero">
+    <section className={`cert-hero${image ? ' cert-hero--media' : ''}`}>
+      {image ? (
+        <div className="hero-bg cert-hero-bg">
+          <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />
+          <div className="hero-overlay" />
+          <div className="grid-overlay" />
+        </div>
+      ) : null}
       <div className="container">
         <div className="eyebrow">{String(content.eyebrow || 'CERTIFICATIONS')}</div>
         <SiteHeading role="pageHero">{String(content.title || '')}</SiteHeading>

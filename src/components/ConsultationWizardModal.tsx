@@ -8,6 +8,7 @@ import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { useSiteCopy } from '@/lib/use-site-copy';
+import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import type { FormField } from '@/lib/types';
 import SiteHeading from '@/components/SiteHeading';
 
@@ -95,7 +96,6 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
   }, []);
 
   function renderField(field: FormField) {
-    const lockedSubject = field.field_name === 'subject' && Boolean(preselectedSubject);
     if (field.field_type === 'textarea') {
       return (
         <div key={field.id} className="consult-field">
@@ -106,7 +106,6 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <textarea
             id={`consult-${field.field_name}`}
             value={payload[field.field_name] || ''}
-            disabled={lockedSubject}
             required={!!field.required}
             rows={5}
             onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
@@ -126,7 +125,6 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <select
             id={`consult-${field.field_name}`}
             value={payload[field.field_name] || ''}
-            disabled={lockedSubject}
             required={!!field.required}
             onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
           >
@@ -156,14 +154,12 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
             onChange={(e) =>
               setPayload({ ...payload, [field.field_name]: e.target.checked ? '1' : '0' })
             }
-            disabled={lockedSubject}
           />
         ) : (
           <input
             id={`consult-${field.field_name}`}
             type={fieldTypeToInputType(field.field_type)}
             value={payload[field.field_name] || ''}
-            disabled={lockedSubject}
             required={!!field.required}
             onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
             placeholder={field.placeholder || ''}
@@ -180,6 +176,9 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
     try {
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       if (!formId) throw new Error('Form not configured');
+      if (isTurnstileClientEnabled() && !turnstileToken.trim()) {
+        throw new Error('Please complete the captcha before submitting.');
+      }
 
       const res = await fetch('/api/public/enquiries', {
         method: 'POST',
@@ -187,7 +186,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
         body: JSON.stringify({
           form_id: formId,
           item_id: null,
-          item_type: null,
+          item_type: 'general',
           payload,
           _hp: typeof hp === 'string' ? hp : '',
           turnstileToken: turnstileToken || undefined,

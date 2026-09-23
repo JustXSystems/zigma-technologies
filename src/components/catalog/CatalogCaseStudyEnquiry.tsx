@@ -4,8 +4,10 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CatalogItem, CatalogItemType, FormField } from '@/lib/types';
 import HoneypotField from '@/components/HoneypotField';
+import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
+import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import SiteHeading from '@/components/SiteHeading';
 
 type Props = {
@@ -20,6 +22,7 @@ export default function CatalogCaseStudyEnquiry({ item, itemType }: Props) {
   const [payload, setPayload] = useState<Record<string, string>>({});
   const [submitMsg, setSubmitMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   useEffect(() => {
     fetch('/api/public/forms/enquiry')
@@ -37,6 +40,9 @@ export default function CatalogCaseStudyEnquiry({ item, itemType }: Props) {
     setSubmitting(true);
     setSubmitMsg('');
     try {
+      if (isTurnstileClientEnabled() && !turnstileToken.trim()) {
+        throw new Error('Please complete the captcha before submitting.');
+      }
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       const res = await fetch('/api/public/enquiries', {
         method: 'POST',
@@ -47,6 +53,7 @@ export default function CatalogCaseStudyEnquiry({ item, itemType }: Props) {
           item_type: itemType,
           payload,
           _hp: typeof hp === 'string' ? hp : '',
+          turnstileToken: turnstileToken || undefined,
         }),
       });
       const data = await res.json();
@@ -55,6 +62,7 @@ export default function CatalogCaseStudyEnquiry({ item, itemType }: Props) {
       router.push('/thank-you?intent=enquiry');
       setSubmitMsg('Thank you. Our team will contact you shortly.');
       setPayload({});
+      setTurnstileToken('');
     } catch (err) {
       setSubmitMsg(err instanceof Error ? err.message : 'Submit failed');
     } finally {
@@ -76,6 +84,7 @@ export default function CatalogCaseStudyEnquiry({ item, itemType }: Props) {
           </div>
           <form className="case-study-enquiry-form" onSubmit={submitEnquiry}>
             <HoneypotField />
+            <TurnstileField onToken={setTurnstileToken} />
             {fields.map((field) => (
               <div key={field.id} className="case-study-field">
                 <label htmlFor={`csf-${field.id}`}>

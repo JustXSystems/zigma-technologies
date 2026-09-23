@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import SiteHeading from '@/components/SiteHeading';
+import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 
 export type InnerBreadcrumb = { label: string; href?: string };
 
@@ -9,6 +10,7 @@ type Props = {
   title: ReactNode;
   lead?: ReactNode;
   image?: string;
+  imageMobile?: string;
   breadcrumb?: InnerBreadcrumb[];
   actions?: ReactNode;
   children?: ReactNode;
@@ -24,6 +26,7 @@ export default function InnerPageHero({
   title,
   lead,
   image = DEFAULT_IMAGE,
+  imageMobile,
   breadcrumb,
   actions,
   children,
@@ -32,8 +35,7 @@ export default function InnerPageHero({
   return (
     <section className="page-hero page-hero--inner">
       <div className="hero-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image} alt="" />
+        <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />
         <div className="hero-overlay" />
         <div className="hero-scrim" />
         <div className="grid-overlay" />

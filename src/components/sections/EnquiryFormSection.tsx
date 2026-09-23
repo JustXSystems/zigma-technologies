@@ -4,9 +4,11 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { FormField } from '@/lib/types';
 import HoneypotField from '@/components/HoneypotField';
+import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/site-settings';
+import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import SiteHeading from '@/components/SiteHeading';
 
 type SideItem = { label: string; value: string; href?: string | null; icon?: string };
@@ -27,6 +29,7 @@ export default function EnquiryFormSection({
   const [submitMsg, setSubmitMsg] = useState('');
   const [success, setSuccess] = useState(false);
   const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [turnstileToken, setTurnstileToken] = useState('');
   const router = useRouter();
 
   const sideItems = (content.sideItems as SideItem[]) || [];
@@ -65,6 +68,9 @@ export default function EnquiryFormSection({
     setSubmitting(true);
     setSubmitMsg('');
     try {
+      if (isTurnstileClientEnabled() && !turnstileToken.trim()) {
+        throw new Error('Please complete the captcha before submitting.');
+      }
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       const res = await fetch('/api/public/enquiries', {
         method: 'POST',
@@ -72,9 +78,10 @@ export default function EnquiryFormSection({
         body: JSON.stringify({
           form_id: formId,
           item_id: null,
-          item_type: null,
+          item_type: 'general',
           payload,
           _hp: typeof hp === 'string' ? hp : '',
+          turnstileToken: turnstileToken || undefined,
         }),
       });
       const data = await res.json();
@@ -82,6 +89,7 @@ export default function EnquiryFormSection({
       trackEvent('enquiry_submit', { source: 'contact_form', subject: payload.subject || '' });
       setSuccess(true);
       setPayload({});
+      setTurnstileToken('');
       setSubmitMsg('');
       router.push('/thank-you?intent=enquiry');
     } catch (err) {
@@ -182,6 +190,7 @@ export default function EnquiryFormSection({
             ) : (
               <form onSubmit={onSubmit} style={{ position: 'relative' }}>
                 <HoneypotField />
+                <TurnstileField onToken={setTurnstileToken} />
                 <h3>{String(content.formTitle || 'Send us a message')}</h3>
                 <p>{String(content.formIntro || 'All fields marked with * are required.')}</p>
 

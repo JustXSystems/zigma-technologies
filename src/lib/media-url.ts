@@ -39,3 +39,18 @@ export function toStorageMediaPath(publicPath: string): string {
   const clean = stripBasePath(trimmed.split('?')[0]);
   return clean.startsWith('/') ? clean : `/${clean}`;
 }
+
+export function isVideoMediaPath(publicPath: string, mime?: string | null): boolean {
+  if (mime && mime.startsWith('video/')) return true;
+  return /\.(mp4|webm)(\?|$)/i.test(toStorageMediaPath(publicPath));
+}
+
+export function isImageMediaPath(publicPath: string, mime?: string | null): boolean {
+  if (mime && mime.startsWith('image/')) return true;
+  return /\.(png|jpe?g|webp|gif|svg)(\?|$)/i.test(toStorageMediaPath(publicPath));
+}
+
+/** Hero / CMS visual backgrounds: raster, SVG, or video from the media library. */
+export function isVisualMediaPath(publicPath: string, mime?: string | null): boolean {
+  return isImageMediaPath(publicPath, mime) || isVideoMediaPath(publicPath, mime);
+}

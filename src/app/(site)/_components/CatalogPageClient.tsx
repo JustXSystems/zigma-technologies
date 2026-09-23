@@ -321,7 +321,7 @@ function CatalogHero({
     <section className={cx('page-hero catalog-hero', `catalog-hero--${variant}`)}>
       <div className="hero-bg catalog-hero-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={active.primary_image || '/assets/images/engineers-reviewing-electrical-design-dr.jpg'} alt="" />
+        <img src={publicMediaUrl(active.primary_image || '/assets/images/engineers-reviewing-electrical-design-dr.jpg')} alt="" />
         <div className="hero-overlay"></div>
         <div className="grid-overlay"></div>
         <div className="catalog-hero-tint"></div>

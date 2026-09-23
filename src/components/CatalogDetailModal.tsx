@@ -24,9 +24,11 @@ import {
 import { detailHasFromList } from '@/lib/catalog-page-elements';
 import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import HoneypotField from '@/components/HoneypotField';
+import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { useSiteCopy } from '@/lib/use-site-copy';
+import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import SiteHeading from '@/components/SiteHeading';
 
 const TYPE_LABEL: Record<CatalogItemType, string> = {
@@ -342,6 +344,7 @@ export default function CatalogDetailModal({
   const [submitMsg, setSubmitMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const elements = useMemo(() => {
     if (detailElements?.length) return detailElements;
@@ -428,6 +431,9 @@ export default function CatalogDetailModal({
     setSubmitting(true);
     setSubmitMsg('');
     try {
+      if (isTurnstileClientEnabled() && !turnstileToken.trim()) {
+        throw new Error('Please complete the captcha before submitting.');
+      }
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       const res = await fetch('/api/public/enquiries', {
         method: 'POST',
@@ -438,12 +444,14 @@ export default function CatalogDetailModal({
           item_type: itemType,
           payload,
           _hp: typeof hp === 'string' ? hp : '',
+          turnstileToken: turnstileToken || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Submit failed');
       setSubmitMsg('Thank you. Our team will contact you shortly.');
       setPayload({});
+      setTurnstileToken('');
     } catch (err) {
       setSubmitMsg(err instanceof Error ? err.message : 'Submit failed');
     } finally {
@@ -717,6 +725,7 @@ export default function CatalogDetailModal({
           </div>
           <form className="catalog-detail-enquiry-form" onSubmit={submitEnquiry}>
             <HoneypotField />
+            <TurnstileField onToken={setTurnstileToken} />
             {fields.map((field) => (
               <div key={field.id} className="catalog-detail-field">
                 <label htmlFor={`cdf-${field.id}`}>

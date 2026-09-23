@@ -4,9 +4,11 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import HoneypotField from '@/components/HoneypotField';
+import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { useSiteCopy } from '@/lib/use-site-copy';
+import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import SiteHeading from '@/components/SiteHeading';
 
 type Props = { onClose: () => void };
@@ -22,6 +24,7 @@ export default function CallbackRequestModal({ onClose }: Props) {
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -46,6 +49,9 @@ export default function CallbackRequestModal({ onClose }: Props) {
     setSubmitting(true);
     setError('');
     try {
+      if (isTurnstileClientEnabled() && !turnstileToken.trim()) {
+        throw new Error('Please complete the captcha before submitting.');
+      }
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       const res = await fetch('/api/public/callback', {
         method: 'POST',
@@ -56,6 +62,7 @@ export default function CallbackRequestModal({ onClose }: Props) {
           preferred_time: preferredTime,
           note,
           _hp: typeof hp === 'string' ? hp : '',
+          turnstileToken: turnstileToken || undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -97,6 +104,7 @@ export default function CallbackRequestModal({ onClose }: Props) {
         <div className="consult-modal-body">
           <form className="consult-form" onSubmit={onSubmit}>
             <HoneypotField />
+            <TurnstileField onToken={setTurnstileToken} />
             <div className="consult-field">
               <label htmlFor="cb-name">Name *</label>
               <input id="cb-name" value={name} onChange={(e) => setName(e.target.value)} required aria-required="true" />

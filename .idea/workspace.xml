@@ -7,7 +7,23 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Media information updated" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Jump links on Site settings now expand the matching section, then scroll to it">
+      <change afterPath="$PROJECT_DIR$/src/components/HeroBackgroundMedia.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/callback/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/callback/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/enquiries/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/enquiries/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CatalogDetailModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/MediaPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/MediaPicker.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/EnquiryFormSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/EnquiryFormSection.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/media-url.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-url.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/turnstile.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/turnstile.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,23 +70,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.223156647930447" />
-      <entry key="MS500" value="3.2572920816643" />
-      <entry key="S2" value="8.622011612086776" />
-      <entry key="S5" value="14.801405229483608" />
-      <entry key="S10" value="21.35224973456143" />
-      <entry key="S30" value="31.701099063494294" />
-      <entry key="S60" value="37.35288813470031" />
-      <entry key="M2" value="52.36576485261218" />
-      <entry key="M5" value="114.15824971911748" />
-      <entry key="M10" value="201.8500248431836" />
-      <entry key="M15" value="274.4600586100105" />
-      <entry key="M30" value="423.7054230806543" />
-      <entry key="H1" value="634.7350767206068" />
-      <entry key="H2" value="998.2425897145522" />
-      <entry key="H4" value="1492.839050406304" />
-      <entry key="D1" value="3842.7586345882373" />
-      <entry key="W1" value="14893.097790849144" />
+      <entry key="MS100" value="1.3155610703787581" />
+      <entry key="MS500" value="3.0513020102886794" />
+      <entry key="S2" value="7.012883143246528" />
+      <entry key="S5" value="10.167478251977563" />
+      <entry key="S10" value="11.837548724984803" />
+      <entry key="S30" value="13.865277928049661" />
+      <entry key="S60" value="18.007289602594177" />
+      <entry key="M2" value="28.791533862587716" />
+      <entry key="M5" value="77.61895266330069" />
+      <entry key="M10" value="168.8833057382378" />
+      <entry key="M15" value="253.62714312091174" />
+      <entry key="M30" value="448.68851012879173" />
+      <entry key="H1" value="711.352437519577" />
+      <entry key="H2" value="1112.6667618805263" />
+      <entry key="H4" value="1642.7493865256295" />
+      <entry key="D1" value="4052.3782967847064" />
+      <entry key="W1" value="15122.499566415168" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -84,31 +100,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.8702873359731346E-196" />
-      <entry key="H1" value="1.3675844895192244E-98" />
-      <entry key="H2" value="1.1694376809043724E-49" />
-      <entry key="H4" value="3.4197041991137545E-25" />
-      <entry key="D1" value="8.496479933443125E-5" />
-      <entry key="W1" value="0.40639562124927003" />
+      <entry key="M30" value="1.1023604566156421E-196" />
+      <entry key="H1" value="1.0499335486667225E-98" />
+      <entry key="H2" value="1.024662651152341E-49" />
+      <entry key="H4" value="3.20103522502757E-25" />
+      <entry key="D1" value="8.403419058617213E-5" />
+      <entry key="W1" value="0.4057567302230913" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1834026906810349" />
-      <entry key="MS500" value="3.237286010658571" />
-      <entry key="S2" value="8.608729825751983" />
-      <entry key="S5" value="14.792322980796461" />
-      <entry key="S10" value="21.34572150355742" />
-      <entry key="S30" value="31.6973664092265" />
-      <entry key="S60" value="37.34924957856146" />
-      <entry key="M2" value="52.362112362619314" />
-      <entry key="M5" value="114.15537039695118" />
-      <entry key="M10" value="201.84789270717366" />
-      <entry key="M15" value="274.45829552602305" />
-      <entry key="M30" value="423.70420641317145" />
-      <entry key="H1" value="634.7342416107816" />
-      <entry key="H2" value="998.2419748525201" />
-      <entry key="H4" value="1492.8386028357397" />
-      <entry key="D1" value="3842.7585227955196" />
-      <entry key="W1" value="14893.50404288039" />
+      <entry key="MS100" value="1.2724278610502144" />
+      <entry key="MS500" value="3.031225849111974" />
+      <entry key="S2" value="7.001068348946257" />
+      <entry key="S5" value="10.160576132204591" />
+      <entry key="S10" value="11.833517767266535" />
+      <entry key="S30" value="13.863281510084711" />
+      <entry key="S60" value="18.00492402243968" />
+      <entry key="M2" value="28.78899909113047" />
+      <entry key="M5" value="77.61679014701056" />
+      <entry key="M10" value="168.88141124051762" />
+      <entry key="M15" value="253.62541108089593" />
+      <entry key="M30" value="448.6871398727251" />
+      <entry key="H1" value="711.3514418387882" />
+      <entry key="H2" value="1112.6660381922538" />
+      <entry key="H4" value="1642.7488730907849" />
+      <entry key="D1" value="4052.3781701816597" />
+      <entry key="W1" value="15122.90517748331" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -263,7 +279,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#20 Popup new look" />
     <MESSAGE value="#20 Popup settings new look" />
     <MESSAGE value="Showcase icons are upgraded" />
     <MESSAGE value="Catalog Settings page redeign" />
@@ -288,7 +303,8 @@
     <MESSAGE value="#27 Footer addressz isses fixing" />
     <MESSAGE value="#27 Mobile cta and float-wa show hide fixing" />
     <MESSAGE value="#27 Media information updated" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 Media information updated" />
+    <MESSAGE value="#27 Jump links on Site settings now expand the matching section, then scroll to it" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 Jump links on Site settings now expand the matching section, then scroll to it" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
