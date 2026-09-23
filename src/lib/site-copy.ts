@@ -145,7 +145,10 @@ export type SiteCopy = {
     closeEnquiry: string;
     copyLink: string;
     facebook: string;
+    instagram: string;
     linkedin: string;
+    x: string;
+    youtube: string;
     viewCertifications: string;
   };
   consultation: {
@@ -399,7 +402,10 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     closeEnquiry: 'Close enquiry form',
     copyLink: 'Copy link',
     facebook: 'Facebook',
+    instagram: 'Instagram',
     linkedin: 'LinkedIn',
+    x: 'X (Twitter)',
+    youtube: 'YouTube',
     viewCertifications: 'View certifications',
   },
   consultation: {

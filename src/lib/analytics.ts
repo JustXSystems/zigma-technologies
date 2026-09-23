@@ -24,7 +24,8 @@ export type TrackEventName =
   | 'callback_submit'
   | 'cta_variant_shown'
   | 'calculator_print'
-  | 'calculator_quote';
+  | 'calculator_quote'
+  | 'social_click';
 
 declare global {
   interface Window {

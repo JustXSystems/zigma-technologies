@@ -129,8 +129,45 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
       { key: 'privacyUrl', label: 'Privacy Policy URL' },
       { key: 'termsUrl', label: 'Terms URL' },
       { key: 'cookiePolicyUrl', label: 'Cookie Policy URL' },
-      { key: 'facebookUrl', label: 'Facebook URL', hint: 'Leave blank to hide' },
-      { key: 'linkedinUrl', label: 'LinkedIn URL', hint: 'Leave blank to hide' },
+    ],
+  },
+  {
+    id: 'social-links',
+    title: 'Social links',
+    description:
+      'Profile URLs shown as icons in the footer brand column. Leave blank to hide a network. Also used in Organization JSON-LD (sameAs).',
+    defaultOpen: true,
+    fields: [
+      {
+        key: 'facebookUrl',
+        label: 'Facebook URL',
+        hint: 'e.g. https://www.facebook.com/your-page — leave blank to hide',
+        full: true,
+      },
+      {
+        key: 'instagramUrl',
+        label: 'Instagram URL',
+        hint: 'e.g. https://www.instagram.com/your-handle — leave blank to hide',
+        full: true,
+      },
+      {
+        key: 'linkedinUrl',
+        label: 'LinkedIn URL',
+        hint: 'e.g. https://www.linkedin.com/company/your-company — leave blank to hide',
+        full: true,
+      },
+      {
+        key: 'xUrl',
+        label: 'X (Twitter) URL',
+        hint: 'e.g. https://x.com/your-handle — leave blank to hide',
+        full: true,
+      },
+      {
+        key: 'youtubeUrl',
+        label: 'YouTube URL',
+        hint: 'e.g. https://www.youtube.com/@your-channel — leave blank to hide',
+        full: true,
+      },
     ],
   },
   {

@@ -1,5 +1,5 @@
 import { getThemeSettings } from '@/lib/cms';
-import { mergeSiteSettings } from '@/lib/site-settings';
+import { mergeSiteSettings, socialLinksFromSettings } from '@/lib/site-settings';
 
 export default async function OrganizationJsonLd() {
   const theme = await getThemeSettings();
@@ -12,7 +12,7 @@ export default async function OrganizationJsonLd() {
       : `${base}${site.logoUrl}`
     : `${base}/assets/images/zigma-technologies-logo.png`;
 
-  const sameAs = [site.facebookUrl, site.linkedinUrl].filter(Boolean);
+  const sameAs = socialLinksFromSettings(site).map((link) => link.href);
 
   const jsonLd = {
     '@context': 'https://schema.org',

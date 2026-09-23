@@ -215,7 +215,10 @@ export default function SiteCopyAdminPage() {
             <Field label="Logo / icon · Close enquiry" path="a11y.closeEnquiry" copy={copy} onChange={setCopy} />
             <Field label="Logo / icon · Copy link" path="a11y.copyLink" copy={copy} onChange={setCopy} />
             <Field label="Logo / icon · Facebook" path="a11y.facebook" copy={copy} onChange={setCopy} />
+            <Field label="Logo / icon · Instagram" path="a11y.instagram" copy={copy} onChange={setCopy} />
             <Field label="Logo / icon · LinkedIn" path="a11y.linkedin" copy={copy} onChange={setCopy} />
+            <Field label="Logo / icon · X (Twitter)" path="a11y.x" copy={copy} onChange={setCopy} />
+            <Field label="Logo / icon · YouTube" path="a11y.youtube" copy={copy} onChange={setCopy} />
             <Field label="Logo / icon · Certifications link" path="a11y.viewCertifications" copy={copy} onChange={setCopy} />
             <Field label="Social proof title" path="socialProof.title" copy={copy} onChange={setCopy} />
             <div className="full">

@@ -166,7 +166,11 @@ export type SiteSettings = {
   /** Logo tagline letter-spacing (e.g. 0.1em) */
   logoTaglineLetterSpacing: string;
   facebookUrl: string;
+  instagramUrl: string;
   linkedinUrl: string;
+  /** X (Twitter) profile URL */
+  xUrl: string;
+  youtubeUrl: string;
   privacyUrl: string;
   termsUrl: string;
   cookiePolicyUrl: string;
@@ -241,7 +245,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   logoTaglineStyle: 'normal',
   logoTaglineLetterSpacing: '0.1em',
   facebookUrl: '',
+  instagramUrl: '',
   linkedinUrl: '',
+  xUrl: '',
+  youtubeUrl: '',
   privacyUrl: '/privacy',
   termsUrl: '/terms',
   cookiePolicyUrl: '/cookies',
@@ -295,6 +302,48 @@ export function headingTagForRole(settings: Pick<SiteSettings, 'headingPageHero'
 
 export function telHref(phone: string) {
   return `tel:${phone.replace(/[^\d+]/g, '')}`;
+}
+
+export type SocialNetworkId = 'facebook' | 'instagram' | 'linkedin' | 'x' | 'youtube';
+
+export type SocialLinkDef = {
+  id: SocialNetworkId;
+  href: string;
+  className: string;
+};
+
+/** Accept http(s) URLs; prepend https:// when the host is given without a scheme. Reject other schemes. */
+export function normalizeExternalUrl(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('//')) return `https:${trimmed}`;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
+  return `https://${trimmed}`;
+}
+
+const SOCIAL_LINK_FIELDS: Array<{
+  id: SocialNetworkId;
+  key: keyof Pick<SiteSettings, 'facebookUrl' | 'instagramUrl' | 'linkedinUrl' | 'xUrl' | 'youtubeUrl'>;
+  className: string;
+}> = [
+  { id: 'facebook', key: 'facebookUrl', className: 'sl-fb' },
+  { id: 'instagram', key: 'instagramUrl', className: 'sl-ig' },
+  { id: 'linkedin', key: 'linkedinUrl', className: 'sl-li' },
+  { id: 'x', key: 'xUrl', className: 'sl-x' },
+  { id: 'youtube', key: 'youtubeUrl', className: 'sl-yt' },
+];
+
+/** Active social profile links from Site Settings (blank URLs omitted). */
+export function socialLinksFromSettings(
+  site: Pick<SiteSettings, 'facebookUrl' | 'instagramUrl' | 'linkedinUrl' | 'xUrl' | 'youtubeUrl'>
+): SocialLinkDef[] {
+  const links: SocialLinkDef[] = [];
+  for (const field of SOCIAL_LINK_FIELDS) {
+    const href = normalizeExternalUrl(site[field.key] || '');
+    if (href) links.push({ id: field.id, href, className: field.className });
+  }
+  return links;
 }
 
 export function logoAltText(settings: SiteSettings) {

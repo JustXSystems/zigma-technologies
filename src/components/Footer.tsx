@@ -11,11 +11,13 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
 import FooterLinkColumns from '@/components/FooterLinkColumns';
+import FooterSocialLinks from '@/components/FooterSocialLinks';
 import { appHref } from '@/lib/base-path';
 
 /**
  * Site chrome footer. Link columns come ONLY from Admin → Navigation → Footer
- * (loaded into SiteProviders as footerColumns). No hardcoded / seed / settings merge.
+ * (loaded into SiteProviders as footerColumns). Social icons come ONLY from
+ * Admin → Site Settings → Social links. No hardcoded profiles.
  */
 export default function Footer() {
   const pathname = usePathname();
@@ -106,6 +108,7 @@ export default function Footer() {
                 <span className="newsletter-success">{copy.footer.subscribeSuccess}</span>
               )}
               {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
+              <FooterSocialLinks site={site} />
             </div>
             <FooterLinkColumns columns={footerColumns} />
           </div>
