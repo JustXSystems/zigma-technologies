@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -272,6 +272,19 @@ export default function SiteSettingsPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  const expandSection = useCallback((sectionId: string, scroll = true) => {
+    setOpenSections((prev) => (prev[sectionId] ? prev : { ...prev, [sectionId]: true }));
+    if (!scroll) return;
+    // Defer until after React paints the expanded panel (hidden panels affect scroll position).
+    window.setTimeout(() => {
+      document.getElementById(`site-settings-${sectionId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 40);
+  }, []);
 
   useEffect(() => {
     fetch('/api/admin/site-settings')
@@ -282,6 +295,23 @@ export default function SiteSettingsPage() {
       })
       .catch((e) => setError(e.message));
   }, []);
+
+  useEffect(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
+    const prefix = 'site-settings-';
+    if (!hash.startsWith(prefix)) return;
+    const sectionId = hash.slice(prefix.length);
+    if (!SECTIONS.some((s) => s.id === sectionId)) return;
+    expandSection(sectionId, true);
+  }, [expandSection]);
+
+  function onJumpClick(e: MouseEvent<HTMLAnchorElement>, sectionId: string) {
+    e.preventDefault();
+    expandSection(sectionId, true);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#site-settings-${sectionId}`);
+    }
+  }
 
   async function save(e?: FormEvent) {
     e?.preventDefault();
@@ -458,7 +488,12 @@ export default function SiteSettingsPage() {
 
       <nav className="admin-settings-jump" aria-label="Jump to section">
         {SECTIONS.map((section) => (
-          <a key={section.id} href={`#site-settings-${section.id}`} className="admin-settings-jump-link">
+          <a
+            key={section.id}
+            href={`#site-settings-${section.id}`}
+            className={`admin-settings-jump-link${openSections[section.id] ? ' is-active' : ''}`}
+            onClick={(e) => onJumpClick(e, section.id)}
+          >
             {section.title}
           </a>
         ))}
@@ -475,7 +510,10 @@ export default function SiteSettingsPage() {
             <AdminCollapsible
               title={section.title}
               description={section.description}
-              defaultOpen={false}
+              open={!!openSections[section.id]}
+              onOpenChange={(next) =>
+                setOpenSections((prev) => ({ ...prev, [section.id]: next }))
+              }
               badge={
                 section.id === 'logo-sizes' ? (
                   <button type="button" className="admin-btn admin-btn-secondary" onClick={resetLogoSizes}>

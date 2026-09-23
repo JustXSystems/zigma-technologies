@@ -7,7 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Mobile cta and float-wa show hide fixing" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Media information updated" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3450015133267195" />
-      <entry key="MS500" value="3.4531702202965016" />
-      <entry key="S2" value="6.3867598257063" />
-      <entry key="S5" value="15.162727579135389" />
-      <entry key="S10" value="31.09299459822939" />
-      <entry key="S30" value="79.25809396817387" />
-      <entry key="S60" value="119.84066933886278" />
-      <entry key="M2" value="155.19153010579893" />
-      <entry key="M5" value="196.70640176075338" />
-      <entry key="M10" value="261.9234313557581" />
-      <entry key="M15" value="322.2347853464136" />
-      <entry key="M30" value="447.9567380889544" />
-      <entry key="H1" value="640.7448191739212" />
-      <entry key="H2" value="993.1238016308533" />
-      <entry key="H4" value="1477.287202493687" />
-      <entry key="D1" value="3809.3762967691478" />
-      <entry key="W1" value="14853.689988942651" />
+      <entry key="MS100" value="1.223156647930447" />
+      <entry key="MS500" value="3.2572920816643" />
+      <entry key="S2" value="8.622011612086776" />
+      <entry key="S5" value="14.801405229483608" />
+      <entry key="S10" value="21.35224973456143" />
+      <entry key="S30" value="31.701099063494294" />
+      <entry key="S60" value="37.35288813470031" />
+      <entry key="M2" value="52.36576485261218" />
+      <entry key="M5" value="114.15824971911748" />
+      <entry key="M10" value="201.8500248431836" />
+      <entry key="M15" value="274.4600586100105" />
+      <entry key="M30" value="423.7054230806543" />
+      <entry key="H1" value="634.7350767206068" />
+      <entry key="H2" value="998.2425897145522" />
+      <entry key="H4" value="1492.839050406304" />
+      <entry key="D1" value="3842.7586345882373" />
+      <entry key="W1" value="14893.097790849144" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -84,31 +84,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="2.220734001561785E-196" />
-      <entry key="H1" value="1.490212737015183E-98" />
-      <entry key="H2" value="1.2207426989398449E-49" />
-      <entry key="H4" value="3.4939128480556264E-25" />
-      <entry key="D1" value="8.526935091516791E-5" />
-      <entry key="W1" value="0.406603402620867" />
+      <entry key="M30" value="1.8702873359731346E-196" />
+      <entry key="H1" value="1.3675844895192244E-98" />
+      <entry key="H2" value="1.1694376809043724E-49" />
+      <entry key="H4" value="3.4197041991137545E-25" />
+      <entry key="D1" value="8.496479933443125E-5" />
+      <entry key="W1" value="0.40639562124927003" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2992308516837063" />
-      <entry key="MS500" value="3.430189879623517" />
-      <entry key="S2" value="6.376373913388026" />
-      <entry key="S5" value="15.15281662784262" />
-      <entry key="S10" value="31.082793397598024" />
-      <entry key="S30" value="79.24938574054882" />
-      <entry key="S60" value="119.83404729668871" />
-      <entry key="M2" value="155.18722347032127" />
-      <entry key="M5" value="196.70419823958747" />
-      <entry key="M10" value="261.9219226446933" />
-      <entry key="M15" value="322.2335221595205" />
-      <entry key="M30" value="447.95583769862975" />
-      <entry key="H1" value="640.7441660047183" />
-      <entry key="H2" value="993.1232845480797" />
-      <entry key="H4" value="1477.2868066937494" />
-      <entry key="D1" value="3809.3761947004045" />
-      <entry key="W1" value="14854.096450125258" />
+      <entry key="MS100" value="1.1834026906810349" />
+      <entry key="MS500" value="3.237286010658571" />
+      <entry key="S2" value="8.608729825751983" />
+      <entry key="S5" value="14.792322980796461" />
+      <entry key="S10" value="21.34572150355742" />
+      <entry key="S30" value="31.6973664092265" />
+      <entry key="S60" value="37.34924957856146" />
+      <entry key="M2" value="52.362112362619314" />
+      <entry key="M5" value="114.15537039695118" />
+      <entry key="M10" value="201.84789270717366" />
+      <entry key="M15" value="274.45829552602305" />
+      <entry key="M30" value="423.70420641317145" />
+      <entry key="H1" value="634.7342416107816" />
+      <entry key="H2" value="998.2419748525201" />
+      <entry key="H4" value="1492.8386028357397" />
+      <entry key="D1" value="3842.7585227955196" />
+      <entry key="W1" value="14893.50404288039" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -263,7 +263,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#20 Popup preview made live preview" />
     <MESSAGE value="#20 Popup new look" />
     <MESSAGE value="#20 Popup settings new look" />
     <MESSAGE value="Showcase icons are upgraded" />
@@ -288,7 +287,8 @@
     <MESSAGE value="#27 Footer logo font isses fixing" />
     <MESSAGE value="#27 Footer addressz isses fixing" />
     <MESSAGE value="#27 Mobile cta and float-wa show hide fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 Mobile cta and float-wa show hide fixing" />
+    <MESSAGE value="#27 Media information updated" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 Media information updated" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
