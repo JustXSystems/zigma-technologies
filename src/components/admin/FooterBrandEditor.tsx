@@ -2,6 +2,7 @@
 
 import {
   DEFAULT_SITE_SETTINGS,
+  describeFooterLogoInherit,
   sanitizeFooterLogoMode,
   sanitizeFooterOfficeAlign,
   type FooterLogoMode,
@@ -59,6 +60,7 @@ function Toggle({
 export default function FooterBrandEditor({ settings, onChange }: Props) {
   const mode = sanitizeFooterLogoMode(settings.footerLogoMode);
   const align = sanitizeFooterOfficeAlign(settings.footerBrandAlign);
+  const inherit = describeFooterLogoInherit(settings);
 
   return (
     <div className="admin-footer-brand-editor">
@@ -185,7 +187,7 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
               {
                 id: 'inherit' as FooterLogoMode,
                 label: 'Inherit from header',
-                hint: 'Scales Logo chip & word type (chip ×0.8, name ×1.25) — stays in sync automatically',
+                hint: 'Chip ×0.8, name ×1.25, fonts/tagline 1:1 — tracks Logo chip & word type live',
               },
               {
                 id: 'custom' as FooterLogoMode,
@@ -219,8 +221,11 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
         </div>
       ) : (
         <p className="admin-footer-office-lead" style={{ marginBottom: 0 }}>
-          Footer sizes track <strong>Logo chip &amp; word type</strong>. Switch to Customize if the footer
-          needs a distinct scale or font.
+          Footer lockup tracks <strong>Logo chip &amp; word type</strong> live: chip ×0.8 →{' '}
+          <code>{inherit.chip}</code> / <code>{inherit.chipMobile}</code> mobile; company name ×1.25 →{' '}
+          <code>{inherit.word}</code> / <code>{inherit.wordMobile}</code> mobile; fonts &amp; tagline match
+          header 1:1. Switch to Customize for independent footer type. Use the Logo preview → Footer toggle
+          above to verify.
         </p>
       )}
     </div>

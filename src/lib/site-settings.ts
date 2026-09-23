@@ -233,6 +233,32 @@ export type SiteSettings = {
   footerOfficeMaxWidth: string;
   /** Top margin above footer office block (e.g. 1.15rem) */
   footerOfficeMarginTop: string;
+  /** Office block heading text (e.g. Office) — blank uses Site Copy fallback */
+  footerOfficeLabel: string;
+  /** Show the office block heading label (true/false) */
+  footerOfficeShowLabel: string;
+  /** Hours row label text (e.g. Hours) */
+  footerOfficeHoursLabel: string;
+  /** SLA row label text (e.g. Reply) */
+  footerOfficeSlaLabel: string;
+  /**
+   * Office heading appearance: match-h6 (same as Contact column) | accent | custom
+   */
+  footerOfficeLabelMode: string;
+  footerOfficeLabelFont: string;
+  footerOfficeLabelSize: string;
+  footerOfficeLabelColor: string;
+  footerOfficeLabelWeight: string;
+  footerOfficeLabelLetterSpacing: string;
+  footerOfficeLabelTransform: string;
+  /** Hours / SLA label appearance: match-h6 | accent | custom */
+  footerOfficeMetaLabelMode: string;
+  footerOfficeMetaLabelFont: string;
+  footerOfficeMetaLabelSize: string;
+  footerOfficeMetaLabelColor: string;
+  footerOfficeMetaLabelWeight: string;
+  footerOfficeMetaLabelLetterSpacing: string;
+  footerOfficeMetaLabelTransform: string;
   ga4MeasurementId: string;
   plausibleDomain: string;
   analyticsConsentRequired: string;
@@ -344,6 +370,24 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   footerOfficeAlign: 'start',
   footerOfficeMaxWidth: '',
   footerOfficeMarginTop: '1.15rem',
+  footerOfficeLabel: 'Office',
+  footerOfficeShowLabel: 'true',
+  footerOfficeHoursLabel: 'Hours',
+  footerOfficeSlaLabel: 'Reply',
+  footerOfficeLabelMode: 'match-h6',
+  footerOfficeLabelFont: 'var(--font-mono)',
+  footerOfficeLabelSize: '0.8rem',
+  footerOfficeLabelColor: '#FFFFFF',
+  footerOfficeLabelWeight: '600',
+  footerOfficeLabelLetterSpacing: '0.1em',
+  footerOfficeLabelTransform: 'uppercase',
+  footerOfficeMetaLabelMode: 'match-h6',
+  footerOfficeMetaLabelFont: 'var(--font-mono)',
+  footerOfficeMetaLabelSize: '0.8rem',
+  footerOfficeMetaLabelColor: '#FFFFFF',
+  footerOfficeMetaLabelWeight: '600',
+  footerOfficeMetaLabelLetterSpacing: '0.1em',
+  footerOfficeMetaLabelTransform: 'uppercase',
   ga4MeasurementId: '',
   plausibleDomain: '',
   analyticsConsentRequired: 'true',
@@ -450,7 +494,12 @@ export type FooterLogoTokens = {
   tagTracking: string;
 };
 
-/** Effective footer logo tokens — either custom fields or scaled header tokens. */
+/**
+ * Effective footer logo tokens.
+ * - custom → absolute values from footerLogo* fields
+ * - inherit → CSS var/calc refs so footer always tracks header --logo-* live
+ *   (chip ×0.8, company name ×1.25, fonts/tagline 1:1)
+ */
 export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoTokens {
   const mode = sanitizeFooterLogoMode(settings.footerLogoMode);
   if (mode === 'custom') {
@@ -478,6 +527,32 @@ export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoToken
     };
   }
 
+  /* Live references — do not bake scaled px/rem or footer will lag header edits. */
+  return {
+    chip: 'calc(var(--logo-chip-h) * 0.8)',
+    chipMobile: 'calc(var(--logo-chip-h-mobile) * 0.8)',
+    wordFont: 'var(--logo-word-font)',
+    word: 'calc(var(--logo-word-size) * 1.25)',
+    wordMobile: 'calc(var(--logo-word-size-mobile) * 1.25)',
+    wordWeight: 'var(--logo-word-weight)',
+    wordStyle: 'var(--logo-word-style)',
+    wordTracking: 'var(--logo-word-letter-spacing)',
+    tagFont: 'var(--logo-tagline-font)',
+    tag: 'var(--logo-tagline-size)',
+    tagMobile: 'var(--logo-tagline-size-mobile)',
+    tagWeight: 'var(--logo-tagline-weight)',
+    tagStyle: 'var(--logo-tagline-style)',
+    tagTracking: 'var(--logo-tagline-letter-spacing)',
+  };
+}
+
+/** Human-readable inherit scales for admin (resolved from current header sizes). */
+export function describeFooterLogoInherit(settings: SiteSettings): {
+  chip: string;
+  chipMobile: string;
+  word: string;
+  wordMobile: string;
+} {
   const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
   const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
   const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
@@ -485,21 +560,8 @@ export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoToken
   return {
     chip: scaleCssSize(chip, 0.8, DEFAULT_SITE_SETTINGS.footerLogoChipHeight),
     chipMobile: scaleCssSize(chipMobile, 0.8, DEFAULT_SITE_SETTINGS.footerLogoChipHeightMobile),
-    wordFont: sanitizeCssFontFamily(settings.logoWordFont, DEFAULT_SITE_SETTINGS.logoWordFont),
     word: scaleCssSize(word, 1.25, DEFAULT_SITE_SETTINGS.footerLogoWordSize),
     wordMobile: scaleCssSize(wordMobile, 1.25, DEFAULT_SITE_SETTINGS.footerLogoWordSizeMobile),
-    wordWeight: sanitizeCssFontWeight(settings.logoWordWeight, DEFAULT_SITE_SETTINGS.logoWordWeight),
-    wordStyle: sanitizeCssFontStyle(settings.logoWordStyle, DEFAULT_SITE_SETTINGS.logoWordStyle),
-    wordTracking: sanitizeCssLetterSpacing(settings.logoWordLetterSpacing, DEFAULT_SITE_SETTINGS.logoWordLetterSpacing),
-    tagFont: sanitizeCssFontFamily(settings.logoTaglineFont, DEFAULT_SITE_SETTINGS.logoTaglineFont),
-    tag: sanitizeCssSize(settings.logoTaglineSize, DEFAULT_SITE_SETTINGS.logoTaglineSize),
-    tagMobile: sanitizeCssSize(settings.logoTaglineSizeMobile, DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile),
-    tagWeight: sanitizeCssFontWeight(settings.logoTaglineWeight, DEFAULT_SITE_SETTINGS.logoTaglineWeight),
-    tagStyle: sanitizeCssFontStyle(settings.logoTaglineStyle, DEFAULT_SITE_SETTINGS.logoTaglineStyle),
-    tagTracking: sanitizeCssLetterSpacing(
-      settings.logoTaglineLetterSpacing,
-      DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing
-    ),
   };
 }
 
@@ -659,6 +721,144 @@ export function sanitizeCssLetterSpacing(value: string | undefined, fallback: st
   return fallback;
 }
 
+/** Safe CSS color: hex, rgb(a), hsl(a), named, or var(--token). */
+export function sanitizeCssColor(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(trimmed)) return trimmed;
+  if (/^rgba?\(\s*[\d.%\s,/]+\s*\)$/i.test(trimmed)) return trimmed;
+  if (/^hsla?\(\s*[\d.%\s,/deg]+\s*\)$/i.test(trimmed)) return trimmed;
+  if (/^var\(--[a-zA-Z0-9-]+\)$/i.test(trimmed)) return trimmed;
+  if (/^[a-zA-Z]{3,20}$/i.test(trimmed)) return trimmed;
+  return fallback;
+}
+
+export type FooterOfficeLabelMode = 'match-h6' | 'accent' | 'custom';
+
+export function sanitizeFooterOfficeLabelMode(value: string | undefined): FooterOfficeLabelMode {
+  const v = value?.trim().toLowerCase();
+  if (v === 'accent' || v === 'custom' || v === 'match-h6') return v;
+  return 'match-h6';
+}
+
+export type CssTextTransform = 'uppercase' | 'none' | 'capitalize' | 'lowercase';
+
+export function sanitizeCssTextTransform(value: string | undefined, fallback: CssTextTransform = 'uppercase'): CssTextTransform {
+  const v = value?.trim().toLowerCase();
+  if (v === 'uppercase' || v === 'none' || v === 'capitalize' || v === 'lowercase') return v;
+  return fallback;
+}
+
+/** Contact column h6 tokens (shared by match-h6 office / meta labels). */
+export const FOOTER_COLUMN_H6_TOKENS = {
+  font: 'var(--font-mono)',
+  size: '0.8rem',
+  color: '#FFFFFF',
+  weight: '600',
+  letterSpacing: '0.1em',
+  transform: 'uppercase' as CssTextTransform,
+};
+
+/** Legacy cyan accent tokens for Hours / SLA labels. */
+export const FOOTER_OFFICE_ACCENT_LABEL_TOKENS = {
+  font: 'var(--font-mono)',
+  size: '0.72rem',
+  color: 'var(--cyan)',
+  weight: '600',
+  letterSpacing: '0.08em',
+  transform: 'uppercase' as CssTextTransform,
+};
+
+export type FooterOfficeLabelTokens = {
+  font: string;
+  size: string;
+  color: string;
+  weight: string;
+  letterSpacing: string;
+  transform: CssTextTransform;
+};
+
+function resolveLabelTokens(
+  mode: FooterOfficeLabelMode,
+  custom: {
+    font: string;
+    size: string;
+    color: string;
+    weight: string;
+    letterSpacing: string;
+    transform: string;
+  },
+  defaults: typeof FOOTER_COLUMN_H6_TOKENS
+): FooterOfficeLabelTokens {
+  if (mode === 'match-h6') return { ...FOOTER_COLUMN_H6_TOKENS };
+  if (mode === 'accent') return { ...FOOTER_OFFICE_ACCENT_LABEL_TOKENS };
+  return {
+    font: sanitizeCssFontFamily(custom.font, defaults.font),
+    size: sanitizeCssSize(custom.size, defaults.size),
+    color: sanitizeCssColor(custom.color, defaults.color),
+    weight: sanitizeCssFontWeight(custom.weight, defaults.weight),
+    letterSpacing: sanitizeCssLetterSpacing(custom.letterSpacing, defaults.letterSpacing),
+    transform: sanitizeCssTextTransform(custom.transform, defaults.transform),
+  };
+}
+
+export function resolveFooterOfficeHeadingTokens(settings: SiteSettings): FooterOfficeLabelTokens {
+  return resolveLabelTokens(
+    sanitizeFooterOfficeLabelMode(settings.footerOfficeLabelMode),
+    {
+      font: settings.footerOfficeLabelFont,
+      size: settings.footerOfficeLabelSize,
+      color: settings.footerOfficeLabelColor,
+      weight: settings.footerOfficeLabelWeight,
+      letterSpacing: settings.footerOfficeLabelLetterSpacing,
+      transform: settings.footerOfficeLabelTransform,
+    },
+    FOOTER_COLUMN_H6_TOKENS
+  );
+}
+
+export function resolveFooterOfficeMetaLabelTokens(settings: SiteSettings): FooterOfficeLabelTokens {
+  return resolveLabelTokens(
+    sanitizeFooterOfficeLabelMode(settings.footerOfficeMetaLabelMode),
+    {
+      font: settings.footerOfficeMetaLabelFont,
+      size: settings.footerOfficeMetaLabelSize,
+      color: settings.footerOfficeMetaLabelColor,
+      weight: settings.footerOfficeMetaLabelWeight,
+      letterSpacing: settings.footerOfficeMetaLabelLetterSpacing,
+      transform: settings.footerOfficeMetaLabelTransform,
+    },
+    FOOTER_COLUMN_H6_TOKENS
+  );
+}
+
+/** Prefer Site Settings label; fall back to Site Copy string. */
+export function footerOfficeLabelText(
+  settings: Pick<SiteSettings, 'footerOfficeLabel'>,
+  copyFallback: string
+): string {
+  const fromSettings = settings.footerOfficeLabel?.trim();
+  if (fromSettings) return fromSettings;
+  return copyFallback?.trim() || DEFAULT_SITE_SETTINGS.footerOfficeLabel;
+}
+
+export function footerOfficeHoursLabelText(
+  settings: Pick<SiteSettings, 'footerOfficeHoursLabel'>,
+  copyFallback: string
+): string {
+  const fromSettings = settings.footerOfficeHoursLabel?.trim();
+  if (fromSettings) return fromSettings;
+  return copyFallback?.trim() || DEFAULT_SITE_SETTINGS.footerOfficeHoursLabel;
+}
+
+export function footerOfficeSlaLabelText(
+  settings: Pick<SiteSettings, 'footerOfficeSlaLabel'>,
+  copyFallback: string
+): string {
+  const fromSettings = settings.footerOfficeSlaLabel?.trim();
+  if (fromSettings) return fromSettings;
+  return copyFallback?.trim() || DEFAULT_SITE_SETTINGS.footerOfficeSlaLabel;
+}
+
 /** Inline :root vars so header/footer logo-chip, logo-word type, and eyebrow sizes follow Site Settings. */
 export function logoSizingCss(settings: SiteSettings): string {
   const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
@@ -691,9 +891,11 @@ export function logoSizingCss(settings: SiteSettings): string {
     DEFAULT_SITE_SETTINGS.footerBrandMaxWidthMobile
   );
   const brandAlign = sanitizeFooterOfficeAlign(settings.footerBrandAlign);
+  const officeHeading = resolveFooterOfficeHeadingTokens(settings);
+  const officeMeta = resolveFooterOfficeMetaLabelTokens(settings);
 
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--foot-office-label-font:${officeHeading.font};--foot-office-label-size:${officeHeading.size};--foot-office-label-color:${officeHeading.color};--foot-office-label-weight:${officeHeading.weight};--foot-office-label-letter-spacing:${officeHeading.letterSpacing};--foot-office-label-transform:${officeHeading.transform};--foot-office-meta-label-font:${officeMeta.font};--foot-office-meta-label-size:${officeMeta.size};--foot-office-meta-label-color:${officeMeta.color};--foot-office-meta-label-weight:${officeMeta.weight};--foot-office-meta-label-letter-spacing:${officeMeta.letterSpacing};--foot-office-meta-label-transform:${officeMeta.transform};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
     `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:var(--footer-logo-chip-h-mobile);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile);}footer .footer-logo .logo-word small,.footer-logo .logo-word small{font-size:var(--footer-logo-tagline-size-mobile);}.logo-word small,header .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}footer .foot-brand{max-width:var(--footer-brand-max-width-mobile);}}`,
   ].join('');

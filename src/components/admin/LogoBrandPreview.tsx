@@ -134,16 +134,22 @@ export default function LogoBrandPreview({ settings }: Props) {
   const footer = useMemo(() => resolveFooterLogoTokens(settings), [settings]);
 
   useEffect(() => {
+    /* Inherit mode exposes var(--logo-*) refs — load the real header families. */
     ensureGoogleFontsLoaded([
       googleFamilyFromCss(settings.logoWordFont),
       googleFamilyFromCss(settings.logoTaglineFont),
-      googleFamilyFromCss(footer.wordFont),
-      googleFamilyFromCss(footer.tagFont),
+      googleFamilyFromCss(footer.wordFont.startsWith('var(') ? settings.logoWordFont : footer.wordFont),
+      googleFamilyFromCss(footer.tagFont.startsWith('var(') ? settings.logoTaglineFont : footer.tagFont),
       'Space Grotesk',
       'Inter',
       'IBM Plex Mono',
     ]);
-  }, [settings.logoWordFont, settings.logoTaglineFont, footer.wordFont, footer.tagFont]);
+  }, [
+    settings.logoWordFont,
+    settings.logoTaglineFont,
+    footer.wordFont,
+    footer.tagFont,
+  ]);
 
   const frameStyle = useMemo(
     () => previewLogoVars(settings, viewport, surface),

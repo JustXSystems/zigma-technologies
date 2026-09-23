@@ -206,9 +206,18 @@ export default function SiteCopyAdminPage() {
             <Field label="Subscribe button" path="footer.subscribe" copy={copy} onChange={setCopy} />
             <Field label="Subscribe success" path="footer.subscribeSuccess" copy={copy} onChange={setCopy} />
             <Field label="Contact column heading" path="footer.contactHeading" copy={copy} onChange={setCopy} />
-            <Field label="Office block label" path="footer.officeHeading" copy={copy} onChange={setCopy} />
-            <Field label="Office hours label" path="footer.officeHoursLabel" copy={copy} onChange={setCopy} />
-            <Field label="Office SLA label" path="footer.officeSlaLabel" copy={copy} onChange={setCopy} />
+            <Field
+              label="Office block label (fallback)"
+              path="footer.officeHeading"
+              copy={copy}
+              onChange={setCopy}
+            />
+            <p className="admin-footer-office-lead" style={{ gridColumn: '1 / -1', margin: 0 }}>
+              Prefer <strong>Site Settings → Address &amp; office</strong> for Office / Hours / SLA label text
+              and type (Match Contact h6 by default). Site Copy values are fallbacks only.
+            </p>
+            <Field label="Office hours label (fallback)" path="footer.officeHoursLabel" copy={copy} onChange={setCopy} />
+            <Field label="Office SLA label (fallback)" path="footer.officeSlaLabel" copy={copy} onChange={setCopy} />
             <Field label="Sticky · Call" path="footer.stickyCall" copy={copy} onChange={setCopy} />
             <Field label="Sticky · WhatsApp" path="footer.stickyWhatsapp" copy={copy} onChange={setCopy} />
             <Field label="Sticky · Quote" path="footer.stickyQuote" copy={copy} onChange={setCopy} />

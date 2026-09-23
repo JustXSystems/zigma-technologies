@@ -3526,24 +3526,28 @@
 }
 /* Mirror footer chrome sizing (resolved --footer-logo-* tokens) */
 .logo-preview-frame.is-footer .footer-logo {
-  font-size: var(--footer-logo-word-size);
+  font-size: var(--footer-logo-word-size, calc(var(--logo-word-size) * 1.25));
   font-family: var(--footer-logo-word-font, var(--logo-word-font));
   font-weight: var(--footer-logo-word-weight, var(--logo-word-weight));
   font-style: var(--footer-logo-word-style, var(--logo-word-style));
   letter-spacing: var(--footer-logo-word-letter-spacing, var(--logo-word-letter-spacing));
 }
 .logo-preview-frame.is-footer .footer-logo .logo-word {
-  font-size: inherit;
+  font-family: var(--footer-logo-word-font, var(--logo-word-font));
+  font-weight: var(--footer-logo-word-weight, var(--logo-word-weight));
+  font-style: var(--footer-logo-word-style, var(--logo-word-style));
+  letter-spacing: var(--footer-logo-word-letter-spacing, var(--logo-word-letter-spacing));
+  font-size: var(--footer-logo-word-size, calc(var(--logo-word-size) * 1.25));
 }
 .logo-preview-frame.is-footer .footer-logo .logo-word small {
-  font-size: var(--footer-logo-tagline-size);
+  font-size: var(--footer-logo-tagline-size, var(--logo-tagline-size));
   font-family: var(--footer-logo-tagline-font, var(--logo-tagline-font));
   font-weight: var(--footer-logo-tagline-weight, var(--logo-tagline-weight));
   font-style: var(--footer-logo-tagline-style, var(--logo-tagline-style));
   letter-spacing: var(--footer-logo-tagline-letter-spacing, var(--logo-tagline-letter-spacing));
 }
 .logo-preview-frame.is-footer .footer-logo .logo-chip img {
-  height: var(--footer-logo-chip-h);
+  height: var(--footer-logo-chip-h, calc(var(--logo-chip-h) * 0.8));
 }
 
 .logo-type-editor {

@@ -1,7 +1,16 @@
 'use client';
 
 import { useMemo, type CSSProperties } from 'react';
-import { isSettingEnabled, sanitizeCssSize, sanitizeFooterOfficeAlign, type SiteSettings } from '@/lib/site-settings';
+import {
+  footerOfficeHoursLabelText,
+  footerOfficeLabelText,
+  footerOfficeSlaLabelText,
+  isSettingEnabled,
+  sanitizeCssSize,
+  sanitizeFooterOfficeAlign,
+  sanitizeFooterOfficeLabelMode,
+  type SiteSettings,
+} from '@/lib/site-settings';
 import { renderFooterOfficeLines } from '@/lib/footer-office-layout';
 import { useSiteCopy } from '@/lib/use-site-copy';
 
@@ -14,6 +23,7 @@ type Props = {
 /**
  * Footer office / address block from Admin → Site Settings → Address & office.
  * Line order and field grouping come from footerOfficeLayoutJson.
+ * Labels + type come from Site Settings (match Contact h6 by default).
  */
 export default function FooterOfficeBlock({ site, showHeading = false }: Props) {
   const copy = useSiteCopy();
@@ -30,6 +40,12 @@ export default function FooterOfficeBlock({ site, showHeading = false }: Props) 
     ? sanitizeCssSize(site.footerOfficeMaxWidth, '')
     : '';
   const marginTop = sanitizeCssSize(site.footerOfficeMarginTop, '1.15rem');
+  const labelMode = sanitizeFooterOfficeLabelMode(site.footerOfficeLabelMode);
+  const showLabel = isSettingEnabled(site.footerOfficeShowLabel, true);
+  const headingText = footerOfficeLabelText(site, copy.footer.officeHeading);
+  const hoursLabel = footerOfficeHoursLabelText(site, copy.footer.officeHoursLabel);
+  const slaLabel = footerOfficeSlaLabelText(site, copy.footer.officeSlaLabel);
+  const useH6 = labelMode === 'match-h6' || showHeading;
 
   /* Prefer CSS vars so mobile media queries can override max-width / margin. */
   const style: CSSProperties = {
@@ -43,9 +59,12 @@ export default function FooterOfficeBlock({ site, showHeading = false }: Props) 
 
   return (
     <div className={`foot-meta foot-office align-${align}`} style={style}>
-      {showHeading && copy.footer.officeHeading ? <h6 className="foot-office-heading">{copy.footer.officeHeading}</h6> : null}
-      {!showHeading && copy.footer.officeHeading ? (
-        <div className="foot-office-label">{copy.footer.officeHeading}</div>
+      {showLabel && headingText ? (
+        useH6 ? (
+          <h6 className="foot-office-heading">{headingText}</h6>
+        ) : (
+          <div className="foot-office-label">{headingText}</div>
+        )
       ) : null}
       {addressLines.length ? (
         <address className="foot-office-address">
@@ -59,7 +78,9 @@ export default function FooterOfficeBlock({ site, showHeading = false }: Props) 
       {metaLines.map((line) => (
         <span key={line.key} className={`foot-office-meta ${line.kind === 'sla' ? 'foot-sla' : 'foot-hours'}`}>
           {line.showLabel ? (
-            <em>{line.kind === 'sla' ? copy.footer.officeSlaLabel : copy.footer.officeHoursLabel}</em>
+            <em className="foot-office-meta-label">
+              {line.kind === 'sla' ? slaLabel : hoursLabel}
+            </em>
           ) : null}
           <span className="foot-office-meta-text">{line.text}</span>
         </span>
