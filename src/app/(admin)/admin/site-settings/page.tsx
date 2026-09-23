@@ -117,6 +117,18 @@ const SECTIONS: SectionDef[] = [
         hint: 'Area, landmark, or continuation — leave blank to hide',
         full: true,
       },
+      {
+        key: 'addressStreet3',
+        label: 'Address street (line 3)',
+        hint: 'Optional third row for footer split — leave blank to hide',
+        full: true,
+      },
+      {
+        key: 'addressStreet4',
+        label: 'Address street (line 4)',
+        hint: 'Optional fourth row for footer split — leave blank to hide',
+        full: true,
+      },
       { key: 'addressLocality', label: 'Address city', hint: 'Default Bengaluru' },
       { key: 'addressRegion', label: 'Address region/state' },
       { key: 'addressPostal', label: 'Postal code' },

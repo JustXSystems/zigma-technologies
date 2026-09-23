@@ -125,7 +125,10 @@ export default function FooterOfficeLayoutEditor({ settings, onChange }: Props) 
       <div className="admin-footer-layout-head">
         <div>
           <strong>Address line layout</strong>
-          <span>Pick fields per line (3 or 4 lines, or custom). Empty values are skipped when rendering.</span>
+          <span>
+            Use up to 4 street rows (L1–L4) plus city / region / country. Empty values are skipped when
+            rendering. Prefer the <em>4 street rows</em> preset to split a long address.
+          </span>
         </div>
       </div>
 
@@ -285,7 +288,7 @@ export default function FooterOfficeLayoutEditor({ settings, onChange }: Props) 
           {jsonError ? <small style={{ color: 'var(--admin-danger, #c0392b)' }}>{jsonError}</small> : (
             <small style={{ color: 'var(--admin-muted)' }}>
               Schema: {'{ lines: [{ parts: [{ field, text? }], join?, showLabel? }] }'} — fields: street,
-              street2, locality, region, postal, country, hours, sla, custom
+              street, street2, street3, street4, locality, region, postal, country, hours, sla, custom
             </small>
           )}
         </div>

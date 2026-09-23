@@ -210,6 +210,10 @@ export type SiteSettings = {
   addressStreet: string;
   /** Second street line (building, floor, landmark) for multi-line footer display */
   addressStreet2: string;
+  /** Third street line — optional split for footer fit */
+  addressStreet3: string;
+  /** Fourth street line — optional split for footer fit */
+  addressStreet4: string;
   addressLocality: string;
   addressRegion: string;
   addressPostal: string;
@@ -358,6 +362,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   cookiePolicyUrl: '/cookies',
   addressStreet: '',
   addressStreet2: '',
+  addressStreet3: '',
+  addressStreet4: '',
   addressLocality: 'Bengaluru',
   addressRegion: 'Karnataka',
   addressPostal: '',
@@ -577,14 +583,21 @@ const COUNTRY_DISPLAY: Record<string, string> = {
 export function formatOfficeAddressLines(
   site: Pick<
     SiteSettings,
-    'addressStreet' | 'addressStreet2' | 'addressLocality' | 'addressRegion' | 'addressPostal' | 'addressCountry'
+    | 'addressStreet'
+    | 'addressStreet2'
+    | 'addressStreet3'
+    | 'addressStreet4'
+    | 'addressLocality'
+    | 'addressRegion'
+    | 'addressPostal'
+    | 'addressCountry'
   >
 ): string[] {
   const lines: string[] = [];
-  const street = site.addressStreet?.trim();
-  if (street) lines.push(street);
-  const street2 = site.addressStreet2?.trim();
-  if (street2) lines.push(street2);
+  for (const part of [site.addressStreet, site.addressStreet2, site.addressStreet3, site.addressStreet4]) {
+    const trimmed = part?.trim();
+    if (trimmed) lines.push(trimmed);
+  }
 
   const cityBits = [site.addressLocality, site.addressRegion, site.addressPostal]
     .map((part) => part?.trim())
@@ -601,9 +614,9 @@ export function formatOfficeAddressLines(
 
 /** Combined street for schema / single-line consumers. */
 export function formatStreetAddress(
-  site: Pick<SiteSettings, 'addressStreet' | 'addressStreet2'>
+  site: Pick<SiteSettings, 'addressStreet' | 'addressStreet2' | 'addressStreet3' | 'addressStreet4'>
 ): string {
-  return [site.addressStreet, site.addressStreet2]
+  return [site.addressStreet, site.addressStreet2, site.addressStreet3, site.addressStreet4]
     .map((part) => part?.trim())
     .filter(Boolean)
     .join(', ');

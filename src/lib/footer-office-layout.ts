@@ -3,6 +3,8 @@
 export const FOOTER_OFFICE_FIELDS = [
   { id: 'street', label: 'Street line 1', group: 'address' },
   { id: 'street2', label: 'Street line 2', group: 'address' },
+  { id: 'street3', label: 'Street line 3', group: 'address' },
+  { id: 'street4', label: 'Street line 4', group: 'address' },
   { id: 'locality', label: 'City', group: 'address' },
   { id: 'region', label: 'Region / state', group: 'address' },
   { id: 'postal', label: 'Postal code', group: 'address' },
@@ -49,8 +51,8 @@ const COUNTRY_DISPLAY: Record<string, string> = {
   SG: 'Singapore',
 };
 
-/** Classic: street L1 · street L2 · city/region/postal · country (+ hours). */
-export const FOOTER_OFFICE_LAYOUT_3_LINES: FooterOfficeLayout = {
+/** Street L1–L2 · city block · country (+ hours). */
+export const FOOTER_OFFICE_LAYOUT_2_STREET: FooterOfficeLayout = {
   lines: [
     { parts: [{ field: 'street' }] },
     { parts: [{ field: 'street2' }] },
@@ -60,11 +62,13 @@ export const FOOTER_OFFICE_LAYOUT_3_LINES: FooterOfficeLayout = {
   ],
 };
 
-/** 4 address lines: street L1 · street L2 · city · region postal · country (+ hours). */
-export const FOOTER_OFFICE_LAYOUT_4_LINES: FooterOfficeLayout = {
+/** Street L1–L4 each on its own row, then city / region postal / country (+ hours). */
+export const FOOTER_OFFICE_LAYOUT_4_STREET: FooterOfficeLayout = {
   lines: [
     { parts: [{ field: 'street' }] },
     { parts: [{ field: 'street2' }] },
+    { parts: [{ field: 'street3' }] },
+    { parts: [{ field: 'street4' }] },
     { parts: [{ field: 'locality' }] },
     { parts: [{ field: 'region' }, { field: 'postal' }], join: ' ' },
     { parts: [{ field: 'country' }] },
@@ -72,10 +76,10 @@ export const FOOTER_OFFICE_LAYOUT_4_LINES: FooterOfficeLayout = {
   ],
 };
 
-/** Compact: both street lines joined, then city block + hours + SLA. */
+/** Compact: street lines joined, then city block + hours + SLA. */
 export const FOOTER_OFFICE_LAYOUT_COMPACT: FooterOfficeLayout = {
   lines: [
-    { parts: [{ field: 'street' }, { field: 'street2' }], join: ', ' },
+    { parts: [{ field: 'street' }, { field: 'street2' }, { field: 'street3' }, { field: 'street4' }], join: ', ' },
     { parts: [{ field: 'locality' }, { field: 'region' }], join: ', ' },
     { parts: [{ field: 'postal' }, { field: 'country' }], join: ' · ' },
     { parts: [{ field: 'hours' }], showLabel: true },
@@ -83,7 +87,12 @@ export const FOOTER_OFFICE_LAYOUT_COMPACT: FooterOfficeLayout = {
   ],
 };
 
-export const DEFAULT_FOOTER_OFFICE_LAYOUT = FOOTER_OFFICE_LAYOUT_3_LINES;
+/** @deprecated alias — prefer FOOTER_OFFICE_LAYOUT_2_STREET */
+export const FOOTER_OFFICE_LAYOUT_3_LINES = FOOTER_OFFICE_LAYOUT_2_STREET;
+/** @deprecated alias — prefer FOOTER_OFFICE_LAYOUT_4_STREET */
+export const FOOTER_OFFICE_LAYOUT_4_LINES = FOOTER_OFFICE_LAYOUT_4_STREET;
+
+export const DEFAULT_FOOTER_OFFICE_LAYOUT = FOOTER_OFFICE_LAYOUT_4_STREET;
 
 export const FOOTER_OFFICE_LAYOUT_PRESETS: Array<{
   id: string;
@@ -92,21 +101,21 @@ export const FOOTER_OFFICE_LAYOUT_PRESETS: Array<{
   layout: FooterOfficeLayout;
 }> = [
   {
-    id: '3-lines',
-    label: 'Street ×2 + city',
-    hint: 'Street L1 · Street L2 · City, region, postal · Country (+ hours)',
-    layout: FOOTER_OFFICE_LAYOUT_3_LINES,
+    id: '4-street',
+    label: '4 street rows',
+    hint: 'Street L1–L4 each on its own line · City · Region postal · Country (+ hours)',
+    layout: FOOTER_OFFICE_LAYOUT_4_STREET,
   },
   {
-    id: '4-lines',
-    label: '4 address lines',
-    hint: 'Street L1 · L2 · City · Region postal · Country (+ hours)',
-    layout: FOOTER_OFFICE_LAYOUT_4_LINES,
+    id: '2-street',
+    label: '2 street rows',
+    hint: 'Street L1 · L2 · City, region, postal · Country (+ hours)',
+    layout: FOOTER_OFFICE_LAYOUT_2_STREET,
   },
   {
     id: 'compact',
     label: 'Compact + SLA',
-    hint: 'Street lines joined, tighter city block, hours + reply SLA',
+    hint: 'All street lines joined, tighter city block, hours + reply SLA',
     layout: FOOTER_OFFICE_LAYOUT_COMPACT,
   },
 ];
@@ -135,7 +144,7 @@ function sanitizeLine(raw: unknown): FooterOfficeLine | null {
   return line;
 }
 
-/** Parse layout JSON; invalid / empty → default 3-line layout. */
+/** Parse layout JSON; invalid / empty → default 4-street layout. */
 export function parseFooterOfficeLayout(raw: unknown): FooterOfficeLayout {
   let data: unknown = raw;
   if (typeof raw === 'string') {
@@ -152,6 +161,32 @@ export function parseFooterOfficeLayout(raw: unknown): FooterOfficeLayout {
   if (!Array.isArray(obj.lines)) return structuredClone(DEFAULT_FOOTER_OFFICE_LAYOUT);
   const lines = obj.lines.map(sanitizeLine).filter(Boolean) as FooterOfficeLine[];
   if (!lines.length) return structuredClone(DEFAULT_FOOTER_OFFICE_LAYOUT);
+  return ensureStreet3And4Lines({ lines });
+}
+
+/**
+ * Older 2-street layouts gain empty L3/L4 rows so Site Settings street 3–4
+ * appear in the footer without forcing a preset click.
+ */
+function ensureStreet3And4Lines(layout: FooterOfficeLayout): FooterOfficeLayout {
+  const used = new Set(layout.lines.flatMap((line) => line.parts.map((p) => p.field)));
+  if (used.has('street3') || used.has('street4')) return layout;
+  if (!used.has('street') && !used.has('street2')) return layout;
+
+  const lines = [...layout.lines];
+  let insertAt = lines.findIndex(
+    (line) => line.parts.length === 1 && (line.parts[0].field === 'street2' || line.parts[0].field === 'street')
+  );
+  if (insertAt < 0) return layout;
+  /* After the last consecutive street/street2-only line */
+  while (
+    insertAt + 1 < lines.length &&
+    lines[insertAt + 1].parts.length === 1 &&
+    (lines[insertAt + 1].parts[0].field === 'street' || lines[insertAt + 1].parts[0].field === 'street2')
+  ) {
+    insertAt += 1;
+  }
+  lines.splice(insertAt + 1, 0, { parts: [{ field: 'street3' }] }, { parts: [{ field: 'street4' }] });
   return { lines };
 }
 
@@ -162,6 +197,8 @@ export function stringifyFooterOfficeLayout(layout: FooterOfficeLayout): string 
 export type FooterOfficeValueSource = {
   addressStreet: string;
   addressStreet2: string;
+  addressStreet3: string;
+  addressStreet4: string;
   addressLocality: string;
   addressRegion: string;
   addressPostal: string;
@@ -186,6 +223,10 @@ function resolveFieldValue(field: FooterOfficeFieldId, site: FooterOfficeValueSo
       return site.addressStreet?.trim() || '';
     case 'street2':
       return site.addressStreet2?.trim() || '';
+    case 'street3':
+      return site.addressStreet3?.trim() || '';
+    case 'street4':
+      return site.addressStreet4?.trim() || '';
     case 'locality':
       return site.addressLocality?.trim() || '';
     case 'region':
