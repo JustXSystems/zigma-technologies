@@ -177,6 +177,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Edit company profile, logo URL, logo alt, Logo chip & word type (font/size/weight/style for name + tagline, chip height)',
       'Navigation menu style: Classic / Corporate / Elegant / Rail / Lumen / Mosaic / Ribbon',
       'Footer blurb, copyright, Powered by credit, legal links',
+      'Address & office — footer Contact column (show/hide, align), JSON-LD, contact/thank-you/SLA',
       'Social links (Facebook, Instagram, LinkedIn, X, YouTube) — blank hides; footer icons + JSON-LD sameAs',
       'Enquiry notify emails (comma-separated), visitor auto-reply toggle',
       'Analytics IDs, consent requirement, CRM webhook URL/secret',

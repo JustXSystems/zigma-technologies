@@ -179,6 +179,20 @@ export type SiteSettings = {
   addressRegion: string;
   addressPostal: string;
   addressCountry: string;
+  /** Show office/address block in footer Contact column (true/false) */
+  footerOfficeEnabled: string;
+  /** Show postal address lines in footer office block (true/false) */
+  footerOfficeShowAddress: string;
+  /** Show office hours in footer office block (true/false) */
+  footerOfficeShowHours: string;
+  /** Show response SLA in footer office block (true/false) */
+  footerOfficeShowSla: string;
+  /** Footer office text alignment: start | center | end */
+  footerOfficeAlign: string;
+  /** Max width of footer office block (e.g. 280px); blank = full column */
+  footerOfficeMaxWidth: string;
+  /** Top margin above footer office block (e.g. 1.15rem) */
+  footerOfficeMarginTop: string;
   ga4MeasurementId: string;
   plausibleDomain: string;
   analyticsConsentRequired: string;
@@ -257,6 +271,13 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   addressRegion: 'Karnataka',
   addressPostal: '',
   addressCountry: 'IN',
+  footerOfficeEnabled: 'true',
+  footerOfficeShowAddress: 'true',
+  footerOfficeShowHours: 'true',
+  footerOfficeShowSla: 'false',
+  footerOfficeAlign: 'start',
+  footerOfficeMaxWidth: '',
+  footerOfficeMarginTop: '1.15rem',
   ga4MeasurementId: '',
   plausibleDomain: '',
   analyticsConsentRequired: 'true',
@@ -302,6 +323,53 @@ export function headingTagForRole(settings: Pick<SiteSettings, 'headingPageHero'
 
 export function telHref(phone: string) {
   return `tel:${phone.replace(/[^\d+]/g, '')}`;
+}
+
+/** Treat Site Settings true/false string fields. */
+export function isSettingEnabled(value: string | undefined, fallback = false): boolean {
+  const trimmed = value?.trim().toLowerCase();
+  if (trimmed === 'true' || trimmed === '1' || trimmed === 'yes') return true;
+  if (trimmed === 'false' || trimmed === '0' || trimmed === 'no') return false;
+  return fallback;
+}
+
+export type FooterOfficeAlign = 'start' | 'center' | 'end';
+
+export function sanitizeFooterOfficeAlign(value: string | undefined): FooterOfficeAlign {
+  const v = value?.trim().toLowerCase();
+  if (v === 'center' || v === 'end' || v === 'start') return v;
+  if (v === 'left') return 'start';
+  if (v === 'right') return 'end';
+  return 'start';
+}
+
+const COUNTRY_DISPLAY: Record<string, string> = {
+  IN: 'India',
+  US: 'United States',
+  GB: 'United Kingdom',
+  AE: 'United Arab Emirates',
+  SG: 'Singapore',
+};
+
+/** Multi-line postal address for footer / contact surfaces. Empty lines omitted. */
+export function formatOfficeAddressLines(
+  site: Pick<SiteSettings, 'addressStreet' | 'addressLocality' | 'addressRegion' | 'addressPostal' | 'addressCountry'>
+): string[] {
+  const lines: string[] = [];
+  const street = site.addressStreet?.trim();
+  if (street) lines.push(street);
+
+  const cityBits = [site.addressLocality, site.addressRegion, site.addressPostal]
+    .map((part) => part?.trim())
+    .filter(Boolean) as string[];
+  if (cityBits.length) lines.push(cityBits.join(', '));
+
+  const countryRaw = site.addressCountry?.trim();
+  if (countryRaw) {
+    const code = countryRaw.toUpperCase();
+    lines.push(COUNTRY_DISPLAY[code] || countryRaw);
+  }
+  return lines;
 }
 
 export type SocialNetworkId = 'facebook' | 'instagram' | 'linkedin' | 'x' | 'youtube';

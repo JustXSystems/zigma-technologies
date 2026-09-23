@@ -204,6 +204,11 @@ export default function SiteCopyAdminPage() {
             <Field label="Newsletter label" path="footer.newsletterLabel" copy={copy} onChange={setCopy} />
             <Field label="Newsletter placeholder" path="footer.newsletterPlaceholder" copy={copy} onChange={setCopy} />
             <Field label="Subscribe button" path="footer.subscribe" copy={copy} onChange={setCopy} />
+            <Field label="Subscribe success" path="footer.subscribeSuccess" copy={copy} onChange={setCopy} />
+            <Field label="Contact column heading" path="footer.contactHeading" copy={copy} onChange={setCopy} />
+            <Field label="Office block label" path="footer.officeHeading" copy={copy} onChange={setCopy} />
+            <Field label="Office hours label" path="footer.officeHoursLabel" copy={copy} onChange={setCopy} />
+            <Field label="Office SLA label" path="footer.officeSlaLabel" copy={copy} onChange={setCopy} />
             <Field label="Sticky · Call" path="footer.stickyCall" copy={copy} onChange={setCopy} />
             <Field label="Sticky · WhatsApp" path="footer.stickyWhatsapp" copy={copy} onChange={setCopy} />
             <Field label="Sticky · Quote" path="footer.stickyQuote" copy={copy} onChange={setCopy} />

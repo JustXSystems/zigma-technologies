@@ -87,6 +87,12 @@ export type SiteCopy = {
     privacy: string;
     cookies: string;
     terms: string;
+    /** Fallback Contact column heading when nav has no Contact column */
+    contactHeading: string;
+    /** Label above footer office / address block */
+    officeHeading: string;
+    officeHoursLabel: string;
+    officeSlaLabel: string;
   };
   cookies: {
     bannerBody: string;
@@ -266,6 +272,10 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     privacy: 'Privacy Policy',
     cookies: 'Cookies',
     terms: 'Terms',
+    contactHeading: 'Contact',
+    officeHeading: 'Office',
+    officeHoursLabel: 'Hours',
+    officeSlaLabel: 'Reply',
   },
   cookies: {
     bannerBody:

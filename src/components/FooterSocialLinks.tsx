@@ -1,12 +1,20 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
-import { socialLinksFromSettings, type SocialNetworkId, type SiteSettings } from '@/lib/site-settings';
+import {
+  sanitizeFooterOfficeAlign,
+  socialLinksFromSettings,
+  type SocialNetworkId,
+  type SiteSettings,
+} from '@/lib/site-settings';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { trackEvent } from '@/lib/analytics';
 
 type Props = {
-  site: Pick<SiteSettings, 'facebookUrl' | 'instagramUrl' | 'linkedinUrl' | 'xUrl' | 'youtubeUrl'>;
+  site: Pick<
+    SiteSettings,
+    'facebookUrl' | 'instagramUrl' | 'linkedinUrl' | 'xUrl' | 'youtubeUrl' | 'footerOfficeAlign'
+  >;
 };
 
 const ICONS: Record<SocialNetworkId, ReactNode> = {
@@ -46,6 +54,7 @@ const ICONS: Record<SocialNetworkId, ReactNode> = {
 export default function FooterSocialLinks({ site }: Props) {
   const copy = useSiteCopy();
   const links = useMemo(() => socialLinksFromSettings(site), [site]);
+  const align = sanitizeFooterOfficeAlign(site.footerOfficeAlign);
 
   if (!links.length) return null;
 
@@ -58,7 +67,7 @@ export default function FooterSocialLinks({ site }: Props) {
   };
 
   return (
-    <nav className="social-links" aria-label="Social media">
+    <nav className={`social-links align-${align}`} aria-label="Social media">
       {links.map((link) => (
         <a
           key={link.id}

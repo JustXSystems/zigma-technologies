@@ -7,16 +7,18 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#26 Industries section creation for its new page design as per the HTML template">
-      <change afterPath="$PROJECT_DIR$/src/components/FooterSocialLinks.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Social media links are missing in Footer">
+      <change afterPath="$PROJECT_DIR$/src/components/FooterOfficeBlock.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/FooterOfficeEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FooterLinkColumns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FooterLinkColumns.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FooterSocialLinks.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FooterSocialLinks.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/analytics.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/analytics.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
     </list>
@@ -66,23 +68,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.325904880515724" />
-      <entry key="MS500" value="2.685869615636928" />
-      <entry key="S2" value="3.5904562533602493" />
-      <entry key="S5" value="4.667022693854593" />
-      <entry key="S10" value="8.933075737552528" />
-      <entry key="S30" value="34.71950888841713" />
-      <entry key="S60" value="67.07670422844468" />
-      <entry key="M2" value="103.12324314867625" />
-      <entry key="M5" value="141.54584824138826" />
-      <entry key="M10" value="167.33427162245655" />
-      <entry key="M15" value="182.3947193556512" />
-      <entry key="M30" value="204.80547173319104" />
-      <entry key="H1" value="220.55641746242492" />
-      <entry key="H2" value="243.51972780920923" />
-      <entry key="H4" value="371.36706653127027" />
-      <entry key="D1" value="2224.9499154341524" />
-      <entry key="W1" value="13098.395549121187" />
+      <entry key="MS100" value="1.0000000045596604" />
+      <entry key="MS500" value="1.0279136329094447" />
+      <entry key="S2" value="1.8311378978018067" />
+      <entry key="S5" value="2.7746027084044647" />
+      <entry key="S10" value="3.3027522216258363" />
+      <entry key="S30" value="3.7529511270495095" />
+      <entry key="S60" value="4.537354762281223" />
+      <entry key="M2" value="10.67489743825248" />
+      <entry key="M5" value="45.54797724155331" />
+      <entry key="M10" value="115.21718725662181" />
+      <entry key="M15" value="173.18423381883264" />
+      <entry key="M30" value="278.45232408285574" />
+      <entry key="H1" value="364.107988108652" />
+      <entry key="H2" value="431.4427223856481" />
+      <entry key="H4" value="577.2163322875115" />
+      <entry key="D1" value="2438.50700193975" />
+      <entry key="W1" value="13318.360254229492" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -96,31 +98,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="4.978663207192906E-193" />
-      <entry key="H1" value="7.055964290721601E-97" />
-      <entry key="H2" value="8.399978744449708E-49" />
-      <entry key="H4" value="9.16513979420484E-25" />
-      <entry key="D1" value="1.0013766523649034E-4" />
-      <entry key="W1" value="0.416047657111313" />
+      <entry key="M30" value="2.5031756599705746E-193" />
+      <entry key="H1" value="5.003174652129432E-97" />
+      <entry key="H2" value="7.07331227370089E-49" />
+      <entry key="H4" value="8.41029861178446E-25" />
+      <entry key="D1" value="9.87134161673717E-5" />
+      <entry key="W1" value="0.4151971143579283" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.269979736957907" />
-      <entry key="MS500" value="2.662016841508561" />
-      <entry key="S2" value="3.582398173948757" />
-      <entry key="S5" value="4.6628605999170185" />
-      <entry key="S10" value="8.929209508254484" />
-      <entry key="S30" value="34.71453968119901" />
-      <entry key="S60" value="67.0717489018062" />
-      <entry key="M2" value="103.11930928587799" />
-      <entry key="M5" value="141.54362379319414" />
-      <entry key="M10" value="167.3329256613974" />
-      <entry key="M15" value="182.39372753923655" />
-      <entry key="M30" value="204.80490422141852" />
-      <entry key="H1" value="220.55610831347764" />
-      <entry key="H2" value="243.51955618057403" />
-      <entry key="H4" value="371.36693770034094" />
-      <entry key="D1" value="2224.9498939275663" />
-      <entry key="W1" value="13098.811464406532" />
+      <entry key="MS100" value="0.9460576510094045" />
+      <entry key="MS500" value="1.0165120047864782" />
+      <entry key="S2" value="1.8253162363477602" />
+      <entry key="S5" value="2.7708274181106116" />
+      <entry key="S10" value="3.300454759197846" />
+      <entry key="S30" value="3.752069010199784" />
+      <entry key="S60" value="4.536845307360033" />
+      <entry key="M2" value="10.674400913501906" />
+      <entry key="M5" value="45.54726919070345" />
+      <entry key="M10" value="115.216332381912" />
+      <entry key="M15" value="173.18337819932032" />
+      <entry key="M30" value="278.4516281614955" />
+      <entry key="H1" value="364.1075277386724" />
+      <entry key="H2" value="431.44244691671025" />
+      <entry key="H4" value="577.2161458049221" />
+      <entry key="D1" value="2438.5069689567804" />
+      <entry key="W1" value="13318.775317549345" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -147,37 +149,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/.next",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/.next&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\.next" />
@@ -275,7 +277,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#17 CSP stylesheet block and the startTime error" />
     <MESSAGE value="File upload error display if any" />
     <MESSAGE value="catalog-listing background color make  configurable in admin catalog settings with color picker&#10;Also I want.catalog-card--marketplace:hover border-color need to configurable from admin using color picker" />
     <MESSAGE value="move catalog-detail-footer to first column catalog-detail-media-col under image catalog-gallery catalog-gallery--detail" />
@@ -300,7 +301,8 @@
     <MESSAGE value="#25 Talk to us - buttons" />
     <MESSAGE value="#25 Request Consultation - buttons also made configurable" />
     <MESSAGE value="#26 Industries section creation for its new page design as per the HTML template" />
-    <option name="LAST_COMMIT_MESSAGE" value="#26 Industries section creation for its new page design as per the HTML template" />
+    <MESSAGE value="#27 Social media links are missing in Footer" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 Social media links are missing in Footer" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

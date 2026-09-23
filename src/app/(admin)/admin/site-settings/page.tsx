@@ -11,6 +11,7 @@ import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
 import HeaderTalkEditor from '@/components/admin/HeaderTalkEditor';
 import HeaderCtaEditor from '@/components/admin/HeaderCtaEditor';
+import FooterOfficeEditor from '@/components/admin/FooterOfficeEditor';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -183,15 +184,16 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
   {
     id: 'address',
     title: 'Address & office',
-    description: 'Postal address, hours, and response SLA.',
+    description:
+      'Postal address, hours, and SLA — used in footer Contact column, Organization JSON-LD, contact form, thank-you, and /sla.',
     defaultOpen: false,
     fields: [
       { key: 'addressStreet', label: 'Address street', full: true },
       { key: 'addressLocality', label: 'Address city', hint: 'Default Bengaluru' },
       { key: 'addressRegion', label: 'Address region/state' },
       { key: 'addressPostal', label: 'Postal code' },
-      { key: 'addressCountry', label: 'Country code', hint: 'e.g. IN' },
-      { key: 'officeHours', label: 'Office hours', hint: 'Shown on contact / thank-you' },
+      { key: 'addressCountry', label: 'Country code', hint: 'e.g. IN (shown as India in footer)' },
+      { key: 'officeHours', label: 'Office hours', hint: 'Footer, contact form, thank-you, /sla' },
       { key: 'responseSla', label: 'Response SLA text', hint: 'e.g. within 1 business day' },
       { key: 'bookingUrl', label: 'Booking / calendar URL', hint: 'Shown on thank-you page', full: true },
       {
@@ -430,6 +432,13 @@ export default function SiteSettingsPage() {
               <HeadingLevelPicker settings={settings} onChange={patchSettings} />
             ) : section.id === 'eyebrow-sizes' ? (
               <EyebrowSizeEditor settings={settings} onChange={patchSettings} />
+            ) : section.id === 'address' ? (
+              <>
+                <FooterOfficeEditor settings={settings} onChange={patchSettings} />
+                <div className="admin-form-grid" style={{ marginTop: '1.25rem' }}>
+                  {section.fields.map(renderField)}
+                </div>
+              </>
             ) : (
               <div className="admin-form-grid">{section.fields.map(renderField)}</div>
             )}

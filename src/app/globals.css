@@ -1445,14 +1445,66 @@
   .foot-col a:hover{color:var(--white);}
   .foot-emergency{color:var(--orange)!important;font-weight:600;}
   .foot-emergency:hover{color:#ff8a4c!important;}
-  .foot-meta{
+  .foot-meta,
+  .foot-office{
     margin-top:1.15rem;
-    font-size:0.95rem;
-    line-height:1.6;
+    font-size:0.92rem;
+    line-height:1.55;
     color:#8FA3C2;
+    font-style:normal;
   }
-  .foot-meta span{display:block;}
-  .foot-meta .foot-hours{margin-top:0.35rem;color:#9FB0CB;}
+  .foot-office-label{
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#A8B7CC;
+    font-weight:600;
+    margin-bottom:0.55rem;
+  }
+  .foot-office-heading{margin-bottom:0.85rem;}
+  .foot-office-address{font-style:normal;display:block;}
+  .foot-meta span,
+  .foot-office span,
+  .foot-office-address span{display:block;}
+  .foot-meta .foot-hours,
+  .foot-office .foot-hours,
+  .foot-office .foot-sla{
+    margin-top:0.45rem;
+    color:#9FB0CB;
+    font-size:0.86rem;
+  }
+  .foot-office .foot-hours em,
+  .foot-office .foot-sla em{
+    font-style:normal;
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    margin-right:0.35rem;
+  }
+  .foot-col-contact .social-links{margin-top:1.35rem;}
+  .foot-contact-extras{display:flex;flex-direction:column;min-width:0;max-width:100%;}
+  .foot-office.align-center .foot-office-label,
+  .foot-office.align-center .foot-office-address,
+  .foot-office.align-end .foot-office-label,
+  .foot-office.align-end .foot-office-address{width:100%;}
+  .social-links.align-center{justify-content:center;}
+  .social-links.align-end{justify-content:flex-end;}
+  .foot-col,
+  .foot-col-contact{min-width:0;}
+  .foot-grid a,
+  .foot-col a{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+  .foot-office-address span,
+  .foot-office .foot-hours,
+  .foot-office .foot-sla{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
   .footer-logo .logo-word{font-size:calc(var(--logo-word-size) * 1.25);letter-spacing:-0.01em;}
   .footer-logo .logo-word small{font-size:var(--logo-tagline-size);color:#8FA3C2;}
   .footer-tagline{
@@ -1662,7 +1714,10 @@
     .stat-grid{grid-template-columns:repeat(3,1fr);row-gap:1.8rem;}
     .why-grid,.ind-grid,.proj-grid,.feat-grid{grid-template-columns:repeat(2,1fr);}
     .idetail-grid{grid-template-columns:repeat(2,1fr);}
-    .foot-grid{grid-template-columns:1fr 1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:2rem 1.5rem;}
+    .foot-col-contact,
+    .foot-brand{min-width:0;}
+    .foot-contact-extras{width:100%;}
     .slide-icon,.big-numeral{display:none;}
     .eco-grid{grid-template-columns:1fr;gap:3rem;}
     .eco-visual{max-width:420px;margin:0 auto;}
@@ -1710,9 +1765,49 @@
       grid-column:auto;grid-row:auto;
     }
     .foot-brand{max-width:none;}
+    .footer-tagline{max-width:none;}
     .newsletter-form{max-width:none;}
-    .foot-bottom{flex-direction:column;align-items:flex-start;gap:0.75rem;}
+    .foot-bottom{flex-direction:column;align-items:flex-start;gap:0.75rem;width:100%;}
+    .foot-legal{
+      display:flex;flex-wrap:wrap;gap:0.45rem 1.1rem;width:100%;
+    }
+    .foot-legal a{margin-left:0;}
     .foot-legal a:first-child{margin-left:0;}
+    footer{
+      padding:3.5rem 0 calc(2.25rem + 4.75rem + env(safe-area-inset-bottom, 0px));
+    }
+    .foot-grid{
+      grid-template-columns:1fr;
+      gap:1.85rem;
+      padding-bottom:2rem;
+    }
+    .foot-col,
+    .foot-col-contact,
+    .foot-brand,
+    .foot-contact-extras,
+    .foot-office,
+    .social-links{
+      min-width:0;
+      max-width:100%;
+      width:100%;
+      box-sizing:border-box;
+    }
+    .foot-office{
+      margin-top:1rem !important;
+    }
+    .foot-office-label{margin-bottom:0.45rem;}
+    .foot-col-contact .social-links,
+    .social-links{
+      margin-top:1.1rem;
+      gap:0.55rem;
+    }
+    .social-links a{
+      width:44px;height:44px;
+      flex-shrink:0;
+    }
+    .social-links a svg{width:18px;height:18px;}
+    .foot-grid h6,
+    .foot-col h6{margin-bottom:0.95rem;}
     .container{padding:0 1.15rem;}
     .cta-actions{flex-direction:column;align-items:stretch;}
     .cta-actions .btn{justify-content:center;white-space:normal;text-align:center;}
