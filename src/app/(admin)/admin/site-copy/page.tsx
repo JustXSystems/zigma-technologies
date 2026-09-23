@@ -6,6 +6,7 @@ import type { IndustryDef } from '@/lib/industries';
 import type { LocationDef } from '@/lib/locations';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import MediaPicker from '@/components/admin/MediaPicker';
 
 type Tab = 'chrome' | 'hubs' | 'legal' | 'features' | 'consultation' | 'tools' | 'catalog' | 'locales' | 'industries' | 'locations';
 
@@ -293,6 +294,28 @@ export default function SiteCopyAdminPage() {
             <Field label="Thank-you eyebrow" path="thankYou.eyebrow" copy={copy} onChange={setCopy} />
             <Field label="Title · enquiry" path="thankYou.titleEnquiry" copy={copy} onChange={setCopy} />
             <Field label="Title · callback" path="thankYou.titleCallback" copy={copy} onChange={setCopy} />
+            <Field label="Title · brochure" path="thankYou.titleBrochure" copy={copy} onChange={setCopy} />
+            <Field label="Title · careers" path="thankYou.titleCareers" copy={copy} onChange={setCopy} />
+            <div className="full">
+              <MediaPicker
+                value={copy.thankYou.heroImage || ''}
+                onChange={(path) => setCopy(setPath(copy, 'thankYou.heroImage', path))}
+                label="Thank-you hero media (desktop)"
+                kinds="visual"
+                allowUpload
+                hint="Background for /thank-you (all intents: enquiry, callback, brochure, careers)."
+              />
+            </div>
+            <div className="full">
+              <MediaPicker
+                value={copy.thankYou.heroImageMobile || ''}
+                onChange={(path) => setCopy(setPath(copy, 'thankYou.heroImageMobile', path))}
+                label="Thank-you hero media (mobile, optional)"
+                kinds="visual"
+                allowUpload
+                hint="Optional ≤760px override. Leave blank to reuse desktop."
+              />
+            </div>
             <div className="full">
               <Field
                 label="Next steps (one per line)"

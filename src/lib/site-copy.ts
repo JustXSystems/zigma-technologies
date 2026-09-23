@@ -126,6 +126,10 @@ export type SiteCopy = {
     nextSteps: string[];
     talkTitle: string;
     whatsappPrefill: string;
+    /** Full-bleed hero background (media library path). */
+    heroImage: string;
+    /** Optional ≤760px hero override. */
+    heroImageMobile: string;
   };
   hubs: {
     industries: HubCopy;
@@ -316,6 +320,8 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     ],
     talkTitle: 'Talk sooner',
     whatsappPrefill: 'Hi — following up on my enquiry.',
+    heroImage: '/assets/images/zigma-technologies-engineers-collaborati.jpg',
+    heroImageMobile: '',
   },
   hubs: {
     industries: hub({

@@ -54,7 +54,11 @@ function ThankYouInner() {
             {site.responseSla ? ` — typically ${site.responseSla}` : ' — typically within 1 business day'}.
           </>
         }
-        image="/assets/images/zigma-technologies-engineers-collaborati.jpg"
+        image={
+          copy.thankYou.heroImage?.trim() ||
+          '/assets/images/zigma-technologies-engineers-collaborati.jpg'
+        }
+        imageMobile={copy.thankYou.heroImageMobile?.trim() || undefined}
       >
         {copy.thankYou.proofRail.length ? (
           <div className="proof-rail">
