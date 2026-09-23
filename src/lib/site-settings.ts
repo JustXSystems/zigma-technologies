@@ -165,6 +165,39 @@ export type SiteSettings = {
   logoTaglineStyle: string;
   /** Logo tagline letter-spacing (e.g. 0.1em) */
   logoTaglineLetterSpacing: string;
+  /**
+   * Footer brand (.foot-brand) logo type mode:
+   * inherit = scale from header logo type; custom = use footerLogo* fields
+   */
+  footerLogoMode: string;
+  /** Optional footer-only logo image URL (blank = use logoUrl) */
+  footerLogoUrl: string;
+  footerLogoChipHeight: string;
+  footerLogoChipHeightMobile: string;
+  footerLogoWordFont: string;
+  footerLogoWordSize: string;
+  footerLogoWordSizeMobile: string;
+  footerLogoWordWeight: string;
+  footerLogoWordStyle: string;
+  footerLogoWordLetterSpacing: string;
+  footerLogoTaglineFont: string;
+  footerLogoTaglineSize: string;
+  footerLogoTaglineSizeMobile: string;
+  footerLogoTaglineWeight: string;
+  footerLogoTaglineStyle: string;
+  footerLogoTaglineLetterSpacing: string;
+  /** Footer brand column show/hide (true/false) */
+  footerBrandShowLogo: string;
+  footerBrandShowName: string;
+  footerBrandShowTagline: string;
+  footerBrandShowBlurb: string;
+  footerBrandShowNewsletter: string;
+  /** Footer brand text/logo alignment: start | center | end */
+  footerBrandAlign: string;
+  /** Footer brand max width desktop (e.g. 420px); none = full column */
+  footerBrandMaxWidth: string;
+  /** Footer brand max width mobile ≤760px; none = full column */
+  footerBrandMaxWidthMobile: string;
   facebookUrl: string;
   instagramUrl: string;
   linkedinUrl: string;
@@ -258,6 +291,30 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   logoTaglineWeight: '500',
   logoTaglineStyle: 'normal',
   logoTaglineLetterSpacing: '0.1em',
+  footerLogoMode: 'inherit',
+  footerLogoUrl: '',
+  footerLogoChipHeight: '34px',
+  footerLogoChipHeightMobile: '26px',
+  footerLogoWordFont: 'var(--font-display)',
+  footerLogoWordSize: '1.5rem',
+  footerLogoWordSizeMobile: '1.25rem',
+  footerLogoWordWeight: '700',
+  footerLogoWordStyle: 'normal',
+  footerLogoWordLetterSpacing: '0',
+  footerLogoTaglineFont: 'var(--font-mono)',
+  footerLogoTaglineSize: '0.6em',
+  footerLogoTaglineSizeMobile: '0.6em',
+  footerLogoTaglineWeight: '500',
+  footerLogoTaglineStyle: 'normal',
+  footerLogoTaglineLetterSpacing: '0.1em',
+  footerBrandShowLogo: 'true',
+  footerBrandShowName: 'true',
+  footerBrandShowTagline: 'true',
+  footerBrandShowBlurb: 'true',
+  footerBrandShowNewsletter: 'true',
+  footerBrandAlign: 'start',
+  footerBrandMaxWidth: '420px',
+  footerBrandMaxWidthMobile: 'none',
   facebookUrl: '',
   instagramUrl: '',
   linkedinUrl: '',
@@ -341,6 +398,105 @@ export function sanitizeFooterOfficeAlign(value: string | undefined): FooterOffi
   if (v === 'left') return 'start';
   if (v === 'right') return 'end';
   return 'start';
+}
+
+export type FooterLogoMode = 'inherit' | 'custom';
+
+export function sanitizeFooterLogoMode(value: string | undefined): FooterLogoMode {
+  return value?.trim().toLowerCase() === 'custom' ? 'custom' : 'inherit';
+}
+
+/** Max-width: none | length | %. */
+export function sanitizeCssMaxWidth(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim() || '';
+  if (/^none$/i.test(trimmed)) return 'none';
+  if (/^\d+(\.\d+)?(px|rem|em|%)$/i.test(trimmed)) return trimmed;
+  if (!trimmed) return fallback;
+  return fallback;
+}
+
+/** Scale a px/rem/em size by a factor (used when footer logo mode = inherit). */
+export function scaleCssSize(value: string, factor: number, fallback: string): string {
+  const trimmed = value.trim();
+  const match = trimmed.match(/^(\d+(\.\d+)?)(px|rem|em)$/i);
+  if (!match) return fallback;
+  const n = Math.round(parseFloat(match[1]) * factor * 1000) / 1000;
+  return `${n}${match[3]}`;
+}
+
+export type FooterLogoTokens = {
+  chip: string;
+  chipMobile: string;
+  wordFont: string;
+  word: string;
+  wordMobile: string;
+  wordWeight: string;
+  wordStyle: string;
+  wordTracking: string;
+  tagFont: string;
+  tag: string;
+  tagMobile: string;
+  tagWeight: string;
+  tagStyle: string;
+  tagTracking: string;
+};
+
+/** Effective footer logo tokens — either custom fields or scaled header tokens. */
+export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoTokens {
+  const mode = sanitizeFooterLogoMode(settings.footerLogoMode);
+  if (mode === 'custom') {
+    return {
+      chip: sanitizeCssSize(settings.footerLogoChipHeight, DEFAULT_SITE_SETTINGS.footerLogoChipHeight),
+      chipMobile: sanitizeCssSize(settings.footerLogoChipHeightMobile, DEFAULT_SITE_SETTINGS.footerLogoChipHeightMobile),
+      wordFont: sanitizeCssFontFamily(settings.footerLogoWordFont, DEFAULT_SITE_SETTINGS.footerLogoWordFont),
+      word: sanitizeCssSize(settings.footerLogoWordSize, DEFAULT_SITE_SETTINGS.footerLogoWordSize),
+      wordMobile: sanitizeCssSize(settings.footerLogoWordSizeMobile, DEFAULT_SITE_SETTINGS.footerLogoWordSizeMobile),
+      wordWeight: sanitizeCssFontWeight(settings.footerLogoWordWeight, DEFAULT_SITE_SETTINGS.footerLogoWordWeight),
+      wordStyle: sanitizeCssFontStyle(settings.footerLogoWordStyle, DEFAULT_SITE_SETTINGS.footerLogoWordStyle),
+      wordTracking: sanitizeCssLetterSpacing(
+        settings.footerLogoWordLetterSpacing,
+        DEFAULT_SITE_SETTINGS.footerLogoWordLetterSpacing
+      ),
+      tagFont: sanitizeCssFontFamily(settings.footerLogoTaglineFont, DEFAULT_SITE_SETTINGS.footerLogoTaglineFont),
+      tag: sanitizeCssSize(settings.footerLogoTaglineSize, DEFAULT_SITE_SETTINGS.footerLogoTaglineSize),
+      tagMobile: sanitizeCssSize(settings.footerLogoTaglineSizeMobile, DEFAULT_SITE_SETTINGS.footerLogoTaglineSizeMobile),
+      tagWeight: sanitizeCssFontWeight(settings.footerLogoTaglineWeight, DEFAULT_SITE_SETTINGS.footerLogoTaglineWeight),
+      tagStyle: sanitizeCssFontStyle(settings.footerLogoTaglineStyle, DEFAULT_SITE_SETTINGS.footerLogoTaglineStyle),
+      tagTracking: sanitizeCssLetterSpacing(
+        settings.footerLogoTaglineLetterSpacing,
+        DEFAULT_SITE_SETTINGS.footerLogoTaglineLetterSpacing
+      ),
+    };
+  }
+
+  const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
+  const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
+  const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
+  const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
+  return {
+    chip: scaleCssSize(chip, 0.8, DEFAULT_SITE_SETTINGS.footerLogoChipHeight),
+    chipMobile: scaleCssSize(chipMobile, 0.8, DEFAULT_SITE_SETTINGS.footerLogoChipHeightMobile),
+    wordFont: sanitizeCssFontFamily(settings.logoWordFont, DEFAULT_SITE_SETTINGS.logoWordFont),
+    word: scaleCssSize(word, 1.25, DEFAULT_SITE_SETTINGS.footerLogoWordSize),
+    wordMobile: scaleCssSize(wordMobile, 1.25, DEFAULT_SITE_SETTINGS.footerLogoWordSizeMobile),
+    wordWeight: sanitizeCssFontWeight(settings.logoWordWeight, DEFAULT_SITE_SETTINGS.logoWordWeight),
+    wordStyle: sanitizeCssFontStyle(settings.logoWordStyle, DEFAULT_SITE_SETTINGS.logoWordStyle),
+    wordTracking: sanitizeCssLetterSpacing(settings.logoWordLetterSpacing, DEFAULT_SITE_SETTINGS.logoWordLetterSpacing),
+    tagFont: sanitizeCssFontFamily(settings.logoTaglineFont, DEFAULT_SITE_SETTINGS.logoTaglineFont),
+    tag: sanitizeCssSize(settings.logoTaglineSize, DEFAULT_SITE_SETTINGS.logoTaglineSize),
+    tagMobile: sanitizeCssSize(settings.logoTaglineSizeMobile, DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile),
+    tagWeight: sanitizeCssFontWeight(settings.logoTaglineWeight, DEFAULT_SITE_SETTINGS.logoTaglineWeight),
+    tagStyle: sanitizeCssFontStyle(settings.logoTaglineStyle, DEFAULT_SITE_SETTINGS.logoTaglineStyle),
+    tagTracking: sanitizeCssLetterSpacing(
+      settings.logoTaglineLetterSpacing,
+      DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing
+    ),
+  };
+}
+
+/** Public footer logo image — optional footer override, else shared brand logo. */
+export function footerLogoSrc(settings: SiteSettings): string {
+  return settings.footerLogoUrl?.trim() || settings.logoUrl?.trim() || DEFAULT_SITE_SETTINGS.logoUrl;
 }
 
 const COUNTRY_DISPLAY: Record<string, string> = {
@@ -504,10 +660,18 @@ export function logoSizingCss(settings: SiteSettings): string {
   const eyebrow = sanitizeCssSize(settings.eyebrowSize, DEFAULT_SITE_SETTINGS.eyebrowSize);
   const eyebrowLg = sanitizeCssSize(settings.eyebrowSizeLg, DEFAULT_SITE_SETTINGS.eyebrowSizeLg);
   const eyebrowMd = sanitizeCssSize(settings.eyebrowSizeMd, DEFAULT_SITE_SETTINGS.eyebrowSizeMd);
+  const footer = resolveFooterLogoTokens(settings);
+  const brandMax = sanitizeCssMaxWidth(settings.footerBrandMaxWidth, DEFAULT_SITE_SETTINGS.footerBrandMaxWidth);
+  const brandMaxMobile = sanitizeCssMaxWidth(
+    settings.footerBrandMaxWidthMobile,
+    DEFAULT_SITE_SETTINGS.footerBrandMaxWidthMobile
+  );
+  const brandAlign = sanitizeFooterOfficeAlign(settings.footerBrandAlign);
+
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
-    `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:calc(var(--logo-chip-h-mobile) * 0.8);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:calc(var(--logo-word-size-mobile) * 1.25);}.logo-word small,header .logo-word small,footer .footer-logo .logo-word small,.footer-logo .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}}`,
+    `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:var(--footer-logo-chip-h-mobile);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile);}footer .footer-logo .logo-word small,.footer-logo .logo-word small{font-size:var(--footer-logo-tagline-size-mobile);}.logo-word small,header .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}footer .foot-brand{max-width:var(--footer-brand-max-width-mobile);}}`,
   ].join('');
 }
 

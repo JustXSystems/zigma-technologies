@@ -174,7 +174,8 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Set thank-you booking URL, WhatsApp number, header CTA',
     ],
     how: [
-      'Edit company profile, logo URL, logo alt, Logo chip & word type (font/size/weight/style for name + tagline, chip height)',
+      'Edit company profile, logo URL, logo alt, Logo chip & word type (header)',
+      'Footer brand (.foot-brand): show/hide lockup pieces, align, max width, inherit vs custom footer logo type',
       'Navigation menu style: Classic / Corporate / Elegant / Rail / Lumen / Mosaic / Ribbon',
       'Footer blurb, copyright, Powered by credit, legal links',
       'Address & office — footer Contact column (show/hide, align), JSON-LD, contact/thank-you/SLA',

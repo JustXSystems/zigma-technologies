@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { telHref, logoAltText, sanitizeTaglineHtml } from '@/lib/site-settings';
+import { telHref, logoAltText, sanitizeTaglineHtml, footerLogoSrc, isSettingEnabled, sanitizeFooterOfficeAlign, sanitizeCssMaxWidth } from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { whatsappHref } from '@/lib/whatsapp';
@@ -72,43 +72,72 @@ export default function Footer() {
     }
   }, []);
 
+  const showLogo = isSettingEnabled(site.footerBrandShowLogo, true);
+  const showName = isSettingEnabled(site.footerBrandShowName, true);
+  const showTagline = isSettingEnabled(site.footerBrandShowTagline, true);
+  const showBlurb = isSettingEnabled(site.footerBrandShowBlurb, true);
+  const showNewsletter = isSettingEnabled(site.footerBrandShowNewsletter, true);
+  const brandAlign = sanitizeFooterOfficeAlign(site.footerBrandAlign);
+  const brandMaxWidth = sanitizeCssMaxWidth(site.footerBrandMaxWidth, '420px');
+  const showLockup = showLogo || showName || (showTagline && site.tagline?.trim());
+
   return (
     <>
       <footer>
         <div className="container">
           <div className="foot-grid">
-            <div className="foot-brand">
-              <a href={current === 'home' ? '#home' : appHref('/')} className="logo footer-logo mb-1">
-                <span className="logo-chip">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={appHref(site.logoUrl || '/assets/images/zigma-technologies-logo.png')}
-                    alt={logoAltText(site)}
-                  />
-                </span>
-                <span className="logo-word">
-                  {site.companyName}
-                  <small dangerouslySetInnerHTML={{ __html: sanitizeTaglineHtml(site.tagline) }} />
-                </span>
-              </a>
-              <p className="footer-tagline">{site.footerBlurb}</p>
-              <div className="newsletter-label">{copy.footer.newsletterLabel}</div>
-              {!subscribed ? (
-                <form className="newsletter-form newsletter-form-relative" onSubmit={handleNewsletterSubmit}>
-                  <HoneypotField />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder={copy.footer.newsletterPlaceholder}
-                    aria-label={copy.footer.newsletterPlaceholder}
-                    required
-                  />
-                  <button type="submit">{copy.footer.subscribe}</button>
-                </form>
-              ) : (
-                <span className="newsletter-success">{copy.footer.subscribeSuccess}</span>
-              )}
-              {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
+            <div
+              className={`foot-brand align-${brandAlign}`}
+              style={{
+                maxWidth: brandMaxWidth === 'none' ? 'none' : brandMaxWidth,
+                textAlign: brandAlign === 'center' ? 'center' : brandAlign === 'end' ? 'right' : 'left',
+              }}
+            >
+              {showLockup ? (
+                <a
+                  href={current === 'home' ? '#home' : appHref('/')}
+                  className={`logo footer-logo mb-1${brandAlign !== 'start' ? ` is-${brandAlign}` : ''}`}
+                >
+                  {showLogo ? (
+                    <span className="logo-chip">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={appHref(footerLogoSrc(site))} alt={logoAltText(site)} />
+                    </span>
+                  ) : null}
+                  {showName || (showTagline && site.tagline?.trim()) ? (
+                    <span className="logo-word">
+                      {showName ? site.companyName : null}
+                      {showTagline && site.tagline?.trim() ? (
+                        <small dangerouslySetInnerHTML={{ __html: sanitizeTaglineHtml(site.tagline) }} />
+                      ) : null}
+                    </span>
+                  ) : null}
+                </a>
+              ) : null}
+              {showBlurb && site.footerBlurb?.trim() ? (
+                <p className="footer-tagline">{site.footerBlurb}</p>
+              ) : null}
+              {showNewsletter ? (
+                <>
+                  <div className="newsletter-label">{copy.footer.newsletterLabel}</div>
+                  {!subscribed ? (
+                    <form className="newsletter-form newsletter-form-relative" onSubmit={handleNewsletterSubmit}>
+                      <HoneypotField />
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder={copy.footer.newsletterPlaceholder}
+                        aria-label={copy.footer.newsletterPlaceholder}
+                        required
+                      />
+                      <button type="submit">{copy.footer.subscribe}</button>
+                    </form>
+                  ) : (
+                    <span className="newsletter-success">{copy.footer.subscribeSuccess}</span>
+                  )}
+                  {newsletterError ? <div className="newsletter-error">{newsletterError}</div> : null}
+                </>
+              ) : null}
             </div>
             <FooterLinkColumns
               columns={footerColumns}

@@ -7,19 +7,15 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Social media links are missing in Footer">
-      <change afterPath="$PROJECT_DIR$/src/components/FooterOfficeBlock.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/FooterOfficeEditor.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Admin controls (Site Settings → Address &amp; office)&#10;mobile view fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FooterLinkColumns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FooterLinkColumns.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FooterSocialLinks.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FooterSocialLinks.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/LogoBrandPreview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/LogoBrandPreview.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/LogoTypeEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/LogoTypeEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -68,23 +64,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000045596604" />
-      <entry key="MS500" value="1.0279136329094447" />
-      <entry key="S2" value="1.8311378978018067" />
-      <entry key="S5" value="2.7746027084044647" />
-      <entry key="S10" value="3.3027522216258363" />
-      <entry key="S30" value="3.7529511270495095" />
-      <entry key="S60" value="4.537354762281223" />
-      <entry key="M2" value="10.67489743825248" />
-      <entry key="M5" value="45.54797724155331" />
-      <entry key="M10" value="115.21718725662181" />
-      <entry key="M15" value="173.18423381883264" />
-      <entry key="M30" value="278.45232408285574" />
-      <entry key="H1" value="364.107988108652" />
-      <entry key="H2" value="431.4427223856481" />
-      <entry key="H4" value="577.2163322875115" />
-      <entry key="D1" value="2438.50700193975" />
-      <entry key="W1" value="13318.360254229492" />
+      <entry key="MS100" value="1.0000109402108182" />
+      <entry key="MS500" value="1.1057543593038424" />
+      <entry key="S2" value="2.0251021184049636" />
+      <entry key="S5" value="3.537276445654753" />
+      <entry key="S10" value="4.980621979358554" />
+      <entry key="S30" value="6.720728488146454" />
+      <entry key="S60" value="7.317436053023939" />
+      <entry key="M2" value="7.873172708316073" />
+      <entry key="M5" value="22.824668339401406" />
+      <entry key="M10" value="80.52384155016122" />
+      <entry key="M15" value="144.58059691468654" />
+      <entry key="M30" value="298.05465980510564" />
+      <entry key="H1" value="458.8112638407157" />
+      <entry key="H2" value="590.5555582956788" />
+      <entry key="H4" value="771.6439306976807" />
+      <entry key="D1" value="2658.5703606011293" />
+      <entry key="W1" value="13548.4018253359" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -98,31 +94,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="2.5031756599705746E-193" />
-      <entry key="H1" value="5.003174652129432E-97" />
-      <entry key="H2" value="7.07331227370089E-49" />
-      <entry key="H4" value="8.41029861178446E-25" />
-      <entry key="D1" value="9.87134161673717E-5" />
-      <entry key="W1" value="0.4151971143579283" />
+      <entry key="M30" value="1.2157197097679235E-193" />
+      <entry key="H1" value="3.486717237987849E-97" />
+      <entry key="H2" value="5.90484312915031E-49" />
+      <entry key="H4" value="7.684297709842162E-25" />
+      <entry key="D1" value="9.723925947453613E-5" />
+      <entry key="W1" value="0.4143056165968176" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9460576510094045" />
-      <entry key="MS500" value="1.0165120047864782" />
-      <entry key="S2" value="1.8253162363477602" />
-      <entry key="S5" value="2.7708274181106116" />
-      <entry key="S10" value="3.300454759197846" />
-      <entry key="S30" value="3.752069010199784" />
-      <entry key="S60" value="4.536845307360033" />
-      <entry key="M2" value="10.674400913501906" />
-      <entry key="M5" value="45.54726919070345" />
-      <entry key="M10" value="115.216332381912" />
-      <entry key="M15" value="173.18337819932032" />
-      <entry key="M30" value="278.4516281614955" />
-      <entry key="H1" value="364.1075277386724" />
-      <entry key="H2" value="431.44244691671025" />
-      <entry key="H4" value="577.2161458049221" />
-      <entry key="D1" value="2438.5069689567804" />
-      <entry key="W1" value="13318.775317549345" />
+      <entry key="MS100" value="0.9592748343897929" />
+      <entry key="MS500" value="1.0970219883680898" />
+      <entry key="S2" value="2.0207776372717157" />
+      <entry key="S5" value="3.5276446004989848" />
+      <entry key="S10" value="4.969069209007141" />
+      <entry key="S30" value="6.713562599943595" />
+      <entry key="S60" value="7.313238817815157" />
+      <entry key="M2" value="7.870894143514615" />
+      <entry key="M5" value="22.82354207763263" />
+      <entry key="M10" value="80.52291967433563" />
+      <entry key="M15" value="144.57970484703657" />
+      <entry key="M30" value="298.0538626333149" />
+      <entry key="H1" value="458.81067268413113" />
+      <entry key="H2" value="590.5551809665556" />
+      <entry key="H4" value="771.6436832875469" />
+      <entry key="D1" value="2658.5703147822255" />
+      <entry key="W1" value="13548.815995528817" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -277,7 +273,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="File upload error display if any" />
     <MESSAGE value="catalog-listing background color make  configurable in admin catalog settings with color picker&#10;Also I want.catalog-card--marketplace:hover border-color need to configurable from admin using color picker" />
     <MESSAGE value="move catalog-detail-footer to first column catalog-detail-media-col under image catalog-gallery catalog-gallery--detail" />
     <MESSAGE value="few upload issue" />
@@ -302,7 +297,8 @@
     <MESSAGE value="#25 Request Consultation - buttons also made configurable" />
     <MESSAGE value="#26 Industries section creation for its new page design as per the HTML template" />
     <MESSAGE value="#27 Social media links are missing in Footer" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 Social media links are missing in Footer" />
+    <MESSAGE value="#27 Admin controls (Site Settings → Address &amp; office)&#10;mobile view fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 Admin controls (Site Settings → Address &amp; office)&#10;mobile view fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

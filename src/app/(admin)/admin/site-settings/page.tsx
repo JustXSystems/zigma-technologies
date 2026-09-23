@@ -5,13 +5,14 @@ import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/l
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import LogoBrandPreview from '@/components/admin/LogoBrandPreview';
-import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
+import LogoTypeEditor, { FOOTER_LOGO_TYPE_KEYS } from '@/components/admin/LogoTypeEditor';
 import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
 import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
 import HeaderTalkEditor from '@/components/admin/HeaderTalkEditor';
 import HeaderCtaEditor from '@/components/admin/HeaderCtaEditor';
 import FooterOfficeEditor from '@/components/admin/FooterOfficeEditor';
+import FooterBrandEditor from '@/components/admin/FooterBrandEditor';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -26,7 +27,7 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
   {
     id: 'brand',
     title: 'Brand & identity',
-    description: 'Company name, logo image, and footer blurb.',
+    description: 'Company name, logo image, tagline, and footer blurb — shared by header and footer .foot-brand.',
     defaultOpen: true,
     fields: [
       { key: 'companyName', label: 'Company name' },
@@ -36,16 +37,24 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
         hint: 'Supports HTML: <br>, <b>, <i>, <em>, <strong>, <span>',
         full: true,
       },
-      { key: 'logoUrl', label: 'Logo image URL', hint: 'Used in header, footer, and ecosystem mark', full: true },
+      { key: 'logoUrl', label: 'Logo image URL', hint: 'Used in header, footer (unless overridden), and ecosystem mark', full: true },
       { key: 'logoAlt', label: 'Logo alt text', hint: 'Accessible name for the logo image sitewide' },
-      { key: 'footerBlurb', label: 'Footer blurb', full: true, multiline: true },
+      { key: 'footerBlurb', label: 'Footer blurb', hint: 'Also editable under Footer brand', full: true, multiline: true },
     ],
   },
   {
     id: 'logo-sizes',
     title: 'Logo chip & word type',
     description:
-      'Logo image height plus company name and tagline type. Preview uses live site CSS. Pick any font installed on this PC (Windows-style list).',
+      'Header logo image height plus company name and tagline type. Footer can inherit these (scaled) or customize under Footer brand. Preview toggles Header/Footer.',
+    defaultOpen: true,
+    fields: [],
+  },
+  {
+    id: 'footer-brand',
+    title: 'Footer brand',
+    description:
+      'Full control of .foot-brand: visibility, alignment, max width, optional footer logo URL, and inherit vs custom logo type (reuses Logo chip & word type UI).',
     defaultOpen: true,
     fields: [],
   },
@@ -326,6 +335,15 @@ export default function SiteSettingsPage() {
     setMessage('Logo chip & word type reset to defaults — click Save settings to publish.');
   }
 
+  function resetFooterLogoType() {
+    const patch: Partial<SiteSettings> = { footerLogoMode: 'inherit' };
+    for (const key of FOOTER_LOGO_TYPE_KEYS) {
+      patch[key] = DEFAULT_SITE_SETTINGS[key];
+    }
+    setSettings((prev) => mergeSiteSettings({ ...prev, ...patch }));
+    setMessage('Footer logo type reset to inherit defaults — click Save settings to publish.');
+  }
+
   function resetEyebrowSizes() {
     setSettings((prev) =>
       mergeSiteSettings({
@@ -413,6 +431,10 @@ export default function SiteSettingsPage() {
                 <button type="button" className="admin-btn admin-btn-secondary" onClick={resetLogoSizes}>
                   Reset logo type
                 </button>
+              ) : section.id === 'footer-brand' ? (
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={resetFooterLogoType}>
+                  Reset footer type
+                </button>
               ) : section.id === 'eyebrow-sizes' ? (
                 <button type="button" className="admin-btn admin-btn-secondary" onClick={resetEyebrowSizes}>
                   Reset eyebrows
@@ -421,7 +443,9 @@ export default function SiteSettingsPage() {
             }
           >
             {section.id === 'logo-sizes' ? (
-              <LogoTypeEditor settings={settings} onChange={patchSettings} />
+              <LogoTypeEditor settings={settings} onChange={patchSettings} scope="header" />
+            ) : section.id === 'footer-brand' ? (
+              <FooterBrandEditor settings={settings} onChange={patchSettings} />
             ) : section.id === 'header-cta' ? (
               <HeaderCtaEditor settings={settings} onChange={patchSettings} />
             ) : section.id === 'header-talk' ? (

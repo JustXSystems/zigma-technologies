@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { withBasePath } from '@/lib/base-path';
 import {
   DEFAULT_SITE_SETTINGS,
+  footerLogoSrc,
   logoAltText,
+  resolveFooterLogoTokens,
   sanitizeCssFontFamily,
   sanitizeCssFontStyle,
   sanitizeCssFontWeight,
@@ -30,19 +32,23 @@ type Surface = 'header' | 'footer';
  * but apply mobile sizes directly when the preview toggle is Mobile (admin viewport
  * is always wide, so @media (max-width:760px) never fires here).
  */
-function previewLogoVars(settings: SiteSettings, viewport: Viewport): CSSProperties {
+function previewLogoVars(settings: SiteSettings, viewport: Viewport, surface: Surface): CSSProperties {
   const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
   const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
   const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
   const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
   const tag = sanitizeCssSize(settings.logoTaglineSize, DEFAULT_SITE_SETTINGS.logoTaglineSize);
   const tagMobile = sanitizeCssSize(settings.logoTaglineSizeMobile, DEFAULT_SITE_SETTINGS.logoTaglineSizeMobile);
+  const footer = resolveFooterLogoTokens(settings);
 
   const activeChip = viewport === 'mobile' ? chipMobile : chip;
   const activeWord = viewport === 'mobile' ? wordMobile : word;
   const activeTag = viewport === 'mobile' ? tagMobile : tag;
+  const activeFooterChip = viewport === 'mobile' ? footer.chipMobile : footer.chip;
+  const activeFooterWord = viewport === 'mobile' ? footer.wordMobile : footer.word;
+  const activeFooterTag = viewport === 'mobile' ? footer.tagMobile : footer.tag;
 
-  return {
+  const base: CSSProperties = {
     ['--logo-chip-h' as string]: activeChip,
     ['--logo-chip-h-mobile' as string]: chipMobile,
     ['--logo-word-size' as string]: activeWord,
@@ -63,16 +69,48 @@ function previewLogoVars(settings: SiteSettings, viewport: Viewport): CSSPropert
       settings.logoTaglineLetterSpacing,
       DEFAULT_SITE_SETTINGS.logoTaglineLetterSpacing
     ),
+    ['--footer-logo-chip-h' as string]: activeFooterChip,
+    ['--footer-logo-chip-h-mobile' as string]: footer.chipMobile,
+    ['--footer-logo-word-size' as string]: activeFooterWord,
+    ['--footer-logo-word-size-mobile' as string]: footer.wordMobile,
+    ['--footer-logo-tagline-size' as string]: activeFooterTag,
+    ['--footer-logo-tagline-size-mobile' as string]: footer.tagMobile,
+    ['--footer-logo-word-font' as string]: footer.wordFont,
+    ['--footer-logo-word-weight' as string]: footer.wordWeight,
+    ['--footer-logo-word-style' as string]: footer.wordStyle,
+    ['--footer-logo-word-letter-spacing' as string]: footer.wordTracking,
+    ['--footer-logo-tagline-font' as string]: footer.tagFont,
+    ['--footer-logo-tagline-weight' as string]: footer.tagWeight,
+    ['--footer-logo-tagline-style' as string]: footer.tagStyle,
+    ['--footer-logo-tagline-letter-spacing' as string]: footer.tagTracking,
     ['--chrome-text' as string]: '1.125rem',
     ['--font-display' as string]: "'Space Grotesk', sans-serif",
     ['--font-body' as string]: "'Inter', sans-serif",
     ['--font-mono' as string]: "'IBM Plex Mono', monospace",
     ['--white' as string]: '#FFFFFF',
-  } as CSSProperties;
+  };
+
+  if (surface === 'footer') {
+    return {
+      ...base,
+      ['--logo-word-font' as string]: footer.wordFont,
+      ['--logo-word-weight' as string]: footer.wordWeight,
+      ['--logo-word-style' as string]: footer.wordStyle,
+      ['--logo-word-letter-spacing' as string]: footer.wordTracking,
+      ['--logo-tagline-font' as string]: footer.tagFont,
+      ['--logo-tagline-weight' as string]: footer.tagWeight,
+      ['--logo-tagline-style' as string]: footer.tagStyle,
+      ['--logo-tagline-letter-spacing' as string]: footer.tagTracking,
+    };
+  }
+
+  return base;
 }
 
 function LogoMark({ settings, surface }: { settings: SiteSettings; surface: Surface }) {
-  const logoSrc = withBasePath(settings.logoUrl || DEFAULT_SITE_SETTINGS.logoUrl);
+  const logoSrc = withBasePath(
+    surface === 'footer' ? footerLogoSrc(settings) : settings.logoUrl || DEFAULT_SITE_SETTINGS.logoUrl
+  );
   const company = settings.companyName?.trim() || DEFAULT_SITE_SETTINGS.companyName;
   const tagHtml = sanitizeTaglineHtml(settings.tagline || DEFAULT_SITE_SETTINGS.tagline);
 
@@ -93,18 +131,24 @@ function LogoMark({ settings, surface }: { settings: SiteSettings; surface: Surf
 export default function LogoBrandPreview({ settings }: Props) {
   const [viewport, setViewport] = useState<Viewport>('desktop');
   const [surface, setSurface] = useState<Surface>('header');
+  const footer = useMemo(() => resolveFooterLogoTokens(settings), [settings]);
 
   useEffect(() => {
     ensureGoogleFontsLoaded([
       googleFamilyFromCss(settings.logoWordFont),
       googleFamilyFromCss(settings.logoTaglineFont),
+      googleFamilyFromCss(footer.wordFont),
+      googleFamilyFromCss(footer.tagFont),
       'Space Grotesk',
       'Inter',
       'IBM Plex Mono',
     ]);
-  }, [settings.logoWordFont, settings.logoTaglineFont]);
+  }, [settings.logoWordFont, settings.logoTaglineFont, footer.wordFont, footer.tagFont]);
 
-  const frameStyle = useMemo(() => previewLogoVars(settings, viewport), [settings, viewport]);
+  const frameStyle = useMemo(
+    () => previewLogoVars(settings, viewport, surface),
+    [settings, viewport, surface]
+  );
 
   return (
     <div className="logo-brand-preview admin-card">
