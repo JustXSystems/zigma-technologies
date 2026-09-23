@@ -67,7 +67,7 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
       <p className="admin-footer-office-lead">
         Controls the public footer <strong>.foot-brand</strong> column. Company name, tagline text, and
         blurb come from <strong>Brand &amp; identity</strong>. Logo sizing reuses the same editor as{' '}
-        <strong>Logo chip &amp; word type</strong> — either inherit (scaled from header) or customize.
+        <strong>Logo chip &amp; word type</strong> — inherit matches header exactly, or customize.
       </p>
 
       <div className="admin-footer-office-toggles">
@@ -175,7 +175,7 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
             placeholder={DEFAULT_SITE_SETTINGS.footerBlurb}
             onChange={(e) => onChange({ footerBlurb: e.target.value })}
           />
-          <small style={{ color: 'var(--admin-muted)' }}>Same field as Brand & identity · Footer blurb</small>
+          <small style={{ color: 'var(--admin-muted)' }}>Shown under the logo lockup when “Show footer blurb” is on</small>
         </div>
       </div>
 
@@ -187,7 +187,7 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
               {
                 id: 'inherit' as FooterLogoMode,
                 label: 'Inherit from header',
-                hint: 'Chip ×0.8, name ×1.25, fonts/tagline 1:1 — tracks Logo chip & word type live',
+                hint: 'Exact 1:1 match — same chip, font, size, spacing, and tagline as the header',
               },
               {
                 id: 'custom' as FooterLogoMode,
@@ -221,11 +221,11 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
         </div>
       ) : (
         <p className="admin-footer-office-lead" style={{ marginBottom: 0 }}>
-          Footer lockup tracks <strong>Logo chip &amp; word type</strong> live: chip ×0.8 →{' '}
-          <code>{inherit.chip}</code> / <code>{inherit.chipMobile}</code> mobile; company name ×1.25 →{' '}
-          <code>{inherit.word}</code> / <code>{inherit.wordMobile}</code> mobile; fonts &amp; tagline match
-          header 1:1. Switch to Customize for independent footer type. Use the Logo preview → Footer toggle
-          above to verify.
+          Footer lockup matches <strong>Logo chip &amp; word type</strong> exactly: chip{' '}
+          <code>{inherit.chip}</code> / <code>{inherit.chipMobile}</code> mobile; company name{' '}
+          <code>{inherit.word}</code> / <code>{inherit.wordMobile}</code> mobile; fonts, weight, tracking,
+          and tagline identical to header. Switch to Customize for a distinct footer scale. Check Logo
+          preview → Footer to verify.
         </p>
       )}
     </div>

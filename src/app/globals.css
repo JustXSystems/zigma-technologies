@@ -177,14 +177,19 @@
   }
   .logo-chip img{height:var(--logo-chip-h);width:auto;display:block;margin:0 auto;}
   .footer-logo .logo-chip{border-radius:3.68px;border:0.24px solid var(--white);}
-  .footer-logo .logo-chip img{height:var(--footer-logo-chip-h, calc(var(--logo-chip-h) * 0.8));}
+  .footer-logo .logo-chip img{height:var(--footer-logo-chip-h, var(--logo-chip-h));}
+  /* Inherit = exact header lockup (chip chrome + type + gap) */
+  .footer-logo[data-logo-mode="inherit"] .logo-chip{
+    border-radius:4.6px;
+    border:0.3px solid var(--white);
+  }
   .logo.footer-logo{
-    display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;color:var(--white);
+    display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;gap:0.65rem;color:var(--white);
     font-family:var(--footer-logo-word-font, var(--logo-word-font));
     font-weight:var(--footer-logo-word-weight, var(--logo-word-weight));
     font-style:var(--footer-logo-word-style, var(--logo-word-style));
     letter-spacing:var(--footer-logo-word-letter-spacing, var(--logo-word-letter-spacing, 0));
-    font-size:var(--footer-logo-word-size, calc(var(--logo-word-size) * 1.25));
+    font-size:var(--footer-logo-word-size, var(--logo-word-size));
   }
   .logo.footer-logo.is-center{justify-content:center;margin-inline:auto;}
   .logo.footer-logo.is-end{justify-content:flex-end;margin-inline-start:auto;}
@@ -210,7 +215,7 @@
     font-weight:var(--footer-logo-word-weight, var(--logo-word-weight));
     font-style:var(--footer-logo-word-style, var(--logo-word-style));
     letter-spacing:var(--footer-logo-word-letter-spacing, var(--logo-word-letter-spacing, 0));
-    font-size:var(--footer-logo-word-size, calc(var(--logo-word-size) * 1.25));
+    font-size:var(--footer-logo-word-size, var(--logo-word-size));
   }
   .footer-logo .logo-word small{
     font-family:var(--footer-logo-tagline-font, var(--logo-tagline-font));
@@ -1614,7 +1619,7 @@
     font-weight:var(--footer-logo-word-weight, var(--logo-word-weight));
     font-style:var(--footer-logo-word-style, var(--logo-word-style));
     letter-spacing:var(--footer-logo-word-letter-spacing, var(--logo-word-letter-spacing, 0));
-    font-size:var(--footer-logo-word-size, calc(var(--logo-word-size) * 1.25));
+    font-size:var(--footer-logo-word-size, var(--logo-word-size));
   }
   .footer-logo .logo-word small{
     font-family:var(--footer-logo-tagline-font, var(--logo-tagline-font));
@@ -1859,11 +1864,11 @@
       --text-lead:1.05rem;
     }
     .logo-chip img{height:var(--logo-chip-h-mobile);}
-    .footer-logo .logo-chip img{height:var(--footer-logo-chip-h-mobile, calc(var(--logo-chip-h-mobile) * 0.8));}
+    .footer-logo .logo-chip img{height:var(--footer-logo-chip-h-mobile, var(--logo-chip-h-mobile));}
     .logo,
     header .logo{font-size:var(--logo-word-size-mobile);}
     .footer-logo .logo-word,
-    footer .footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile, calc(var(--logo-word-size-mobile) * 1.25));}
+    footer .footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile, var(--logo-word-size-mobile));}
     .logo-word small,
     header .logo-word small,
     .page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}
@@ -6044,7 +6049,7 @@ footer .footer-logo .logo-word{
   font-weight:var(--footer-logo-word-weight, var(--logo-word-weight));
   font-style:var(--footer-logo-word-style, var(--logo-word-style));
   letter-spacing:var(--footer-logo-word-letter-spacing, var(--logo-word-letter-spacing, 0));
-  font-size:var(--footer-logo-word-size, calc(var(--logo-word-size) * 1.25));
+  font-size:var(--footer-logo-word-size, var(--logo-word-size));
 }
 footer .footer-logo .logo-word small{
   font-family:var(--footer-logo-tagline-font, var(--logo-tagline-font));
@@ -6068,7 +6073,7 @@ footer .foot-powered{font-size:0.8em;}
 @media (max-width:760px){
   header .logo{font-size:var(--logo-word-size-mobile);}
   .page-shell .logo{font-size:var(--logo-word-size-mobile);}
-  footer .footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile, calc(var(--logo-word-size-mobile) * 1.25));}
+  footer .footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile, var(--logo-word-size-mobile));}
   header .logo-word small,
   .page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}
   footer .footer-logo .logo-word small{font-size:var(--footer-logo-tagline-size-mobile, var(--logo-tagline-size-mobile));}

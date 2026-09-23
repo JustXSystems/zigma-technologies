@@ -17,7 +17,7 @@ export default function AdminCollapsible({
   title,
   description,
   children,
-  defaultOpen = true,
+  defaultOpen = false,
   className = '',
   badge,
 }: Props) {

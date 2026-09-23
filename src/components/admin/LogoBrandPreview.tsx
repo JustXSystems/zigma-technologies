@@ -12,6 +12,7 @@ import {
   sanitizeCssFontWeight,
   sanitizeCssLetterSpacing,
   sanitizeCssSize,
+  sanitizeFooterLogoMode,
   sanitizeTaglineHtml,
   type SiteSettings,
 } from '@/lib/site-settings';
@@ -113,9 +114,13 @@ function LogoMark({ settings, surface }: { settings: SiteSettings; surface: Surf
   );
   const company = settings.companyName?.trim() || DEFAULT_SITE_SETTINGS.companyName;
   const tagHtml = sanitizeTaglineHtml(settings.tagline || DEFAULT_SITE_SETTINGS.tagline);
+  const logoMode = surface === 'footer' ? sanitizeFooterLogoMode(settings.footerLogoMode) : undefined;
 
   return (
-    <span className={surface === 'footer' ? 'logo footer-logo' : 'logo'}>
+    <span
+      className={surface === 'footer' ? 'logo footer-logo' : 'logo'}
+      {...(logoMode ? { 'data-logo-mode': logoMode } : {})}
+    >
       <span className="logo-chip">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logoSrc} alt={logoAltText(settings)} />

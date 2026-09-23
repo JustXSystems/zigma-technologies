@@ -2,7 +2,17 @@
 
 import { useCallback, useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { telHref, logoAltText, sanitizeTaglineHtml, footerLogoSrc, isSettingEnabled, sanitizeFooterOfficeAlign, sanitizeCssMaxWidth } from '@/lib/site-settings';
+import {
+  DEFAULT_SITE_SETTINGS,
+  footerLogoSrc,
+  isSettingEnabled,
+  logoAltText,
+  sanitizeCssMaxWidth,
+  sanitizeFooterLogoMode,
+  sanitizeFooterOfficeAlign,
+  sanitizeTaglineHtml,
+  telHref,
+} from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { whatsappHref } from '@/lib/whatsapp';
@@ -80,6 +90,7 @@ export default function Footer() {
   const brandAlign = sanitizeFooterOfficeAlign(site.footerBrandAlign);
   const brandMaxWidth = sanitizeCssMaxWidth(site.footerBrandMaxWidth, '420px');
   const showLockup = showLogo || showName || (showTagline && site.tagline?.trim());
+  const logoMode = sanitizeFooterLogoMode(site.footerLogoMode);
 
   return (
     <>
@@ -97,6 +108,7 @@ export default function Footer() {
                 <a
                   href={current === 'home' ? '#home' : appHref('/')}
                   className={`logo footer-logo mb-1${brandAlign !== 'start' ? ` is-${brandAlign}` : ''}`}
+                  data-logo-mode={logoMode}
                 >
                   {showLogo ? (
                     <span className="logo-chip">

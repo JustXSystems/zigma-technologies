@@ -167,7 +167,7 @@ export type SiteSettings = {
   logoTaglineLetterSpacing: string;
   /**
    * Footer brand (.foot-brand) logo type mode:
-   * inherit = scale from header logo type; custom = use footerLogo* fields
+   * inherit = exact 1:1 match of header logo type; custom = use footerLogo* fields
    */
   footerLogoMode: string;
   /** Optional footer-only logo image URL (blank = use logoUrl) */
@@ -468,7 +468,7 @@ export function sanitizeCssMaxWidth(value: string | undefined, fallback: string)
   return fallback;
 }
 
-/** Scale a px/rem/em size by a factor (used when footer logo mode = inherit). */
+/** Scale a px/rem/em size by a factor (available for custom admin helpers). */
 export function scaleCssSize(value: string, factor: number, fallback: string): string {
   const trimmed = value.trim();
   const match = trimmed.match(/^(\d+(\.\d+)?)(px|rem|em)$/i);
@@ -497,8 +497,7 @@ export type FooterLogoTokens = {
 /**
  * Effective footer logo tokens.
  * - custom → absolute values from footerLogo* fields
- * - inherit → CSS var/calc refs so footer always tracks header --logo-* live
- *   (chip ×0.8, company name ×1.25, fonts/tagline 1:1)
+ * - inherit → exact 1:1 CSS var refs to header --logo-* (font, size, spacing, chip)
  */
 export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoTokens {
   const mode = sanitizeFooterLogoMode(settings.footerLogoMode);
@@ -527,13 +526,13 @@ export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoToken
     };
   }
 
-  /* Live references — do not bake scaled px/rem or footer will lag header edits. */
+  /* Exact match — footer uses the same tokens as header, live. */
   return {
-    chip: 'calc(var(--logo-chip-h) * 0.8)',
-    chipMobile: 'calc(var(--logo-chip-h-mobile) * 0.8)',
+    chip: 'var(--logo-chip-h)',
+    chipMobile: 'var(--logo-chip-h-mobile)',
     wordFont: 'var(--logo-word-font)',
-    word: 'calc(var(--logo-word-size) * 1.25)',
-    wordMobile: 'calc(var(--logo-word-size-mobile) * 1.25)',
+    word: 'var(--logo-word-size)',
+    wordMobile: 'var(--logo-word-size-mobile)',
     wordWeight: 'var(--logo-word-weight)',
     wordStyle: 'var(--logo-word-style)',
     wordTracking: 'var(--logo-word-letter-spacing)',
@@ -546,22 +545,18 @@ export function resolveFooterLogoTokens(settings: SiteSettings): FooterLogoToken
   };
 }
 
-/** Human-readable inherit scales for admin (resolved from current header sizes). */
+/** Human-readable inherit sizes for admin (same as current header). */
 export function describeFooterLogoInherit(settings: SiteSettings): {
   chip: string;
   chipMobile: string;
   word: string;
   wordMobile: string;
 } {
-  const chip = sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight);
-  const chipMobile = sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile);
-  const word = sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize);
-  const wordMobile = sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile);
   return {
-    chip: scaleCssSize(chip, 0.8, DEFAULT_SITE_SETTINGS.footerLogoChipHeight),
-    chipMobile: scaleCssSize(chipMobile, 0.8, DEFAULT_SITE_SETTINGS.footerLogoChipHeightMobile),
-    word: scaleCssSize(word, 1.25, DEFAULT_SITE_SETTINGS.footerLogoWordSize),
-    wordMobile: scaleCssSize(wordMobile, 1.25, DEFAULT_SITE_SETTINGS.footerLogoWordSizeMobile),
+    chip: sanitizeCssSize(settings.logoChipHeight, DEFAULT_SITE_SETTINGS.logoChipHeight),
+    chipMobile: sanitizeCssSize(settings.logoChipHeightMobile, DEFAULT_SITE_SETTINGS.logoChipHeightMobile),
+    word: sanitizeCssSize(settings.logoWordSize, DEFAULT_SITE_SETTINGS.logoWordSize),
+    wordMobile: sanitizeCssSize(settings.logoWordSizeMobile, DEFAULT_SITE_SETTINGS.logoWordSizeMobile),
   };
 }
 

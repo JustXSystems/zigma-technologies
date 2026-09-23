@@ -10,8 +10,8 @@ type Props = {
 };
 
 /**
- * Sticky floating action cluster — stays visible at the top-right of the admin content area
- * so Save / Publish remain reachable on long forms.
+ * Sticky/fixed floating action cluster — docked bottom-right so Save / Publish
+ * stay reachable on long forms (site settings, catalog, theme, etc.).
  */
 export default function AdminFloatingActions({ children, status, className = '' }: Props) {
   return (
