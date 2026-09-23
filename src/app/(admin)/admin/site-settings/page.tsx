@@ -11,6 +11,7 @@ import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
 import HeaderTalkEditor from '@/components/admin/HeaderTalkEditor';
 import HeaderCtaEditor from '@/components/admin/HeaderCtaEditor';
+import FloatingCtaEditor from '@/components/admin/FloatingCtaEditor';
 import FooterOfficeEditor from '@/components/admin/FooterOfficeEditor';
 import FooterBrandEditor from '@/components/admin/FooterBrandEditor';
 
@@ -157,6 +158,13 @@ const SECTIONS: SectionDef[] = [
     title: 'Header · Talk to us',
     description:
       'Talk to us trigger and submenu chips: add, edit, delete, reorder; desktop/mobile display.',
+    fields: [],
+  },
+  {
+    id: 'floating-cta',
+    title: 'Sticky mobile & floating CTAs',
+    description:
+      'Mobile sticky bar and floating WhatsApp-style buttons: add, edit, delete, reorder, show/hide, path filters.',
     fields: [],
   },
   {
@@ -397,6 +405,8 @@ export default function SiteSettingsPage() {
         return <HeaderCtaEditor settings={settings} onChange={patchSettings} />;
       case 'header-talk':
         return <HeaderTalkEditor settings={settings} onChange={patchSettings} />;
+      case 'floating-cta':
+        return <FloatingCtaEditor settings={settings} onChange={patchSettings} />;
       case 'nav-menu-style':
         return <NavMenuStylePicker settings={settings} onChange={patchSettings} />;
       case 'typography':

@@ -2040,13 +2040,19 @@
     .stat .label{font-size:0.68rem;}
 
     .sticky-mobile-cta{
-      display:flex;position:fixed;bottom:0;left:0;right:0;z-index:950;
+      display:grid;
+      grid-template-columns:repeat(var(--sticky-cta-count, 3), minmax(0, 1fr));
+      position:fixed;bottom:0;left:0;right:0;z-index:950;
       background:var(--navy-950);border-top:1px solid rgba(255,255,255,0.1);
       padding:0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom, 0px));gap:0.6rem;
+      left:0;right:0;border-radius:0;
     }
-    .sticky-mobile-cta a,.sticky-mobile-cta button{flex:1;text-align:center;padding:0.8rem 0.5rem;font-size:0.88rem;font-weight:700;border-radius:6px;font-family:var(--font-display);}
+    .sticky-mobile-cta a,.sticky-mobile-cta button{
+      flex:1;text-align:center;padding:0.8rem 0.5rem;font-size:0.88rem;font-weight:700;border-radius:6px;font-family:var(--font-display);
+    }
     .sticky-mobile-cta a.call,.sticky-mobile-cta button.call{background:var(--orange);color:var(--white);}
     .sticky-mobile-cta a.quote,.sticky-mobile-cta button.quote{border:1px solid rgba(255,255,255,0.25);color:var(--white);}
+    .float-cta-stack--above-sticky{bottom:calc(4.8rem + env(safe-area-inset-bottom, 0px));}
     .float-wa{bottom:4.4rem;}
     body{padding-bottom:calc(64px + env(safe-area-inset-bottom, 0px));}
   }
@@ -4801,17 +4807,25 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .consult-modal-backdrop{
   position:fixed;inset:0;background:rgba(7,18,33,0.78);
   z-index:1200;display:flex;align-items:center;justify-content:center;
-  padding:1.2rem;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:1.2rem;
+  padding:
+    max(1.2rem, env(safe-area-inset-top, 0px))
+    max(1.2rem, env(safe-area-inset-right, 0px))
+    max(1.2rem, env(safe-area-inset-bottom, 0px))
+    max(1.2rem, env(safe-area-inset-left, 0px));
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  overscroll-behavior:contain;
 }
 .consult-modal-panel{
-  width:min(920px,100%);
-  max-height:92vh;
+  width:min(560px,100%);
+  max-height:min(92vh, 92dvh);
   background:var(--white);
   border:1px solid rgba(15,31,61,0.12);
   border-radius:10px;
   box-shadow:0 24px 64px rgba(7,18,33,0.32);
   overflow:hidden;
   display:flex;flex-direction:column;
+  min-height:0;
   animation:consultModalIn .26s cubic-bezier(.22,1,.36,1);
 }
 @keyframes consultModalIn{
@@ -4819,12 +4833,13 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   to{opacity:1;transform:translateY(0);}
 }
 .consult-modal-head{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:0.85rem;
   padding:1.15rem 1.35rem 1.05rem;
   background:linear-gradient(135deg,var(--navy-950) 0%,var(--navy-900) 62%,var(--navy-850) 100%);
   color:var(--white);
   border-bottom:2px solid rgba(255,107,26,0.55);
   position:relative;overflow:hidden;
+  flex:0 0 auto;
 }
 .consult-modal-head::before{
   content:'';
@@ -4835,7 +4850,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   background-size:28px 28px;
   pointer-events:none;opacity:0.45;
 }
-.consult-modal-title{display:flex;flex-direction:column;gap:0.4rem;min-width:0;position:relative;z-index:1;}
+.consult-modal-title{display:flex;flex-direction:column;gap:0.4rem;min-width:0;position:relative;z-index:1;flex:1 1 auto;}
 .consult-badge{
   display:inline-flex;align-items:center;
   font-family:var(--font-mono);
@@ -4843,15 +4858,17 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   font-size:0.68rem;font-weight:600;
   color:var(--cyan);
   width:max-content;
+  max-width:100%;
 }
 .consult-badge::before{content:'◆';margin-right:0.45rem;font-size:0.55rem;opacity:0.85;}
 .consult-modal-head :is(h1,h2,h3){
-  margin:0;font-family:var(--font-display);font-size:clamp(1.2rem,2.2vw,1.45rem);
+  margin:0;font-family:var(--font-display);font-size:clamp(1.15rem,2.2vw,1.45rem);
   font-weight:700;line-height:1.15;letter-spacing:-0.02em;
+  overflow-wrap:anywhere;
 }
 .consult-modal-head p{margin:0;color:#B7C2D6;font-size:0.88rem;max-width:520px;line-height:1.5;}
 .consult-close{
-  width:36px;height:36px;border-radius:6px;flex:0 0 auto;
+  width:40px;height:40px;border-radius:6px;flex:0 0 auto;
   border:1px solid rgba(255,255,255,0.16);
   background:rgba(255,255,255,0.04);
   color:var(--white);
@@ -4859,9 +4876,41 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   display:grid;place-items:center;
   transition:background .15s, border-color .15s;
   position:relative;z-index:1;
+  -webkit-tap-highlight-color:transparent;
 }
 .consult-close:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.28);}
-.consult-modal-body{padding:1.25rem 1.35rem 1.35rem;overflow:auto;background:#fafbfd;}
+.consult-modal-body{
+  padding:1.25rem 1.35rem 1.35rem;
+  overflow:auto;
+  background:#fafbfd;
+  flex:1 1 auto;
+  min-height:0;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+.consult-form-shell.consult-modal-body{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  padding:0;
+  overflow:hidden;
+  background:#fafbfd;
+}
+.consult-form-shell > .consult-form{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  margin:1.25rem 1.35rem 0;
+}
+.consult-form-actions{
+  flex:0 0 auto;
+  padding:0.9rem 1.35rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  background:var(--white);
+  border-top:1px solid var(--gray-200);
+  box-shadow:0 -8px 24px rgba(10,22,40,0.04);
+}
 
 .consult-modal-panel .consult-proof-strip{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
@@ -4946,6 +4995,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 }
 .consult-loading{color:var(--graphite-500);margin:0;font-size:0.88rem;}
 .consult-field{margin-bottom:0.85rem;}
+.consult-field:last-child{margin-bottom:0;}
 .consult-field label{
   display:block;font-size:0.72rem;font-weight:600;color:var(--graphite-800);
   margin-bottom:0.32rem;font-family:var(--font-mono);
@@ -4954,33 +5004,97 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .consult-field input,
 .consult-field select,
 .consult-field textarea{
-  width:100%;padding:0.68rem 0.78rem;border:1px solid var(--gray-200);
+  width:100%;max-width:100%;
+  padding:0.72rem 0.78rem;border:1px solid var(--gray-200);
   border-radius:6px;background:var(--white);color:var(--graphite-800);
-  font:inherit;font-size:0.9rem;
+  font:inherit;font-size:1rem; /* 16px — avoids iOS focus zoom */
+  line-height:1.4;
   transition:border-color .15s, box-shadow .15s;
+  box-sizing:border-box;
+  -webkit-appearance:none;appearance:none;
+}
+.consult-field textarea{min-height:7.5rem;resize:vertical;}
+.consult-field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235B6472' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 0.85rem center;
+  padding-right:2.2rem;
 }
 .consult-field select option,
 .consult-field select optgroup{
   background-color:var(--white);
   color:var(--graphite-800);
 }
-.consult-field input[type="checkbox"]{width:auto;margin-top:0.15rem;}
+.consult-field input[type="checkbox"]{
+  width:1.15rem;height:1.15rem;margin-top:0.15rem;
+  -webkit-appearance:checkbox;appearance:checkbox;
+}
 .consult-field input:focus,
 .consult-field select:focus,
 .consult-field textarea:focus{
   outline:none;border-color:rgba(255,107,26,0.45);box-shadow:0 0 0 2px rgba(255,107,26,0.1);
 }
-.consult-submit{width:100%;margin-top:0.15rem;}
-.consult-msg{margin:0.75rem 0 0;font-size:0.86rem;color:#c9540f;font-weight:600;}
+.consult-submit{
+  width:100%;margin-top:0;
+  min-height:48px;
+  justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.consult-msg{margin:0 0 0.65rem;font-size:0.86rem;color:#c9540f;font-weight:600;}
 .consult-msg--ok{color:#2e8b57;}
+.consult-modal-panel .turnstile-slot{
+  margin-bottom:0.85rem;
+  max-width:100%;
+  overflow:hidden;
+}
 
 @media (max-width:760px){
+  .consult-modal-backdrop{
+    align-items:flex-end;
+    padding:0;
+  }
+  .consult-modal-panel{
+    width:100%;
+    max-width:100%;
+    max-height:min(94vh, 94dvh);
+    height:auto;
+    border-radius:14px 14px 0 0;
+    border-left:none;border-right:none;border-bottom:none;
+    animation:consultSheetIn .28s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes consultSheetIn{
+    from{opacity:0;transform:translateY(18px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .consult-modal-head{
+    padding:1rem 1rem 0.9rem;
+    padding-top:max(1rem, env(safe-area-inset-top, 0px));
+  }
+  .consult-modal-head :is(h1,h2,h3){font-size:1.12rem;}
+  .consult-modal-head p{font-size:0.82rem;line-height:1.45;}
+  .consult-modal-body{padding:0.85rem 1rem 1rem;}
+  .consult-form-shell > .consult-form{
+    margin:0.85rem 1rem 0;
+    padding:0.95rem;
+    border-radius:8px;
+  }
+  .consult-form-actions{
+    padding:0.85rem 1rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
+  }
   .consult-modal-panel .consult-options{grid-template-columns:1fr;}
   .consult-modal-panel .consult-proof-strip{grid-template-columns:1fr;}
   .consult-modal-panel .consult-proof-item{border-right:none;border-bottom:1px solid var(--gray-200);}
   .consult-modal-panel .consult-proof-item:last-child{border-bottom:none;}
-  .consult-modal-body{padding:1rem;}
-  .consult-modal-head :is(h1,h2,h3){font-size:1.12rem;}
+  .consult-field{margin-bottom:0.95rem;}
+  .consult-field input,
+  .consult-field select,
+  .consult-field textarea{padding:0.78rem 0.85rem;}
+}
+
+@media (max-width:380px){
+  .consult-modal-head :is(h1,h2,h3){font-size:1.05rem;}
+  .consult-badge{font-size:0.62rem;}
+  .consult-form-shell > .consult-form{padding:0.85rem;}
 }
 
 /* ---------- STICKY EXPERT CTA ---------- */
@@ -5322,18 +5436,78 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .sticky-mobile-cta{display:none;}
 @media (max-width:900px){
   .sticky-mobile-cta{
-    display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem;
+    display:grid;
+    grid-template-columns:repeat(var(--sticky-cta-count, 3), minmax(0, 1fr));
+    gap:0.4rem;
     position:fixed;left:0.65rem;right:0.65rem;
     bottom:calc(0.65rem + env(safe-area-inset-bottom, 0px));
-    z-index:55;
+    z-index:950;
   }
-  .sticky-mobile-cta .call,.sticky-mobile-cta .wa,.sticky-mobile-cta .quote{
+  .sticky-mobile-cta .call,.sticky-mobile-cta .wa,.sticky-mobile-cta .quote,.sticky-mobile-cta .ghost{
     text-align:center;padding:0.7rem 0.4rem;border-radius:12px;font-weight:700;font-size:0.82rem;text-decoration:none;border:0;cursor:pointer;
     white-space:normal;line-height:1.2;
+    font-family:var(--font-display);
+    min-height:44px;
+    display:inline-flex;align-items:center;justify-content:center;
+    -webkit-tap-highlight-color:transparent;
   }
   .sticky-mobile-cta .call{background:#122033;color:#fff;}
   .sticky-mobile-cta .wa{background:#128C7E;color:#fff;}
   .sticky-mobile-cta .quote{background:var(--orange);color:#fff;}
+  .sticky-mobile-cta .ghost{
+    background:rgba(10,22,40,0.88);color:#fff;
+    border:1px solid rgba(255,255,255,0.28);
+  }
+}
+
+.float-cta-stack{
+  position:fixed;
+  right:1.6rem;
+  bottom:1.6rem;
+  z-index:900;
+  display:flex;
+  flex-direction:column-reverse;
+  align-items:center;
+  gap:0.65rem;
+}
+.float-cta-stack .float-wa,
+.float-cta-stack a.float-wa,
+.float-cta-stack button.float-wa{
+  position:static;
+  width:56px;height:56px;border-radius:50%;
+  background:#25D366;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  border:0;cursor:pointer;padding:0;
+  text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.float-cta-stack .call,
+.float-cta-stack .wa,
+.float-cta-stack .quote,
+.float-cta-stack .ghost{
+  position:static;
+  min-width:56px;min-height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  padding:0.55rem 0.7rem;font-size:0.72rem;font-weight:700;
+  text-align:center;line-height:1.15;text-decoration:none;border:0;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,0.22);
+  font-family:var(--font-display);
+  color:#fff;
+}
+.float-cta-stack .call{background:#122033;}
+.float-cta-stack .wa{background:#128C7E;}
+.float-cta-stack .quote{background:var(--orange);}
+.float-cta-stack .ghost{background:rgba(10,22,40,0.92);border:1px solid rgba(255,255,255,0.28);}
+
+/* Legacy single float button (if rendered outside stack) */
+.float-wa{position:fixed;bottom:1.6rem;right:1.6rem;z-index:900;width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.25);}
+
+@media (max-width:900px){
+  .float-cta-stack--above-sticky{
+    bottom:calc(4.6rem + env(safe-area-inset-bottom, 0px));
+  }
+  .float-wa{bottom:4.4rem;}
 }
 
 .visit-tailor{

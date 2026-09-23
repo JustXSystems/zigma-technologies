@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useState, useMemo } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
-  DEFAULT_SITE_SETTINGS,
   footerLogoSrc,
   isSettingEnabled,
   logoAltText,
@@ -11,13 +10,11 @@ import {
   sanitizeFooterLogoMode,
   sanitizeFooterOfficeAlign,
   sanitizeTaglineHtml,
-  telHref,
 } from '@/lib/site-settings';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
-import { whatsappHref } from '@/lib/whatsapp';
 import { trackEvent } from '@/lib/analytics';
-import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import FloatingCtaHost from '@/components/FloatingCtaHost';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { useSiteShell } from '@/components/SiteProviders';
 import FooterLinkColumns from '@/components/FooterLinkColumns';
@@ -32,7 +29,6 @@ import { appHref } from '@/lib/base-path';
  */
 export default function Footer() {
   const pathname = usePathname();
-  const router = useRouter();
   const { settings: site, footerColumns } = useSiteShell();
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
@@ -48,16 +44,6 @@ export default function Footer() {
             ? 'certifications'
             : 'home',
     [pathname]
-  );
-
-  const openConsultation = useCallback(
-    (subject: string) => {
-      const url = new URL(window.location.href);
-      url.searchParams.set('consult', '1');
-      url.searchParams.set('consult_subject', subject);
-      router.replace(`${url.pathname}?${url.searchParams.toString()}`);
-    },
-    [router]
   );
 
   const handleNewsletterSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -187,42 +173,7 @@ export default function Footer() {
         </div>
       </footer>
 
-      <FloatingWhatsApp />
-
-      <div className="sticky-mobile-cta">
-        <a
-          href={telHref(site.phone)}
-          className="call"
-          onClick={useCallback(() => trackEvent('cta_click', { channel: 'call', placement: 'mobile_sticky' }), [])}
-        >
-          {copy.footer.stickyCall}
-        </a>
-        <a
-          href={whatsappHref(site.whatsapp, copy.talk.whatsappPrefill)}
-          className="wa"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={useCallback(() => trackEvent('cta_click', { channel: 'whatsapp', placement: 'mobile_sticky' }), [])}
-        >
-          {copy.footer.stickyWhatsapp}
-        </a>
-        {pathname === '/careers' ? (
-          <a href={appHref('/careers#apply')} className="quote">
-            Apply Now
-          </a>
-        ) : (
-          <button
-            type="button"
-            className="quote"
-            onClick={useCallback(() => {
-              trackEvent('cta_click', { channel: 'consultation', placement: 'mobile_sticky' });
-              openConsultation('Request a Quote');
-            }, [openConsultation])}
-          >
-            {copy.footer.stickyQuote}
-          </button>
-        )}
-      </div>
+      <FloatingCtaHost />
     </>
   );
 }

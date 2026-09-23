@@ -122,6 +122,11 @@ export default function FormsPage() {
     <div>
       {error ? <div className="admin-error">{error}</div> : null}
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
+        <p style={{ margin: '0 0 0.75rem', color: 'var(--admin-muted, #64748b)', fontSize: '0.92rem', lineHeight: 1.5 }}>
+          Fields below power the home-page <strong>Send an Enquiry</strong> modal, the contact page form, catalog
+          enquiry drawers, and case-study enquiry blocks. Add, reorder, edit labels/options, or disable fields —
+          changes apply on the public site immediately.
+        </p>
         <h2 style={{ marginTop: 0, fontSize: '1.05rem' }}>Add enquiry field</h2>
         <form onSubmit={addField} className="admin-form-grid">
           <div className="admin-field">

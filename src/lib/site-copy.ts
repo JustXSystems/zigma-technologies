@@ -419,12 +419,14 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     viewCertifications: 'View certifications',
   },
   consultation: {
-    badge: 'Premium intake',
-    title: 'Request a Consultation',
+    badge: 'Enquiry',
+    title: 'Send an Enquiry',
+    /** @deprecated Multi-step wizard removed — kept for stored site-copy compatibility */
     step0Lead: 'Pick what you need. Then share capacity and contact details.',
+    /** @deprecated Multi-step wizard removed — kept for stored site-copy compatibility */
     step1Lead: 'Tell us capacity, location, and urgency for a faster quote.',
     step2Lead: 'Submit your details — we respond with a clear next step.',
-    ariaLabel: 'Request consultation',
+    ariaLabel: 'Send an enquiry',
     proofStrip: ['Fast feasibility response', 'Aligned to certified process', 'Commercial clarity upfront'],
     interestOptions: [
       { title: 'Solar EPC', subtitle: 'Design, supply, and commissioning', subject: 'Solar Solution' },
@@ -446,7 +448,7 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     backLabel: '← Back',
     continueQuote: 'Continue to contact details →',
     skipQuote: 'Skip quote details',
-    submitLabel: 'Submit consultation request →',
+    submitLabel: 'Send enquiry →',
     submittingLabel: 'Submitting…',
     loadingForm: 'Loading form…',
     successMsg: 'Thank you — our engineering team will contact you shortly.',

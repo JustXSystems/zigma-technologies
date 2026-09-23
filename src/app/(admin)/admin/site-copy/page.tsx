@@ -75,7 +75,6 @@ export default function SiteCopyAdminPage() {
   const [copy, setCopy] = useState<SiteCopy>(DEFAULT_SITE_COPY);
   const [industriesJson, setIndustriesJson] = useState('[]');
   const [locationsJson, setLocationsJson] = useState('[]');
-  const [interestJson, setInterestJson] = useState('[]');
   const [needOptionsJson, setNeedOptionsJson] = useState('[]');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -89,7 +88,6 @@ export default function SiteCopyAdminPage() {
         setCopy(data.copy);
         setIndustriesJson(JSON.stringify(data.industries || [], null, 2));
         setLocationsJson(JSON.stringify(data.locations || [], null, 2));
-        setInterestJson(JSON.stringify(data.copy?.consultation?.interestOptions || [], null, 2));
         setNeedOptionsJson(JSON.stringify(data.copy?.tools?.solutionFinder?.needOptions || [], null, 2));
       })
       .catch((e) => setError(e.message));
@@ -102,7 +100,7 @@ export default function SiteCopyAdminPage() {
         { id: 'hubs' as const, label: 'Hub pages' },
         { id: 'legal' as const, label: 'Cookies / Thank-you' },
         { id: 'features' as const, label: 'Features' },
-        { id: 'consultation' as const, label: 'Consultation' },
+        { id: 'consultation' as const, label: 'Enquiry modal' },
         { id: 'tools' as const, label: 'Tools' },
         { id: 'catalog' as const, label: 'Catalog' },
         { id: 'locales' as const, label: 'Locales' },
@@ -126,9 +124,6 @@ export default function SiteCopyAdminPage() {
       if (tab === 'locations' || locationsJson) {
         locations = JSON.parse(locationsJson) as LocationDef[];
       }
-      if (interestJson) {
-        nextCopy = setPath(nextCopy, 'consultation.interestOptions', JSON.parse(interestJson));
-      }
       if (needOptionsJson) {
         nextCopy = setPath(nextCopy, 'tools.solutionFinder.needOptions', JSON.parse(needOptionsJson));
       }
@@ -142,7 +137,6 @@ export default function SiteCopyAdminPage() {
       setCopy(data.copy);
       setIndustriesJson(JSON.stringify(data.industries || [], null, 2));
       setLocationsJson(JSON.stringify(data.locations || [], null, 2));
-      setInterestJson(JSON.stringify(data.copy?.consultation?.interestOptions || [], null, 2));
       setNeedOptionsJson(JSON.stringify(data.copy?.tools?.solutionFinder?.needOptions || [], null, 2));
       setMessage('Site copy saved. Public pages pick this up on next load.');
     } catch (e) {
@@ -343,39 +337,22 @@ export default function SiteCopyAdminPage() {
 
         {tab === 'consultation' ? (
           <div className="admin-form-grid">
+            <p className="full theme-help" style={{ marginTop: 0 }}>
+              Chrome for the home-page enquiry modal (single-step). Form fields, subject options, and required flags
+              are configured under <a href="/admin/forms">Enquiry Forms</a>.
+            </p>
             <Field label="Badge" path="consultation.badge" copy={copy} onChange={setCopy} />
             <Field label="Title" path="consultation.title" copy={copy} onChange={setCopy} />
             <div className="full">
-              <Field label="Step 0 lead" path="consultation.step0Lead" copy={copy} onChange={setCopy} multiline />
-            </div>
-            <div className="full">
-              <Field label="Step 1 lead" path="consultation.step1Lead" copy={copy} onChange={setCopy} multiline />
-            </div>
-            <div className="full">
-              <Field label="Step 2 lead" path="consultation.step2Lead" copy={copy} onChange={setCopy} multiline />
-            </div>
-            <div className="full">
-              <Field label="Proof strip (one per line)" path="consultation.proofStrip" copy={copy} onChange={setCopy} multiline />
-            </div>
-            <div className="full">
-              <Field label="Capacity options (one per line)" path="consultation.capacityOptions" copy={copy} onChange={setCopy} multiline />
-            </div>
-            <div className="full">
-              <Field label="Urgency options (one per line)" path="consultation.urgencyOptions" copy={copy} onChange={setCopy} multiline />
+              <Field label="Lead (under title)" path="consultation.step2Lead" copy={copy} onChange={setCopy} multiline />
             </div>
             <Field label="Submit label" path="consultation.submitLabel" copy={copy} onChange={setCopy} />
+            <Field label="Submitting label" path="consultation.submittingLabel" copy={copy} onChange={setCopy} />
+            <Field label="Loading form" path="consultation.loadingForm" copy={copy} onChange={setCopy} />
             <div className="full">
-              <label className="admin-field">Interest options JSON</label>
-              <p className="theme-help">
-                Array of <code>{'{ title, subtitle, subject }'}</code> — subject must match enquiry form options.
-              </p>
-              <textarea
-                className="admin-textarea"
-                style={{ width: '100%', minHeight: 220, fontFamily: 'var(--admin-mono)', fontSize: '0.82rem' }}
-                value={interestJson}
-                onChange={(e) => setInterestJson(e.target.value)}
-              />
+              <Field label="Success message" path="consultation.successMsg" copy={copy} onChange={setCopy} multiline />
             </div>
+            <Field label="Aria label" path="consultation.ariaLabel" copy={copy} onChange={setCopy} />
           </div>
         ) : null}
 

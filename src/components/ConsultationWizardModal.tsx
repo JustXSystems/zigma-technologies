@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import HoneypotField from '@/components/HoneypotField';
@@ -32,29 +32,15 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
   const [mounted, setMounted] = useState(false);
-  const [step, setStep] = useState<0 | 1 | 2>(0);
 
   const [formId, setFormId] = useState<number | null>(null);
   const [fields, setFields] = useState<FormField[]>([]);
   const [payload, setPayload] = useState<Record<string, string>>({});
-  const [capacity, setCapacity] = useState('');
-  const [siteLocation, setSiteLocation] = useState('');
-  const [urgency, setUrgency] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState('');
   const [success, setSuccess] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
-
-  const subjectField = useMemo(() => fields.find((f) => f.field_name === 'subject') || null, [fields]);
-  const selectedInterest = useMemo(() => {
-    if (!preselectedSubject) return null;
-    return c.interestOptions.find((o) => o.subject === preselectedSubject) || null;
-  }, [preselectedSubject, c.interestOptions]);
-
-  const isQuotePath =
-    (payload.subject || preselectedSubject || '') === 'Request a Quote' ||
-    Boolean(capacity || siteLocation || urgency);
 
   useEffect(() => {
     setMounted(true);
@@ -70,13 +56,10 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
   }, [preselectedSubject]);
 
   useEffect(() => {
-    if (!fields.length) return;
-    if (!preselectedSubject) return;
-    if (!subjectField) return;
-
+    if (!fields.length || !preselectedSubject) return;
+    if (!fields.some((f) => f.field_name === 'subject')) return;
     setPayload((prev) => ({ ...prev, subject: String(preselectedSubject) }));
-    setStep(preselectedSubject === 'Request a Quote' ? 1 : 2);
-  }, [fields.length, preselectedSubject, subjectField]);
+  }, [fields, preselectedSubject]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -112,7 +95,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
   }, []);
 
   function renderField(field: FormField) {
-    const disabled = subjectField?.id === field.id;
+    const lockedSubject = field.field_name === 'subject' && Boolean(preselectedSubject);
     if (field.field_type === 'textarea') {
       return (
         <div key={field.id} className="consult-field">
@@ -123,7 +106,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <textarea
             id={`consult-${field.field_name}`}
             value={payload[field.field_name] || ''}
-            disabled={disabled}
+            disabled={lockedSubject}
             required={!!field.required}
             rows={5}
             onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
@@ -143,7 +126,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <select
             id={`consult-${field.field_name}`}
             value={payload[field.field_name] || ''}
-            disabled={disabled}
+            disabled={lockedSubject}
             required={!!field.required}
             onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
           >
@@ -173,14 +156,14 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
             onChange={(e) =>
               setPayload({ ...payload, [field.field_name]: e.target.checked ? '1' : '0' })
             }
-            disabled={disabled}
+            disabled={lockedSubject}
           />
         ) : (
           <input
             id={`consult-${field.field_name}`}
             type={fieldTypeToInputType(field.field_type)}
             value={payload[field.field_name] || ''}
-            disabled={disabled}
+            disabled={lockedSubject}
             required={!!field.required}
             onChange={(e) => setPayload({ ...payload, [field.field_name]: e.target.value })}
             placeholder={field.placeholder || ''}
@@ -198,20 +181,6 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       if (!formId) throw new Error('Form not configured');
 
-      const quoteBits = [
-        capacity ? `Capacity: ${capacity}` : '',
-        siteLocation ? `Location: ${siteLocation}` : '',
-        urgency ? `Urgency: ${urgency}` : '',
-      ].filter(Boolean);
-      const messageExtra = quoteBits.length ? `\n\n— Quote details —\n${quoteBits.join('\n')}` : '';
-      const nextPayload = {
-        ...payload,
-        capacity: capacity || undefined,
-        site_location: siteLocation || undefined,
-        urgency: urgency || undefined,
-        message: `${payload.message || ''}${messageExtra}`.trim(),
-      };
-
       const res = await fetch('/api/public/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -219,7 +188,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           form_id: formId,
           item_id: null,
           item_type: null,
-          payload: nextPayload,
+          payload,
           _hp: typeof hp === 'string' ? hp : '',
           turnstileToken: turnstileToken || undefined,
         }),
@@ -254,9 +223,7 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           <div className="consult-modal-title">
             <span className="consult-badge">{c.badge}</span>
             <SiteHeading role="section">{c.title}</SiteHeading>
-            <p>
-              {step === 0 ? c.step0Lead : step === 1 ? c.step1Lead : c.step2Lead}
-            </p>
+            <p>{c.step2Lead}</p>
           </div>
           <button
             ref={closeButtonRef}
@@ -271,130 +238,22 @@ export default function ConsultationWizardModal({ preselectedSubject, onClose }:
           </button>
         </div>
 
-        {step === 0 ? (
-          <div className="consult-modal-body">
-            <div className="consult-proof-strip">
-              {c.proofStrip.map((line) => (
-                <div key={line} className="consult-proof-item">
-                  <span className="consult-proof-dot consult-proof-dot--orange" />
-                  <span>{line}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="consult-options">
-              {c.interestOptions.map((opt) => {
-                const checked = payload.subject === opt.subject || selectedInterest?.subject === opt.subject;
-                return (
-                  <button
-                    key={opt.subject}
-                    type="button"
-                    className={`consult-option${checked ? ' is-selected' : ''}`}
-                    onClick={() => {
-                      setPayload((prev) => ({ ...prev, subject: opt.subject }));
-                      setStep(opt.subject === 'Request a Quote' || opt.title.includes('Quote') ? 1 : 1);
-                    }}
-                  >
-                    <div className="consult-option-title">{opt.title}</div>
-                    <div className="consult-option-subtitle">{opt.subtitle}</div>
-                    <div className="consult-option-cta">Continue →</div>
-                  </button>
-                );
-              })}
-            </div>
+        <form className="consult-modal-body consult-form-shell" onSubmit={submitEnquiry}>
+          <div className="consult-form">
+            <HoneypotField />
+            <TurnstileField onToken={setTurnstileToken} />
+            {fields.length ? fields.map((f) => renderField(f)) : <p className="consult-loading">{c.loadingForm}</p>}
           </div>
-        ) : null}
 
-        {step === 1 ? (
-          <div className="consult-modal-body">
-            <div className="consult-form-head">
-              <button type="button" className="consult-back" onClick={() => setStep(0)}>
-                {c.backLabel}
-              </button>
-              <div className="consult-form-head-right">
-                <span className="consult-step-label">{c.step2Label}</span>
-              </div>
-            </div>
-            <div className="consult-form">
-              <div className="consult-field">
-                <label htmlFor="consult-capacity">{c.capacityLabel}</label>
-                <select
-                  id="consult-capacity"
-                  value={capacity}
-                  required
-                  onChange={(e) => setCapacity(e.target.value)}
-                >
-                  <option value="">Select…</option>
-                  {c.capacityOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="consult-field">
-                <label htmlFor="consult-location">{c.locationLabel}</label>
-                <input
-                  id="consult-location"
-                  value={siteLocation}
-                  onChange={(e) => setSiteLocation(e.target.value)}
-                  placeholder={c.locationPlaceholder}
-                />
-              </div>
-              <div className="consult-field">
-                <label htmlFor="consult-urgency">{c.urgencyLabel}</label>
-                <select id="consult-urgency" value={urgency} onChange={(e) => setUrgency(e.target.value)}>
-                  <option value="">Select…</option>
-                  {c.urgencyOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                type="button"
-                className="btn btn-primary consult-submit"
-                disabled={!capacity}
-                onClick={() => setStep(2)}
-              >
-                {c.continueQuote}
-              </button>
-              {!isQuotePath ? (
-                <button type="button" className="consult-back" style={{ marginTop: '0.75rem' }} onClick={() => setStep(2)}>
-                  {c.skipQuote}
-                </button>
-              ) : null}
-            </div>
+          <div className="consult-form-actions">
+            {submitMsg ? (
+              <p className={`consult-msg${success ? ' consult-msg--ok' : ''}`}>{submitMsg}</p>
+            ) : null}
+            <button type="submit" className="btn btn-primary consult-submit" disabled={submitting || !fields.length}>
+              {submitting ? c.submittingLabel : c.submitLabel}
+            </button>
           </div>
-        ) : null}
-
-        {step === 2 ? (
-          <div className="consult-modal-body">
-            <div className="consult-form-head">
-              <button type="button" className="consult-back" onClick={() => setStep(1)}>
-                {c.backLabel}
-              </button>
-              <div className="consult-form-head-right">
-                <span className="consult-step-label">{c.step3Label}</span>
-              </div>
-            </div>
-
-            <form className="consult-form" onSubmit={submitEnquiry}>
-              <HoneypotField />
-              <TurnstileField onToken={setTurnstileToken} />
-              {fields.length ? fields.map((f) => renderField(f)) : <p className="consult-loading">{c.loadingForm}</p>}
-
-              <button type="submit" className="btn btn-primary consult-submit" disabled={submitting || !fields.length}>
-                {submitting ? c.submittingLabel : c.submitLabel}
-              </button>
-
-              {submitMsg ? (
-                <p className={`consult-msg${success ? ' consult-msg--ok' : ''}`}>{submitMsg}</p>
-              ) : null}
-            </form>
-          </div>
-        ) : null}
+        </form>
       </div>
     </div>
   );

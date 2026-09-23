@@ -103,6 +103,11 @@ export type SiteSettings = {
    */
   headerCtaJson: string;
   /**
+   * Sticky mobile CTA bar + floating action buttons (JSON).
+   * See `parseFloatingCta` in `@/lib/floating-cta`.
+   */
+  floatingCtaJson: string;
+  /**
    * Public header / mega-menu visual style:
    * classic | corporate | elegant | rail | lumen | mosaic | ribbon
    */
@@ -295,6 +300,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   ctaVariantBPercent: '50',
   headerTalkJson: '',
   headerCtaJson: '',
+  floatingCtaJson: '',
   navMenuStyle: 'classic',
   headingPageHero: 'h3',
   headingSection: 'h3',
