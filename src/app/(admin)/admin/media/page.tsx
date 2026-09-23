@@ -1,6 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import {
+  MEDIA_UPLOAD_ACCEPT,
+  MEDIA_UPLOAD_MAX_BYTES,
+  MEDIA_UPLOAD_RESTRICTIONS,
+  MEDIA_UPLOAD_TYPE_INFO,
+  formatMediaBytes,
+  validateMediaUploadFile,
+} from '@/lib/media-upload-rules';
 
 type Asset = {
   id: number | null;
@@ -11,6 +19,17 @@ type Asset = {
   created_at?: string | null;
   category?: string;
   source?: 'database' | 'filesystem' | 'legacy';
+};
+
+type ApiErrorBody = {
+  error?: string;
+  code?: string;
+  detail?: string;
+  receivedType?: string | null;
+  receivedBytes?: number;
+  maxBytes?: number;
+  fileName?: string | null;
+  allowedTypes?: string[];
 };
 
 function parseTags(raw: unknown): string[] {
@@ -26,11 +45,36 @@ function parseTags(raw: unknown): string[] {
   return [];
 }
 
+function formatApiError(data: ApiErrorBody, fallback: string, status?: number): string {
+  const parts: string[] = [];
+  if (data.error) parts.push(data.error);
+  else parts.push(fallback);
+  if (data.code && !parts[0].includes(data.code)) {
+    parts.push(`Code: ${data.code}`);
+  }
+  if (typeof data.receivedBytes === 'number' && typeof data.maxBytes === 'number') {
+    parts.push(
+      `Received ${formatMediaBytes(data.receivedBytes)} / limit ${formatMediaBytes(data.maxBytes)}.`
+    );
+  }
+  if (data.receivedType != null && data.code === 'UNSUPPORTED_TYPE') {
+    parts.push(`Reported type: ${data.receivedType || '(none)'}.`);
+  }
+  if (status && status >= 500 && data.detail && data.detail !== data.error) {
+    parts.push(data.detail);
+  }
+  if (status && !data.error) {
+    parts.push(`HTTP ${status}`);
+  }
+  return parts.filter(Boolean).join(' ');
+}
+
 export default function MediaPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Asset | null>(null);
   const [editAlt, setEditAlt] = useState('');
@@ -45,9 +89,9 @@ export default function MediaPage() {
       try {
         data = await res.json();
       } catch {
-        throw new Error(res.ok ? 'Failed to load media' : `Failed to load media (${res.status})`);
+        throw new Error(res.ok ? 'Failed to load media' : `Failed to load media (HTTP ${res.status})`);
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to load media');
+      if (!res.ok) throw new Error(formatApiError(data, 'Failed to load media', res.status));
       setAssets(data.assets || []);
     } finally {
       setLoading(false);
@@ -67,24 +111,38 @@ export default function MediaPage() {
     if (!file) return;
     setError('');
     setMessage('');
+
+    const invalid = validateMediaUploadFile(file);
+    if (invalid) {
+      setError(invalid.message);
+      return;
+    }
+
+    setUploading(true);
     try {
       const fd = new FormData();
       fd.append('file', file);
       const res = await fetch('/api/admin/media', { method: 'POST', body: fd });
-      let data: { error?: string; path?: string } = {};
+      let data: ApiErrorBody & { path?: string } = {};
       try {
         data = await res.json();
       } catch {
-        throw new Error(res.ok ? 'Upload failed' : `Upload failed (${res.status})`);
+        throw new Error(
+          res.ok
+            ? 'Upload failed — server returned an empty response.'
+            : `Upload failed (HTTP ${res.status}). The server may have rejected a large body before validation.`
+        );
       }
       if (!res.ok) {
-        setError(data.error || 'Upload failed');
+        setError(formatApiError(data, 'Upload failed', res.status));
         return;
       }
       setMessage(`Uploaded: ${data.path}`);
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Upload failed');
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -102,9 +160,15 @@ export default function MediaPage() {
     setError('');
     const qs = asset.id ? `id=${asset.id}` : `path=${encodeURIComponent(asset.path)}`;
     const res = await fetch(`/api/admin/media?${qs}`, { method: 'DELETE' });
-    const data = await res.json();
+    let data: ApiErrorBody = {};
+    try {
+      data = await res.json();
+    } catch {
+      setError(`Delete failed (HTTP ${res.status})`);
+      return;
+    }
     if (!res.ok) {
-      setError(data.error || 'Delete failed');
+      setError(formatApiError(data, 'Delete failed', res.status));
       return;
     }
     setMessage('Deleted');
@@ -135,9 +199,15 @@ export default function MediaPage() {
         tags,
       }),
     });
-    const data = await res.json();
+    let data: ApiErrorBody = {};
+    try {
+      data = await res.json();
+    } catch {
+      setError(`Update failed (HTTP ${res.status})`);
+      return;
+    }
     if (!res.ok) {
-      setError(data.error || 'Update failed');
+      setError(formatApiError(data, 'Update failed', res.status));
       return;
     }
     setMessage('Media metadata saved');
@@ -153,17 +223,28 @@ export default function MediaPage() {
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <h2 style={{ marginTop: 0 }}>Media library</h2>
         <p style={{ color: 'var(--admin-muted)' }}>
-          Browse CMS assets from <code>/assets/images</code>, <code>/assets/svg</code>, and <code>/assets/video</code> (including seeded static files). Uploads are saved by type. Edit alt text and tags — metadata is stored in the database.
+          Browse CMS assets from <code>/assets/images</code>, <code>/assets/svg</code>, and <code>/assets/video</code>{' '}
+          (including seeded static files). Uploads are saved by type. Edit alt text and tags — metadata is stored in the
+          database.
         </p>
-        {error ? <div className="admin-error">{error}</div> : null}
+        {error ? (
+          <div className="admin-error" role="alert">
+            <strong style={{ display: 'block', marginBottom: '0.25rem' }}>Something went wrong</strong>
+            {error}
+          </div>
+        ) : null}
         {message ? <div className="admin-success">{message}</div> : null}
         <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <label className="admin-btn admin-btn-primary" style={{ cursor: 'pointer' }}>
-            Upload file
+          <label
+            className={`admin-btn admin-btn-primary${uploading ? ' is-disabled' : ''}`}
+            style={{ cursor: uploading ? 'wait' : 'pointer', opacity: uploading ? 0.7 : 1 }}
+          >
+            {uploading ? 'Uploading…' : 'Upload file'}
             <input
               type="file"
-              accept="image/*,video/mp4,video/webm,.svg"
+              accept={MEDIA_UPLOAD_ACCEPT}
               hidden
+              disabled={uploading}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 void onUpload(file).finally(() => {
@@ -186,7 +267,56 @@ export default function MediaPage() {
             Search
           </button>
         </div>
+        <p className="admin-hint" style={{ marginTop: '0.65rem' }}>
+          Max {formatMediaBytes(MEDIA_UPLOAD_MAX_BYTES)} · JPEG, PNG, WebP, GIF, SVG, MP4, WebM
+        </p>
         {filteredHint ? <p style={{ color: 'var(--admin-muted)', fontSize: '0.85rem' }}>{filteredHint}</p> : null}
+      </div>
+
+      <div className="admin-card admin-media-rules" style={{ marginBottom: '1rem' }}>
+        <h3 style={{ marginTop: 0, fontSize: '0.98rem' }}>Supported files &amp; restrictions</h3>
+        <p className="admin-hint" style={{ marginTop: 0, marginBottom: '0.85rem' }}>
+          These rules are enforced by the upload API. Invalid files are rejected before they are saved.
+        </p>
+        <div className="admin-media-rules-grid">
+          <div>
+            <h4 className="admin-media-rules-title">Supported types</h4>
+            <table className="admin-media-rules-table">
+              <thead>
+                <tr>
+                  <th>Format</th>
+                  <th>Extensions</th>
+                  <th>MIME type</th>
+                  <th>Saved under</th>
+                </tr>
+              </thead>
+              <tbody>
+                {MEDIA_UPLOAD_TYPE_INFO.map((row) => (
+                  <tr key={row.mime}>
+                    <td>{row.label}</td>
+                    <td>
+                      <code>{row.extensions}</code>
+                    </td>
+                    <td>
+                      <code>{row.mime}</code>
+                    </td>
+                    <td>
+                      <code>{row.folder}</code>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h4 className="admin-media-rules-title">Current restrictions</h4>
+            <ul className="admin-media-rules-list">
+              {MEDIA_UPLOAD_RESTRICTIONS.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div className="admin-card">

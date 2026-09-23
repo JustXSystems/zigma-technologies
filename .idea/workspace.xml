@@ -7,19 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Footer addressz isses fixing">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/forms/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/forms/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ConsultationWizardModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FloatingWhatsApp.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FloatingWhatsApp.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Mobile cta and float-wa show hide fixing" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -66,23 +54,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2459164775339664" />
-      <entry key="MS500" value="2.6155650295246176" />
-      <entry key="S2" value="3.55375842049246" />
-      <entry key="S5" value="3.8236769415074745" />
-      <entry key="S10" value="4.3948214366462235" />
-      <entry key="S30" value="16.343607155752387" />
-      <entry key="S60" value="40.7106263261477" />
-      <entry key="M2" value="77.53167263070293" />
-      <entry key="M5" value="153.5049079216541" />
-      <entry key="M10" value="235.9545348852228" />
-      <entry key="M15" value="285.78250881580806" />
-      <entry key="M30" value="371.6574782837382" />
-      <entry key="H1" value="535.4183963976143" />
-      <entry key="H2" value="871.6198238570668" />
-      <entry key="H4" value="1335.944333120147" />
-      <entry key="D1" value="3629.3689115048032" />
-      <entry key="W1" value="14659.753893314573" />
+      <entry key="MS100" value="1.3450015133267195" />
+      <entry key="MS500" value="3.4531702202965016" />
+      <entry key="S2" value="6.3867598257063" />
+      <entry key="S5" value="15.162727579135389" />
+      <entry key="S10" value="31.09299459822939" />
+      <entry key="S30" value="79.25809396817387" />
+      <entry key="S60" value="119.84066933886278" />
+      <entry key="M2" value="155.19153010579893" />
+      <entry key="M5" value="196.70640176075338" />
+      <entry key="M10" value="261.9234313557581" />
+      <entry key="M15" value="322.2347853464136" />
+      <entry key="M30" value="447.9567380889544" />
+      <entry key="H1" value="640.7448191739212" />
+      <entry key="H2" value="993.1238016308533" />
+      <entry key="H4" value="1477.287202493687" />
+      <entry key="D1" value="3809.3762967691478" />
+      <entry key="W1" value="14853.689988942651" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -96,31 +84,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="3.4373575601337195E-196" />
-      <entry key="H1" value="1.8540112082008755E-98" />
-      <entry key="H2" value="1.3616208019124046E-49" />
-      <entry key="H4" value="3.6900146367705723E-25" />
-      <entry key="D1" value="8.604896029702362E-5" />
-      <entry key="W1" value="0.40713240983977467" />
+      <entry key="M30" value="2.220734001561785E-196" />
+      <entry key="H1" value="1.490212737015183E-98" />
+      <entry key="H2" value="1.2207426989398449E-49" />
+      <entry key="H4" value="3.4939128480556264E-25" />
+      <entry key="D1" value="8.526935091516791E-5" />
+      <entry key="W1" value="0.406603402620867" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2103303049832332" />
-      <entry key="MS500" value="2.599017017136361" />
-      <entry key="S2" value="3.5479679993896607" />
-      <entry key="S5" value="3.8211689306662997" />
-      <entry key="S10" value="4.393373922575115" />
-      <entry key="S30" value="16.34176463731263" />
-      <entry key="S60" value="40.70826822796251" />
-      <entry key="M2" value="77.52937369041022" />
-      <entry key="M5" value="153.5030083520483" />
-      <entry key="M10" value="235.95303658689562" />
-      <entry key="M15" value="285.78128880143584" />
-      <entry key="M30" value="371.6566823617559" />
-      <entry key="H1" value="535.4178269729048" />
-      <entry key="H2" value="871.6193567993098" />
-      <entry key="H4" value="1335.9439672019876" />
-      <entry key="D1" value="3629.3688168210665" />
-      <entry key="W1" value="14660.160884498979" />
+      <entry key="MS100" value="1.2992308516837063" />
+      <entry key="MS500" value="3.430189879623517" />
+      <entry key="S2" value="6.376373913388026" />
+      <entry key="S5" value="15.15281662784262" />
+      <entry key="S10" value="31.082793397598024" />
+      <entry key="S30" value="79.24938574054882" />
+      <entry key="S60" value="119.83404729668871" />
+      <entry key="M2" value="155.18722347032127" />
+      <entry key="M5" value="196.70419823958747" />
+      <entry key="M10" value="261.9219226446933" />
+      <entry key="M15" value="322.2335221595205" />
+      <entry key="M30" value="447.95583769862975" />
+      <entry key="H1" value="640.7441660047183" />
+      <entry key="H2" value="993.1232845480797" />
+      <entry key="H4" value="1477.2868066937494" />
+      <entry key="D1" value="3809.3761947004045" />
+      <entry key="W1" value="14854.096450125258" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -275,7 +263,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#20 Provide configurable shadow preset for catalog-gallery-main in admin for catalog-detail-panel popup" />
     <MESSAGE value="#20 Popup preview made live preview" />
     <MESSAGE value="#20 Popup new look" />
     <MESSAGE value="#20 Popup settings new look" />
@@ -300,7 +287,8 @@
     <MESSAGE value="#27 Footer office address isses fixing" />
     <MESSAGE value="#27 Footer logo font isses fixing" />
     <MESSAGE value="#27 Footer addressz isses fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 Footer addressz isses fixing" />
+    <MESSAGE value="#27 Mobile cta and float-wa show hide fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 Mobile cta and float-wa show hide fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

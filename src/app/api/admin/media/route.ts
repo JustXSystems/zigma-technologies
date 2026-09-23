@@ -20,16 +20,15 @@ import {
   mediaKindFromMime,
   upsertMediaMetadata,
 } from '@/lib/media-library';
-
-const ALLOWED = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/svg+xml',
-  'video/mp4',
-  'video/webm',
-]);
+import {
+  MEDIA_UPLOAD_ACCEPT,
+  MEDIA_UPLOAD_MAX_BYTES,
+  MEDIA_UPLOAD_MIME_TYPES,
+  MEDIA_UPLOAD_RESTRICTIONS,
+  MEDIA_UPLOAD_TYPE_INFO,
+  formatMediaBytes,
+  validateMediaUploadFile,
+} from '@/lib/media-upload-rules';
 
 export async function GET(request: Request) {
   try {
@@ -37,7 +36,17 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q') || '';
     const assets = await listMediaLibrary(q);
-    return jsonOk({ assets });
+    return jsonOk({
+      assets,
+      uploadRules: {
+        maxBytes: MEDIA_UPLOAD_MAX_BYTES,
+        maxLabel: formatMediaBytes(MEDIA_UPLOAD_MAX_BYTES),
+        accept: MEDIA_UPLOAD_ACCEPT,
+        allowedTypes: [...MEDIA_UPLOAD_MIME_TYPES],
+        typeInfo: MEDIA_UPLOAD_TYPE_INFO,
+        restrictions: [...MEDIA_UPLOAD_RESTRICTIONS],
+      },
+    });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
       return jsonError('Unauthorized', 401);
@@ -56,9 +65,19 @@ export async function POST(request: Request) {
     const alt = String(form.get('alt') || '');
     const isPrimary = String(form.get('is_primary') || '') === '1';
 
-    if (!(file instanceof File)) return jsonError('file required');
-    if (!ALLOWED.has(file.type)) return jsonError('Unsupported file type');
-    if (file.size > 15 * 1024 * 1024) return jsonError('File too large (max 15MB)');
+    if (!(file instanceof File)) {
+      return jsonError('No file was received. Choose a file and try again.', 400, {
+        code: 'FILE_REQUIRED',
+      });
+    }
+
+    const invalid = validateMediaUploadFile(file);
+    if (invalid) {
+      return jsonError(invalid.message, 400, {
+        code: invalid.code,
+        ...invalid.details,
+      });
+    }
 
     const category = adminCategoryFromMime(file.type);
     const uploadsDir = adminMediaDiskDir(category);
@@ -90,7 +109,8 @@ export async function POST(request: Request) {
       return jsonError('Unauthorized', 401);
     }
     console.error(error);
-    return jsonError(error instanceof Error ? error.message : 'Upload failed', 500);
+    const detail = error instanceof Error ? error.message : 'Unknown server error';
+    return jsonError(`Upload failed: ${detail}`, 500, { code: 'UPLOAD_FAILED', detail });
   }
 }
 
@@ -109,14 +129,22 @@ export async function DELETE(request: Request) {
         [id]
       );
       const asset = rows[0];
-      if (!asset) return jsonError('Not found', 404);
+      if (!asset) return jsonError('Media asset not found for that id.', 404, { code: 'NOT_FOUND', id });
       pathToDelete = String(asset.path);
       await pool.query('DELETE FROM media_assets WHERE id = ?', [id]);
     } else if (assetPath && isManagedMediaPath(assetPath)) {
       pathToDelete = assetPath;
       await pool.query('DELETE FROM media_assets WHERE path = ?', [assetPath]);
+    } else if (assetPath) {
+      return jsonError(
+        `Path “${assetPath}” is outside managed media folders (/assets/images, /assets/svg, /assets/video, or legacy /uploads).`,
+        400,
+        { code: 'UNMANAGED_PATH', path: assetPath }
+      );
     } else {
-      return jsonError('id or path required', 400);
+      return jsonError('Provide a media id or a managed path to delete.', 400, {
+        code: 'ID_OR_PATH_REQUIRED',
+      });
     }
 
     if (pathToDelete && isManagedMediaPath(pathToDelete)) {
@@ -140,7 +168,8 @@ export async function DELETE(request: Request) {
       return jsonError('Unauthorized', 401);
     }
     console.error(error);
-    return jsonError('Failed to delete media', 500);
+    const detail = error instanceof Error ? error.message : 'Unknown server error';
+    return jsonError(`Failed to delete media: ${detail}`, 500, { code: 'DELETE_FAILED', detail });
   }
 }
 
@@ -161,11 +190,20 @@ export async function PATCH(request: Request) {
     let assetPath = body.path || null;
     if (body.id) {
       const existing = await findMediaById(body.id);
-      if (!existing) return jsonError('Not found', 404);
+      if (!existing) {
+        return jsonError(`Media asset not found for id ${body.id}.`, 404, {
+          code: 'NOT_FOUND',
+          id: body.id,
+        });
+      }
       assetPath = existing.path;
     }
 
-    if (!assetPath) return jsonError('Not found', 404);
+    if (!assetPath) {
+      return jsonError('Media asset not found — provide a valid id or path.', 404, {
+        code: 'NOT_FOUND',
+      });
+    }
 
     const id = await upsertMediaMetadata({
       path: assetPath,
@@ -175,10 +213,17 @@ export async function PATCH(request: Request) {
 
     return jsonOk({ ok: true, id });
   } catch (error) {
-    if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
+    if (error instanceof z.ZodError) {
+      const detail = error.issues.map((i) => i.message).join('; ') || 'Invalid payload';
+      return jsonError(`Could not update media: ${detail}`, 400, {
+        code: 'INVALID_PAYLOAD',
+        issues: error.issues,
+      });
+    }
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
       return jsonError('Unauthorized', 401);
     }
-    return jsonError('Failed to update media', 500);
+    const detail = error instanceof Error ? error.message : 'Unknown server error';
+    return jsonError(`Failed to update media: ${detail}`, 500, { code: 'UPDATE_FAILED', detail });
   }
 }
