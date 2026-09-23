@@ -6,6 +6,7 @@ import {
   type FooterOfficeAlign,
   type SiteSettings,
 } from '@/lib/site-settings';
+import FooterOfficeLayoutEditor from '@/components/admin/FooterOfficeLayoutEditor';
 
 type Props = {
   settings: SiteSettings;
@@ -33,12 +34,7 @@ function Toggle({
 }) {
   return (
     <label className="admin-footer-office-toggle" htmlFor={id}>
-      <input
-        id={id}
-        type="checkbox"
-        checked={value}
-        onChange={(e) => onChange(e.target.checked)}
-      />
+      <input id={id} type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
       <span>
         <strong>{label}</strong>
         <small>{hint}</small>
@@ -54,7 +50,7 @@ function isOn(value: string | undefined, fallback: boolean) {
   return fallback;
 }
 
-/** Show/hide + alignment controls for the footer office / address block. */
+/** Show/hide, alignment, and address line layout for the footer office block. */
 export default function FooterOfficeEditor({ settings, onChange }: Props) {
   const align = sanitizeFooterOfficeAlign(settings.footerOfficeAlign);
 
@@ -62,7 +58,8 @@ export default function FooterOfficeEditor({ settings, onChange }: Props) {
     <div className="admin-footer-office-editor">
       <p className="admin-footer-office-lead">
         Renders in the footer <strong>Contact</strong> column — after contact links, before social icons.
-        Also powers JSON-LD, contact form SLA, thank-you, and /sla.
+        Arrange address fields into 3 or 4 lines (or custom) with the layout builder. Values still come from
+        the address fields below; JSON-LD / contact / thank-you / SLA keep using those same fields.
       </p>
 
       <div className="admin-footer-office-toggles">
@@ -75,26 +72,28 @@ export default function FooterOfficeEditor({ settings, onChange }: Props) {
         />
         <Toggle
           id="footerOfficeShowAddress"
-          label="Show address"
-          hint="Street, city, region, postal, country"
+          label="Include address fields"
+          hint="Street, city, region, postal, country in the layout"
           value={isOn(settings.footerOfficeShowAddress, true)}
           onChange={(on) => onChange({ footerOfficeShowAddress: on ? 'true' : 'false' })}
         />
         <Toggle
           id="footerOfficeShowHours"
-          label="Show office hours"
-          hint="Uses the Office hours field below"
+          label="Include office hours"
+          hint="Only if hours is in the layout"
           value={isOn(settings.footerOfficeShowHours, true)}
           onChange={(on) => onChange({ footerOfficeShowHours: on ? 'true' : 'false' })}
         />
         <Toggle
           id="footerOfficeShowSla"
-          label="Show response SLA"
-          hint="Uses the Response SLA text field below"
+          label="Include response SLA"
+          hint="Only if SLA is in the layout"
           value={isOn(settings.footerOfficeShowSla, false)}
           onChange={(on) => onChange({ footerOfficeShowSla: on ? 'true' : 'false' })}
         />
       </div>
+
+      <FooterOfficeLayoutEditor settings={settings} onChange={onChange} />
 
       <div className="admin-field full">
         <span className="admin-footer-office-align-label">Text alignment</span>

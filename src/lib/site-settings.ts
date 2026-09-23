@@ -208,6 +208,8 @@ export type SiteSettings = {
   termsUrl: string;
   cookiePolicyUrl: string;
   addressStreet: string;
+  /** Second street line (building, floor, landmark) for multi-line footer display */
+  addressStreet2: string;
   addressLocality: string;
   addressRegion: string;
   addressPostal: string;
@@ -220,6 +222,11 @@ export type SiteSettings = {
   footerOfficeShowHours: string;
   /** Show response SLA in footer office block (true/false) */
   footerOfficeShowSla: string;
+  /**
+   * Footer office line layout JSON: { lines: [{ parts: [{ field }], join?, showLabel? }] }.
+   * Fields: street | locality | region | postal | country | hours | sla | custom.
+   */
+  footerOfficeLayoutJson: string;
   /** Footer office text alignment: start | center | end */
   footerOfficeAlign: string;
   /** Max width of footer office block (e.g. 280px); blank = full column */
@@ -324,6 +331,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   termsUrl: '/terms',
   cookiePolicyUrl: '/cookies',
   addressStreet: '',
+  addressStreet2: '',
   addressLocality: 'Bengaluru',
   addressRegion: 'Karnataka',
   addressPostal: '',
@@ -332,6 +340,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   footerOfficeShowAddress: 'true',
   footerOfficeShowHours: 'true',
   footerOfficeShowSla: 'false',
+  footerOfficeLayoutJson: '',
   footerOfficeAlign: 'start',
   footerOfficeMaxWidth: '',
   footerOfficeMarginTop: '1.15rem',
@@ -509,11 +518,16 @@ const COUNTRY_DISPLAY: Record<string, string> = {
 
 /** Multi-line postal address for footer / contact surfaces. Empty lines omitted. */
 export function formatOfficeAddressLines(
-  site: Pick<SiteSettings, 'addressStreet' | 'addressLocality' | 'addressRegion' | 'addressPostal' | 'addressCountry'>
+  site: Pick<
+    SiteSettings,
+    'addressStreet' | 'addressStreet2' | 'addressLocality' | 'addressRegion' | 'addressPostal' | 'addressCountry'
+  >
 ): string[] {
   const lines: string[] = [];
   const street = site.addressStreet?.trim();
   if (street) lines.push(street);
+  const street2 = site.addressStreet2?.trim();
+  if (street2) lines.push(street2);
 
   const cityBits = [site.addressLocality, site.addressRegion, site.addressPostal]
     .map((part) => part?.trim())
@@ -526,6 +540,16 @@ export function formatOfficeAddressLines(
     lines.push(COUNTRY_DISPLAY[code] || countryRaw);
   }
   return lines;
+}
+
+/** Combined street for schema / single-line consumers. */
+export function formatStreetAddress(
+  site: Pick<SiteSettings, 'addressStreet' | 'addressStreet2'>
+): string {
+  return [site.addressStreet, site.addressStreet2]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(', ');
 }
 
 export type SocialNetworkId = 'facebook' | 'instagram' | 'linkedin' | 'x' | 'youtube';

@@ -178,7 +178,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Footer brand (.foot-brand): show/hide lockup pieces, align, max width, inherit vs custom footer logo type',
       'Navigation menu style: Classic / Corporate / Elegant / Rail / Lumen / Mosaic / Ribbon',
       'Footer blurb, copyright, Powered by credit, legal links',
-      'Address & office — footer Contact column (show/hide, align), JSON-LD, contact/thank-you/SLA',
+      'Address & office — footer Contact column layout (3/4-line field builder + JSON), JSON-LD, contact/thank-you/SLA',
       'Social links (Facebook, Instagram, LinkedIn, X, YouTube) — blank hides; footer icons + JSON-LD sameAs',
       'Enquiry notify emails (comma-separated), visitor auto-reply toggle',
       'Analytics IDs, consent requirement, CRM webhook URL/secret',

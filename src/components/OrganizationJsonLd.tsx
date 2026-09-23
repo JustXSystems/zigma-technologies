@@ -1,5 +1,5 @@
 import { getThemeSettings } from '@/lib/cms';
-import { mergeSiteSettings, socialLinksFromSettings } from '@/lib/site-settings';
+import { formatStreetAddress, mergeSiteSettings, socialLinksFromSettings } from '@/lib/site-settings';
 
 export default async function OrganizationJsonLd() {
   const theme = await getThemeSettings();
@@ -13,6 +13,7 @@ export default async function OrganizationJsonLd() {
     : `${base}/assets/images/zigma-technologies-logo.png`;
 
   const sameAs = socialLinksFromSettings(site).map((link) => link.href);
+  const streetAddress = formatStreetAddress(site);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -32,7 +33,7 @@ export default async function OrganizationJsonLd() {
     email: site.email,
     address: {
       '@type': 'PostalAddress',
-      ...(site.addressStreet ? { streetAddress: site.addressStreet } : {}),
+      ...(streetAddress ? { streetAddress } : {}),
       addressLocality: site.addressLocality || 'Bengaluru',
       addressRegion: site.addressRegion || 'Karnataka',
       ...(site.addressPostal ? { postalCode: site.addressPostal } : {}),

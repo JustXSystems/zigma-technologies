@@ -1,13 +1,8 @@
 'use client';
 
 import { useMemo, type CSSProperties } from 'react';
-import {
-  formatOfficeAddressLines,
-  isSettingEnabled,
-  sanitizeCssSize,
-  sanitizeFooterOfficeAlign,
-  type SiteSettings,
-} from '@/lib/site-settings';
+import { isSettingEnabled, sanitizeCssSize, sanitizeFooterOfficeAlign, type SiteSettings } from '@/lib/site-settings';
+import { renderFooterOfficeLines } from '@/lib/footer-office-layout';
 import { useSiteCopy } from '@/lib/use-site-copy';
 
 type Props = {
@@ -18,24 +13,17 @@ type Props = {
 
 /**
  * Footer office / address block from Admin → Site Settings → Address & office.
- * Placed after Contact links and before Social icons.
+ * Line order and field grouping come from footerOfficeLayoutJson.
  */
 export default function FooterOfficeBlock({ site, showHeading = false }: Props) {
   const copy = useSiteCopy();
 
-  const visible = useMemo(() => {
-    if (!isSettingEnabled(site.footerOfficeEnabled, true)) return null;
-    const showAddress = isSettingEnabled(site.footerOfficeShowAddress, true);
-    const showHours = isSettingEnabled(site.footerOfficeShowHours, true);
-    const showSla = isSettingEnabled(site.footerOfficeShowSla, false);
-    const lines = showAddress ? formatOfficeAddressLines(site) : [];
-    const hours = showHours ? site.officeHours?.trim() : '';
-    const sla = showSla ? site.responseSla?.trim() : '';
-    if (!lines.length && !hours && !sla) return null;
-    return { lines, hours, sla };
+  const lines = useMemo(() => {
+    if (!isSettingEnabled(site.footerOfficeEnabled, true)) return [];
+    return renderFooterOfficeLines(site, site.footerOfficeLayoutJson);
   }, [site]);
 
-  if (!visible) return null;
+  if (!lines.length) return null;
 
   const align = sanitizeFooterOfficeAlign(site.footerOfficeAlign);
   const maxWidth = site.footerOfficeMaxWidth?.trim()
@@ -43,18 +31,15 @@ export default function FooterOfficeBlock({ site, showHeading = false }: Props) 
     : '';
   const marginTop = sanitizeCssSize(site.footerOfficeMarginTop, '1.15rem');
 
+  /* Prefer CSS vars so mobile media queries can override max-width / margin. */
   const style: CSSProperties = {
-    textAlign: align === 'center' ? 'center' : align === 'end' ? 'right' : 'left',
     marginTop,
-    ...(maxWidth
-      ? {
-          maxWidth: `min(${maxWidth}, 100%)`,
-          ...(align === 'center' ? { marginInline: 'auto' as const } : {}),
-          ...(align === 'end' ? { marginInlineStart: 'auto' as const } : {}),
-        }
-      : { maxWidth: '100%' }),
     ['--foot-office-align' as string]: align,
+    ['--foot-office-max-width' as string]: maxWidth || '100%',
   };
+
+  const addressLines = lines.filter((l) => l.kind === 'address' || l.kind === 'custom');
+  const metaLines = lines.filter((l) => l.kind === 'hours' || l.kind === 'sla');
 
   return (
     <div className={`foot-meta foot-office align-${align}`} style={style}>
@@ -62,23 +47,23 @@ export default function FooterOfficeBlock({ site, showHeading = false }: Props) 
       {!showHeading && copy.footer.officeHeading ? (
         <div className="foot-office-label">{copy.footer.officeHeading}</div>
       ) : null}
-      {visible.lines.length ? (
+      {addressLines.length ? (
         <address className="foot-office-address">
-          {visible.lines.map((line) => (
-            <span key={line}>{line}</span>
+          {addressLines.map((line) => (
+            <span key={line.key} className="foot-office-line">
+              {line.text}
+            </span>
           ))}
         </address>
       ) : null}
-      {visible.hours ? (
-        <span className="foot-hours">
-          <em>{copy.footer.officeHoursLabel}</em> {visible.hours}
+      {metaLines.map((line) => (
+        <span key={line.key} className={`foot-office-meta ${line.kind === 'sla' ? 'foot-sla' : 'foot-hours'}`}>
+          {line.showLabel ? (
+            <em>{line.kind === 'sla' ? copy.footer.officeSlaLabel : copy.footer.officeHoursLabel}</em>
+          ) : null}
+          <span className="foot-office-meta-text">{line.text}</span>
         </span>
-      ) : null}
-      {visible.sla ? (
-        <span className="foot-sla">
-          <em>{copy.footer.officeSlaLabel}</em> {visible.sla}
-        </span>
-      ) : null}
+      ))}
     </div>
   );
 }

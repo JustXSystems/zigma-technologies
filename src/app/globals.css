@@ -1490,6 +1490,22 @@
     line-height:1.55;
     color:#8FA3C2;
     font-style:normal;
+    max-width:min(var(--foot-office-max-width, 100%), 100%);
+    width:100%;
+    box-sizing:border-box;
+    text-align:var(--foot-office-align, start);
+  }
+  .foot-office.align-center{
+    text-align:center;
+    margin-inline:auto;
+  }
+  .foot-office.align-end{
+    text-align:right;
+    margin-inline-start:auto;
+  }
+  .foot-office.align-start{
+    text-align:left;
+    margin-inline-start:0;
   }
   .foot-office-label{
     font-family:var(--font-mono);
@@ -1501,29 +1517,66 @@
     margin-bottom:0.55rem;
   }
   .foot-office-heading{margin-bottom:0.85rem;}
-  .foot-office-address{font-style:normal;display:block;}
-  .foot-meta span,
-  .foot-office span,
-  .foot-office-address span{display:block;}
+  .foot-office-address{
+    font-style:normal;
+    display:flex;
+    flex-direction:column;
+    gap:0.2rem;
+    min-width:0;
+    width:100%;
+  }
+  .foot-office-address .foot-office-line,
+  .foot-meta > span:not(.foot-office-meta),
+  .foot-office > span:not(.foot-office-meta){
+    display:block;
+    min-width:0;
+    max-width:100%;
+  }
+  .foot-office-address .foot-office-line{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    hyphens:auto;
+  }
+  .foot-office-meta,
   .foot-meta .foot-hours,
   .foot-office .foot-hours,
   .foot-office .foot-sla{
-    margin-top:0.45rem;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    gap:0.25rem 0.4rem;
+    margin-top:0.5rem;
     color:#9FB0CB;
     font-size:0.86rem;
+    min-width:0;
+    max-width:100%;
   }
   .foot-office .foot-hours em,
-  .foot-office .foot-sla em{
+  .foot-office .foot-sla em,
+  .foot-office-meta em{
     font-style:normal;
     font-family:var(--font-mono);
     font-size:0.72rem;
     letter-spacing:0.08em;
     text-transform:uppercase;
     color:var(--cyan);
-    margin-right:0.35rem;
+    flex:0 0 auto;
+  }
+  .foot-office-meta-text{
+    display:inline;
+    min-width:0;
+    overflow-wrap:anywhere;
+    word-break:break-word;
   }
   .foot-col-contact .social-links{margin-top:1.35rem;}
-  .foot-contact-extras{display:flex;flex-direction:column;min-width:0;max-width:100%;}
+  .foot-contact-extras{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    min-width:0;
+    max-width:100%;
+    width:100%;
+  }
   .foot-office.align-center .foot-office-label,
   .foot-office.align-center .foot-office-address,
   .foot-office.align-end .foot-office-label,
@@ -1534,12 +1587,6 @@
   .foot-col-contact{min-width:0;}
   .foot-grid a,
   .foot-col a{
-    overflow-wrap:anywhere;
-    word-break:break-word;
-  }
-  .foot-office-address span,
-  .foot-office .foot-hours,
-  .foot-office .foot-sla{
     overflow-wrap:anywhere;
     word-break:break-word;
   }
@@ -1824,6 +1871,7 @@
     .foot-brand,
     .foot-contact-extras,
     .foot-office,
+    .foot-office-address,
     .social-links{
       min-width:0;
       max-width:100%;
@@ -1832,8 +1880,36 @@
     }
     .foot-office{
       margin-top:1rem !important;
+      max-width:100% !important;
+      margin-inline:0 !important;
+      /* Keep admin align on mobile, but never overflow */
+      padding-inline:0;
     }
     .foot-office-label{margin-bottom:0.45rem;}
+    .foot-office-address{
+      gap:0.28rem;
+      line-height:1.5;
+    }
+    .foot-office-address .foot-office-line{
+      font-size:0.9rem;
+      line-height:1.45;
+    }
+    .foot-office-meta,
+    .foot-office .foot-hours,
+    .foot-office .foot-sla{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:0.15rem;
+      margin-top:0.65rem;
+      font-size:0.84rem;
+    }
+    .foot-office.align-center .foot-office-meta,
+    .foot-office.align-center .foot-hours,
+    .foot-office.align-center .foot-sla{align-items:center;}
+    .foot-office.align-end .foot-office-meta,
+    .foot-office.align-end .foot-hours,
+    .foot-office.align-end .foot-sla{align-items:flex-end;}
+    .foot-office-meta-text{display:block;width:100%;}
     .foot-col-contact .social-links,
     .social-links{
       margin-top:1.1rem;
@@ -1846,6 +1922,7 @@
     .social-links a svg{width:18px;height:18px;}
     .foot-grid h6,
     .foot-col h6{margin-bottom:0.95rem;}
+    .foot-col-contact a{padding:0.4rem 0;}
     .container{padding:0 1.15rem;}
     .cta-actions{flex-direction:column;align-items:stretch;}
     .cta-actions .btn{justify-content:center;white-space:normal;text-align:center;}

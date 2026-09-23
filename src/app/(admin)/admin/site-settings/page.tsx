@@ -194,10 +194,16 @@ const SECTIONS: Array<{ id: string; title: string; description: string; defaultO
     id: 'address',
     title: 'Address & office',
     description:
-      'Postal address, hours, and SLA — used in footer Contact column, Organization JSON-LD, contact form, thank-you, and /sla.',
+      'Postal address values, plus footer line layout (3/4-line field builder). Also used for Organization JSON-LD, contact form, thank-you, and /sla.',
     defaultOpen: false,
     fields: [
-      { key: 'addressStreet', label: 'Address street', full: true },
+      { key: 'addressStreet', label: 'Address street (line 1)', hint: 'Building / plot / road', full: true },
+      {
+        key: 'addressStreet2',
+        label: 'Address street (line 2)',
+        hint: 'Area, landmark, or continuation — leave blank to hide',
+        full: true,
+      },
       { key: 'addressLocality', label: 'Address city', hint: 'Default Bengaluru' },
       { key: 'addressRegion', label: 'Address region/state' },
       { key: 'addressPostal', label: 'Postal code' },
