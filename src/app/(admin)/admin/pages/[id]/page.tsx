@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { SECTION_TYPES } from '@/lib/cms-types';
+import { defaultIndustryCategoryContent } from '@/lib/industry-category';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -89,6 +90,8 @@ export default function AdminPageSectionsPage() {
 
   async function addSection(e: FormEvent) {
     e.preventDefault();
+    const content_json =
+      addType === 'industry_category' ? defaultIndustryCategoryContent() : {};
     const res = await fetch('/api/admin/sections', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -96,7 +99,8 @@ export default function AdminPageSectionsPage() {
         page_id: pageId,
         type: addType,
         title: typeLabel(addType),
-        content_json: {},
+        section_key: addType === 'industry_category' ? 'cat-infra' : undefined,
+        content_json,
       }),
     });
     const data = await res.json();

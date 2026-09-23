@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { CmsSection } from '@/lib/cms-types';
 import EnquiryFormSection from '@/components/sections/EnquiryFormSection';
 import CareersApplySection from '@/components/sections/CareersApplySection';
@@ -12,6 +12,10 @@ import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
 import { featIconFor } from '@/lib/feat-icons';
 import { indIconFor } from '@/lib/ind-icons';
+import {
+  normalizeIndustryCategoryCards,
+  type IndustryCategoryCard,
+} from '@/lib/industry-category';
 import { INDUSTRY_DEFS } from '@/lib/industries';
 import { INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
 import { statIconFor } from '@/lib/stat-icons';
@@ -1201,6 +1205,139 @@ function SplitSection({ content, sectionKey }: { content: Record<string, unknown
   );
 }
 
+function cssLength(value: unknown, fallback?: string): string | undefined {
+  const v = typeof value === 'string' ? value.trim() : '';
+  return v || fallback;
+}
+
+function IndustryCategorySection({
+  content,
+  sectionKey,
+}: {
+  content: Record<string, unknown>;
+  sectionKey?: string | null;
+}) {
+  const cards = normalizeIndustryCategoryCards(content.cards).filter((c) => c.enabled !== false);
+  const toneClass = content.tone === 'gray' ? 'section-gray' : 'section-light';
+  const catColor = cssLength(content.catColor, '#00D4FF') || '#00D4FF';
+  const sectionBg = cssLength(content.sectionBg);
+  const showAccentBar = content.showAccentBar !== false;
+  const cols = Math.max(1, Math.min(6, Number(content.gridColumns) || 3));
+  const iconSize = cssLength(content.iconSize, '48px') || '48px';
+  const svgInner = (card: IndustryCategoryCard) =>
+    (card.icon && card.icon.trim()) || indIconFor(card.title);
+
+  const sectionStyle: CSSProperties = {
+    ['--cat-color' as string]: catColor,
+    ['--cat-bar-w' as string]: cssLength(content.accentBarWidth, '56px'),
+    ['--cat-bar-h' as string]: cssLength(content.accentBarHeight, '4px'),
+    ['--cat-bar-color' as string]: cssLength(content.accentBarColor, catColor),
+    ['--idetail-cols' as string]: String(cols),
+    ['--idetail-gap' as string]: cssLength(content.gridGap, '1.5rem'),
+    ...(cssLength(content.sectionPadding)
+      ? { paddingBlock: cssLength(content.sectionPadding) }
+      : {}),
+    ...(sectionBg ? { background: sectionBg } : {}),
+  };
+
+  const headStyle: CSSProperties = {
+    ...(cssLength(content.headMarginBottom)
+      ? { marginBottom: cssLength(content.headMarginBottom) }
+      : {}),
+  };
+
+  const eyebrowStyle: CSSProperties = {
+    ...(cssLength(content.eyebrowColor) ? { color: cssLength(content.eyebrowColor) } : {}),
+    ...(cssLength(content.eyebrowFont) ? { fontFamily: cssLength(content.eyebrowFont) } : {}),
+    ...(cssLength(content.eyebrowSize) ? { fontSize: cssLength(content.eyebrowSize) } : {}),
+    ...(cssLength(content.eyebrowWeight) ? { fontWeight: cssLength(content.eyebrowWeight) as never } : {}),
+    ...(cssLength(content.eyebrowLetterSpacing)
+      ? { letterSpacing: cssLength(content.eyebrowLetterSpacing) }
+      : {}),
+    ...(cssLength(content.eyebrowTransform)
+      ? { textTransform: cssLength(content.eyebrowTransform) as CSSProperties['textTransform'] }
+      : {}),
+  };
+
+  const titleStyle: CSSProperties = {
+    ...(cssLength(content.titleColor) ? { color: cssLength(content.titleColor) } : {}),
+    ...(cssLength(content.titleFont) ? { fontFamily: cssLength(content.titleFont) } : {}),
+    ...(cssLength(content.titleSize) ? { fontSize: cssLength(content.titleSize) } : {}),
+    ...(cssLength(content.titleWeight) ? { fontWeight: cssLength(content.titleWeight) as never } : {}),
+  };
+
+  const bodyStyle: CSSProperties = {
+    ...(cssLength(content.bodyColor) ? { color: cssLength(content.bodyColor) } : {}),
+    ...(cssLength(content.bodyFont) ? { fontFamily: cssLength(content.bodyFont) } : {}),
+    ...(cssLength(content.bodySize) ? { fontSize: cssLength(content.bodySize) } : {}),
+  };
+
+  const cardStyle: CSSProperties = {
+    ...(cssLength(content.cardBg) ? { background: cssLength(content.cardBg) } : {}),
+    ...(cssLength(content.cardBorderColor) ? { borderColor: cssLength(content.cardBorderColor) } : {}),
+    ...(cssLength(content.cardBorderRadius) ? { borderRadius: cssLength(content.cardBorderRadius) } : {}),
+    ...(cssLength(content.cardPadding) ? { padding: cssLength(content.cardPadding) } : {}),
+  };
+
+  const cardTitleStyle: CSSProperties = {
+    ...(cssLength(content.cardTitleColor) ? { color: cssLength(content.cardTitleColor) } : {}),
+    ...(cssLength(content.cardTitleFont) ? { fontFamily: cssLength(content.cardTitleFont) } : {}),
+    ...(cssLength(content.cardTitleSize) ? { fontSize: cssLength(content.cardTitleSize) } : {}),
+  };
+
+  const cardBodyStyle: CSSProperties = {
+    ...(cssLength(content.cardBodyColor) ? { color: cssLength(content.cardBodyColor) } : {}),
+    ...(cssLength(content.cardBodyFont) ? { fontFamily: cssLength(content.cardBodyFont) } : {}),
+    ...(cssLength(content.cardBodySize) ? { fontSize: cssLength(content.cardBodySize) } : {}),
+  };
+
+  return (
+    <section
+      className={`cat-block ${toneClass}`}
+      id={sectionKey || undefined}
+      style={sectionStyle}
+    >
+      <div className="container">
+        <div
+          className={`cat-section-head reveal${showAccentBar ? ' has-accent-bar' : ''}`}
+          style={headStyle}
+        >
+          {content.eyebrow ? (
+            <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-orange'}`} style={eyebrowStyle}>
+              {String(content.eyebrow)}
+            </div>
+          ) : null}
+          {content.title ? (
+            <SiteHeading role="section" style={titleStyle}>
+              {String(content.title)}
+            </SiteHeading>
+          ) : null}
+          {content.body ? <p style={bodyStyle}>{String(content.body)}</p> : null}
+        </div>
+        {cards.length ? (
+          <div className="idetail-grid">
+            {cards.map((card) => (
+              <div className="idetail-card reveal" key={card.id} style={cardStyle}>
+                <div className="idetail-icon" style={{ width: iconSize, height: iconSize }}>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    dangerouslySetInnerHTML={{ __html: svgInner(card) }}
+                  />
+                </div>
+                <h5 style={cardTitleStyle}>{card.title}</h5>
+                <p style={cardBodyStyle}>{card.body}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 function TestimonialsSection({ content }: { content: Record<string, unknown> }) {
   const items =
     (content.items as Array<{ quote: string; name: string; role?: string }>) || [];
@@ -1760,6 +1897,10 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
               return wrap(<IndustriesSection key={key} content={content} sectionKey={section.section_key} />);
             case 'industry_hub':
               return wrap(<IndustryHubSection key={key} content={content} sectionKey={section.section_key} />);
+            case 'industry_category':
+              return wrap(
+                <IndustryCategorySection key={key} content={content} sectionKey={section.section_key} />
+              );
             case 'testimonials':
               return wrap(<TestimonialsSection key={key} content={content} />);
             case 'partners':

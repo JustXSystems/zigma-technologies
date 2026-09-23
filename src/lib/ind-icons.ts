@@ -45,6 +45,18 @@ const IND_ICONS: Record<string, string> = {
   'EV Charging Infrastructure': '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>',
   'Renewable Energy Developers':
     '<rect x="2" y="8" width="18" height="8" rx="1.5"/><path d="M22 10v4"/><path d="M6 8v8M10 8v8"/>',
+  'Ports & Maritime Infrastructure':
+    '<path d="M2 21c3 1 6 1 9 0s6-1 9 0"/><path d="M5 21V10l7-6 7 6v11"/><path d="M9 21v-6h6v6"/>',
+  'Railway Infrastructure':
+    '<rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M8 21l-2-4h12l-2 4"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/>',
+  'Pharmaceutical & Chemical Plants':
+    '<path d="M9 2v6L4 19a2 2 0 002 3h12a2 2 0 002-3l-5-11V2"/><path d="M9 2h6"/><path d="M7 15h10"/>',
+  'Textile & Apparel Manufacturing':
+    '<path d="M4 4h4l1 3h9l-2 8H8L5 4z"/><path d="M8 20a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/><path d="M16 20a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>',
+  'Retail & Shopping Malls':
+    '<path d="M3 9l1-5h16l1 5"/><path d="M4 9h16v11H4z"/><path d="M9 20v-6h6v6"/>',
+  'Microgrid & Energy Storage Projects':
+    '<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/>',
 };
 
 const IND_FALLBACK =

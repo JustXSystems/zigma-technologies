@@ -4,6 +4,13 @@ import { FormEvent, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CmsSection } from '@/lib/cms-types';
 import MediaPicker from '@/components/admin/MediaPicker';
+import {
+  createIndustryCategoryCard,
+  INDUSTRY_CATEGORY_COLOR_PRESETS,
+  INDUSTRY_CATEGORY_FONT_OPTIONS,
+  normalizeIndustryCategoryCards,
+  type IndustryCategoryCard,
+} from '@/lib/industry-category';
 
 type Props = {
   section: CmsSection;
@@ -199,6 +206,10 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
   const ctaFields = content as Record<string, string>;
   const timelineCtas = (Array.isArray(content.ctas) ? content.ctas : []) as TimelineCta[];
   const splitCtas = (Array.isArray(content.ctas) ? content.ctas : []) as SplitCta[];
+  const industryCards =
+    section.type === 'industry_category'
+      ? normalizeIndustryCategoryCards(content.cards)
+      : [];
 
   function setTimelineCtas(next: TimelineCta[]) {
     setContent((prev) => {
@@ -212,6 +223,25 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
       const { cta: _cta, ctaHref: _ctaHref, ...rest } = prev;
       return { ...rest, ctas: next };
     });
+  }
+
+  function setIndustryCards(next: IndustryCategoryCard[]) {
+    setField('cards', next);
+  }
+
+  function patchIndustryCard(id: string, patch: Partial<IndustryCategoryCard>) {
+    setIndustryCards(industryCards.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }
+
+  function moveIndustryCard(id: string, dir: -1 | 1) {
+    const idx = industryCards.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= industryCards.length) return;
+    const next = [...industryCards];
+    const [item] = next.splice(idx, 1);
+    next.splice(nextIdx, 0, item);
+    setIndustryCards(next);
   }
 
   return createPortal(
@@ -282,6 +312,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
               section.type === 'projects_teaser' ||
               section.type === 'industries' ||
               section.type === 'industry_hub' ||
+              section.type === 'industry_category' ||
               section.type === 'split' ||
               section.type === 'rich_text' ||
               section.type === 'enquiry_form' ||
@@ -610,6 +641,487 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                   <small style={{ color: 'var(--admin-muted)' }}>
                     Card icons come from seed/CMS JSON; editing titles preserves matching icons when possible.
                   </small>
+                </div>
+              </div>
+            ) : null}
+
+            {section.type === 'industry_category' ? (
+              <div style={{ marginTop: '0.8rem' }}>
+                <div className="admin-form-grid">
+                  <Field label="Tone (background preset)">
+                    <select
+                      className="admin-select"
+                      value={String(content.tone || 'light')}
+                      onChange={(e) => setField('tone', e.target.value)}
+                    >
+                      <option value="light">Light (white) — cat-infra / industrial</option>
+                      <option value="gray">Gray — cat-commercial / energy</option>
+                    </select>
+                  </Field>
+                  <ColorPickerField
+                    label="Section background override"
+                    value={String(content.sectionBg || '')}
+                    fallback={content.tone === 'gray' ? '#F4F6F9' : '#FFFFFF'}
+                    onChange={(next) => setField('sectionBg', next)}
+                    hint="Overrides Tone when set. Clear to use the Tone preset."
+                  />
+                  <ColorPickerField
+                    label="Category accent (--cat-color)"
+                    value={String(content.catColor || '')}
+                    fallback="#00D4FF"
+                    onChange={(next) => setField('catColor', next)}
+                    hint="Icon tint, card hover bar, and title hover. Infra=cyan, commercial=orange, industrial=green, energy=purple."
+                  />
+                  <Field label="Accent presets">
+                    <select
+                      className="admin-select"
+                      value=""
+                      onChange={(e) => {
+                        if (e.target.value) setField('catColor', e.target.value);
+                      }}
+                    >
+                      <option value="">Apply preset…</option>
+                      {INDUSTRY_CATEGORY_COLOR_PRESETS.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Eyebrow class">
+                    <input
+                      className="admin-input"
+                      value={String(content.eyebrowClass || 'eyebrow-orange')}
+                      onChange={(e) => setField('eyebrowClass', e.target.value)}
+                      placeholder="eyebrow-orange"
+                    />
+                  </Field>
+                  <Field label="Section padding (block)">
+                    <input
+                      className="admin-input"
+                      value={String(content.sectionPadding || '')}
+                      onChange={(e) => setField('sectionPadding', e.target.value)}
+                      placeholder="4rem"
+                    />
+                  </Field>
+                  <Field label="Head margin bottom">
+                    <input
+                      className="admin-input"
+                      value={String(content.headMarginBottom || '')}
+                      onChange={(e) => setField('headMarginBottom', e.target.value)}
+                      placeholder="2.2rem"
+                    />
+                  </Field>
+                  <Field label="Grid columns">
+                    <input
+                      className="admin-input"
+                      type="number"
+                      min={1}
+                      max={6}
+                      value={Number(content.gridColumns) || 3}
+                      onChange={(e) => setField('gridColumns', Number(e.target.value) || 3)}
+                    />
+                  </Field>
+                  <Field label="Grid gap">
+                    <input
+                      className="admin-input"
+                      value={String(content.gridGap || '')}
+                      onChange={(e) => setField('gridGap', e.target.value)}
+                      placeholder="1.5rem"
+                    />
+                  </Field>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: '1rem',
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <strong>Typography &amp; colors</strong>
+                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                    <ColorPickerField
+                      label="Eyebrow color"
+                      value={String(content.eyebrowColor || '')}
+                      fallback="#FF6B1A"
+                      onChange={(next) => setField('eyebrowColor', next)}
+                    />
+                    <Field label="Eyebrow font">
+                      <select
+                        className="admin-select"
+                        value={String(content.eyebrowFont || '')}
+                        onChange={(e) => setField('eyebrowFont', e.target.value)}
+                      >
+                        <option value="">Default (mono)</option>
+                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Eyebrow size">
+                      <input
+                        className="admin-input"
+                        value={String(content.eyebrowSize || '')}
+                        onChange={(e) => setField('eyebrowSize', e.target.value)}
+                        placeholder="0.72rem"
+                      />
+                    </Field>
+                    <Field label="Eyebrow weight">
+                      <input
+                        className="admin-input"
+                        value={String(content.eyebrowWeight || '')}
+                        onChange={(e) => setField('eyebrowWeight', e.target.value)}
+                        placeholder="600"
+                      />
+                    </Field>
+                    <Field label="Eyebrow letter-spacing">
+                      <input
+                        className="admin-input"
+                        value={String(content.eyebrowLetterSpacing || '')}
+                        onChange={(e) => setField('eyebrowLetterSpacing', e.target.value)}
+                        placeholder="0.14em"
+                      />
+                    </Field>
+                    <Field label="Eyebrow text-transform">
+                      <select
+                        className="admin-select"
+                        value={String(content.eyebrowTransform || '')}
+                        onChange={(e) => setField('eyebrowTransform', e.target.value)}
+                      >
+                        <option value="">Default (uppercase)</option>
+                        <option value="uppercase">uppercase</option>
+                        <option value="none">none</option>
+                        <option value="capitalize">capitalize</option>
+                      </select>
+                    </Field>
+                    <ColorPickerField
+                      label="Title color"
+                      value={String(content.titleColor || '')}
+                      fallback="#1E2530"
+                      onChange={(next) => setField('titleColor', next)}
+                    />
+                    <Field label="Title font">
+                      <select
+                        className="admin-select"
+                        value={String(content.titleFont || '')}
+                        onChange={(e) => setField('titleFont', e.target.value)}
+                      >
+                        <option value="">Default (display)</option>
+                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Title size">
+                      <input
+                        className="admin-input"
+                        value={String(content.titleSize || '')}
+                        onChange={(e) => setField('titleSize', e.target.value)}
+                        placeholder="clamp(1.7rem,2.8vw,2.2rem)"
+                      />
+                    </Field>
+                    <Field label="Title weight">
+                      <input
+                        className="admin-input"
+                        value={String(content.titleWeight || '')}
+                        onChange={(e) => setField('titleWeight', e.target.value)}
+                        placeholder="700"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Body color"
+                      value={String(content.bodyColor || '')}
+                      fallback="#5B6472"
+                      onChange={(next) => setField('bodyColor', next)}
+                    />
+                    <Field label="Body font">
+                      <select
+                        className="admin-select"
+                        value={String(content.bodyFont || '')}
+                        onChange={(e) => setField('bodyFont', e.target.value)}
+                      >
+                        <option value="">Default (body)</option>
+                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Body size">
+                      <input
+                        className="admin-input"
+                        value={String(content.bodySize || '')}
+                        onChange={(e) => setField('bodySize', e.target.value)}
+                        placeholder="0.96rem"
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: '1rem',
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <strong>Accent bar &amp; cards chrome</strong>
+                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                    <Field label="Show accent bar">
+                      <select
+                        className="admin-select"
+                        value={content.showAccentBar === false ? '0' : '1'}
+                        onChange={(e) => setField('showAccentBar', e.target.value === '1')}
+                      >
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                      </select>
+                    </Field>
+                    <ColorPickerField
+                      label="Accent bar color"
+                      value={String(content.accentBarColor || '')}
+                      fallback={String(content.catColor || '#00D4FF')}
+                      onChange={(next) => setField('accentBarColor', next)}
+                      hint="Defaults to category accent when cleared."
+                    />
+                    <Field label="Accent bar width">
+                      <input
+                        className="admin-input"
+                        value={String(content.accentBarWidth || '')}
+                        onChange={(e) => setField('accentBarWidth', e.target.value)}
+                        placeholder="56px"
+                      />
+                    </Field>
+                    <Field label="Accent bar height">
+                      <input
+                        className="admin-input"
+                        value={String(content.accentBarHeight || '')}
+                        onChange={(e) => setField('accentBarHeight', e.target.value)}
+                        placeholder="4px"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Card background"
+                      value={String(content.cardBg || '')}
+                      fallback="#FFFFFF"
+                      onChange={(next) => setField('cardBg', next)}
+                    />
+                    <ColorPickerField
+                      label="Card border color"
+                      value={String(content.cardBorderColor || '')}
+                      fallback="#E7EBF1"
+                      onChange={(next) => setField('cardBorderColor', next)}
+                    />
+                    <Field label="Card border radius">
+                      <input
+                        className="admin-input"
+                        value={String(content.cardBorderRadius || '')}
+                        onChange={(e) => setField('cardBorderRadius', e.target.value)}
+                        placeholder="12px"
+                      />
+                    </Field>
+                    <Field label="Card padding">
+                      <input
+                        className="admin-input"
+                        value={String(content.cardPadding || '')}
+                        onChange={(e) => setField('cardPadding', e.target.value)}
+                        placeholder="1.9rem"
+                      />
+                    </Field>
+                    <Field label="Icon circle size">
+                      <input
+                        className="admin-input"
+                        value={String(content.iconSize || '')}
+                        onChange={(e) => setField('iconSize', e.target.value)}
+                        placeholder="48px"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Card title color"
+                      value={String(content.cardTitleColor || '')}
+                      fallback="#1E2530"
+                      onChange={(next) => setField('cardTitleColor', next)}
+                    />
+                    <Field label="Card title font">
+                      <select
+                        className="admin-select"
+                        value={String(content.cardTitleFont || '')}
+                        onChange={(e) => setField('cardTitleFont', e.target.value)}
+                      >
+                        <option value="">Default (display)</option>
+                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Card title size">
+                      <input
+                        className="admin-input"
+                        value={String(content.cardTitleSize || '')}
+                        onChange={(e) => setField('cardTitleSize', e.target.value)}
+                        placeholder="1.04rem"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Card body color"
+                      value={String(content.cardBodyColor || '')}
+                      fallback="#5B6472"
+                      onChange={(next) => setField('cardBodyColor', next)}
+                    />
+                    <Field label="Card body font">
+                      <select
+                        className="admin-select"
+                        value={String(content.cardBodyFont || '')}
+                        onChange={(e) => setField('cardBodyFont', e.target.value)}
+                      >
+                        <option value="">Default (body)</option>
+                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Card body size">
+                      <input
+                        className="admin-input"
+                        value={String(content.cardBodySize || '')}
+                        onChange={(e) => setField('cardBodySize', e.target.value)}
+                        placeholder="0.86rem"
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                <div
+                  className="full"
+                  style={{
+                    marginTop: '1rem',
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <div>
+                      <strong>Industry detail cards</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        Add, edit, delete, reorder (↑↓), and show/hide any number of idetail-cards.
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() => setIndustryCards([...industryCards, createIndustryCategoryCard()])}
+                    >
+                      Add card
+                    </button>
+                  </div>
+                  {industryCards.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No cards yet. Add one to populate the idetail-grid.
+                    </p>
+                  ) : null}
+                  {industryCards.map((card, idx) => (
+                    <div
+                      key={card.id}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                        background: card.enabled === false ? '#f1f5f9' : '#fff',
+                        opacity: card.enabled === false ? 0.72 : 1,
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong>
+                          #{idx + 1} · {card.title || 'Untitled'}
+                          {card.enabled === false ? ' (hidden)' : ''}
+                        </strong>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveIndustryCard(card.id, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveIndustryCard(card.id, 1)}
+                            disabled={idx === industryCards.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() =>
+                              patchIndustryCard(card.id, { enabled: card.enabled === false })
+                            }
+                          >
+                            {card.enabled === false ? 'Show' : 'Hide'}
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() =>
+                              setIndustryCards(industryCards.filter((c) => c.id !== card.id))
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Title">
+                          <input
+                            className="admin-input"
+                            value={card.title}
+                            onChange={(e) => patchIndustryCard(card.id, { title: e.target.value })}
+                          />
+                        </Field>
+                        <div className="admin-field full">
+                          <label>Body</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 72 }}
+                            value={card.body}
+                            onChange={(e) => patchIndustryCard(card.id, { body: e.target.value })}
+                          />
+                        </div>
+                        <div className="admin-field full">
+                          <label>Icon SVG (inner markup for 24×24 viewBox)</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
+                            value={card.icon || ''}
+                            onChange={(e) => patchIndustryCard(card.id, { icon: e.target.value })}
+                            placeholder='<path d="M3 21h18…" />'
+                          />
+                          <small style={{ color: 'var(--admin-muted)' }}>
+                            Paths/circles only — the renderer wraps them in an SVG. Leave blank to use a title-matched fallback.
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : null}
