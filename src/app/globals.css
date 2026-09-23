@@ -5077,13 +5077,14 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .consult-modal-panel .turnstile-slot{
   margin-bottom:0.85rem;
   max-width:100%;
-  overflow:hidden;
+  overflow:visible;
 }
 
 @media (max-width:760px){
   .consult-modal-backdrop{
     align-items:flex-end;
     padding:0;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
   }
   .consult-modal-panel{
     width:100%;
@@ -5092,6 +5093,7 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
     height:auto;
     border-radius:14px 14px 0 0;
     border-left:none;border-right:none;border-bottom:none;
+    overflow:visible;
     animation:consultSheetIn .28s cubic-bezier(.22,1,.36,1);
   }
   @keyframes consultSheetIn{
@@ -5101,10 +5103,16 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   .consult-modal-head{
     padding:1rem 1rem 0.9rem;
     padding-top:max(1rem, env(safe-area-inset-top, 0px));
+    border-radius:14px 14px 0 0;
+    overflow:hidden;
   }
   .consult-modal-head :is(h1,h2,h3){font-size:1.12rem;}
   .consult-modal-head p{font-size:0.82rem;line-height:1.45;}
   .consult-modal-body{padding:0.85rem 1rem 1rem;}
+  .consult-form-shell.consult-modal-body{
+    overflow:hidden;
+    border-radius:0 0 14px 14px;
+  }
   .consult-form-shell > .consult-form{
     margin:0.85rem 1rem 0;
     padding:0.95rem;
@@ -5117,6 +5125,11 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
   .consult-modal-panel .consult-proof-strip{grid-template-columns:1fr;}
   .consult-modal-panel .consult-proof-item{border-right:none;border-bottom:1px solid var(--gray-200);}
   .consult-modal-panel .consult-proof-item:last-child{border-bottom:none;}
+  .consult-modal-panel .turnstile-field,
+  .consult-modal-panel .turnstile-slot{
+    width:100%;
+    max-width:100%;
+  }
   .consult-field{margin-bottom:0.95rem;}
   .consult-field input,
   .consult-field select,
@@ -6200,7 +6213,59 @@ a.chip.chip-active{
 .case-study-video{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0b1220;}
 .case-study-video video,.case-study-video iframe{width:100%;height:100%;border:0;}
 .case-study-availability{margin:0.5rem 0 0;color:#c7cfdc;font-size:0.9rem;}
-.turnstile-slot{margin:0.75rem 0;}
+.turnstile-field{
+  width:100%;
+  max-width:100%;
+  margin:0.75rem 0;
+  min-width:0;
+}
+.turnstile-slot{
+  margin:0;
+  width:100%;
+  max-width:100%;
+  min-height:65px;
+  overflow:visible;
+}
+.turnstile-slot > div,
+.turnstile-slot iframe{
+  max-width:100% !important;
+}
+.turnstile-field-hint{
+  margin:0.45rem 0 0;
+  font-size:0.8rem;
+  color:#c9540f;
+  font-weight:600;
+  line-height:1.4;
+}
+@media (max-width:760px){
+  .turnstile-field{margin:0.65rem 0 0.85rem;}
+  .cf-form .turnstile-field,
+  .catalog-detail-enquiry-form .turnstile-field,
+  .case-study-enquiry-form .turnstile-field{
+    width:100%;
+  }
+  .catalog-detail-enquiry-form{
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Hero media: keep full-bleed cover on phones (relative slide height) */
+  .page-hero .hero-bg,
+  .cert-hero-bg{
+    position:absolute;
+    inset:0;
+  }
+  .page-hero .hero-bg img,
+  .page-hero .hero-bg video,
+  .page-hero .hero-bg .hero-bg-media,
+  .cert-hero-bg img,
+  .cert-hero-bg video,
+  .cert-hero-bg .hero-bg-media{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center 30%;
+  }
+}
 @media print{
   header,footer,.personalize-fab-wrap,.trust-fab-wrap,.sticky-mobile-cta,.calc-actions,.page-hero,.expert-cta-wrap{display:none!important;}
   .calc-result{color:#000;background:#fff;border:1px solid #ccc;}

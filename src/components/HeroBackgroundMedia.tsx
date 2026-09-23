@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { isVideoMediaPath, publicMediaUrl } from '@/lib/media-url';
 
 type Props = {
@@ -12,9 +13,26 @@ type Props = {
   eager?: boolean;
 };
 
+const MOBILE_MQ = '(max-width: 760px)';
+
+function useIsMobileViewport() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_MQ);
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener?.('change', sync);
+    return () => mq.removeEventListener?.('change', sync);
+  }, []);
+
+  return isMobile;
+}
+
 /**
  * Full-bleed hero background from a media-library path.
  * Resolves basePath via publicMediaUrl; supports image or video; optional mobile override.
+ * Picks mobile vs desktop asset with matchMedia so video works on iOS/Android.
  */
 export default function HeroBackgroundMedia({
   src,
@@ -23,40 +41,51 @@ export default function HeroBackgroundMedia({
   className = 'slide-img',
   eager = false,
 }: Props) {
+  const isMobile = useIsMobileViewport();
   const desktop = publicMediaUrl(String(src || '').trim());
   const mobile = publicMediaUrl(String(mobileSrc || '').trim());
-  const primary = desktop || mobile;
-  if (!primary) return null;
+  const active = (isMobile && mobile ? mobile : desktop) || mobile || desktop;
+  if (!active) return null;
 
-  if (isVideoMediaPath(primary) || (desktop && isVideoMediaPath(desktop))) {
-    const videoSrc = desktop && isVideoMediaPath(desktop) ? desktop : primary;
-    const poster = mobile && !isVideoMediaPath(mobile) ? mobile : undefined;
+  if (isVideoMediaPath(active)) {
+    const posterCandidate = isMobile
+      ? mobile && !isVideoMediaPath(mobile)
+        ? mobile
+        : desktop && !isVideoMediaPath(desktop)
+          ? desktop
+          : undefined
+      : mobile && !isVideoMediaPath(mobile)
+        ? mobile
+        : undefined;
+
     return (
       <video
+        key={active}
         className={className}
-        src={videoSrc}
-        poster={poster}
+        src={active}
+        poster={posterCandidate}
         autoPlay
         muted
         loop
         playsInline
-        preload={eager ? 'auto' : 'metadata'}
+        preload={eager || isMobile ? 'auto' : 'metadata'}
         aria-label={alt || undefined}
       />
     );
   }
 
-  if (mobile && mobile !== desktop) {
+  if (mobile && desktop && mobile !== desktop) {
     return (
       <picture>
-        <source media="(max-width: 760px)" srcSet={mobile} />
+        <source media={MOBILE_MQ} srcSet={mobile} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className={className}
-          src={desktop || mobile}
+          src={desktop}
           alt={alt}
           loading={eager ? 'eager' : 'lazy'}
           fetchPriority={eager ? 'high' : undefined}
+          decoding="async"
         />
       </picture>
     );
@@ -66,10 +95,11 @@ export default function HeroBackgroundMedia({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       className={className}
-      src={primary}
+      src={active}
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       fetchPriority={eager ? 'high' : undefined}
+      decoding="async"
     />
   );
 }
