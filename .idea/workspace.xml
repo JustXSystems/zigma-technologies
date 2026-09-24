@@ -7,16 +7,9 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 enquiry thank you fixed">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 midea upload restiction raising">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/guide/migration/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/guide/migration/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-migration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-migration.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/media-upload-rules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-upload-rules.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,23 +57,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.5878306082301221" />
-      <entry key="MS500" value="3.1713894645590677" />
-      <entry key="S2" value="5.446758650369692" />
-      <entry key="S5" value="6.723934955717321" />
-      <entry key="S10" value="11.10816488153403" />
-      <entry key="S30" value="34.0698149823573" />
-      <entry key="S60" value="57.16266464267225" />
-      <entry key="M2" value="87.6769361926891" />
-      <entry key="M5" value="144.63178889380882" />
-      <entry key="M10" value="190.63211720650503" />
-      <entry key="M15" value="213.0210975840151" />
-      <entry key="M30" value="240.67370246415047" />
-      <entry key="H1" value="263.0985965907772" />
-      <entry key="H2" value="371.6940709732972" />
-      <entry key="H4" value="785.2885337953869" />
-      <entry key="D1" value="3663.494501682456" />
-      <entry key="W1" value="15062.874943086124" />
+      <entry key="MS100" value="1.000372622791568" />
+      <entry key="MS500" value="1.2264878302022673" />
+      <entry key="S2" value="2.495368190484424" />
+      <entry key="S5" value="4.29359114912823" />
+      <entry key="S10" value="5.679287934788337" />
+      <entry key="S30" value="7.08566752777916" />
+      <entry key="S60" value="7.718656516914991" />
+      <entry key="M2" value="12.898999826211227" />
+      <entry key="M5" value="54.41791600175436" />
+      <entry key="M10" value="116.06130022947237" />
+      <entry key="M15" value="153.91719401871495" />
+      <entry key="M30" value="207.19743333845216" />
+      <entry key="H1" value="247.35864297522554" />
+      <entry key="H2" value="362.53031598030196" />
+      <entry key="H4" value="774.9454943995709" />
+      <entry key="D1" value="3657.0927891601264" />
+      <entry key="W1" value="15062.401628504947" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -94,31 +87,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="6.260498889648627E-201" />
-      <entry key="H1" value="7.912331445060974E-101" />
-      <entry key="H2" value="8.895128692188567E-51" />
-      <entry key="H4" value="9.431398990863988E-26" />
-      <entry key="D1" value="6.854939593467265E-5" />
-      <entry key="W1" value="0.39412109118233574" />
+      <entry key="M30" value="5.182034925878809E-201" />
+      <entry key="H1" value="7.19863523584853E-101" />
+      <entry key="H2" value="8.48447714113681E-51" />
+      <entry key="H4" value="9.211122158250583E-26" />
+      <entry key="D1" value="6.827992511019652E-5" />
+      <entry key="W1" value="0.3938993876599723" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5414215457706089" />
-      <entry key="MS500" value="3.151336258072506" />
-      <entry key="S2" value="5.437528274009086" />
-      <entry key="S5" value="6.719310232089628" />
-      <entry key="S10" value="11.10432988836662" />
-      <entry key="S30" value="34.06586861030634" />
-      <entry key="S60" value="57.15929401438912" />
-      <entry key="M2" value="87.67424982079793" />
-      <entry key="M5" value="144.6298782474959" />
-      <entry key="M10" value="190.63080166848417" />
-      <entry key="M15" value="213.0201009429412" />
-      <entry key="M30" value="240.67312910071198" />
-      <entry key="H1" value="263.0982614730821" />
-      <entry key="H2" value="371.69374043769005" />
-      <entry key="H4" value="785.2881202723574" />
-      <entry key="D1" value="3663.4943019198786" />
-      <entry key="W1" value="15063.2689066697" />
+      <entry key="MS100" value="0.9662987623204097" />
+      <entry key="MS500" value="1.218286980841388" />
+      <entry key="S2" value="2.4910500827854585" />
+      <entry key="S5" value="4.2904536713132915" />
+      <entry key="S10" value="5.677167656645631" />
+      <entry key="S30" value="7.084773210008157" />
+      <entry key="S60" value="7.718168594068702" />
+      <entry key="M2" value="12.898596259240895" />
+      <entry key="M5" value="54.41720115751873" />
+      <entry key="M10" value="116.06050366536851" />
+      <entry key="M15" value="153.91647743575518" />
+      <entry key="M30" value="207.19694183893165" />
+      <entry key="H1" value="247.3583296228064" />
+      <entry key="H2" value="362.5299964705906" />
+      <entry key="H4" value="774.9450884172887" />
+      <entry key="D1" value="3657.0925898298497" />
+      <entry key="W1" value="15062.795370423179" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -273,7 +266,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Every Catalog Settings area now has self-serve guidance" />
     <MESSAGE value="code cleanup" />
     <MESSAGE value="#21 Mobile view rendering issue" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other." />
@@ -298,7 +290,8 @@
     <MESSAGE value="#27 hero section enabling  for image/media to select&#10;captcha implemented&#10;enquiry submission issue fixed" />
     <MESSAGE value="#27 mobile display issue fixed" />
     <MESSAGE value="#27 enquiry thank you fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 enquiry thank you fixed" />
+    <MESSAGE value="#27 midea upload restiction raising" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 midea upload restiction raising" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

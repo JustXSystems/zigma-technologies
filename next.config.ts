@@ -24,12 +24,12 @@ function resolveBasePath(): string | undefined {
 
 const basePath = resolveBasePath();
 
-/** Keep ≥ VPS nginx client_max_body_size and MEDIA_UPLOAD_MAX_MB (default 100). */
-function resolveUploadBodyLimit(): string {
+/** Next SizeLimit template literal (e.g. `100mb`). Keep ≥ nginx client_max_body_size. */
+function resolveUploadBodyLimit(): `${number}mb` {
   const raw = (process.env.MEDIA_UPLOAD_MAX_MB || '').trim();
   const mb = raw ? Number(raw) : 100;
   const safe = Number.isFinite(mb) && mb > 0 ? Math.round(mb) : 100;
-  return `${safe}mb`;
+  return `${safe}mb` as `${number}mb`;
 }
 
 const uploadBodyLimit = resolveUploadBodyLimit();
