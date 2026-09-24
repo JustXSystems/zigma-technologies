@@ -129,7 +129,7 @@ export default function AdminMigrationGuidePage() {
                 <div className="admin-guide-diagram-tier admin-guide-diagram-tier--split">
                   <div className="admin-guide-diagram-node">
                     <strong>Nginx (443/80)</strong>
-                    <p>SSL termination, reverse proxy, 25 MB upload limit</p>
+                    <p>SSL termination, reverse proxy, 100 MB upload limit</p>
                   </div>
                   <div className="admin-guide-diagram-node">
                     <strong>PM2 → Next.js :3000</strong>

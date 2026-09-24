@@ -750,7 +750,7 @@ sudo grep -R "justxsystems.com" /etc/nginx/sites-available/ /etc/nginx/sites-ena
 #         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 #         proxy_set_header X-Forwarded-Proto $scheme;
 #         proxy_cache_bypass $http_upgrade;
-#         client_max_body_size 25M;
+#         client_max_body_size 100M;
 #     }
 
 # Prove there is no trailing slash URI on proxy_pass
@@ -977,7 +977,7 @@ export const JX_NGINX = `# Insert inside the existing HTTPS server { ... } for j
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        client_max_body_size 25M;
+        client_max_body_size 100M;
     }
 
 # After saving:

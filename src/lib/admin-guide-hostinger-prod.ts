@@ -796,7 +796,7 @@ server {
     server_name zigma-technologies.com www.zigma-technologies.com;
 
     # Allow CMS / resume uploads
-    client_max_body_size 25M;
+    client_max_body_size 100M;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -1341,7 +1341,7 @@ server {
     server_name zigma-technologies.com www.zigma-technologies.com;
 
     # CMS / resume uploads
-    client_max_body_size 25M;
+    client_max_body_size 100M;
 
     location / {
         # PM2 process name "zigma" listens on localhost:3000

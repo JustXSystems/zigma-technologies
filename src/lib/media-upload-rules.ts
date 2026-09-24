@@ -1,6 +1,18 @@
 /** Shared admin media upload rules (API + UI). Keep in sync with /api/admin/media. */
 
-export const MEDIA_UPLOAD_MAX_BYTES = 15 * 1024 * 1024;
+/**
+ * Max upload size from env `MEDIA_UPLOAD_MAX_MB` (default 100).
+ * Not admin-configurable — also raise nginx `client_max_body_size` on the VPS to match.
+ */
+function resolveMediaUploadMaxBytes(): number {
+  const raw = (process.env.MEDIA_UPLOAD_MAX_MB || '').trim();
+  const mb = raw ? Number(raw) : 100;
+  if (!Number.isFinite(mb) || mb <= 0) return 100 * 1024 * 1024;
+  return Math.round(mb * 1024 * 1024);
+}
+
+export const MEDIA_UPLOAD_MAX_BYTES = resolveMediaUploadMaxBytes();
+export const MEDIA_UPLOAD_MAX_MB = Math.round(MEDIA_UPLOAD_MAX_BYTES / (1024 * 1024));
 
 export const MEDIA_UPLOAD_MIME_TYPES = [
   'image/jpeg',

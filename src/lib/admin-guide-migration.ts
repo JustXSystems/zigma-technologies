@@ -274,7 +274,7 @@ export const MIGRATION_NGINX_SNIPPET = `server {
     listen 80;
     server_name www.zigma-technologies.com zigma-technologies.com;
 
-    client_max_body_size 25M;
+    client_max_body_size 100M;
 
     location / {
         proxy_pass http://127.0.0.1:3000;

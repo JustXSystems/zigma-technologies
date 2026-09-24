@@ -311,6 +311,7 @@ Copy `.env.example` → `.env` locally. On Hostinger, set the same keys in hPane
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile (public forms) |
 | `TURNSTILE_SECRET_KEY` | Turnstile server verification |
 | `MEDIA_BASE_URL` | Default `/assets` — rarely changed |
+| `MEDIA_UPLOAD_MAX_MB` | Admin media max upload size in MB (default `100`; must match nginx `client_max_body_size`) |
 
 ### Generate secrets (run locally)
 
@@ -813,7 +814,7 @@ server {
     listen 80;
     server_name uat.zigma-technologies.com;   # or www.zigma-technologies.com for PROD
 
-    client_max_body_size 25M;   # form uploads / admin media
+    client_max_body_size 100M;   # form uploads / admin media (match MEDIA_UPLOAD_MAX_MB)
 
     location / {
         proxy_pass http://127.0.0.1:3000;
