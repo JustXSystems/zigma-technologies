@@ -7,19 +7,15 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 buils error fixed">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 Hero section slide timer configured in admin">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/migrate-catalog-card-size.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/migrate-catalog-card-size.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/homepage-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/homepage-seed.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
@@ -69,23 +65,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3842538510553561" />
-      <entry key="MS500" value="1.9824347275258252" />
-      <entry key="S2" value="3.6924244585349997" />
-      <entry key="S5" value="5.214113332274267" />
-      <entry key="S10" value="6.002729743873989" />
-      <entry key="S30" value="6.6730472356905475" />
-      <entry key="S60" value="8.511481222416553" />
-      <entry key="M2" value="20.415594649942093" />
-      <entry key="M5" value="59.021349585699774" />
-      <entry key="M10" value="95.60154261743773" />
-      <entry key="M15" value="115.37840514898566" />
-      <entry key="M30" value="149.82990335263793" />
-      <entry key="H1" value="208.38017779149453" />
-      <entry key="H2" value="331.28178252443473" />
-      <entry key="H4" value="694.0015704865119" />
-      <entry key="D1" value="3600.2935904775027" />
-      <entry key="W1" value="15097.944293810602" />
+      <entry key="MS100" value="1.2559826240372884" />
+      <entry key="MS500" value="2.5782831729088347" />
+      <entry key="S2" value="4.171827628697126" />
+      <entry key="S5" value="7.048320761005323" />
+      <entry key="S10" value="12.489815623949028" />
+      <entry key="S30" value="36.42683987746286" />
+      <entry key="S60" value="58.664661126721754" />
+      <entry key="M2" value="77.69501640510033" />
+      <entry key="M5" value="93.2792910739256" />
+      <entry key="M10" value="99.37712135179018" />
+      <entry key="M15" value="101.52399071288978" />
+      <entry key="M30" value="103.73249202436081" />
+      <entry key="H1" value="105.55297938524674" />
+      <entry key="H2" value="125.55290122299552" />
+      <entry key="H4" value="272.12276194083614" />
+      <entry key="D1" value="2959.590709862265" />
+      <entry key="W1" value="14795.966824221301" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -99,31 +95,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="2.231394693347544E-202" />
-      <entry key="H1" value="1.4937853571875913E-101" />
-      <entry key="H2" value="3.864951949490876E-51" />
-      <entry key="H4" value="6.216873771937579E-26" />
-      <entry key="D1" value="6.394937250259388E-5" />
-      <entry key="W1" value="0.39022946261416813" />
+      <entry key="M30" value="1.6214853158146734E-208" />
+      <entry key="H1" value="1.2733755596111634E-104" />
+      <entry key="H2" value="1.1284394355085889E-52" />
+      <entry key="H4" value="1.0622802998956712E-26" />
+      <entry key="D1" value="4.763733604202838E-5" />
+      <entry key="W1" value="0.3741538551296925" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3464011211758975" />
-      <entry key="MS500" value="1.9712274600235937" />
-      <entry key="S2" value="3.686412732877709" />
-      <entry key="S5" value="5.210524119087217" />
-      <entry key="S10" value="6.000626209733818" />
-      <entry key="S30" value="6.672258695563376" />
-      <entry key="S60" value="8.51097300466053" />
-      <entry key="M2" value="20.41496523200966" />
-      <entry key="M5" value="59.02059117262647" />
-      <entry key="M10" value="95.60091089169916" />
-      <entry key="M15" value="115.37789066462082" />
-      <entry key="M30" value="149.82956388039364" />
-      <entry key="H1" value="208.3799341460414" />
-      <entry key="H2" value="331.2815421663281" />
-      <entry key="H4" value="694.0012476066504" />
-      <entry key="D1" value="3600.293395433057" />
-      <entry key="W1" value="15098.33436607185" />
+      <entry key="MS100" value="1.2074309125231448" />
+      <entry key="MS500" value="2.5573455790899793" />
+      <entry key="S2" value="4.163380608905526" />
+      <entry key="S5" value="7.042360635426913" />
+      <entry key="S10" value="12.484525917670002" />
+      <entry key="S30" value="36.421749695743785" />
+      <entry key="S60" value="58.66053415091142" />
+      <entry key="M2" value="77.69226476299711" />
+      <entry key="M5" value="93.27796263032177" />
+      <entry key="M10" value="99.37641232009253" />
+      <entry key="M15" value="101.523507487526" />
+      <entry key="M30" value="103.73224498553525" />
+      <entry key="H1" value="105.55285315939821" />
+      <entry key="H2" value="125.55281699421407" />
+      <entry key="H4" value="272.12263754035234" />
+      <entry key="D1" value="2959.590533961028" />
+      <entry key="W1" value="14796.340821995556" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -278,7 +274,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#21 Mobile view rendering issue" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other." />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Mobile view, Catalog modal/popup catalog-detail-showcase-cta is overlapping" />
@@ -303,7 +298,8 @@
     <MESSAGE value="#27 enquiry thank you fixed" />
     <MESSAGE value="#27 midea upload restiction raising" />
     <MESSAGE value="#27 buils error fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 buils error fixed" />
+    <MESSAGE value="#27 Hero section slide timer configured in admin" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 Hero section slide timer configured in admin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

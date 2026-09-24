@@ -18,12 +18,14 @@ import {
   DEFAULT_CARD_SIZE_MODE,
   DEFAULT_CARD_FIXED_HEIGHT_PX,
   DEFAULT_CARD_FIXED_WIDTH_PX,
+  DEFAULT_LISTING_GAP_PX,
   normalizeCardMediaFitPercent,
   normalizeCardMediaInset,
   normalizeCardSizeMode,
   normalizeCardFixedHeightPx,
   normalizeCardFixedWidthPx,
   normalizeListingAlign,
+  normalizeListingGapPx,
 } from '@/lib/types';
 import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
@@ -371,14 +373,20 @@ function CatalogHero({
 function CatalogLoadingSkeleton({
   layout,
   columns,
+  gapPx = DEFAULT_LISTING_GAP_PX,
 }: {
   layout: 'grid' | 'list';
   columns: number;
+  gapPx?: number;
 }) {
   return (
     <div
       className={layout === 'list' ? 'catalog-list catalog-skeleton-list' : 'proj-grid catalog-skeleton-grid'}
-      style={layout === 'list' ? { display: 'grid', gap: '1rem' } : { gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+      style={
+        layout === 'list'
+          ? { display: 'grid', gap: `${gapPx}px` }
+          : { gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: `${gapPx}px` }
+      }
     >
       {Array.from({ length: layout === 'list' ? 4 : Math.max(columns, 3) }).map((_, index) => (
         <div
@@ -569,6 +577,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const cardFixedHeightPx = normalizeCardFixedHeightPx(settings?.card_fixed_height_px);
   const cardFixedWidthPx = normalizeCardFixedWidthPx(settings?.card_fixed_width_px);
   const listingAlign = normalizeListingAlign(settings?.listing_align);
+  const listingGapPx = normalizeListingGapPx(settings?.listing_gap_px ?? DEFAULT_LISTING_GAP_PX);
   const modalFields = settings?.modal_fields_json ?? DEFAULT_MODAL;
   const detailElements = resolveDetailElements(settings);
   const layout = settings?.layout || 'grid';
@@ -832,10 +841,28 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
     setMobileFiltersOpen(false);
   }
 
-  const gridStyle =
-    layout === 'list'
-      ? ({ display: 'grid', gap: '1rem' } as CSSProperties)
-      : ({ gridTemplateColumns: `repeat(${Math.min(gridColumns, columns)}, 1fr)` } as CSSProperties);
+  function buildGridStyle(itemCount: number): CSSProperties {
+    const gap = `${listingGapPx}px`;
+    if (layout === 'list') return { display: 'grid', gap };
+    const colCount = Math.min(gridColumns, Math.max(1, itemCount));
+    const justifyContent =
+      listingAlign === 'center' ? 'center' : listingAlign === 'right' ? 'end' : 'start';
+    // Custom card width: size tracks to the card so leftover row space is not
+    // mistaken for gap when few items are shown.
+    if (cardSizeMode === 'custom') {
+      return {
+        gridTemplateColumns: `repeat(${colCount}, minmax(0, ${cardFixedWidthPx}px))`,
+        gap,
+        justifyContent,
+      };
+    }
+    return {
+      gridTemplateColumns: `repeat(${colCount}, 1fr)`,
+      gap,
+    };
+  }
+
+  const gridStyle = buildGridStyle(columns);
 
   return (
     <main id="main-content" className={pageClassName}>
@@ -855,6 +882,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
           {
             ['--catalog-listing-bg']: listingBg,
             ['--catalog-marketplace-hover-border']: marketplaceHoverBorder,
+            ['--catalog-listing-gap']: `${listingGapPx}px`,
           } as CSSProperties
         }
       >
@@ -1101,7 +1129,11 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
 
               {error ? <p style={{ color: '#c9540f' }}>{error}</p> : null}
               {loading && !items.length && showSkeleton ? (
-                <CatalogLoadingSkeleton layout={layout} columns={Math.min(gridColumns, 3)} />
+                <CatalogLoadingSkeleton
+                  layout={layout}
+                  columns={Math.min(gridColumns, 3)}
+                  gapPx={listingGapPx}
+                />
               ) : null}
               {loading && !items.length && !showSkeleton ? <p>Loading…</p> : null}
 
@@ -1150,13 +1182,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
                         <div
                           className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
                           data-listing-align={listingAlign}
-                          style={
-                            layout === 'list'
-                              ? { display: 'grid', gap: '1rem' }
-                              : {
-                                  gridTemplateColumns: `repeat(${Math.min(gridColumns, preview.length || 1)}, 1fr)`,
-                                }
-                          }
+                          style={buildGridStyle(preview.length || 1)}
                         >
                           {preview.map((item, index) => (
                             <CatalogItemCard

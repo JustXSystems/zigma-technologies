@@ -45,4 +45,15 @@ SET @sql := IF(
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+SET @exists := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'catalog_page_settings' AND COLUMN_NAME = 'listing_gap_px'
+);
+SET @sql := IF(
+  @exists = 0,
+  'ALTER TABLE catalog_page_settings ADD COLUMN listing_gap_px SMALLINT UNSIGNED NOT NULL DEFAULT 28 AFTER listing_align',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 UPDATE catalog_page_settings;

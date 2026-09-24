@@ -22,6 +22,7 @@ import {
   normalizeCardFixedHeightPx,
   normalizeCardFixedWidthPx,
   normalizeListingAlign,
+  normalizeListingGapPx,
   normalizeDetailLayout,
   normalizeDetailTemplate,
   normalizeDetailElements,
@@ -660,6 +661,7 @@ export async function getPageSettings(itemType: CatalogItemType) {
     card_fixed_height_px: normalizeCardFixedHeightPx(row.card_fixed_height_px),
     card_fixed_width_px: normalizeCardFixedWidthPx(row.card_fixed_width_px),
     listing_align: normalizeListingAlign(row.listing_align),
+    listing_gap_px: normalizeListingGapPx(row.listing_gap_px),
     detail_layout: normalizeDetailLayout(row.detail_layout),
     detail_gallery_shadow: normalizeShadowStyle(row.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     detail_template: normalizeDetailTemplate(row.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
@@ -740,6 +742,8 @@ export async function updatePageSettings(
         : undefined,
     listing_align:
       input.listing_align !== undefined ? normalizeListingAlign(input.listing_align) : undefined,
+    listing_gap_px:
+      input.listing_gap_px !== undefined ? normalizeListingGapPx(input.listing_gap_px) : undefined,
     detail_layout:
       input.detail_layout !== undefined ? normalizeDetailLayout(input.detail_layout) : undefined,
     detail_gallery_shadow:

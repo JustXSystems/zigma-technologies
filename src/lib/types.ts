@@ -282,6 +282,17 @@ export function normalizeListingAlign(value: unknown): CatalogListingAlign {
   return DEFAULT_LISTING_ALIGN;
 }
 
+/** Space between listing cards (CSS gap). Default ~1.8rem at 16px root. */
+export const DEFAULT_LISTING_GAP_PX = 28;
+export const LISTING_GAP_MIN = 0;
+export const LISTING_GAP_MAX = 64;
+
+export function normalizeListingGapPx(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return DEFAULT_LISTING_GAP_PX;
+  return Math.min(LISTING_GAP_MAX, Math.max(LISTING_GAP_MIN, Math.round(n)));
+}
+
 export type CatalogCaseStudy = {
   enabled?: boolean;
   client_name?: string;
@@ -452,6 +463,8 @@ export type CatalogPageSettings = {
   card_fixed_width_px: number;
   /** Horizontal alignment of cards in the listing grid / list */
   listing_align: CatalogListingAlign;
+  /** Pixel gap between listing cards (grid / list). Useful when few cards leave large empty tracks. */
+  listing_gap_px: number;
   /**
    * Quick-view popup composition (catalog-detail-panel).
    * media-stage = product-first sticky gallery; balanced = equal split; stacked = gallery on top.

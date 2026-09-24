@@ -136,8 +136,8 @@ export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: Set
         'Control card composition, columns, and whether listing tiles use content-driven or custom fixed width/height.',
       when:
         'Change when desktop density feels wrong, marketing wants text over the image, or uneven card sizes look untidy.',
-      how: 'Marketplace = image on top, details below (recommended). Overlay = text on media. Grid columns 2–4 work best on desktop. List alignment = left / centre / right. Card size Auto = content-driven; Custom = set width and height with the sliders.',
-      tip: 'List layout is better for long summaries; grid is better for visual browsing. Use Custom + Centre when you want a uniform, centred card lineup.',
+      how: 'Marketplace = image on top, details below (recommended). Overlay = text on media. Grid columns 2–4 work best on desktop. List alignment = left / centre / right. Card gap controls space between cards (lower it when few cards look too spread out). Card size Auto = content-driven; Custom = set width and height with the sliders.',
+      tip: 'List layout is better for long summaries; grid is better for visual browsing. Use Custom + Centre + a tighter card gap when you want a compact, uniform lineup.',
     },
   },
   listing_colors: {

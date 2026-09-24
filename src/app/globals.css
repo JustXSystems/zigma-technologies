@@ -3119,6 +3119,10 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .catalog-page .catalog-list[data-listing-align="right"]{
   justify-items:end;
 }
+.catalog-page .proj-grid,
+.catalog-page .catalog-list{
+  gap:var(--catalog-listing-gap, 1.8rem);
+}
 .catalog-page .catalog-card--tile.catalog-card--size-custom{
   display:flex;
   flex-direction:column;

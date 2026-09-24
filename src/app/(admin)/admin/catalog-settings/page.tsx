@@ -15,6 +15,9 @@ import {
   DEFAULT_CARD_FIXED_HEIGHT_PX,
   DEFAULT_CARD_FIXED_WIDTH_PX,
   DEFAULT_LISTING_ALIGN,
+  DEFAULT_LISTING_GAP_PX,
+  LISTING_GAP_MIN,
+  LISTING_GAP_MAX,
   DEFAULT_DETAIL_ELEMENTS,
   DEFAULT_DETAIL_GALLERY_SHADOW,
   DEFAULT_DETAIL_LAYOUT,
@@ -25,6 +28,7 @@ import {
   normalizeCardFixedHeightPx,
   normalizeCardFixedWidthPx,
   normalizeListingAlign,
+  normalizeListingGapPx,
   normalizeDetailElements,
   normalizeDetailLayout,
   normalizeDetailTemplate,
@@ -121,6 +125,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     card_fixed_height_px: normalizeCardFixedHeightPx(raw?.card_fixed_height_px),
     card_fixed_width_px: normalizeCardFixedWidthPx(raw?.card_fixed_width_px),
     listing_align: normalizeListingAlign(raw?.listing_align),
+    listing_gap_px: normalizeListingGapPx(raw?.listing_gap_px),
     detail_layout: normalizeDetailLayout(raw?.detail_layout ?? DEFAULT_DETAIL_LAYOUT),
     detail_gallery_shadow: normalizeShadowStyle(raw?.detail_gallery_shadow ?? DEFAULT_DETAIL_GALLERY_SHADOW),
     detail_template: normalizeDetailTemplate(raw?.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
@@ -693,6 +698,7 @@ export default function CatalogSettingsPage() {
           card_fixed_height_px: normalizeCardFixedHeightPx(settings.card_fixed_height_px),
           card_fixed_width_px: normalizeCardFixedWidthPx(settings.card_fixed_width_px),
           listing_align: normalizeListingAlign(settings.listing_align),
+          listing_gap_px: normalizeListingGapPx(settings.listing_gap_px),
           detail_layout: normalizeDetailLayout(settings.detail_layout),
           detail_gallery_shadow: normalizeShadowStyle(settings.detail_gallery_shadow),
           detail_template: normalizeDetailTemplate(settings.detail_template),
@@ -1177,6 +1183,42 @@ export default function CatalogSettingsPage() {
                         <option value="center">Centre</option>
                         <option value="right">Right</option>
                       </select>
+                    </div>
+                    <div className="admin-field full">
+                      <LabelWithHelp help="Space between cards. Lower this when few cards look too spread out. Default matches the previous 1.8rem gap (~28px).">
+                        Card gap — {normalizeListingGapPx(settings.listing_gap_px ?? DEFAULT_LISTING_GAP_PX)}px
+                      </LabelWithHelp>
+                      <div className="admin-range-row">
+                        <input
+                          id="catalog-listing-gap"
+                          type="range"
+                          min={LISTING_GAP_MIN}
+                          max={LISTING_GAP_MAX}
+                          step={2}
+                          value={normalizeListingGapPx(settings.listing_gap_px ?? DEFAULT_LISTING_GAP_PX)}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              listing_gap_px: normalizeListingGapPx(Number(e.target.value)),
+                            })
+                          }
+                          aria-label="Card gap"
+                        />
+                        <input
+                          className="admin-input"
+                          type="number"
+                          min={LISTING_GAP_MIN}
+                          max={LISTING_GAP_MAX}
+                          value={normalizeListingGapPx(settings.listing_gap_px ?? DEFAULT_LISTING_GAP_PX)}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              listing_gap_px: normalizeListingGapPx(Number(e.target.value)),
+                            })
+                          }
+                          aria-label="Card gap in pixels"
+                        />
+                      </div>
                     </div>
                     <div className="admin-field full">
                       <LabelWithHelp help="Auto keeps content-driven sizing. Custom locks width and height with the sliders below.">
