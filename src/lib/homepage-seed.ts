@@ -17,6 +17,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
           tags: ['Trusted Engineering Partner', 'Industrial Power Solutions', 'Reliability', 'Customer-Centric Service'],
           image: '/assets/images/zigma-technologies-engineers-monitoring-.jpg',
           numeral: '20+',
+          durationMs: 6000,
         },
         {
           theme: 'theme-ups',
@@ -27,6 +28,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
           ctaHref: '#protect',
           tags: ['UPS Sales, AMC & Repair', 'Industrial UPS Solutions', 'Inverter & Battery Backup', 'Power Quality Solutions'],
           image: '/assets/images/solar-farm-with-wind-turbines-at-sunset-.jpg',
+          durationMs: 6000,
         },
         {
           theme: 'theme-solar',
@@ -37,6 +39,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
           ctaHref: '#generate',
           tags: ['Solar EPC & Power Plants', 'Rooftop, Industrial & Commercial Solar', 'Solar AMC & O&M', 'Green Energy Solutions', 'EV Charging & BESS'],
           image: '/assets/images/engineers-reviewing-electrical-design-dr.jpg',
+          durationMs: 6000,
         },
         {
           theme: 'theme-eng',
@@ -47,6 +50,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
           ctaHref: '#experts',
           tags: ['Electrical Engineering Design', 'CAD Drafting & Documentation', 'Technical Consulting', 'Engineering Outsourcing'],
           image: '/assets/images/city-skyline-with-solar-panels-and-indus.jpg',
+          durationMs: 6000,
         },
         {
           theme: 'theme-future',
@@ -57,6 +61,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
           ctaHref: '/contact',
           tags: ['Smart Energy & Digital Monitoring', 'Predictive Maintenance', 'AI-Driven Power Management', 'IoT Integration'],
           image: '/assets/images/engineers-inspecting-switchgear-panels-i.jpg',
+          durationMs: 6000,
         },
       ],
     },

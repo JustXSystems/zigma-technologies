@@ -413,6 +413,8 @@ export type CatalogPageSettings = {
   hero_enabled: number;
   hero_autoplay_ms: number;
   hero_item_ids_json: number[] | null;
+  /** Per spotlight item duration overrides (item id → ms). Falls back to hero_autoplay_ms. */
+  hero_item_durations_json: Record<string, number> | null;
   hero_eyebrow: string | null;
   hero_title: string | null;
   hero_lead: string | null;

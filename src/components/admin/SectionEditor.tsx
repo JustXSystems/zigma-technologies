@@ -1211,6 +1211,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                           tags: [],
                           image: '/assets/images/zigma-technologies-engineers-monitoring-.jpg',
                           imageMobile: '',
+                          durationMs: 6000,
                         },
                       ])
                     }
@@ -1307,6 +1308,25 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                           onChange={(e) => {
                             const next = [...slides];
                             next[idx] = { ...next[idx], numeral: e.target.value };
+                            setField('slides', next);
+                          }}
+                        />
+                      </Field>
+                      <Field label="Duration (ms)">
+                        <input
+                          className="admin-input"
+                          type="number"
+                          min={2500}
+                          max={30000}
+                          step={500}
+                          value={Number(slide.durationMs ?? 6000)}
+                          onChange={(e) => {
+                            const next = [...slides];
+                            const raw = Number(e.target.value);
+                            const durationMs = Number.isFinite(raw)
+                              ? Math.min(30000, Math.max(2500, Math.round(raw)))
+                              : 6000;
+                            next[idx] = { ...next[idx], durationMs };
                             setField('slides', next);
                           }}
                         />

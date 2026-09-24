@@ -1053,7 +1053,7 @@
   .dot-nav{position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1.5rem;z-index:6;}
   .dot-nav button{width:32px;height:2px;background:rgba(255,255,255,0.22);position:relative;overflow:hidden;}
   .dot-nav button .fill{position:absolute;left:0;top:0;height:100%;width:0;background:var(--white);}
-  .dot-nav button.active .fill.run{animation:fillProgress 6s linear forwards;}
+  .dot-nav button.active .fill.run{animation:fillProgress var(--slide-duration, 6s) linear forwards;}
   @keyframes fillProgress{from{width:0;}to{width:100%;}}
 
   /* Theme variables per slide */

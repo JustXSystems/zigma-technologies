@@ -44,6 +44,29 @@ export function normalizeMediaFitPercent(value: unknown): number {
   return Math.min(100, Math.max(20, Math.round(n)));
 }
 
+/** Clamp catalog hero slide duration (ms). */
+export function clampHeroDurationMs(value: unknown, fallback = 6000): number {
+  const n = Number(value ?? fallback);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(30000, Math.max(2500, Math.round(n)));
+}
+
+/** Parse { "itemId": ms } map for per-spotlight-item durations. */
+export function normalizeHeroItemDurations(value: unknown): Record<string, number> | null {
+  const raw =
+    typeof value === 'string'
+      ? parseJsonField<Record<string, unknown> | null>(value, null)
+      : (value as Record<string, unknown> | null | undefined);
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const out: Record<string, number> = {};
+  for (const [key, ms] of Object.entries(raw)) {
+    const id = Number(key);
+    if (!Number.isInteger(id) || id <= 0) continue;
+    out[String(id)] = clampHeroDurationMs(ms);
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 function mapItem(row: RowDataPacket): CatalogItem {
   return {
     id: row.id,
@@ -621,6 +644,7 @@ export async function getPageSettings(itemType: CatalogItemType) {
     hero_enabled: Number(row.hero_enabled ?? 1),
     hero_autoplay_ms: Number(row.hero_autoplay_ms ?? 6000),
     hero_item_ids_json: parseJsonField<number[] | null>(row.hero_item_ids_json, null),
+    hero_item_durations_json: normalizeHeroItemDurations(row.hero_item_durations_json),
     hero_eyebrow: row.hero_eyebrow ?? null,
     hero_title: row.hero_title ?? null,
     hero_lead: row.hero_lead ?? null,
@@ -685,6 +709,10 @@ export async function updatePageSettings(
     hero_autoplay_ms: input.hero_autoplay_ms,
     hero_item_ids_json:
       input.hero_item_ids_json !== undefined ? JSON.stringify(input.hero_item_ids_json) : undefined,
+    hero_item_durations_json:
+      input.hero_item_durations_json !== undefined
+        ? JSON.stringify(normalizeHeroItemDurations(input.hero_item_durations_json) ?? {})
+        : undefined,
     hero_eyebrow: input.hero_eyebrow,
     hero_title: input.hero_title,
     hero_lead: input.hero_lead,

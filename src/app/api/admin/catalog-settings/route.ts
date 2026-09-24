@@ -35,6 +35,10 @@ const putSchema = z.object({
   hero_enabled: z.boolean().optional(),
   hero_autoplay_ms: z.number().int().min(2500).max(30000).optional(),
   hero_item_ids_json: z.array(z.number().int().positive()).max(12).optional(),
+  hero_item_durations_json: z
+    .record(z.string(), z.number().int().min(2500).max(30000))
+    .nullable()
+    .optional(),
   hero_eyebrow: z.string().max(160).nullable().optional(),
   hero_title: z.string().max(255).nullable().optional(),
   hero_lead: z.string().max(2000).nullable().optional(),

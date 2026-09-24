@@ -109,6 +109,7 @@ function normalizeAdminCardFields(fields: string[] | null | undefined): string[]
 function hydratePageSettings(raw: CatalogPageSettings | null | undefined): CatalogPageSettings {
   return {
     ...raw!,
+    hero_item_durations_json: raw?.hero_item_durations_json || null,
     card_style: raw?.card_style || 'marketplace',
     card_body_bg_color: raw?.card_body_bg_color || '#ffffff',
     card_media_bg_color: raw?.card_media_bg_color || '#ffffff',
@@ -676,6 +677,7 @@ export default function CatalogSettingsPage() {
           hero_enabled: !!settings.hero_enabled,
           hero_autoplay_ms: settings.hero_autoplay_ms,
           hero_item_ids_json: settings.hero_item_ids_json || [],
+          hero_item_durations_json: settings.hero_item_durations_json || {},
           hero_eyebrow: settings.hero_eyebrow || null,
           hero_title: settings.hero_title || null,
           hero_lead: settings.hero_lead || null,
@@ -884,7 +886,7 @@ export default function CatalogSettingsPage() {
 
                     </div>
                     <div className="admin-field">
-                      <LabelWithHelp help="Time between slides when multiple spotlight items are selected. 5000–8000 ms feels natural.">Rotation interval (ms)</LabelWithHelp>
+                      <LabelWithHelp help="Default time between slides. Individual spotlight items can override this below.">Default rotation (ms)</LabelWithHelp>
                       <input
                         className="admin-input"
                         type="number"
@@ -987,6 +989,10 @@ export default function CatalogSettingsPage() {
                         const idx = activeIds.indexOf(item.id);
                         const canUp = checked && idx > 0;
                         const canDown = checked && idx >= 0 && idx < activeIds.length - 1;
+                        const durationMs =
+                          settings.hero_item_durations_json?.[String(item.id)] ??
+                          settings.hero_autoplay_ms ??
+                          6000;
                         return (
                           <label
                             key={item.id}
@@ -999,7 +1005,17 @@ export default function CatalogSettingsPage() {
                                 const next = e.target.checked
                                   ? [...activeIds, item.id]
                                   : activeIds.filter((id) => id !== item.id);
-                                setSettings({ ...settings, hero_item_ids_json: next });
+                                const durations = { ...(settings.hero_item_durations_json || {}) };
+                                if (!e.target.checked) {
+                                  delete durations[String(item.id)];
+                                } else if (durations[String(item.id)] == null) {
+                                  durations[String(item.id)] = settings.hero_autoplay_ms || 6000;
+                                }
+                                setSettings({
+                                  ...settings,
+                                  hero_item_ids_json: next,
+                                  hero_item_durations_json: durations,
+                                });
                               }}
                             />
                             <span>
@@ -1010,7 +1026,33 @@ export default function CatalogSettingsPage() {
                               </span>
                             </span>
                             {checked ? (
-                              <div className="admin-picker-actions">
+                              <div className="admin-picker-actions" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <input
+                                  className="admin-input"
+                                  type="number"
+                                  min={2500}
+                                  max={30000}
+                                  step={500}
+                                  title="Slide duration (ms)"
+                                  aria-label={`Duration for ${item.title}`}
+                                  style={{ width: 88, padding: '0.25rem 0.4rem', fontSize: '0.78rem' }}
+                                  value={durationMs}
+                                  onClick={(ev) => ev.preventDefault()}
+                                  onChange={(e) => {
+                                    const raw = Number(e.target.value);
+                                    const ms = Number.isFinite(raw)
+                                      ? Math.min(30000, Math.max(2500, Math.round(raw)))
+                                      : settings.hero_autoplay_ms || 6000;
+                                    setSettings({
+                                      ...settings,
+                                      hero_item_durations_json: {
+                                        ...(settings.hero_item_durations_json || {}),
+                                        [String(item.id)]: ms,
+                                      },
+                                    });
+                                  }}
+                                />
+                                <span style={{ fontSize: '0.7rem', color: 'var(--admin-muted)' }}>ms</span>
                                 <button
                                   type="button"
                                   className="admin-btn admin-btn-secondary"

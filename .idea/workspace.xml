@@ -7,9 +7,21 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 midea upload restiction raising">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#27 buils error fixed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/homepage-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/homepage-seed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,23 +69,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000372622791568" />
-      <entry key="MS500" value="1.2264878302022673" />
-      <entry key="S2" value="2.495368190484424" />
-      <entry key="S5" value="4.29359114912823" />
-      <entry key="S10" value="5.679287934788337" />
-      <entry key="S30" value="7.08566752777916" />
-      <entry key="S60" value="7.718656516914991" />
-      <entry key="M2" value="12.898999826211227" />
-      <entry key="M5" value="54.41791600175436" />
-      <entry key="M10" value="116.06130022947237" />
-      <entry key="M15" value="153.91719401871495" />
-      <entry key="M30" value="207.19743333845216" />
-      <entry key="H1" value="247.35864297522554" />
-      <entry key="H2" value="362.53031598030196" />
-      <entry key="H4" value="774.9454943995709" />
-      <entry key="D1" value="3657.0927891601264" />
-      <entry key="W1" value="15062.401628504947" />
+      <entry key="MS100" value="1.3842538510553561" />
+      <entry key="MS500" value="1.9824347275258252" />
+      <entry key="S2" value="3.6924244585349997" />
+      <entry key="S5" value="5.214113332274267" />
+      <entry key="S10" value="6.002729743873989" />
+      <entry key="S30" value="6.6730472356905475" />
+      <entry key="S60" value="8.511481222416553" />
+      <entry key="M2" value="20.415594649942093" />
+      <entry key="M5" value="59.021349585699774" />
+      <entry key="M10" value="95.60154261743773" />
+      <entry key="M15" value="115.37840514898566" />
+      <entry key="M30" value="149.82990335263793" />
+      <entry key="H1" value="208.38017779149453" />
+      <entry key="H2" value="331.28178252443473" />
+      <entry key="H4" value="694.0015704865119" />
+      <entry key="D1" value="3600.2935904775027" />
+      <entry key="W1" value="15097.944293810602" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -87,31 +99,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="5.182034925878809E-201" />
-      <entry key="H1" value="7.19863523584853E-101" />
-      <entry key="H2" value="8.48447714113681E-51" />
-      <entry key="H4" value="9.211122158250583E-26" />
-      <entry key="D1" value="6.827992511019652E-5" />
-      <entry key="W1" value="0.3938993876599723" />
+      <entry key="M30" value="2.231394693347544E-202" />
+      <entry key="H1" value="1.4937853571875913E-101" />
+      <entry key="H2" value="3.864951949490876E-51" />
+      <entry key="H4" value="6.216873771937579E-26" />
+      <entry key="D1" value="6.394937250259388E-5" />
+      <entry key="W1" value="0.39022946261416813" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9662987623204097" />
-      <entry key="MS500" value="1.218286980841388" />
-      <entry key="S2" value="2.4910500827854585" />
-      <entry key="S5" value="4.2904536713132915" />
-      <entry key="S10" value="5.677167656645631" />
-      <entry key="S30" value="7.084773210008157" />
-      <entry key="S60" value="7.718168594068702" />
-      <entry key="M2" value="12.898596259240895" />
-      <entry key="M5" value="54.41720115751873" />
-      <entry key="M10" value="116.06050366536851" />
-      <entry key="M15" value="153.91647743575518" />
-      <entry key="M30" value="207.19694183893165" />
-      <entry key="H1" value="247.3583296228064" />
-      <entry key="H2" value="362.5299964705906" />
-      <entry key="H4" value="774.9450884172887" />
-      <entry key="D1" value="3657.0925898298497" />
-      <entry key="W1" value="15062.795370423179" />
+      <entry key="MS100" value="1.3464011211758975" />
+      <entry key="MS500" value="1.9712274600235937" />
+      <entry key="S2" value="3.686412732877709" />
+      <entry key="S5" value="5.210524119087217" />
+      <entry key="S10" value="6.000626209733818" />
+      <entry key="S30" value="6.672258695563376" />
+      <entry key="S60" value="8.51097300466053" />
+      <entry key="M2" value="20.41496523200966" />
+      <entry key="M5" value="59.02059117262647" />
+      <entry key="M10" value="95.60091089169916" />
+      <entry key="M15" value="115.37789066462082" />
+      <entry key="M30" value="149.82956388039364" />
+      <entry key="H1" value="208.3799341460414" />
+      <entry key="H2" value="331.2815421663281" />
+      <entry key="H4" value="694.0012476066504" />
+      <entry key="D1" value="3600.293395433057" />
+      <entry key="W1" value="15098.33436607185" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -266,7 +278,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="code cleanup" />
     <MESSAGE value="#21 Mobile view rendering issue" />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Hero overlap is fixed. The headline and tag pills were both absolutely positioned in the same bottom band, so they stacked on top of each other." />
     <MESSAGE value="#21 Mobile view rendering issue&#10;Catalog popup mobile layout is fixed" />
@@ -291,7 +302,8 @@
     <MESSAGE value="#27 mobile display issue fixed" />
     <MESSAGE value="#27 enquiry thank you fixed" />
     <MESSAGE value="#27 midea upload restiction raising" />
-    <option name="LAST_COMMIT_MESSAGE" value="#27 midea upload restiction raising" />
+    <MESSAGE value="#27 buils error fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="#27 buils error fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

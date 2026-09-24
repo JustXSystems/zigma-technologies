@@ -120,6 +120,10 @@ export function ensureCatalogMediaFitColumns(): Promise<void> {
 
 const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
   {
+    name: 'hero_item_durations_json',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_item_durations_json JSON NULL AFTER hero_item_ids_json`,
+  },
+  {
     name: 'hero_standard_panel_enabled',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_variant`,
   },

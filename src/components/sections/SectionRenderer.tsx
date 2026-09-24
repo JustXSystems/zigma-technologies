@@ -135,22 +135,31 @@ type Slide = {
   imageMobile?: string;
   numeral?: string;
   iconHtml?: string;
+  /** How long this slide stays visible before advancing (ms). */
+  durationMs?: number;
 };
+
+function clampSlideDurationMs(value: unknown, fallback = 6000) {
+  const n = Number(value ?? fallback);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(30000, Math.max(2500, Math.round(n)));
+}
 
 function HeroSection({ content }: { content: Record<string, unknown> }) {
   const slides = (content.slides as Slide[]) || [];
   const [current, setCurrent] = useState(0);
   const [fillKey, setFillKey] = useState(0);
   const [timerTick, setTimerTick] = useState(0);
+  const durationMs = clampSlideDurationMs(slides[current]?.durationMs);
 
   useEffect(() => {
-    if (!slides.length) return;
-    const t = setInterval(() => {
+    if (slides.length < 2) return;
+    const t = window.setTimeout(() => {
       setCurrent((p) => (p + 1) % slides.length);
       setFillKey((k) => k + 1);
-    }, 6000);
-    return () => clearInterval(t);
-  }, [slides.length, timerTick]);
+    }, durationMs);
+    return () => window.clearTimeout(t);
+  }, [slides.length, current, durationMs, timerTick]);
 
   const goToSlide = (i: number) => {
     setCurrent(i);
@@ -219,7 +228,15 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
             data-goto={i}
             aria-label={`Go to slide ${i + 1}`}
           >
-            <span key={`${i}-${fillKey}`} className={`fill ${i === current ? 'run' : ''}`}></span>
+            <span
+              key={`${i}-${fillKey}`}
+              className={`fill ${i === current ? 'run' : ''}`}
+              style={
+                i === current
+                  ? ({ ['--slide-duration' as string]: `${durationMs}ms` } as CSSProperties)
+                  : undefined
+              }
+            ></span>
           </button>
         ))}
       </div>

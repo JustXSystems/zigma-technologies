@@ -207,21 +207,30 @@ function CatalogHero({
   onOpenItem: (item: CatalogItem) => void;
 }) {
   const [current, setCurrent] = useState(0);
+  const [timerTick, setTimerTick] = useState(0);
   const slides = heroItems.length ? heroItems : [];
-  const autoplayMs = Math.max(2500, Number(settings?.hero_autoplay_ms || 6000));
+  const defaultAutoplayMs = Math.max(2500, Number(settings?.hero_autoplay_ms || 6000));
+  const activeSlide = slides[current] || slides[0];
+  const autoplayMs = Math.max(
+    2500,
+    Number(
+      (activeSlide && settings?.hero_item_durations_json?.[String(activeSlide.id)]) ?? defaultAutoplayMs
+    )
+  );
   const heroEnabled = settings?.hero_enabled !== 0 && slides.length > 0;
 
   useEffect(() => {
     setCurrent(0);
+    setTimerTick((n) => n + 1);
   }, [itemType, slides.length]);
 
   useEffect(() => {
     if (!heroEnabled || slides.length < 2) return;
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, autoplayMs);
-    return () => window.clearInterval(timer);
-  }, [autoplayMs, heroEnabled, slides.length]);
+    return () => window.clearTimeout(timer);
+  }, [autoplayMs, heroEnabled, slides.length, current, timerTick]);
 
   const heroEyebrow = settings?.hero_eyebrow?.trim() || eyebrow;
   const heroTitle = settings?.hero_title?.trim() || title;
@@ -310,7 +319,10 @@ function CatalogHero({
             type="button"
             className={index === current ? 'active' : ''}
             aria-label={`Show ${item.title}`}
-            onClick={() => setCurrent(index)}
+            onClick={() => {
+              setCurrent(index);
+              setTimerTick((n) => n + 1);
+            }}
           />
         ))}
       </div>

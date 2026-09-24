@@ -36,8 +36,8 @@ export const CATALOG_SETTINGS_SECTIONS: Array<{
         'Create a strong first impression and highlight a short list of priority items before visitors scroll the grid.',
       when:
         'Turn on when the catalog should feel curated (campaigns, launches, flagship products). Turn off for a minimal page that jumps straight to filters and cards.',
-      how: 'Enable the hero, choose a visual style + variant, write title/lead copy, pick which elements show, then tick the items to rotate (order = slide order).',
-      tip: 'If no spotlight items are selected, the site falls back to items marked Featured in Inventory.',
+      how: 'Enable the hero, choose a visual style + variant, write title/lead copy, pick which elements show, then tick the items to rotate (order = slide order). Set Default rotation, and optionally override Duration (ms) on each selected spotlight item.',
+      tip: 'If no spotlight items are selected, the site falls back to items marked Featured in Inventory. Per-item duration falls back to the default rotation when blank.',
     },
   },
   {
@@ -125,8 +125,8 @@ export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: Set
     guide: {
       purpose: 'Hand-pick which inventory items appear in the rotating hero.',
       when: 'Use for launches, bestsellers, or a short curated set. Leave empty to auto-use Featured items.',
-      how: 'Tick items to include. Use ↑ ↓ to set slide order (top of list plays first).',
-      tip: 'Only published/enabled items should be curated — draft items may not appear publicly.',
+      how: 'Tick items to include. Use ↑ ↓ to set slide order (top of list plays first). Set Duration (ms) on each selected row to control how long that slide stays visible.',
+      tip: 'Duration falls back to Default rotation when not set. Only published/enabled items should be curated — draft items may not appear publicly.',
     },
   },
   listing_layout: {
