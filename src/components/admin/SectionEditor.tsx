@@ -11,6 +11,13 @@ import {
   normalizeIndustryCategoryCards,
   type IndustryCategoryCard,
 } from '@/lib/industry-category';
+import {
+  createLocationOfficeCard,
+  LOCATIONS_SECTION_EYEBROW_PRESETS,
+  LOCATIONS_SECTION_FONT_OPTIONS,
+  normalizeLocationOfficeCards,
+  type LocationOfficeCard,
+} from '@/lib/locations-section';
 
 type Props = {
   section: CmsSection;
@@ -210,6 +217,8 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     section.type === 'industry_category'
       ? normalizeIndustryCategoryCards(content.cards)
       : [];
+  const locationCards =
+    section.type === 'locations' ? normalizeLocationOfficeCards(content.locations) : [];
 
   function setTimelineCtas(next: TimelineCta[]) {
     setContent((prev) => {
@@ -242,6 +251,34 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     const [item] = next.splice(idx, 1);
     next.splice(nextIdx, 0, item);
     setIndustryCards(next);
+  }
+
+  function setLocationCards(next: LocationOfficeCard[]) {
+    setField('locations', next);
+  }
+
+  function patchLocationCard(id: string, patch: Partial<LocationOfficeCard>) {
+    setLocationCards(
+      locationCards.map((c) => {
+        if (c.id !== id) {
+          // Only one default map source at a time
+          if (patch.isDefault === true) return { ...c, isDefault: false };
+          return c;
+        }
+        return { ...c, ...patch };
+      })
+    );
+  }
+
+  function moveLocationCard(id: string, dir: -1 | 1) {
+    const idx = locationCards.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= locationCards.length) return;
+    const next = [...locationCards];
+    const [item] = next.splice(idx, 1);
+    next.splice(nextIdx, 0, item);
+    setLocationCards(next);
   }
 
   return createPortal(
@@ -2062,56 +2099,477 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
 
             {section.type === 'locations' ? (
               <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Map embed URL">
-                    <input
-                      className="admin-input"
-                      value={String(content.mapEmbedUrl || '')}
-                      onChange={(e) => setField('mapEmbedUrl', e.target.value)}
+                <div
+                  style={{
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                    marginBottom: '0.9rem',
+                  }}
+                >
+                  <strong>Section &amp; map layout</strong>
+                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                    <Field label="Tone">
+                      <select
+                        className="admin-select"
+                        value={String(content.tone || 'gray')}
+                        onChange={(e) => setField('tone', e.target.value)}
+                      >
+                        <option value="gray">Gray</option>
+                        <option value="light">Light</option>
+                      </select>
+                    </Field>
+                    <ColorPickerField
+                      label="Section background"
+                      value={String(content.sectionBg || '')}
+                      fallback={content.tone === 'light' ? '#FFFFFF' : '#F4F6F9'}
+                      onChange={(next) => setField('sectionBg', next)}
+                      hint="Overrides Tone when set."
                     />
-                  </Field>
-                  <Field label="Map title">
-                    <input
-                      className="admin-input"
-                      value={String(content.mapTitle || '')}
-                      onChange={(e) => setField('mapTitle', e.target.value)}
-                    />
-                  </Field>
+                    <Field label="Layout">
+                      <select
+                        className="admin-select"
+                        value={String(content.layout || 'img-right')}
+                        onChange={(e) => setField('layout', e.target.value)}
+                      >
+                        <option value="img-right">Cards left · Map right</option>
+                        <option value="img-left">Map left · Cards right</option>
+                      </select>
+                    </Field>
+                    <Field label="Show map">
+                      <select
+                        className="admin-select"
+                        value={content.showMap === false ? '0' : '1'}
+                        onChange={(e) => setField('showMap', e.target.value === '1')}
+                      >
+                        <option value="1">Show</option>
+                        <option value="0">Hide</option>
+                      </select>
+                    </Field>
+                    <Field label="Eyebrow class">
+                      <select
+                        className="admin-select"
+                        value={String(content.eyebrowClass || 'eyebrow-orange')}
+                        onChange={(e) => setField('eyebrowClass', e.target.value)}
+                      >
+                        {LOCATIONS_SECTION_EYEBROW_PRESETS.map((p) => (
+                          <option key={p.value} value={p.value}>
+                            {p.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Section padding (block)">
+                      <input
+                        className="admin-input"
+                        value={String(content.sectionPadding || '')}
+                        onChange={(e) => setField('sectionPadding', e.target.value)}
+                        placeholder="9rem"
+                      />
+                    </Field>
+                    <Field label="Default map embed URL">
+                      <input
+                        className="admin-input"
+                        value={String(content.mapEmbedUrl || '')}
+                        onChange={(e) => setField('mapEmbedUrl', e.target.value)}
+                        placeholder="https://www.google.com/maps?q=…&output=embed"
+                      />
+                    </Field>
+                    <Field label="Default map title">
+                      <input
+                        className="admin-input"
+                        value={String(content.mapTitle || '')}
+                        onChange={(e) => setField('mapTitle', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Map min height">
+                      <input
+                        className="admin-input"
+                        value={String(content.mapMinHeight || '')}
+                        onChange={(e) => setField('mapMinHeight', e.target.value)}
+                        placeholder="460px"
+                      />
+                    </Field>
+                    <Field label="Card list gap">
+                      <input
+                        className="admin-input"
+                        value={String(content.locGridGap || '')}
+                        onChange={(e) => setField('locGridGap', e.target.value)}
+                        placeholder="1.25rem"
+                      />
+                    </Field>
+                    <Field label="Default directions label">
+                      <input
+                        className="admin-input"
+                        value={String(content.directionsLabel || '')}
+                        onChange={(e) => setField('directionsLabel', e.target.value)}
+                        placeholder="Get Directions →"
+                      />
+                    </Field>
+                  </div>
                 </div>
-                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                  <label>Locations (one per line: Tag | Title | Address | Phone | phoneHref | directionsUrl)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 180 }}
-                    value={((content.locations as Array<Record<string, string>>) || [])
-                      .map(
-                        (l) =>
-                          `${l.tag || ''} | ${l.title || ''} | ${l.address || ''} | ${l.phone || ''} | ${l.phoneHref || ''} | ${l.directionsUrl || ''}`
-                      )
-                      .join('\n')}
-                    onChange={(e) => {
-                      const prev = (content.locations as Array<Record<string, string>>) || [];
-                      setField(
-                        'locations',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line, idx) => {
-                            const parts = line.split('|').map((p) => p.trim());
-                            return {
-                              tag: parts[0] || '',
-                              title: parts[1] || '',
-                              address: parts[2] || '',
-                              phone: parts[3] || '',
-                              phoneHref: parts[4] || '',
-                              directionsUrl: parts[5] || '',
-                              icon: prev[idx]?.icon,
-                            };
-                          })
-                      );
-                    }}
-                  />
+
+                <div
+                  style={{
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                    marginBottom: '0.9rem',
+                  }}
+                >
+                  <strong>Typography &amp; colors</strong>
+                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                    <ColorPickerField
+                      label="Eyebrow color"
+                      value={String(content.eyebrowColor || '')}
+                      fallback="#FF6B1A"
+                      onChange={(next) => setField('eyebrowColor', next)}
+                    />
+                    <Field label="Eyebrow font">
+                      <select
+                        className="admin-select"
+                        value={String(content.eyebrowFont || '')}
+                        onChange={(e) => setField('eyebrowFont', e.target.value)}
+                      >
+                        <option value="">Default (mono)</option>
+                        {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Eyebrow size">
+                      <input
+                        className="admin-input"
+                        value={String(content.eyebrowSize || '')}
+                        onChange={(e) => setField('eyebrowSize', e.target.value)}
+                        placeholder="0.72rem"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Title color"
+                      value={String(content.titleColor || '')}
+                      fallback="#1E2530"
+                      onChange={(next) => setField('titleColor', next)}
+                    />
+                    <Field label="Title font">
+                      <select
+                        className="admin-select"
+                        value={String(content.titleFont || '')}
+                        onChange={(e) => setField('titleFont', e.target.value)}
+                      >
+                        <option value="">Default (display)</option>
+                        {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Title size">
+                      <input
+                        className="admin-input"
+                        value={String(content.titleSize || '')}
+                        onChange={(e) => setField('titleSize', e.target.value)}
+                        placeholder="clamp(2.6rem,5vw,4.2rem)"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Body color"
+                      value={String(content.bodyColor || '')}
+                      fallback="#5B6472"
+                      onChange={(next) => setField('bodyColor', next)}
+                    />
+                    <Field label="Body font">
+                      <select
+                        className="admin-select"
+                        value={String(content.bodyFont || '')}
+                        onChange={(e) => setField('bodyFont', e.target.value)}
+                      >
+                        <option value="">Default (body)</option>
+                        {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
+                          <option key={f.value} value={f.value}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Body size">
+                      <input
+                        className="admin-input"
+                        value={String(content.bodySize || '')}
+                        onChange={(e) => setField('bodySize', e.target.value)}
+                        placeholder="1.02rem"
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                    marginBottom: '0.9rem',
+                  }}
+                >
+                  <strong>Loc-card style</strong>
+                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                    <ColorPickerField
+                      label="Card background"
+                      value={String(content.cardBg || '')}
+                      fallback="#FFFFFF"
+                      onChange={(next) => setField('cardBg', next)}
+                    />
+                    <ColorPickerField
+                      label="Card border"
+                      value={String(content.cardBorderColor || '')}
+                      fallback="#E7EBF1"
+                      onChange={(next) => setField('cardBorderColor', next)}
+                    />
+                    <ColorPickerField
+                      label="Active / hover border"
+                      value={String(content.cardActiveBorderColor || '')}
+                      fallback="#FF6B1A"
+                      onChange={(next) => setField('cardActiveBorderColor', next)}
+                      hint="Matches HTML .loc-card:hover / .map-active orange border."
+                    />
+                    <Field label="Card radius">
+                      <input
+                        className="admin-input"
+                        value={String(content.cardBorderRadius || '')}
+                        onChange={(e) => setField('cardBorderRadius', e.target.value)}
+                        placeholder="10px"
+                      />
+                    </Field>
+                    <Field label="Card padding">
+                      <input
+                        className="admin-input"
+                        value={String(content.cardPadding || '')}
+                        onChange={(e) => setField('cardPadding', e.target.value)}
+                        placeholder="1.6rem 1.7rem"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Icon background"
+                      value={String(content.iconBg || '')}
+                      fallback="#0A1628"
+                      onChange={(next) => setField('iconBg', next)}
+                    />
+                    <ColorPickerField
+                      label="Icon color"
+                      value={String(content.iconColor || '')}
+                      fallback="#00D4FF"
+                      onChange={(next) => setField('iconColor', next)}
+                    />
+                    <Field label="Icon size">
+                      <input
+                        className="admin-input"
+                        value={String(content.iconSize || '')}
+                        onChange={(e) => setField('iconSize', e.target.value)}
+                        placeholder="40px"
+                      />
+                    </Field>
+                    <ColorPickerField
+                      label="Tag color"
+                      value={String(content.tagColor || '')}
+                      fallback="#FF6B1A"
+                      onChange={(next) => setField('tagColor', next)}
+                    />
+                    <ColorPickerField
+                      label="Tag border"
+                      value={String(content.tagBorderColor || '')}
+                      fallback="#FFB48A"
+                      onChange={(next) => setField('tagBorderColor', next)}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className="full"
+                  style={{
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <div>
+                      <strong>Office location cards</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        Add, edit, delete, reorder (↑↓), and show/hide. Hovering a card with a map URL
+                        previews that pin on the map (HTML parity).
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() => setLocationCards([...locationCards, createLocationOfficeCard()])}
+                    >
+                      Add location
+                    </button>
+                  </div>
+                  {locationCards.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No locations yet. Add one to populate the loc-grid.
+                    </p>
+                  ) : null}
+                  {locationCards.map((card, idx) => (
+                    <div
+                      key={card.id}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                        background: card.enabled === false ? '#f1f5f9' : '#fff',
+                        opacity: card.enabled === false ? 0.72 : 1,
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong>
+                          #{idx + 1} · {card.title || 'Untitled'}
+                          {card.enabled === false ? ' (hidden)' : ''}
+                          {card.isDefault ? ' · default map' : ''}
+                        </strong>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveLocationCard(card.id, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveLocationCard(card.id, 1)}
+                            disabled={idx === locationCards.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() =>
+                              patchLocationCard(card.id, { enabled: card.enabled === false })
+                            }
+                          >
+                            {card.enabled === false ? 'Show' : 'Hide'}
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => patchLocationCard(card.id, { isDefault: !card.isDefault })}
+                          >
+                            {card.isDefault ? 'Unset default' : 'Set default map'}
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() =>
+                              setLocationCards(locationCards.filter((c) => c.id !== card.id))
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Tag">
+                          <input
+                            className="admin-input"
+                            value={card.tag || ''}
+                            onChange={(e) => patchLocationCard(card.id, { tag: e.target.value })}
+                            placeholder="Head Office"
+                          />
+                        </Field>
+                        <Field label="Title">
+                          <input
+                            className="admin-input"
+                            value={card.title}
+                            onChange={(e) => patchLocationCard(card.id, { title: e.target.value })}
+                          />
+                        </Field>
+                        <div className="admin-field full">
+                          <label>Address</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 64 }}
+                            value={card.address}
+                            onChange={(e) => patchLocationCard(card.id, { address: e.target.value })}
+                          />
+                        </div>
+                        <Field label="Phone label">
+                          <input
+                            className="admin-input"
+                            value={card.phone || ''}
+                            onChange={(e) => patchLocationCard(card.id, { phone: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Phone href">
+                          <input
+                            className="admin-input"
+                            value={card.phoneHref || ''}
+                            onChange={(e) => patchLocationCard(card.id, { phoneHref: e.target.value })}
+                            placeholder="tel:+919590137666"
+                          />
+                        </Field>
+                        <Field label="Directions URL">
+                          <input
+                            className="admin-input"
+                            value={card.directionsUrl || ''}
+                            onChange={(e) =>
+                              patchLocationCard(card.id, { directionsUrl: e.target.value })
+                            }
+                          />
+                        </Field>
+                        <Field label="Directions label">
+                          <input
+                            className="admin-input"
+                            value={card.directionsLabel || ''}
+                            onChange={(e) =>
+                              patchLocationCard(card.id, { directionsLabel: e.target.value })
+                            }
+                            placeholder="Get Directions →"
+                          />
+                        </Field>
+                        <Field label="Map embed URL (hover preview)">
+                          <input
+                            className="admin-input"
+                            value={card.mapEmbedUrl || ''}
+                            onChange={(e) =>
+                              patchLocationCard(card.id, { mapEmbedUrl: e.target.value })
+                            }
+                            placeholder="https://www.google.com/maps?q=lat,lng&z=16&output=embed"
+                          />
+                        </Field>
+                        <Field label="Map title">
+                          <input
+                            className="admin-input"
+                            value={card.mapTitle || ''}
+                            onChange={(e) => patchLocationCard(card.id, { mapTitle: e.target.value })}
+                          />
+                        </Field>
+                        <div className="admin-field full">
+                          <label>Icon SVG (inner markup for 24×24 viewBox)</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
+                            value={card.icon || ''}
+                            onChange={(e) => patchLocationCard(card.id, { icon: e.target.value })}
+                            placeholder='<path d="M21 10c0 7-9 13…" />'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : null}

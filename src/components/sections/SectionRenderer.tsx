@@ -17,6 +17,12 @@ import {
   normalizeIndustryCategoryCards,
   type IndustryCategoryCard,
 } from '@/lib/industry-category';
+import {
+  normalizeLocationOfficeCards,
+  resolveDefaultLocationMap,
+  LOCATIONS_DEFAULT_PIN,
+  type LocationOfficeCard,
+} from '@/lib/locations-section';
 import { INDUSTRY_DEFS } from '@/lib/industries';
 import { INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
 import { statIconFor } from '@/lib/stat-icons';
@@ -1601,71 +1607,202 @@ function FeatureGridSection({
 }
 
 function LocationsSection({ content, sectionKey }: { content: Record<string, unknown>; sectionKey?: string | null }) {
-  const locations =
-    (content.locations as Array<{
-      tag?: string;
-      title: string;
-      address: string;
-      phone?: string;
-      phoneHref?: string;
-      directionsUrl?: string;
-      icon?: string;
-    }>) || [];
+  const locations = normalizeLocationOfficeCards(content.locations).filter((l) => l.enabled !== false);
+  const showMap = content.showMap !== false;
+  const layout = content.layout === 'img-left' ? 'img-left' : 'img-right';
+  const toneClass = content.tone === 'light' ? 'section-light' : 'section-gray';
+  const sectionBg = cssLength(content.sectionBg);
+  const defaultMap = resolveDefaultLocationMap(content, locations);
+  const mapWrapRef = useRef<HTMLDivElement>(null);
+  const [fineHover, setFineHover] = useState(false);
+  const [activeLocId, setActiveLocId] = useState<string | null>(null);
+  const activeLoc: LocationOfficeCard | null = activeLocId
+    ? locations.find((l) => l.id === activeLocId) || null
+    : null;
+  const mapSrc = (activeLoc?.mapEmbedUrl || defaultMap.src).trim();
+  const mapTitle = (activeLoc?.mapTitle || activeLoc?.title || defaultMap.title).trim() || 'Office map';
+  const directionsFallback = String(content.directionsLabel || 'Get Directions →');
+
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const sync = () => {
+      const canHover = mq.matches;
+      setFineHover(canHover);
+      // Touch / coarse pointers: keep a sticky selection so the map matches a card.
+      if (!canHover) {
+        setActiveLocId((prev) => {
+          if (prev && locations.some((l) => l.id === prev)) return prev;
+          const preferred =
+            locations.find((l) => l.isDefault && l.mapEmbedUrl) ||
+            locations.find((l) => l.mapEmbedUrl);
+          return preferred?.id ?? null;
+        });
+      }
+    };
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+    // locations identity is stable enough via enabled list length + ids
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locations.map((l) => l.id).join('|')]);
+
+  const sectionStyle: CSSProperties = {
+    ...(cssLength(content.sectionPadding) ? { paddingBlock: cssLength(content.sectionPadding) } : {}),
+    ...(sectionBg ? { background: sectionBg } : {}),
+    ...(cssLength(content.locGridGap) ? { ['--loc-grid-gap' as string]: cssLength(content.locGridGap) } : {}),
+    ...(cssLength(content.mapMinHeight) ? { ['--map-min-height' as string]: cssLength(content.mapMinHeight) } : {}),
+    ...(cssLength(content.cardActiveBorderColor)
+      ? { ['--loc-active-border' as string]: cssLength(content.cardActiveBorderColor) }
+      : {}),
+    ...(cssLength(content.iconBg) ? { ['--loc-icon-bg' as string]: cssLength(content.iconBg) } : {}),
+    ...(cssLength(content.iconColor) ? { ['--loc-icon-color' as string]: cssLength(content.iconColor) } : {}),
+    ...(cssLength(content.tagColor) ? { ['--loc-tag-color' as string]: cssLength(content.tagColor) } : {}),
+    ...(cssLength(content.tagBorderColor)
+      ? { ['--loc-tag-border' as string]: cssLength(content.tagBorderColor) }
+      : {}),
+  };
+
+  const eyebrowStyle: CSSProperties = {
+    ...(cssLength(content.eyebrowColor) ? { color: cssLength(content.eyebrowColor) } : {}),
+    ...(cssLength(content.eyebrowFont) ? { fontFamily: cssLength(content.eyebrowFont) } : {}),
+    ...(cssLength(content.eyebrowSize) ? { fontSize: cssLength(content.eyebrowSize) } : {}),
+    ...(cssLength(content.eyebrowWeight) ? { fontWeight: cssLength(content.eyebrowWeight) as never } : {}),
+    ...(cssLength(content.eyebrowLetterSpacing)
+      ? { letterSpacing: cssLength(content.eyebrowLetterSpacing) }
+      : {}),
+    ...(cssLength(content.eyebrowTransform)
+      ? { textTransform: cssLength(content.eyebrowTransform) as CSSProperties['textTransform'] }
+      : {}),
+  };
+
+  const titleStyle: CSSProperties = {
+    ...(cssLength(content.titleColor) ? { color: cssLength(content.titleColor) } : {}),
+    ...(cssLength(content.titleFont) ? { fontFamily: cssLength(content.titleFont) } : {}),
+    ...(cssLength(content.titleSize) ? { fontSize: cssLength(content.titleSize) } : {}),
+    ...(cssLength(content.titleWeight) ? { fontWeight: cssLength(content.titleWeight) as never } : {}),
+  };
+
+  const bodyStyle: CSSProperties = {
+    ...(cssLength(content.bodyColor) ? { color: cssLength(content.bodyColor) } : {}),
+    ...(cssLength(content.bodyFont) ? { fontFamily: cssLength(content.bodyFont) } : {}),
+    ...(cssLength(content.bodySize) ? { fontSize: cssLength(content.bodySize) } : {}),
+  };
+
+  const cardStyle: CSSProperties = {
+    ...(cssLength(content.cardBg) ? { background: cssLength(content.cardBg) } : {}),
+    ...(cssLength(content.cardBorderColor) ? { borderColor: cssLength(content.cardBorderColor) } : {}),
+    ...(cssLength(content.cardBorderRadius) ? { borderRadius: cssLength(content.cardBorderRadius) } : {}),
+    ...(cssLength(content.cardPadding) ? { padding: cssLength(content.cardPadding) } : {}),
+  };
+
+  const iconSize = cssLength(content.iconSize);
+
+  function selectLoc(id: string, scrollMap: boolean) {
+    setActiveLocId(id);
+    if (scrollMap && mapWrapRef.current) {
+      mapWrapRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
 
   return (
-    <section className="section section-gray" id={sectionKey || 'locations'}>
+    <section className={`section ${toneClass}`} id={sectionKey || 'locations'} style={sectionStyle}>
       <div className="container">
-        <div className="split-layout img-right">
+        <div className={`split-layout ${layout}`}>
           <div className="split-content reveal">
-            <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-orange'}`}>
+            <div className={`eyebrow ${content.eyebrowClass || 'eyebrow-orange'}`} style={eyebrowStyle}>
               {String(content.eyebrow || 'LOCATIONS')}
             </div>
-            <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
-            <p className="split-desc">{String(content.body || '')}</p>
+            <SiteHeading role="section" style={titleStyle}>
+              {String(content.title || '')}
+            </SiteHeading>
+            {content.body ? (
+              <p className="split-desc" style={bodyStyle}>
+                {String(content.body)}
+              </p>
+            ) : null}
             <div className="loc-grid">
-              {locations.map((loc) => (
-                <div className="loc-card" key={loc.title}>
+              {locations.map((loc) => {
+                const hasMap = Boolean(loc.mapEmbedUrl?.trim());
+                const isActive = activeLocId === loc.id;
+                return (
                   <div
-                    className="loc-icon"
-                    aria-hidden="true"
-                    dangerouslySetInnerHTML={{
-                      __html: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${
-                        loc.icon ||
-                        '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>'
-                      }</svg>`,
+                    className={`loc-card${isActive ? ' map-active' : ''}${hasMap ? ' has-map' : ''}`}
+                    key={loc.id}
+                    style={cardStyle}
+                    data-map={loc.mapEmbedUrl || undefined}
+                    data-map-title={loc.mapTitle || loc.title || undefined}
+                    onMouseEnter={() => {
+                      if (fineHover && hasMap) setActiveLocId(loc.id);
                     }}
-                  />
-                  <div className="loc-body">
-                    {loc.tag ? <span className="loc-tag">{loc.tag}</span> : null}
-                    <h5>{loc.title}</h5>
-                    <p>{loc.address}</p>
-                    {loc.phone ? (
-                      <a href={loc.phoneHref || `tel:${loc.phone.replace(/\s/g, '')}`} className="loc-link">
-                        {loc.phone}
-                      </a>
-                    ) : null}
-                    {loc.directionsUrl ? (
-                      <a
-                        href={loc.directionsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="loc-link loc-link-block"
-                      >
-                        Get Directions →
-                      </a>
-                    ) : null}
+                    onMouseLeave={() => {
+                      if (fineHover && hasMap) setActiveLocId(null);
+                    }}
+                    onClick={(e) => {
+                      if (!hasMap || fineHover) return;
+                      if ((e.target as HTMLElement | null)?.closest?.('a')) return;
+                      selectLoc(loc.id, true);
+                    }}
+                    onKeyDown={(e) => {
+                      if (!hasMap) return;
+                      if (e.key !== 'Enter' && e.key !== ' ') return;
+                      e.preventDefault();
+                      selectLoc(loc.id, !fineHover);
+                    }}
+                    tabIndex={hasMap ? 0 : undefined}
+                    role={hasMap ? 'button' : undefined}
+                    aria-pressed={hasMap ? isActive : undefined}
+                    aria-label={
+                      hasMap
+                        ? `${loc.title}${loc.tag ? `, ${loc.tag}` : ''}. Show on map`
+                        : undefined
+                    }
+                  >
+                    <div
+                      className="loc-icon"
+                      aria-hidden="true"
+                      style={iconSize ? { width: iconSize, height: iconSize } : undefined}
+                      dangerouslySetInnerHTML={{
+                        __html: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${
+                          loc.icon || LOCATIONS_DEFAULT_PIN
+                        }</svg>`,
+                      }}
+                    />
+                    <div className="loc-body">
+                      {loc.tag ? <span className="loc-tag">{loc.tag}</span> : null}
+                      <h5>{loc.title}</h5>
+                      {loc.address ? <p>{loc.address}</p> : null}
+                      {loc.phone ? (
+                        <a
+                          href={loc.phoneHref || `tel:${loc.phone.replace(/\s/g, '')}`}
+                          className="loc-link"
+                        >
+                          {loc.phone}
+                        </a>
+                      ) : null}
+                      {loc.directionsUrl ? (
+                        <a
+                          href={loc.directionsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="loc-link loc-link-block"
+                        >
+                          {loc.directionsLabel || directionsFallback}
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-          {content.mapEmbedUrl ? (
-            <div className="split-img-wrap reveal map-wrap">
+          {showMap && mapSrc ? (
+            <div className="split-img-wrap reveal map-wrap" ref={mapWrapRef}>
               <iframe
-                src={String(content.mapEmbedUrl)}
+                key={mapSrc}
+                src={mapSrc}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title={String(content.mapTitle || 'Office map')}
+                title={mapTitle}
               />
             </div>
           ) : null}

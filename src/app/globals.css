@@ -3602,20 +3602,48 @@ button.qc-value{padding:0;font:inherit;} /* reset for qc-value used on a <button
 .feat-card.emergency-card .feat-icon{color:var(--white);}
 
 /* ---------- LOCATIONS ---------- */
-.loc-grid{display:flex;flex-direction:column;gap:1.25rem;}
-.loc-card{background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:1.6rem 1.7rem;display:flex;gap:1.1rem;transition:box-shadow .25s, transform .25s;}
+.loc-grid{display:flex;flex-direction:column;gap:var(--loc-grid-gap, 1.25rem);}
+.loc-card{background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:1.6rem 1.7rem;display:flex;gap:1.1rem;transition:box-shadow .25s, transform .25s, border-color .25s;}
+.loc-card.has-map{cursor:pointer;}
+.loc-card:hover,.loc-card.map-active{border-color:var(--loc-active-border, var(--orange));box-shadow:0 18px 36px rgba(10,22,40,0.12);}
 .loc-card:hover{box-shadow:0 18px 36px rgba(10,22,40,0.09);transform:translateY(-3px);}
-.loc-icon{width:40px;height:40px;border-radius:9px;background:var(--navy-950);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--cyan);}
+.loc-card:focus-visible{outline:2px solid var(--loc-active-border, var(--orange));outline-offset:2px;}
+.loc-icon{width:40px;height:40px;border-radius:9px;background:var(--loc-icon-bg, var(--navy-950));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--loc-icon-color, var(--cyan));}
 .loc-icon svg{width:20px;height:20px;}
 .loc-body h5{font-size:1.02rem;margin-bottom:0.5rem;}
-.loc-tag{display:inline-block;font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);border:1px solid rgba(255,107,26,0.35);padding:0.16rem 0.55rem;border-radius:100px;margin-bottom:0.6rem;}
+.loc-tag{display:inline-block;font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--loc-tag-color, var(--orange));border:1px solid var(--loc-tag-border, rgba(255,107,26,0.35));padding:0.16rem 0.55rem;border-radius:100px;margin-bottom:0.6rem;}
 .loc-body p{font-size:0.86rem;color:var(--graphite-500);margin-bottom:0.25rem;}
 .loc-body .loc-link{font-size:0.85rem;color:var(--graphite-800);font-weight:600;display:inline-block;margin-top:0.4rem;}
 .loc-body .loc-link:hover{color:var(--orange-dim);}
 .loc-body .loc-link.loc-link-block{display:block;margin-top:0.3rem;} /* "Get Directions" variant */
 
 /* Google Map embed (sits inside the shared .split-img-wrap box) */
-.map-wrap iframe{width:100%;height:100%;min-height:460px;border:0;display:block;}
+.map-wrap{position:relative;height:100%;min-height:var(--map-min-height, 460px);border-radius:16px;overflow:hidden;box-shadow:0 30px 60px -25px rgba(10,22,40,0.3);}
+.map-wrap iframe{width:100%;height:100%;min-height:var(--map-min-height, 460px);border:0;display:block;}
+
+/* Touch / no-hover: avoid sticky synthetic :hover lift; rely on .map-active */
+@media (hover: none){
+  .loc-card:hover{transform:none;box-shadow:none;border-color:var(--gray-200);}
+  .loc-card.map-active,.loc-card.map-active:hover{
+    border-color:var(--loc-active-border, var(--orange));
+    box-shadow:0 18px 36px rgba(10,22,40,0.12);
+    transform:none;
+  }
+}
+@media (hover: hover) and (pointer: fine){
+  .loc-card.has-map:hover{transform:translateY(-3px);}
+}
+
+/* Stacked layout: cards first, map below — tap a card → map updates underneath */
+@media (max-width:1080px){
+  #locations .split-content{order:0;}
+  #locations .map-wrap{order:1;min-height:var(--map-min-height, 280px);}
+  #locations .map-wrap iframe{min-height:var(--map-min-height, 280px);}
+}
+@media (max-width:760px){
+  #locations .loc-card{padding:1.35rem 1.25rem;}
+  #locations .map-wrap,#locations .map-wrap iframe{min-height:var(--map-min-height, 260px);}
+}
 
 /* ---------- CONTACT FORM extras (cf-* base rules reused from Careers) ---------- */
 .cf-hours-row{display:flex;justify-content:space-between;font-size:0.85rem;color:#C7CFDC;padding:0.25rem 0;}
