@@ -64,6 +64,10 @@
     --foot-office-meta-label-weight: 600;
     --foot-office-meta-label-letter-spacing: 0.1em;
     --foot-office-meta-label-transform: uppercase;
+    --foot-office-text-font: var(--font-body);
+    --foot-office-text-size: 1em;
+    --foot-office-text-size-mobile: 0.9rem;
+    --foot-office-meta-text-size: 1em;
   }
 
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -1556,6 +1560,8 @@
   .foot-office-label{margin-bottom:0.55rem;}
   .foot-office-address{
     font-style:normal;
+    font-family:var(--foot-office-text-font, var(--font-body));
+    font-size:var(--foot-office-text-size, 1em);
     display:flex;
     flex-direction:column;
     gap:0.2rem;
@@ -1603,6 +1609,8 @@
   }
   .foot-office-meta-text{
     display:inline;
+    font-family:var(--foot-office-text-font, var(--font-body));
+    font-size:var(--foot-office-meta-text-size, 1em);
     min-width:0;
     overflow-wrap:anywhere;
     word-break:break-word;
@@ -1944,7 +1952,7 @@
       line-height:1.5;
     }
     .foot-office-address .foot-office-line{
-      font-size:0.9rem;
+      font-size:var(--foot-office-text-size-mobile, 0.9rem);
       line-height:1.45;
     }
     .foot-office-meta,

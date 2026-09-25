@@ -250,6 +250,14 @@ export type SiteSettings = {
   footerOfficeHoursLabel: string;
   /** SLA row label text (e.g. Reply) */
   footerOfficeSlaLabel: string;
+  /** Office content (address lines + hours / SLA values) font-family */
+  footerOfficeTextFont: string;
+  /** Office address line font-size (desktop); blank inherits the footer type scale */
+  footerOfficeTextSize: string;
+  /** Office address line font-size (≤760px); blank follows desktop size, else 0.9rem */
+  footerOfficeTextSizeMobile: string;
+  /** Hours / SLA value font-size; blank inherits the meta row size */
+  footerOfficeMetaTextSize: string;
   /**
    * Office heading appearance: match-h6 (same as Contact column) | accent | custom
    */
@@ -386,6 +394,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   footerOfficeShowLabel: 'true',
   footerOfficeHoursLabel: 'Hours',
   footerOfficeSlaLabel: 'Reply',
+  footerOfficeTextFont: 'var(--font-body)',
+  footerOfficeTextSize: '',
+  footerOfficeTextSizeMobile: '',
+  footerOfficeMetaTextSize: '',
   footerOfficeLabelMode: 'match-h6',
   footerOfficeLabelFont: 'var(--font-mono)',
   footerOfficeLabelSize: '0.8rem',
@@ -845,6 +857,23 @@ export function resolveFooterOfficeMetaLabelTokens(settings: SiteSettings): Foot
   );
 }
 
+export type FooterOfficeTextTokens = {
+  font: string;
+  size: string;
+  sizeMobile: string;
+  metaSize: string;
+};
+
+export function resolveFooterOfficeTextTokens(settings: SiteSettings): FooterOfficeTextTokens {
+  const size = sanitizeCssSize(settings.footerOfficeTextSize, '');
+  return {
+    font: sanitizeCssFontFamily(settings.footerOfficeTextFont, DEFAULT_SITE_SETTINGS.footerOfficeTextFont),
+    size: size || '1em',
+    sizeMobile: sanitizeCssSize(settings.footerOfficeTextSizeMobile, size || '0.9rem'),
+    metaSize: sanitizeCssSize(settings.footerOfficeMetaTextSize, '1em'),
+  };
+}
+
 /** Prefer Site Settings label; fall back to Site Copy string. */
 export function footerOfficeLabelText(
   settings: Pick<SiteSettings, 'footerOfficeLabel'>,
@@ -907,9 +936,10 @@ export function logoSizingCss(settings: SiteSettings): string {
   const brandAlign = sanitizeFooterOfficeAlign(settings.footerBrandAlign);
   const officeHeading = resolveFooterOfficeHeadingTokens(settings);
   const officeMeta = resolveFooterOfficeMetaLabelTokens(settings);
+  const officeText = resolveFooterOfficeTextTokens(settings);
 
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--foot-office-label-font:${officeHeading.font};--foot-office-label-size:${officeHeading.size};--foot-office-label-color:${officeHeading.color};--foot-office-label-weight:${officeHeading.weight};--foot-office-label-letter-spacing:${officeHeading.letterSpacing};--foot-office-label-transform:${officeHeading.transform};--foot-office-meta-label-font:${officeMeta.font};--foot-office-meta-label-size:${officeMeta.size};--foot-office-meta-label-color:${officeMeta.color};--foot-office-meta-label-weight:${officeMeta.weight};--foot-office-meta-label-letter-spacing:${officeMeta.letterSpacing};--foot-office-meta-label-transform:${officeMeta.transform};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--foot-office-label-font:${officeHeading.font};--foot-office-label-size:${officeHeading.size};--foot-office-label-color:${officeHeading.color};--foot-office-label-weight:${officeHeading.weight};--foot-office-label-letter-spacing:${officeHeading.letterSpacing};--foot-office-label-transform:${officeHeading.transform};--foot-office-meta-label-font:${officeMeta.font};--foot-office-meta-label-size:${officeMeta.size};--foot-office-meta-label-color:${officeMeta.color};--foot-office-meta-label-weight:${officeMeta.weight};--foot-office-meta-label-letter-spacing:${officeMeta.letterSpacing};--foot-office-meta-label-transform:${officeMeta.transform};--foot-office-text-font:${officeText.font};--foot-office-text-size:${officeText.size};--foot-office-text-size-mobile:${officeText.sizeMobile};--foot-office-meta-text-size:${officeText.metaSize};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
     `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:var(--footer-logo-chip-h-mobile);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile);}footer .footer-logo .logo-word small,.footer-logo .logo-word small{font-size:var(--footer-logo-tagline-size-mobile);}.logo-word small,header .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}footer .foot-brand{max-width:var(--footer-brand-max-width-mobile);}}`,
   ].join('');

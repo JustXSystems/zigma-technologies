@@ -13,7 +13,9 @@ import {
   type FooterOfficeLine,
   type FooterOfficeLinePart,
 } from '@/lib/footer-office-layout';
-import type { SiteSettings } from '@/lib/site-settings';
+import { resolveFooterOfficeTextTokens, type SiteSettings } from '@/lib/site-settings';
+import { resolveLogoFontCss } from '@/lib/logo-fonts';
+import LogoFontPicker from '@/components/admin/LogoFontPicker';
 
 type Props = {
   settings: SiteSettings;
@@ -42,6 +44,9 @@ export default function FooterOfficeLayoutEditor({ settings, onChange }: Props) 
     () => renderFooterOfficeLines(settings, settings.footerOfficeLayoutJson),
     [settings]
   );
+
+  const textTokens = resolveFooterOfficeTextTokens(settings);
+  const previewFont = resolveLogoFontCss(textTokens.font, "'Inter', sans-serif");
 
   function commit(next: FooterOfficeLayout) {
     setJsonError('');
@@ -294,16 +299,71 @@ export default function FooterOfficeLayoutEditor({ settings, onChange }: Props) 
         </div>
       ) : null}
 
+      <div className="admin-footer-layout-type">
+        <strong>Office content type</strong>
+        <span>Font and size for the address lines and the hours / SLA values (labels are styled above).</span>
+        <div className="admin-form-grid">
+          <LogoFontPicker
+            id="footerOfficeTextFont"
+            label="Content font"
+            value={settings.footerOfficeTextFont || ''}
+            onChange={(v) => onChange({ footerOfficeTextFont: v })}
+            hint="Default: Site body (Inter)"
+          />
+          <div className="admin-field">
+            <label htmlFor="footerOfficeTextSize">Address size</label>
+            <input
+              id="footerOfficeTextSize"
+              className="admin-input"
+              value={settings.footerOfficeTextSize}
+              placeholder="Inherit footer scale"
+              onChange={(e) => onChange({ footerOfficeTextSize: e.target.value })}
+            />
+            <small style={{ color: 'var(--admin-muted)' }}>e.g. 0.92rem, 15px — blank inherits</small>
+          </div>
+          <div className="admin-field">
+            <label htmlFor="footerOfficeTextSizeMobile">Address size (mobile)</label>
+            <input
+              id="footerOfficeTextSizeMobile"
+              className="admin-input"
+              value={settings.footerOfficeTextSizeMobile}
+              placeholder={settings.footerOfficeTextSize?.trim() || '0.9rem'}
+              onChange={(e) => onChange({ footerOfficeTextSizeMobile: e.target.value })}
+            />
+            <small style={{ color: 'var(--admin-muted)' }}>≤760px — blank follows address size</small>
+          </div>
+          <div className="admin-field">
+            <label htmlFor="footerOfficeMetaTextSize">Hours / SLA size</label>
+            <input
+              id="footerOfficeMetaTextSize"
+              className="admin-input"
+              value={settings.footerOfficeMetaTextSize}
+              placeholder="Inherit (0.86rem)"
+              onChange={(e) => onChange({ footerOfficeMetaTextSize: e.target.value })}
+            />
+            <small style={{ color: 'var(--admin-muted)' }}>Value text beside the Hours / Reply label</small>
+          </div>
+        </div>
+      </div>
+
       <div className="admin-footer-layout-preview" aria-live="polite">
         <strong>Live preview</strong>
         {preview.length ? (
-          <div className="admin-footer-layout-preview-body">
-            {preview.map((line) => (
-              <div key={line.key} className={`is-${line.kind}`}>
-                {line.showLabel ? <em>{line.kind === 'sla' ? 'Reply' : 'Hours'}</em> : null}
-                {line.text}
-              </div>
-            ))}
+          <div className="admin-footer-layout-preview-body" style={{ fontFamily: previewFont }}>
+            {preview.map((line) => {
+              const isMeta = line.kind === 'hours' || line.kind === 'sla';
+              const size = isMeta ? textTokens.metaSize : textTokens.size;
+              return (
+                <div
+                  key={line.key}
+                  className={`is-${line.kind}`}
+                  style={size !== '1em' ? { fontSize: size } : undefined}
+                >
+                  {line.showLabel ? <em>{line.kind === 'sla' ? 'Reply' : 'Hours'}</em> : null}
+                  {line.text}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p>Nothing to show yet — fill Address &amp; office fields below, or adjust the layout.</p>

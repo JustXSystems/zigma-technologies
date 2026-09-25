@@ -4072,6 +4072,15 @@
   font-weight:500 !important;padding-bottom:0.35rem;
 }
 .admin-footer-layout-toolbar{display:flex;flex-wrap:wrap;gap:0.45rem;}
+.admin-footer-layout-type{
+  border:1px solid var(--admin-border, #d8dee8);
+  border-radius:8px;padding:0.75rem;background:#fafbfc;
+}
+.admin-footer-layout-type > strong{display:block;font-size:0.9rem;}
+.admin-footer-layout-type > span{
+  display:block;margin:0.2rem 0 0.6rem;
+  color:var(--admin-muted, #4a5565);font-size:0.82rem;line-height:1.4;
+}
 .admin-footer-layout-preview{
   border-radius:8px;padding:0.85rem 1rem;
   background:#0a1628;color:#b7c2d6;
