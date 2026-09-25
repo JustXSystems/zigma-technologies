@@ -7,12 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#29 certificate loop gap">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#30 Office Address Font issue">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/FooterOfficeLayoutEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/FooterOfficeLayoutEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,23 +59,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.02538309898674" />
-      <entry key="MS500" value="1.8497963740997678" />
-      <entry key="S2" value="3.6576375890697594" />
-      <entry key="S5" value="5.416027251185185" />
-      <entry key="S10" value="7.661979350923341" />
-      <entry key="S30" value="22.07069411592241" />
-      <entry key="S60" value="37.544405348177406" />
-      <entry key="M2" value="51.2525394139265" />
-      <entry key="M5" value="62.63862178199904" />
-      <entry key="M10" value="67.12110583377529" />
-      <entry key="M15" value="68.76017348660992" />
-      <entry key="M30" value="73.52368447079549" />
-      <entry key="H1" value="95.56025187266538" />
-      <entry key="H2" value="142.42712544250816" />
-      <entry key="H4" value="232.32172522874234" />
-      <entry key="D1" value="2352.595814316331" />
-      <entry key="W1" value="14479.99668389672" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000000000207485" />
+      <entry key="S10" value="1.0000176307586404" />
+      <entry key="S30" value="1.2051331570369528" />
+      <entry key="S60" value="3.907051733965628" />
+      <entry key="M2" value="14.679697424484294" />
+      <entry key="M5" value="46.17234553876785" />
+      <entry key="M10" value="77.56548843859501" />
+      <entry key="M15" value="94.3782633623775" />
+      <entry key="M30" value="118.54122899185401" />
+      <entry key="H1" value="150.43232057587093" />
+      <entry key="H2" value="202.4901898027925" />
+      <entry key="H4" value="295.2520858867086" />
+      <entry key="D1" value="2409.961658054597" />
+      <entry key="W1" value="14539.34261373731" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -90,31 +89,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.1931493870042475E-218" />
-      <entry key="H1" value="1.0923137768079872E-109" />
-      <entry key="H2" value="3.305017060179558E-55" />
-      <entry key="H4" value="5.748927778543018E-28" />
-      <entry key="D1" value="2.929805261381633E-5" />
-      <entry key="W1" value="0.3490533712417132" />
+      <entry key="M30" value="8.695348747856917E-219" />
+      <entry key="H1" value="9.324885386887576E-110" />
+      <entry key="H2" value="3.053667530509162E-55" />
+      <entry key="H4" value="5.525999937216365E-28" />
+      <entry key="D1" value="2.9105568850196426E-5" />
+      <entry key="W1" value="0.3487248410936359" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.983776312176272" />
-      <entry key="MS500" value="1.8348420911014678" />
-      <entry key="S2" value="3.6501493096153594" />
-      <entry key="S5" value="5.411596341085351" />
-      <entry key="S10" value="7.658750379914963" />
-      <entry key="S30" value="22.066747351550877" />
-      <entry key="S60" value="37.540588318015686" />
-      <entry key="M2" value="51.24974364927994" />
-      <entry key="M5" value="62.63719451993137" />
-      <entry key="M10" value="67.12032995000766" />
-      <entry key="M15" value="68.75964118946882" />
-      <entry key="M30" value="73.52340205762809" />
-      <entry key="H1" value="95.56007697562823" />
-      <entry key="H2" value="142.42700096704746" />
-      <entry key="H4" value="232.32162547180207" />
-      <entry key="D1" value="2352.595667898809" />
-      <entry key="W1" value="14480.345584663413" />
+      <entry key="MS100" value="0.9592641193252643" />
+      <entry key="MS500" value="0.9917167307382933" />
+      <entry key="S2" value="0.9979227189990506" />
+      <entry key="S5" value="0.9991685692343363" />
+      <entry key="S10" value="0.9996018206186342" />
+      <entry key="S30" value="1.2049605324568355" />
+      <entry key="S60" value="3.9067181539170277" />
+      <entry key="M2" value="14.67898912116565" />
+      <entry key="M5" value="46.17138045231435" />
+      <entry key="M10" value="77.56465187077308" />
+      <entry key="M15" value="94.37757737374899" />
+      <entry key="M30" value="118.54079552315186" />
+      <entry key="H1" value="150.43205028535513" />
+      <entry key="H2" value="202.4900124242017" />
+      <entry key="H4" value="295.2519583324153" />
+      <entry key="D1" value="2409.9615072536244" />
+      <entry key="W1" value="14539.69118535219" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -141,37 +140,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/public",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/public&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
@@ -269,7 +268,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#23 Footer Navigation issues" />
     <MESSAGE value="#24 Catalog Item Listing size fixing" />
     <MESSAGE value="#25 Talk to us - buttons" />
     <MESSAGE value="#25 Request Consultation - buttons also made configurable" />
@@ -294,7 +292,8 @@
     <MESSAGE value="#28 Mobile is covered for both the public cards and the admin pickers." />
     <MESSAGE value="#28 put control on tag-pill to display all in one single line, in admin Hero section edit popup" />
     <MESSAGE value="#29 certificate loop gap" />
-    <option name="LAST_COMMIT_MESSAGE" value="#29 certificate loop gap" />
+    <MESSAGE value="#30 Office Address Font issue" />
+    <option name="LAST_COMMIT_MESSAGE" value="#30 Office Address Font issue" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

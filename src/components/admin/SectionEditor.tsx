@@ -1673,6 +1673,13 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                       placeholder="/industries"
                     />
                   </Field>
+                  <ColorPickerField
+                    label="Industry item background"
+                    value={String(content.itemBg || '')}
+                    fallback="#FFFFFF"
+                    onChange={(next) => setField('itemBg', next || undefined)}
+                    hint="Background of each industry tile. Clear to use the default white."
+                  />
                 </div>
                 <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
                   <label>Industry labels (one per line)</label>

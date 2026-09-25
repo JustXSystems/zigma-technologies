@@ -819,11 +819,13 @@ function IndustriesSection({
   const items = (content.items as string[]) || [];
   const layout = String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee';
   const durationSec = Math.max(36, Math.round(items.length * 2.8));
+  const itemBg = typeof content.itemBg === 'string' ? content.itemBg.trim() : '';
 
   return (
     <section
       className={`section section-gray${layout === 'marquee' ? ' industries-section--marquee' : ''}`}
       id={sectionKey || 'industries'}
+      style={itemBg ? ({ ['--ind-item-bg' as string]: itemBg } as CSSProperties) : undefined}
     >
       <div className="container">
         <div className="section-head center">
