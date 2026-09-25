@@ -176,7 +176,10 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
   if (!slides.length) return null;
 
   return (
-    <section className="hero-slider" id="home">
+    <section
+      className={`hero-slider${content.tagsSingleLine ? ' hero-slider--tags-single-line' : ''}`}
+      id="home"
+    >
       {slides.map((slide, i) => {
         const icon = HERO_SLIDE_ICONS[slide.theme];
         const iconHtml = slide.iconHtml || icon?.html;

@@ -1458,6 +1458,16 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     Add slide
                   </button>
                 </div>
+                <div className="admin-field" style={{ marginBottom: '0.7rem' }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(content.tagsSingleLine)}
+                      onChange={(e) => setField('tagsSingleLine', e.target.checked)}
+                    />{' '}
+                    Show tag pills in one single line (scrolls sideways if they don&apos;t fit)
+                  </label>
+                </div>
                 {slides.map((slide, idx) => (
                   <div
                     key={idx}
