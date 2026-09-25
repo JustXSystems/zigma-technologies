@@ -7,7 +7,6 @@ import HoneypotField from '@/components/HoneypotField';
 import TurnstileField from '@/components/TurnstileField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
-import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/site-settings';
 import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import SiteHeading from '@/components/SiteHeading';
 
@@ -28,14 +27,16 @@ export default function EnquiryFormSection({
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState('');
   const [success, setSuccess] = useState(false);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const [turnstileToken, setTurnstileToken] = useState('');
   const router = useRouter();
 
+  const text = (key: string) => String(content[key] ?? '').trim();
   const sideItems = (content.sideItems as SideItem[]) || [];
   const offices = (content.offices as Office[]) || [];
   const hours = (content.hours as HoursRow[]) || [];
-  const emergencyNote = content.emergencyNote as { title?: string; body?: string; phone?: string } | undefined;
+  const rawNote = content.emergencyNote as { title?: string; body?: string; phone?: string } | undefined;
+  const emergencyNote =
+    rawNote && (rawNote.title?.trim() || rawNote.body?.trim() || rawNote.phone?.trim()) ? rawNote : undefined;
 
   useEffect(() => {
     fetch('/api/public/forms/enquiry')
@@ -44,12 +45,6 @@ export default function EnquiryFormSection({
         if (!r.ok) return;
         setFormId(data.form.id);
         setFields(data.form.fields || []);
-      })
-      .catch(() => undefined);
-    fetch('/api/public/site-settings')
-      .then(async (r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.settings) setSite(data.settings);
       })
       .catch(() => undefined);
   }, []);
@@ -179,24 +174,17 @@ export default function EnquiryFormSection({
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
                 </div>
-                <h3>{String(content.successTitle || 'Thank you — message received')}</h3>
-                <p>
-                  {String(
-                    content.successBody ||
-                      'A member of our engineering team will get back to you within one business day. For anything urgent, please call our 24×7 emergency line.'
-                  )}
-                </p>
+                {text('successTitle') ? <h3>{text('successTitle')}</h3> : null}
+                {text('successBody') ? <p>{text('successBody')}</p> : null}
               </div>
             ) : (
               <form onSubmit={onSubmit} style={{ position: 'relative' }}>
                 <HoneypotField />
                 <TurnstileField onToken={setTurnstileToken} />
-                <h3>{String(content.formTitle || 'Send us a message')}</h3>
-                <p>{String(content.formIntro || 'All fields marked with * are required.')}</p>
+                {text('formTitle') ? <h3>{text('formTitle')}</h3> : null}
+                {text('formIntro') ? <p>{text('formIntro')}</p> : null}
 
-                {fields.length === 0 ? (
-                  <p style={{ color: 'var(--graphite-500)' }}>Enquiry form fields are not configured yet.</p>
-                ) : (
+                {fields.length === 0 ? null : (
                   <>
                     {pairs.map((pair, idx) => (
                       <div className="cf-row" key={`row-${idx}`}>
@@ -221,9 +209,9 @@ export default function EnquiryFormSection({
                   className="btn btn-primary btn-hover-lift"
                   disabled={submitting || !fields.length}
                 >
-                  {submitting ? 'Sending…' : String(content.submitLabel || 'Submit Request →')}
+                  {submitting ? 'Sending…' : text('submitLabel')}
                 </button>
-                {content.privacyNote ? <p className="cf-note">{String(content.privacyNote)}</p> : null}
+                {text('privacyNote') ? <p className="cf-note">{text('privacyNote')}</p> : null}
                 {submitMsg ? <p style={{ marginTop: '0.9rem', color: 'var(--orange-dim)' }}>{submitMsg}</p> : null}
               </form>
             )}
@@ -233,7 +221,7 @@ export default function EnquiryFormSection({
             <div className="cf-side">
               {sideItems.length ? (
                 <div className="cf-side-block">
-                  <h4>{String(content.sideTitle || 'Direct Contact')}</h4>
+                  {text('sideTitle') ? <h4>{text('sideTitle')}</h4> : null}
                   {sideItems.map((item) => (
                     <div className="cf-side-item" key={item.label}>
                       {item.icon ? (
@@ -264,27 +252,19 @@ export default function EnquiryFormSection({
 
               {hours.length ? (
                 <div className="cf-side-block">
-                  <h4>{String(content.hoursTitle || 'Business Hours')}</h4>
+                  {text('hoursTitle') ? <h4>{text('hoursTitle')}</h4> : null}
                   {hours.map((row) => (
                     <div className="cf-hours-row" key={row.label}>
                       <span>{row.label}</span>
                       <span>{row.value}</span>
                     </div>
                   ))}
-                  {site.officeHours ? <p className="contact-sla">Desk hours: {site.officeHours}</p> : null}
-                  {site.responseSla ? <p className="contact-sla">Response SLA: {site.responseSla}</p> : null}
                 </div>
-              ) : (
-                <div className="cf-side-block">
-                  <h4>Response promise</h4>
-                  {site.officeHours ? <p className="contact-sla">Desk hours: {site.officeHours}</p> : null}
-                  <p className="contact-sla">We typically respond {site.responseSla || 'within 1 business day'}.</p>
-                </div>
-              )}
+              ) : null}
 
               {offices.length ? (
                 <div className="cf-side-block">
-                  <h4>{String(content.officesTitle || 'Office Locations')}</h4>
+                  {text('officesTitle') ? <h4>{text('officesTitle')}</h4> : null}
                   <ul>
                     {offices.map((office) => (
                       <li key={office.title}>
@@ -301,12 +281,12 @@ export default function EnquiryFormSection({
 
               {emergencyNote ? (
                 <div className="emergency-note">
-                  <strong>{emergencyNote.title || 'Need urgent help?'}</strong>
+                  {emergencyNote.title ? <strong>{emergencyNote.title}</strong> : null}
                   {emergencyNote.body ? <> {emergencyNote.body}</> : null}
                   {emergencyNote.phone ? (
                     <>
                       <br />
-                      <a href={`tel:${emergencyNote.phone.replace(/\s/g, '')}`}>{emergencyNote.phone} →</a>
+                      <a href={`tel:${emergencyNote.phone.replace(/\s/g, '')}`}>{emergencyNote.phone}</a>
                     </>
                   ) : null}
                 </div>
