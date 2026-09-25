@@ -7,10 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#28 Mobile is covered for both the public cards and the admin pickers.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#28 put control on tag-pill to display all in one single line, in admin Hero section edit popup">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/CertMarquee.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/CertMarquee.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,23 +60,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4796320596626322" />
-      <entry key="MS500" value="1.8633395593616358" />
-      <entry key="S2" value="1.9796451673913806" />
-      <entry key="S5" value="2.7068297733429594" />
-      <entry key="S10" value="6.078151673322974" />
-      <entry key="S30" value="23.38655376009315" />
-      <entry key="S60" value="39.25176466030446" />
-      <entry key="M2" value="52.5738701456208" />
-      <entry key="M5" value="63.32335385897409" />
-      <entry key="M10" value="67.49311239070995" />
-      <entry key="M15" value="68.95652233380378" />
-      <entry key="M30" value="70.45848091002317" />
-      <entry key="H1" value="71.34976909187245" />
-      <entry key="H2" value="79.91036721049917" />
-      <entry key="H4" value="154.16794208321087" />
-      <entry key="D1" value="2391.086700914166" />
-      <entry key="W1" value="14488.76363330705" />
+      <entry key="MS100" value="1.0237300251682784" />
+      <entry key="MS500" value="2.2863909164652227" />
+      <entry key="S2" value="7.800755273800889" />
+      <entry key="S5" value="15.679215708956749" />
+      <entry key="S10" value="21.961910690168004" />
+      <entry key="S30" value="28.59522099282182" />
+      <entry key="S60" value="31.65987534805023" />
+      <entry key="M2" value="40.42767475312215" />
+      <entry key="M5" value="66.81272505903489" />
+      <entry key="M10" value="91.27614548670846" />
+      <entry key="M15" value="107.18820075722405" />
+      <entry key="M30" value="135.15665312613316" />
+      <entry key="H1" value="158.27521592722968" />
+      <entry key="H2" value="180.01368227686814" />
+      <entry key="H4" value="255.60712515453042" />
+      <entry key="D1" value="2465.104261445437" />
+      <entry key="W1" value="14568.838693238347" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,31 +90,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.2849209509785384E-216" />
-      <entry key="H1" value="1.1335435373106942E-108" />
-      <entry key="H2" value="1.0646800163948289E-54" />
-      <entry key="H4" value="1.0318333278347466E-27" />
-      <entry key="D1" value="3.2298017907848606E-5" />
-      <entry key="W1" value="0.3539484349645517" />
+      <entry key="M30" value="5.089011598654411E-217" />
+      <entry key="H1" value="7.133730860255118E-109" />
+      <entry key="H2" value="8.446141639976106E-55" />
+      <entry key="H4" value="9.190289244773142E-28" />
+      <entry key="D1" value="3.1680775877318646E-5" />
+      <entry key="W1" value="0.35297410416386055" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4067766547892504" />
-      <entry key="MS500" value="1.8431704392619452" />
-      <entry key="S2" value="1.974173196881896" />
-      <entry key="S5" value="2.7036002526158858" />
-      <entry key="S10" value="6.074161978311186" />
-      <entry key="S30" value="23.380593848445262" />
-      <entry key="S60" value="39.24640563497857" />
-      <entry key="M2" value="52.57014226061378" />
-      <entry key="M5" value="63.321515398510506" />
-      <entry key="M10" value="67.4921249366644" />
-      <entry key="M15" value="68.95584800041034" />
-      <entry key="M30" value="70.45813549930534" />
-      <entry key="H1" value="71.34959410336172" />
-      <entry key="H2" value="79.91027292482185" />
-      <entry key="H4" value="154.16786283094584" />
-      <entry key="D1" value="2391.08655161157" />
-      <entry key="W1" value="14489.117428641832" />
+      <entry key="MS100" value="0.9822097518349684" />
+      <entry key="MS500" value="2.270013306752626" />
+      <entry key="S2" value="7.787995331288311" />
+      <entry key="S5" value="15.668893430788774" />
+      <entry key="S10" value="21.954584529406887" />
+      <entry key="S30" value="28.592000312048377" />
+      <entry key="S60" value="31.65807216304284" />
+      <entry key="M2" value="40.426474135126" />
+      <entry key="M5" value="66.81187843264846" />
+      <entry key="M10" value="91.27552344225406" />
+      <entry key="M15" value="107.18767865431475" />
+      <entry key="M30" value="135.156283258982" />
+      <entry key="H1" value="158.27498226433914" />
+      <entry key="H2" value="180.01354385291316" />
+      <entry key="H4" value="255.60702227450892" />
+      <entry key="D1" value="2465.1041095464625" />
+      <entry key="W1" value="14569.191513883572" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -268,7 +269,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#21 Mobile view rendering issue&#10;On mobile, the showcase modal now stacks in a single scrollable column: media-stage → scroll content → trust → CTA, with grid placement and sticky positioning cleared so nothing sits on top of the rest." />
     <MESSAGE value="#22 Split feature block - multiple CTA" />
     <MESSAGE value="#23 Footer Navigation issues" />
     <MESSAGE value="#24 Catalog Item Listing size fixing" />
@@ -293,7 +293,8 @@
     <MESSAGE value="#27 catalog card gap customization done" />
     <MESSAGE value="#28 Contact Map issues" />
     <MESSAGE value="#28 Mobile is covered for both the public cards and the admin pickers." />
-    <option name="LAST_COMMIT_MESSAGE" value="#28 Mobile is covered for both the public cards and the admin pickers." />
+    <MESSAGE value="#28 put control on tag-pill to display all in one single line, in admin Hero section edit popup" />
+    <option name="LAST_COMMIT_MESSAGE" value="#28 put control on tag-pill to display all in one single line, in admin Hero section edit popup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

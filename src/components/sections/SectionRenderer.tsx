@@ -1503,7 +1503,12 @@ function CertHeroSection({ content }: { content: Record<string, unknown> }) {
 }
 
 function LogoMarqueeSection({ content }: { content: Record<string, unknown> }) {
-  return <CertMarquee items={normalizeCertItems(content.items)} />;
+  return (
+    <CertMarquee
+      items={normalizeCertItems(content.items)}
+      startFrom={content.startFrom === 'right' ? 'right' : 'left'}
+    />
+  );
 }
 
 function FeatureGridSection({

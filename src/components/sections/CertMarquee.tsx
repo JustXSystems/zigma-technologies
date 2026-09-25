@@ -1,19 +1,94 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 export type CertItem = {
   name: string;
   image?: string;
 };
 
+export type CertMarqueeStart = 'left' | 'right';
+
 type Props = {
   items: CertItem[];
+  startFrom?: CertMarqueeStart;
 };
 
-export default function CertMarquee({ items }: Props) {
+/** Seconds for one full set of certificates to scroll past (matches the CSS default). */
+const BASE_DURATION_S = 28;
+
+type FillState = {
+  copies: number;
+  durationS: number;
+  delayS: number;
+  /** Static translate used instead of the animation when the user prefers reduced motion. */
+  offsetPx: number;
+  still: boolean;
+};
+
+export default function CertMarquee({ items, startFrom = 'left' }: Props) {
   const [active, setActive] = useState<CertItem | null>(null);
-  const loop = items.length ? [...items, ...items] : [];
+  const [fill, setFill] = useState<FillState | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const fromRight = startFrom === 'right';
+  const copies = fromRight && fill ? fill.copies : 1;
+  const unit = Array.from({ length: copies }, () => items).flat();
+  const loop = items.length ? [...unit, ...unit] : [];
+
+  useEffect(() => {
+    if (!fromRight || !items.length) return;
+    const track = trackRef.current;
+    const wrap = track?.parentElement;
+    if (!track || !wrap) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const measure = () => {
+      const first = track.children[0] as HTMLElement | undefined;
+      const nextSet = track.children[items.length] as HTMLElement | undefined;
+      if (!first || !nextSet) return;
+      const period = nextSet.offsetLeft - first.offsetLeft;
+      const viewport = wrap.clientWidth;
+      if (period <= 0 || viewport <= 0) return;
+
+      // Half the track must be at least as wide as the viewport, or a gap shows.
+      const nextCopies = Math.max(1, Math.ceil(viewport / period));
+      const unitWidth = nextCopies * period;
+      // Translate that puts the first certificate's right edge on the viewport's right edge.
+      let offset = viewport - first.offsetWidth;
+      offset -= Math.ceil(offset / period) * period;
+      const durationS = BASE_DURATION_S * nextCopies;
+      const delayS = -((offset + unitWidth) / unitWidth) * durationS;
+      const still = reducedMotion.matches;
+
+      setFill((prev) =>
+        prev &&
+        prev.copies === nextCopies &&
+        prev.still === still &&
+        Math.abs(prev.delayS - delayS) < 0.01
+          ? prev
+          : { copies: nextCopies, durationS, delayS, offsetPx: offset, still }
+      );
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(wrap);
+    reducedMotion.addEventListener('change', measure);
+    return () => {
+      observer.disconnect();
+      reducedMotion.removeEventListener('change', measure);
+    };
+  }, [fromRight, items.length]);
+
+  // Animation stays off until measured so it starts fresh with the computed delay
+  // (some mobile browsers ignore a delay changed on an already-running animation).
+  const trackStyle: CSSProperties | undefined = fromRight
+    ? !fill
+      ? { visibility: 'hidden', animationName: 'none' }
+      : fill.still
+        ? { animationName: 'none', transform: `translateX(${fill.offsetPx}px)` }
+        : { animationDuration: `${fill.durationS}s`, animationDelay: `${fill.delayS}s` }
+    : undefined;
 
   useEffect(() => {
     if (!active) return;
@@ -30,7 +105,7 @@ export default function CertMarquee({ items }: Props) {
     <>
       <section className="cert-marquee-section">
         <div className="cert-marquee-wrap">
-          <div className="cert-marquee">
+          <div className="cert-marquee" ref={trackRef} style={trackStyle}>
             {loop.map((item, i) => {
               const clickable = Boolean(item.image);
               return (

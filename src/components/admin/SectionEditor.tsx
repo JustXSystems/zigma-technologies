@@ -1762,6 +1762,20 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
 
             {section.type === 'logo_marquee' ? (
               <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                <Field label="Start position">
+                  <select
+                    className="admin-select"
+                    value={content.startFrom === 'right' ? 'right' : 'left'}
+                    onChange={(e) => setField('startFrom', e.target.value)}
+                  >
+                    <option value="left">Left edge (default — may leave a gap on the right)</option>
+                    <option value="right">Right-most edge, fill the strip (no gap)</option>
+                  </select>
+                </Field>
+                <small style={{ color: 'var(--admin-muted)', marginBottom: '0.8rem', display: 'block' }}>
+                  Right-most repeats the certificates as needed so the strip is full from the first frame, with the
+                  first certificate starting at the right edge.
+                </small>
                 <label>Certificates / brands (one per line: Name | Image URL)</label>
                 <textarea
                   className="admin-textarea"

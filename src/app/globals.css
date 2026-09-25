@@ -2294,8 +2294,12 @@
 .cert-marquee-wrap{overflow:hidden;width:100%;
   -webkit-mask-image:linear-gradient(90deg, transparent 0, black 6%, black 94%, transparent 100%);
   mask-image:linear-gradient(90deg, transparent 0, black 6%, black 94%, transparent 100%);}
-.cert-marquee{display:flex;align-items:stretch;gap:1.8rem;width:max-content;animation:certMarqueeLTR 28s linear infinite;}
-.cert-marquee-wrap:hover .cert-marquee{animation-play-state:paused;}
+/* Spacing is margin-right on cards (not gap) so -50% is exactly one loop period. */
+.cert-marquee{display:flex;align-items:stretch;width:max-content;animation:certMarqueeLTR 28s linear infinite;}
+.cert-marquee > .cert-card{margin-right:1.8rem;}
+@media (hover:hover){
+  .cert-marquee-wrap:hover .cert-marquee{animation-play-state:paused;}
+}
 @keyframes certMarqueeLTR{from{transform:translateX(-50%);}to{transform:translateX(0%);}}
 
 /* Uniform certificate cards */
