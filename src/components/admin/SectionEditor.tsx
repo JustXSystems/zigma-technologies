@@ -18,6 +18,13 @@ import {
   normalizeLocationOfficeCards,
   type LocationOfficeCard,
 } from '@/lib/locations-section';
+import {
+  ECO_GROUP_COLOR_PRESETS,
+  ecoGroupColorKey,
+  ecoGroupForColor,
+  type EcoCapabilityGroup,
+  type EcoGroupColorKey,
+} from '@/lib/eco-section';
 
 type Props = {
   section: CmsSection;
@@ -228,6 +235,15 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
       if (section.type === 'split') {
         content_json = migrateSplitContent(content_json);
       }
+      if (section.type === 'eco' && Array.isArray(content_json.groups)) {
+        content_json = {
+          ...content_json,
+          groups: (content_json.groups as EcoCapabilityGroup[]).map((g) => ({
+            ...g,
+            items: (g.items || []).map((i) => i.trim()).filter(Boolean),
+          })),
+        };
+      }
       const res = await fetch(`/api/admin/sections/${section.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -266,6 +282,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
       : [];
   const locationCards =
     section.type === 'locations' ? normalizeLocationOfficeCards(content.locations) : [];
+  const ecoGroups = section.type === 'eco' ? ((content.groups as EcoCapabilityGroup[]) || []) : [];
 
   function setWhyCards(next: WhyCard[]) {
     setField('cards', next);
@@ -377,6 +394,29 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     const [item] = next.splice(idx, 1);
     next.splice(nextIdx, 0, item);
     setLocationCards(next);
+  }
+
+  function setEcoGroups(next: EcoCapabilityGroup[]) {
+    setField('groups', next);
+  }
+
+  function patchEcoGroup(idx: number, patch: Partial<EcoCapabilityGroup>) {
+    setEcoGroups(ecoGroups.map((g, i) => (i === idx ? { ...g, ...patch } : g)));
+  }
+
+  function moveEcoGroup(idx: number, dir: -1 | 1) {
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= ecoGroups.length) return;
+    const next = [...ecoGroups];
+    const [item] = next.splice(idx, 1);
+    next.splice(nextIdx, 0, item);
+    setEcoGroups(next);
+  }
+
+  function addEcoGroup() {
+    const used = new Set(ecoGroups.map((g) => ecoGroupColorKey(g)));
+    const color = ECO_GROUP_COLOR_PRESETS.find((p) => !used.has(p.key))?.key ?? 'orange';
+    setEcoGroups([...ecoGroups, ecoGroupForColor(color, ['New capability'])]);
   }
 
   return createPortal(
@@ -2371,30 +2411,109 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
 
             {section.type === 'eco' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>Capability groups (block per group: className|dot then items as bullet lines)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 200, fontFamily: 'var(--admin-mono)' }}
-                  value={((content.groups as Array<{ className: string; items: string[]; dot: string }>) || [])
-                    .map((g) => `${g.className}|${g.dot}\n${(g.items || []).map((i) => `- ${i}`).join('\n')}`)
-                    .join('\n\n')}
-                  onChange={(e) => {
-                    const blocks = e.target.value.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
-                    setField(
-                      'groups',
-                      blocks.map((block) => {
-                        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
-                        const [className, dot] = (lines[0] || 'cap-group-orange|dot-orange').split('|');
-                        const items = lines
-                          .slice(1)
-                          .map((l) => l.replace(/^[-*]\s*/, '').trim())
-                          .filter(Boolean);
-                        return { className: className.trim(), dot: (dot || 'dot-orange').trim(), items };
-                      })
-                    );
-                  }}
-                />
+              <div
+                style={{
+                  marginTop: '0.8rem',
+                  border: '1px solid var(--admin-border, #e5e7eb)',
+                  borderRadius: 10,
+                  padding: '0.9rem',
+                  background: 'var(--admin-muted-bg, #f8fafc)',
+                }}
+              >
+                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                  <div>
+                    <strong>Capability groups</strong>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                      Each group gets a dot and hover color. Orange, Green, Blue and Purple keep their fixed 2×2 spots;
+                      the other colors fill the next free cells in order.
+                    </div>
+                  </div>
+                  <button type="button" className="admin-btn admin-btn-secondary" onClick={addEcoGroup}>
+                    Add group
+                  </button>
+                </div>
+                {ecoGroups.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                    No groups yet. Add one to populate the checklist.
+                  </p>
+                ) : null}
+                {ecoGroups.map((group, idx) => {
+                  const colorKey = ecoGroupColorKey(group);
+                  const preset = ECO_GROUP_COLOR_PRESETS.find((p) => p.key === colorKey)!;
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderLeft: `4px solid ${preset.hex}`,
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                        background: '#fff',
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <span
+                            style={{ width: 10, height: 10, borderRadius: '50%', background: preset.hex, display: 'inline-block' }}
+                          />
+                          #{idx + 1} · {preset.label}
+                        </strong>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveEcoGroup(idx, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveEcoGroup(idx, 1)}
+                            disabled={idx === ecoGroups.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() => setEcoGroups(ecoGroups.filter((_, i) => i !== idx))}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Color">
+                          <select
+                            className="admin-select"
+                            value={colorKey}
+                            onChange={(e) =>
+                              patchEcoGroup(idx, ecoGroupForColor(e.target.value as EcoGroupColorKey, group.items))
+                            }
+                          >
+                            {ECO_GROUP_COLOR_PRESETS.map((p) => (
+                              <option key={p.key} value={p.key}>
+                                {p.label} ({p.hex})
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                        <div className="admin-field full">
+                          <label>Items (one per line)</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 90 }}
+                            value={(group.items || []).join('\n')}
+                            onChange={(e) => patchEcoGroup(idx, { items: e.target.value.split('\n') })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
 

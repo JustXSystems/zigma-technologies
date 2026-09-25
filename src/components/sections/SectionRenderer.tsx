@@ -267,9 +267,9 @@ function EcoSection({ content }: { content: Record<string, unknown> }) {
             <SiteHeading role="section">{String(content.title || '')}</SiteHeading>
             <p>{String(content.body || '')}</p>
             <div className="cap-checklist">
-              {groups.map((g) => (
-                <div key={g.className} className={`cap-group ${g.className}`}>
-                  {g.items.map((item) => (
+              {groups.map((g, gi) => (
+                <div key={`${g.className}-${gi}`} className={`cap-group ${g.className}`}>
+                  {(g.items || []).filter((item) => item.trim()).map((item) => (
                     <div key={item} className="cap-check">
                       <span className={`dot ${g.dot}`}></span>
                       {item}

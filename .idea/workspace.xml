@@ -7,8 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#30 Office Address Font issue">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#31 Industry marquee item background color customization">
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
@@ -59,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000207485" />
-      <entry key="S10" value="1.0000176307586404" />
-      <entry key="S30" value="1.2051331570369528" />
-      <entry key="S60" value="3.907051733965628" />
-      <entry key="M2" value="14.679697424484294" />
-      <entry key="M5" value="46.17234553876785" />
-      <entry key="M10" value="77.56548843859501" />
-      <entry key="M15" value="94.3782633623775" />
-      <entry key="M30" value="118.54122899185401" />
-      <entry key="H1" value="150.43232057587093" />
-      <entry key="H2" value="202.4901898027925" />
-      <entry key="H4" value="295.2520858867086" />
-      <entry key="D1" value="2409.961658054597" />
-      <entry key="W1" value="14539.34261373731" />
+      <entry key="MS100" value="1.0000017655816265" />
+      <entry key="MS500" value="1.1773310047061927" />
+      <entry key="S2" value="4.671162780079957" />
+      <entry key="S5" value="9.597949163034485" />
+      <entry key="S10" value="14.50348411541121" />
+      <entry key="S30" value="35.41458301028954" />
+      <entry key="S60" value="63.905041509372566" />
+      <entry key="M2" value="103.84572983358801" />
+      <entry key="M5" value="171.80912814897772" />
+      <entry key="M10" value="233.85790839775783" />
+      <entry key="M15" value="270.1857612342985" />
+      <entry key="M30" value="324.00018021722474" />
+      <entry key="H1" value="375.204477202707" />
+      <entry key="H2" value="438.4877582753277" />
+      <entry key="H4" value="537.4778317382826" />
+      <entry key="D1" value="2650.7351954677574" />
+      <entry key="W1" value="14782.391131656217" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,31 +88,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="8.695348747856917E-219" />
-      <entry key="H1" value="9.324885386887576E-110" />
-      <entry key="H2" value="3.053667530509162E-55" />
-      <entry key="H4" value="5.525999937216365E-28" />
-      <entry key="D1" value="2.9105568850196426E-5" />
-      <entry key="W1" value="0.3487248410936359" />
+      <entry key="M30" value="6.606400564948639E-219" />
+      <entry key="H1" value="8.127976725452787E-110" />
+      <entry key="H2" value="2.8509606671175476E-55" />
+      <entry key="H4" value="5.339438797489019E-28" />
+      <entry key="D1" value="2.8939446106885978E-5" />
+      <entry key="W1" value="0.34843980317193657" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9592641193252643" />
-      <entry key="MS500" value="0.9917167307382933" />
-      <entry key="S2" value="0.9979227189990506" />
-      <entry key="S5" value="0.9991685692343363" />
-      <entry key="S10" value="0.9996018206186342" />
-      <entry key="S30" value="1.2049605324568355" />
-      <entry key="S60" value="3.9067181539170277" />
-      <entry key="M2" value="14.67898912116565" />
-      <entry key="M5" value="46.17138045231435" />
-      <entry key="M10" value="77.56465187077308" />
-      <entry key="M15" value="94.37757737374899" />
-      <entry key="M30" value="118.54079552315186" />
-      <entry key="H1" value="150.43205028535513" />
-      <entry key="H2" value="202.4900124242017" />
-      <entry key="H4" value="295.2519583324153" />
-      <entry key="D1" value="2409.9615072536244" />
-      <entry key="W1" value="14539.69118535219" />
+      <entry key="MS100" value="0.9659380342472672" />
+      <entry key="MS500" value="1.169131972164003" />
+      <entry key="S2" value="4.662864724579335" />
+      <entry key="S5" value="9.591173099820887" />
+      <entry key="S10" value="14.498341957030759" />
+      <entry key="S30" value="35.410358541699836" />
+      <entry key="S60" value="63.90122100159853" />
+      <entry key="M2" value="103.84257553171513" />
+      <entry key="M5" value="171.8068974047978" />
+      <entry key="M10" value="233.85626023090333" />
+      <entry key="M15" value="270.1844352445023" />
+      <entry key="M30" value="323.9993417842021" />
+      <entry key="H1" value="375.203974675173" />
+      <entry key="H2" value="438.4874559213169" />
+      <entry key="H4" value="537.4776392689812" />
+      <entry key="D1" value="2650.735033870876" />
+      <entry key="W1" value="14782.739416690223" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -268,7 +267,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#24 Catalog Item Listing size fixing" />
     <MESSAGE value="#25 Talk to us - buttons" />
     <MESSAGE value="#25 Request Consultation - buttons also made configurable" />
     <MESSAGE value="#26 Industries section creation for its new page design as per the HTML template" />
@@ -293,7 +291,8 @@
     <MESSAGE value="#28 put control on tag-pill to display all in one single line, in admin Hero section edit popup" />
     <MESSAGE value="#29 certificate loop gap" />
     <MESSAGE value="#30 Office Address Font issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="#30 Office Address Font issue" />
+    <MESSAGE value="#31 Industry marquee item background color customization" />
+    <option name="LAST_COMMIT_MESSAGE" value="#31 Industry marquee item background color customization" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
