@@ -369,7 +369,7 @@ function StatsSection({ content }: { content: Record<string, unknown> }) {
 
 function WhySection({ content, sectionKey }: { content: Record<string, unknown>; sectionKey?: string | null }) {
   const cards =
-    (content.cards as Array<{ index: string; title: string; desc: string; tint: string }>) || [];
+    (content.cards as Array<{ index: string; title: string; desc: string; tint: string; bg?: string }>) || [];
   const tone =
     content.tone === 'gray' ? 'section-gray' : content.tone === 'dark' ? 'section-dark' : 'section-light';
   return (
@@ -381,17 +381,29 @@ function WhySection({ content, sectionKey }: { content: Record<string, unknown>;
           <p>{String(content.body || '')}</p>
         </div>
         <div className="why-grid">
-          {cards.map((card) => (
-            <div key={card.index} className={`why-card is-animated ${card.tint} reveal`}>
-              <svg className="card-outline" width="100%" height="100%">
-                <rect className="outline-base" x="0" y="0" width="100%" height="100%" rx="10" pathLength="100" />
-                <rect className="outline-highlight" x="0" y="0" width="100%" height="100%" rx="10" pathLength="100" />
-              </svg>
-              <div className="why-index">{card.index}</div>
-              <h4>{card.title}</h4>
-              <p>{card.desc}</p>
-            </div>
-          ))}
+          {cards.map((card) => {
+            const customBg =
+              typeof card.bg === 'string' && card.bg.trim() ? card.bg.trim() : '';
+            return (
+              <div
+                key={card.index}
+                className={`why-card is-animated ${card.tint} reveal${customBg ? ' has-custom-bg' : ''}`}
+                style={
+                  customBg
+                    ? ({ ['--card-bg' as string]: customBg, backgroundColor: customBg } as CSSProperties)
+                    : undefined
+                }
+              >
+                <svg className="card-outline" width="100%" height="100%">
+                  <rect className="outline-base" x="0" y="0" width="100%" height="100%" rx="10" pathLength="100" />
+                  <rect className="outline-highlight" x="0" y="0" width="100%" height="100%" rx="10" pathLength="100" />
+                </svg>
+                <div className="why-index">{card.index}</div>
+                <h4>{card.title}</h4>
+                <p>{card.desc}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1509,6 +1521,7 @@ function FeatureGridSection({
       linkLabel?: string;
       linkHref?: string;
       subject?: string;
+      bg?: string;
     }>) || [];
   const tone =
     content.tone === 'gray' ? 'section-gray' : content.tone === 'dark' ? 'section-dark' : 'section-light';
@@ -1533,19 +1546,29 @@ function FeatureGridSection({
                 : card.variant === 'emergency'
                   ? ' emergency-card'
                   : '';
+            const customBg =
+              typeof card.bg === 'string' && card.bg.trim() ? card.bg.trim() : '';
+            const cardStyle: CSSProperties | undefined = darkCards
+              ? {
+                  ...(customBg
+                    ? ({ ['--card-bg' as string]: customBg } as CSSProperties)
+                    : {}),
+                  background: customBg || 'var(--navy-950)',
+                  backgroundColor: customBg || 'var(--navy-950)',
+                  color: 'var(--white)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }
+              : customBg
+                ? ({
+                    ['--card-bg' as string]: customBg,
+                    backgroundColor: customBg,
+                  } as CSSProperties)
+                : undefined;
             return (
               <div
                 key={card.title}
-                className={`feat-card reveal${variantClass}`}
-                style={
-                  darkCards
-                    ? {
-                        background: 'var(--navy-950)',
-                        color: 'var(--white)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                      }
-                    : undefined
-                }
+                className={`feat-card reveal${variantClass}${customBg ? ' has-custom-bg' : ''}`}
+                style={cardStyle}
               >
                 {card.icon ? (
                   <div className="feat-icon-wrap">
@@ -1814,7 +1837,13 @@ function LocationsSection({ content, sectionKey }: { content: Record<string, unk
 
 function JobListSection({ content, sectionKey }: { content: Record<string, unknown>; sectionKey?: string | null }) {
   const jobs =
-    (content.jobs as Array<{ title: string; department?: string; location?: string; type?: string }>) || [];
+    (content.jobs as Array<{
+      title: string;
+      department?: string;
+      location?: string;
+      type?: string;
+      bg?: string;
+    }>) || [];
 
   return (
     <section className="section section-light" id={sectionKey || 'current-openings'}>
@@ -1825,26 +1854,38 @@ function JobListSection({ content, sectionKey }: { content: Record<string, unkno
           {content.body ? <p>{String(content.body)}</p> : null}
         </div>
         <div className="job-list">
-          {jobs.map((job) => (
-            <div className="job-card reveal" key={job.title}>
-              <div className="job-main">
-                <h5>{job.title}</h5>
-                <div className="job-meta">
-                  {job.department ? <span className="job-chip">{job.department}</span> : null}
-                  {job.location ? <span className="job-chip">{job.location}</span> : null}
-                  {job.type ? <span className="job-chip">{job.type}</span> : null}
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                data-role={job.title}
-                onClick={() => focusApplyRole(job.title)}
+          {jobs.map((job) => {
+            const customBg =
+              typeof job.bg === 'string' && job.bg.trim() ? job.bg.trim() : '';
+            return (
+              <div
+                className={`job-card reveal${customBg ? ' has-custom-bg' : ''}`}
+                key={job.title}
+                style={
+                  customBg
+                    ? ({ ['--card-bg' as string]: customBg, backgroundColor: customBg } as CSSProperties)
+                    : undefined
+                }
               >
-                Apply Now →
-              </button>
-            </div>
-          ))}
+                <div className="job-main">
+                  <h5>{job.title}</h5>
+                  <div className="job-meta">
+                    {job.department ? <span className="job-chip">{job.department}</span> : null}
+                    {job.location ? <span className="job-chip">{job.location}</span> : null}
+                    {job.type ? <span className="job-chip">{job.type}</span> : null}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  data-role={job.title}
+                  onClick={() => focusApplyRole(job.title)}
+                >
+                  Apply Now →
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

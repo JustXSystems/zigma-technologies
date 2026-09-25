@@ -58,26 +58,19 @@ function ColorPickerField({
   const pickerValue = HEX6.test(value) ? value : fallback;
   return (
     <Field label={label}>
-      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+      <div className="admin-color-field">
         <input
           type="color"
           value={pickerValue}
           onChange={(e) => onChange(e.target.value)}
           aria-label={label}
-          style={{
-            width: 44,
-            height: 34,
-            padding: 0,
-            border: '1px solid var(--admin-border)',
-            borderRadius: 6,
-            background: 'transparent',
-          }}
         />
         <input
           className="admin-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={fallback}
+          style={{ minWidth: 0, flex: '1 1 8rem' }}
         />
         {value ? (
           <button
@@ -85,7 +78,7 @@ function ColorPickerField({
             className="admin-btn admin-btn-secondary"
             onClick={() => onChange('')}
             title="Clear to use tone preset"
-            style={{ padding: '0.35rem 0.65rem', whiteSpace: 'nowrap' }}
+            style={{ padding: '0.35rem 0.65rem', whiteSpace: 'nowrap', flex: '0 0 auto' }}
           >
             Clear
           </button>
@@ -120,6 +113,57 @@ function migrateTimelineContent(raw: Record<string, unknown>): Record<string, un
 }
 
 type SplitCta = { label: string; href: string; position?: string; type?: 'primary' | 'secondary' };
+
+type FeatureGridCard = {
+  title: string;
+  body: string;
+  badge?: string;
+  badgeColor?: string;
+  icon?: string;
+  variant?: string;
+  linkLabel?: string;
+  linkHref?: string;
+  subject?: string;
+  /** Optional per-card background; empty uses tone / variant CSS. */
+  bg?: string;
+};
+
+function featureCardBgFallback(card: FeatureGridCard): string {
+  if (card.variant === 'pastel-green') return '#EAF7EF';
+  if (card.variant === 'emergency') return '#FFF7F2';
+  return '#EAF2FC';
+}
+
+type WhyCard = {
+  index: string;
+  title: string;
+  desc: string;
+  tint: string;
+  /** Optional per-card background; empty uses tint CSS class. */
+  bg?: string;
+};
+
+const WHY_TINT_FALLBACKS: Record<string, string> = {
+  'tint-1': '#FFF7F2',
+  'tint-2': '#F1FAF4',
+  'tint-3': '#F1FAFC',
+  'tint-4': '#FFFCF3',
+  'tint-5': '#F8F5FD',
+  'tint-6': '#F5F8FE',
+};
+
+function whyCardBgFallback(card: WhyCard): string {
+  return WHY_TINT_FALLBACKS[card.tint] || '#FFFFFF';
+}
+
+type JobCard = {
+  title: string;
+  department?: string;
+  location?: string;
+  type?: string;
+  /** Optional per-card background; empty uses default white. */
+  bg?: string;
+};
 
 function migrateSplitContent(raw: Record<string, unknown>): Record<string, unknown> {
   if (Array.isArray(raw.ctas)) return raw;
@@ -208,7 +252,10 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
   }
 
   const features = (content.features as Array<{ title: string; body: string; icon?: string }>) || [];
-  const cards = (content.cards as Array<{ index: string; title: string; desc: string; tint: string }>) || [];
+  const whyCards = section.type === 'why' ? ((content.cards as WhyCard[]) || []) : [];
+  const featureCards =
+    section.type === 'feature_grid' ? ((content.cards as FeatureGridCard[]) || []) : [];
+  const jobCards = section.type === 'job_list' ? ((content.jobs as JobCard[]) || []) : [];
   const slides = (content.slides as Array<Record<string, unknown>>) || [];
   const ctaFields = content as Record<string, string>;
   const timelineCtas = (Array.isArray(content.ctas) ? content.ctas : []) as TimelineCta[];
@@ -219,6 +266,57 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
       : [];
   const locationCards =
     section.type === 'locations' ? normalizeLocationOfficeCards(content.locations) : [];
+
+  function setWhyCards(next: WhyCard[]) {
+    setField('cards', next);
+  }
+
+  function patchWhyCard(idx: number, patch: Partial<WhyCard>) {
+    setWhyCards(whyCards.map((c, i) => (i === idx ? { ...c, ...patch } : c)));
+  }
+
+  function moveWhyCard(idx: number, dir: -1 | 1) {
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= whyCards.length) return;
+    const next = [...whyCards];
+    const [item] = next.splice(idx, 1);
+    next.splice(nextIdx, 0, item);
+    setWhyCards(next);
+  }
+
+  function setFeatureCards(next: FeatureGridCard[]) {
+    setField('cards', next);
+  }
+
+  function patchFeatureCard(idx: number, patch: Partial<FeatureGridCard>) {
+    setFeatureCards(featureCards.map((c, i) => (i === idx ? { ...c, ...patch } : c)));
+  }
+
+  function moveFeatureCard(idx: number, dir: -1 | 1) {
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= featureCards.length) return;
+    const next = [...featureCards];
+    const [item] = next.splice(idx, 1);
+    next.splice(nextIdx, 0, item);
+    setFeatureCards(next);
+  }
+
+  function setJobCards(next: JobCard[]) {
+    setField('jobs', next);
+  }
+
+  function patchJobCard(idx: number, patch: Partial<JobCard>) {
+    setJobCards(jobCards.map((c, i) => (i === idx ? { ...c, ...patch } : c)));
+  }
+
+  function moveJobCard(idx: number, dir: -1 | 1) {
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= jobCards.length) return;
+    const next = [...jobCards];
+    const [item] = next.splice(idx, 1);
+    next.splice(nextIdx, 0, item);
+    setJobCards(next);
+  }
 
   function setTimelineCtas(next: TimelineCta[]) {
     setContent((prev) => {
@@ -1200,31 +1298,135 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
 
             {section.type === 'why' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>Cards (one per line: Index | Title | Desc | tint-N)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 180 }}
-                  value={cards.map((c) => `${c.index} | ${c.title} | ${c.desc} | ${c.tint}`).join('\n')}
-                  onChange={(e) =>
-                    setField(
-                      'cards',
-                      e.target.value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean)
-                        .map((line, i) => {
-                          const parts = line.split('|').map((p) => p.trim());
-                          return {
-                            index: parts[0] || String(i + 1).padStart(2, '0'),
-                            title: parts[1] || '',
-                            desc: parts[2] || '',
-                            tint: parts[3] || `tint-${(i % 6) + 1}`,
-                          };
-                        })
-                    )
-                  }
-                />
+              <div
+                style={{
+                  marginTop: '0.8rem',
+                  border: '1px solid var(--admin-border, #e5e7eb)',
+                  borderRadius: 10,
+                  padding: '0.9rem',
+                  background: 'var(--admin-muted-bg, #f8fafc)',
+                }}
+              >
+                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                  <div>
+                    <strong>Why cards</strong>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                      Edit each card and set its background color. Clear uses the tint preset.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-secondary"
+                    onClick={() => {
+                      const i = whyCards.length;
+                      setWhyCards([
+                        ...whyCards,
+                        {
+                          index: String(i + 1).padStart(2, '0'),
+                          title: 'New reason',
+                          desc: 'Describe this differentiator.',
+                          tint: `tint-${(i % 6) + 1}`,
+                        },
+                      ]);
+                    }}
+                  >
+                    Add card
+                  </button>
+                </div>
+                {whyCards.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                    No cards yet. Add one to populate the why-grid.
+                  </p>
+                ) : null}
+                {whyCards.map((card, idx) => (
+                  <div
+                    key={`why-${idx}-${card.index}`}
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 8,
+                      padding: '0.8rem',
+                      marginBottom: '0.7rem',
+                      background: '#fff',
+                    }}
+                  >
+                    <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                      <strong>
+                        #{idx + 1} · {card.title || 'Untitled'}
+                      </strong>
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary"
+                          onClick={() => moveWhyCard(idx, -1)}
+                          disabled={idx === 0}
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary"
+                          onClick={() => moveWhyCard(idx, 1)}
+                          disabled={idx === whyCards.length - 1}
+                        >
+                          ↓
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-danger"
+                          onClick={() => setWhyCards(whyCards.filter((_, i) => i !== idx))}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <div className="admin-form-grid">
+                      <Field label="Index">
+                        <input
+                          className="admin-input"
+                          value={card.index}
+                          onChange={(e) => patchWhyCard(idx, { index: e.target.value })}
+                        />
+                      </Field>
+                      <Field label="Title">
+                        <input
+                          className="admin-input"
+                          value={card.title}
+                          onChange={(e) => patchWhyCard(idx, { title: e.target.value })}
+                        />
+                      </Field>
+                      <Field label="Tint preset">
+                        <select
+                          className="admin-select"
+                          value={card.tint || 'tint-1'}
+                          onChange={(e) => patchWhyCard(idx, { tint: e.target.value })}
+                        >
+                          <option value="tint-1">tint-1</option>
+                          <option value="tint-2">tint-2</option>
+                          <option value="tint-3">tint-3</option>
+                          <option value="tint-4">tint-4</option>
+                          <option value="tint-5">tint-5</option>
+                          <option value="tint-6">tint-6</option>
+                        </select>
+                      </Field>
+                      <ColorPickerField
+                        label="Card background"
+                        value={String(card.bg || '')}
+                        fallback={whyCardBgFallback(card)}
+                        onChange={(next) => patchWhyCard(idx, { bg: next || undefined })}
+                        hint="Overrides tint preset when set."
+                      />
+                      <div className="admin-field full">
+                        <label>Description</label>
+                        <textarea
+                          className="admin-textarea"
+                          style={{ minHeight: 72 }}
+                          value={card.desc}
+                          onChange={(e) => patchWhyCard(idx, { desc: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : null}
 
@@ -1667,28 +1869,174 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     </select>
                   </Field>
                 </div>
-                <div className="admin-field full">
-                  <label>Cards (one per line: Title | Body | optionalBadge)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 180 }}
-                    value={((content.cards as Array<{ title: string; body: string; badge?: string }>) || [])
-                      .map((c) => `${c.title} | ${c.body}${c.badge ? ` | ${c.badge}` : ''}`)
-                      .join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'cards',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const parts = line.split('|').map((p) => p.trim());
-                            return { title: parts[0] || '', body: parts[1] || '', badge: parts[2] || undefined };
-                          })
-                      )
-                    }
-                  />
+                <div
+                  className="full"
+                  style={{
+                    marginTop: '0.9rem',
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <div>
+                      <strong>Feature cards</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        Edit each card and set its background color. Clear uses the variant / CSS default.
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() =>
+                        setFeatureCards([
+                          ...featureCards,
+                          { title: 'New card', body: 'Describe this feature or request type.' },
+                        ])
+                      }
+                    >
+                      Add card
+                    </button>
+                  </div>
+                  {featureCards.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No cards yet. Add one to populate the feature grid.
+                    </p>
+                  ) : null}
+                  {featureCards.map((card, idx) => (
+                    <div
+                      key={`feat-${idx}-${card.title}`}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                        background: '#fff',
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong>
+                          #{idx + 1} · {card.title || 'Untitled'}
+                        </strong>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveFeatureCard(idx, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveFeatureCard(idx, 1)}
+                            disabled={idx === featureCards.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() =>
+                              setFeatureCards(featureCards.filter((_, i) => i !== idx))
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Title">
+                          <input
+                            className="admin-input"
+                            value={card.title}
+                            onChange={(e) => patchFeatureCard(idx, { title: e.target.value })}
+                          />
+                        </Field>
+                        <ColorPickerField
+                          label="Card background"
+                          value={String(card.bg || '')}
+                          fallback={featureCardBgFallback(card)}
+                          onChange={(next) => patchFeatureCard(idx, { bg: next || undefined })}
+                          hint="Overrides variant tint when set."
+                        />
+                        <div className="admin-field full">
+                          <label>Body</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 72 }}
+                            value={card.body}
+                            onChange={(e) => patchFeatureCard(idx, { body: e.target.value })}
+                          />
+                        </div>
+                        <Field label="Badge (optional)">
+                          <input
+                            className="admin-input"
+                            value={card.badge || ''}
+                            onChange={(e) =>
+                              patchFeatureCard(idx, { badge: e.target.value || undefined })
+                            }
+                          />
+                        </Field>
+                        <Field label="Variant">
+                          <select
+                            className="admin-select"
+                            value={card.variant || ''}
+                            onChange={(e) =>
+                              patchFeatureCard(idx, { variant: e.target.value || undefined })
+                            }
+                          >
+                            <option value="">default</option>
+                            <option value="pastel-green">pastel-green</option>
+                            <option value="emergency">emergency</option>
+                          </select>
+                        </Field>
+                        <Field label="Link label">
+                          <input
+                            className="admin-input"
+                            value={card.linkLabel || ''}
+                            onChange={(e) =>
+                              patchFeatureCard(idx, { linkLabel: e.target.value || undefined })
+                            }
+                            placeholder="Ask About Solar →"
+                          />
+                        </Field>
+                        <Field label="Link href (or leave blank for subject)">
+                          <input
+                            className="admin-input"
+                            value={card.linkHref || ''}
+                            onChange={(e) =>
+                              patchFeatureCard(idx, { linkHref: e.target.value || undefined })
+                            }
+                            placeholder="tel:+91… or /contact"
+                          />
+                        </Field>
+                        <Field label="Contact subject">
+                          <input
+                            className="admin-input"
+                            value={card.subject || ''}
+                            onChange={(e) =>
+                              patchFeatureCard(idx, { subject: e.target.value || undefined })
+                            }
+                          />
+                        </Field>
+                        <div className="admin-field full">
+                          <label>Icon SVG (inner markup for 24×24 viewBox)</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
+                            value={card.icon || ''}
+                            onChange={(e) =>
+                              patchFeatureCard(idx, { icon: e.target.value || undefined })
+                            }
+                            placeholder='<path d="M3 21h18…" />'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : null}
@@ -2575,33 +2923,130 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
 
             {section.type === 'job_list' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>Jobs (one per line: Title | Department | Location | Type)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 160 }}
-                  value={((content.jobs as Array<Record<string, string>>) || [])
-                    .map((j) => `${j.title || ''} | ${j.department || ''} | ${j.location || ''} | ${j.type || ''}`)
-                    .join('\n')}
-                  onChange={(e) =>
-                    setField(
-                      'jobs',
-                      e.target.value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean)
-                        .map((line) => {
-                          const parts = line.split('|').map((p) => p.trim());
-                          return {
-                            title: parts[0] || '',
-                            department: parts[1] || '',
-                            location: parts[2] || '',
-                            type: parts[3] || 'Full-Time',
-                          };
-                        })
-                    )
-                  }
-                />
+              <div
+                style={{
+                  marginTop: '0.8rem',
+                  border: '1px solid var(--admin-border, #e5e7eb)',
+                  borderRadius: 10,
+                  padding: '0.9rem',
+                  background: 'var(--admin-muted-bg, #f8fafc)',
+                }}
+              >
+                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                  <div>
+                    <strong>Job cards</strong>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                      Edit each opening and set its background color. Clear uses the default white card.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-secondary"
+                    onClick={() =>
+                      setJobCards([
+                        ...jobCards,
+                        {
+                          title: 'New role',
+                          department: 'Engineering',
+                          location: 'Bengaluru',
+                          type: 'Full-Time',
+                        },
+                      ])
+                    }
+                  >
+                    Add job
+                  </button>
+                </div>
+                {jobCards.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                    No jobs yet. Add one to populate the openings list.
+                  </p>
+                ) : null}
+                {jobCards.map((job, idx) => (
+                  <div
+                    key={`job-${idx}-${job.title}`}
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 8,
+                      padding: '0.8rem',
+                      marginBottom: '0.7rem',
+                      background: '#fff',
+                    }}
+                  >
+                    <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                      <strong>
+                        #{idx + 1} · {job.title || 'Untitled'}
+                      </strong>
+                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary"
+                          onClick={() => moveJobCard(idx, -1)}
+                          disabled={idx === 0}
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary"
+                          onClick={() => moveJobCard(idx, 1)}
+                          disabled={idx === jobCards.length - 1}
+                        >
+                          ↓
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-danger"
+                          onClick={() => setJobCards(jobCards.filter((_, i) => i !== idx))}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <div className="admin-form-grid">
+                      <Field label="Title">
+                        <input
+                          className="admin-input"
+                          value={job.title}
+                          onChange={(e) => patchJobCard(idx, { title: e.target.value })}
+                        />
+                      </Field>
+                      <ColorPickerField
+                        label="Card background"
+                        value={String(job.bg || '')}
+                        fallback="#FFFFFF"
+                        onChange={(next) => patchJobCard(idx, { bg: next || undefined })}
+                        hint="Overrides the default white job card when set."
+                      />
+                      <Field label="Department">
+                        <input
+                          className="admin-input"
+                          value={job.department || ''}
+                          onChange={(e) =>
+                            patchJobCard(idx, { department: e.target.value || undefined })
+                          }
+                        />
+                      </Field>
+                      <Field label="Location">
+                        <input
+                          className="admin-input"
+                          value={job.location || ''}
+                          onChange={(e) =>
+                            patchJobCard(idx, { location: e.target.value || undefined })
+                          }
+                        />
+                      </Field>
+                      <Field label="Type">
+                        <input
+                          className="admin-input"
+                          value={job.type || ''}
+                          onChange={(e) => patchJobCard(idx, { type: e.target.value || undefined })}
+                          placeholder="Full-Time"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : null}
 

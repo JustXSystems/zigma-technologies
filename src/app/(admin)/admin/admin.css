@@ -924,19 +924,27 @@
 
 .admin-color-field {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
 }
 
 .admin-color-field input[type='color'] {
-  width: 42px;
-  height: 34px;
+  width: 44px;
+  height: 40px;
+  min-width: 44px;
+  min-height: 40px;
   padding: 0;
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
   flex: 0 0 auto;
+}
+
+.admin-color-field .admin-input {
+  min-width: 0;
+  flex: 1 1 8rem;
 }
 
 .admin-range-row {
@@ -1690,6 +1698,25 @@
     flex: 1 1 100%;
     text-align: center;
     white-space: normal;
+  }
+  .admin-color-field {
+    width: 100%;
+  }
+  .admin-color-field input[type='color'] {
+    width: 48px;
+    height: 44px;
+    min-width: 48px;
+    min-height: 44px;
+  }
+  .admin-modal-backdrop {
+    padding: 0.5rem;
+    align-items: stretch;
+    place-items: stretch;
+  }
+  .admin-modal {
+    width: 100%;
+    max-height: min(96dvh, 100%);
+    margin: auto 0;
   }
 }
 
