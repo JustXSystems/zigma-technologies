@@ -819,13 +819,22 @@ function IndustriesSection({
   const items = (content.items as string[]) || [];
   const layout = String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee';
   const durationSec = Math.max(36, Math.round(items.length * 2.8));
-  const itemBg = typeof content.itemBg === 'string' ? content.itemBg.trim() : '';
+  const itemBg = cssLength(content.itemBg);
+  const itemBorderColor = cssLength(content.itemBorderColor);
+  const rawBorderWidth = cssLength(content.itemBorderWidth);
+  const itemBorderWidth =
+    rawBorderWidth && /^\d+(\.\d+)?$/.test(rawBorderWidth) ? `${rawBorderWidth}px` : rawBorderWidth;
+  const sectionStyle = {
+    ...(itemBg ? { '--ind-item-bg': itemBg } : {}),
+    ...(itemBorderColor ? { '--ind-item-border-color': itemBorderColor } : {}),
+    ...(itemBorderWidth ? { '--ind-item-border-width': itemBorderWidth } : {}),
+  } as CSSProperties;
 
   return (
     <section
       className={`section section-gray${layout === 'marquee' ? ' industries-section--marquee' : ''}`}
       id={sectionKey || 'industries'}
-      style={itemBg ? ({ ['--ind-item-bg' as string]: itemBg } as CSSProperties) : undefined}
+      style={Object.keys(sectionStyle).length ? sectionStyle : undefined}
     >
       <div className="container">
         <div className="section-head center">

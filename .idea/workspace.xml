@@ -7,8 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#32 eco-section need to update">
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2">
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,23 +58,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0425323032168334" />
-      <entry key="MS500" value="2.6754383560140393" />
-      <entry key="S2" value="6.7181649419259" />
-      <entry key="S5" value="12.513670477885967" />
-      <entry key="S10" value="18.030977450819982" />
-      <entry key="S30" value="24.653276767705417" />
-      <entry key="S60" value="29.6504143879781" />
-      <entry key="M2" value="41.53955370528614" />
-      <entry key="M5" value="66.94112871964204" />
-      <entry key="M10" value="93.24482444842754" />
-      <entry key="M15" value="123.14208767797848" />
-      <entry key="M30" value="211.26797374879104" />
-      <entry key="H1" value="324.74659204606763" />
-      <entry key="H2" value="443.0943400696979" />
-      <entry key="H4" value="578.9853135821332" />
-      <entry key="D1" value="2702.225089596957" />
-      <entry key="W1" value="14845.485522714864" />
+      <entry key="MS100" value="1.3998632883741287" />
+      <entry key="MS500" value="2.5037371238770305" />
+      <entry key="S2" value="4.399535662438389" />
+      <entry key="S5" value="5.952454436597418" />
+      <entry key="S10" value="8.111709192568712" />
+      <entry key="S30" value="13.078213580235701" />
+      <entry key="S60" value="20.83940541687889" />
+      <entry key="M2" value="32.511050232590804" />
+      <entry key="M5" value="46.08139754257144" />
+      <entry key="M10" value="52.42872807030045" />
+      <entry key="M15" value="54.805368731057364" />
+      <entry key="M30" value="57.47557487151734" />
+      <entry key="H1" value="68.0454753268297" />
+      <entry key="H2" value="142.9582028741438" />
+      <entry key="H4" value="335.73255366050836" />
+      <entry key="D1" value="2487.9896841639825" />
+      <entry key="W1" value="14719.300081743753" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -86,31 +88,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="2.272650937282632E-219" />
-      <entry key="H1" value="4.7672328842664823E-110" />
-      <entry key="H2" value="2.1833993872550287E-55" />
-      <entry key="H4" value="4.6726859377965915E-28" />
-      <entry key="D1" value="2.8303189412076396E-5" />
-      <entry key="W1" value="0.34733495933671354" />
+      <entry key="M30" value="6.334614505796414E-223" />
+      <entry key="H1" value="7.959029152979604E-112" />
+      <entry key="H2" value="2.821175136885015E-56" />
+      <entry key="H4" value="1.6796354178748295E-28" />
+      <entry key="D1" value="2.3865843207328528E-5" />
+      <entry key="W1" value="0.33897580291590645" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0001693026038436" />
-      <entry key="MS500" value="2.6552323266103963" />
-      <entry key="S2" value="6.705788259985908" />
-      <entry key="S5" value="12.504445377822998" />
-      <entry key="S10" value="18.02427216793244" />
-      <entry key="S30" value="24.650185688960644" />
-      <entry key="S60" value="29.64851507978081" />
-      <entry key="M2" value="41.538164660663575" />
-      <entry key="M5" value="66.94019528677035" />
-      <entry key="M10" value="93.24416484288021" />
-      <entry key="M15" value="123.14149841942172" />
-      <entry key="M30" value="211.2674473067023" />
-      <entry key="H1" value="324.7461720768648" />
-      <entry key="H2" value="443.09404422955777" />
-      <entry key="H4" value="578.9851125716925" />
-      <entry key="D1" value="2702.2249260619596" />
-      <entry key="W1" value="14845.832702609836" />
+      <entry key="MS100" value="1.3177366741583774" />
+      <entry key="MS500" value="2.467546686283861" />
+      <entry key="S2" value="4.380148229789093" />
+      <entry key="S5" value="5.941814278858706" />
+      <entry key="S10" value="8.104591692871352" />
+      <entry key="S30" value="13.074548898526887" />
+      <entry key="S60" value="20.83661279652035" />
+      <entry key="M2" value="32.508918395387745" />
+      <entry key="M5" value="46.08019685870727" />
+      <entry key="M10" value="52.42804559483288" />
+      <entry key="M15" value="54.80489317738994" />
+      <entry key="M30" value="57.47532579665406" />
+      <entry key="H1" value="68.0453362179027" />
+      <entry key="H2" value="142.95808417045805" />
+      <entry key="H4" value="335.7324283060517" />
+      <entry key="D1" value="2487.989533255174" />
+      <entry key="W1" value="14719.638904197918" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -265,7 +267,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#25 Request Consultation - buttons also made configurable" />
     <MESSAGE value="#26 Industries section creation for its new page design as per the HTML template" />
     <MESSAGE value="#27 Social media links are missing in Footer" />
     <MESSAGE value="#27 Admin controls (Site Settings → Address &amp; office)&#10;mobile view fix" />
@@ -290,7 +291,8 @@
     <MESSAGE value="#30 Office Address Font issue" />
     <MESSAGE value="#31 Industry marquee item background color customization" />
     <MESSAGE value="#32 eco-section need to update" />
-    <option name="LAST_COMMIT_MESSAGE" value="#32 eco-section need to update" />
+    <MESSAGE value="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2" />
+    <option name="LAST_COMMIT_MESSAGE" value="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

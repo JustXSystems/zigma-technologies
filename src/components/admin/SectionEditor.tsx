@@ -1720,6 +1720,21 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                     onChange={(next) => setField('itemBg', next || undefined)}
                     hint="Background of each industry tile. Clear to use the default white."
                   />
+                  <ColorPickerField
+                    label="Industry item border color"
+                    value={String(content.itemBorderColor || '')}
+                    fallback="#E7EBF1"
+                    onChange={(next) => setField('itemBorderColor', next || undefined)}
+                    hint="Clear to use the default light gray."
+                  />
+                  <Field label="Industry item border width">
+                    <input
+                      className="admin-input"
+                      value={String(content.itemBorderWidth || '')}
+                      onChange={(e) => setField('itemBorderWidth', e.target.value || undefined)}
+                      placeholder="1px"
+                    />
+                  </Field>
                 </div>
                 <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
                   <label>Industry labels (one per line)</label>
