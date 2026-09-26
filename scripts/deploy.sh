@@ -192,9 +192,8 @@ else
   if grep -qE '^NEXT_PUBLIC_BASE_PATH=.+' .env; then
     die "Production .env must NOT set NEXT_PUBLIC_BASE_PATH (domain-root deploy on Zigma VPS)."
   fi
-  if ! grep -qE '^NEXT_PUBLIC_SEO_INDEXABLE=true' .env; then
-    log "WARNING: Production .env should set NEXT_PUBLIC_SEO_INDEXABLE=true or the site is built noindex."
-  fi
+  # Production is the only indexable build. Exported env wins over .env when Next builds.
+  export NEXT_PUBLIC_SEO_INDEXABLE=true
 fi
 
 if [[ "$DO_SYNC" -eq 1 ]]; then
