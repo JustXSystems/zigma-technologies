@@ -1,6 +1,5 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import SiteSeo from '@/components/SiteSeo';
 import OrganizationJsonLd from '@/components/OrganizationJsonLd';
 import CookieConsent from '@/components/CookieConsent';
 import SiteProviders from '@/components/SiteProviders';
@@ -28,7 +27,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <style dangerouslySetInnerHTML={{ __html: logoSizingCss(shell.settings) }} />
       <ThemePreviewBridge />
       <OrganizationJsonLd />
-      <SiteSeo />
       <Header />
       <ConsultationModalHost />
       {children}

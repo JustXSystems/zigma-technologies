@@ -1,27 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
 import { getLocationByKey, LOCATION_DEFS } from '@/lib/locations';
-import { notFound } from 'next/navigation';
+import { LOCALE_OG, cityLocalePaths, localeCityCopy } from '@/lib/locale-locations';
+import { buildPageMetadata, localeAlternates } from '@/lib/seo';
+import { getSiteCopy } from '@/lib/site-content';
 
 type Props = { params: Promise<{ slug: string }> };
-
-const KN: Record<string, { title: string; lead: string }> = {
-  bengaluru: {
-    title: 'ಬೆಂಗಳೂರಿನಲ್ಲಿ ಪವರ್ ಮತ್ತು ಎನರ್ಜಿ ಎಂಜಿನಿಯರಿಂಗ್',
-    lead: 'ಬೆಂಗಳೂರು ಕೈಗಾರಿಕೆ, ಕ್ಯಾಂಪಸ್ ಮತ್ತು ಆಸ್ಪತ್ರೆಗಳಿಗೆ ಸೋಲಾರ್ EPC, UPS, BESS ಮತ್ತು 24×7 AMC.',
-  },
-};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const loc = getLocationByKey(slug);
-  const kn = KN[slug];
-  if (!loc) return { title: 'ಸ್ಥಳ ಸಿಗಲಿಲ್ಲ' };
-  return {
-    title: kn?.title || `${loc.name} | ಝಿಗ್ಮಾ`,
+  if (!loc) notFound();
+  const copy = await getSiteCopy();
+  const kn = localeCityCopy('kn', slug);
+  return buildPageMetadata({
+    title: kn?.title || loc.name,
     description: kn?.lead || loc.lead,
-    alternates: { languages: { en: `/locations/${slug}`, hi: `/hi/locations/${slug}`, kn: `/kn/locations/${slug}` } },
-  };
+    path: `/kn/locations/${slug}`,
+    locale: LOCALE_OG.kn,
+    noindex: !kn,
+    ...(kn ? { languages: localeAlternates(cityLocalePaths(slug, copy.features.localesEnabled)) } : {}),
+  });
 }
 
 export function generateStaticParams() {
@@ -32,9 +32,11 @@ export default async function KannadaLocationPage({ params }: Props) {
   const { slug } = await params;
   const loc = getLocationByKey(slug);
   if (!loc) notFound();
-  const kn = KN[slug];
+  const copy = await getSiteCopy();
+  if (!copy.features.localesEnabled) redirect(`/locations/${slug}`);
+  const kn = localeCityCopy('kn', slug);
   return (
-    <main id="main-content" className="container" style={{ padding: '8rem 0 4rem', maxWidth: 800 }}>
+    <main id="main-content" lang="kn" className="container" style={{ padding: '8rem 0 4rem', maxWidth: 800 }}>
       <nav className="breadcrumb" aria-label="Breadcrumb">
         <Link href="/kn">ಕನ್ನಡ</Link>
         <span className="sep">/</span>
@@ -42,7 +44,7 @@ export default async function KannadaLocationPage({ params }: Props) {
         <span className="sep">/</span>
         <span className="current">{loc.name}</span>
       </nav>
-      <h3>{kn?.title || loc.name}</h3>
+      <h1 className="heading-size-h3">{kn?.title || loc.name}</h1>
       <p className="lead">{kn?.lead || loc.lead}</p>
       <p>
         <Link href={`/locations/${slug}`} className="btn btn-ghost-dark">

@@ -1,55 +1,34 @@
 import type { Metadata } from 'next';
 import { getPageBySlug, getThemeSettings } from '@/lib/cms';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '@/lib/site-settings';
-
-function siteOrigin() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
-}
+import { getSiteCopy } from '@/lib/site-content';
+import { buildPageMetadata, localeAlternates, siteOgImage } from '@/lib/seo';
 
 export async function buildCmsMetadata(slug: string): Promise<Metadata> {
-  const [page, theme] = await Promise.all([
+  const isHome = slug === 'home';
+  const [page, theme, copy] = await Promise.all([
     getPageBySlug(slug, false).catch(() => null),
     getThemeSettings().catch(() => ({}) as Awaited<ReturnType<typeof getThemeSettings>>),
+    isHome ? getSiteCopy().catch(() => null) : Promise.resolve(null),
   ]);
   const site = mergeSiteSettings(theme?.site);
-  const titleBase = page?.meta_title || page?.title || (slug === 'home' ? site.companyName : slug);
+  const companyName = site.companyName || DEFAULT_SITE_SETTINGS.companyName;
+
+  const rawTitle = page?.meta_title || page?.title || (isHome ? companyName : slug);
+  // Home with no meta title, or a brand-only one, gets a descriptive default title.
+  const homeMetaTitle = (page?.meta_title || '').trim();
+  const homeNeedsDefault = !homeMetaTitle || homeMetaTitle.toLowerCase() === companyName.toLowerCase();
   const title =
-    slug === 'home' || titleBase.includes(site.companyName)
-      ? titleBase
-      : `${titleBase} | ${site.companyName || DEFAULT_SITE_SETTINGS.companyName}`;
-  const description =
-    page?.meta_description || site.defaultMetaDescription || DEFAULT_SITE_SETTINGS.defaultMetaDescription;
-  const image = site.ogImage || DEFAULT_SITE_SETTINGS.ogImage;
-  const path = slug === 'home' ? '/' : `/${slug}`;
-  const url = `${siteOrigin()}${path}`;
+    isHome && homeNeedsDefault ? `${companyName} | Solar EPC, UPS, BESS & EV Charging in India` : rawTitle;
 
-  const imageAbsolute = image
-    ? image.startsWith('http')
-      ? image
-      : `${siteOrigin()}${image}`
-    : undefined;
-
-  return {
+  return buildPageMetadata({
     title,
-    description,
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: site.companyName,
-      locale: 'en_IN',
-      images: imageAbsolute
-        ? [{ url: imageAbsolute, width: 1200, height: 630, alt: `${title} — ${site.companyName}` }]
-        : undefined,
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: imageAbsolute ? [imageAbsolute] : undefined,
-    },
-    alternates: { canonical: url },
-    robots: { index: true, follow: true },
-  };
+    description:
+      page?.meta_description || site.defaultMetaDescription || DEFAULT_SITE_SETTINGS.defaultMetaDescription,
+    path: isHome ? '/' : `/${slug}`,
+    image: siteOgImage(site.ogImage),
+    ...(isHome && copy?.features.localesEnabled
+      ? { languages: localeAlternates({ en: '/', hi: '/hi', kn: '/kn' }) }
+      : {}),
+  });
 }

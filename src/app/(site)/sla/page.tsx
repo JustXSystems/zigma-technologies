@@ -3,17 +3,18 @@ import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import { getThemeSettings } from '@/lib/cms';
+import { buildPageMetadata } from '@/lib/seo';
 import { getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
 import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  return {
-    title: `${copy.hubs.sla.title} | ${site.companyName}`,
+  const copy = await getSiteCopy();
+  return buildPageMetadata({
+    title: copy.hubs.sla.title,
     description: copy.hubs.sla.lead,
-  };
+    path: '/sla',
+  });
 }
 
 type Metric = { label: string; value: string };

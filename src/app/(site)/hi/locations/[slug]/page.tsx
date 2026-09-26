@@ -1,27 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
 import { getLocationByKey, LOCATION_DEFS } from '@/lib/locations';
-import { notFound } from 'next/navigation';
+import { LOCALE_OG, cityLocalePaths, localeCityCopy } from '@/lib/locale-locations';
+import { buildPageMetadata, localeAlternates } from '@/lib/seo';
+import { getSiteCopy } from '@/lib/site-content';
 
 type Props = { params: Promise<{ slug: string }> };
-
-const HI: Record<string, { title: string; lead: string }> = {
-  bengaluru: {
-    title: 'बेंगलुरु में पावर और एनर्जी इंजीनियरिंग',
-    lead: 'बेंगलुरु उद्योगों, कैंपस और अस्पतालों के लिए सोलर EPC, UPS, BESS और 24×7 AMC।',
-  },
-};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const loc = getLocationByKey(slug);
-  const hi = HI[slug];
-  if (!loc) return { title: 'स्थान नहीं मिला' };
-  return {
-    title: hi?.title || `${loc.name} | ज़िग्मा`,
+  if (!loc) notFound();
+  const copy = await getSiteCopy();
+  const hi = localeCityCopy('hi', slug);
+  return buildPageMetadata({
+    title: hi?.title || loc.name,
     description: hi?.lead || loc.lead,
-    alternates: { languages: { en: `/locations/${slug}`, hi: `/hi/locations/${slug}`, kn: `/kn/locations/${slug}` } },
-  };
+    path: `/hi/locations/${slug}`,
+    locale: LOCALE_OG.hi,
+    noindex: !hi,
+    ...(hi ? { languages: localeAlternates(cityLocalePaths(slug, copy.features.localesEnabled)) } : {}),
+  });
 }
 
 export function generateStaticParams() {
@@ -32,9 +32,11 @@ export default async function HindiLocationPage({ params }: Props) {
   const { slug } = await params;
   const loc = getLocationByKey(slug);
   if (!loc) notFound();
-  const hi = HI[slug];
+  const copy = await getSiteCopy();
+  if (!copy.features.localesEnabled) redirect(`/locations/${slug}`);
+  const hi = localeCityCopy('hi', slug);
   return (
-    <main id="main-content" className="container" style={{ padding: '8rem 0 4rem', maxWidth: 800 }}>
+    <main id="main-content" lang="hi" className="container" style={{ padding: '8rem 0 4rem', maxWidth: 800 }}>
       <nav className="breadcrumb" aria-label="Breadcrumb">
         <Link href="/hi">हिन्दी</Link>
         <span className="sep">/</span>
@@ -42,7 +44,7 @@ export default async function HindiLocationPage({ params }: Props) {
         <span className="sep">/</span>
         <span className="current">{loc.name}</span>
       </nav>
-      <h3>{hi?.title || loc.name}</h3>
+      <h1 className="heading-size-h3">{hi?.title || loc.name}</h1>
       <p className="lead">{hi?.lead || loc.lead}</p>
       <p>
         <Link href={`/locations/${slug}`} className="btn btn-ghost-dark">

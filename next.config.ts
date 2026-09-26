@@ -34,6 +34,9 @@ function resolveUploadBodyLimit(): `${number}mb` {
 
 const uploadBodyLimit = resolveUploadBodyLimit();
 
+/** Only production builds set NEXT_PUBLIC_SEO_INDEXABLE=true; every other build is noindex. */
+const seoIndexable = process.env.NEXT_PUBLIC_SEO_INDEXABLE === 'true';
+
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath } : {}),
   // CI packages .next/standalone into a release tarball for VPS apply (see scripts/package-release.sh).
@@ -74,6 +77,7 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
           { key: "Content-Security-Policy", value: csp },
+          ...(seoIndexable ? [] : [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]),
         ],
       },
     ];

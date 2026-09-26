@@ -18,6 +18,7 @@ import {
 import { buildCaseStudyJson, caseStudyToEditor } from '@/lib/catalog-case-study';
 import { getBrochureUrl, withBrochureUrl } from '@/lib/catalog-brochure';
 import MediaPicker from '@/components/admin/MediaPicker';
+import SeoFieldsEditor from '@/components/admin/SeoFieldsEditor';
 import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import { publicMediaUrl } from '@/lib/media-url';
 
@@ -58,6 +59,10 @@ type EditorState = {
   case_study_pdf_url: string;
   case_study_video_url: string;
   case_study_video_title: string;
+  meta_title: string;
+  meta_description: string;
+  og_image_url: string;
+  seo_noindex: boolean;
 };
 
 const emptyEditor = (): EditorState => ({
@@ -94,6 +99,10 @@ const emptyEditor = (): EditorState => ({
   case_study_pdf_url: '',
   case_study_video_url: '',
   case_study_video_title: '',
+  meta_title: '',
+  meta_description: '',
+  og_image_url: '',
+  seo_noindex: false,
 });
 
 function InventoryInner() {
@@ -126,7 +135,7 @@ function InventoryInner() {
   const [previewDetailShadow, setPreviewDetailShadow] = useState<CatalogShadowStyle>(DEFAULT_DETAIL_GALLERY_SHADOW);
   const [previewSurface, setPreviewSurface] = useState<'detail' | 'card'>('detail');
   const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null);
-  const [editorTab, setEditorTab] = useState<'basics' | 'commerce' | 'case'>('basics');
+  const [editorTab, setEditorTab] = useState<'basics' | 'commerce' | 'case' | 'seo'>('basics');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -185,6 +194,10 @@ function InventoryInner() {
       featured: !!item.featured,
       enabled: !!item.enabled,
       ...caseStudyToEditor(item.case_study_json),
+      meta_title: item.meta_title || '',
+      meta_description: item.meta_description || '',
+      og_image_url: item.og_image_url || '',
+      seo_noindex: !!item.seo_noindex,
     });
     setEditorTab('basics');
     setEditorOpen(true);
@@ -248,6 +261,10 @@ function InventoryInner() {
           video_url: editor.case_study_video_url,
           video_title: editor.case_study_video_title,
         }),
+        meta_title: editor.meta_title.trim() || null,
+        meta_description: editor.meta_description.trim() || null,
+        og_image_url: editor.og_image_url.trim() || null,
+        seo_noindex: editor.seo_noindex,
       };
 
       const res = await fetch(editor.id ? `/api/admin/catalog/${editor.id}` : '/api/admin/catalog', {
@@ -779,6 +796,7 @@ function InventoryInner() {
                   { id: 'basics', label: 'Basics' },
                   { id: 'commerce', label: 'Commerce' },
                   { id: 'case', label: 'Case study' },
+                  { id: 'seo', label: 'SEO' },
                 ] as const
               ).map((tab) => (
                 <button
@@ -885,6 +903,21 @@ function InventoryInner() {
                     />
                   </div>
                 </div>
+              ) : null}
+
+              {editorTab === 'seo' ? (
+                <SeoFieldsEditor
+                  value={{
+                    meta_title: editor.meta_title,
+                    meta_description: editor.meta_description,
+                    og_image_url: editor.og_image_url,
+                    seo_noindex: editor.seo_noindex,
+                  }}
+                  onChange={(next) => setEditor({ ...editor, ...next })}
+                  fallbackTitle={editor.title || 'Item title'}
+                  fallbackDescription={editor.summary || editor.description}
+                  path={`/${type}s/${editor.slug || 'slug'}`}
+                />
               ) : null}
 
               {editorTab === 'case' ? (

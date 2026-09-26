@@ -185,9 +185,15 @@ if [[ "$ENV_NAME" == "preprod" ]]; then
   if ! grep -qE '^NEXT_PUBLIC_SITE_URL=https://justxsystems.com/zigma-technologies[[:space:]]*$' .env; then
     log "WARNING: NEXT_PUBLIC_SITE_URL should be https://justxsystems.com/zigma-technologies"
   fi
+  if grep -qE '^NEXT_PUBLIC_SEO_INDEXABLE=true' .env; then
+    die "PreProd .env must NOT set NEXT_PUBLIC_SEO_INDEXABLE=true (PreProd must stay out of search results)."
+  fi
 else
   if grep -qE '^NEXT_PUBLIC_BASE_PATH=.+' .env; then
     die "Production .env must NOT set NEXT_PUBLIC_BASE_PATH (domain-root deploy on Zigma VPS)."
+  fi
+  if ! grep -qE '^NEXT_PUBLIC_SEO_INDEXABLE=true' .env; then
+    log "WARNING: Production .env should set NEXT_PUBLIC_SEO_INDEXABLE=true or the site is built noindex."
   fi
 fi
 

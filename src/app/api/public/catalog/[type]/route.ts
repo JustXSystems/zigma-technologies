@@ -1,5 +1,5 @@
 import { jsonError, jsonOk } from '@/lib/api';
-import { getCatalogFacets, getPageSettings, listCatalogItems, listCatalogItemsByIds, listCategories } from '@/lib/catalog';
+import { loadCatalogListing, normalizeListingSort } from '@/lib/catalog-listing';
 import type { CatalogItemType } from '@/lib/types';
 
 type Ctx = { params: Promise<{ type: string }> };
@@ -12,43 +12,17 @@ export async function GET(request: Request, ctx: Ctx) {
     }
     const itemType = type as CatalogItemType;
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get('q') || undefined;
-    const category = searchParams.get('category') || undefined;
-    const tag = searchParams.get('tag') || undefined;
-    const featuredOnly = searchParams.get('featured') === '1';
-    const limit = Number(searchParams.get('limit') || 0) || undefined;
-    const sortRaw = searchParams.get('sort') || 'featured';
-    const sort = sortRaw === 'newest' || sortRaw === 'title' || sortRaw === 'featured' ? sortRaw : 'featured';
 
-    const settings = await getPageSettings(itemType);
-    // Always honor deep-link filters from the menu (?category=&tag=), even if filter UI toggles are off.
-    const [items, categories, heroItems, facets] = await Promise.all([
-      listCatalogItems({
-        itemType,
-        q,
-        category,
-        tag,
-        featuredOnly,
-        limit,
-        sort,
-        searchFields: settings?.search_fields_json,
-      }),
-      listCategories(itemType),
-      settings?.hero_item_ids_json?.length
-        ? listCatalogItemsByIds(itemType, settings.hero_item_ids_json)
-        : listCatalogItems({ itemType, featuredOnly: true, limit: 4 }),
-      getCatalogFacets({
-        itemType,
-        q,
-        category,
-        tag,
-        searchFields: settings?.search_fields_json,
-      }),
-    ]);
+    const data = await loadCatalogListing(itemType, {
+      q: searchParams.get('q') || undefined,
+      category: searchParams.get('category') || undefined,
+      tag: searchParams.get('tag') || undefined,
+      featuredOnly: searchParams.get('featured') === '1',
+      limit: Number(searchParams.get('limit') || 0) || undefined,
+      sort: normalizeListingSort(searchParams.get('sort')),
+    });
 
-    const tags = facets.tags.map((t) => t.value);
-
-    return jsonOk({ items, categories, settings, tags, facets, heroItems });
+    return jsonOk(data);
   } catch (error) {
     console.error(error);
     return jsonError('Failed to load catalog', 500);

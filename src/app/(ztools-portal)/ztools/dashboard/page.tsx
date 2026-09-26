@@ -65,7 +65,7 @@ export default function ZtoolsDashboardPage() {
         ) : (
           <div className="ztools-tool-grid">
             {tools.map((tool) => {
-              const href = tool.url || tool.route_path || `https://www.zigma-technologies.com/tools/${tool.slug}`;
+              const href = tool.url || tool.route_path || `https://zigma-technologies.com/tools/${tool.slug}`;
               const external = /^https?:\/\//i.test(href);
               return (
                 <Link

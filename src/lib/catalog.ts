@@ -124,6 +124,10 @@ function mapItem(row: RowDataPacket): CatalogItem {
     enabled: row.enabled,
     cta_config_json: parseJsonField<Record<string, unknown> | null>(row.cta_config_json, null),
     case_study_json: parseJsonField<CatalogCaseStudy | null>(row.case_study_json, null),
+    meta_title: row.meta_title ?? null,
+    meta_description: row.meta_description ?? null,
+    og_image_url: row.og_image_url ? toStorageMediaPath(String(row.og_image_url)) : null,
+    seo_noindex: !!Number(row.seo_noindex ?? 0),
     created_at: row.created_at,
     updated_at: row.updated_at,
     primary_image: row.primary_image ?? null,
@@ -392,6 +396,10 @@ export async function createCatalogItem(input: {
   sort_order?: number;
   case_study_json?: CatalogCaseStudy | null;
   cta_config_json?: Record<string, unknown> | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  og_image_url?: string | null;
+  seo_noindex?: boolean;
 }) {
   await ensureCatalogBackgroundColumn();
   const slug = slugify(input.slug || input.title);
@@ -427,6 +435,10 @@ export async function createCatalogItem(input: {
       input.cta_config_json ? JSON.stringify(input.cta_config_json) : null,
     ]
   );
+  const { meta_title, meta_description, og_image_url, seo_noindex } = input;
+  if (meta_title || meta_description || og_image_url || seo_noindex) {
+    return updateCatalogItem(result.insertId, { meta_title, meta_description, og_image_url, seo_noindex });
+  }
   return getCatalogItemById(result.insertId);
 }
 
@@ -455,6 +467,10 @@ export async function updateCatalogItem(
     sort_order: number;
     cta_config_json: Record<string, unknown> | null;
     case_study_json: CatalogCaseStudy | null;
+    meta_title: string | null;
+    meta_description: string | null;
+    og_image_url: string | null;
+    seo_noindex: boolean;
   }>
 ) {
   await ensureCatalogBackgroundColumn();
@@ -502,6 +518,16 @@ export async function updateCatalogItem(
       input.cta_config_json !== undefined ? JSON.stringify(input.cta_config_json) : undefined,
     case_study_json:
       input.case_study_json !== undefined ? JSON.stringify(input.case_study_json) : undefined,
+    meta_title: input.meta_title !== undefined ? input.meta_title?.trim() || null : undefined,
+    meta_description:
+      input.meta_description !== undefined ? input.meta_description?.trim() || null : undefined,
+    og_image_url:
+      input.og_image_url !== undefined
+        ? input.og_image_url?.trim()
+          ? toStorageMediaPath(input.og_image_url.trim())
+          : null
+        : undefined,
+    seo_noindex: input.seo_noindex === undefined ? undefined : input.seo_noindex ? 1 : 0,
   };
 
   for (const [key, value] of Object.entries(map)) {

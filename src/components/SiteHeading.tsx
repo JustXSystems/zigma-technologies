@@ -17,17 +17,29 @@ type Props = {
   style?: ComponentPropsWithoutRef<'h3'>['style'];
   /** Override resolved tag (tests / previews). */
   as?: HeadingLevelId;
+  /** pageHero only: render as <h2> with the hero size (e.g. carousel slides after the first). */
+  secondary?: boolean;
 };
 
 /**
- * Renders h1|h2|h3 from Site Settings → Typography heading levels.
- * Default for both roles is h3 (compact). Changing the setting updates
- * both the HTML tag and the matching --text-h* size.
+ * Renders headings from Site Settings → Typography heading levels.
+ * `pageHero` is always an <h1> (one per page, for SEO / accessibility); the configured
+ * level only sets its visual size via `heading-size-h*`. `section` headings use the
+ * configured tag directly.
  */
-export default function SiteHeading({ role, children, className, id, style, as }: Props) {
+export default function SiteHeading({ role, children, className, id, style, as, secondary }: Props) {
   const { settings } = useSiteShell();
-  const tag = as ?? headingTagForRole(settings, role);
-  const Tag = tag as ElementType;
+  const level = as ?? headingTagForRole(settings, role);
+  if (role === 'pageHero') {
+    const HeroTag = secondary ? 'h2' : 'h1';
+    const sizeClass = level === HeroTag ? '' : `heading-size-${level}`;
+    return (
+      <HeroTag className={[sizeClass, className].filter(Boolean).join(' ') || undefined} id={id} style={style}>
+        {children}
+      </HeroTag>
+    );
+  }
+  const Tag = level as ElementType;
   return (
     <Tag className={className} id={id} style={style}>
       {children}

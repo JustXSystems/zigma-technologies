@@ -29,6 +29,10 @@ const createSchema = z.object({
   sort_order: z.number().optional(),
   case_study_json: z.record(z.string(), z.unknown()).nullable().optional(),
   cta_config_json: z.record(z.string(), z.unknown()).nullable().optional(),
+  meta_title: z.string().max(255).nullable().optional(),
+  meta_description: z.string().max(320).nullable().optional(),
+  og_image_url: z.string().max(500).nullable().optional(),
+  seo_noindex: z.boolean().optional(),
 });
 
 export async function GET(request: Request) {

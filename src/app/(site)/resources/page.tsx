@@ -2,21 +2,22 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
-import { getThemeSettings } from '@/lib/cms';
 import { listResourcePosts } from '@/lib/resources';
+import { buildPageMetadata } from '@/lib/seo';
 import { getSiteCopy } from '@/lib/site-content';
-import { mergeSiteSettings } from '@/lib/site-settings';
 
 type Props = { searchParams: Promise<{ tag?: string }> };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { tag } = await searchParams;
-  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  return {
-    title: tag ? `${tag} guides | ${site.companyName}` : `${copy.hubs.resources.title} | ${site.companyName}`,
+  const copy = await getSiteCopy();
+  return buildPageMetadata({
+    title: tag ? `${tag} guides` : copy.hubs.resources.title,
     description: copy.hubs.resources.lead,
-  };
+    path: '/resources',
+    // Tag filters are thin re-sorts of the hub; keep links followable but out of the index.
+    noindex: Boolean(tag),
+  });
 }
 
 export default async function ResourcesIndexPage({ searchParams }: Props) {

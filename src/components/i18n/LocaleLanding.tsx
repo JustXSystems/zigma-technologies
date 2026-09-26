@@ -10,7 +10,7 @@ type Props = {
 
 export default function LocaleLanding({ locale, copy, toolsEnabled }: Props) {
   return (
-    <main id="main-content">
+    <main id="main-content" lang={locale}>
       <section className="page-hero" style={{ minHeight: '70vh', padding: '10rem 0 4rem' }}>
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}

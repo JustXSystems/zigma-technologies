@@ -1,4 +1,4 @@
-import Script from 'next/script';
+import JsonLd from '@/components/JsonLd';
 import {
   buildCatalogCaseStudyMetadata,
   catalogCaseStudyJsonLd,
@@ -19,11 +19,7 @@ export default async function ProductCaseStudyPage({ params }: Props) {
 
   return (
     <>
-      {jsonLd ? (
-        <Script id="product-case-study-jsonld" type="application/ld+json">
-          {JSON.stringify(jsonLd)}
-        </Script>
-      ) : null}
+      {jsonLd ? <JsonLd data={jsonLd} /> : null}
       {await renderCatalogCaseStudyPage('product', slug)}
     </>
   );

@@ -27,6 +27,10 @@ const updateSchema = z.object({
   sort_order: z.number().optional(),
   cta_config_json: z.record(z.string(), z.unknown()).nullable().optional(),
   case_study_json: z.record(z.string(), z.unknown()).nullable().optional(),
+  meta_title: z.string().max(255).nullable().optional(),
+  meta_description: z.string().max(320).nullable().optional(),
+  og_image_url: z.string().max(500).nullable().optional(),
+  seo_noindex: z.boolean().optional(),
 });
 
 type Ctx = { params: Promise<{ id: string }> };

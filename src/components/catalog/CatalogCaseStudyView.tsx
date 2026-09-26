@@ -15,6 +15,8 @@ import { getBrochureUrl } from '@/lib/catalog-brochure';
 import { catalogWhatsAppMessage, whatsappHref } from '@/lib/whatsapp';
 import { DEFAULT_SITE_SETTINGS } from '@/lib/site-settings';
 import SiteHeading from '@/components/SiteHeading';
+import JsonLd from '@/components/JsonLd';
+import { absoluteUrl, plainText, toIsoDate } from '@/lib/seo';
 
 type Props = {
   item: CatalogItem;
@@ -69,7 +71,7 @@ export default function CatalogCaseStudyView({
       <section className="case-study-hero">
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={heroImage} alt="" />
+          <img src={heroImage} alt="" fetchPriority="high" />
           <div className="hero-overlay"></div>
           <div className="grid-overlay"></div>
         </div>
@@ -252,19 +254,17 @@ export default function CatalogCaseStudyView({
                     />
                   )}
                 </div>
-                <script
-                  type="application/ld+json"
-                  dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                      '@context': 'https://schema.org',
-                      '@type': 'VideoObject',
-                      name: cs.video_title || item.title,
-                      description: item.summary || item.title,
-                      contentUrl: cs.video_url,
-                      embedUrl: cs.video_url,
-                      thumbnailUrl: heroImage,
-                      uploadDate: item.updated_at || item.created_at,
-                    }),
+                <JsonLd
+                  data={{
+                    '@context': 'https://schema.org',
+                    '@type': 'VideoObject',
+                    name: cs.video_title || item.title,
+                    description: plainText(item.summary) || item.title,
+                    ...(/\.(mp4|webm)(\?|$)/i.test(cs.video_url)
+                      ? { contentUrl: absoluteUrl(cs.video_url) }
+                      : { embedUrl: absoluteUrl(cs.video_url) }),
+                    thumbnailUrl: absoluteUrl(heroImage),
+                    uploadDate: toIsoDate(item.created_at || item.updated_at),
                   }}
                 />
               </article>

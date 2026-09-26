@@ -7,10 +7,72 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#34 SEO Implementation">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/deploy.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/hi/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/hi/locations/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/hi/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/hi/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/kn/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/kn/locations/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/kn/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/kn/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/[service]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/[service]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/press/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/press/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/products/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/products/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/projects/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/projects/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/resources/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/resources/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/search/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/search/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/services/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/services/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/solar-roi/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/solar-roi/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/solution-finder/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/solution-finder/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/ups-calculator/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/ups-calculator/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(ztools-portal)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(ztools-portal)/ztools/dashboard/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/catalog/[type]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/catalog/[type]/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/robots.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/robots.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/sitemap.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/sitemap.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CmsPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CmsPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/SiteHeading.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SiteHeading.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/SiteSeo.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SiteSeo.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TestimonialsStrip.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TestimonialsStrip.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/HeadingLevelPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/HeadingLevelPicker.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogCaseStudyView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/industries/IndustryLandingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/industries/IndustryLandingView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-email.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-email.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-migration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-migration.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-seo.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-seo.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/location-services.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/location-services.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/testimonials.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/testimonials.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/ztools.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/ztools.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,23 +120,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3998632883741287" />
-      <entry key="MS500" value="2.5037371238770305" />
-      <entry key="S2" value="4.399535662438389" />
-      <entry key="S5" value="5.952454436597418" />
-      <entry key="S10" value="8.111709192568712" />
-      <entry key="S30" value="13.078213580235701" />
-      <entry key="S60" value="20.83940541687889" />
-      <entry key="M2" value="32.511050232590804" />
-      <entry key="M5" value="46.08139754257144" />
-      <entry key="M10" value="52.42872807030045" />
-      <entry key="M15" value="54.805368731057364" />
-      <entry key="M30" value="57.47557487151734" />
-      <entry key="H1" value="68.0454753268297" />
-      <entry key="H2" value="142.9582028741438" />
-      <entry key="H4" value="335.73255366050836" />
-      <entry key="D1" value="2487.9896841639825" />
-      <entry key="W1" value="14719.300081743753" />
+      <entry key="MS100" value="1.287857417187993" />
+      <entry key="MS500" value="2.7170847454316966" />
+      <entry key="S2" value="5.519081536671481" />
+      <entry key="S5" value="7.538834974653002" />
+      <entry key="S10" value="12.30337397477332" />
+      <entry key="S30" value="32.28291413840081" />
+      <entry key="S60" value="46.618550992029405" />
+      <entry key="M2" value="58.86680490981655" />
+      <entry key="M5" value="105.6294058616" />
+      <entry key="M10" value="191.75965508897238" />
+      <entry key="M15" value="249.70446709543697" />
+      <entry key="M30" value="334.79205646346355" />
+      <entry key="H1" value="393.81571368890314" />
+      <entry key="H2" value="451.59566502732974" />
+      <entry key="H4" value="589.0753206484445" />
+      <entry key="D1" value="2626.0135354949502" />
+      <entry key="W1" value="14893.439036714797" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -88,31 +150,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="6.334614505796414E-223" />
-      <entry key="H1" value="7.959029152979604E-112" />
-      <entry key="H2" value="2.821175136885015E-56" />
-      <entry key="H4" value="1.6796354178748295E-28" />
-      <entry key="D1" value="2.3865843207328528E-5" />
-      <entry key="W1" value="0.33897580291590645" />
+      <entry key="M30" value="8.600619352238096E-226" />
+      <entry key="H1" value="2.932681256502346E-113" />
+      <entry key="H2" value="5.4154235813109E-57" />
+      <entry key="H4" value="7.358956163405441E-29" />
+      <entry key="D1" value="2.079905715885384E-5" />
+      <entry key="W1" value="0.3323803900572892" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3177366741583774" />
-      <entry key="MS500" value="2.467546686283861" />
-      <entry key="S2" value="4.380148229789093" />
-      <entry key="S5" value="5.941814278858706" />
-      <entry key="S10" value="8.104591692871352" />
-      <entry key="S30" value="13.074548898526887" />
-      <entry key="S60" value="20.83661279652035" />
-      <entry key="M2" value="32.508918395387745" />
-      <entry key="M5" value="46.08019685870727" />
-      <entry key="M10" value="52.42804559483288" />
-      <entry key="M15" value="54.80489317738994" />
-      <entry key="M30" value="57.47532579665406" />
-      <entry key="H1" value="68.0453362179027" />
-      <entry key="H2" value="142.95808417045805" />
-      <entry key="H4" value="335.7324283060517" />
-      <entry key="D1" value="2487.989533255174" />
-      <entry key="W1" value="14719.638904197918" />
+      <entry key="MS100" value="1.2487727826499782" />
+      <entry key="MS500" value="2.697265223699221" />
+      <entry key="S2" value="5.508305729862203" />
+      <entry key="S5" value="7.532953117127101" />
+      <entry key="S10" value="12.298806723749673" />
+      <entry key="S30" value="32.27908253938455" />
+      <entry key="S60" value="46.61578361120128" />
+      <entry key="M2" value="58.865046475914426" />
+      <entry key="M5" value="105.62808552224935" />
+      <entry key="M10" value="191.75841807994067" />
+      <entry key="M15" value="249.70338265018313" />
+      <entry key="M30" value="334.79132288887166" />
+      <entry key="H1" value="393.81527821694493" />
+      <entry key="H2" value="451.59540850331246" />
+      <entry key="H4" value="589.0751437852288" />
+      <entry key="D1" value="2626.0133829001343" />
+      <entry key="W1" value="14893.771263709392" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -139,37 +201,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
-    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/public&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "seo/fix-technical-bugs",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/public",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
@@ -267,8 +329,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#26 Industries section creation for its new page design as per the HTML template" />
-    <MESSAGE value="#27 Social media links are missing in Footer" />
     <MESSAGE value="#27 Admin controls (Site Settings → Address &amp; office)&#10;mobile view fix" />
     <MESSAGE value="#27 Footer logo isses fixing" />
     <MESSAGE value="#27 Footer office address isses fixing" />
@@ -292,7 +352,9 @@
     <MESSAGE value="#31 Industry marquee item background color customization" />
     <MESSAGE value="#32 eco-section need to update" />
     <MESSAGE value="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2" />
-    <option name="LAST_COMMIT_MESSAGE" value="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2" />
+    <MESSAGE value="#31 ind-item border style (color, size/width) to be able to control in admin" />
+    <MESSAGE value="#34 SEO Implementation" />
+    <option name="LAST_COMMIT_MESSAGE" value="#34 SEO Implementation" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
