@@ -1,36 +1,29 @@
+import JsonLd from '@/components/JsonLd';
 import { getThemeSettings } from '@/lib/cms';
+import { absoluteUrl, organizationId, siteOrigin, websiteId } from '@/lib/seo';
 import { formatStreetAddress, mergeSiteSettings, socialLinksFromSettings } from '@/lib/site-settings';
 
 export default async function OrganizationJsonLd() {
-  const theme = await getThemeSettings();
-  const site = mergeSiteSettings(theme.site);
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
+  const theme = await getThemeSettings().catch(() => ({}) as Awaited<ReturnType<typeof getThemeSettings>>);
+  const site = mergeSiteSettings(theme?.site);
+  const base = siteOrigin();
 
-  const logoUrl = site.logoUrl
-    ? site.logoUrl.startsWith('http')
-      ? site.logoUrl
-      : `${base}${site.logoUrl}`
-    : `${base}/assets/images/zigma-technologies-logo.png`;
-
+  const logoUrl = absoluteUrl(site.logoUrl || '/assets/images/zigma-technologies-logo.png');
   const sameAs = socialLinksFromSettings(site).map((link) => link.href);
   const streetAddress = formatStreetAddress(site);
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
+  const organization = {
     '@type': ['Organization', 'LocalBusiness'],
-    '@id': `${base}/#organization`,
+    '@id': organizationId(),
     name: site.companyName,
     alternateName: 'Zigma',
     description: site.defaultMetaDescription,
-    url: base,
-    logo: {
-      '@type': 'ImageObject',
-      url: logoUrl,
-    },
+    url: `${base}/`,
+    logo: { '@type': 'ImageObject', url: logoUrl },
     image: logoUrl,
     foundingDate: '2006',
-    telephone: site.phone,
-    email: site.email,
+    ...(site.phone ? { telephone: site.phone } : {}),
+    ...(site.email ? { email: site.email } : {}),
     address: {
       '@type': 'PostalAddress',
       ...(streetAddress ? { streetAddress } : {}),
@@ -40,33 +33,35 @@ export default async function OrganizationJsonLd() {
       addressCountry: site.addressCountry || 'IN',
     },
     contactPoint: [
-      {
-        '@type': 'ContactPoint',
-        telephone: site.phone,
-        contactType: 'customer service',
-        areaServed: 'IN',
-        availableLanguage: ['English', 'Hindi', 'Kannada'],
-      },
+      ...(site.phone
+        ? [
+            {
+              '@type': 'ContactPoint',
+              telephone: site.phone,
+              contactType: 'customer service',
+              areaServed: 'IN',
+              availableLanguage: ['English', 'Hindi', 'Kannada'],
+            },
+          ]
+        : []),
       ...(site.emergencyPhone
         ? [
             {
               '@type': 'ContactPoint',
               telephone: site.emergencyPhone,
               contactType: 'technical support',
-              contactOption: 'TollFree',
               hoursAvailable: {
                 '@type': 'OpeningHoursSpecification',
                 dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                opens: '00:00',
+                closes: '23:59',
               },
               areaServed: 'IN',
             },
           ]
         : []),
     ],
-    areaServed: {
-      '@type': 'Country',
-      name: 'India',
-    },
+    areaServed: { '@type': 'Country', name: 'India' },
     knowsAbout: [
       'Solar EPC',
       'UPS Systems',
@@ -78,10 +73,14 @@ export default async function OrganizationJsonLd() {
     ...(sameAs.length ? { sameAs } : {}),
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
+  const website = {
+    '@type': 'WebSite',
+    '@id': websiteId(),
+    url: `${base}/`,
+    name: site.companyName,
+    inLanguage: 'en-IN',
+    publisher: { '@id': organizationId() },
+  };
+
+  return <JsonLd data={{ '@context': 'https://schema.org', '@graph': [organization, website] }} />;
 }

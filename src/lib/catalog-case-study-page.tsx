@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCatalogItemBySlug, getPageSettings, listCatalogItems } from '@/lib/catalog';
-import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
+import { CATALOG_TYPE_LABEL, catalogListingPath, catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
+import { absoluteUrl, breadcrumbJsonLd, buildPageMetadata, organizationId, plainText, toIsoDate } from '@/lib/seo';
 import CatalogCaseStudyView from '@/components/catalog/CatalogCaseStudyView';
 import type { CatalogItemType } from '@/lib/types';
 
@@ -9,21 +10,20 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function buildCatalogCaseStudyMetadata(itemType: CatalogItemType, slug: string): Promise<Metadata> {
   const item = await getCatalogItemBySlug(itemType, slug);
-  if (!item) return { title: 'Not found' };
+  if (!item) notFound();
 
   const label = caseStudyLabel(itemType);
-  const description = item.summary || item.description || `${label} by Zigma Technologies`;
-  const image = item.primary_image || undefined;
-
-  return {
-    title: `${item.title} | ${label} | Zigma Technologies`,
-    description,
-    openGraph: {
-      title: item.title,
-      description,
-      images: image ? [{ url: image }] : undefined,
-    },
-  };
+  return buildPageMetadata({
+    title: item.meta_title || `${item.title} — ${label}`,
+    description: item.meta_description || item.summary || item.description || `${label} by Zigma Technologies`,
+    path: catalogPublicPath(itemType, item.slug),
+    image: item.og_image_url || item.primary_image,
+    imageAlt: item.title,
+    type: itemType === 'project' ? 'article' : 'website',
+    publishedTime: item.created_at,
+    modifiedTime: item.updated_at,
+    noindex: Boolean(item.seo_noindex),
+  });
 }
 
 export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug: string) {
@@ -57,39 +57,51 @@ export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug
   );
 }
 
+/** Numeric INR price from labels like "₹1,25,000" or "INR 45000 + GST"; null for "On request". */
+function parsePriceInr(label: string | null | undefined): number | null {
+  const match = (label || '').replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
 export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNullable<Awaited<ReturnType<typeof getCatalogItemBySlug>>>) {
-  const origin = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
   const path = catalogPublicPath(itemType, item.slug);
-  const breadcrumb = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: `${caseStudyLabel(itemType)}s`,
-        item: `${origin}/${itemType === 'project' ? 'projects' : itemType === 'product' ? 'products' : 'services'}`,
-      },
-      { '@type': 'ListItem', position: 3, name: item.title, item: `${origin}${path}` },
-    ],
-  };
+  const url = absoluteUrl(path);
+  const description = plainText(item.summary || item.description) || undefined;
+  const image = item.primary_image ? absoluteUrl(item.primary_image) : undefined;
+  const organization = { '@id': organizationId() };
+  const breadcrumb = breadcrumbJsonLd([
+    { name: 'Home', path: '/' },
+    { name: `${CATALOG_TYPE_LABEL[itemType]}s`, path: catalogListingPath(itemType) },
+    { name: item.title, path },
+  ]);
 
   if (itemType === 'product') {
+    const price = parsePriceInr(item.price_label);
     return [
       breadcrumb,
       {
         '@context': 'https://schema.org',
         '@type': 'Product',
         name: item.title,
-        description: item.summary || item.description,
-        image: item.primary_image || undefined,
-        brand: item.tags_json?.[0]
-          ? { '@type': 'Brand', name: item.tags_json[0] }
-          : { '@type': 'Brand', name: 'Zigma Technologies' },
-        offers: item.price_label
-          ? { '@type': 'Offer', priceCurrency: 'INR', availability: 'https://schema.org/InStock', url: `${origin}${path}` }
-          : undefined,
+        description,
+        image,
+        url,
+        brand: { '@type': 'Brand', name: item.tags_json?.[0] || 'Zigma Technologies' },
+        ...(item.category_name ? { category: item.category_name } : {}),
+        ...(price
+          ? {
+              offers: {
+                '@type': 'Offer',
+                price,
+                priceCurrency: 'INR',
+                availability: 'https://schema.org/InStock',
+                url,
+                seller: organization,
+              },
+            }
+          : {}),
       },
     ];
   }
@@ -101,10 +113,12 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
         '@context': 'https://schema.org',
         '@type': 'Service',
         name: item.title,
-        description: item.summary || item.description,
-        provider: { '@type': 'Organization', name: 'Zigma Technologies' },
-        areaServed: 'IN',
-        url: `${origin}${path}`,
+        description,
+        image,
+        url,
+        ...(item.category_name ? { serviceType: item.category_name } : {}),
+        provider: organization,
+        areaServed: { '@type': 'Country', name: 'India' },
       },
     ];
   }
@@ -115,10 +129,14 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
       '@context': 'https://schema.org',
       '@type': 'Article',
       headline: item.title,
-      description: item.summary || item.description,
-      image: item.primary_image || undefined,
-      url: `${origin}${path}`,
-      author: { '@type': 'Organization', name: 'Zigma Technologies' },
+      description,
+      image,
+      url,
+      mainEntityOfPage: url,
+      ...(item.created_at ? { datePublished: toIsoDate(item.created_at) } : {}),
+      ...(item.updated_at ? { dateModified: toIsoDate(item.updated_at) } : {}),
+      author: organization,
+      publisher: organization,
     },
   ];
 }

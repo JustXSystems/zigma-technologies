@@ -3,18 +3,17 @@ import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import VisitTailorBar from '@/components/VisitTailorBar';
-import { getThemeSettings } from '@/lib/cms';
+import { buildPageMetadata } from '@/lib/seo';
 import { getLocationDefsCms, getSiteCopy } from '@/lib/site-content';
-import { mergeSiteSettings } from '@/lib/site-settings';
 import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  return {
-    title: `${copy.hubs.locations.title} | ${site.companyName}`,
+  const copy = await getSiteCopy();
+  return buildPageMetadata({
+    title: copy.hubs.locations.title,
     description: copy.hubs.locations.lead,
-  };
+    path: '/locations',
+  });
 }
 
 const LOCATION_IMAGE: Record<string, string> = {

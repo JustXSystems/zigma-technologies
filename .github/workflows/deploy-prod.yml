@@ -90,6 +90,11 @@ jobs:
       - name: Install + build (Production — no BASE_PATH)
         env:
           NEXT_PUBLIC_SITE_URL: https://zigma-technologies.com
+          # Only the production build may be indexed (robots meta, X-Robots-Tag, sitemap).
+          NEXT_PUBLIC_SEO_INDEXABLE: 'true'
+          # Optional — set as GitHub repository variables once Search Console / Bing issue tokens.
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_BING_SITE_VERIFICATION: ${{ vars.BING_SITE_VERIFICATION }}
           MEDIA_BASE_URL: /assets
         run: |
           set -euo pipefail

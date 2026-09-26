@@ -30,6 +30,22 @@ const CATALOG_ITEM_MEDIA_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'media_fit_percent',
     ddl: `ALTER TABLE catalog_items ADD COLUMN media_fit_percent TINYINT UNSIGNED NOT NULL DEFAULT 78 AFTER media_fit_to_space`,
   },
+  {
+    name: 'meta_title',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN meta_title VARCHAR(255) NULL AFTER description`,
+  },
+  {
+    name: 'meta_description',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN meta_description VARCHAR(320) NULL AFTER meta_title`,
+  },
+  {
+    name: 'og_image_url',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN og_image_url VARCHAR(500) NULL AFTER meta_description`,
+  },
+  {
+    name: 'seo_noindex',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN seo_noindex TINYINT(1) NOT NULL DEFAULT 0 AFTER og_image_url`,
+  },
 ];
 
 const CATALOG_MEDIA_FIT_COLUMNS: Array<{ name: string; ddl: string }> = [

@@ -1,6 +1,4 @@
-import { listTestimonials, testimonialsJsonLd, type SiteTestimonial } from '@/lib/testimonials';
-import { getThemeSettings } from '@/lib/cms';
-import { mergeSiteSettings } from '@/lib/site-settings';
+import { listTestimonials, type SiteTestimonial } from '@/lib/testimonials';
 import SiteHeading from '@/components/SiteHeading';
 
 export default async function TestimonialsStrip({ title = 'What clients say' }: { title?: string }) {
@@ -12,15 +10,10 @@ export default async function TestimonialsStrip({ title = 'What clients say' }: 
   }
   if (!items.length) return null;
 
-  const theme = await getThemeSettings();
-  const site = mergeSiteSettings(theme.site);
-  const jsonLd = testimonialsJsonLd(items, site.companyName);
-
+  // No Review / AggregateRating markup: Google treats testimonials a business publishes
+  // about itself as self-serving and ineligible for review rich results.
   return (
     <section className="section section-gray testimonials-strip" aria-label="Testimonials">
-      {jsonLd ? (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      ) : null}
       <div className="container">
         <div className="section-head center">
           <div className="eyebrow eyebrow-orange">Reviews</div>

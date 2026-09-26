@@ -210,7 +210,9 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
             <div className="container">
               <div className="slide-content">
                 <div className="eyebrow">{slide.eyebrow}</div>
-                <SiteHeading role="pageHero">{slide.title}</SiteHeading>
+                <SiteHeading role="pageHero" secondary={i > 0}>
+                  {slide.title}
+                </SiteHeading>
                 <p className="lead">{slide.lead}</p>
                 <a href={hrefOf(slide.ctaHref)} className="slide-cta">
                   {slide.cta}

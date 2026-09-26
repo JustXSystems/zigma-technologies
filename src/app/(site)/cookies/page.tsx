@@ -1,17 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeading from '@/components/SiteHeading';
-import { getThemeSettings } from '@/lib/cms';
+import { buildPageMetadata } from '@/lib/seo';
 import { getSiteCopy } from '@/lib/site-content';
-import { mergeSiteSettings } from '@/lib/site-settings';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  return {
-    title: `${copy.cookies.pageTitle} | ${site.companyName}`,
+  const copy = await getSiteCopy();
+  return buildPageMetadata({
+    title: copy.cookies.pageTitle,
     description: copy.cookies.pageLead,
-  };
+    path: '/cookies',
+  });
 }
 
 export default async function CookiesPage() {

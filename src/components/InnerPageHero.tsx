@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import SiteHeading from '@/components/SiteHeading';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbJsonLd } from '@/lib/seo';
 
 export type InnerBreadcrumb = { label: string; href?: string };
 
@@ -41,6 +43,9 @@ export default function InnerPageHero({
         <div className="grid-overlay" />
       </div>
       <div className="container page-hero-inner">
+        {breadcrumb?.length ? (
+          <JsonLd data={breadcrumbJsonLd(breadcrumb.map((c) => ({ name: c.label, path: c.href })))} />
+        ) : null}
         {breadcrumb?.length ? (
           <nav className="breadcrumb" aria-label="Breadcrumb">
             {breadcrumb.map((crumb, i) => {

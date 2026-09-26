@@ -35,9 +35,10 @@ export default function HeadingLevelPicker({ settings, onChange }: Props) {
   return (
     <div className="admin-heading-level-picker">
       <p className="admin-muted" style={{ marginTop: 0, marginBottom: '1rem', maxWidth: 640 }}>
-        Choose the HTML heading tag (and matching type size) for public titles. Defaults stay at{' '}
-        <strong>H3</strong> for a denser page. Switch a role to H2 or H1 when you want more emphasis —
-        layout styles already accept any of the three tags.
+        Choose the type size for public titles. Defaults stay at <strong>H3</strong> for a denser page. Switch a
+        role to H2 or H1 when you want more emphasis. Page heroes are always output as a single HTML{' '}
+        <code>&lt;h1&gt;</code> for SEO — this setting only changes how large they look. Section titles use the
+        chosen tag.
       </p>
       <div className="admin-form-grid" style={{ gap: '1.25rem' }}>
         {ROLES.map((role) => {

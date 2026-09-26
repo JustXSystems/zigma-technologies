@@ -1020,7 +1020,7 @@ nslookup www.zigma-technologies.com 8.8.8.8
       'Confirm nslookup returns 200.234.45.106 for apex and www.',
       'As root: certbot --nginx -d zigma-technologies.com -d www.zigma-technologies.com',
       'Follow prompts (email, agree ToS). Certbot will modify Nginx for 443 and HTTP→HTTPS.',
-      'Optional: add www → apex redirect in Nginx if Certbot did not (see Nginx section).',
+      'Required for SEO: make http:// and https://www redirect (301, one hop) to https://zigma-technologies.com (see Nginx section).',
       'curl -I https://zigma-technologies.com — expect 200/308 and valid cert.',
       'certbot renew --dry-run (renewal timer is installed by default).',
     ],
@@ -1358,13 +1358,51 @@ server {
     }
 }
 
-# After Certbot, optional www → apex redirect (only if not already present):
+# ============================================================
+# REQUIRED after Certbot (SEO): one canonical host — https://zigma-technologies.com
+# NEXT_PUBLIC_SITE_URL, canonicals and the sitemap all use the apex, so every other
+# host/scheme must 301 to it in ONE hop. Edit /etc/nginx/sites-available/zigma so that:
+#   - the apex :443 server keeps the location / proxy block above
+#   - the :80 server only redirects
+#   - www on :443 only redirects
+# Keep the ssl_certificate lines Certbot wrote (paths below are Certbot defaults).
+# ============================================================
 # server {
-#     listen 443 ssl;
-#     server_name www.zigma-technologies.com;
-#     # ssl_certificate lines managed by Certbot
+#     listen 80;
+#     listen [::]:80;
+#     server_name zigma-technologies.com www.zigma-technologies.com;
 #     return 301 https://zigma-technologies.com$request_uri;
 # }
+#
+# server {
+#     listen 443 ssl;
+#     listen [::]:443 ssl;
+#     http2 on;
+#     server_name www.zigma-technologies.com;
+#     ssl_certificate /etc/letsencrypt/live/zigma-technologies.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/zigma-technologies.com/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#     return 301 https://zigma-technologies.com$request_uri;
+# }
+#
+# server {
+#     listen 443 ssl;
+#     listen [::]:443 ssl;
+#     http2 on;
+#     server_name zigma-technologies.com;
+#     ssl_certificate /etc/letsencrypt/live/zigma-technologies.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/zigma-technologies.com/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#     client_max_body_size 100M;
+#     location / { ...same proxy block as above... }
+# }
+#
+# Verify (each must be a single 301 straight to https://zigma-technologies.com/…):
+#   curl -sI http://www.zigma-technologies.com/projects  | grep -i '^location'
+#   curl -sI https://www.zigma-technologies.com/projects | grep -i '^location'
+#   curl -sI http://zigma-technologies.com/projects      | grep -i '^location'
 `;
 
 export const PROD_UPDATE_COMMANDS = `# ============================================================

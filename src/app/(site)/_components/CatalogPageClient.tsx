@@ -27,19 +27,22 @@ import {
   normalizeListingAlign,
   normalizeListingGapPx,
 } from '@/lib/types';
-import { applyDocumentSeo } from '@/components/SiteSeo';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { publicMediaUrl } from '@/lib/media-url';
 import { heroHas, toolbarHas, resolveDetailElements } from '@/lib/catalog-page-elements';
 import SiteHeading from '@/components/SiteHeading';
+import { catalogListingKey, type CatalogListingData } from '@/lib/catalog-listing-key';
 
 type Props = {
   itemType: CatalogItemType;
   title: string;
   eyebrow: string;
   lead: string;
+  /** Server-rendered first page so crawlers get real item links in the initial HTML. */
+  initialData?: CatalogListingData | null;
+  initialKey?: string;
 };
 
 const DEFAULT_CARD = [
@@ -250,7 +253,11 @@ function CatalogHero({
         <div className="container">
           <div className="section-head">
             {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
-            {heroHas(settings, 'title') ? <SiteHeading role="pageHero">{heroTitle}</SiteHeading> : null}
+            {heroHas(settings, 'title') ? (
+              <SiteHeading role="pageHero">{heroTitle}</SiteHeading>
+            ) : (
+              <h1 className="sr-only">{heroTitle}</h1>
+            )}
             {heroHas(settings, 'lead') ? <p className="lead">{heroLead}</p> : null}
           </div>
         </div>
@@ -343,7 +350,11 @@ function CatalogHero({
       <div className={cx('container catalog-hero-layout', variant === 'standard' && 'catalog-hero-layout--standard')}>
         <div className={cx('catalog-hero-copy', revealEnabled && 'reveal')}>
           {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
-          {heroHas(settings, 'title') ? <SiteHeading role="pageHero">{heroTitle}</SiteHeading> : null}
+          {heroHas(settings, 'title') ? (
+            <SiteHeading role="pageHero">{heroTitle}</SiteHeading>
+          ) : (
+            <h1 className="sr-only">{heroTitle}</h1>
+          )}
           {heroHas(settings, 'lead') ? <p className="lead">{heroLead}</p> : null}
           {heroHas(settings, 'meta') ? (
             <div className="catalog-hero-meta">
@@ -492,7 +503,25 @@ function CatalogItemCard({
           {hasField(cardFields, 'category', DEFAULT_CARD) ? (
             <div className="catalog-card-eyebrow">{item.category_name || item.item_type.toUpperCase()}</div>
           ) : null}
-          {hasField(cardFields, 'title', DEFAULT_CARD) ? <h5>{item.title}</h5> : null}
+          {hasField(cardFields, 'title', DEFAULT_CARD) ? (
+            <h5>
+              {/* Crawlable link to the detail page; a plain click falls through to the card's quick view. */}
+              <Link
+                href={catalogPublicPath(itemType, item.slug)}
+                prefetch={false}
+                className="catalog-card-title-link"
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+                    e.stopPropagation();
+                    return;
+                  }
+                  e.preventDefault();
+                }}
+              >
+                {item.title}
+              </Link>
+            </h5>
+          ) : null}
           {hasField(cardFields, 'price_label', DEFAULT_CARD) && item.price_label ? (
             <div className="catalog-card-stat">{item.price_label}</div>
           ) : null}
@@ -540,7 +569,7 @@ export default function CatalogPageClient(props: Props) {
   );
 }
 
-function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
+function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, initialKey }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -551,13 +580,14 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   const tag = searchParams.get('tag') || '';
   const sort = (searchParams.get('sort') || 'featured') as 'featured' | 'newest' | 'title';
 
-  const [items, setItems] = useState<CatalogItem[]>([]);
-  const [categories, setCategories] = useState<CatalogCategory[]>([]);
-  const [facets, setFacets] = useState<CatalogFacets | null>(null);
-  const [settings, setSettings] = useState<CatalogPageSettings | null>(null);
-  const [heroItems, setHeroItems] = useState<CatalogItem[]>([]);
+  const [items, setItems] = useState<CatalogItem[]>(initialData?.items ?? []);
+  const [categories, setCategories] = useState<CatalogCategory[]>(initialData?.categories ?? []);
+  const [facets, setFacets] = useState<CatalogFacets | null>(initialData?.facets ?? null);
+  const [settings, setSettings] = useState<CatalogPageSettings | null>(initialData?.settings ?? null);
+  const [heroItems, setHeroItems] = useState<CatalogItem[]>(initialData?.heroItems ?? []);
   const [searchDraft, setSearchDraft] = useState(q);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
+  const serverDataKeyRef = useRef<string | null>(initialData ? initialKey ?? null : null);
   const [error, setError] = useState('');
   const [active, setActive] = useState<CatalogItem | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -664,20 +694,10 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead }: Props) {
   }, [searchDraft, q, setFilterParam]);
 
   useEffect(() => {
-    fetch('/api/public/site-settings')
-      .then(async (r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        applyDocumentSeo({
-          title: `${title} | ${data?.settings?.companyName || 'Zigma Technologies'}`,
-          description: lead || data?.settings?.defaultMetaDescription,
-          image: data?.settings?.ogImage,
-          siteName: data?.settings?.companyName,
-        });
-      })
-      .catch(() => undefined);
-  }, [title, lead]);
+    const serverKey = serverDataKeyRef.current;
+    serverDataKeyRef.current = null;
+    if (serverKey !== null && serverKey === catalogListingKey({ q, category, tag, sort })) return;
 
-  useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (category) params.set('category', category);

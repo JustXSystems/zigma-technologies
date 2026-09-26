@@ -46,14 +46,12 @@ export default function CmsPageClient({
         setSource(data.source || '');
         setPreview(!!data.preview);
 
-        const title = data.page.meta_title || data.page.title || settings.companyName;
-        const description = data.page.meta_description || settings.defaultMetaDescription;
-        applyDocumentSeo({
-          title,
-          description,
-          image: settings.ogImage,
-          siteName: settings.companyName,
-        });
+        if (isPreview) {
+          applyDocumentSeo({
+            title: data.page.meta_title || data.page.title || settings.companyName,
+            description: data.page.meta_description || settings.defaultMetaDescription,
+          });
+        }
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load page'));
   }, [slug, initialSections, initialPreview, initialSource, settings]);

@@ -65,6 +65,18 @@ export function getServiceSeo(key: string) {
   return SERVICE_SEO_DEFS.find((s) => s.key === key) || null;
 }
 
+/**
+ * City × service pages that carry unique, city-specific content and may be indexed.
+ * Everything else is rendered with `noindex, follow` and kept out of the sitemap so
+ * templated pages are not treated as doorway / scaled content. Add `city/service`
+ * keys here only after writing real local copy (projects, response times, team).
+ */
+export const INDEXABLE_CITY_SERVICES = new Set<string>([]);
+
+export function isCityServiceIndexable(city: string, service: string) {
+  return INDEXABLE_CITY_SERVICES.has(`${city}/${service}`);
+}
+
 export function cityServicePath(city: string, service: string) {
   return `/locations/${city}/${service}`;
 }

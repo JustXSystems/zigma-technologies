@@ -9,7 +9,7 @@ import { cookiePath } from '@/lib/base-path';
 const ZTOOLS_COOKIE = 'zigma_ztools_session';
 const SESSION_DAYS = 7;
 /** Live public site opened from ZTools cards (not the local /ztools mock tools). */
-export const ZTOOLS_PUBLIC_SITE_ORIGIN = 'https://www.zigma-technologies.com';
+export const ZTOOLS_PUBLIC_SITE_ORIGIN = 'https://zigma-technologies.com';
 
 export function ztoolsPublicToolUrl(routePath: string) {
   const path = routePath.trim();

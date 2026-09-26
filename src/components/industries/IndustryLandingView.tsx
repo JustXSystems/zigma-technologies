@@ -4,6 +4,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import type { CatalogItem } from '@/lib/types';
 import type { IndustryDef } from '@/lib/industries';
 import SiteHeading from '@/components/SiteHeading';
+import JsonLd from '@/components/JsonLd';
 
 type Props = {
   industry: IndustryDef;
@@ -23,7 +24,7 @@ export default function IndustryLandingView({ industry, items }: Props) {
 
   return (
     <main id="main-content" className="hub-page">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      {industry.faqs.length ? <JsonLd data={faqLd} /> : null}
       <InnerPageHero
         eyebrow={industry.eyebrow}
         title={industry.name}

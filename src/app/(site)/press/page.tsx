@@ -3,18 +3,17 @@ import SiteHeading from '@/components/SiteHeading';
 import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
-import { getThemeSettings } from '@/lib/cms';
 import { listPressPosts } from '@/lib/press';
+import { buildPageMetadata } from '@/lib/seo';
 import { getSiteCopy } from '@/lib/site-content';
-import { mergeSiteSettings } from '@/lib/site-settings';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [copy, theme] = await Promise.all([getSiteCopy(), getThemeSettings().catch(() => ({}))]);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  return {
-    title: `${copy.hubs.press.title} | ${site.companyName}`,
+  const copy = await getSiteCopy();
+  return buildPageMetadata({
+    title: copy.hubs.press.title,
     description: copy.hubs.press.lead,
-  };
+    path: '/press',
+  });
 }
 
 export default async function PressIndexPage() {

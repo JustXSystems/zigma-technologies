@@ -2,31 +2,28 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import LocationLandingView from '@/components/locations/LocationLandingView';
 import { listCatalogItems } from '@/lib/catalog';
-import { getThemeSettings } from '@/lib/cms';
+import { cityLocalePaths } from '@/lib/locale-locations';
 import { getLocationByKeyFromList } from '@/lib/locations';
-import { getLocationDefsCms } from '@/lib/site-content';
-import { mergeSiteSettings } from '@/lib/site-settings';
+import { buildPageMetadata, localeAlternates } from '@/lib/seo';
+import { getLocationDefsCms, getSiteCopy } from '@/lib/site-content';
 import type { CatalogItem } from '@/lib/types';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [defs, theme] = await Promise.all([getLocationDefsCms(), getThemeSettings().catch(() => ({}))]);
+  const [defs, copy] = await Promise.all([getLocationDefsCms(), getSiteCopy()]);
   const location = getLocationByKeyFromList(defs, slug);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  if (!location) return { title: 'Location not found' };
-  return {
-    title: `${location.name} Power & Energy Solutions | ${site.companyName}`,
+  if (!location) notFound();
+  const paths = cityLocalePaths(location.key, copy.features.localesEnabled);
+  return buildPageMetadata({
+    title: `Power & Energy Solutions in ${location.name}`,
     description: location.lead,
-    alternates: {
-      languages: {
-        en: `/locations/${location.key}`,
-        hi: `/hi/locations/${location.key}`,
-        kn: `/kn/locations/${location.key}`,
-      },
-    },
-  };
+    path: `/locations/${location.key}`,
+    ...(paths.hi || paths.kn
+      ? { languages: localeAlternates({ en: paths.en, hi: paths.hi || undefined, kn: paths.kn || undefined }) }
+      : {}),
+  });
 }
 
 export default async function LocationDetailPage({ params }: Props) {

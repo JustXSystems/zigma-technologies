@@ -441,7 +441,7 @@ export const EMAIL_DNS_RECORDS = [
 ];
 
 export const EMAIL_SMTP_SITE = `NODE_ENV=production
-NEXT_PUBLIC_SITE_URL=https://www.zigma-technologies.com
+NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com
 # Enquiry notifications — Google Workspace (App Password on noreply@ or SMTP relay)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587

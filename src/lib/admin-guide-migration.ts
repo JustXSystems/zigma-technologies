@@ -172,10 +172,10 @@ export const MIGRATION_PHASES: MigrationPhase[] = [
     steps: [
       'Create separate PROD MySQL database (never share UAT DB credentials).',
       'Deploy code to /var/www/zigma-technologies (or use a prod branch / separate folder).',
-      'Configure PROD .env: NEXT_PUBLIC_SITE_URL=https://www.zigma-technologies.com, PROD DB_*, SMTP_*, unique AUTH_SECRET.',
+      'Configure PROD .env: NEXT_PUBLIC_SITE_URL=https://zigma-technologies.com, PROD DB_*, SMTP_*, unique AUTH_SECRET.',
       'Import UAT-approved content: npm run db:import -- <export-path> --force (or promote from UAT export).',
       'Apply any pending scripts/migrate-*.sql files in order.',
-      'pm2 start/restart production process; configure Nginx for www.zigma-technologies.com and apex redirect.',
+      'pm2 start/restart production process; configure Nginx to serve zigma-technologies.com (apex) and 301 www → apex.',
       'Install SSL for www and apex: certbot --nginx -d www.zigma-technologies.com -d zigma-technologies.com',
       'Test via hosts file or curl -H "Host: www.zigma-technologies.com" http://VPS_IP before DNS cutover.',
       'Add Redirects in admin for legacy .html paths if migrating from old static site.',

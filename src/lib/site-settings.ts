@@ -322,7 +322,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   poweredByUrl: 'https://www.justxsystems.com/',
   defaultMetaDescription:
     'Zigma Technologies delivers Solar EPC, UPS, BESS, EV charging, and industrial engineering solutions across India.',
-  ogImage: '/assets/images/zigma-technologies-logo.png',
+  ogImage: '/og.png',
   enquiryNotifyEmail: 'info@zigma-technologies.com',
   enquiryNotifyEnabled: 'true',
   visitorAutoReplyEnabled: 'true',

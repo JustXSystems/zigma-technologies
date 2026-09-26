@@ -167,27 +167,3 @@ export async function seedTestimonials() {
   }
   return { created: seeds.length, total: seeds.length };
 }
-
-export function testimonialsJsonLd(items: SiteTestimonial[], companyName: string) {
-  const rated = items.filter((t) => t.rating && t.rating > 0);
-  if (!rated.length) return null;
-  const avg = rated.reduce((sum, t) => sum + (t.rating || 0), 0) / rated.length;
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: companyName,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: Number(avg.toFixed(1)),
-      reviewCount: rated.length,
-      bestRating: 5,
-      worstRating: 1,
-    },
-    review: rated.slice(0, 6).map((t) => ({
-      '@type': 'Review',
-      reviewBody: t.quote,
-      author: { '@type': 'Person', name: t.author_name },
-      reviewRating: { '@type': 'Rating', ratingValue: t.rating, bestRating: 5 },
-    })),
-  };
-}

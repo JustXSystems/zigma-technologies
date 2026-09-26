@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import BasePathBootstrap from "@/components/BasePathBootstrap";
 import { basePathFetchPatchScript, withBasePath } from "@/lib/base-path";
+import { DEFAULT_OG_IMAGE, SITE_NAME, isIndexable, siteOrigin } from "@/lib/seo";
 import "./globals.css";
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.zigma-technologies.com').replace(/\/$/, '');
-const OG_IMAGE = `${SITE_URL}/assets/images/zigma-technologies-logo.png`;
 const TITLE = 'Zigma Technologies | Solar EPC, UPS, BESS & EV Charging in India';
 const DESCRIPTION =
   'Zigma Technologies delivers end-to-end Solar EPC, UPS & Power Continuity, BESS, EV Charging Infrastructure, and Industrial Engineering solutions across India. 20+ years of engineering excellence, installation, AMC and 24×7 support.';
@@ -16,55 +15,56 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
+  const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+  const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION?.trim();
+  // No `alternates.canonical` here: metadata merges shallowly, so a root canonical
+  // would mark every page without its own as a duplicate of the homepage.
   return {
-    metadataBase: new URL(SITE_URL),
+    metadataBase: new URL(siteOrigin()),
     title: {
       default: TITLE,
-      template: '%s | Zigma Technologies',
+      template: `%s | ${SITE_NAME}`,
     },
     description: DESCRIPTION,
+    applicationName: SITE_NAME,
     manifest: '/manifest.webmanifest',
     appleWebApp: {
       capable: true,
       title: 'Zigma',
       statusBarStyle: 'black-translucent',
     },
-    keywords: [
-      'Solar EPC India',
-      'UPS solutions Bangalore',
-      'Battery Energy Storage BESS',
-      'EV Charging Infrastructure',
-      'Industrial UPS AMC',
-      'Solar power plant',
-      'Power engineering company India',
-      'Annual maintenance contract power',
-      'Zigma Technologies',
-    ],
-    authors: [{ name: 'Zigma Technologies', url: SITE_URL }],
-    creator: 'Zigma Technologies',
-    publisher: 'Zigma Technologies',
+    authors: [{ name: SITE_NAME, url: siteOrigin() }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
     openGraph: {
       type: 'website',
       locale: 'en_IN',
-      url: SITE_URL,
-      siteName: 'Zigma Technologies',
+      siteName: SITE_NAME,
       title: TITLE,
       description: DESCRIPTION,
-      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Zigma Technologies — Power & Energy Engineering' }],
+      images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: 'Zigma Technologies — Power & Energy Engineering' }],
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@zigmatech',
       title: TITLE,
       description: DESCRIPTION,
-      images: [OG_IMAGE],
+      images: [DEFAULT_OG_IMAGE],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' },
-    },
-    alternates: { canonical: SITE_URL },
+    robots: isIndexable()
+      ? {
+          index: true,
+          follow: true,
+          googleBot: { index: true, follow: true, 'max-snippet': -1, 'max-image-preview': 'large' },
+        }
+      : { index: false, follow: true },
+    ...(googleVerification || bingVerification
+      ? {
+          verification: {
+            ...(googleVerification ? { google: googleVerification } : {}),
+            ...(bingVerification ? { other: { 'msvalidate.01': bingVerification } } : {}),
+          },
+        }
+      : {}),
   };
 }
 

@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import SiteProviders from '@/components/SiteProviders';
 import { loadSiteShell } from '@/lib/site-shell';
+
+export const metadata: Metadata = {
+  title: 'ZTools',
+  robots: { index: false, follow: false },
+};
 
 /** ZTools portal — no public site header/footer. */
 export default async function ZtoolsPortalLayout({ children }: { children: React.ReactNode }) {

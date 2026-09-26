@@ -3,18 +3,24 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
+import JsonLd from '@/components/JsonLd';
 import { getPressPostBySlug } from '@/lib/press';
+import { absoluteUrl, buildPageMetadata, organizationId, plainText, toIsoDate } from '@/lib/seo';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPressPostBySlug(slug);
-  if (!post) return { title: 'Not found' };
-  return {
+  if (!post) notFound();
+  return buildPageMetadata({
     title: post.title,
-    description: post.excerpt || post.title,
-  };
+    description: post.excerpt || plainText(post.body_html) || post.title,
+    path: `/press/${post.slug}`,
+    image: post.cover_url,
+    type: 'article',
+    publishedTime: post.published_at,
+  });
 }
 
 export default async function PressDetailPage({ params }: Props) {
@@ -22,8 +28,22 @@ export default async function PressDetailPage({ params }: Props) {
   const post = await getPressPostBySlug(slug);
   if (!post) notFound();
 
+  const path = `/press/${post.slug}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: post.title,
+    description: plainText(post.excerpt) || undefined,
+    ...(post.cover_url ? { image: [absoluteUrl(post.cover_url)] } : {}),
+    ...(post.published_at ? { datePublished: toIsoDate(post.published_at) } : {}),
+    mainEntityOfPage: absoluteUrl(path),
+    author: { '@id': organizationId() },
+    publisher: { '@id': organizationId() },
+  };
+
   return (
     <main id="main-content" className="hub-page">
+      <JsonLd data={jsonLd} />
       <InnerPageHero
         accent="cyan"
         eyebrow="Press"

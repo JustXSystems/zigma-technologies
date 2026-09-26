@@ -2,28 +2,27 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import IndustryLandingView from '@/components/industries/IndustryLandingView';
 import { listCatalogItems } from '@/lib/catalog';
-import { getPageBySlug, getThemeSettings } from '@/lib/cms';
+import { getPageBySlug } from '@/lib/cms';
 import { getIndustryByKeyFromList, industryPageSlug } from '@/lib/industries';
+import { buildPageMetadata } from '@/lib/seo';
 import { getIndustryDefsCms } from '@/lib/site-content';
-import { mergeSiteSettings } from '@/lib/site-settings';
 import type { CatalogItem } from '@/lib/types';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [defs, theme, cmsPage] = await Promise.all([
+  const [defs, cmsPage] = await Promise.all([
     getIndustryDefsCms(),
-    getThemeSettings().catch(() => ({})),
     getPageBySlug(industryPageSlug(slug), false).catch(() => null),
   ]);
   const industry = getIndustryByKeyFromList(defs, slug);
-  const site = mergeSiteSettings((theme as { site?: unknown }).site);
-  if (!industry) return { title: 'Industry not found' };
-  return {
-    title: cmsPage?.meta_title || `${industry.name} | ${site.companyName}`,
+  if (!industry) notFound();
+  return buildPageMetadata({
+    title: cmsPage?.meta_title || `Power & Energy Solutions for ${industry.name}`,
     description: cmsPage?.meta_description || industry.lead,
-  };
+    path: `/industries/${industry.key}`,
+  });
 }
 
 export default async function IndustryDetailPage({ params }: Props) {
