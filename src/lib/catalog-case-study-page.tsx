@@ -58,8 +58,10 @@ export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug
 }
 
 /** Numeric INR price from labels like "₹1,25,000" or "INR 45000 + GST"; null for "On request". */
+/** Only a plain amount ("₹1,25,000", "Rs. 125000/-") becomes an Offer; ranges, "lakh", "from …" do not. */
 function parsePriceInr(label: string | null | undefined): number | null {
-  const match = (label || '').replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+  const compact = (label || '').replace(/[,\s]/g, '');
+  const match = compact.match(/^(?:₹|rs\.?|inr)?(\d+(?:\.\d{1,2})?)(?:\/-)?$/i);
   if (!match) return null;
   const value = Number(match[1]);
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -79,6 +81,8 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
 
   if (itemType === 'product') {
     const price = parsePriceInr(item.price_label);
+    // Google rejects Product markup without offers / review / aggregateRating, so "On request" items get none.
+    if (!price) return [breadcrumb];
     return [
       breadcrumb,
       {
@@ -90,18 +94,14 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
         url,
         brand: { '@type': 'Brand', name: item.tags_json?.[0] || 'Zigma Technologies' },
         ...(item.category_name ? { category: item.category_name } : {}),
-        ...(price
-          ? {
-              offers: {
-                '@type': 'Offer',
-                price,
-                priceCurrency: 'INR',
-                availability: 'https://schema.org/InStock',
-                url,
-                seller: organization,
-              },
-            }
-          : {}),
+        offers: {
+          '@type': 'Offer',
+          price,
+          priceCurrency: 'INR',
+          availability: 'https://schema.org/InStock',
+          url,
+          seller: organization,
+        },
       },
     ];
   }
