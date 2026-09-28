@@ -635,7 +635,7 @@ export function formatStreetAddress(
   site: Pick<SiteSettings, 'addressStreet' | 'addressStreet2' | 'addressStreet3' | 'addressStreet4'>
 ): string {
   return [site.addressStreet, site.addressStreet2, site.addressStreet3, site.addressStreet4]
-    .map((part) => part?.trim())
+    .map((part) => part?.trim().replace(/^[\s,]+|[\s,]+$/g, '').replace(/,\s*,+/g, ','))
     .filter(Boolean)
     .join(', ');
 }
@@ -652,10 +652,17 @@ export type SocialLinkDef = {
 export function normalizeExternalUrl(raw: string): string | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  if (trimmed.startsWith('//')) return `https:${trimmed}`;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
-  return `https://${trimmed}`;
+  let candidate: string;
+  if (/^https?:\/\//i.test(trimmed)) candidate = trimmed;
+  else if (trimmed.startsWith('//')) candidate = `https:${trimmed}`;
+  else if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null;
+  else candidate = `https://${trimmed}`;
+  // Placeholders such as "#" or "https://#" have no real host and must not reach the footer or sameAs.
+  try {
+    return new URL(candidate).hostname.includes('.') ? candidate : null;
+  } catch {
+    return null;
+  }
 }
 
 const SOCIAL_LINK_FIELDS: Array<{

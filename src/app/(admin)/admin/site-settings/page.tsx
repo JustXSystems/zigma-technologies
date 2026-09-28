@@ -14,6 +14,7 @@ import HeaderCtaEditor from '@/components/admin/HeaderCtaEditor';
 import FloatingCtaEditor from '@/components/admin/FloatingCtaEditor';
 import FooterOfficeEditor from '@/components/admin/FooterOfficeEditor';
 import FooterBrandEditor from '@/components/admin/FooterBrandEditor';
+import NapLinkPanel from '@/components/admin/NapLinkPanel';
 
 type FieldDef = {
   key: keyof SiteSettings;
@@ -78,7 +79,8 @@ const SECTIONS: SectionDef[] = [
   {
     id: 'contact',
     title: 'Contact details',
-    description: 'Phone, email, and WhatsApp used in header, footer Contact column, and floating actions.',
+    description:
+      'The one place to type phone and email. Header, floating actions, structured data and emails read them directly; menus and page sections follow them through {{phone}}-style placeholders.',
     fields: [
       { key: 'phone', label: 'Main phone' },
       { key: 'emergencyPhone', label: 'Emergency phone' },
@@ -111,7 +113,12 @@ const SECTIONS: SectionDef[] = [
     description:
       'Postal address, office hours / SLA values, footer office labels & layout (default Match Contact h6). Feeds JSON-LD, contact form, thank-you, /sla.',
     fields: [
-      { key: 'addressStreet', label: 'Address street (line 1)', hint: 'Building / plot / road', full: true },
+      {
+        key: 'addressStreet',
+        label: 'Address street (line 1)',
+        hint: 'Building / plot / road. No trailing comma — lines are joined with ", " automatically',
+        full: true,
+      },
       {
         key: 'addressStreet2',
         label: 'Address street (line 2)',
@@ -452,6 +459,13 @@ export default function SiteSettingsPage() {
               <EyebrowSizeEditor settings={settings} onChange={patchSettings} />
             </div>
           </div>
+        );
+      case 'contact':
+        return (
+          <>
+            <div className="admin-form-grid">{section.fields.map(renderField)}</div>
+            <NapLinkPanel />
+          </>
         );
       case 'address':
         return (

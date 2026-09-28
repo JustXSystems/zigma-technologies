@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { getThemeSettings } from '@/lib/cms';
 import { isDbUnavailableError } from '@/lib/db';
+import { napValues, resolveNapDeep } from '@/lib/nap';
 import { resolvePublicFooterColumns, resolvePublicHeaderNav } from '@/lib/nav-data';
 import type { FooterColumn } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
@@ -25,8 +26,14 @@ export const loadSiteShell = cache(async (): Promise<SiteShellData> => {
 
     const settings = mergeSiteSettings(theme.site);
     const copy = mergeSiteCopy(theme.site_copy);
+    const nap = napValues(settings);
 
-    return { settings, copy, headerNav, footerColumns };
+    return {
+      settings,
+      copy,
+      headerNav: headerNav ? resolveNapDeep(headerNav, nap) : null,
+      footerColumns: resolveNapDeep(footerColumns, nap),
+    };
   } catch (err) {
     if (isDbUnavailableError(err)) {
       return {

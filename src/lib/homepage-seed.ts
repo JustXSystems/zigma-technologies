@@ -449,7 +449,7 @@ export const HOMEPAGE_SEED_SECTIONS = [
       title: "Let's build India's next 20 years of reliable power.",
       body: "Whether it's a single rooftop system or a multi-site industrial rollout, our engineers will size it right the first time.",
       primaryCta: 'Talk to an Engineer',
-      primaryHref: 'tel:+919590137444',
+      primaryHref: 'tel:{{phone}}',
       secondaryCta: 'Contact Us',
       secondaryHref: '/contact',
     },
