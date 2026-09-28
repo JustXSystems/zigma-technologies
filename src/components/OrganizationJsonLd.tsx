@@ -29,7 +29,7 @@ export default async function OrganizationJsonLd() {
       ...(streetAddress ? { streetAddress } : {}),
       addressLocality: site.addressLocality || 'Bengaluru',
       addressRegion: site.addressRegion || 'Karnataka',
-      ...(site.addressPostal ? { postalCode: site.addressPostal } : {}),
+      ...(site.addressPostal?.trim() ? { postalCode: site.addressPostal.trim() } : {}),
       addressCountry: site.addressCountry || 'IN',
     },
     contactPoint: [

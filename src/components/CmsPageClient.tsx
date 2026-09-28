@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SectionRenderer from '@/components/sections/SectionRenderer';
 import type { CmsSection } from '@/lib/cms-types';
+import { napValues, resolveNapDeep } from '@/lib/nap';
 import { applyDocumentSeo } from '@/components/SiteSeo';
 import { useSiteShell } from '@/components/SiteProviders';
 
@@ -24,6 +25,10 @@ export default function CmsPageClient({
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(initialPreview);
   const [source, setSource] = useState(initialSource);
+  const resolvedSections = useMemo(
+    () => (sections ? resolveNapDeep(sections, napValues(settings)) : null),
+    [sections, settings]
+  );
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -75,7 +80,7 @@ export default function CmsPageClient({
     );
   }
 
-  if (!sections) {
+  if (!resolvedSections) {
     return (
       <main id="main-content" className="section">
         <div className="container">
@@ -108,7 +113,7 @@ export default function CmsPageClient({
         </div>
       ) : null}
       <div style={preview ? { paddingTop: '2.2rem' } : undefined}>
-        <SectionRenderer sections={sections} />
+        <SectionRenderer sections={resolvedSections} />
       </div>
     </>
   );

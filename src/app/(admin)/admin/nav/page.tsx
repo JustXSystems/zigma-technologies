@@ -321,6 +321,11 @@ export default function NavAdminPage() {
           <strong>Under (parent)</strong> — not list position. Disable or delete a row to remove it from the site.
           Reset: Clear Footer → Seed footer tree.
         </p>
+        <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
+          <strong>Company details:</strong> type <code>{'{{phone}}'}</code>, <code>{'{{emergencyPhone}}'}</code> or{' '}
+          <code>{'{{email}}'}</code> instead of the number or address, e.g. Label <code>{'{{phone}}'}</code> and Href{' '}
+          <code>{'tel:{{phone}}'}</code>. The site fills them from Site Settings → Contact details.
+        </p>
         <form onSubmit={addItem} className="admin-form-grid">
           <div className="admin-field">
             <label>Label</label>

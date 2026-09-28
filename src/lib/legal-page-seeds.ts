@@ -21,7 +21,7 @@ export const PRIVACY_SEED_SECTIONS = [
     content_json: {
       html: `<p>We collect contact details you voluntarily submit via enquiry forms, careers applications, newsletter signup, and direct email or phone. This may include name, company, email, phone number, project requirements, and — when you apply for a role — work experience and a CV/resume file.</p>
 <p>Information is used to respond to requests, evaluate job applications, improve our services, and (with consent) send occasional updates. We do not sell personal data. Resume files are stored privately and are accessible only to authorized staff through the admin portal.</p>
-<p>Data is stored securely with access limited to authorized staff. You may request correction or deletion by contacting <a href="mailto:info@zigma-technologies.com">info@zigma-technologies.com</a>.</p>
+<p>Data is stored securely with access limited to authorized staff. You may request correction or deletion by contacting <a href="mailto:{{email}}">{{email}}</a>.</p>
 <p>This policy may be updated periodically. Continued use of the site after changes constitutes acceptance of the revised policy.</p>`,
     },
   },
