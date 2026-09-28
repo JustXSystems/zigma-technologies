@@ -4,17 +4,15 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import { getThemeSettings } from '@/lib/cms';
 import { buildPageMetadata } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
 import { mergeSiteSettings } from '@/lib/site-settings';
 import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const copy = await getSiteCopy();
-  return buildPageMetadata({
-    title: copy.hubs.sla.title,
-    description: copy.hubs.sla.lead,
-    path: '/sla',
-  });
+  const seo = pageSeo(copy, '/sla', { title: copy.hubs.sla.title, description: copy.hubs.sla.lead });
+  return buildPageMetadata({ ...seo, path: '/sla' });
 }
 
 type Metric = { label: string; value: string };

@@ -5,12 +5,10 @@ import { createPage, createSection, getPageBySlug, listSections, updatePage } fr
 async function seedIndustriesHubPage() {
   let page = await getPageBySlug('industries', true);
   if (!page) {
+    // Meta fields stay empty so Site Copy → SEO supplies the search title/description.
     page = await createPage({
       slug: 'industries',
       title: 'Industries',
-      meta_title: 'Industries | Zigma Technologies',
-      meta_description:
-        'Explore tailored UPS, solar, BESS, and service pathways for healthcare, data centres, manufacturing, banking, education, and airports.',
       status: 'published',
       enabled: true,
     });
@@ -66,19 +64,12 @@ export async function seedIndustryPages() {
       page = await createPage({
         slug,
         title: ind.name,
-        meta_title: `${ind.name} | Zigma Technologies`,
-        meta_description: ind.lead,
         status: 'published',
         enabled: true,
       });
       created += 1;
     } else {
-      await updatePage(page.id, {
-        status: 'published',
-        enabled: true,
-        meta_title: `${ind.name} | Zigma Technologies`,
-        meta_description: ind.lead,
-      });
+      await updatePage(page.id, { status: 'published', enabled: true });
     }
     if (!page) continue;
 

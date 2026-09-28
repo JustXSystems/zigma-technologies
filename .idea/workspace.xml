@@ -8,8 +8,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#34 SEO Implementation basic issues fixing pre requisite">
-      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/seo-phase3-content.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/cookies/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/hi/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/hi/locations/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/hi/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/hi/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/industries/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/kn/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/kn/locations/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/kn/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/kn/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/[slug]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/locations/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/press/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/sla/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/solar-roi/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/solar-roi/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/tools/ups-calculator/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/tools/ups-calculator/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/industry-seeds.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industry-seeds.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +53,11 @@
     </colors>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="seo/fix-technical-bugs" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -67,23 +91,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1874495104755505" />
-      <entry key="MS500" value="2.8989243817064874" />
-      <entry key="S2" value="6.027864093690902" />
-      <entry key="S5" value="10.183038448831434" />
-      <entry key="S10" value="15.969909080644122" />
-      <entry key="S30" value="26.43525750311197" />
-      <entry key="S60" value="31.039010540290807" />
-      <entry key="M2" value="33.82398221433481" />
-      <entry key="M5" value="35.6788651099367" />
-      <entry key="M10" value="36.33063796007959" />
-      <entry key="M15" value="36.55177822707314" />
-      <entry key="M30" value="36.77489230587038" />
-      <entry key="H1" value="36.88755579553226" />
-      <entry key="H2" value="37.335167921175795" />
-      <entry key="H4" value="50.745662504949706" />
-      <entry key="D1" value="1173.9264183833416" />
-      <entry key="W1" value="13224.406869949818" />
+      <entry key="MS100" value="1.6319909592121313" />
+      <entry key="MS500" value="4.001453117489957" />
+      <entry key="S2" value="7.284173593561055" />
+      <entry key="S5" value="12.67952740400292" />
+      <entry key="S10" value="19.082611904407205" />
+      <entry key="S30" value="31.850171548496025" />
+      <entry key="S60" value="46.40158251241394" />
+      <entry key="M2" value="74.9717767327404" />
+      <entry key="M5" value="151.14560429295224" />
+      <entry key="M10" value="217.43874643352714" />
+      <entry key="M15" value="250.34840183361388" />
+      <entry key="M30" value="304.8683927737096" />
+      <entry key="H1" value="393.06325376962604" />
+      <entry key="H2" value="511.08846776725807" />
+      <entry key="H4" value="633.3295474529676" />
+      <entry key="D1" value="2239.4483222586955" />
+      <entry key="W1" value="14531.544851978828" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -97,31 +121,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="6.767700042975693E-249" />
-      <entry key="H1" value="8.226603213342251E-125" />
-      <entry key="H2" value="9.070062410667764E-63" />
-      <entry key="H4" value="9.523687526883354E-32" />
-      <entry key="D1" value="6.866073825326669E-6" />
-      <entry key="W1" value="0.2837090729273514" />
+      <entry key="M30" value="3.159497045073365E-238" />
+      <entry key="H1" value="1.777497410708135E-119" />
+      <entry key="H2" value="4.21603772600273E-60" />
+      <entry key="H4" value="2.053299229567818E-30" />
+      <entry key="D1" value="1.1454680667591908E-5" />
+      <entry key="W1" value="0.305229655951703" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.07616194420828" />
-      <entry key="MS500" value="2.8387091077850983" />
-      <entry key="S2" value="5.989111111903838" />
-      <entry key="S5" value="10.1471505063249" />
-      <entry key="S10" value="15.931290619886212" />
-      <entry key="S30" value="26.40806835443859" />
-      <entry key="S60" value="31.022170266600924" />
-      <entry key="M2" value="33.81457676493504" />
-      <entry key="M5" value="35.67484021939651" />
-      <entry key="M10" value="36.328579353669745" />
-      <entry key="M15" value="36.55039538153285" />
-      <entry key="M30" value="36.774195615938076" />
-      <entry key="H1" value="36.887206124416466" />
-      <entry key="H2" value="37.33499244451201" />
-      <entry key="H4" value="50.745569478116366" />
-      <entry key="D1" value="1173.926336040722" />
-      <entry key="W1" value="13224.690441694427" />
+      <entry key="MS100" value="1.5780835262839736" />
+      <entry key="MS500" value="3.9734482800103543" />
+      <entry key="S2" value="7.270641818338751" />
+      <entry key="S5" value="12.669050504139816" />
+      <entry key="S10" value="19.074240490289476" />
+      <entry key="S30" value="31.844781802512152" />
+      <entry key="S60" value="46.396941414165184" />
+      <entry key="M2" value="74.96774337182507" />
+      <entry key="M5" value="151.14242108970785" />
+      <entry key="M10" value="217.43648109117302" />
+      <entry key="M15" value="250.34665586568238" />
+      <entry key="M30" value="304.8673153514273" />
+      <entry key="H1" value="393.06255980186455" />
+      <entry key="H2" value="511.0880216892127" />
+      <entry key="H4" value="633.3292759984766" />
+      <entry key="D1" value="2239.4481826060837" />
+      <entry key="W1" value="14531.84993230886" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -276,7 +300,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 Footer logo isses fixing" />
     <MESSAGE value="#27 Footer office address isses fixing" />
     <MESSAGE value="#27 Footer logo font isses fixing" />
     <MESSAGE value="#27 Footer addressz isses fixing" />
@@ -301,7 +324,8 @@
     <MESSAGE value="#31 ind-item border style (color, size/width) to be able to control in admin" />
     <MESSAGE value="#34 SEO Implementation" />
     <MESSAGE value="#34 SEO Implementation basic issues fixing pre requisite" />
-    <option name="LAST_COMMIT_MESSAGE" value="#34 SEO Implementation basic issues fixing pre requisite" />
+    <MESSAGE value="#33 close buttton issue fixed in certificates" />
+    <option name="LAST_COMMIT_MESSAGE" value="#33 close buttton issue fixed in certificates" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
