@@ -8,11 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#34 SEO Implementation basic issues fixing pre requisite">
-      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-case-study-page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,45 +45,45 @@
   <component name="GithubDefaultAccount">
     <option name="defaultAccountId" value="02f182f7-37cd-422d-9778-ff9cd6d137c9" />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/JustXSystems/zigma-technologies.git",
-    "accountId": "02f182f7-37cd-422d-9778-ff9cd6d137c9"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JustXSystems/zigma-technologies.git&quot;,
+    &quot;accountId&quot;: &quot;02f182f7-37cd-422d-9778-ff9cd6d137c9&quot;
   },
-  "recentNewPullRequestHead": {
-    "server": {
-      "useHttp": false,
-      "host": "github.com",
-      "port": null,
-      "suffix": null
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
     },
-    "owner": "JustXSystems",
-    "repository": "zigma-technologies"
+    &quot;owner&quot;: &quot;JustXSystems&quot;,
+    &quot;repository&quot;: &quot;zigma-technologies&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0547141516178553" />
-      <entry key="MS500" value="2.5614977666373995" />
-      <entry key="S2" value="7.344823563184928" />
-      <entry key="S5" value="14.198636561858812" />
-      <entry key="S10" value="24.72578983498072" />
-      <entry key="S30" value="61.42042686695179" />
-      <entry key="S60" value="94.72915287706684" />
-      <entry key="M2" value="141.83055794616675" />
-      <entry key="M5" value="239.0339331745054" />
-      <entry key="M10" value="310.44645319171804" />
-      <entry key="M15" value="342.52045260647515" />
-      <entry key="M30" value="380.034486973399" />
-      <entry key="H1" value="401.1421059870765" />
-      <entry key="H2" value="413.3540853357374" />
-      <entry key="H4" value="447.48535837498594" />
-      <entry key="D1" value="2030.8963170331326" />
-      <entry key="W1" value="14326.91876699" />
+      <entry key="MS100" value="1.1874495104755505" />
+      <entry key="MS500" value="2.8989243817064874" />
+      <entry key="S2" value="6.027864093690902" />
+      <entry key="S5" value="10.183038448831434" />
+      <entry key="S10" value="15.969909080644122" />
+      <entry key="S30" value="26.43525750311197" />
+      <entry key="S60" value="31.039010540290807" />
+      <entry key="M2" value="33.82398221433481" />
+      <entry key="M5" value="35.6788651099367" />
+      <entry key="M10" value="36.33063796007959" />
+      <entry key="M15" value="36.55177822707314" />
+      <entry key="M30" value="36.77489230587038" />
+      <entry key="H1" value="36.88755579553226" />
+      <entry key="H2" value="37.335167921175795" />
+      <entry key="H4" value="50.745662504949706" />
+      <entry key="D1" value="1173.9264183833416" />
+      <entry key="W1" value="13224.406869949818" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -100,31 +97,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="8.398730444955588E-237" />
-      <entry key="H1" value="9.164458764683049E-119" />
-      <entry key="H2" value="9.573117968917698E-60" />
-      <entry key="H4" value="3.0940455667682278E-30" />
-      <entry key="D1" value="1.2264844979272983E-5" />
-      <entry key="W1" value="0.30822410152019913" />
+      <entry key="M30" value="6.767700042975693E-249" />
+      <entry key="H1" value="8.226603213342251E-125" />
+      <entry key="H2" value="9.070062410667764E-63" />
+      <entry key="H4" value="9.523687526883354E-32" />
+      <entry key="D1" value="6.866073825326669E-6" />
+      <entry key="W1" value="0.2837090729273514" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.017796094237452" />
-      <entry key="MS500" value="2.539469225224756" />
-      <entry key="S2" value="7.328468794033683" />
-      <entry key="S5" value="14.185414526252057" />
-      <entry key="S10" value="24.713780482919365" />
-      <entry key="S30" value="61.41040951568706" />
-      <entry key="S60" value="94.72147605875317" />
-      <entry key="M2" value="141.82468032480693" />
-      <entry key="M5" value="239.02970292835627" />
-      <entry key="M10" value="310.4436114840296" />
-      <entry key="M15" value="342.5183368096775" />
-      <entry key="M30" value="380.03329851267085" />
-      <entry key="H1" value="401.14147479446234" />
-      <entry key="H2" value="413.353759315415" />
-      <entry key="H4" value="447.4851842502056" />
-      <entry key="D1" value="2030.8961960653855" />
-      <entry key="W1" value="14327.226844166571" />
+      <entry key="MS100" value="1.07616194420828" />
+      <entry key="MS500" value="2.8387091077850983" />
+      <entry key="S2" value="5.989111111903838" />
+      <entry key="S5" value="10.1471505063249" />
+      <entry key="S10" value="15.931290619886212" />
+      <entry key="S30" value="26.40806835443859" />
+      <entry key="S60" value="31.022170266600924" />
+      <entry key="M2" value="33.81457676493504" />
+      <entry key="M5" value="35.67484021939651" />
+      <entry key="M10" value="36.328579353669745" />
+      <entry key="M15" value="36.55039538153285" />
+      <entry key="M30" value="36.774195615938076" />
+      <entry key="H1" value="36.887206124416466" />
+      <entry key="H2" value="37.33499244451201" />
+      <entry key="H4" value="50.745569478116366" />
+      <entry key="D1" value="1173.926336040722" />
+      <entry key="W1" value="13224.690441694427" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -151,37 +148,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "seo/fix-technical-bugs",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/public",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;seo/fix-technical-bugs&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/public&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
