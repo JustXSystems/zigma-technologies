@@ -5,23 +5,30 @@ import { listCatalogItems } from '@/lib/catalog';
 import { getPageBySlug } from '@/lib/cms';
 import { getIndustryByKeyFromList, industryPageSlug } from '@/lib/industries';
 import { buildPageMetadata } from '@/lib/seo';
-import { getIndustryDefsCms } from '@/lib/site-content';
+import { pageSeo } from '@/lib/site-copy';
+import { getIndustryDefsCms, getSiteCopy } from '@/lib/site-content';
 import type { CatalogItem } from '@/lib/types';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const [defs, cmsPage] = await Promise.all([
+  const [defs, cmsPage, copy] = await Promise.all([
     getIndustryDefsCms(),
     getPageBySlug(industryPageSlug(slug), false).catch(() => null),
+    getSiteCopy(),
   ]);
   const industry = getIndustryByKeyFromList(defs, slug);
   if (!industry) notFound();
+  const path = `/industries/${industry.key}`;
+  const seo = pageSeo(copy, path, {
+    title: `Power & Energy Solutions for ${industry.name}`,
+    description: industry.lead,
+  });
   return buildPageMetadata({
-    title: cmsPage?.meta_title || `Power & Energy Solutions for ${industry.name}`,
-    description: cmsPage?.meta_description || industry.lead,
-    path: `/industries/${industry.key}`,
+    title: cmsPage?.meta_title || seo.title,
+    description: cmsPage?.meta_description || seo.description,
+    path,
   });
 }
 

@@ -5,6 +5,7 @@ import { listCatalogItems } from '@/lib/catalog';
 import { cityLocalePaths } from '@/lib/locale-locations';
 import { getLocationByKeyFromList } from '@/lib/locations';
 import { buildPageMetadata, localeAlternates } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getLocationDefsCms, getSiteCopy } from '@/lib/site-content';
 import type { CatalogItem } from '@/lib/types';
 
@@ -16,9 +17,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const location = getLocationByKeyFromList(defs, slug);
   if (!location) notFound();
   const paths = cityLocalePaths(location.key, copy.features.localesEnabled);
-  return buildPageMetadata({
+  const seo = pageSeo(copy, `/locations/${location.key}`, {
     title: `Power & Energy Solutions in ${location.name}`,
     description: location.lead,
+  });
+  return buildPageMetadata({
+    ...seo,
     path: `/locations/${location.key}`,
     ...(paths.hi || paths.kn
       ? { languages: localeAlternates({ en: paths.en, hi: paths.hi || undefined, kn: paths.kn || undefined }) }

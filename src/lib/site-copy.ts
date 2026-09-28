@@ -66,6 +66,12 @@ export type LocaleCopy = {
   altLocaleLabel: string;
 };
 
+/** Google title (brand appended automatically) and description for a page without its own admin SEO fields. */
+export type PageSeoCopy = {
+  title: string;
+  description: string;
+};
+
 export type SiteCopy = {
   talk: {
     buttonLabel: string;
@@ -241,6 +247,8 @@ export type SiteCopy = {
     hi: LocaleCopy;
     kn: LocaleCopy;
   };
+  /** Search titles/descriptions keyed by public path, e.g. `/projects`, `/locations/pune`. */
+  seo: Record<string, PageSeoCopy>;
   /** Feature flags for vertical product packaging */
   features: {
     toolsEnabled: boolean;
@@ -608,6 +616,138 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
       altLocaleLabel: 'हिन्दी',
     },
   },
+  seo: {
+    '/projects': {
+      title: 'Solar, UPS & Battery Storage Projects Across India',
+      description:
+        'Case studies from 1,500+ projects: rooftop solar plants up to 600 kW, data-centre UPS and hybrid lithium systems, with scope, capacity and results.',
+    },
+    '/products': {
+      title: 'UPS, Inverters, Batteries, Solar & EV Charging Products',
+      description:
+        'ABB, APC, Vertiv, Eaton and Delta UPS, Exide and Amaron batteries, Studer hybrids, Kirloskar solar and EV chargers, with installation and AMC.',
+    },
+    '/services': {
+      title: 'UPS AMC, Repair, Rental, Solar O&M & Installation Services',
+      description:
+        'UPS AMC (10,000+ contracts delivered), repairs, rentals, solar O&M, commissioning and EPLAN/AutoCAD design support across India. Get a quote.',
+    },
+    '/industries': {
+      title: 'Power & Energy Solutions by Industry – Hospitals to Airports',
+      description:
+        'UPS, solar, battery storage and AMC matched to your sector: hospitals, data centres, factories, banks, campuses and airports. See what fits your site.',
+    },
+    '/industries/healthcare': {
+      title: 'Hospital UPS & Solar – Backup Power for ICU, OT & Imaging',
+      description:
+        'Online double-conversion UPS with N+1 redundancy, battery care and rooftop solar for hospitals, keeping ICU, OT and imaging loads powered. Talk to us.',
+    },
+    '/industries/data-centres': {
+      title: 'Data Centre UPS & Battery Monitoring – N+1 and 2N Designs',
+      description:
+        'Modular UPS, APC battery monitoring and power distribution for server rooms and data centres, sized for N, N+1 or 2N redundancy. Plan your upgrade.',
+    },
+    '/industries/manufacturing': {
+      title: 'Solar EPC, Industrial UPS & BESS for Factories and Plants',
+      description:
+        'Rooftop solar up to 600 kW, ABB industrial UPS and peak-shaving battery storage for plants that cannot afford downtime. See our factory projects.',
+    },
+    '/industries/banking': {
+      title: 'UPS & AMC for Banks, Branches, ATMs and BFSI Data Floors',
+      description:
+        'Online UPS, multi-branch AMC with SLAs and rental UPS for migrations, keeping bank branches, ATMs and data floors running. Get a pan-India AMC quote.',
+    },
+    '/industries/education': {
+      title: 'Rooftop Solar, UPS & EV Charging for Colleges and Schools',
+      description:
+        'Campus rooftop solar like our 200 kW plant at AMC Engineering College, UPS for labs and data rooms, and smart EV charging for staff and students.',
+    },
+    '/industries/airports': {
+      title: 'Critical UPS & Power Engineering for Airports and Transit',
+      description:
+        'UPS, rental power for staged cutovers and HSE-compliant field engineering for terminals, airside systems and transit infrastructure. Talk to our team.',
+    },
+    '/locations': {
+      title: 'Solar, UPS & AMC Service Locations – Bengaluru to Delhi NCR',
+      description:
+        'Engineering desks in Bengaluru, Chennai, Hyderabad, Mumbai, Pune and Delhi NCR for site surveys, UPS, solar EPC and AMC. Find your nearest team.',
+    },
+    '/locations/bengaluru': {
+      title: 'Solar EPC, UPS & 24×7 AMC in Bengaluru – Head Office',
+      description:
+        'Our Bengaluru head office serves factories, campuses, hospitals and data centres with solar EPC, UPS, BESS and 24×7 AMC, plus same-day emergency help.',
+    },
+    '/locations/chennai': {
+      title: 'UPS, AMC & Solar EPC in Chennai for Industry & Commerce',
+      description:
+        'Industrial UPS, AMC and C&I solar for Chennai manufacturers and commercial sites, backed by projects like the eMudhra data-centre UPS. Get a quote.',
+    },
+    '/locations/hyderabad': {
+      title: 'Data Centre UPS, Campus Solar & BESS Advisory in Hyderabad',
+      description:
+        'Mission-critical UPS, campus rooftop solar and hybrid/BESS advice for Hyderabad IT parks, pharma units and manufacturing campuses. Talk to an engineer.',
+    },
+    '/locations/mumbai': {
+      title: 'UPS for BFSI, Rental UPS & Commercial Solar in Mumbai',
+      description:
+        'UPS continuity for Mumbai banks and offices, rental UPS for cutovers and commercial rooftop solar for real estate and industry. Request a site review.',
+    },
+    '/locations/pune': {
+      title: 'Industrial UPS, Solar EPC & Peak Shaving BESS in Pune',
+      description:
+        "Process-industry UPS, plant solar EPC and peak-shaving battery studies for Pune's automotive and manufacturing plants. Share your load for a proposal.",
+    },
+    '/locations/delhi-ncr': {
+      title: 'Multi-Site UPS AMC, Solar & Power Engineering in Delhi NCR',
+      description:
+        'Multi-site UPS AMC, campus solar and emergency desk access for Delhi NCR corporate campuses and industrial estates. Get an AMC or solar quote today.',
+    },
+    '/press': {
+      title: 'Press & News – Projects, Certifications and Milestones',
+      description:
+        'Company news: new solar and UPS projects, OEM authorisations, ISO certification and awards like the Karnataka Solar Awards 2025. Media enquiries welcome.',
+    },
+    '/sla': {
+      title: 'Service Levels – UPS Emergency, AMC & Solar O&M Response',
+      description:
+        'Our published response targets for enquiries, emergency UPS call-outs, AMC visits and solar O&M, so you know what to expect before you sign up.',
+    },
+    '/cookies': {
+      title: 'Cookie Policy',
+      description:
+        'Which cookies our website uses (necessary, analytics and marketing), what each one does, and how you can change your consent choices at any time.',
+    },
+    '/tools/ups-calculator': {
+      title: 'UPS kVA Calculator – Size Your UPS and Battery Backup',
+      description:
+        'Free UPS sizing tool: enter load, power factor, growth and backup time to get the recommended kVA, modular frames and battery energy. Print or get a quote.',
+    },
+    '/tools/solar-roi': {
+      title: 'Solar ROI Calculator for Commercial Rooftops in India',
+      description:
+        'Estimate rooftop solar generation, first-year savings, payback period and 10-year returns using your own tariff and system cost. Free and instant.',
+    },
+    '/hi': {
+      title: 'सोलर EPC, UPS, BESS और EV चार्जिंग कंपनी – भारत',
+      description:
+        '2006 से फ़ैक्टरियों, अस्पतालों और कैंपस के लिए सोलर EPC, UPS, बैटरी स्टोरेज, EV चार्जिंग और 24×7 AMC। बेंगलुरु मुख्यालय, पूरे भारत में सेवा।',
+    },
+    '/kn': {
+      title: 'ಸೋಲಾರ್ EPC, UPS, BESS ಮತ್ತು EV ಚಾರ್ಜಿಂಗ್ ಕಂಪನಿ – ಭಾರತ',
+      description:
+        '2006 ರಿಂದ ಕಾರ್ಖಾನೆ, ಆಸ್ಪತ್ರೆ ಮತ್ತು ಕ್ಯಾಂಪಸ್‌ಗಳಿಗೆ ಸೋಲಾರ್ EPC, UPS, ಬ್ಯಾಟರಿ ಸಂಗ್ರಹಣೆ, EV ಚಾರ್ಜಿಂಗ್ ಮತ್ತು 24×7 AMC. ಬೆಂಗಳೂರು ಮುಖ್ಯ ಕಚೇರಿ.',
+    },
+    '/hi/locations/bengaluru': {
+      title: 'बेंगलुरु में सोलर EPC, UPS और 24×7 AMC सेवाएँ',
+      description:
+        'बेंगलुरु मुख्यालय से उद्योगों, कैंपस, अस्पतालों और डेटा सेंटर के लिए सोलर EPC, UPS, BESS और 24×7 AMC। उसी दिन आपातकालीन सहायता।',
+    },
+    '/kn/locations/bengaluru': {
+      title: 'ಬೆಂಗಳೂರಿನಲ್ಲಿ ಸೋಲಾರ್ EPC, UPS ಮತ್ತು 24×7 AMC ಸೇವೆಗಳು',
+      description:
+        'ಬೆಂಗಳೂರು ಮುಖ್ಯ ಕಚೇರಿಯಿಂದ ಕೈಗಾರಿಕೆ, ಕ್ಯಾಂಪಸ್, ಆಸ್ಪತ್ರೆ ಮತ್ತು ಡೇಟಾ ಸೆಂಟರ್‌ಗಳಿಗೆ ಸೋಲಾರ್ EPC, UPS, BESS ಮತ್ತು 24×7 AMC. ಅದೇ ದಿನ ತುರ್ತು ಸಹಾಯ.',
+    },
+  },
   features: {
     toolsEnabled: true,
     solutionFinderEnabled: false,
@@ -642,6 +782,15 @@ function deepMerge<T extends Record<string, unknown>>(base: T, overlay: unknown)
 
 export function mergeSiteCopy(raw: unknown): SiteCopy {
   return deepMerge(DEFAULT_SITE_COPY as unknown as Record<string, unknown>, raw) as unknown as SiteCopy;
+}
+
+/** SEO copy for a path, falling back per field when the admin value is blank. */
+export function pageSeo(copy: SiteCopy, path: string, fallback: PageSeoCopy): PageSeoCopy {
+  const entry = copy.seo?.[path];
+  return {
+    title: entry?.title?.trim() || fallback.title,
+    description: entry?.description?.trim() || fallback.description,
+  };
 }
 
 /** Replace {company} placeholders after a new-client bootstrap. */
