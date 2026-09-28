@@ -157,7 +157,7 @@ if [[ "$DO_DB_BACKUP" -eq 1 ]]; then
   OUT="$BACKUP_ROOT/${ENV_NAME}-${DB_NAME}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
   export MYSQL_PWD="${DB_PASSWORD}"
   if ! mysqldump -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" \
-    --single-transaction --routines --triggers "$DB_NAME" | gzip >"$OUT"; then
+    --single-transaction --no-tablespaces --routines --triggers "$DB_NAME" | gzip >"$OUT"; then
     unset MYSQL_PWD
     rm -f "$OUT"
     die "mysqldump failed (check DB_* in .env and that deploy can connect)"
@@ -174,16 +174,29 @@ if [[ "$DO_MIGRATIONS" -eq 1 ]]; then
   DB_NAME="$(env_get DB_NAME)"
   DB_USER="$(env_get DB_USER)"
   DB_PASSWORD="$(env_get DB_PASSWORD)"
+  # Migrations run before extract, so SQL shipped in this release only exists inside the tarball.
+  MIG_STAGE="$(mktemp -d /tmp/zigma-migrations.XXXXXX)"
   export MYSQL_PWD="${DB_PASSWORD}"
   IFS=',' read -r -a MIGS <<<"$MIGRATION_FILES"
   for raw in "${MIGS[@]}"; do
     name="$(echo "$raw" | xargs)"
     [[ -n "$name" ]] || continue
-    file="scripts/$name"
-    [[ -f "$file" ]] || die "Migration not found: $file"
+    file=""
+    if [[ -f "$TARBALL" ]]; then
+      tar -xzf "$TARBALL" -C "$MIG_STAGE" --wildcards --no-anchored "scripts/$name" 2>/dev/null || true
+      for candidate in "$MIG_STAGE/scripts/$name" "$MIG_STAGE/./scripts/$name"; do
+        [[ -f "$candidate" ]] && { file="$candidate"; break; }
+      done
+    fi
+    if [[ -z "$file" && -f "scripts/$name" ]]; then
+      file="scripts/$name"
+    fi
+    [[ -n "$file" && -f "$file" ]] || { rm -rf "$MIG_STAGE"; die "Migration not found in tarball or $APP_DIR/scripts: $name"; }
+    log "  mysql < $name (from ${file#"$MIG_STAGE"/})"
     mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" <"$file"
   done
   unset MYSQL_PWD
+  rm -rf "$MIG_STAGE"
 fi
 
 if [[ "$DO_EXTRACT" -eq 1 ]]; then
