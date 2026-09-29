@@ -64,7 +64,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Friendly aliases for the Life at Zigma CMS page (slug life-at-zigma), matched case-insensitively
-  const LIFE_ALIASES = new Set(['/lifeatgizma', '/lifeatzigma', '/life-at-gizma', '/lifeatzigma.html', '/life-at-zigma.html']);
+  const LIFE_ALIASES = new Set(['/lifeatzigma', '/lifeatzigma.html', '/life-at-zigma.html']);
   if (LIFE_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
     const url = request.nextUrl.clone();
     url.pathname = '/life-at-zigma';

@@ -7,23 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#42 About sectiom font cconfiguration">
-      <change afterPath="$PROJECT_DIR$/src/app/life-sections.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/life-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/about-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/about-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutControls.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutControls.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#44 LIFE AT ZIGMA implemented">
       <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -82,23 +66,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0000000000003504" />
-      <entry key="S5" value="1.0000524970724425" />
-      <entry key="S10" value="1.0404479442348153" />
-      <entry key="S30" value="5.659197528578369" />
-      <entry key="S60" value="17.52383660290455" />
-      <entry key="M2" value="33.10901969912719" />
-      <entry key="M5" value="49.73860556972548" />
-      <entry key="M10" value="57.9301737843138" />
-      <entry key="M15" value="63.098323995472185" />
-      <entry key="M30" value="86.3110987304056" />
-      <entry key="H1" value="143.772686118432" />
-      <entry key="H2" value="231.95737459806492" />
-      <entry key="H4" value="349.63294177754847" />
-      <entry key="D1" value="1449.2728060866232" />
-      <entry key="W1" value="13329.469168583391" />
+      <entry key="MS100" value="1.2598563474201252" />
+      <entry key="MS500" value="2.534468303355562" />
+      <entry key="S2" value="5.273891074183944" />
+      <entry key="S5" value="10.282986845192601" />
+      <entry key="S10" value="19.794432178904756" />
+      <entry key="S30" value="47.5044244302949" />
+      <entry key="S60" value="65.98932066880401" />
+      <entry key="M2" value="79.87475951210736" />
+      <entry key="M5" value="91.14500723401152" />
+      <entry key="M10" value="100.92466571533555" />
+      <entry key="M15" value="110.42069629558219" />
+      <entry key="M30" value="138.69649364009481" />
+      <entry key="H1" value="197.56828209815782" />
+      <entry key="H2" value="291.41417971526397" />
+      <entry key="H4" value="417.5622334733907" />
+      <entry key="D1" value="1526.0758151515035" />
+      <entry key="W1" value="13399.148499019888" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -112,31 +96,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="7.373148749742524E-255" />
-      <entry key="H1" value="8.58670411144129E-128" />
-      <entry key="H2" value="2.9303078526734755E-64" />
-      <entry key="H4" value="1.7118141992551296E-32" />
-      <entry key="D1" value="5.158028251504051E-6" />
-      <entry key="W1" value="0.272349656242635" />
+      <entry key="M30" value="3.5185509854661753E-255" />
+      <entry key="H1" value="5.931737507229245E-128" />
+      <entry key="H2" value="2.435515860598783E-64" />
+      <entry key="H4" value="1.5606139371030364E-32" />
+      <entry key="D1" value="5.079140103593325E-6" />
+      <entry key="W1" value="0.27175066389058566" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9526379980439373" />
-      <entry key="MS500" value="0.9903428719330246" />
-      <entry key="S2" value="0.9975769252648039" />
-      <entry key="S5" value="0.9990825134870716" />
-      <entry key="S10" value="1.0399447252319816" />
-      <entry key="S30" value="5.658352314422596" />
-      <entry key="S60" value="17.522546428163967" />
-      <entry key="M2" value="33.10780305115799" />
-      <entry key="M5" value="49.73787217528386" />
-      <entry key="M10" value="57.92973290141642" />
-      <entry key="M15" value="63.09798903990525" />
-      <entry key="M30" value="86.3108539700123" />
-      <entry key="H1" value="143.77248187474183" />
-      <entry key="H2" value="231.9572054283018" />
-      <entry key="H4" value="349.6328005648494" />
-      <entry key="D1" value="1449.2727070964906" />
-      <entry key="W1" value="13329.74138037767" />
+      <entry key="MS100" value="1.2096301220160108" />
+      <entry key="MS500" value="2.514032955726348" />
+      <entry key="S2" value="5.263010723796222" />
+      <entry key="S5" value="10.274699598292877" />
+      <entry key="S10" value="19.786679252787007" />
+      <entry key="S30" value="47.49818084627189" />
+      <entry key="S60" value="65.98492439731089" />
+      <entry key="M2" value="79.87207217358922" />
+      <entry key="M5" value="91.14377100738912" />
+      <entry key="M10" value="100.92397471867001" />
+      <entry key="M15" value="110.42018445259293" />
+      <entry key="M30" value="138.69615554815303" />
+      <entry key="H1" value="197.56802946705554" />
+      <entry key="H2" value="291.4139831154829" />
+      <entry key="H4" value="417.562076679542" />
+      <entry key="D1" value="1526.0757129917697" />
+      <entry key="W1" value="13399.420111455765" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -291,7 +275,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 Footer addressz isses fixing" />
     <MESSAGE value="#27 Mobile cta and float-wa show hide fixing" />
     <MESSAGE value="#27 Media information updated" />
     <MESSAGE value="#27 Jump links on Site settings now expand the matching section, then scroll to it" />
@@ -316,7 +299,8 @@
     <MESSAGE value="#42 About Zigma" />
     <MESSAGE value="#42 Menu options fonts customization" />
     <MESSAGE value="#42 About sectiom font cconfiguration" />
-    <option name="LAST_COMMIT_MESSAGE" value="#42 About sectiom font cconfiguration" />
+    <MESSAGE value="#44 LIFE AT ZIGMA implemented" />
+    <option name="LAST_COMMIT_MESSAGE" value="#44 LIFE AT ZIGMA implemented" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
