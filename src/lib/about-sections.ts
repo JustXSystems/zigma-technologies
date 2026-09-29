@@ -63,10 +63,27 @@ export type TextEl = {
   tag?: HeadingTag;
 };
 
+/** Site Settings → Public typography eyebrow sizes (base / medium / large). */
+export type EyebrowScale = 'base' | 'md' | 'lg';
+
+/* --az-eyebrow-cap is set on phones (about-sections.css) so md / lg never outgrow the shrunken headings. */
+export const EYEBROW_SCALE_VAR: Record<EyebrowScale, string> = {
+  base: 'var(--text-eyebrow)',
+  md: 'min(var(--text-eyebrow-md), var(--az-eyebrow-cap, 100vw))',
+  lg: 'min(var(--text-eyebrow-lg), var(--az-eyebrow-cap, 100vw))',
+};
+
 export type EyebrowEl = TextEl & {
   /** Short accent line before the label */
   line?: boolean;
+  /** Site eyebrow scale; empty = placement default (hero md, sections lg). style.fontSize still wins. */
+  size?: EyebrowScale;
 };
+
+/** Headings whose tag / size follow Site Settings → Public typography heading levels. */
+export type AboutHeadingRole = 'pageHero' | 'section';
+
+export const ABOUT_TYPOGRAPHY_VERSION = 2;
 
 export type LinkItem = { label: string; href?: string };
 
@@ -582,7 +599,6 @@ export function defaultAboutHeroContent(): AboutHeroContent {
     eyebrow: { text: 'WHO WE ARE', line: true, style: { color: CYAN } },
     title: {
       text: "Engineering India's power infrastructure, one accountable project at a time.",
-      tag: 'h1',
     },
     lead: {
       text: 'For over 20 years, Zigma Technologies has designed, built, and maintained the solar, power continuity, storage, and EV charging systems that keep Indian industry running — as one team, not a chain of subcontractors.',
@@ -648,7 +664,6 @@ export function defaultStoryContent(): StoryContent {
     eyebrow: { text: 'OUR STORY', line: true, style: { color: ORANGE } },
     title: {
       text: "Founded on one idea: power infrastructure shouldn't be fragmented.",
-      tag: 'h2',
     },
     paragraphs: [
       {
@@ -676,7 +691,7 @@ export function defaultPurposeContent(): PurposeContent {
     header: {
       align: 'center',
       eyebrow: { text: 'PURPOSE', line: true, style: { color: GREEN } },
-      title: { text: 'What drives every project we take on', tag: 'h2' },
+      title: { text: 'What drives every project we take on' },
       subtitle: { text: '' },
     },
     cards: [
@@ -714,7 +729,7 @@ export function defaultFounderNoteContent(): FounderNoteContent {
     header: {
       align: 'center',
       eyebrow: { text: 'A NOTE FROM OUR FOUNDER', line: true, style: { color: ORANGE } },
-      title: { text: '', tag: 'h2' },
+      title: { text: '' },
       subtitle: { text: '' },
     },
     layout: {
@@ -778,7 +793,7 @@ export function defaultFacilitiesContent(): FacilitiesContent {
     header: {
       align: 'left',
       eyebrow: { text: 'HOW WE WORK', line: true, style: { color: GREEN } },
-      title: { text: 'A single team, from first site visit to AMC', tag: 'h2' },
+      title: { text: 'A single team, from first site visit to AMC' },
       subtitle: {
         text: 'Every project runs through the same five stages — no handoffs to third-party subcontractors along the way.',
       },
@@ -864,7 +879,37 @@ export function withAboutDefaults<T extends object>(type: AboutSectionType, raw:
       out[k] = v;
     }
   }
-  return out as T;
+  return upgradeAboutTypography(type, out) as T;
+}
+
+/** Tags the original seed wrote on role headings; stored copies of these follow Site Settings instead. */
+const LEGACY_SEED_TAGS: Partial<Record<AboutSectionType, { path: 'title' | 'header.title'; tag: HeadingTag }>> = {
+  about_hero: { path: 'title', tag: 'h1' },
+  story: { path: 'title', tag: 'h2' },
+  purpose: { path: 'header.title', tag: 'h2' },
+  founder_note: { path: 'header.title', tag: 'h2' },
+  facilities: { path: 'header.title', tag: 'h2' },
+};
+
+function upgradeAboutTypography(type: AboutSectionType, out: Record<string, unknown>): Record<string, unknown> {
+  if (out.typographyVersion === ABOUT_TYPOGRAPHY_VERSION) return out;
+  const legacy = LEGACY_SEED_TAGS[type];
+  if (legacy) {
+    const dropSeedTag = (el: unknown): unknown => {
+      if (!el || typeof el !== 'object' || (el as TextEl).tag !== legacy.tag) return el;
+      const rest = { ...(el as TextEl) };
+      delete rest.tag;
+      return rest;
+    };
+    if (legacy.path === 'title') {
+      out.title = dropSeedTag(out.title);
+    } else if (out.header && typeof out.header === 'object') {
+      const header = out.header as Record<string, unknown>;
+      out.header = { ...header, title: dropSeedTag(header.title) };
+    }
+  }
+  out.typographyVersion = ABOUT_TYPOGRAPHY_VERSION;
+  return out;
 }
 
 /** Accept legacy string arrays for link-ish lists. */

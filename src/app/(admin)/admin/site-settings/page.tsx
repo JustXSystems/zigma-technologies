@@ -186,7 +186,7 @@ const SECTIONS: SectionDef[] = [
     id: 'typography',
     title: 'Public typography',
     description:
-      'Page hero / section heading levels (H1–H3) and eyebrow (uppercase mono) sizes.',
+      'Page hero / section heading levels (H1–H3) and eyebrow (uppercase mono) sizes. Also the defaults for About section titles and eyebrows (each can be overridden in the About section editor).',
     fields: [],
   },
   {

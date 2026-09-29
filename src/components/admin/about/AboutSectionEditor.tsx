@@ -1,7 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
+import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
+  AboutSiteSettingsContext,
   AlignButtons,
   ColorInput,
   CtaListEditor,
@@ -149,8 +152,8 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
         <StyleEditor title="Breadcrumb style" value={c.breadcrumb.style} onChange={(style) => set('breadcrumb', { ...c.breadcrumb, style })} allowHide={false} />
       </Group>
       <Group title="Text content" description="Eyebrow, heading, lead" open>
-        <TextElementEditor label="Eyebrow" eyebrow value={c.eyebrow} onChange={(v) => set('eyebrow', v)} />
-        <TextElementEditor label="Heading" headingTag multiline value={c.title} onChange={(v) => set('title', v)} />
+        <TextElementEditor label="Eyebrow" eyebrow siteScale="md" value={c.eyebrow} onChange={(v) => set('eyebrow', v)} />
+        <TextElementEditor label="Heading" headingTag siteRole="pageHero" multiline value={c.title} onChange={(v) => set('title', v)} />
         <TextElementEditor label="Lead" multiline value={c.lead} onChange={(v) => set('lead', v)} />
       </Group>
       <Group title="Pills" description="Value chips under the lead">
@@ -264,8 +267,8 @@ function StoryEditor({ content: c, onChange }: EditorProps<StoryContent>) {
   return (
     <>
       <Group title="Text content" description="Eyebrow, heading, paragraphs" open>
-        <TextElementEditor label="Eyebrow" eyebrow value={c.eyebrow} onChange={(v) => set('eyebrow', v)} />
-        <TextElementEditor label="Heading" headingTag multiline value={c.title} onChange={(v) => set('title', v)} />
+        <TextElementEditor label="Eyebrow" eyebrow siteScale="lg" value={c.eyebrow} onChange={(v) => set('eyebrow', v)} />
+        <TextElementEditor label="Heading" headingTag siteRole="section" multiline value={c.title} onChange={(v) => set('title', v)} />
         <ParagraphsEditor items={c.paragraphs} onChange={(v) => set('paragraphs', v)} />
         <StyleEditor title="Style for all paragraphs" value={c.paragraphStyle} onChange={(v) => set('paragraphStyle', v)} allowHide={false} />
       </Group>
@@ -576,21 +579,38 @@ export default function AboutSectionEditor({
   onChange: (next: Record<string, unknown>) => void;
 }) {
   const emit = (next: object) => onChange(next as Record<string, unknown>);
+  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/site-settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
-    <div className="az-admin">
-      {type === 'about_hero' ? (
-        <AboutHeroEditor content={withAboutDefaults<AboutHeroContent>(type, content)} onChange={emit} />
-      ) : type === 'services_marquee' ? (
-        <ServicesMarqueeEditor content={withAboutDefaults<ServicesMarqueeContent>(type, content)} onChange={emit} />
-      ) : type === 'story' ? (
-        <StoryEditor content={withAboutDefaults<StoryContent>(type, content)} onChange={emit} />
-      ) : type === 'purpose' ? (
-        <PurposeEditor content={withAboutDefaults<PurposeContent>(type, content)} onChange={emit} />
-      ) : type === 'founder_note' ? (
-        <FounderNoteEditor content={withAboutDefaults<FounderNoteContent>(type, content)} onChange={emit} />
-      ) : type === 'facilities' ? (
-        <FacilitiesEditor content={withAboutDefaults<FacilitiesContent>(type, content)} onChange={emit} />
-      ) : null}
-    </div>
+    <AboutSiteSettingsContext.Provider value={site}>
+      <div className="az-admin">
+        {type === 'about_hero' ? (
+          <AboutHeroEditor content={withAboutDefaults<AboutHeroContent>(type, content)} onChange={emit} />
+        ) : type === 'services_marquee' ? (
+          <ServicesMarqueeEditor content={withAboutDefaults<ServicesMarqueeContent>(type, content)} onChange={emit} />
+        ) : type === 'story' ? (
+          <StoryEditor content={withAboutDefaults<StoryContent>(type, content)} onChange={emit} />
+        ) : type === 'purpose' ? (
+          <PurposeEditor content={withAboutDefaults<PurposeContent>(type, content)} onChange={emit} />
+        ) : type === 'founder_note' ? (
+          <FounderNoteEditor content={withAboutDefaults<FounderNoteContent>(type, content)} onChange={emit} />
+        ) : type === 'facilities' ? (
+          <FacilitiesEditor content={withAboutDefaults<FacilitiesContent>(type, content)} onChange={emit} />
+        ) : null}
+      </div>
+    </AboutSiteSettingsContext.Provider>
   );
 }

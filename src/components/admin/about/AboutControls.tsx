@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
+import { DEFAULT_SITE_SETTINGS, headingTagForRole, type SiteSettings } from '@/lib/site-settings';
 import {
   ABOUT_ICON_PRESETS,
   FONT_FAMILY_OPTIONS,
   svgMarkup,
+  type AboutHeadingRole,
   type CtaButton,
   type ElementStyle,
   type EyebrowEl,
+  type EyebrowScale,
   type HeadingTag,
   type IconEl,
   type ImageEl,
@@ -21,6 +24,19 @@ import {
 } from '@/lib/about-sections';
 
 const HEX6 = /^#[0-9A-Fa-f]{6}$/;
+
+/** Site Settings → Public typography values shown as the inherited defaults in About editors. */
+export const AboutSiteSettingsContext = createContext<SiteSettings>(DEFAULT_SITE_SETTINGS);
+
+const ROLE_LABEL: Record<AboutHeadingRole, string> = { pageHero: 'Page hero', section: 'Section' };
+
+const EYEBROW_SCALES: Array<{ value: EyebrowScale; label: string; key: 'eyebrowSize' | 'eyebrowSizeMd' | 'eyebrowSizeLg' }> = [
+  { value: 'base', label: 'Base', key: 'eyebrowSize' },
+  { value: 'md', label: 'Medium', key: 'eyebrowSizeMd' },
+  { value: 'lg', label: 'Large', key: 'eyebrowSizeLg' },
+];
+
+const SITE_TYPOGRAPHY_LINK = 'Site Settings → Public typography';
 
 export function Field({
   label,
@@ -263,11 +279,13 @@ export function StyleEditor({
   onChange,
   title = 'Style',
   allowHide = true,
+  fontSizePlaceholder = 'e.g. 1.2rem, 18px, clamp(...)',
 }: {
   value?: ElementStyle;
   onChange: (next: ElementStyle) => void;
   title?: string;
   allowHide?: boolean;
+  fontSizePlaceholder?: string;
 }) {
   const s = value || {};
   const set = (k: keyof ElementStyle, v: string | boolean) => onChange({ ...s, [k]: v === '' ? undefined : v });
@@ -294,7 +312,7 @@ export function StyleEditor({
           options={FONT_FAMILY_OPTIONS}
           onChange={(v) => set('fontFamily', v)}
         />
-        <TextInput label="Font size" value={s.fontSize} onChange={(v) => set('fontSize', v)} placeholder="e.g. 1.2rem, 18px, clamp(...)" />
+        <TextInput label="Font size" value={s.fontSize} onChange={(v) => set('fontSize', v)} placeholder={fontSizePlaceholder} />
         <TextInput
           label="Font size (phone)"
           value={s.fontSizeMobile}
@@ -363,16 +381,48 @@ export function TextElementEditor({
   headingTag,
   eyebrow,
   hint,
+  siteRole,
+  siteScale,
 }: {
   label: string;
   value?: TextEl | EyebrowEl;
-  onChange: (next: TextEl & { line?: boolean }) => void;
+  onChange: (next: EyebrowEl) => void;
   multiline?: boolean;
   headingTag?: boolean;
   eyebrow?: boolean;
   hint?: string;
+  /** Heading tag + size default to Site Settings → Public typography for this role. */
+  siteRole?: AboutHeadingRole;
+  /** Eyebrow placement default scale (Site Settings eyebrow sizes). */
+  siteScale?: EyebrowScale;
 }) {
+  const site = useContext(AboutSiteSettingsContext);
   const v = (value || { text: '' }) as EyebrowEl;
+  const level = siteRole ? headingTagForRole(site, siteRole) : null;
+  const tagOptions =
+    siteRole && level
+      ? [
+          {
+            value: '' as const,
+            label: siteRole === 'pageHero' ? 'Default (H1 · one per page)' : `Site setting (${level.toUpperCase()})`,
+          },
+          ...HEADING_TAGS.slice(1),
+        ]
+      : HEADING_TAGS;
+  const scaleSize = (scale: EyebrowScale) => site[EYEBROW_SCALES.find((s) => s.value === scale)!.key];
+  const activeScale = v.size || siteScale;
+
+  let fontSizePlaceholder: string | undefined;
+  let siteHint: string | undefined;
+  if (siteRole && level) {
+    fontSizePlaceholder = `Site ${ROLE_LABEL[siteRole]} level (${level.toUpperCase()} size)`;
+    siteHint = `${ROLE_LABEL[siteRole]} heading level ${level.toUpperCase()} from ${SITE_TYPOGRAPHY_LINK} sets the default size${
+      siteRole === 'section' ? ' and tag' : ''
+    }. Pick a tag or set a font size under style to override.`;
+  } else if (eyebrow && activeScale) {
+    fontSizePlaceholder = `Site eyebrow scale (${scaleSize(activeScale)})`;
+  }
+
   return (
     <div className="az-admin-el">
       <div className="admin-form-grid">
@@ -385,7 +435,7 @@ export function TextElementEditor({
           <SelectInput
             label="HTML tag (SEO)"
             value={v.tag || ''}
-            options={HEADING_TAGS}
+            options={tagOptions}
             onChange={(tag) => onChange({ ...v, tag: (tag || undefined) as HeadingTag | undefined })}
           />
         ) : null}
@@ -394,8 +444,37 @@ export function TextElementEditor({
             <Toggle label="Show line before label" checked={v.line !== false} onChange={(line) => onChange({ ...v, line })} />
           </Field>
         ) : null}
+        {eyebrow && siteScale ? (
+          <SelectInput
+            label="Eyebrow size (site scale)"
+            value={v.size || ''}
+            options={[
+              {
+                value: '',
+                label: `Site default · ${EYEBROW_SCALES.find((s) => s.value === siteScale)!.label} (${scaleSize(siteScale)})`,
+              },
+              ...EYEBROW_SCALES.map((s) => ({ value: s.value, label: `${s.label} (${site[s.key]})` })),
+            ]}
+            onChange={(size) => onChange({ ...v, size: (size || undefined) as EyebrowScale | undefined })}
+          />
+        ) : null}
+        {siteHint ? (
+          <p className="az-admin-hint" style={{ gridColumn: '1 / -1' }}>
+            {siteHint}
+          </p>
+        ) : eyebrow && siteScale ? (
+          <p className="az-admin-hint" style={{ gridColumn: '1 / -1' }}>
+            Sizes come from {SITE_TYPOGRAPHY_LINK} → eyebrow sizes. On phones, Medium / Large step down to the base
+            size (min 1rem) so eyebrows never outgrow headings. A font size set under style overrides the scale.
+          </p>
+        ) : null}
       </div>
-      <StyleEditor value={v.style} onChange={(style) => onChange({ ...v, style })} title={`${label} style`} />
+      <StyleEditor
+        value={v.style}
+        onChange={(style) => onChange({ ...v, style })}
+        title={`${label} style`}
+        fontSizePlaceholder={fontSizePlaceholder}
+      />
     </div>
   );
 }
@@ -868,8 +947,8 @@ export function SectionHeaderEditor({ value, onChange }: { value: SectionHeader;
         <TextInput label="Header max width" value={h.maxWidth} onChange={(maxWidth) => set({ maxWidth })} placeholder="680px" />
         <TextInput label="Space below header" value={h.marginBottom} onChange={(marginBottom) => set({ marginBottom })} placeholder="4rem" />
       </div>
-      <TextElementEditor label="Eyebrow" eyebrow value={h.eyebrow} onChange={(eyebrow) => set({ eyebrow })} />
-      <TextElementEditor label="Heading" headingTag value={h.title} onChange={(title) => set({ title })} />
+      <TextElementEditor label="Eyebrow" eyebrow siteScale="lg" value={h.eyebrow} onChange={(eyebrow) => set({ eyebrow })} />
+      <TextElementEditor label="Heading" headingTag siteRole="section" value={h.title} onChange={(title) => set({ title })} />
       <TextElementEditor label="Subtitle" multiline value={h.subtitle} onChange={(subtitle) => set({ subtitle })} />
     </div>
   );

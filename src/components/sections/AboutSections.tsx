@@ -2,7 +2,10 @@
 
 import { Fragment, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { appHref } from '@/lib/base-path';
+import { useSiteShell } from '@/components/SiteProviders';
+import { headingTagForRole } from '@/lib/site-settings';
 import {
+  EYEBROW_SCALE_VAR,
   elementCss,
   imageCss,
   mediaSrc,
@@ -12,10 +15,12 @@ import {
   sectionBoxCss,
   svgMarkup,
   withAboutDefaults,
+  type AboutHeadingRole,
   type AboutHeroContent,
   type CtaButton,
   type ElementStyle,
   type EyebrowEl,
+  type EyebrowScale,
   type FacilitiesContent,
   type FounderNoteContent,
   type HeadingTag,
@@ -77,12 +82,26 @@ function AzText({
   );
 }
 
-function AzEyebrow({ el, className = '' }: { el?: EyebrowEl; className?: string }) {
+/** Heading whose tag and size default to Site Settings → Public typography; element tag / style override. */
+function AzRoleHeading({ el, role, className }: { el?: TextEl; role: AboutHeadingRole; className: string }) {
+  const { settings } = useSiteShell();
+  const level = headingTagForRole(settings, role);
+  return (
+    <AzText
+      el={el}
+      defaultTag={role === 'pageHero' ? 'h1' : level}
+      className={className}
+      style={{ fontSize: `var(--text-${level})` }}
+    />
+  );
+}
+
+function AzEyebrow({ el, className = '', scale }: { el?: EyebrowEl; className?: string; scale: EyebrowScale }) {
   if (!hasText(el)) return null;
   return (
     <div
       className={`az-eyebrow${el.line === false ? '' : ' az-eyebrow--line'}${className ? ` ${className}` : ''}`}
-      style={elementCss(el.style)}
+      style={elementCss(mergeStyle({ fontSize: EYEBROW_SCALE_VAR[el.size || scale] }, el.style))}
     >
       {withLines(String(el.text))}
     </div>
@@ -139,8 +158,8 @@ function AzHeader({ header }: { header?: SectionHeader }) {
       className={`az-head az-head--${align}`}
       style={vars({ maxWidth: header.maxWidth, marginBottom: header.marginBottom })}
     >
-      <AzEyebrow el={header.eyebrow} />
-      <AzText el={header.title} defaultTag="h2" className="az-head-title" />
+      <AzEyebrow el={header.eyebrow} scale="lg" />
+      <AzRoleHeading el={header.title} role="section" className="az-head-title" />
       <AzText el={header.subtitle} defaultTag="p" className="az-head-sub" />
     </div>
   );
@@ -296,8 +315,8 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
           ))}
         </nav>
       ) : null}
-      <AzEyebrow el={c.eyebrow} />
-      <AzText el={c.title} defaultTag="h1" className="az-hero-title" />
+      <AzEyebrow el={c.eyebrow} scale="md" />
+      <AzRoleHeading el={c.title} role="pageHero" className="az-hero-title" />
       <AzText el={c.lead} defaultTag="p" className="az-hero-lead" />
       <AzPills pills={c.pills} />
       <AzCtas ctas={c.ctas} />
@@ -428,8 +447,8 @@ export function StorySection({ content, sectionKey }: SectionProps) {
   );
   const body = (
     <div className={`az-split-content${reveal}`}>
-      <AzEyebrow el={c.eyebrow} />
-      <AzText el={c.title} defaultTag="h2" className="az-split-title" />
+      <AzEyebrow el={c.eyebrow} scale="lg" />
+      <AzRoleHeading el={c.title} role="section" className="az-split-title" />
       {(c.paragraphs || []).map((p, i) => (
         <AzText key={i} el={p} defaultTag="p" className="az-split-p" style={c.paragraphStyle} />
       ))}
