@@ -53,7 +53,9 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function seedInner(slug: 'about-zigma' | 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms') {
+  async function seedInner(
+    slug: 'about-zigma' | 'life-at-zigma' | 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms'
+  ) {
     setSeedMsg('');
     setError('');
     const res = await fetch('/api/admin/pages/seed-inner', {
@@ -136,6 +138,9 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('about-zigma')}>
               Seed about zigma
+            </button>
+            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('life-at-zigma')}>
+              Seed life at zigma
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('contact')}>
               Seed contact

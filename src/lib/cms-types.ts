@@ -59,4 +59,11 @@ export const SECTION_TYPES = [
   { type: 'purpose', label: 'About · Purpose (mission / vision)' },
   { type: 'founder_note', label: "About · Founder's note" },
   { type: 'facilities', label: 'About · Facilities / How we work' },
+  { type: 'life_hero', label: 'Life · Page hero (breadcrumb, pills, optional media)' },
+  { type: 'life_stats', label: 'Life · Stat bar (count-up numbers)' },
+  { type: 'life_cards', label: 'Life · Culture cards (Why Zigma)' },
+  { type: 'life_roles', label: 'Life · Roles grid (animated icons)' },
+  { type: 'life_events', label: 'Life · Events & moments (marquee / albums / grid)' },
+  { type: 'life_gallery', label: 'Life · Gallery (mosaic + auto slider)' },
+  { type: 'life_cta', label: 'Life · CTA band' },
 ] as const;

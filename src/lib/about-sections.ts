@@ -154,6 +154,8 @@ export type Orb = {
   left?: string;
   opacity?: string;
   blur?: string;
+  /** Slow floating animation */
+  drift?: boolean;
 };
 
 export type SectionBox = {
@@ -163,6 +165,8 @@ export type SectionBox = {
   /** Gradient layers painted above the background image */
   bgGradient?: string;
   bgImage?: string;
+  /** Looping muted background video (mp4 / webm); the background image is its poster / fallback */
+  bgVideo?: string;
   bgPosition?: string;
   bgSize?: string;
   bgRepeat?: string;
@@ -177,7 +181,7 @@ export type SectionBox = {
   borderTop?: string;
   borderBottom?: string;
   containerMaxWidth?: string;
-  pattern?: 'none' | 'grid' | 'grid-fade';
+  pattern?: 'none' | 'grid' | 'grid-fade' | 'grid-fade-top';
   patternColor?: string;
   patternSize?: string;
   orbs?: Orb[];

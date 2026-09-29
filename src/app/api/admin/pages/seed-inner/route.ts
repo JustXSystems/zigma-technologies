@@ -8,6 +8,7 @@ import {
 } from '@/lib/inner-page-seeds';
 import { PRIVACY_SEED_SECTIONS, TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
 import { ABOUT_ZIGMA_SEED_SECTIONS } from '@/lib/about-sections';
+import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
 
 const SEEDS = {
   'about-zigma': {
@@ -16,6 +17,13 @@ const SEEDS = {
     meta_description:
       'Zigma Technologies is a 20+ year engineering partner delivering Solar EPC, UPS & Power Continuity, BESS, EV Charging, and Industrial Engineering solutions across India. Learn about our story, values, and team.',
     sections: ABOUT_ZIGMA_SEED_SECTIONS,
+  },
+  [LIFE_AT_ZIGMA_SLUG]: {
+    title: 'Life at Zigma',
+    meta_title: 'Life at Zigma | Careers at Zigma Technologies',
+    meta_description:
+      'Life at Zigma Technologies: a 250+ strong team of engineers, technicians and support specialists powering UPS, solar and power electronics across India.',
+    sections: LIFE_AT_ZIGMA_SEED_SECTIONS,
   },
   contact: {
     title: 'Contact',
@@ -55,7 +63,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const slug = String(body.slug || '') as keyof typeof SEEDS;
     if (!SEEDS[slug]) {
-      return jsonError('slug must be about-zigma, contact, careers, certifications, privacy, or terms');
+      return jsonError('slug must be about-zigma, life-at-zigma, contact, careers, certifications, privacy, or terms');
     }
 
     const seedDef = SEEDS[slug];

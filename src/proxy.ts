@@ -63,6 +63,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(LEGACY_HTML[pathname], request.url), 301);
   }
 
+  // Friendly aliases for the Life at Zigma CMS page (slug life-at-zigma), matched case-insensitively
+  const LIFE_ALIASES = new Set(['/lifeatgizma', '/lifeatzigma', '/life-at-gizma', '/lifeatzigma.html', '/life-at-zigma.html']);
+  if (LIFE_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/life-at-zigma';
+    return NextResponse.redirect(url, 308);
+  }
+
   try {
     const hit = await findRedirect(pathname);
     if (hit) {

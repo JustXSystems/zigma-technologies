@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
 import { DEFAULT_SITE_SETTINGS, headingTagForRole, type SiteSettings } from '@/lib/site-settings';
+import { DEFAULT_THEME_TOKENS, THEME_TOKEN_META } from '@/lib/theme-tokens';
 import {
   ABOUT_ICON_PRESETS,
   FONT_FAMILY_OPTIONS,
@@ -157,6 +158,28 @@ export function Toggle({
   );
 }
 
+const THEME_COLOR_LIST_ID = 'az-theme-colors';
+
+/** Default hex for `var(--token)` / `var(--token, #hex)` so theme colors get a swatch. */
+function themeTokenHex(value?: string): string | undefined {
+  const m = (value || '').trim().match(/^var\(\s*(--[\w-]+)\s*(?:,\s*(#[0-9A-Fa-f]{6})\s*)?\)$/);
+  if (!m) return undefined;
+  return DEFAULT_THEME_TOKENS[m[1]] || m[2];
+}
+
+/** Theme Studio color tokens offered as suggestions in every ColorInput; render once per editor. */
+export function ThemeColorDatalist() {
+  return (
+    <datalist id={THEME_COLOR_LIST_ID}>
+      {THEME_TOKEN_META.filter((t) => t.type === 'color').map((t) => (
+        <option key={t.key} value={`var(${t.key})`}>
+          {t.label}
+        </option>
+      ))}
+    </datalist>
+  );
+}
+
 /** Color picker + free text (accepts hex, rgba(), var(), gradients). */
 export function ColorInput({
   label,
@@ -174,17 +197,14 @@ export function ColorInput({
   full?: boolean;
 }) {
   const v = value || '';
+  const swatch = [v, themeTokenHex(v), fallback, themeTokenHex(fallback)].find((c) => c && HEX6.test(c)) || '#000000';
   return (
     <Field label={label} hint={hint} full={full}>
       <div className="admin-color-field">
-        <input
-          type="color"
-          aria-label={label}
-          value={HEX6.test(v) ? v : HEX6.test(fallback) ? fallback : '#000000'}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <input type="color" aria-label={label} value={swatch} onChange={(e) => onChange(e.target.value)} />
         <input
           className="admin-input"
+          list={THEME_COLOR_LIST_ID}
           value={v}
           placeholder={fallback ? `default ${fallback}` : 'default'}
           onChange={(e) => onChange(e.target.value)}
@@ -479,7 +499,10 @@ export function TextElementEditor({
   );
 }
 
-/** Generic reorderable list wrapper. */
+let listKeySeq = 0;
+const nextListKey = () => `li-${++listKeySeq}`;
+
+/** Generic reorderable list wrapper. Rows keep a stable key so open/closed state follows the item. */
 export function ListEditor<T>({
   label,
   items,
@@ -497,25 +520,46 @@ export function ListEditor<T>({
   itemTitle: (item: T, index: number) => string;
   addLabel?: string;
 }) {
+  const [keys, setKeys] = useState<string[]>(() => items.map(() => nextListKey()));
+  const [fresh, setFresh] = useState<string | null>(null);
+  let rowKeys = keys;
+  if (keys.length !== items.length) {
+    rowKeys = items.map((_, i) => keys[i] ?? nextListKey());
+    setKeys(rowKeys);
+  }
   const move = (i: number, dir: -1 | 1) => {
     const j = i + dir;
     if (j < 0 || j >= items.length) return;
     const next = [...items];
     [next[i], next[j]] = [next[j], next[i]];
+    const nextKeys = [...rowKeys];
+    [nextKeys[i], nextKeys[j]] = [nextKeys[j], nextKeys[i]];
+    setKeys(nextKeys);
     onChange(next);
+  };
+  const insertAt = (at: number, item: T) => {
+    const key = nextListKey();
+    setKeys([...rowKeys.slice(0, at), key, ...rowKeys.slice(at)]);
+    setFresh(key);
+    onChange([...items.slice(0, at), item, ...items.slice(at)]);
+  };
+  const removeAt = (i: number) => {
+    setKeys(rowKeys.filter((_, k) => k !== i));
+    onChange(items.filter((_, k) => k !== i));
   };
   return (
     <div className="az-admin-list">
       <div className="az-admin-list-head">
         <strong>{label}</strong>
-        <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => onChange([...items, create()])}>
+        <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => insertAt(items.length, create())}>
           + {addLabel}
         </button>
       </div>
       {items.length === 0 ? <p className="az-admin-hint">Nothing here yet.</p> : null}
       {items.map((item, i) => (
         <Panel
-          key={i}
+          key={rowKeys[i]}
+          defaultOpen={rowKeys[i] === fresh}
           title={`#${i + 1} · ${itemTitle(item, i) || 'Untitled'}`}
           actions={
             <>
@@ -533,15 +577,11 @@ export function ListEditor<T>({
               <button
                 type="button"
                 className="admin-btn admin-btn-secondary az-admin-mini"
-                onClick={() => onChange([...items.slice(0, i + 1), structuredClone(item), ...items.slice(i + 1)])}
+                onClick={() => insertAt(i + 1, structuredClone(item))}
               >
                 Copy
               </button>
-              <button
-                type="button"
-                className="admin-btn admin-btn-danger az-admin-mini"
-                onClick={() => onChange(items.filter((_, k) => k !== i))}
-              >
+              <button type="button" className="admin-btn admin-btn-danger az-admin-mini" onClick={() => removeAt(i)}>
                 ✕
               </button>
             </>
@@ -762,16 +802,28 @@ export function ImageEditor({ value, onChange, label = 'Image' }: { value: Image
   );
 }
 
-export function IconEditor({ value, onChange, label = 'Icon' }: { value: IconEl; onChange: (next: IconEl) => void; label?: string }) {
+export function IconEditor({
+  value,
+  onChange,
+  label = 'Icon',
+  presets = ABOUT_ICON_PRESETS,
+  previewClassName,
+}: {
+  value: IconEl;
+  onChange: (next: IconEl) => void;
+  label?: string;
+  presets?: Array<{ key: string; label: string; svg: string }>;
+  previewClassName?: string;
+}) {
   const icon = value || {};
   const set = (patch: Partial<IconEl>) => onChange({ ...icon, ...patch });
   const preview = svgMarkup(icon.svg);
-  const presetKey = ABOUT_ICON_PRESETS.find((p) => p.svg === (icon.svg || '').trim())?.key || '';
+  const presetKey = presets.find((p) => p.svg === (icon.svg || '').trim())?.key || '';
   return (
     <div>
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
         <div
-          className="az-admin-icon-preview"
+          className={`az-admin-icon-preview${previewClassName ? ` ${previewClassName}` : ''}`}
           style={{ color: icon.color || '#FF6B1A', background: icon.background || undefined }}
           dangerouslySetInnerHTML={{ __html: preview }}
         />
@@ -781,9 +833,9 @@ export function IconEditor({ value, onChange, label = 'Icon' }: { value: IconEl;
         <SelectInput
           label="Preset icon"
           value={presetKey}
-          options={[{ value: '', label: presetKey ? 'Custom' : 'Custom SVG…' }, ...ABOUT_ICON_PRESETS.map((p) => ({ value: p.key, label: p.label }))]}
+          options={[{ value: '', label: presetKey ? 'Custom' : 'Custom SVG…' }, ...presets.map((p) => ({ value: p.key, label: p.label }))]}
           onChange={(key) => {
-            const preset = ABOUT_ICON_PRESETS.find((p) => p.key === key);
+            const preset = presets.find((p) => p.key === key);
             if (preset) set({ svg: preset.svg });
           }}
         />
@@ -849,6 +901,19 @@ export function SectionBoxEditor({ value, onChange }: { value: SectionBox; onCha
         <div className="full">
           <MediaPicker label="Background image" value={b.bgImage || ''} onChange={(bgImage) => set({ bgImage })} kinds={['image', 'svg']} allowUpload />
         </div>
+        <div className="full">
+          <MediaPicker
+            label="Background video (optional, muted loop)"
+            value={b.bgVideo || ''}
+            onChange={(bgVideo) => set({ bgVideo })}
+            kinds={['video']}
+            allowUpload
+          />
+          <p className="az-admin-hint">
+            Plays behind the content, covering the section. The background image is used as the poster and the gradient overlay is
+            drawn on top of the video.
+          </p>
+        </div>
         <TextInput label="Image position" value={b.bgPosition} onChange={(bgPosition) => set({ bgPosition })} placeholder="center 30%" />
         <SelectInput
           label="Image size"
@@ -902,6 +967,7 @@ export function SectionBoxEditor({ value, onChange }: { value: SectionBox; onCha
             { value: '', label: 'None' },
             { value: 'grid', label: 'Grid lines' },
             { value: 'grid-fade', label: 'Grid lines (faded top-left)' },
+            { value: 'grid-fade-top', label: 'Grid lines (faded top-center)' },
           ]}
           onChange={(pattern) => set({ pattern: (pattern || undefined) as SectionBox['pattern'] })}
         />
@@ -926,6 +992,9 @@ export function SectionBoxEditor({ value, onChange }: { value: SectionBox; onCha
               <TextInput label="Left" value={o.left} onChange={(left) => patch({ ...o, left })} placeholder="8%" />
               <TextInput label="Opacity" value={o.opacity} onChange={(opacity) => patch({ ...o, opacity })} placeholder="0.28" />
               <TextInput label="Blur" value={o.blur} onChange={(blur) => patch({ ...o, blur })} placeholder="90px" />
+              <Field label="Motion">
+                <Toggle label="Slow drift animation" checked={Boolean(o.drift)} onChange={(drift) => patch({ ...o, drift: drift || undefined })} />
+              </Field>
             </div>
           )}
         />

@@ -38,7 +38,7 @@ import {
 type SectionProps = { content: Record<string, unknown>; sectionKey?: string | null };
 
 /** Build a style object of CSS custom properties / props, dropping empty values. */
-function vars(input: Record<string, string | number | undefined | null>): CSSProperties {
+export function vars(input: Record<string, string | number | undefined | null>): CSSProperties {
   const out: Record<string, string | number> = {};
   for (const [k, v] of Object.entries(input)) {
     if (v === undefined || v === null) continue;
@@ -48,7 +48,7 @@ function vars(input: Record<string, string | number | undefined | null>): CSSPro
   return out as CSSProperties;
 }
 
-function withLines(text: string): ReactNode {
+export function withLines(text: string): ReactNode {
   const parts = text.split('\n');
   return parts.map((part, i) => (
     <Fragment key={i}>
@@ -58,11 +58,11 @@ function withLines(text: string): ReactNode {
   ));
 }
 
-function hasText(el?: TextEl | null): el is TextEl {
+export function hasText(el?: TextEl | null): el is TextEl {
   return Boolean(el && !el.style?.hidden && String(el.text || '').trim());
 }
 
-function AzText({
+export function AzText({
   el,
   defaultTag,
   className,
@@ -96,7 +96,7 @@ function AzRoleHeading({ el, role, className }: { el?: TextEl; role: AboutHeadin
   );
 }
 
-function AzEyebrow({ el, className = '', scale }: { el?: EyebrowEl; className?: string; scale: EyebrowScale }) {
+export function AzEyebrow({ el, className = '', scale }: { el?: EyebrowEl; className?: string; scale: EyebrowScale }) {
   if (!hasText(el)) return null;
   return (
     <div
@@ -108,7 +108,50 @@ function AzEyebrow({ el, className = '', scale }: { el?: EyebrowEl; className?: 
   );
 }
 
-function AzShell({
+/** Muted looping video; play() is re-triggered on mount because SSR markup does not carry the muted flag. */
+export function AzVideo({
+  src,
+  poster,
+  className,
+  controls,
+  autoPlay = true,
+  loop = true,
+}: {
+  src: string;
+  poster?: string;
+  className?: string;
+  controls?: boolean;
+  autoPlay?: boolean;
+  loop?: boolean;
+}) {
+  return (
+    <video
+      className={className}
+      src={src}
+      poster={poster || undefined}
+      muted={!controls}
+      loop={loop}
+      playsInline
+      autoPlay={autoPlay}
+      controls={controls}
+      preload="metadata"
+      ref={(el) => {
+        if (!el || !autoPlay || el.dataset.azAutoplay) return;
+        el.dataset.azAutoplay = '1';
+        if (!controls) el.muted = true;
+        void el.play().catch(() => {});
+      }}
+    />
+  );
+}
+
+const PATTERN_CLASS: Record<string, string> = {
+  grid: '',
+  'grid-fade': ' az-pattern--fade',
+  'grid-fade-top': ' az-pattern--fade-top',
+};
+
+export function AzShell({
   box,
   className,
   id,
@@ -123,17 +166,24 @@ function AzShell({
 }) {
   const tone = box?.tone === 'dark' ? 'dark' : 'light';
   const pattern = box?.pattern && box.pattern !== 'none' ? box.pattern : null;
+  const video = mediaSrc(box?.bgVideo);
   return (
     <section id={id || undefined} className={`az-block az-tone-${tone} ${className}`} style={sectionBoxCss(box)}>
+      {video ? (
+        <div aria-hidden="true" className="az-bg-video">
+          <AzVideo src={video} poster={mediaSrc(box?.bgImage)} />
+          {box?.bgGradient?.trim() ? <span className="az-bg-video-overlay" style={{ background: box.bgGradient }} /> : null}
+        </div>
+      ) : null}
       {pattern ? (
         <div
           aria-hidden="true"
-          className={`az-pattern${pattern === 'grid-fade' ? ' az-pattern--fade' : ''}`}
+          className={`az-pattern${PATTERN_CLASS[pattern] ?? ''}`}
           style={vars({ '--az-pattern-color': box?.patternColor, '--az-pattern-size': box?.patternSize })}
         />
       ) : null}
       {(box?.orbs || []).map((orb, i) => (
-        <div key={i} aria-hidden="true" className="az-orb" style={orbCss(orb)} />
+        <div key={i} aria-hidden="true" className={`az-orb${orb.drift ? ' az-orb--drift' : ''}`} style={orbCss(orb)} />
       ))}
       {noContainer ? (
         <div className="az-inner">{children}</div>
@@ -165,7 +215,7 @@ function AzHeader({ header }: { header?: SectionHeader }) {
   );
 }
 
-function AzPills({ pills, className = '' }: { pills?: PillsEl; className?: string }) {
+export function AzPills({ pills, className = '' }: { pills?: PillsEl; className?: string }) {
   const items = normalizeLinkItems(pills?.items);
   if (!pills || pills.hidden || !items.length) return null;
   const { color, background, border, ...rest } = pills.style || {};
@@ -200,7 +250,7 @@ function AzPills({ pills, className = '' }: { pills?: PillsEl; className?: strin
   );
 }
 
-function AzImage({
+export function AzImage({
   image,
   className,
   eager,
@@ -234,7 +284,7 @@ function AzImage({
   );
 }
 
-function AzIcon({ icon, className }: { icon?: IconEl; className: string }) {
+export function AzIcon({ icon, className }: { icon?: IconEl; className: string }) {
   if (!icon || icon.hidden) return null;
   const markup = svgMarkup(icon.svg);
   const src = markup ? '' : mediaSrc(icon.src);
@@ -263,7 +313,7 @@ function AzIcon({ icon, className }: { icon?: IconEl; className: string }) {
   );
 }
 
-function AzCtas({ ctas, className = '' }: { ctas?: CtaButton[]; className?: string }) {
+export function AzCtas({ ctas, className = '' }: { ctas?: CtaButton[]; className?: string }) {
   const list = (ctas || []).filter((c) => c && String(c.label || '').trim());
   if (!list.length) return null;
   return (

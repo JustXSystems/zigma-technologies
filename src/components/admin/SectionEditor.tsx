@@ -27,6 +27,8 @@ import {
 } from '@/lib/eco-section';
 import { isAboutSectionType, withAboutDefaults } from '@/lib/about-sections';
 import AboutSectionEditor from '@/components/admin/about/AboutSectionEditor';
+import { isLifeSectionType, withLifeDefaults } from '@/lib/life-sections';
+import LifeSectionEditor from '@/components/admin/life/LifeSectionEditor';
 
 type Props = {
   section: CmsSection;
@@ -201,6 +203,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     if (section.type === 'timeline') return migrateTimelineContent(raw);
     if (section.type === 'split') return migrateSplitContent(raw);
     if (isAboutSectionType(section.type)) return withAboutDefaults<Record<string, unknown>>(section.type, raw);
+    if (isLifeSectionType(section.type)) return withLifeDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
@@ -485,6 +488,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
           <div style={{ marginTop: '1rem' }}>
             {isAboutSectionType(section.type) ? (
               <AboutSectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isLifeSectionType(section.type) ? (
+              <LifeSectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {(section.type === 'cta' ||
               section.type === 'eco' ||

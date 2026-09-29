@@ -7,6 +7,7 @@ import CareersApplySection from '@/components/sections/CareersApplySection';
 import CertMarquee, { normalizeCertItems } from '@/components/sections/CertMarquee';
 import EcoVisual from '@/components/sections/EcoVisual';
 import { renderAboutSection } from '@/components/sections/AboutSections';
+import { renderLifeSection } from '@/components/sections/LifeSections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2173,6 +2174,14 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
             case 'founder_note':
             case 'facilities':
               return wrap(renderAboutSection(section.type, { key, content, sectionKey: section.section_key }));
+            case 'life_hero':
+            case 'life_stats':
+            case 'life_cards':
+            case 'life_roles':
+            case 'life_events':
+            case 'life_gallery':
+            case 'life_cta':
+              return wrap(renderLifeSection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">

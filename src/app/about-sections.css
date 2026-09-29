@@ -22,7 +22,17 @@
   -webkit-mask-image:radial-gradient(ellipse at 20% 30%, black 5%, transparent 68%);
   mask-image:radial-gradient(ellipse at 20% 30%, black 5%, transparent 68%);
 }
+.az-pattern--fade-top{
+  -webkit-mask-image:radial-gradient(ellipse at 50% 20%, #000 10%, transparent 70%);
+  mask-image:radial-gradient(ellipse at 50% 20%, #000 10%, transparent 70%);
+}
 .az-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;opacity:0.28;}
+.az-orb--drift{animation:az-orb-drift 14s ease-in-out infinite alternate;}
+.az-orb--drift:nth-of-type(even){animation-duration:17s;animation-direction:alternate-reverse;}
+@keyframes az-orb-drift{0%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-30px) scale(1.08);}100%{transform:translate(-30px,25px) scale(0.95);}}
+.az-bg-video{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.az-bg-video video{width:100%;height:100%;object-fit:cover;display:block;}
+.az-bg-video-overlay{position:absolute;inset:0;}
 
 .az-eyebrow{
   font-family:var(--font-mono);font-size:var(--text-eyebrow-lg);letter-spacing:0.14em;
@@ -288,6 +298,7 @@
 
 @media (prefers-reduced-motion: reduce){
   .az-marquee-track{animation:none;}
+  .az-orb--drift{animation:none;}
   .az-zz-item{opacity:1;transform:none;transition:none;}
   .az-principle-track-fill{transform:scaleY(1);transition:none;}
 }
