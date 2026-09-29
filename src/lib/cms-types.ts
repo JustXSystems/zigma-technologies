@@ -53,4 +53,10 @@ export const SECTION_TYPES = [
   { type: 'cta', label: 'CTA band' },
   { type: 'rich_text', label: 'Rich text / HTML' },
   { type: 'comparison_table', label: 'Capability / Comparison table' },
+  { type: 'about_hero', label: 'About · Page hero (split + image)' },
+  { type: 'services_marquee', label: 'About · Services marquee' },
+  { type: 'story', label: 'About · Story (image + text)' },
+  { type: 'purpose', label: 'About · Purpose (mission / vision)' },
+  { type: 'founder_note', label: "About · Founder's note" },
+  { type: 'facilities', label: 'About · Facilities / How we work' },
 ] as const;

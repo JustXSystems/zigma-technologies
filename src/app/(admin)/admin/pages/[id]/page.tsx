@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { SECTION_TYPES } from '@/lib/cms-types';
 import { defaultIndustryCategoryContent } from '@/lib/industry-category';
+import { defaultAboutSectionContent } from '@/lib/about-sections';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -91,7 +92,9 @@ export default function AdminPageSectionsPage() {
   async function addSection(e: FormEvent) {
     e.preventDefault();
     const content_json =
-      addType === 'industry_category' ? defaultIndustryCategoryContent() : {};
+      addType === 'industry_category'
+        ? defaultIndustryCategoryContent()
+        : defaultAboutSectionContent(addType) || {};
     const res = await fetch('/api/admin/sections', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

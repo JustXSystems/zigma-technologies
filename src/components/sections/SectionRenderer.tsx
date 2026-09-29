@@ -6,6 +6,7 @@ import EnquiryFormSection from '@/components/sections/EnquiryFormSection';
 import CareersApplySection from '@/components/sections/CareersApplySection';
 import CertMarquee, { normalizeCertItems } from '@/components/sections/CertMarquee';
 import EcoVisual from '@/components/sections/EcoVisual';
+import { renderAboutSection } from '@/components/sections/AboutSections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2165,6 +2166,13 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
               return wrap(<RichTextSection key={key} content={content} sectionKey={section.section_key} />);
             case 'comparison_table':
               return wrap(<ComparisonTableSection key={key} content={content} sectionKey={section.section_key} />);
+            case 'about_hero':
+            case 'services_marquee':
+            case 'story':
+            case 'purpose':
+            case 'founder_note':
+            case 'facilities':
+              return wrap(renderAboutSection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">

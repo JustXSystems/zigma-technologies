@@ -8,8 +8,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#34 SEO Implementation basic issues fixing pre requisite">
-      <change beforePath="$PROJECT_DIR$/public/assets/css/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/about-zigma-office-building.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/images/founder-raghavendra-y.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/about-sections.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/about/AboutControls.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tmp-about/about.stripped.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,23 +82,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1874495104755505" />
-      <entry key="MS500" value="2.8989243817064874" />
-      <entry key="S2" value="6.027864093690902" />
-      <entry key="S5" value="10.183038448831434" />
-      <entry key="S10" value="15.969909080644122" />
-      <entry key="S30" value="26.43525750311197" />
-      <entry key="S60" value="31.039010540290807" />
-      <entry key="M2" value="33.82398221433481" />
-      <entry key="M5" value="35.6788651099367" />
-      <entry key="M10" value="36.33063796007959" />
-      <entry key="M15" value="36.55177822707314" />
-      <entry key="M30" value="36.77489230587038" />
-      <entry key="H1" value="36.88755579553226" />
-      <entry key="H2" value="37.335167921175795" />
-      <entry key="H4" value="50.745662504949706" />
-      <entry key="D1" value="1173.9264183833416" />
-      <entry key="W1" value="13224.406869949818" />
+      <entry key="MS100" value="1.016238808122389" />
+      <entry key="MS500" value="2.3618149329826372" />
+      <entry key="S2" value="6.842257242003585" />
+      <entry key="S5" value="13.437237372930909" />
+      <entry key="S10" value="22.4504934115778" />
+      <entry key="S30" value="41.39339102708379" />
+      <entry key="S60" value="51.11718822479604" />
+      <entry key="M2" value="57.42281949004836" />
+      <entry key="M5" value="61.79840237726059" />
+      <entry key="M10" value="63.36907059204662" />
+      <entry key="M15" value="63.90588743533475" />
+      <entry key="M30" value="64.44949727335049" />
+      <entry key="H1" value="64.72423962301156" />
+      <entry key="H2" value="65.25270890573526" />
+      <entry key="H4" value="78.69334354269776" />
+      <entry key="D1" value="1201.7630637443451" />
+      <entry key="W1" value="13252.146514015676" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -97,31 +112,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="6.767700042975693E-249" />
-      <entry key="H1" value="8.226603213342251E-125" />
-      <entry key="H2" value="9.070062410667764E-63" />
-      <entry key="H4" value="9.523687526883354E-32" />
-      <entry key="D1" value="6.866073825326669E-6" />
-      <entry key="W1" value="0.2837090729273514" />
+      <entry key="M30" value="6.723121315334955E-249" />
+      <entry key="H1" value="8.1994641991636E-125" />
+      <entry key="H2" value="9.055089286783528E-63" />
+      <entry key="H4" value="9.515823289178199E-32" />
+      <entry key="D1" value="6.865128550292442E-6" />
+      <entry key="W1" value="0.2837034927175218" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.07616194420828" />
-      <entry key="MS500" value="2.8387091077850983" />
-      <entry key="S2" value="5.989111111903838" />
-      <entry key="S5" value="10.1471505063249" />
-      <entry key="S10" value="15.931290619886212" />
-      <entry key="S30" value="26.40806835443859" />
-      <entry key="S60" value="31.022170266600924" />
-      <entry key="M2" value="33.81457676493504" />
-      <entry key="M5" value="35.67484021939651" />
-      <entry key="M10" value="36.328579353669745" />
-      <entry key="M15" value="36.55039538153285" />
-      <entry key="M30" value="36.774195615938076" />
-      <entry key="H1" value="36.887206124416466" />
-      <entry key="H2" value="37.33499244451201" />
-      <entry key="H4" value="50.745569478116366" />
-      <entry key="D1" value="1173.926336040722" />
-      <entry key="W1" value="13224.690441694427" />
+      <entry key="MS100" value="0.9095651907446961" />
+      <entry key="MS500" value="2.3106850956812535" />
+      <entry key="S2" value="6.804886166818764" />
+      <entry key="S5" value="13.401963655879035" />
+      <entry key="S10" value="22.411883121332917" />
+      <entry key="S30" value="41.36092820724172" />
+      <entry key="S60" value="51.095314875163" />
+      <entry key="M2" value="57.409994010562116" />
+      <entry key="M5" value="61.792739725047724" />
+      <entry key="M10" value="63.36614300354164" />
+      <entry key="M15" value="63.903913724430176" />
+      <entry key="M30" value="64.44849927316685" />
+      <entry key="H1" value="64.7237378072949" />
+      <entry key="H2" value="65.2524569823747" />
+      <entry key="H4" value="78.69321220264192" />
+      <entry key="D1" value="1201.762975011684" />
+      <entry key="W1" value="13252.430079268217" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -157,7 +172,7 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;seo/fix-technical-bugs&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
     &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,

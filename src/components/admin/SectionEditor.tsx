@@ -25,6 +25,8 @@ import {
   type EcoCapabilityGroup,
   type EcoGroupColorKey,
 } from '@/lib/eco-section';
+import { isAboutSectionType, withAboutDefaults } from '@/lib/about-sections';
+import AboutSectionEditor from '@/components/admin/about/AboutSectionEditor';
 
 type Props = {
   section: CmsSection;
@@ -198,6 +200,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     const raw = { ...(section.content_json || {}) };
     if (section.type === 'timeline') return migrateTimelineContent(raw);
     if (section.type === 'split') return migrateSplitContent(raw);
+    if (isAboutSectionType(section.type)) return withAboutDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
@@ -480,6 +483,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
           </div>
         ) : (
           <div style={{ marginTop: '1rem' }}>
+            {isAboutSectionType(section.type) ? (
+              <AboutSectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
             {(section.type === 'cta' ||
               section.type === 'eco' ||
               section.type === 'why' ||
