@@ -981,22 +981,27 @@ Open **Search Console → Indexing → Pages** once a week. Some "Not indexed" r
 
 **Why:** the company data (name, logo, phone, address, social profiles) appears in hidden structured data on every page, in the footer, and in emails. Google compares it with your Google Business Profile and directory listings. It must be complete and identical everywhere (see NAP in Phase 5.1). **Decide the exact NAP text in Phase 5.1 first**, then enter it here.
 
+> **Site Settings is the one place where company details are typed.** The footer menu (Admin → Navigation) and page sections such as the Contact page (Admin → Pages) follow it through placeholders like `{{phone}}`. After saving, run the one-time **Scan menus & pages → Link** in Contact details so older typed copies are replaced. See [Where NAP appears and how to update each place](#where-nap-appears-and-how-to-update-each-place) in 5.1.
+
+> **The Example column below is placeholder text.** The address, phone numbers and URLs are made up to show the format. Do not copy them. Enter your own values from the NAP sheet (5.1).
+
 1. Open `https://zigma-technologies.com/admin` → log in → left menu **Site Settings**.
 2. Each section is collapsed. Click a section title to open it. Fill in:
 
-| Section | Field | What to enter | Example |
+| Section | Field | What to enter | Example (placeholder, format only) |
 | --- | --- | --- | --- |
 | **Brand & identity** | Company name | Legal/brand name exactly as on Google Business Profile | `Zigma Technologies` |
 | **Brand & identity** | Logo image URL | Your logo image address (square or wide PNG/SVG, at least 112×112 pixels) | `/assets/images/zigma-technologies-logo.png` |
 | **Contact details** | Main phone | Main number in international format | `+91 80 1234 5678` |
 | **Contact details** | Emergency phone | 24×7 support number, if you have one (leave blank if not) | `+91 98765 43210` |
 | **Contact details** | Info email | Public enquiry email | `info@zigma-technologies.com` |
-| **Address & office** | Address street (line 1) | Building / plot / road | `No. 12, 3rd Cross, Peenya Industrial Area` |
+| **Address & office** | Address street (line 1) | Building / plot / road. Lines 2–4 are optional and only split the address across footer lines. No comma at the end of a line: the site joins the lines with ", " itself (it also removes stray end commas automatically). | `No. 12, 3rd Cross, Peenya Industrial Area` |
 | **Address & office** | Address city | City | `Bengaluru` |
 | **Address & office** | Address region/state | State | `Karnataka` |
-| **Address & office** | Postal code | PIN code | `560058` |
+| **Address & office** | Postal code | PIN code, 6 digits, no spaces before or after | `560058` |
 | **Address & office** | Country code | Two letters | `IN` |
-| **Social links** | LinkedIn URL / Facebook URL / YouTube URL / Instagram / X | Full profile addresses. Leave blank if you do not have one. | `https://www.linkedin.com/company/zigma-technologies` |
+| **Address & office** | Office hours | Same hours as your Google Business Profile | `Mon–Sat 9:30–18:30 IST` |
+| **Social links** | LinkedIn URL / Facebook URL / YouTube URL / Instagram / X | Full profile addresses (starting with `https://`). Leave blank if you do not have one. Do not type `#` as a stand-in (the site ignores it, but a blank field is clearer). | `https://www.linkedin.com/company/zigma-technologies` |
 | **SEO & social** | Default meta description | One sentence (120–160 characters) describing the company. Used when a page has no description of its own. | `Solar EPC, UPS, BESS and EV charging for industries, hospitals and campuses across India. 20+ years, 24×7 support.` |
 | **SEO & social** | Default OG / social image URL | **Leave empty.** The site then uses the new 1200×630 share image `/og.png`. Only fill it if you have your own 1200×630 image. | *(empty)* |
 
@@ -1266,20 +1271,99 @@ Do these only if Mobile Performance stays below 70 **after** step 4.2. They need
 **What:** NAP means **N**ame, **A**ddress, **P**hone. Google cross-checks these on your website, your Business Profile and directories. Any difference (for example "Zigma Technologies Pvt Ltd" in one place and "Zigma Tech" in another, or two different phone numbers) weakens trust.
 
 1. Open your baseline sheet → add a tab **NAP**.
-2. Write down the exact text you will use **everywhere, forever**:
+2. Write down the exact text you will use **everywhere, forever**.
 
-| Item | Your official version | Rules |
+> **The "Example" column is placeholder text, not your real details.** The address and phone number are made up to show the format. Replace every value with your own before you enter it anywhere.
+
+| Item | Example (placeholder, replace) | Rules |
 | --- | --- | --- |
 | Name | `Zigma Technologies` | The real-world name on your signboard, invoices and GST certificate. No extra keywords ("Zigma Technologies – Best Solar Company" breaks Google's rules and can get the profile suspended). |
-| Address | `No. 12, 3rd Cross, Peenya Industrial Area, Bengaluru, Karnataka 560058` | Exactly as Google Maps shows it. Same order, same abbreviations. |
-| Phone | `+91 80 1234 5678` | One main landline or mobile that is answered in office hours. Use the same number everywhere. |
+| Address | `No. 12, 3rd Cross, Peenya Industrial Area, Bengaluru, Karnataka 560058` | Exactly as Google Maps shows it for your pin. Same order, same abbreviations, same road names (if Maps includes a road such as "DLF City Road", include it everywhere; if not, leave it out everywhere). |
+| Phone (main) | `+91 80 1234 5678` | One main landline or mobile that is answered in office hours. Use the same number everywhere, written the same way (pick one format, e.g. `+91 95901 12345`, and never mix it with `+91 9590112345`). |
+| Phone (emergency) | `+91 98765 43210` | Only if you run a 24×7 line. Keep it separate from the main phone and always label it "Emergency". Do not use it as the main number. |
 | Website | `https://zigma-technologies.com` | Always the apex address (without `www`). |
-| Email | `info@zigma-technologies.com` | A domain email, not Gmail. |
-| Hours | `Mon–Sat 9:30–18:30` | Match what you really do. |
+| Email | `info@zigma-technologies.com` | One public domain email, not Gmail. Use the same address in every place that shows "email us". |
+| Hours | `Mon–Sat 9:30–18:30` | Match what you really do. The same hours must appear in the footer, on the Contact page and on Google Business Profile. |
 | Short description (250 characters) | *(write one)* | Reused in directories. |
 | Long description (750 characters) | *(write one; template in 5.2 under "Complete the profile")* | Reused in Business Profile and directories. |
 
-3. Enter the same details in **Admin → Site Settings** (step 2.1) if you have not already.
+3. Enter the details once in **Admin → Site Settings** and link the rest of the website to them (below).
+
+#### Where NAP appears and how to update each place
+
+**Site Settings is the one place where company details are typed.** Everything else on the website either reads Site Settings directly or shows a **placeholder** such as `{{phone}}` that the website replaces with the Site Settings value when the page is shown. Change the phone once in Site Settings and the header, footer, Contact page, Careers page, structured data and emails all change with it.
+
+| Placeholder | Filled with (Site Settings field) |
+| --- | --- |
+| `{{companyName}}` | Brand & identity → Company name |
+| `{{phone}}` | Contact details → Main phone |
+| `{{emergencyPhone}}` | Contact details → Emergency phone |
+| `{{email}}` | Contact details → Info email |
+| `{{supportEmail}}` | Contact details → Support email |
+| `{{address}}` | Address & office → street lines, city, state and PIN on one line |
+| `{{street}}`, `{{city}}`, `{{region}}`, `{{postalCode}}` | The single address parts |
+| `{{hours}}` | Address & office → Office hours |
+
+For links, put the placeholder after `tel:` or `mailto:`: `tel:{{phone}}`, `mailto:{{email}}`. The website removes the spaces from phone links automatically.
+
+**A. Admin → Site Settings** (`/admin/site-settings`): type the details here
+
+| Section → field | What it controls on the website |
+| --- | --- |
+| **Brand & identity** → Company name, Logo image URL | Hidden structured data (Organization / LocalBusiness) on every page, header and footer brand name, auto-reply emails |
+| **Contact details** → Main phone | Structured data `telephone`, header **Talk to us** menu, floating/sticky call button on mobile, thank-you page ("Call …"), auto-reply emails ("For urgent support, call …") |
+| **Contact details** → Emergency phone | Structured data "technical support" contact (24×7), header **Talk to us** menu emergency chip |
+| **Contact details** → Info email | Structured data `email` |
+| **Contact details** → Support email | Careers auto-reply email ("email … or call …") |
+| **Contact details** → WhatsApp | WhatsApp buttons in the header menu, mobile/floating buttons and thank-you page (digits only, with country code, e.g. `919590112345`) |
+| **Address & office** → Street lines 1–4, City, Region/state, Postal code, Country code | Structured data `address`; footer **Office** block (each street line is one footer line) |
+| **Address & office** → Office hours | Footer **Office** block hours, thank-you page, `/sla` page |
+| **Social links** → LinkedIn / Facebook / YouTube / Instagram / X | Structured data `sameAs` (tells Google which profiles are yours), footer social icons |
+
+How to update: open each section → change the field → **Save settings** (bottom-right). Changes are live immediately, including every placeholder in menus and pages.
+
+**B. One-time: link menus and pages to Site Settings**
+
+Older menus and page sections still contain typed copies of the phone numbers, emails, head-office address and hours. Replace them with placeholders once:
+
+1. Fill in and **save** Site Settings first (step A). The tool uses the saved values.
+2. In Site Settings, open **Contact details** → scroll to **Use these details everywhere** → click **Scan menus & pages**.
+3. **Expect:** a table with every field that will change. **Now typed** is the current text, **Becomes** is the placeholder, **Visitors will see** is the result with your Site Settings values. Read the last column carefully: for example, if the Contact page address contains a road name that Site Settings does not, the road name disappears. Fix Site Settings, save, and scan again until the last column is right.
+4. Click **Link N field(s)**. **Expect:** "Linked N field(s)". Scan again: it should say **Nothing to link**.
+
+What the tool changes:
+- Phone numbers that match the Site Settings phones (or appear in a `tel:` link) in the footer/header menus and in every page section. Items labelled **Emergency**, **urgent** or **24×7** get `{{emergencyPhone}}`; all others get `{{phone}}`.
+- The Info email and Support email (other addresses such as `careers@` or `hr@` stay as typed).
+- The **Head Office** address on the Contact page (only if Site Settings has a street) and "City, State" lines such as "Bengaluru, Karnataka".
+- The **Business Hours** rows in the Contact Form section become one `{{hours}}` row.
+
+What it leaves alone: regional hub addresses (Mumbai, Noida…) and hub phone numbers that differ from Site Settings, because those are genuinely different offices. Edit those in **Pages → contact → Locations**. Make sure each hub title matches its address (a Noida address should be titled "Noida, Uttar Pradesh" or "Delhi NCR", not "Delhi, Uttar Pradesh").
+
+**C. When you add new text in Navigation or Pages**
+
+Type the placeholder instead of the number, email or address, for example in **Navigation → Footer → Edit nav item**: Label `{{phone}}`, Href `tel:{{phone}}`; or Label `Emergency Call: {{emergencyPhone}} →`, Href `tel:{{emergencyPhone}}`. The Navigation and Pages screens show a reminder of the placeholders.
+
+**D. Outside the website**
+
+Google Business Profile (5.2), Bing Places and Apple Business Connect (5.4), and every directory and social profile in 5.5 (Justdial, IndiaMART, LinkedIn, Facebook, etc.). Copy the text from your NAP sheet each time; do not retype it from memory.
+
+#### Check that everything matches
+
+1. **Structured data:** open `https://zigma-technologies.com/` → **Ctrl + U** → **Ctrl + F** → search `"LocalBusiness"`. Compare `name`, `telephone`, `email`, `streetAddress`, `postalCode` and `sameAs` with your NAP sheet. (The website removes stray commas, spaces around the PIN code and `#` social links automatically.)
+2. **Footer:** scroll to the bottom of any page. Phone, email, address and hours must match the sheet character for character.
+3. **Contact page:** open `/contact` and check every phone, email, address and hours line (Quick Contact, the Emergency card, Locations, Contact Form side panel).
+4. **Linking:** Site Settings → Contact details → **Scan menus & pages** must say **Nothing to link**. If it lists fields, someone typed a number or email again; click **Link**.
+5. **Google Business Profile:** name, address, phone, website and hours must match the sheet.
+6. Write the date of the check in your NAP sheet. Repeat after any change of phone, address or hours.
+
+> **Known mismatches found on production (28 Sep 2026).** Entering the NAP in Site Settings and running **Scan menus & pages → Link** (B above) fixes all except the Noida hub title, which you edit in Pages → contact → Locations:
+> - Main phone: structured data and footer show the emergency line; the Contact page shows a different head-office number.
+> - Phone written two ways (`+91 95901 37666` and `+91 9590137666`).
+> - Email: `info@` in the footer and structured data, `support@` on the Contact page.
+> - Address: the Contact page includes "DLF City Road"; the footer and structured data do not. Structured data has `,,` and a trailing comma (street lines end with commas) and a leading space in the PIN code.
+> - Hours: footer `Mon–Sat 9:30–18:30 IST`; Contact page `Mon–Sat 9:00 AM–7:00 PM, Sunday closed`.
+> - Social links: all set to `#`, so Google receives four fake `https://#` profiles.
+> - Locations: Noida hub titled "Delhi, Uttar Pradesh".
 
 ### 5.2 Create and verify your Google Business Profile [You]
 
@@ -2020,6 +2104,8 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 | `src/lib/seo.ts` | `siteOrigin()`, `absoluteUrl()`, `isIndexable()`, `buildPageMetadata()`, `localeAlternates()`, `breadcrumbJsonLd()`, `organizationId()` / `websiteId()`, `toIsoDate()` |
 | `src/components/JsonLd.tsx` | Safe JSON-LD script tag (escapes `<`) |
 | `src/components/OrganizationJsonLd.tsx` | Site-wide `@graph`: Organization + LocalBusiness and WebSite, from Site Settings |
+| `src/lib/nap.ts` | NAP placeholders (`{{phone}}` …) filled from Site Settings in nav (`loadSiteShell`) and page sections (`CmsPageShell` / `CmsPageClient`) |
+| `src/lib/nap-link.ts`, `/api/admin/nap-link` | One-time scan/replace of typed NAP in `nav_items` and `page_sections` with placeholders (GET = dry run, POST = apply) |
 | `src/lib/cms-seo.ts` | Metadata for page-builder pages; brand-only home title fallback; hreflang on home when locales are on |
 | `src/lib/catalog-case-study-page.tsx` | Catalog detail metadata and JSON-LD; `parsePriceInr()` (plain amounts only → Offer) |
 | `src/components/admin/SeoFieldsEditor.tsx` | Inventory SEO tab (meta title/description, share image, noindex, preview) |
@@ -2103,7 +2189,8 @@ Print this or copy it into your sheet. Tick each box when the step and its **Exp
 - [ ] 4.4 Developer backlog items scheduled if Mobile Performance stays under 70
 
 **Phase 5 — Local SEO**
-- [ ] 5.1 NAP decided and written down; Site Settings match
+- [ ] 5.1 NAP decided and written down; entered in Site Settings
+- [ ] 5.1 Site Settings → Contact details → **Scan menus & pages** says "Nothing to link"; footer and Contact page show the NAP
 - [ ] 5.2 Google Business Profile created/claimed
 - [ ] 5.2 Profile verified
 - [ ] 5.2 Profile complete (categories, description, services, hours, 10+ photos)

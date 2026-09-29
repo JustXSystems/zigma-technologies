@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getLocationByKey, LOCATION_DEFS } from '@/lib/locations';
 import { LOCALE_OG, cityLocalePaths, localeCityCopy } from '@/lib/locale-locations';
 import { buildPageMetadata, localeAlternates } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -15,8 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const copy = await getSiteCopy();
   const kn = localeCityCopy('kn', slug);
   return buildPageMetadata({
-    title: kn?.title || loc.name,
-    description: kn?.lead || loc.lead,
+    ...pageSeo(copy, `/kn/locations/${slug}`, { title: kn?.title || loc.name, description: kn?.lead || loc.lead }),
     path: `/kn/locations/${slug}`,
     locale: LOCALE_OG.kn,
     noindex: !kn,

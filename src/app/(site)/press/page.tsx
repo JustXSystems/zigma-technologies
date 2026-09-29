@@ -5,15 +5,13 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import { listPressPosts } from '@/lib/press';
 import { buildPageMetadata } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   const copy = await getSiteCopy();
-  return buildPageMetadata({
-    title: copy.hubs.press.title,
-    description: copy.hubs.press.lead,
-    path: '/press',
-  });
+  const seo = pageSeo(copy, '/press', { title: copy.hubs.press.title, description: copy.hubs.press.lead });
+  return buildPageMetadata({ ...seo, path: '/press' });
 }
 
 export default async function PressIndexPage() {

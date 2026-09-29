@@ -1,18 +1,22 @@
+import type { Metadata } from 'next';
 import CatalogPageClient from '../_components/CatalogPageClient';
 import SocialProofStrip from '@/components/SocialProofStrip';
 import JsonLd from '@/components/JsonLd';
 import { loadInitialCatalogListing } from '@/lib/catalog-listing';
 import { breadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
-export const metadata = buildPageMetadata({
-  title: 'Solar, UPS & Battery Energy Projects',
-  description:
-    'Case studies of solar EPC, industrial UPS, BESS and EV charging projects delivered by Zigma Technologies across India — scope, capacity and outcomes.',
-  path: '/projects',
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = pageSeo(await getSiteCopy(), '/projects', {
+    title: 'Solar, UPS & Battery Energy Projects',
+    description:
+      'Case studies of solar EPC, industrial UPS, BESS and EV charging projects delivered by Zigma Technologies across India — scope, capacity and outcomes.',
+  });
+  return buildPageMetadata({ ...seo, path: '/projects' });
+}
 
 export default async function ProjectsPage({ searchParams }: Props) {
   const [copy, initial] = await Promise.all([getSiteCopy(), loadInitialCatalogListing('project', await searchParams)]);

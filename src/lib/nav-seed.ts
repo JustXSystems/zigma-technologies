@@ -163,11 +163,11 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
     label: 'Contact',
     meta_json: { kind: 'column' },
     children: [
-      { label: '+91 95901 37444', href: 'tel:+919590137444' },
-      { label: 'info@zigma-technologies.com', href: 'mailto:info@zigma-technologies.com' },
+      { label: '{{phone}}', href: 'tel:{{phone}}' },
+      { label: '{{email}}', href: 'mailto:{{email}}' },
       {
-        label: 'Emergency Call: +91 9590137666 →',
-        href: 'tel:+919590137666',
+        label: 'Emergency Call: {{emergencyPhone}} →',
+        href: 'tel:{{emergencyPhone}}',
         meta_json: { className: 'foot-emergency' },
       },
     ],

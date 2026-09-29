@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_SITE_COPY, type SiteCopy } from '@/lib/site-copy';
 import type { IndustryDef } from '@/lib/industries';
@@ -8,7 +9,70 @@ import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import MediaPicker from '@/components/admin/MediaPicker';
 
-type Tab = 'chrome' | 'hubs' | 'legal' | 'features' | 'consultation' | 'tools' | 'catalog' | 'locales' | 'industries' | 'locations';
+type Tab =
+  | 'chrome'
+  | 'hubs'
+  | 'legal'
+  | 'features'
+  | 'consultation'
+  | 'tools'
+  | 'catalog'
+  | 'locales'
+  | 'seo'
+  | 'industries'
+  | 'locations';
+
+function counterColor(length: number, good: [number, number], warnMax: number) {
+  if (length === 0) return 'var(--admin-muted, #6b7280)';
+  if (length >= good[0] && length <= good[1]) return '#12B76A';
+  if (length <= warnMax) return '#d97706';
+  return '#EF4444';
+}
+
+function SeoEntry({ path, copy, onChange }: { path: string; copy: SiteCopy; onChange: (next: SiteCopy) => void }) {
+  const entry = copy.seo?.[path] || { title: '', description: '' };
+  const set = (field: 'title' | 'description', value: string) =>
+    onChange({ ...copy, seo: { ...copy.seo, [path]: { ...entry, [field]: value } } });
+  const titleLen = entry.title.trim().length;
+  const descLen = entry.description.trim().length;
+
+  return (
+    <div className="full" style={{ borderTop: '1px solid var(--admin-border)', paddingTop: '0.75rem' }}>
+      <h4 style={{ margin: '0 0 0.5rem' }}>
+        <a href={path} target="_blank" rel="noreferrer">
+          {path}
+        </a>
+      </h4>
+      <div className="admin-field">
+        <label>
+          Meta title{' '}
+          <small style={{ color: counterColor(titleLen, [50, 60], 65) }}>
+            {titleLen}/60 — brand is appended automatically
+          </small>
+        </label>
+        <input
+          className="admin-input"
+          style={{ width: '100%' }}
+          value={entry.title}
+          maxLength={255}
+          onChange={(e) => set('title', e.target.value)}
+        />
+      </div>
+      <div className="admin-field">
+        <label>
+          Meta description <small style={{ color: counterColor(descLen, [120, 160], 180) }}>{descLen}/160</small>
+        </label>
+        <textarea
+          className="admin-textarea"
+          style={{ width: '100%', minHeight: 64 }}
+          value={entry.description}
+          maxLength={320}
+          onChange={(e) => set('description', e.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
 
 function setPath(obj: SiteCopy, path: string, value: unknown): SiteCopy {
   const parts = path.split('.');
@@ -105,6 +169,7 @@ export default function SiteCopyAdminPage() {
         { id: 'tools' as const, label: 'Tools' },
         { id: 'catalog' as const, label: 'Catalog' },
         { id: 'locales' as const, label: 'Locales' },
+        { id: 'seo' as const, label: 'SEO' },
         { id: 'industries' as const, label: 'Industries JSON' },
         { id: 'locations' as const, label: 'Locations JSON' },
       ] as const,
@@ -453,6 +518,21 @@ export default function SiteCopyAdminPage() {
                   <Field label="Alt locale link" path={`locales.${locale}.altLocaleLabel`} copy={copy} onChange={setCopy} />
                 </div>
               </AdminCollapsible>
+            ))}
+          </div>
+        ) : null}
+
+        {tab === 'seo' ? (
+          <div className="admin-form-grid">
+            <p className="full theme-help" style={{ marginTop: 0 }}>
+              Google title and description for pages that have no SEO fields of their own (listing, hub, city,
+              industry, tool and language pages). Title 50–60 characters without the brand; description 120–160
+              characters. Leave a field empty to use the automatic text. Home, Contact, Careers and other CMS pages
+              are edited in <Link href="/admin/pages">Pages</Link>; products, projects and services in{' '}
+              <Link href="/admin/inventory">Inventory → SEO</Link>.
+            </p>
+            {Object.keys(DEFAULT_SITE_COPY.seo).map((path) => (
+              <SeoEntry key={path} path={path} copy={copy} onChange={setCopy} />
             ))}
           </div>
         ) : null}

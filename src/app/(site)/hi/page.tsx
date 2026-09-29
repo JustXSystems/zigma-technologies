@@ -3,14 +3,14 @@ import { redirect } from 'next/navigation';
 import LocaleLanding from '@/components/i18n/LocaleLanding';
 import { LOCALE_OG } from '@/lib/locale-locations';
 import { buildPageMetadata, localeAlternates } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   const copy = await getSiteCopy();
   const locale = copy.locales.hi;
   return buildPageMetadata({
-    title: locale.title,
-    description: locale.lead,
+    ...pageSeo(copy, '/hi', { title: locale.title, description: locale.lead }),
     path: '/hi',
     locale: LOCALE_OG.hi,
     languages: localeAlternates({ en: '/', hi: '/hi', kn: '/kn' }),

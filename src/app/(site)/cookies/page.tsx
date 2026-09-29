@@ -2,15 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeading from '@/components/SiteHeading';
 import { buildPageMetadata } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   const copy = await getSiteCopy();
-  return buildPageMetadata({
-    title: copy.cookies.pageTitle,
-    description: copy.cookies.pageLead,
-    path: '/cookies',
-  });
+  const seo = pageSeo(copy, '/cookies', { title: copy.cookies.pageTitle, description: copy.cookies.pageLead });
+  return buildPageMetadata({ ...seo, path: '/cookies' });
 }
 
 export default async function CookiesPage() {

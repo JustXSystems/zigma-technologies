@@ -124,6 +124,11 @@ export default function AdminPagesPage() {
             <p style={{ margin: '0.4rem 0 0', color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
               Manage public pages, reorder sections, enable/disable blocks.
             </p>
+            <p style={{ margin: '0.3rem 0 0', color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
+              Company details: type <code>{'{{phone}}'}</code>, <code>{'{{emergencyPhone}}'}</code>,{' '}
+              <code>{'{{email}}'}</code>, <code>{'{{address}}'}</code> or <code>{'{{hours}}'}</code> (links:{' '}
+              <code>{'tel:{{phone}}'}</code>) and the site fills them from Site Settings.
+            </p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button type="button" className="admin-btn admin-btn-primary" onClick={seedHome}>

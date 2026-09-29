@@ -4,16 +4,17 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import VisitTailorBar from '@/components/VisitTailorBar';
 import { buildPageMetadata } from '@/lib/seo';
+import { pageSeo } from '@/lib/site-copy';
 import { getLocationDefsCms, getSiteCopy } from '@/lib/site-content';
 import SiteHeading from '@/components/SiteHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const copy = await getSiteCopy();
-  return buildPageMetadata({
+  const seo = pageSeo(copy, '/locations', {
     title: copy.hubs.locations.title,
     description: copy.hubs.locations.lead,
-    path: '/locations',
   });
+  return buildPageMetadata({ ...seo, path: '/locations' });
 }
 
 const LOCATION_IMAGE: Record<string, string> = {
