@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { buildFooterColumns } from '@/lib/nav-tree';
 
 type NavRow = {
@@ -326,6 +327,15 @@ export default function NavAdminPage() {
           <code>{'{{email}}'}</code> instead of the number or address, e.g. Label <code>{'{{phone}}'}</code> and Href{' '}
           <code>{'tel:{{phone}}'}</code>. The site fills them from Site Settings → Contact details.
         </p>
+        {location === 'header' ? (
+          <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
+            <strong>Fonts:</strong> menu and submenu font, size, weight, style and letter case are set in{' '}
+            <Link href="/admin/site-settings#site-settings-nav-menu-style">
+              Site Settings → Navigation menu style &amp; fonts
+            </Link>
+            .
+          </p>
+        ) : null}
         <form onSubmit={addItem} className="admin-form-grid">
           <div className="admin-field">
             <label>Label</label>

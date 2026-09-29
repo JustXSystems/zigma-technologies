@@ -14,9 +14,11 @@ type Props = {
   value: string;
   onChange: (css: string) => void;
   hint?: string;
+  /** Adds a blank option (e.g. "Preset default") that stores an empty value. */
+  emptyLabel?: string;
 };
 
-export default function LogoFontPicker({ id, label, value, onChange, hint }: Props) {
+export default function LogoFontPicker({ id, label, value, onChange, hint, emptyLabel }: Props) {
   const [fonts, setFonts] = useState<LogoFontEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [customMode, setCustomMode] = useState(false);
@@ -80,12 +82,13 @@ export default function LogoFontPicker({ id, label, value, onChange, hint }: Pro
           disabled={loading}
           onChange={(e) => {
             const next = e.target.value;
-            if (next) onChange(next);
+            if (next || emptyLabel) onChange(next);
           }}
           style={{ fontFamily: previewCss }}
         >
           {loading ? <option value="">Loading fonts…</option> : null}
-          {!loading && !matched && value.trim() ? (
+          {!loading && emptyLabel ? <option value="">{emptyLabel}</option> : null}
+          {!loading && !emptyLabel && !matched && value.trim() ? (
             <option value="">Current: {value} (pick a listed font or use Custom CSS)</option>
           ) : null}
           {fonts.map((font) => (

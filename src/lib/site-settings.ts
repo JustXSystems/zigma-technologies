@@ -113,6 +113,11 @@ export type SiteSettings = {
    */
   navMenuStyle: string;
   /**
+   * Header nav font overrides (JSON) for top items, submenu headings and submenu links.
+   * See `parseNavTypography` in `@/lib/nav-typography`. Blank = preset typography.
+   */
+  navTypographyJson: string;
+  /**
    * HTML tag for page heroes / primary titles (slides, page-hero, catalog heroes).
    * h1 | h2 | h3 — size follows --text-h1/h2/h3.
    */
@@ -310,6 +315,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   headerCtaJson: '',
   floatingCtaJson: '',
   navMenuStyle: 'classic',
+  navTypographyJson: '',
   headingPageHero: 'h3',
   headingSection: 'h3',
   eyebrowSize: '0.9rem',

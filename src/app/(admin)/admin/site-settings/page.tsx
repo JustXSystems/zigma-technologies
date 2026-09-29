@@ -7,6 +7,7 @@ import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import LogoBrandPreview from '@/components/admin/LogoBrandPreview';
 import LogoTypeEditor, { FOOTER_LOGO_TYPE_KEYS } from '@/components/admin/LogoTypeEditor';
 import NavMenuStylePicker from '@/components/admin/NavMenuStylePicker';
+import NavTypographyEditor from '@/components/admin/NavTypographyEditor';
 import HeadingLevelPicker from '@/components/admin/HeadingLevelPicker';
 import EyebrowSizeEditor from '@/components/admin/EyebrowSizeEditor';
 import HeaderTalkEditor from '@/components/admin/HeaderTalkEditor';
@@ -176,9 +177,9 @@ const SECTIONS: SectionDef[] = [
   },
   {
     id: 'nav-menu-style',
-    title: 'Navigation menu style',
+    title: 'Navigation menu style & fonts',
     description:
-      'Public header mega-menu look: Classic, Corporate, Elegant, Rail, Lumen, Mosaic, Ribbon.',
+      'Public header mega-menu look (Classic, Corporate, Elegant, Rail, Lumen, Mosaic, Ribbon) plus font family, size, weight, style, case and spacing for top menu items, submenu headings and submenu links.',
     fields: [],
   },
   {
@@ -445,7 +446,14 @@ export default function SiteSettingsPage() {
       case 'floating-cta':
         return <FloatingCtaEditor settings={settings} onChange={patchSettings} />;
       case 'nav-menu-style':
-        return <NavMenuStylePicker settings={settings} onChange={patchSettings} />;
+        return (
+          <div className="admin-page-stack">
+            <NavMenuStylePicker settings={settings} onChange={patchSettings} />
+            <div style={{ marginTop: '1.25rem' }}>
+              <NavTypographyEditor settings={settings} onChange={patchSettings} />
+            </div>
+          </div>
+        );
       case 'typography':
         return (
           <div className="admin-page-stack">
