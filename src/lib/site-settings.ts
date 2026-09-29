@@ -145,6 +145,8 @@ export type SiteSettings = {
   enquiryNotifyEnabled: string;
   visitorAutoReplyEnabled: string;
   logoUrl: string;
+  /** Where the header/footer logo links to (blank = home page) */
+  logoHref: string;
   /** Alt text for the logo image (header, footer, ecosystem mark) */
   logoAlt: string;
   /** Header logo-chip image height (e.g. 42px) */
@@ -333,6 +335,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   enquiryNotifyEnabled: 'true',
   visitorAutoReplyEnabled: 'true',
   logoUrl: '/assets/images/zigma-technologies-logo.png',
+  logoHref: '/',
   logoAlt: 'Zigma Technologies logo',
   logoChipHeight: '42px',
   logoChipHeightMobile: '32px',
@@ -693,6 +696,12 @@ export function socialLinksFromSettings(
     if (href) links.push({ id: field.id, href, className: field.className });
   }
   return links;
+}
+
+/** Logo link target; blank or script URLs fall back to the home page. */
+export function logoHref(settings: SiteSettings): string {
+  const href = settings.logoHref?.trim() || '/';
+  return /^\s*(javascript|data|vbscript):/i.test(href) ? '/' : href;
 }
 
 export function logoAltText(settings: SiteSettings) {

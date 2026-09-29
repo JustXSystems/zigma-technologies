@@ -61,6 +61,12 @@ const SECTIONS: SectionDef[] = [
         full: true,
       },
       { key: 'logoAlt', label: 'Logo alt text', hint: 'Accessible name for the logo image sitewide' },
+      {
+        key: 'logoHref',
+        label: 'Logo link',
+        hint: 'Where clicking the header and footer logo goes, e.g. / or /products or https://… (blank = home page)',
+        placeholder: '/',
+      },
     ],
   },
   {

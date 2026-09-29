@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { isMegaLearnMoreLink } from '@/lib/nav-tree';
 import type { NavItem } from '@/lib/nav-types';
-import { logoAltText, sanitizeTaglineHtml, sanitizeNavMenuStyle } from '@/lib/site-settings';
+import { logoAltText, logoHref, sanitizeTaglineHtml, sanitizeNavMenuStyle } from '@/lib/site-settings';
 import SiteSearchForm from '@/components/SiteSearchForm';
 import HeaderIconMenus from '@/components/HeaderIconMenus';
 import HeaderCtaMenus from '@/components/HeaderCtaMenus';
@@ -241,6 +241,7 @@ export default function Header() {
   }, [pathname, closeMobileNav]);
 
   const resolveHref = (item: { href?: string }) => appHref(item.href);
+  const brandHref = logoHref(site);
 
   const isCurrentPage = (item: NavItem) => {
     if (!item.href) return false;
@@ -267,7 +268,7 @@ export default function Header() {
       </a>
       <header id="siteHeader" ref={headerRef} className={scrolled ? 'scrolled' : ''} data-nav-style={navMenuStyle}>
         <div className="container nav-wrap">
-          <a href={current === 'home' ? '#home' : appHref('/')} className="logo">
+          <a href={pathname === '/' && brandHref === '/' ? '#home' : appHref(brandHref)} className="logo">
             <span className="logo-chip">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={appHref(site.logoUrl || '/assets/images/zigma-technologies-logo.png')} alt={logoAltText(site)} />

@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   footerLogoSrc,
   isSettingEnabled,
   logoAltText,
+  logoHref,
   sanitizeCssMaxWidth,
   sanitizeFooterLogoMode,
   sanitizeFooterOfficeAlign,
@@ -33,18 +34,7 @@ export default function Footer() {
   const [subscribed, setSubscribed] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
   const copy = useSiteCopy();
-
-  const current = useMemo(
-    () =>
-      pathname === '/contact'
-        ? 'contact'
-        : pathname === '/careers'
-          ? 'careers'
-          : pathname === '/certifications'
-            ? 'certifications'
-            : 'home',
-    [pathname]
-  );
+  const brandHref = logoHref(site);
 
   const handleNewsletterSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -92,7 +82,7 @@ export default function Footer() {
             >
               {showLockup ? (
                 <a
-                  href={current === 'home' ? '#home' : appHref('/')}
+                  href={pathname === '/' && brandHref === '/' ? '#home' : appHref(brandHref)}
                   className={`logo footer-logo mb-1${brandAlign !== 'start' ? ` is-${brandAlign}` : ''}`}
                   data-logo-mode={logoMode}
                 >
