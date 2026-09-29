@@ -39,6 +39,7 @@ export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug
     getPageSettings(itemType),
   ]);
   const mediaBgColor = settings?.card_media_bg_color || '#ffffff';
+  const heroHeight = settings?.detail_hero_height;
   const related = relatedItems.filter((rel) => rel.id !== item.id).slice(0, 3);
   if (!related.length) {
     const fallback = await listCatalogItems({ itemType, limit: 4 });
@@ -48,12 +49,19 @@ export async function renderCatalogCaseStudyPage(itemType: CatalogItemType, slug
         itemType={itemType}
         related={fallback.filter((rel) => rel.id !== item.id).slice(0, 3)}
         mediaBgColor={mediaBgColor}
+        heroHeight={heroHeight}
       />
     );
   }
 
   return (
-    <CatalogCaseStudyView item={item} itemType={itemType} related={related} mediaBgColor={mediaBgColor} />
+    <CatalogCaseStudyView
+      item={item}
+      itemType={itemType}
+      related={related}
+      mediaBgColor={mediaBgColor}
+      heroHeight={heroHeight}
+    />
   );
 }
 

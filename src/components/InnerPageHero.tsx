@@ -4,6 +4,7 @@ import SiteHeading from '@/components/SiteHeading';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import JsonLd from '@/components/JsonLd';
 import { breadcrumbJsonLd } from '@/lib/seo';
+import { heroHeightClass, type HeroHeight } from '@/lib/hero-height';
 
 export type InnerBreadcrumb = { label: string; href?: string };
 
@@ -18,6 +19,7 @@ type Props = {
   children?: ReactNode;
   /** Soft cyan vs orange eyebrow accent */
   accent?: 'orange' | 'cyan';
+  height?: HeroHeight;
 };
 
 const DEFAULT_IMAGE = '/assets/images/engineers-in-hard-hats-reviewing-a-digit.jpg';
@@ -33,9 +35,10 @@ export default function InnerPageHero({
   actions,
   children,
   accent = 'orange',
+  height,
 }: Props) {
   return (
-    <section className="page-hero page-hero--inner">
+    <section className={`page-hero page-hero--inner ${heroHeightClass(height)}`}>
       <div className="hero-bg">
         <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />
         <div className="hero-overlay" />

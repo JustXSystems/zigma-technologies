@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { DEFAULT_SITE_COPY, type SiteCopy } from '@/lib/site-copy';
+import { DEFAULT_SITE_COPY, HERO_HEIGHT_PAGES, type SiteCopy } from '@/lib/site-copy';
+import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
 import type { IndustryDef } from '@/lib/industries';
 import type { LocationDef } from '@/lib/locations';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
@@ -14,6 +15,7 @@ type Tab =
   | 'hubs'
   | 'legal'
   | 'features'
+  | 'heroHeights'
   | 'consultation'
   | 'tools'
   | 'catalog'
@@ -165,6 +167,7 @@ export default function SiteCopyAdminPage() {
         { id: 'hubs' as const, label: 'Hub pages' },
         { id: 'legal' as const, label: 'Cookies / Thank-you' },
         { id: 'features' as const, label: 'Features' },
+        { id: 'heroHeights' as const, label: 'Hero height' },
         { id: 'consultation' as const, label: 'Enquiry modal' },
         { id: 'tools' as const, label: 'Tools' },
         { id: 'catalog' as const, label: 'Catalog' },
@@ -419,6 +422,38 @@ export default function SiteCopyAdminPage() {
                 />
                 {label}
               </label>
+            ))}
+          </div>
+        ) : null}
+
+        {tab === 'heroHeights' ? (
+          <div className="admin-form-grid">
+            <p className="full theme-help" style={{ marginTop: 0 }}>
+              Full screen fills the browser window (like the Industries page); Compact fits the hero content. CMS
+              pages (Home, About, Contact, Careers, Industries, …) set this on their hero section in{' '}
+              <Link href="/admin/pages">Pages</Link>; product, project and service pages in{' '}
+              <Link href="/admin/catalog-settings">Catalog settings → Hero</Link>.
+            </p>
+            {HERO_HEIGHT_PAGES.map(({ key, label }) => (
+              <div key={key} className="admin-field">
+                <label>{label}</label>
+                <select
+                  className="admin-select"
+                  value={normalizeHeroHeight(copy.heroHeights?.[key])}
+                  onChange={(e) =>
+                    setCopy({
+                      ...copy,
+                      heroHeights: { ...copy.heroHeights, [key]: normalizeHeroHeight(e.target.value) },
+                    })
+                  }
+                >
+                  {HERO_HEIGHT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             ))}
           </div>
         ) : null}

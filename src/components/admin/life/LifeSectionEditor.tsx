@@ -52,6 +52,7 @@ import {
   type LifeStatItem,
   type LifeStatsContent,
 } from '@/lib/life-sections';
+import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -177,6 +178,14 @@ function LifeHeroEditor({ content: c, onChange }: EditorProps<LifeHeroContent>) 
           <Field label="Dots">
             <Toggle label="Show slide dots" checked={media.showDots !== false} onChange={(showDots) => setMedia({ showDots })} />
           </Field>
+        </div>
+        <div className="admin-form-grid">
+          <SelectInput
+            label="Hero height"
+            value={normalizeHeroHeight(c.heroHeight)}
+            options={HERO_HEIGHT_OPTIONS}
+            onChange={(v) => set({ heroHeight: normalizeHeroHeight(v) })}
+          />
         </div>
         <SplitLayoutEditor value={c.layout} onChange={(layout) => set({ layout })} />
         <div className="admin-form-grid">

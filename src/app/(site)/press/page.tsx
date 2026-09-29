@@ -21,6 +21,7 @@ export default async function PressIndexPage() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.press}
         eyebrow={hub.eyebrow}
         title={hub.title}
         lead={hub.lead}

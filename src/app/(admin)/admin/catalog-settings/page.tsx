@@ -33,6 +33,7 @@ import {
   normalizeDetailLayout,
   normalizeDetailTemplate,
   normalizeShadowStyle,
+  normalizeToolbarDisplay,
 } from '@/lib/types';
 import {
   DEFAULT_HERO_ELEMENTS,
@@ -42,6 +43,7 @@ import {
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
 import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
 import {
   CATALOG_SETTINGS_BLOCKS,
@@ -114,6 +116,9 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
   return {
     ...raw!,
     hero_item_durations_json: raw?.hero_item_durations_json || null,
+    hero_height: normalizeHeroHeight(raw?.hero_height),
+    detail_hero_height: normalizeHeroHeight(raw?.detail_hero_height),
+    toolbar_display: normalizeToolbarDisplay(raw?.toolbar_display),
     card_style: raw?.card_style || 'marketplace',
     card_body_bg_color: raw?.card_body_bg_color || '#ffffff',
     card_media_bg_color: raw?.card_media_bg_color || '#ffffff',
@@ -704,6 +709,9 @@ export default function CatalogSettingsPage() {
           detail_template: normalizeDetailTemplate(settings.detail_template),
           detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
+          hero_height: normalizeHeroHeight(settings.hero_height),
+          detail_hero_height: normalizeHeroHeight(settings.detail_hero_height),
+          toolbar_display: normalizeToolbarDisplay(settings.toolbar_display),
           hero_elements_json: heroElements,
           toolbar_elements_json: resolveToolbarElements(settings),
           hero_standard_panel_enabled: heroElements.includes('standard_panel'),
@@ -874,6 +882,54 @@ export default function CatalogSettingsPage() {
                         ))}
                       </select>
 
+                    </div>
+                    <div className="admin-field">
+                      <LabelWithHelp help="Docked: hero + search toolbar fill the first screen; the toolbar floats at the bottom of the screen and pins under the header once you scroll past the hero. Classic: toolbar sits in the listing below the profile rail.">
+                        Search toolbar display
+                      </LabelWithHelp>
+                      <select
+                        className="admin-select"
+                        value={normalizeToolbarDisplay(settings.toolbar_display)}
+                        onChange={(e) =>
+                          setSettings({ ...settings, toolbar_display: normalizeToolbarDisplay(e.target.value) })
+                        }
+                      >
+                        <option value="hero_dock">Docked to hero (floating + sticky)</option>
+                        <option value="inline">Classic (below profile rail)</option>
+                      </select>
+                    </div>
+                    <div className="admin-field">
+                      <LabelWithHelp help="Full screen fills the browser window (like the Industries page). Compact fits the hero content. Ignored when the search toolbar is docked to the hero (always full screen).">Listing hero height</LabelWithHelp>
+                      <select
+                        className="admin-select"
+                        disabled={normalizeToolbarDisplay(settings.toolbar_display) === 'hero_dock'}
+                        value={normalizeHeroHeight(settings.hero_height)}
+                        onChange={(e) =>
+                          setSettings({ ...settings, hero_height: normalizeHeroHeight(e.target.value) })
+                        }
+                      >
+                        {HERO_HEIGHT_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="admin-field">
+                      <LabelWithHelp help={`Hero on each /${type}s/[slug] case-study page.`}>Detail page hero height</LabelWithHelp>
+                      <select
+                        className="admin-select"
+                        value={normalizeHeroHeight(settings.detail_hero_height)}
+                        onChange={(e) =>
+                          setSettings({ ...settings, detail_hero_height: normalizeHeroHeight(e.target.value) })
+                        }
+                      >
+                        {HERO_HEIGHT_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="admin-field">
                       <LabelWithHelp help="Small label above the title (e.g. “Product Spotlight”). Keep short.">Hero eyebrow</LabelWithHelp>
@@ -1536,7 +1592,7 @@ export default function CatalogSettingsPage() {
                         [
                           'discovery_sticky_toolbar_enabled',
                           'Sticky search toolbar',
-                          'Keep search/sort visible while scrolling',
+                          'Keep search/sort visible while scrolling (Classic toolbar display; Docked is always sticky)',
                         ],
                       ] as const
                     ).map(([key, label, tip]) => (

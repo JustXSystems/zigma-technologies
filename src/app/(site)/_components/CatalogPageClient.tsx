@@ -26,12 +26,14 @@ import {
   normalizeCardFixedWidthPx,
   normalizeListingAlign,
   normalizeListingGapPx,
+  normalizeToolbarDisplay,
 } from '@/lib/types';
 import CatalogDetailModal from '@/components/CatalogDetailModal';
 import { useScrollReveal } from '@/lib/use-scroll-reveal';
 import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { publicMediaUrl } from '@/lib/media-url';
 import { heroHas, toolbarHas, resolveDetailElements } from '@/lib/catalog-page-elements';
+import { heroHeightClass } from '@/lib/hero-height';
 import SiteHeading from '@/components/SiteHeading';
 import { catalogListingKey, type CatalogListingData } from '@/lib/catalog-listing-key';
 
@@ -202,6 +204,7 @@ function CatalogHero({
   settings,
   heroItems,
   onOpenItem,
+  docked,
 }: {
   itemType: CatalogItemType;
   title: string;
@@ -210,7 +213,9 @@ function CatalogHero({
   settings: CatalogPageSettings | null;
   heroItems: CatalogItem[];
   onOpenItem: (item: CatalogItem) => void;
+  docked: boolean;
 }) {
+  const heightClass = docked ? 'catalog-hero--docked' : heroHeightClass(settings?.hero_height);
   const [current, setCurrent] = useState(0);
   const [timerTick, setTimerTick] = useState(0);
   const slides = heroItems.length ? heroItems : [];
@@ -243,7 +248,7 @@ function CatalogHero({
 
   if (!heroEnabled) {
     return (
-      <section className="page-hero" style={{ minHeight: 'auto', padding: '10rem 0 4rem' }}>
+      <section className={cx('page-hero', heightClass)} style={docked ? undefined : { padding: '10rem 0 4rem' }}>
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/images/engineers-reviewing-electrical-design-dr.jpg" alt="" />
@@ -339,7 +344,7 @@ function CatalogHero({
   }
 
   return (
-    <section className={cx('page-hero catalog-hero', `catalog-hero--${variant}`)}>
+    <section className={cx('page-hero catalog-hero', `catalog-hero--${variant}`, heightClass)}>
       <div className="hero-bg catalog-hero-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={publicMediaUrl(active.primary_image || '/assets/images/engineers-reviewing-electrical-design-dr.jpg')} alt="" />
@@ -574,6 +579,9 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const resultsRef = useRef<HTMLDivElement | null>(null);
+  const pageRef = useRef<HTMLElement | null>(null);
+  const dockRef = useRef<HTMLDivElement | null>(null);
+  const listingRef = useRef<HTMLElement | null>(null);
 
   const q = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
@@ -621,6 +629,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
   const facetRailEnabled = settings?.discovery_facet_rail_enabled !== 0;
   const groupedResultsEnabled = settings?.discovery_grouped_results_enabled !== 0;
   const stickyToolbarEnabled = settings?.discovery_sticky_toolbar_enabled !== 0;
+  const docked = normalizeToolbarDisplay(settings?.toolbar_display) === 'hero_dock';
   const groupPreviewCount = Math.min(
     12,
     Math.max(1, Number(settings?.discovery_group_preview_count || 4) || 4)
@@ -630,9 +639,62 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
 
   const scrollToResults = useCallback(() => {
     window.requestAnimationFrame(() => {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // A stuck toolbar reports its pinned position, so docked mode scrolls to the listing instead.
+      const target = docked ? listingRef.current : resultsRef.current;
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-  }, []);
+  }, [docked]);
+
+  useEffect(() => {
+    const page = pageRef.current;
+    const bar = docked ? dockRef.current : stickyToolbarEnabled ? resultsRef.current : null;
+    if (!page) return;
+    const root = document.documentElement;
+    const header = document.getElementById('siteHeader');
+    const setPx = (el: HTMLElement, name: string, px: number) => el.style.setProperty(name, `${Math.round(px)}px`);
+    // Floating CTA buttons lift while the dock sits in the bottom zone they occupy.
+    let io: IntersectionObserver | null = null;
+    let ioMargin = '';
+    const watchFloatZone = (dock: HTMLElement, zone: number) => {
+      const margin = `${-Math.max(0, Math.round(window.innerHeight - zone))}px 0px 0px 0px`;
+      if (margin === ioMargin) return;
+      ioMargin = margin;
+      io?.disconnect();
+      io = new IntersectionObserver(([entry]) => root.classList.toggle('catalog-dock-low', entry.isIntersecting), {
+        rootMargin: margin,
+      });
+      io.observe(dock);
+    };
+    const measure = () => {
+      if (header) setPx(page, '--catalog-sticky-top', header.getBoundingClientRect().height + 8);
+      const dockH = bar ? bar.getBoundingClientRect().height : 0;
+      setPx(page, '--catalog-dock-h', dockH);
+      if (!docked || !bar) return;
+      const cta = document.querySelector<HTMLElement>('.sticky-mobile-cta');
+      const ctaTop =
+        cta && getComputedStyle(cta).display !== 'none' ? cta.getBoundingClientRect().top : window.innerHeight;
+      const dockBottom = Math.max(0, window.innerHeight - ctaTop) + 12;
+      setPx(page, '--catalog-dock-bottom', dockBottom);
+      const float = document.querySelector<HTMLElement>('.float-cta-stack, .float-wa');
+      if (float) {
+        const floatBottom = parseFloat(getComputedStyle(float).bottom) || 0;
+        setPx(root, '--catalog-dock-lift', Math.max(0, dockBottom + dockH + 10 - floatBottom));
+        watchFloatZone(bar, floatBottom + float.offsetHeight + 8);
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (header) ro.observe(header, { box: 'border-box' });
+    if (bar) ro.observe(bar);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      io?.disconnect();
+      window.removeEventListener('resize', measure);
+      root.classList.remove('catalog-dock-low');
+      root.style.removeProperty('--catalog-dock-lift');
+    };
+  }, [docked, stickyToolbarEnabled]);
 
   useEffect(() => {
     queryRef.current = new URLSearchParams(searchParams.toString());
@@ -759,7 +821,9 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
     'catalog-page',
     `catalog-style-${stylePreset}`,
     premiumBordersEnabled && 'catalog-premium-borders',
-    revealEnabled && 'catalog-reveal-enabled'
+    revealEnabled && 'catalog-reveal-enabled',
+    docked && 'catalog-page--dock',
+    mobileFiltersOpen && 'catalog-page--filters-open'
   );
 
   /**
@@ -884,8 +948,118 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
 
   const gridStyle = buildGridStyle(columns);
 
+  const toolbar = (
+    <div
+      className={cx('catalog-toolbar', stickyToolbarEnabled && !docked && 'catalog-toolbar--sticky')}
+      ref={resultsRef}
+      id="catalog-results"
+    >
+      <div className="catalog-toolbar-controls">
+        {toolbarHas(settings, 'search') ? (
+          <label className="catalog-toolbar-search">
+            <span className="sr-only">Search {itemType}s</span>
+            <input
+              className="catalog-toolbar-input"
+              placeholder={`Search ${itemType}s…`}
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
+            />
+          </label>
+        ) : null}
+        {facetRailEnabled && (showCategoryFilters || showTagFilters) ? (
+          <button
+            type="button"
+            className="catalog-toolbar-filters-btn"
+            onClick={() => setMobileFiltersOpen((open) => !open)}
+            aria-expanded={mobileFiltersOpen}
+          >
+            Filters
+          </button>
+        ) : null}
+        {toolbarHas(settings, 'sort') ? (
+          <select
+            className="catalog-toolbar-select"
+            value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
+            onChange={(e) => setFilterParam('sort', e.target.value, { scroll: false })}
+            aria-label="Sort catalog"
+          >
+            <option value="featured">Sort: Featured</option>
+            <option value="newest">Sort: Newest</option>
+            <option value="title">Sort: Title A–Z</option>
+          </select>
+        ) : null}
+        {toolbarHas(settings, 'clear') && hasActiveFilters ? (
+          <button type="button" className="catalog-toolbar-clear" onClick={clearFilters}>
+            Clear
+          </button>
+        ) : null}
+        {toolbarHas(settings, 'result_meta') ? (
+          <p className="catalog-toolbar-meta">
+            <span className="catalog-toolbar-kicker">Showing</span>
+            {hasActiveFilters ? (
+              <span className="catalog-toolbar-scope">
+                {activeCategoryName ? <strong>{activeCategoryName}</strong> : null}
+                {tag ? (
+                  <>
+                    {activeCategoryName ? ' · ' : null}
+                    tagged <strong>{tag}</strong>
+                  </>
+                ) : null}
+                {q ? (
+                  <>
+                    {activeCategoryName || tag ? ' · ' : null}
+                    matching <strong>&ldquo;{q}&rdquo;</strong>
+                  </>
+                ) : null}
+              </span>
+            ) : (
+              <span className="catalog-toolbar-scope">all {itemType}s by group</span>
+            )}
+            <span className="catalog-toolbar-count">
+              {loading ? '…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
+            </span>
+          </p>
+        ) : null}
+      </div>
+
+      {toolbarHas(settings, 'filter_chips') && hasActiveFilters ? (
+        <div className="catalog-filter-chips" aria-label="Active filters">
+          {activeCategoryName ? (
+            <button
+              type="button"
+              className="catalog-filter-chip"
+              onClick={() => setFilterParam('category', '')}
+            >
+              {activeCategoryName}
+              <span aria-hidden>×</span>
+            </button>
+          ) : null}
+          {tag ? (
+            <button type="button" className="catalog-filter-chip" onClick={() => setFilterParam('tag', '')}>
+              {tag}
+              <span aria-hidden>×</span>
+            </button>
+          ) : null}
+          {q ? (
+            <button
+              type="button"
+              className="catalog-filter-chip"
+              onClick={() => {
+                setSearchDraft('');
+                setFilterParam('q', '', { scroll: false });
+              }}
+            >
+              “{q}”
+              <span aria-hidden>×</span>
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+
   return (
-    <main id="main-content" className={pageClassName}>
+    <main id="main-content" className={pageClassName} ref={pageRef}>
       <CatalogHero
         itemType={itemType}
         title={title}
@@ -894,9 +1068,17 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
         settings={settings}
         heroItems={heroSlides}
         onOpenItem={(item) => void openItem(item)}
+        docked={docked}
       />
 
+      {docked ? (
+        <div className="catalog-dock" ref={dockRef}>
+          <div className="container">{toolbar}</div>
+        </div>
+      ) : null}
+
       <section
+        ref={listingRef}
         className="section section-light catalog-listing"
         style={
           {
@@ -944,113 +1126,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
             </div>
           ) : null}
 
-          <div
-            className={cx('catalog-toolbar', stickyToolbarEnabled && 'catalog-toolbar--sticky')}
-            ref={resultsRef}
-            id="catalog-results"
-          >
-            <div className="catalog-toolbar-controls">
-              {toolbarHas(settings, 'search') ? (
-                <label className="catalog-toolbar-search">
-                  <span className="sr-only">Search {itemType}s</span>
-                  <input
-                    className="catalog-toolbar-input"
-                    placeholder={`Search ${itemType}s…`}
-                    value={searchDraft}
-                    onChange={(e) => setSearchDraft(e.target.value)}
-                  />
-                </label>
-              ) : null}
-              {facetRailEnabled && (showCategoryFilters || showTagFilters) ? (
-                <button
-                  type="button"
-                  className="catalog-toolbar-filters-btn"
-                  onClick={() => setMobileFiltersOpen((open) => !open)}
-                  aria-expanded={mobileFiltersOpen}
-                >
-                  Filters
-                </button>
-              ) : null}
-              {toolbarHas(settings, 'sort') ? (
-                <select
-                  className="catalog-toolbar-select"
-                  value={sort === 'newest' || sort === 'title' ? sort : 'featured'}
-                  onChange={(e) => setFilterParam('sort', e.target.value, { scroll: false })}
-                  aria-label="Sort catalog"
-                >
-                  <option value="featured">Sort: Featured</option>
-                  <option value="newest">Sort: Newest</option>
-                  <option value="title">Sort: Title A–Z</option>
-                </select>
-              ) : null}
-              {toolbarHas(settings, 'clear') && hasActiveFilters ? (
-                <button type="button" className="catalog-toolbar-clear" onClick={clearFilters}>
-                  Clear
-                </button>
-              ) : null}
-              {toolbarHas(settings, 'result_meta') ? (
-                <p className="catalog-toolbar-meta">
-                  <span className="catalog-toolbar-kicker">Showing</span>
-                  {hasActiveFilters ? (
-                    <span className="catalog-toolbar-scope">
-                      {activeCategoryName ? <strong>{activeCategoryName}</strong> : null}
-                      {tag ? (
-                        <>
-                          {activeCategoryName ? ' · ' : null}
-                          tagged <strong>{tag}</strong>
-                        </>
-                      ) : null}
-                      {q ? (
-                        <>
-                          {activeCategoryName || tag ? ' · ' : null}
-                          matching <strong>&ldquo;{q}&rdquo;</strong>
-                        </>
-                      ) : null}
-                    </span>
-                  ) : (
-                    <span className="catalog-toolbar-scope">all {itemType}s by group</span>
-                  )}
-                  <span className="catalog-toolbar-count">
-                    {loading ? '…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
-                  </span>
-                </p>
-              ) : null}
-            </div>
-
-            {toolbarHas(settings, 'filter_chips') && hasActiveFilters ? (
-              <div className="catalog-filter-chips" aria-label="Active filters">
-                {activeCategoryName ? (
-                  <button
-                    type="button"
-                    className="catalog-filter-chip"
-                    onClick={() => setFilterParam('category', '')}
-                  >
-                    {activeCategoryName}
-                    <span aria-hidden>×</span>
-                  </button>
-                ) : null}
-                {tag ? (
-                  <button type="button" className="catalog-filter-chip" onClick={() => setFilterParam('tag', '')}>
-                    {tag}
-                    <span aria-hidden>×</span>
-                  </button>
-                ) : null}
-                {q ? (
-                  <button
-                    type="button"
-                    className="catalog-filter-chip"
-                    onClick={() => {
-                      setSearchDraft('');
-                      setFilterParam('q', '', { scroll: false });
-                    }}
-                  >
-                    “{q}”
-                    <span aria-hidden>×</span>
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
+          {docked ? null : toolbar}
 
           <div
             className={cx(
@@ -1260,18 +1336,17 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
                 </div>
               ) : null}
             </div>
+            {mobileFiltersOpen && facetRailEnabled ? (
+              <button
+                type="button"
+                className="catalog-facet-backdrop"
+                aria-label="Close filters"
+                onClick={() => setMobileFiltersOpen(false)}
+              />
+            ) : null}
           </div>
         </div>
       </section>
-
-      {mobileFiltersOpen && facetRailEnabled ? (
-        <button
-          type="button"
-          className="catalog-facet-backdrop"
-          aria-label="Close filters"
-          onClick={() => setMobileFiltersOpen(false)}
-        />
-      ) : null}
 
       {active ? (
         <CatalogDetailModal

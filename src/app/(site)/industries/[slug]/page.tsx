@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function IndustryDetailPage({ params }: Props) {
   const { slug } = await params;
-  const defs = await getIndustryDefsCms();
+  const [defs, copy] = await Promise.all([getIndustryDefsCms(), getSiteCopy()]);
   const industry = getIndustryByKeyFromList(defs, slug);
   if (!industry) notFound();
 
@@ -57,5 +57,5 @@ export default async function IndustryDetailPage({ params }: Props) {
     if (collected.length >= 9) break;
   }
 
-  return <IndustryLandingView industry={industry} items={collected} />;
+  return <IndustryLandingView industry={industry} items={collected} heroHeight={copy.heroHeights.industryDetail} />;
 }

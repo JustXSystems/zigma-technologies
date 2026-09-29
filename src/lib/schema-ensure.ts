@@ -144,6 +144,18 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_variant`,
   },
   {
+    name: 'hero_height',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_height VARCHAR(8) NOT NULL DEFAULT 'full' AFTER hero_variant`,
+  },
+  {
+    name: 'detail_hero_height',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_hero_height VARCHAR(8) NOT NULL DEFAULT 'full' AFTER hero_height`,
+  },
+  {
+    name: 'toolbar_display',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN toolbar_display VARCHAR(16) NOT NULL DEFAULT 'hero_dock' AFTER detail_hero_height`,
+  },
+  {
     name: 'hero_meta_enabled',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_meta_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_standard_panel_enabled`,
   },

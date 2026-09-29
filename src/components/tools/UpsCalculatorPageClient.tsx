@@ -16,6 +16,7 @@ export default function UpsCalculatorPageClient() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.upsCalculator}
         accent="cyan"
         eyebrow={t.eyebrow}
         title={t.title}

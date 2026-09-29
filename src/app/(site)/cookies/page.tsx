@@ -4,6 +4,7 @@ import SiteHeading from '@/components/SiteHeading';
 import { buildPageMetadata } from '@/lib/seo';
 import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
+import { heroHeightClass } from '@/lib/hero-height';
 
 export async function generateMetadata(): Promise<Metadata> {
   const copy = await getSiteCopy();
@@ -17,7 +18,7 @@ export default async function CookiesPage() {
 
   return (
     <main id="main-content">
-      <section className="page-hero" style={{ minHeight: 'auto', padding: '10rem 0 3rem' }}>
+      <section className={`page-hero ${heroHeightClass(copy.heroHeights.cookies)}`} style={{ padding: '10rem 0 3rem' }}>
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/images/engineers-reviewing-electrical-design-dr.jpg" alt="" />

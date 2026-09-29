@@ -22,6 +22,7 @@ export default async function LocationServiceLandingView({ location, service, it
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.locationDetail}
         eyebrow={location.name}
         title={
           <>

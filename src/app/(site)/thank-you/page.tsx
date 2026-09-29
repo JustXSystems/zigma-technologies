@@ -44,6 +44,7 @@ function ThankYouInner() {
   return (
     <main id="main-content" className="thank-you-page hub-page">
       <InnerPageHero
+        height={copy.heroHeights.thankYou}
         accent="cyan"
         eyebrow={copy.thankYou.eyebrow}
         title={title}

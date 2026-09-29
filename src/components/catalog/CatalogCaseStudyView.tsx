@@ -17,6 +17,7 @@ import { DEFAULT_SITE_SETTINGS } from '@/lib/site-settings';
 import SiteHeading from '@/components/SiteHeading';
 import JsonLd from '@/components/JsonLd';
 import { absoluteUrl, plainText, toIsoDate } from '@/lib/seo';
+import { heroHeightClass, type HeroHeight } from '@/lib/hero-height';
 
 type Props = {
   item: CatalogItem;
@@ -25,6 +26,7 @@ type Props = {
   whatsapp?: string;
   /** Page-level Card media background — matches listing catalog-card-media */
   mediaBgColor?: string | null;
+  heroHeight?: HeroHeight;
 };
 
 function MetricCard({ label, value }: { label: string; value: string }) {
@@ -49,6 +51,7 @@ export default function CatalogCaseStudyView({
   related = [],
   whatsapp = DEFAULT_SITE_SETTINGS.whatsapp,
   mediaBgColor = '#ffffff',
+  heroHeight,
 }: Props) {
   const cs = item.case_study_json;
   const showCaseStudy = hasCaseStudyContent(item);
@@ -68,7 +71,7 @@ export default function CatalogCaseStudyView({
 
   return (
     <main id="main-content" className="case-study-page">
-      <section className="case-study-hero">
+      <section className={`case-study-hero ${heroHeightClass(heroHeight)}`}>
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={heroImage} alt="" fetchPriority="high" />

@@ -33,6 +33,7 @@ export default async function ResourcesIndexPage({ searchParams }: Props) {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.resources}
         accent="cyan"
         eyebrow={hub.eyebrow}
         title={tag ? `${tag} guides` : hub.title}

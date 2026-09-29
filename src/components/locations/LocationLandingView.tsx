@@ -26,6 +26,7 @@ export default async function LocationLandingView({ location, items }: Props) {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.locationDetail}
         eyebrow={location.eyebrow}
         title={<>Power &amp; energy engineering in {location.name}</>}
         lead={location.lead}

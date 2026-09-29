@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { appHref } from '@/lib/base-path';
+import { heroHeightClass } from '@/lib/hero-height';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -444,7 +445,7 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
   const visual = hasMedia ? <LzHeroMedia c={c} /> : null;
 
   return (
-    <AzShell box={c.section} className="az-hero lz-hero" id={sectionKey || 'top'}>
+    <AzShell box={c.section} className={`az-hero lz-hero ${heroHeightClass(c.heroHeight)}`} id={sectionKey || 'top'}>
       <div
         className={`az-hero-grid${visual ? '' : ' az-hero-grid--single'} ${
           c.layout?.mobileImageFirst ? 'az-mobile-img-first' : 'az-mobile-img-last'

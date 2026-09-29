@@ -1,3 +1,5 @@
+import type { HeroHeight } from '@/lib/hero-height';
+
 export type CatalogItemType = 'project' | 'product' | 'service';
 
 /** Drop-shadow style for background frame or attached product media */
@@ -71,6 +73,19 @@ export const CATALOG_DETAIL_TEMPLATE_VALUES = [
 ] as const;
 export type CatalogDetailTemplate = (typeof CATALOG_DETAIL_TEMPLATE_VALUES)[number];
 export const DEFAULT_DETAIL_TEMPLATE: CatalogDetailTemplate = 'classic';
+
+/**
+ * Listing search toolbar placement.
+ * hero_dock = full-screen hero with the toolbar floating at the screen bottom, pinning under the header on scroll.
+ * inline = toolbar inside the listing below the profile rail (classic).
+ */
+export const CATALOG_TOOLBAR_DISPLAY_VALUES = ['hero_dock', 'inline'] as const;
+export type CatalogToolbarDisplay = (typeof CATALOG_TOOLBAR_DISPLAY_VALUES)[number];
+export const DEFAULT_TOOLBAR_DISPLAY: CatalogToolbarDisplay = 'hero_dock';
+
+export function normalizeToolbarDisplay(raw: unknown): CatalogToolbarDisplay {
+  return raw === 'inline' || raw === 'hero_dock' ? raw : DEFAULT_TOOLBAR_DISPLAY;
+}
 
 /** Templates that use floating chrome instead of the navy header bar */
 export const CATALOG_DETAIL_MODERN_TEMPLATES: readonly CatalogDetailTemplate[] = [
@@ -486,6 +501,12 @@ export type CatalogPageSettings = {
   /** Toggleable UI pieces inside the Quick-view popup */
   detail_elements_json: string[] | null;
   hero_variant: 'standard' | 'spotlight';
+  /** Listing page hero: full viewport or fit content. */
+  hero_height: HeroHeight;
+  /** Case-study / detail page (/products/[slug] etc.) hero height. */
+  detail_hero_height: HeroHeight;
+  /** Where the search toolbar sits; hero_dock overrides hero_height and the sticky toggle. */
+  toolbar_display: CatalogToolbarDisplay;
   /** When hero_variant is standard, show/hide the compact active-item panel. */
   hero_standard_panel_enabled: number;
   /** Show/hide the hero meta row (highlights / autoplay / type). */

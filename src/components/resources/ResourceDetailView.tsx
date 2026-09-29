@@ -65,6 +65,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
   return (
     <main id="main-content" className="resource-detail">
       <InnerPageHero
+        height={copy.heroHeights.resourceDetail}
         accent="cyan"
         eyebrow={primaryTag(tags)}
         title={post.title}

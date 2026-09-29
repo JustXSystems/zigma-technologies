@@ -16,6 +16,7 @@ export default function SolarRoiPageClient() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.solarRoi}
         eyebrow={t.eyebrow}
         title={t.title}
         lead={t.lead}

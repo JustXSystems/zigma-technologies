@@ -20,5 +20,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function KannadaHomePage() {
   const copy = await getSiteCopy();
   if (!copy.features.localesEnabled) redirect('/');
-  return <LocaleLanding locale="kn" copy={copy.locales.kn} toolsEnabled={copy.features.toolsEnabled} />;
+  return <LocaleLanding locale="kn" copy={copy.locales.kn} toolsEnabled={copy.features.toolsEnabled} heroHeight={copy.heroHeights.locales} />;
 }

@@ -20,5 +20,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HindiHomePage() {
   const copy = await getSiteCopy();
   if (!copy.features.localesEnabled) redirect('/');
-  return <LocaleLanding locale="hi" copy={copy.locales.hi} toolsEnabled={copy.features.toolsEnabled} />;
+  return <LocaleLanding locale="hi" copy={copy.locales.hi} toolsEnabled={copy.features.toolsEnabled} heroHeight={copy.heroHeights.locales} />;
 }

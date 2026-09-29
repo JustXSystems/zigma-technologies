@@ -38,6 +38,7 @@ export default async function SlaPage() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.sla}
         accent="cyan"
         eyebrow={hub.eyebrow}
         title={hub.title}

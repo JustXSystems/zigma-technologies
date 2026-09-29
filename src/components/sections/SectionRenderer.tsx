@@ -13,6 +13,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
+import { heroHeightClass, normalizeHeroHeight } from '@/lib/hero-height';
 import { featIconFor } from '@/lib/feat-icons';
 import { indIconFor } from '@/lib/ind-icons';
 import {
@@ -961,10 +962,12 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   const image =
     String(content.image || '') || '/assets/images/engineers-reviewing-electrical-design-dr.jpg';
   const imageMobile = String(content.imageMobile || '') || undefined;
+  const height = normalizeHeroHeight(content.heroHeight);
 
   if (useInner) {
     return (
       <InnerPageHero
+        height={height}
         eyebrow={String(content.eyebrow || '')}
         title={String(content.title || '')}
         lead={content.lead ? String(content.lead) : undefined}
@@ -1003,7 +1006,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   }
 
   return (
-    <section className="page-hero">
+    <section className={`page-hero ${heroHeightClass(height)}`}>
       <div className="hero-bg">
         <HeroBackgroundMedia
           src={image}
@@ -1498,7 +1501,7 @@ function CertHeroSection({ content }: { content: Record<string, unknown> }) {
   const image = String(content.image || '').trim();
   const imageMobile = String(content.imageMobile || '').trim() || undefined;
   return (
-    <section className={`cert-hero${image ? ' cert-hero--media' : ''}`}>
+    <section className={`cert-hero${image ? ' cert-hero--media' : ''} ${heroHeightClass(content.heroHeight)}`}>
       {image ? (
         <div className="hero-bg cert-hero-bg">
           <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />

@@ -77,6 +77,7 @@ export default function SolutionFinderClient() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.solutionFinder}
         accent="cyan"
         eyebrow={t.eyebrow}
         title={t.title}

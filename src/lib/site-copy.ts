@@ -1,5 +1,28 @@
 /** Marketing / chrome copy editable from Admin → Site Copy (theme_settings.site_copy). */
 
+import type { HeroHeight } from '@/lib/hero-height';
+
+/** Code-rendered pages whose hero height is set in Admin → Site Copy → Hero height. CMS pages set it per section. */
+export const HERO_HEIGHT_PAGES = [
+  { key: 'industryDetail', label: 'Industry detail (/industries/[slug])' },
+  { key: 'locations', label: 'Locations hub (/locations)' },
+  { key: 'locationDetail', label: 'City + city-service pages (/locations/…)' },
+  { key: 'resources', label: 'Resources hub (/resources)' },
+  { key: 'resourceDetail', label: 'Resource article (/resources/[slug])' },
+  { key: 'press', label: 'Press hub (/press)' },
+  { key: 'pressDetail', label: 'Press article (/press/[slug])' },
+  { key: 'sla', label: 'SLA (/sla)' },
+  { key: 'search', label: 'Search (/search)' },
+  { key: 'thankYou', label: 'Thank-you (/thank-you)' },
+  { key: 'cookies', label: 'Cookies (/cookies)' },
+  { key: 'solutionFinder', label: 'Solution finder (/tools/solution-finder)' },
+  { key: 'upsCalculator', label: 'UPS calculator (/tools/ups-calculator)' },
+  { key: 'solarRoi', label: 'Solar ROI (/tools/solar-roi)' },
+  { key: 'locales', label: 'Locale landings (/hi, /kn)' },
+] as const;
+
+export type HeroHeightPageKey = (typeof HERO_HEIGHT_PAGES)[number]['key'];
+
 export type HubCopy = {
   eyebrow: string;
   title: string;
@@ -259,6 +282,7 @@ export type SiteCopy = {
     partnersEnabled: boolean;
     localesEnabled: boolean;
   };
+  heroHeights: Record<HeroHeightPageKey, HeroHeight>;
 };
 
 const hub = (partial: HubCopy): HubCopy => partial;
@@ -757,6 +781,10 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     partnersEnabled: true,
     localesEnabled: true,
   },
+  heroHeights: Object.fromEntries(HERO_HEIGHT_PAGES.map((p) => [p.key, 'full'])) as Record<
+    HeroHeightPageKey,
+    HeroHeight
+  >,
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {

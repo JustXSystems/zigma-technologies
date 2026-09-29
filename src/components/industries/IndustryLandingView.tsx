@@ -3,15 +3,17 @@ import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import type { CatalogItem } from '@/lib/types';
 import type { IndustryDef } from '@/lib/industries';
+import type { HeroHeight } from '@/lib/hero-height';
 import SiteHeading from '@/components/SiteHeading';
 import JsonLd from '@/components/JsonLd';
 
 type Props = {
   industry: IndustryDef;
   items: CatalogItem[];
+  heroHeight?: HeroHeight;
 };
 
-export default function IndustryLandingView({ industry, items }: Props) {
+export default function IndustryLandingView({ industry, items, heroHeight }: Props) {
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -26,6 +28,7 @@ export default function IndustryLandingView({ industry, items }: Props) {
     <main id="main-content" className="hub-page">
       {industry.faqs.length ? <JsonLd data={faqLd} /> : null}
       <InnerPageHero
+        height={heroHeight}
         eyebrow={industry.eyebrow}
         title={industry.name}
         lead={industry.lead}

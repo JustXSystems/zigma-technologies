@@ -1,17 +1,19 @@
 import Link from 'next/link';
 import type { LocaleCopy } from '@/lib/site-copy';
 import SiteHeading from '@/components/SiteHeading';
+import { heroHeightClass, type HeroHeight } from '@/lib/hero-height';
 
 type Props = {
   locale: 'hi' | 'kn';
   copy: LocaleCopy;
   toolsEnabled: boolean;
+  heroHeight?: HeroHeight;
 };
 
-export default function LocaleLanding({ locale, copy, toolsEnabled }: Props) {
+export default function LocaleLanding({ locale, copy, toolsEnabled, heroHeight }: Props) {
   return (
     <main id="main-content" lang={locale}>
-      <section className="page-hero" style={{ minHeight: '70vh', padding: '10rem 0 4rem' }}>
+      <section className={`page-hero ${heroHeightClass(heroHeight)}`} style={{ padding: '10rem 0 4rem' }}>
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/images/solar-farm-with-wind-turbines-at-sunset-.jpg" alt="" />

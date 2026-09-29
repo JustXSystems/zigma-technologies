@@ -1,4 +1,5 @@
 import { isVideoMediaPath } from '@/lib/media-url';
+import type { HeroHeight } from '@/lib/hero-height';
 import {
   ABOUT_HERO_IMAGE,
   ABOUT_ICON_PRESETS,
@@ -93,6 +94,7 @@ export function visibleMedia(items?: LifeMediaItem[]): LifeMediaItem[] {
 export type LifeHeroContent = {
   section: SectionBox;
   layout: SplitLayout;
+  heroHeight?: HeroHeight;
   breadcrumb: {
     hidden?: boolean;
     items: Array<{ label: string; href?: string }>;

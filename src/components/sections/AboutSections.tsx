@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { appHref } from '@/lib/base-path';
+import { heroHeightClass } from '@/lib/hero-height';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -389,7 +390,7 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
   ) : null;
 
   return (
-    <AzShell box={c.section} className="az-hero" id={sectionKey || 'top'}>
+    <AzShell box={c.section} className={`az-hero ${heroHeightClass(c.heroHeight)}`} id={sectionKey || 'top'}>
       <div
         className={`az-hero-grid${visual ? '' : ' az-hero-grid--single'} ${
           c.layout?.mobileImageFirst ? 'az-mobile-img-first' : 'az-mobile-img-last'

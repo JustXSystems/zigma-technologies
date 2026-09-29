@@ -37,6 +37,7 @@ function SearchInner() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.search}
         accent="cyan"
         eyebrow={hub.eyebrow}
         title={hub.title}

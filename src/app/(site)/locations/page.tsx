@@ -33,6 +33,7 @@ export default async function LocationsIndexPage() {
   return (
     <main id="main-content" className="hub-page">
       <InnerPageHero
+        height={copy.heroHeights.locations}
         eyebrow={hub.eyebrow}
         title={hub.title}
         lead={hub.lead}

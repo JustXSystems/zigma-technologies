@@ -6,6 +6,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import JsonLd from '@/components/JsonLd';
 import { getPressPostBySlug } from '@/lib/press';
 import { absoluteUrl, buildPageMetadata, organizationId, plainText, toIsoDate } from '@/lib/seo';
+import { getSiteCopy } from '@/lib/site-content';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PressDetailPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getPressPostBySlug(slug);
+  const [post, copy] = await Promise.all([getPressPostBySlug(slug), getSiteCopy()]);
   if (!post) notFound();
 
   const path = `/press/${post.slug}`;
@@ -45,6 +46,7 @@ export default async function PressDetailPage({ params }: Props) {
     <main id="main-content" className="hub-page">
       <JsonLd data={jsonLd} />
       <InnerPageHero
+        height={copy.heroHeights.pressDetail}
         accent="cyan"
         eyebrow="Press"
         title={post.title}
