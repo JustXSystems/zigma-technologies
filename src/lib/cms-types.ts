@@ -75,4 +75,9 @@ export const SECTION_TYPES = [
   { type: 'legacy_caps', label: 'Legacy · Capabilities grid' },
   { type: 'legacy_next', label: 'Legacy · Next twenty years (roadmap)' },
   { type: 'legacy_cta', label: 'Legacy · CTA band' },
+  { type: 'contact_hero', label: 'Contact · Page hero (slideshow, leads, pills)' },
+  { type: 'contact_quick', label: 'Contact · Quick contact bar' },
+  { type: 'contact_help', label: 'Contact · How can we help (request cards)' },
+  { type: 'contact_locations', label: 'Contact · Locations (offices + map / media)' },
+  { type: 'contact_form', label: 'Contact · Enquiry form + contact panel' },
 ] as const;

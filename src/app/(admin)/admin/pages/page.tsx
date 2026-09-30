@@ -72,6 +72,28 @@ export default function AdminPagesPage() {
     await load();
   }
 
+  async function contactUpgrade(action: 'upgrade' | 'revert') {
+    const question =
+      action === 'upgrade'
+        ? 'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.'
+        : 'Restore the Contact page sections to the version saved before the upgrade? Changes made in the new editors will be lost.';
+    if (!window.confirm(question)) return;
+    setSeedMsg('');
+    setError('');
+    const res = await fetch('/api/admin/pages/upgrade-contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || 'Contact upgrade failed');
+      return;
+    }
+    setSeedMsg(data.message);
+    await load();
+  }
+
   async function seedIndustries() {
     setSeedMsg('');
     setError('');
@@ -147,6 +169,22 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('contact')}>
               Seed contact
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => contactUpgrade('upgrade')}
+              title="Convert the live Contact sections to the configurable contact editors (keeps all content)"
+            >
+              Upgrade contact page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => contactUpgrade('revert')}
+              title="Restore the Contact sections saved before the upgrade"
+            >
+              Restore previous contact
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('careers')}>
               Seed careers

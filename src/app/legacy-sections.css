@@ -37,6 +37,10 @@
 }
 .lgy-bg--kenburns .lgy-bg-media{transform:scale(1.14);transition:transform var(--lgy-motion,8s) linear;}
 .lgy-bg--kenburns .is-on .lgy-bg-media{transform:scale(1);}
+.lgy-bg--zoom .lgy-bg-media:not(video){transform-origin:center;animation:lgy-zoom var(--lgy-motion,12s) ease-in-out infinite alternate;}
+@keyframes lgy-zoom{from{transform:scale(1);}to{transform:scale(1.14);}}
+.lgy-bg-scope{display:contents;}
+.lgy-bg-scope--mob{display:none;}
 .lgy-bg--pan{inset:-4%;}
 .lgy-bg--pan .lgy-bg-media{animation:lgy-pan var(--lgy-motion,32s) ease-in-out infinite alternate;}
 .lgy-bg--drift .lgy-bg-media{animation:lgy-drift var(--lgy-motion,28s) ease-in-out infinite alternate;}
@@ -449,6 +453,9 @@
   .lgy-badge{padding:1rem 1.4rem 0.9rem;}
   .lgy-hero .az-hero-lead{font-size:1rem;}
   .lgy-bg-ui{bottom:0.8rem;}
+  .lgy-bg-scope--desk{display:none;}
+  .lgy-bg-scope--mob{display:contents;}
+  .lgy-bg-slide .lgy-bg-media{object-position:var(--lgy-pos-m,var(--lgy-pos,center));}
   .lgy-mq-item{font-size:0.9rem;}
   .lgy-mq-sep{margin:0 var(--lgy-mq-gap,1.6rem);}
   .lgy-split{gap:2rem;}

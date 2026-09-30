@@ -1,11 +1,8 @@
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/api';
 import { createPage, createSection, getPageBySlug, listSections, updatePage } from '@/lib/cms';
-import {
-  CONTACT_SEED_SECTIONS,
-  CAREERS_SEED_SECTIONS,
-  CERTIFICATIONS_SEED_SECTIONS,
-} from '@/lib/inner-page-seeds';
+import { CAREERS_SEED_SECTIONS, CERTIFICATIONS_SEED_SECTIONS } from '@/lib/inner-page-seeds';
+import { CONTACT_SEED_SECTIONS_V2 } from '@/lib/contact-sections';
 import { PRIVACY_SEED_SECTIONS, TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
 import { ABOUT_ZIGMA_SEED_SECTIONS } from '@/lib/about-sections';
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
@@ -37,7 +34,7 @@ const SEEDS = {
     title: 'Contact',
     meta_title: 'Contact | Zigma Technologies',
     meta_description: 'Get in touch with Zigma Technologies for solar, UPS, BESS and EV charging support.',
-    sections: CONTACT_SEED_SECTIONS,
+    sections: CONTACT_SEED_SECTIONS_V2,
   },
   careers: {
     title: 'Careers',

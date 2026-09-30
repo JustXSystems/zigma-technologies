@@ -9,6 +9,7 @@ import EcoVisual from '@/components/sections/EcoVisual';
 import { renderAboutSection } from '@/components/sections/AboutSections';
 import { renderLifeSection } from '@/components/sections/LifeSections';
 import { renderLegacySection } from '@/components/sections/LegacySections';
+import { renderContactSection } from '@/components/sections/ContactSections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2196,6 +2197,12 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
             case 'legacy_next':
             case 'legacy_cta':
               return wrap(renderLegacySection(section.type, { key, content, sectionKey: section.section_key }));
+            case 'contact_hero':
+            case 'contact_quick':
+            case 'contact_help':
+            case 'contact_locations':
+            case 'contact_form':
+              return wrap(renderContactSection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">

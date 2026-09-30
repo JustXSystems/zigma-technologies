@@ -48,18 +48,22 @@ export function isLegacySectionType(type: string): type is LegacySectionType {
 /* Shared shapes                                                       */
 /* ------------------------------------------------------------------ */
 
-export type LegacyBgMotion = 'none' | 'kenburns' | 'pan' | 'drift';
+export type LegacyBgMotion = 'none' | 'kenburns' | 'zoom' | 'pan' | 'drift';
 
 /** Background image / video layer (one item = still, several = cross-fading slideshow). */
 export type LegacyBgMedia = {
   hidden?: boolean;
   items: LifeMediaItem[];
+  /** Phone-only slides (≤760px); empty = reuse `items` */
+  mobileItems?: LifeMediaItem[];
   intervalSeconds?: number;
   motion?: LegacyBgMotion;
   /** Length of one motion cycle */
   motionSeconds?: number;
   /** object-position of every slide */
   position?: string;
+  /** object-position on phones (≤760px) */
+  positionMobile?: string;
   /** Gradient drawn over the media */
   overlay?: string;
   /** Slide indicators (hero) */
@@ -785,7 +789,9 @@ export function withLegacyDefaults<T extends object>(type: LegacySectionType, ra
   }
   const arr = <V>(v: unknown): V[] => (Array.isArray(v) ? (v as V[]) : []);
   const bg = out.background as LegacyBgMedia | undefined;
-  if (bg && typeof bg === 'object') out.background = { ...bg, items: arr<LifeMediaItem>(bg.items) };
+  if (bg && typeof bg === 'object') {
+    out.background = { ...bg, items: arr<LifeMediaItem>(bg.items), mobileItems: arr<LifeMediaItem>(bg.mobileItems) };
+  }
   if (type === 'legacy_story') {
     const collage = out.collage as LegacyStoryContent['collage'];
     out.collage = {

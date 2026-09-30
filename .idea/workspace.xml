@@ -7,26 +7,25 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#43 logo link made editable">
-      <change afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/legacy-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/careers.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/careers.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/certifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/certifications.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/contact.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/contact.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/uploads/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/index.html" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 20+ years lagacy page implementation">
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/pages/upgrade-contact/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/contact-sections.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/contact-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/legacy-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/contact-subject.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/contact-subject.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/legacy-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/legacy-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,22 +84,22 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0000000000161595" />
-      <entry key="M2" value="1.0000166232077259" />
-      <entry key="M5" value="1.0785377693090483" />
-      <entry key="M10" value="3.0660406724362472" />
-      <entry key="M15" value="9.466369617478291" />
-      <entry key="M30" value="57.77079137133846" />
-      <entry key="H1" value="199.1163885203256" />
-      <entry key="H2" value="428.7118465711987" />
-      <entry key="H4" value="697.8773862113518" />
-      <entry key="D1" value="1990.1431923303812" />
-      <entry key="W1" value="13854.481380548385" />
+      <entry key="MS500" value="1.0003645245747883" />
+      <entry key="S2" value="1.3280168994476187" />
+      <entry key="S5" value="3.1137758485712608" />
+      <entry key="S10" value="5.424200765101338" />
+      <entry key="S30" value="8.550836663591024" />
+      <entry key="S60" value="9.679803902942657" />
+      <entry key="M2" value="10.597239078044874" />
+      <entry key="M5" value="28.111720348835252" />
+      <entry key="M10" value="80.99409934434337" />
+      <entry key="M15" value="122.91074490975527" />
+      <entry key="M30" value="195.6078687866267" />
+      <entry key="H1" value="300.51336683538347" />
+      <entry key="H2" value="507.26191830715896" />
+      <entry key="H4" value="804.9886427427925" />
+      <entry key="D1" value="2191.7359744269947" />
+      <entry key="W1" value="14057.080799135347" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -114,31 +113,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="5.944048723003915E-257" />
-      <entry key="H1" value="7.709765705263241E-129" />
-      <entry key="H2" value="8.780527151180562E-65" />
-      <entry key="H4" value="9.370446708388032E-33" />
-      <entry key="D1" value="4.665172013598673E-6" />
-      <entry key="W1" value="0.2684701258976886" />
+      <entry key="M30" value="6.034561896550527E-258" />
+      <entry key="H1" value="2.4565345298920546E-129" />
+      <entry key="H2" value="4.956343944775852E-65" />
+      <entry key="H4" value="7.04013064150195E-33" />
+      <entry key="D1" value="4.448064390438247E-6" />
+      <entry key="W1" value="0.2666486012566011" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9726549474122855" />
-      <entry key="MS500" value="0.9944701686732144" />
-      <entry key="S2" value="0.9986146661010289" />
-      <entry key="S5" value="0.9994456359721023" />
-      <entry key="S10" value="0.9997227795604651" />
-      <entry key="S30" value="0.9999075846464872" />
-      <entry key="S60" value="0.9999537912717774" />
-      <entry key="M2" value="0.9999935177068563" />
-      <entry key="M5" value="1.07852650784842" />
-      <entry key="M10" value="3.0659928926236346" />
-      <entry key="M15" value="9.46624065473246" />
-      <entry key="M30" value="57.7704516090077" />
-      <entry key="H1" value="199.1159233852474" />
-      <entry key="H2" value="428.7114130362225" />
-      <entry key="H4" value="697.8770544715492" />
-      <entry key="D1" value="1990.1430485949993" />
-      <entry key="W1" value="13854.749706693709" />
+      <entry key="MS100" value="0.9592641193252643" />
+      <entry key="MS500" value="0.9920792362868902" />
+      <entry key="S2" value="1.3254392398932133" />
+      <entry key="S5" value="3.111479662572963" />
+      <entry key="S10" value="5.422144026699301" />
+      <entry key="S30" value="8.549714098616002" />
+      <entry key="S60" value="9.679161158853324" />
+      <entry key="M2" value="10.596885685376018" />
+      <entry key="M5" value="28.111355533990665" />
+      <entry key="M10" value="80.99357866881654" />
+      <entry key="M15" value="122.91021772579391" />
+      <entry key="M30" value="195.6074280968026" />
+      <entry key="H1" value="300.51296482148604" />
+      <entry key="H2" value="507.2615315690277" />
+      <entry key="H4" value="804.9883183638688" />
+      <entry key="D1" value="2191.7358242522455" />
+      <entry key="W1" value="14057.34730284216" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -293,7 +292,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 Jump links on Site settings now expand the matching section, then scroll to it" />
     <MESSAGE value="#27 hero section enabling  for image/media to select&#10;captcha implemented&#10;enquiry submission issue fixed" />
     <MESSAGE value="#27 mobile display issue fixed" />
     <MESSAGE value="#27 enquiry thank you fixed" />
@@ -318,7 +316,8 @@
     <MESSAGE value="#44 LIFE AT ZIGMA implemented" />
     <MESSAGE value="#43 All hero sections must be full screen." />
     <MESSAGE value="#43 logo link made editable" />
-    <option name="LAST_COMMIT_MESSAGE" value="#43 logo link made editable" />
+    <MESSAGE value="#45 20+ years lagacy page implementation" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 20+ years lagacy page implementation" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

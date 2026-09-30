@@ -60,7 +60,7 @@ type SectionProps = { content: Record<string, unknown>; sectionKey?: string | nu
 /* ------------------------------------------------------------------ */
 
 /** True once the element has scrolled into view (threshold 0 so tall blocks on phones still trigger). */
-function useInView(ref: RefObject<HTMLElement | null>, enabled = true) {
+export function useInView(ref: RefObject<HTMLElement | null>, enabled = true) {
   const [seen, setSeen] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -109,7 +109,7 @@ function useCountPhase(ref: RefObject<HTMLElement | null>, enabled: boolean): Co
 }
 
 /** Media list minus files that failed to load. */
-function useOkMedia(items?: LifeMediaItem[]) {
+export function useOkMedia(items?: LifeMediaItem[]) {
   const [failed, setFailed] = useState<Record<string, true>>({});
   const markFailed = useCallback((src: string) => {
     setFailed((f) => (f[src] ? f : { ...f, [src]: true }));
@@ -118,7 +118,7 @@ function useOkMedia(items?: LifeMediaItem[]) {
 }
 
 /** Auto-advancing slide index that restarts its timer whenever the visitor picks a slide. */
-function useSlides(count: number, intervalMs: number) {
+export function useSlides(count: number, intervalMs: number) {
   const [state, setState] = useState({ index: 0, epoch: 0 });
   useEffect(() => {
     if (count < 2 || !(intervalMs > 0)) return;
@@ -140,22 +140,34 @@ const PATTERN_CLASS: Record<string, string> = {
   'grid-fade-top': ' az-pattern--fade-top',
 };
 
-/** Background image / video layer: cross-fading slides with Ken Burns, pan or drift motion. */
-function LgBackground({ bg }: { bg?: LegacyBgMedia }) {
-  const { items, markFailed } = useOkMedia(bg?.hidden ? [] : bg?.items);
-  const intervalMs = (Number(bg?.intervalSeconds) || 5.5) * 1000;
-  const { index, go } = useSlides(items.length, intervalMs);
-  if (!items.length) return null;
-  const motion = bg?.motion && bg.motion !== 'none' ? bg.motion : 'none';
-  const showUi = items.length > 1 && (bg?.showDots || bg?.showCount);
+/** Background image / video layer: cross-fading slides with Ken Burns, zoom, pan or drift motion. */
+export function LgBackground({ bg }: { bg?: LegacyBgMedia }) {
+  if (!bg || bg.hidden) return null;
+  if (!visibleMedia(bg.mobileItems).length) return <LgBgLayer bg={bg} items={bg.items} />;
   return (
     <>
+      <LgBgLayer bg={bg} items={bg.items} scope="desk" />
+      <LgBgLayer bg={bg} items={bg.mobileItems} scope="mob" />
+    </>
+  );
+}
+
+function LgBgLayer({ bg, items: raw, scope }: { bg: LegacyBgMedia; items?: LifeMediaItem[]; scope?: 'desk' | 'mob' }) {
+  const { items, markFailed } = useOkMedia(raw);
+  const intervalMs = (Number(bg.intervalSeconds) || 5.5) * 1000;
+  const { index, go } = useSlides(items.length, intervalMs);
+  if (!items.length) return null;
+  const motion = bg.motion && bg.motion !== 'none' ? bg.motion : 'none';
+  const showUi = items.length > 1 && (bg.showDots || bg.showCount);
+  return (
+    <div className={`lgy-bg-scope${scope ? ` lgy-bg-scope--${scope}` : ''}`}>
       <div
         aria-hidden="true"
         className={`lgy-bg lgy-bg--${motion}`}
         style={vars({
-          '--lgy-motion': Number(bg?.motionSeconds) > 0 ? `${bg!.motionSeconds}s` : undefined,
-          '--lgy-pos': bg?.position,
+          '--lgy-motion': Number(bg.motionSeconds) > 0 ? `${bg.motionSeconds}s` : undefined,
+          '--lgy-pos': bg.position,
+          '--lgy-pos-m': bg.positionMobile,
         })}
       >
         {items.map((item, i) => (
@@ -163,12 +175,12 @@ function LgBackground({ bg }: { bg?: LegacyBgMedia }) {
             <LzMedia item={item} className="lgy-bg-media" eager={i === 0} onFail={markFailed} />
           </div>
         ))}
-        {bg?.overlay?.trim() ? <span className="lgy-bg-overlay" style={{ background: bg.overlay }} /> : null}
+        {bg.overlay?.trim() ? <span className="lgy-bg-overlay" style={{ background: bg.overlay }} /> : null}
       </div>
       {showUi ? (
-        <div className="lgy-bg-ui" style={vars({ '--lgy-dot': bg?.dotColor, '--lgy-interval': `${intervalMs}ms` })}>
+        <div className="lgy-bg-ui" style={vars({ '--lgy-dot': bg.dotColor, '--lgy-interval': `${intervalMs}ms` })}>
           <div className="container lgy-bg-ui-inner">
-            {bg?.showDots ? (
+            {bg.showDots ? (
               <div className="lgy-dots" role="group" aria-label="Background slides">
                 {items.map((item, i) => (
                   <button
@@ -182,7 +194,7 @@ function LgBackground({ bg }: { bg?: LegacyBgMedia }) {
                 ))}
               </div>
             ) : null}
-            {bg?.showCount ? (
+            {bg.showCount ? (
               <span className="lgy-count" aria-hidden="true">
                 {pad2(index + 1)} / {pad2(items.length)}
               </span>
@@ -190,12 +202,12 @@ function LgBackground({ bg }: { bg?: LegacyBgMedia }) {
           </div>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
 
 /** Section shell (same contract as the About shell) plus the animated background media layer. */
-function LgShell({
+export function LgShell({
   box,
   bg,
   className,
@@ -244,7 +256,7 @@ function LgShell({
 }
 
 /** Section header with the design's animated accent bar under the heading. */
-function LgHeader({ header }: { header?: LegacySectionHeader }) {
+export function LgHeader({ header }: { header?: LegacySectionHeader }) {
   const ref = useRef<HTMLDivElement>(null);
   const seen = useInView(ref);
   if (!header || header.hidden) return null;
@@ -270,7 +282,7 @@ function LgHeader({ header }: { header?: LegacySectionHeader }) {
   );
 }
 
-function cardVars(cs: { background?: string; hoverBackground?: string; border?: string; radius?: string; padding?: string; shadow?: string }) {
+export function cardVars(cs: { background?: string; hoverBackground?: string; border?: string; radius?: string; padding?: string; shadow?: string }) {
   return {
     '--lgy-card-bg': cs.background,
     '--lgy-card-hover-bg': cs.hoverBackground,

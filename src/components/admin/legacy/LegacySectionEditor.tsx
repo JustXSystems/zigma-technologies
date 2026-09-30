@@ -66,7 +66,7 @@ type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
-const VALIGN_OPTIONS = [
+export const VALIGN_OPTIONS = [
   { value: '', label: 'Default (center)' },
   { value: 'start', label: 'Top' },
   { value: 'center', label: 'Center' },
@@ -76,11 +76,12 @@ const VALIGN_OPTIONS = [
 const MOTION_OPTIONS: Array<{ value: LegacyBgMotion; label: string }> = [
   { value: 'none', label: 'None (still)' },
   { value: 'kenburns', label: 'Ken Burns (slow zoom per slide)' },
+  { value: 'zoom', label: 'Zoom (slow zoom in / out loop)' },
   { value: 'pan', label: 'Pan (slow zoom + pan loop)' },
   { value: 'drift', label: 'Drift (side-to-side loop)' },
 ];
 
-function SectionBoxGroup({ value, onChange }: { value: SectionBox; onChange: (v: SectionBox) => void }) {
+export function SectionBoxGroup({ value, onChange }: { value: SectionBox; onChange: (v: SectionBox) => void }) {
   return (
     <Group title="Section background & spacing" description="Colors, gradient, image or video background, pattern, glow orbs, padding">
       <SectionBoxEditor value={value} onChange={onChange} />
@@ -89,7 +90,7 @@ function SectionBoxGroup({ value, onChange }: { value: SectionBox; onChange: (v:
 }
 
 /** Background images / videos with slideshow + motion (hero, values, next). */
-function BgMediaGroup({
+export function BgMediaGroup({
   value,
   onChange,
   title = 'Background images / videos',
@@ -112,6 +113,14 @@ function BgMediaGroup({
         showLabel={false}
         showColor={false}
         hint="Caption = alt text. Videos play muted and looped."
+      />
+      <MediaItemsEditor
+        label="Phone slides (optional, ≤760px)"
+        items={bg.mobileItems || []}
+        onChange={(mobileItems) => set({ mobileItems })}
+        showLabel={false}
+        showColor={false}
+        hint="Leave empty to reuse the slides above on phones."
       />
       <div className="admin-form-grid">
         <NumberInput
@@ -138,6 +147,12 @@ function BgMediaGroup({
           onChange={(motionSeconds) => set({ motionSeconds })}
         />
         <TextInput label="Focus position" value={bg.position} onChange={(position) => set({ position })} placeholder="center, 50% 30%" />
+        <TextInput
+          label="Focus position (phone)"
+          value={bg.positionMobile}
+          onChange={(positionMobile) => set({ positionMobile })}
+          placeholder="Empty = same as desktop"
+        />
         <TextArea
           label="Overlay gradient (drawn over the media)"
           rows={2}
@@ -159,7 +174,7 @@ function BgMediaGroup({
   );
 }
 
-function LegacyHeaderEditor({ value, onChange }: { value: LegacySectionHeader; onChange: (next: LegacySectionHeader) => void }) {
+export function LegacyHeaderEditor({ value, onChange }: { value: LegacySectionHeader; onChange: (next: LegacySectionHeader) => void }) {
   const h = value || { eyebrow: { text: '' }, title: { text: '' }, subtitle: { text: '' } };
   const bar = h.bar || {};
   const setBar = (patch: Partial<NonNullable<LegacySectionHeader['bar']>>) => onChange({ ...h, bar: { ...bar, ...patch } });
@@ -184,7 +199,7 @@ function LegacyHeaderEditor({ value, onChange }: { value: LegacySectionHeader; o
   );
 }
 
-function CardStyleFields<T extends LegacyCardStyle>({
+export function CardStyleFields<T extends LegacyCardStyle>({
   value,
   onChange,
   placeholders,
@@ -218,7 +233,7 @@ function CardStyleFields<T extends LegacyCardStyle>({
   );
 }
 
-function ParagraphsEditor({ value, onChange }: { value: TextEl[]; onChange: (next: TextEl[]) => void }) {
+export function ParagraphsEditor({ value, onChange }: { value: TextEl[]; onChange: (next: TextEl[]) => void }) {
   return (
     <ListEditor<TextEl>
       label="Paragraphs"
