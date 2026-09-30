@@ -7,19 +7,15 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 similar admin page design for career">
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/pages/upgrade-certifications/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/certifications-sections.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/sections/CertificationsSections.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/certifications-sections.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 similar admin page design for certifications">
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/CertificationsSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/CertificationsSections.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/cms-public-page.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-public-page.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
@@ -80,23 +76,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.6461764153187461" />
-      <entry key="MS500" value="1.9163686451303128" />
-      <entry key="S2" value="1.9958888085141253" />
-      <entry key="S5" value="2.6767998324694453" />
-      <entry key="S10" value="4.598960967101329" />
-      <entry key="S30" value="11.654230511870098" />
-      <entry key="S60" value="17.71628087746426" />
-      <entry key="M2" value="22.89488951084211" />
-      <entry key="M5" value="28.38491364707763" />
-      <entry key="M10" value="45.18701244543353" />
-      <entry key="M15" value="71.62048410000686" />
-      <entry key="M30" value="144.60311787902475" />
-      <entry key="H1" value="260.35666358484275" />
-      <entry key="H2" value="474.3141363865661" />
-      <entry key="H4" value="783.5994904271772" />
-      <entry key="D1" value="2198.31816568287" />
-      <entry key="W1" value="14065.611944368457" />
+      <entry key="MS100" value="1.4154402295831998" />
+      <entry key="MS500" value="3.0998417348519633" />
+      <entry key="S2" value="4.882210663733979" />
+      <entry key="S5" value="5.5031884982349375" />
+      <entry key="S10" value="5.742278063877044" />
+      <entry key="S30" value="5.911920356467517" />
+      <entry key="S60" value="5.9678568472480205" />
+      <entry key="M2" value="6.578047128851838" />
+      <entry key="M5" value="12.606142300613937" />
+      <entry key="M10" value="27.80960044732626" />
+      <entry key="M15" value="50.07136677574221" />
+      <entry key="M30" value="119.43478295599905" />
+      <entry key="H1" value="236.59741617998318" />
+      <entry key="H2" value="452.3846752134731" />
+      <entry key="H4" value="766.1789221179125" />
+      <entry key="D1" value="2193.2285863081866" />
+      <entry key="W1" value="14061.45355300711" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -110,31 +106,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="3.5256331573336663E-258" />
-      <entry key="H1" value="1.8776669452633268E-129" />
-      <entry key="H2" value="4.33320544777535E-65" />
-      <entry key="H4" value="6.58270874938284E-33" />
-      <entry key="D1" value="4.3985383800419554E-6" />
-      <entry key="W1" value="0.2662224288449702" />
+      <entry key="M30" value="2.765740314964542E-258" />
+      <entry key="H1" value="1.66305150700909E-129" />
+      <entry key="H2" value="4.078052852782561E-65" />
+      <entry key="H4" value="6.385963398672768E-33" />
+      <entry key="D1" value="4.376349688243231E-6" />
+      <entry key="W1" value="0.26603015918375406" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5748363259977225" />
-      <entry key="MS500" value="1.8992358865066068" />
-      <entry key="S2" value="1.9914014981028663" />
-      <entry key="S5" value="2.6743721980184443" />
-      <entry key="S10" value="4.596836812129931" />
-      <entry key="S30" value="11.651881073832836" />
-      <entry key="S60" value="17.712294884403477" />
-      <entry key="M2" value="22.889707704972967" />
-      <entry key="M5" value="28.3809421303093" />
-      <entry key="M10" value="45.184434245522155" />
-      <entry key="M15" value="71.61852563169555" />
-      <entry key="M30" value="144.6019013243465" />
-      <entry key="H1" value="260.35585823041373" />
-      <entry key="H2" value="474.31354446188726" />
-      <entry key="H4" value="783.5990590083537" />
-      <entry key="D1" value="2198.317995657779" />
-      <entry key="W1" value="14065.878019055615" />
+      <entry key="MS100" value="1.350004014166594" />
+      <entry key="MS500" value="3.0681833444617173" />
+      <entry key="S2" value="4.869228098080317" />
+      <entry key="S5" value="5.497264753388462" />
+      <entry key="S10" value="5.739174153899868" />
+      <entry key="S30" value="5.9108519853538235" />
+      <entry key="S60" value="5.967315561708649" />
+      <entry key="M2" value="6.5776408937504875" />
+      <entry key="M5" value="12.605108330651275" />
+      <entry key="M10" value="27.808301567674665" />
+      <entry key="M15" value="50.07012538122205" />
+      <entry key="M30" value="119.43381051598067" />
+      <entry key="H1" value="236.59669382856774" />
+      <entry key="H2" value="452.38411361875603" />
+      <entry key="H4" value="766.1785013311451" />
+      <entry key="D1" value="2193.228416763741" />
+      <entry key="W1" value="14061.719435477438" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -289,7 +285,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 enquiry thank you fixed" />
     <MESSAGE value="#27 midea upload restiction raising" />
     <MESSAGE value="#27 buils error fixed" />
     <MESSAGE value="#27 Hero section slide timer configured in admin" />
@@ -314,7 +309,8 @@
     <MESSAGE value="#45 20+ years lagacy page implementation" />
     <MESSAGE value="#45 similar admin page design for contact" />
     <MESSAGE value="#45 similar admin page design for career" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 similar admin page design for career" />
+    <MESSAGE value="#45 similar admin page design for certifications" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 similar admin page design for certifications" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

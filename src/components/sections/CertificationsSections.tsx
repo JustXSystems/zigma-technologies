@@ -274,11 +274,21 @@ export function CertsGallerySection({ content, sectionKey }: SectionProps) {
 /* CTA band                                                            */
 /* ------------------------------------------------------------------ */
 
-export function CertsCtaSection({ content, sectionKey }: SectionProps) {
+export function CertsCtaSection({
+  content,
+  sectionKey,
+  defaultId = 'cert-cta',
+  className = '',
+}: SectionProps & { defaultId?: string; className?: string }) {
   const c = withCertsDefaults<CertsCtaContent>('certs_cta', content);
   const align = c.align || 'center';
   return (
-    <LgShell box={c.section} bg={c.background} className={`lz-cta lz-cta--${align} cer-cta`} id={sectionKey || 'cert-cta'}>
+    <LgShell
+      box={c.section}
+      bg={c.background}
+      className={`lz-cta lz-cta--${align} cer-cta${className ? ` ${className}` : ''}`}
+      id={sectionKey || defaultId}
+    >
       <div className="lz-cta-inner" style={vars({ maxWidth: c.maxWidth })}>
         <AzEyebrow el={c.eyebrow} scale="lg" />
         <LzHeading el={c.title} role="section" className="lz-cta-title" highlight={c.highlight} />

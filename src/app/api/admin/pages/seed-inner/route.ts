@@ -4,7 +4,8 @@ import { createPage, createSection, getPageBySlug, listSections, updatePage } fr
 import { CONTACT_SEED_SECTIONS_V2 } from '@/lib/contact-sections';
 import { CAREERS_SEED_SECTIONS_V2 } from '@/lib/careers-sections';
 import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
-import { PRIVACY_SEED_SECTIONS, TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
+import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
+import { TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
 import { ABOUT_ZIGMA_SEED_SECTIONS } from '@/lib/about-sections';
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
 import { LEGACY_20YRS_SEED_SECTIONS, LEGACY_20YRS_SLUG } from '@/lib/legacy-sections';
@@ -53,7 +54,7 @@ const SEEDS = {
     title: 'Privacy Policy',
     meta_title: 'Privacy Policy | Zigma Technologies',
     meta_description: 'How Zigma Technologies collects, uses, and protects personal information.',
-    sections: PRIVACY_SEED_SECTIONS,
+    sections: PRIVACY_SEED_SECTIONS_V2,
   },
   terms: {
     title: 'Terms of Use',

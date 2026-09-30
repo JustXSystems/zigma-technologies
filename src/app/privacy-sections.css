@@ -1,0 +1,111 @@
+/* =========================================================
+   Privacy page sections (privacy_*) — scoped .pvc-* classes.
+   The hero reuses .ctc-hero and the CTA band reuses .lz-cta / .cer-cta;
+   defaults here mirror the live privacy page. CMS values arrive as CSS variables.
+   ========================================================= */
+
+/* ---------- Policy text ---------- */
+/* clip (not hidden) so the sticky table of contents keeps working */
+.pvc-policy.az-block{overflow:hidden;overflow:clip;}
+.pvc-policy .az-head{margin-bottom:2.4rem;}
+.pvc-layout{display:block;}
+.pvc-layout--toc{
+  display:grid;grid-template-columns:var(--pvc-toc-w,240px) minmax(0,1fr);
+  gap:var(--pvc-gap,3.5rem);align-items:start;
+}
+.pvc-layout--toc.pvc-toc-right{grid-template-columns:minmax(0,1fr) var(--pvc-toc-w,240px);}
+.pvc-toc-right > .pvc-toc{order:2;}
+.pvc-main{min-width:0;}
+
+.pvc-toc{
+  min-width:0;background:var(--pvc-toc-bg,var(--gray-100,#F3F5F8));border:var(--pvc-toc-border,1px solid var(--gray-200,#E7EBF1));
+  border-radius:var(--pvc-toc-radius,12px);padding:var(--pvc-toc-pad,1.3rem 1.2rem);
+}
+.pvc-toc--sticky{position:sticky;top:var(--pvc-toc-top,110px);max-height:calc(100vh - var(--pvc-toc-top,110px) - 1.5rem);overflow:auto;}
+.pvc-toc-title{
+  cursor:pointer;list-style:none;font-family:var(--font-mono);font-size:0.72rem;font-weight:600;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--graphite-500,#4A5565);
+}
+.pvc-toc-title::-webkit-details-marker{display:none;}
+.pvc-toc-title::after{content:'';display:inline-block;width:0.45rem;height:0.45rem;margin-left:0.5rem;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s;}
+.pvc-toc details:not([open]) .pvc-toc-title::after{transform:translateY(1px) rotate(-45deg);}
+.pvc-toc-list{list-style:none;margin:0.9rem 0 0;padding:0;display:flex;flex-direction:column;gap:0.15rem;}
+.pvc-toc-list a{
+  display:flex;gap:0.55rem;align-items:baseline;padding:0.4rem 0.6rem;border-radius:6px;border-left:2px solid transparent;
+  font-size:0.88rem;line-height:1.4;color:var(--graphite-800,#1E2530);transition:color .2s,background .2s,border-color .2s;
+}
+.pvc-toc-list a:hover{color:var(--pvc-toc-active,var(--orange-dim,#c9540f));background:rgba(10,22,40,0.04);}
+.pvc-toc-list a.is-on{color:var(--pvc-toc-active,var(--orange-dim,#c9540f));border-left-color:var(--pvc-toc-active,var(--orange,#FF6B1A));background:rgba(255,107,26,0.07);font-weight:600;}
+.pvc-toc-no{font-family:var(--font-mono);font-size:0.72rem;color:var(--graphite-500,#4A5565);}
+
+.pvc-panel{
+  background:var(--lgy-card-bg,transparent);border:var(--lgy-card-border,0);border-radius:var(--lgy-card-radius,0);
+  padding:var(--lgy-card-pad,0);box-shadow:var(--lgy-card-shadow,none);
+}
+.pvc-updated{font-family:var(--font-mono);font-size:0.76rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--graphite-500,#4A5565);margin-bottom:1rem;}
+.pvc-intro{font-size:var(--text-lead,1.14rem);line-height:1.6;color:var(--graphite-800,#1E2530);margin-bottom:2rem;}
+
+.pvc-blocks{display:flex;flex-direction:column;gap:var(--pvc-block-gap,2.4rem);counter-reset:pvc;}
+.pvc-block{scroll-margin-top:var(--pvc-toc-top,110px);min-width:0;}
+.pvc-dividers > .pvc-block + .pvc-block{padding-top:var(--pvc-block-gap,2.4rem);border-top:1px solid var(--pvc-divider,var(--gray-200,#E7EBF1));}
+.pvc-block-head{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.9rem;}
+.pvc-ico{--ctc-d-box:40px;--ctc-d-radius:10px;--ctc-d-bg:rgba(255,107,26,0.1);--ctc-d-size:20px;--ctc-ico-color:var(--orange-dim,#c9540f);}
+.pvc-block-title{font-size:1.35rem;line-height:1.3;letter-spacing:-0.015em;color:#0A1628;margin:0;}
+.pvc-numbered .pvc-block-title{counter-increment:pvc;}
+.pvc-numbered .pvc-block-title::before{
+  content:counter(pvc,decimal-leading-zero);display:inline-block;margin-right:0.7rem;
+  font-family:var(--font-mono);font-size:0.8em;font-weight:600;color:var(--orange,#FF6B1A);
+}
+.az-tone-dark .pvc-block-title{color:#FFFFFF;}
+
+/* Prose (admin HTML) */
+.pvc-prose{font-size:var(--text-base,1rem);line-height:1.65;color:var(--graphite-800,#1E2530);overflow-wrap:anywhere;}
+.pvc-prose > * + *{margin-top:var(--pvc-para-gap,1rem);}
+.pvc-prose :is(h2,h3,h4,h5){font-family:var(--font-display);color:#0A1628;line-height:1.3;letter-spacing:-0.01em;}
+.pvc-prose > :is(h2,h3,h4,h5):not(:first-child){margin-top:1.8rem;}
+.pvc-prose h2{font-size:1.3rem;}
+.pvc-prose h3{font-size:1.15rem;}
+.pvc-prose h4{font-size:1.02rem;}
+.pvc-prose :is(ul,ol){padding-left:1.35rem;}
+.pvc-prose li + li{margin-top:0.45rem;}
+.pvc-prose li::marker{color:var(--pvc-marker,var(--orange,#FF6B1A));}
+.pvc-prose strong{font-weight:600;color:#0A1628;}
+.pvc-prose a{
+  color:var(--pvc-link,var(--orange-dim,#c9540f));font-weight:600;
+  text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;transition:color .2s;
+}
+.pvc-prose a:hover{color:var(--pvc-link-hover,var(--orange,#FF6B1A));}
+.pvc-prose blockquote{padding:1rem 1.2rem;border-left:4px solid var(--pvc-marker,var(--orange,#FF6B1A));background:#FFF7F2;border-radius:0 10px 10px 0;}
+.pvc-prose table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;font-size:0.92em;}
+.pvc-prose :is(th,td){border:1px solid var(--gray-200,#E7EBF1);padding:0.6rem 0.8rem;text-align:left;vertical-align:top;}
+.pvc-prose th{background:var(--gray-100,#F3F5F8);font-weight:600;}
+.pvc-prose hr{border:0;border-top:1px solid var(--gray-200,#E7EBF1);}
+.az-tone-dark .pvc-prose{color:#C9D4E5;}
+.az-tone-dark .pvc-prose :is(h2,h3,h4,h5,strong){color:#FFFFFF;}
+.az-tone-dark :is(.pvc-updated,.pvc-toc-no){color:#8FA3C2;}
+.az-tone-dark .pvc-intro{color:#FFFFFF;}
+.pvc-media{position:relative;height:var(--pvc-media-h,280px);border-radius:12px;margin-top:1.4rem;}
+
+/* ---------- Motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  .pvc-toc-list a,.pvc-toc-title::after{transition:none;}
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width:1000px){
+  .pvc-layout--toc,.pvc-layout--toc.pvc-toc-right{grid-template-columns:minmax(0,1fr);gap:1.8rem;}
+  .pvc-toc-right > .pvc-toc{order:0;}
+  .pvc-toc--sticky{position:static;max-height:none;overflow:visible;}
+}
+
+/* ---------- Phone ---------- */
+@media (max-width:760px){
+  .pvc-policy .az-head{margin-bottom:1.6rem;}
+  .pvc-intro{font-size:var(--text-lead,1.05rem);margin-bottom:1.5rem;}
+  .pvc-blocks{gap:var(--pvc-block-gap,1.9rem);}
+  .pvc-block-title{font-size:1.18rem;}
+  .pvc-toc-list a{padding:0.55rem 0.6rem;}
+  .pvc-media{height:var(--pvc-media-h,200px);}
+  .pvc-cta .az-ctas{flex-direction:column;align-items:stretch;}
+  .pvc-cta .az-ctas .btn{justify-content:center;white-space:normal;text-align:center;}
+}

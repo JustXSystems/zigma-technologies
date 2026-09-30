@@ -90,4 +90,7 @@ export const SECTION_TYPES = [
   { type: 'certs_hero', label: 'Certifications · Page hero (slideshow, sub-line, tagline)' },
   { type: 'certs_gallery', label: 'Certifications · Certificates gallery (marquee / grid + lightbox)' },
   { type: 'certs_cta', label: 'Certifications · CTA band (buttons, background media)' },
+  { type: 'privacy_hero', label: 'Privacy · Page hero (slideshow, breadcrumb, lead)' },
+  { type: 'privacy_policy', label: 'Privacy · Policy text (blocks, table of contents, media)' },
+  { type: 'privacy_cta', label: 'Privacy · CTA band (buttons, background media)' },
 ] as const;

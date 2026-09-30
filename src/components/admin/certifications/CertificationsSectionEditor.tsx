@@ -206,7 +206,7 @@ function CertsGalleryEditor({ content: c, onChange }: EditorProps<CertsGalleryCo
 /* CTA band                                                            */
 /* ------------------------------------------------------------------ */
 
-function CertsCtaEditor({ content: c, onChange }: EditorProps<CertsCtaContent>) {
+export function CertsCtaEditor({ content: c, onChange }: EditorProps<CertsCtaContent>) {
   const set = (patch: Partial<CertsCtaContent>) => onChange({ ...c, ...patch });
   return (
     <>

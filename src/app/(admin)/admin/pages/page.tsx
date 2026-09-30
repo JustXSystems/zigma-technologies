@@ -72,7 +72,7 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications', action: 'upgrade' | 'revert') {
+  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications' | 'privacy', action: 'upgrade' | 'revert') {
     const upgradeQuestion = {
       contact:
         'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
@@ -80,8 +80,10 @@ export default function AdminPagesPage() {
         'Upgrade the Careers page sections to the fully configurable careers editors? All current text, cards, jobs, roles and custom CSS are kept, and the previous version is saved so it can be restored.',
       certifications:
         'Upgrade the Certifications page sections to the fully configurable certifications editors? All current text, certificates, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      privacy:
+        'Upgrade the Privacy page sections to the fully configurable privacy editors? All current text, policy HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
-    const name = { contact: 'Contact', careers: 'Careers', certifications: 'Certifications' }[page];
+    const name = { contact: 'Contact', careers: 'Careers', certifications: 'Certifications', privacy: 'Privacy' }[page];
     const question =
       action === 'upgrade'
         ? upgradeQuestion
@@ -235,6 +237,22 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('privacy')}>
               Seed privacy
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('privacy', 'upgrade')}
+              title="Convert the live Privacy sections to the configurable privacy editors (keeps all content)"
+            >
+              Upgrade privacy page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('privacy', 'revert')}
+              title="Restore the Privacy sections saved before the upgrade"
+            >
+              Restore previous privacy
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('terms')}>
               Seed terms
