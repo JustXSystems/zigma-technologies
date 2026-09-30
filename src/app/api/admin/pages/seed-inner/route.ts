@@ -1,9 +1,9 @@
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/api';
 import { createPage, createSection, getPageBySlug, listSections, updatePage } from '@/lib/cms';
-import { CERTIFICATIONS_SEED_SECTIONS } from '@/lib/inner-page-seeds';
 import { CONTACT_SEED_SECTIONS_V2 } from '@/lib/contact-sections';
 import { CAREERS_SEED_SECTIONS_V2 } from '@/lib/careers-sections';
+import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
 import { PRIVACY_SEED_SECTIONS, TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
 import { ABOUT_ZIGMA_SEED_SECTIONS } from '@/lib/about-sections';
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
@@ -47,7 +47,7 @@ const SEEDS = {
     title: 'Certifications',
     meta_title: 'Certifications | Zigma Technologies',
     meta_description: 'OEM authorizations, ISO certification, and engineering partnerships.',
-    sections: CERTIFICATIONS_SEED_SECTIONS,
+    sections: CERTIFICATIONS_SEED_SECTIONS_V2,
   },
   privacy: {
     title: 'Privacy Policy',

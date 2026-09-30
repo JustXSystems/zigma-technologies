@@ -205,9 +205,9 @@ export function LzMedia({
 
 /* ---------- Lightbox ---------- */
 
-type LbState = { list: LifeMediaItem[]; index: number } | null;
+export type LbState = { list: LifeMediaItem[]; index: number } | null;
 
-function LzLightbox({ state, onChange }: { state: NonNullable<LbState>; onChange: (s: LbState) => void }) {
+export function LzLightbox({ state, onChange }: { state: NonNullable<LbState>; onChange: (s: LbState) => void }) {
   const { list, index } = state;
   const item = list[index];
   const touchX = useRef<number | null>(null);

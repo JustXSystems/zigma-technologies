@@ -72,14 +72,16 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function pageUpgrade(page: 'contact' | 'careers', action: 'upgrade' | 'revert') {
+  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications', action: 'upgrade' | 'revert') {
     const upgradeQuestion = {
       contact:
         'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
       careers:
         'Upgrade the Careers page sections to the fully configurable careers editors? All current text, cards, jobs, roles and custom CSS are kept, and the previous version is saved so it can be restored.',
+      certifications:
+        'Upgrade the Certifications page sections to the fully configurable certifications editors? All current text, certificates, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
-    const name = page === 'contact' ? 'Contact' : 'Careers';
+    const name = { contact: 'Contact', careers: 'Careers', certifications: 'Certifications' }[page];
     const question =
       action === 'upgrade'
         ? upgradeQuestion
@@ -214,6 +216,22 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('certifications')}>
               Seed certifications
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('certifications', 'upgrade')}
+              title="Convert the live Certifications sections to the configurable certifications editors (keeps all content)"
+            >
+              Upgrade certifications page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('certifications', 'revert')}
+              title="Restore the Certifications sections saved before the upgrade"
+            >
+              Restore previous certifications
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('privacy')}>
               Seed privacy

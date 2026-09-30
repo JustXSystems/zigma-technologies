@@ -87,4 +87,7 @@ export const SECTION_TYPES = [
   { type: 'careers_jobs', label: 'Careers · Current openings (job cards)' },
   { type: 'careers_internship', label: 'Careers · Internship program (text + program card)' },
   { type: 'careers_application', label: 'Careers · Application form + side panel' },
+  { type: 'certs_hero', label: 'Certifications · Page hero (slideshow, sub-line, tagline)' },
+  { type: 'certs_gallery', label: 'Certifications · Certificates gallery (marquee / grid + lightbox)' },
+  { type: 'certs_cta', label: 'Certifications · CTA band (buttons, background media)' },
 ] as const;

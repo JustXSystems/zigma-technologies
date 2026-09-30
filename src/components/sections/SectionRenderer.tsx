@@ -11,6 +11,7 @@ import { renderLifeSection } from '@/components/sections/LifeSections';
 import { renderLegacySection } from '@/components/sections/LegacySections';
 import { renderContactSection } from '@/components/sections/ContactSections';
 import { renderCareersSection } from '@/components/sections/CareersSections';
+import { renderCertsSection } from '@/components/sections/CertificationsSections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2212,6 +2213,10 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
             case 'careers_internship':
             case 'careers_application':
               return wrap(renderCareersSection(section.type, { key, content, sectionKey: section.section_key }));
+            case 'certs_hero':
+            case 'certs_gallery':
+            case 'certs_cta':
+              return wrap(renderCertsSection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">

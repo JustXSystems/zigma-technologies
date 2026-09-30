@@ -35,6 +35,8 @@ import { isContactSectionType, withContactDefaults } from '@/lib/contact-section
 import ContactSectionEditor from '@/components/admin/contact/ContactSectionEditor';
 import { isCareersSectionType, withCareersDefaults } from '@/lib/careers-sections';
 import CareersSectionEditor from '@/components/admin/careers/CareersSectionEditor';
+import { isCertsSectionType, withCertsDefaults } from '@/lib/certifications-sections';
+import CertificationsSectionEditor from '@/components/admin/certifications/CertificationsSectionEditor';
 import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
 
 type Props = {
@@ -232,6 +234,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     if (isLegacySectionType(section.type)) return withLegacyDefaults<Record<string, unknown>>(section.type, raw);
     if (isContactSectionType(section.type)) return withContactDefaults<Record<string, unknown>>(section.type, raw);
     if (isCareersSectionType(section.type)) return withCareersDefaults<Record<string, unknown>>(section.type, raw);
+    if (isCertsSectionType(section.type)) return withCertsDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
@@ -528,6 +531,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
             {isCareersSectionType(section.type) ? (
               <CareersSectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isCertsSectionType(section.type) ? (
+              <CertificationsSectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {(section.type === 'cta' ||
               section.type === 'eco' ||
