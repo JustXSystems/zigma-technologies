@@ -10,6 +10,7 @@ import { renderAboutSection } from '@/components/sections/AboutSections';
 import { renderLifeSection } from '@/components/sections/LifeSections';
 import { renderLegacySection } from '@/components/sections/LegacySections';
 import { renderContactSection } from '@/components/sections/ContactSections';
+import { renderCareersSection } from '@/components/sections/CareersSections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2203,6 +2204,14 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
             case 'contact_locations':
             case 'contact_form':
               return wrap(renderContactSection(section.type, { key, content, sectionKey: section.section_key }));
+            case 'careers_hero':
+            case 'careers_stats':
+            case 'careers_cards':
+            case 'careers_why':
+            case 'careers_jobs':
+            case 'careers_internship':
+            case 'careers_application':
+              return wrap(renderCareersSection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">

@@ -387,7 +387,7 @@ function LegacyHeroEditor({ content: c, onChange }: EditorProps<LegacyHeroConten
 /* Stat bar                                                            */
 /* ------------------------------------------------------------------ */
 
-function LegacyStatsEditor({ content: c, onChange }: EditorProps<LegacyStatsContent>) {
+export function LegacyStatsEditor({ content: c, onChange }: EditorProps<LegacyStatsContent>) {
   const set = (patch: Partial<LegacyStatsContent>) => onChange({ ...c, ...patch });
   const is = c.iconStyle || {};
   const setIcon = (patch: Partial<LegacyStatsContent['iconStyle']>) => set({ iconStyle: { ...is, ...patch } });

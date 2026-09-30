@@ -80,4 +80,11 @@ export const SECTION_TYPES = [
   { type: 'contact_help', label: 'Contact · How can we help (request cards)' },
   { type: 'contact_locations', label: 'Contact · Locations (offices + map / media)' },
   { type: 'contact_form', label: 'Contact · Enquiry form + contact panel' },
+  { type: 'careers_hero', label: 'Careers · Page hero (slideshow, leads, pills)' },
+  { type: 'careers_stats', label: 'Careers · Culture stats bar (count-up)' },
+  { type: 'careers_cards', label: 'Careers · Icon cards (life at Zigma / benefits)' },
+  { type: 'careers_why', label: 'Careers · Why join us (numbered cards)' },
+  { type: 'careers_jobs', label: 'Careers · Current openings (job cards)' },
+  { type: 'careers_internship', label: 'Careers · Internship program (text + program card)' },
+  { type: 'careers_application', label: 'Careers · Application form + side panel' },
 ] as const;

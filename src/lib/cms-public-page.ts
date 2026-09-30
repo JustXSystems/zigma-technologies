@@ -1,7 +1,8 @@
 import { getPageBySlug } from '@/lib/cms';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { HOMEPAGE_SEED_SECTIONS } from '@/lib/homepage-seed';
-import { CAREERS_SEED_SECTIONS, CERTIFICATIONS_SEED_SECTIONS } from '@/lib/inner-page-seeds';
+import { CERTIFICATIONS_SEED_SECTIONS } from '@/lib/inner-page-seeds';
+import { CAREERS_SEED_SECTIONS_V2 } from '@/lib/careers-sections';
 import { INDUSTRIES_HUB_SEED_SECTIONS, INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
 import { INDUSTRY_DEFS, industryPublicPath } from '@/lib/industries';
 import { PRIVACY_SEED_SECTIONS, TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
@@ -22,7 +23,7 @@ function industriesHubSeedSections() {
 
 function seedForSlug(slug: string) {
   if (slug === 'home') return HOMEPAGE_SEED_SECTIONS;
-  if (slug === 'careers') return CAREERS_SEED_SECTIONS;
+  if (slug === 'careers') return CAREERS_SEED_SECTIONS_V2;
   if (slug === 'certifications') return CERTIFICATIONS_SEED_SECTIONS;
   if (slug === 'privacy') return PRIVACY_SEED_SECTIONS;
   if (slug === 'terms') return TERMS_SEED_SECTIONS;

@@ -11,6 +11,7 @@ import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
 import { CONTACT_SUBJECT_EVENT, focusContactSubject } from '@/lib/contact-subject';
+import { focusApplyRole } from '@/lib/careers-apply';
 import { AzCtas, AzEyebrow, AzIcon, AzImage, AzPills, AzText, vars } from '@/components/sections/AboutSections';
 import { LzHeading, LzMedia, colVars, useStaggerReveal } from '@/components/sections/LifeSections';
 import { LgHeader, LgShell, cardVars, useOkMedia, useSlides } from '@/components/sections/LegacySections';
@@ -30,10 +31,12 @@ import {
 } from '@/lib/contact-sections';
 
 type SectionProps = { content: Record<string, unknown>; sectionKey?: string | null };
+/** Other page families render these blocks with their own content and anchor id. */
+type SharedSectionProps = SectionProps & { defaultId?: string };
 
 const t = (v: unknown) => String(v ?? '').trim();
 
-function iconVars(is?: ContactIconStyle) {
+export function iconVars(is?: ContactIconStyle) {
   return {
     '--ctc-ico-box': is?.boxSize,
     '--ctc-ico-size': is?.size,
@@ -45,8 +48,8 @@ function iconVars(is?: ContactIconStyle) {
   };
 }
 
-/** Subject preset → scroll to the contact form; otherwise a plain link (tel:, mailto:, page, URL). */
-function ContactActionLink({
+/** Role → careers application form; subject → contact form; otherwise a plain link (tel:, mailto:, page, URL). */
+export function ContactActionLink({
   action,
   className,
   style,
@@ -57,9 +60,17 @@ function ContactActionLink({
   style?: ElementStyle;
   children: ReactNode;
 }) {
+  const role = t(action.role);
   const subject = t(action.subject);
   const href = t(action.href);
   const css = elementCss(style);
+  if (role) {
+    return (
+      <button type="button" className={className} style={css} data-role={role} onClick={() => focusApplyRole(role)}>
+        {children}
+      </button>
+    );
+  }
   if (subject) {
     return (
       <button type="button" className={className} style={css} onClick={() => focusContactSubject(subject)}>
@@ -88,7 +99,7 @@ function ContactActionLink({
 }
 
 /** Cross-fading image / video slides (one item = still). */
-function ContactSlides({
+export function ContactSlides({
   items: raw,
   intervalSeconds,
   className,
@@ -131,7 +142,7 @@ function ContactSlides({
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
 
-export function ContactHeroSection({ content, sectionKey }: SectionProps) {
+export function ContactHeroSection({ content, sectionKey, defaultId = 'contact-hero' }: SharedSectionProps) {
   const c = withContactDefaults<ContactHeroContent>('contact_hero', content);
   const crumbs = normalizeLinkItems(c.breadcrumb?.items);
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
@@ -142,7 +153,7 @@ export function ContactHeroSection({ content, sectionKey }: SectionProps) {
       className={`az-hero ctc-hero ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(c.heroHeight)}${
         c.entrance === false ? '' : ' lgy-enter'
       }`}
-      id={sectionKey || 'contact-hero'}
+      id={sectionKey || defaultId}
     >
       <div className="az-hero-copy ctc-hero-copy" style={vars({ maxWidth: c.contentMaxWidth })}>
         {!c.breadcrumb?.hidden && crumbs.length ? (
@@ -267,7 +278,7 @@ function HelpCard({ card, c }: { card: ContactHelpCard; c: ContactHelpContent })
   );
 }
 
-export function ContactHelpSection({ content, sectionKey }: SectionProps) {
+export function ContactHelpSection({ content, sectionKey, defaultId = 'how-we-help' }: SharedSectionProps) {
   const c = withContactDefaults<ContactHelpContent>('contact_help', content);
   const cards = (c.cards || []).filter((card) => !card.hidden);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -275,7 +286,7 @@ export function ContactHelpSection({ content, sectionKey }: SectionProps) {
   const cs = c.cardStyle || {};
   const v = c.variants || {};
   return (
-    <LgShell box={c.section} className="lgy-section ctc-help" id={sectionKey || 'how-we-help'}>
+    <LgShell box={c.section} className="lgy-section ctc-help" id={sectionKey || defaultId}>
       <LgHeader header={c.header} />
       {cards.length ? (
         <div

@@ -7,25 +7,25 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 20+ years lagacy page implementation">
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/pages/upgrade-contact/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/contact-sections.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/contact-sections.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 similar admin page design for contact">
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/pages/upgrade-careers/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/careers-sections.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/careers/CareersSectionEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/sections/CareersSections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/careers-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/legacy-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-public-page.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-public-page.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/contact-subject.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/contact-subject.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/legacy-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/legacy-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/contact-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/contact-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,7 +292,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 hero section enabling  for image/media to select&#10;captcha implemented&#10;enquiry submission issue fixed" />
     <MESSAGE value="#27 mobile display issue fixed" />
     <MESSAGE value="#27 enquiry thank you fixed" />
     <MESSAGE value="#27 midea upload restiction raising" />
@@ -317,7 +316,8 @@
     <MESSAGE value="#43 All hero sections must be full screen." />
     <MESSAGE value="#43 logo link made editable" />
     <MESSAGE value="#45 20+ years lagacy page implementation" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 20+ years lagacy page implementation" />
+    <MESSAGE value="#45 similar admin page design for contact" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 similar admin page design for contact" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

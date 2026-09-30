@@ -65,7 +65,9 @@ function embedSrc(v: string) {
   return m ? m[1] : v;
 }
 
-function IconStyleFields({
+const ROLE_HINT = 'Scrolls to the application form and preselects this role (added to the role list when missing). Wins over the link.';
+
+export function IconStyleFields({
   value,
   onChange,
   placeholders,
@@ -89,14 +91,17 @@ function IconStyleFields({
   );
 }
 
-function ActionFields<T extends { href?: string; subject?: string; newTab?: boolean }>({
+export function ActionFields<T extends { href?: string; subject?: string; role?: string; newTab?: boolean }>({
   value,
   patch,
   hrefLabel = 'Link',
+  mode = 'subject',
 }: {
   value: T;
   patch: (next: T) => void;
   hrefLabel?: string;
+  /** subject = contact form preset; role = careers application role */
+  mode?: 'subject' | 'role';
 }) {
   return (
     <>
@@ -106,7 +111,11 @@ function ActionFields<T extends { href?: string; subject?: string; newTab?: bool
         onChange={(href) => patch({ ...value, href })}
         placeholder="tel:{{phone}}, mailto:{{email}}, /page, https://…"
       />
-      <TextInput label="Form subject (optional)" value={value.subject} onChange={(subject) => patch({ ...value, subject })} hint={SUBJECT_HINT} />
+      {mode === 'role' ? (
+        <TextInput label="Apply role (optional)" value={value.role} onChange={(role) => patch({ ...value, role })} hint={ROLE_HINT} />
+      ) : (
+        <TextInput label="Form subject (optional)" value={value.subject} onChange={(subject) => patch({ ...value, subject })} hint={SUBJECT_HINT} />
+      )}
       <Field label="Link behaviour">
         <Toggle label="Open link in a new tab" checked={Boolean(value.newTab)} onChange={(newTab) => patch({ ...value, newTab })} />
       </Field>
@@ -118,7 +127,7 @@ function ActionFields<T extends { href?: string; subject?: string; newTab?: bool
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
 
-function ContactHeroEditor({ content: c, onChange }: EditorProps<ContactHeroContent>) {
+export function ContactHeroEditor({ content: c, onChange }: EditorProps<ContactHeroContent>) {
   const set = (patch: Partial<ContactHeroContent>) => onChange({ ...c, ...patch });
   const bc = c.breadcrumb || { items: [], separator: '/' };
   const setBc = (patch: Partial<ContactHeroContent['breadcrumb']>) => set({ breadcrumb: { ...bc, ...patch } });
@@ -277,12 +286,27 @@ function ContactQuickEditor({ content: c, onChange }: EditorProps<ContactQuickCo
 /* ------------------------------------------------------------------ */
 
 const VARIANT_OPTIONS: Array<{ value: ContactHelpVariant; label: string }> = [
-  { value: 'default', label: 'Default (light blue)' },
+  { value: 'default', label: 'Default (card style color)' },
   { value: 'green', label: 'Green (pastel)' },
   { value: 'emergency', label: 'Emergency (orange)' },
 ];
 
-function ContactHelpEditor({ content: c, onChange }: EditorProps<ContactHelpContent>) {
+type HelpEditorOptions = {
+  presets?: Array<{ key: string; label: string; svg: string }>;
+  actionMode?: 'subject' | 'role';
+  cardsTitle?: string;
+  /** Card style placeholders (design defaults) */
+  cardPlaceholders?: { background: string; border: string; shadow: string };
+};
+
+export function ContactHelpEditor({
+  content: c,
+  onChange,
+  presets = CONTACT_ALL_ICON_PRESETS,
+  actionMode = 'subject',
+  cardsTitle = 'Request cards',
+  cardPlaceholders = { background: '#EAF2FC', border: '1px solid rgba(0,123,214,0.12)', shadow: '0 6px 18px -8px rgba(10,22,40,0.18)' },
+}: EditorProps<ContactHelpContent> & HelpEditorOptions) {
   const set = (patch: Partial<ContactHelpContent>) => onChange({ ...c, ...patch });
   const cs = c.cardStyle || {};
   const setCs = (patch: Partial<ContactHelpContent['cardStyle']>) => set({ cardStyle: { ...cs, ...patch } });
@@ -294,7 +318,7 @@ function ContactHelpEditor({ content: c, onChange }: EditorProps<ContactHelpCont
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
-      <Group title="Request cards" open>
+      <Group title={cardsTitle} open>
         <NapHint />
         <ListEditor<ContactHelpCard>
           label="Cards"
@@ -302,11 +326,11 @@ function ContactHelpEditor({ content: c, onChange }: EditorProps<ContactHelpCont
           onChange={(cards) => set({ cards })}
           addLabel="Card"
           create={() => ({
-            title: { text: 'New request' },
-            body: { text: 'Short description of this request type.' },
-            icon: { svg: CONTACT_ALL_ICON_PRESETS[2].svg },
+            title: { text: actionMode === 'role' ? 'New card' : 'New request' },
+            body: { text: 'Short description.' },
+            icon: { svg: (presets[2] || presets[0])?.svg || '' },
             media: [],
-            linkLabel: 'Start Request →',
+            linkLabel: actionMode === 'role' ? '' : 'Start Request →',
             subject: '',
           })}
           itemTitle={(card) => `${card.hidden ? '(hidden) ' : ''}${card.title?.text || 'Card'}`}
@@ -328,10 +352,15 @@ function ContactHelpEditor({ content: c, onChange }: EditorProps<ContactHelpCont
               <TextElementEditor label="Title" headingTag value={card.title} onChange={(title) => patch({ ...card, title })} />
               <TextElementEditor label="Description" multiline value={card.body} onChange={(body) => patch({ ...card, body })} />
               <div className="admin-form-grid">
-                <TextInput label="Link label" value={card.linkLabel} onChange={(linkLabel) => patch({ ...card, linkLabel })} placeholder="Ask About Solar →" />
-                <ActionFields value={card} patch={patch} />
+                <TextInput
+                  label="Link label"
+                  value={card.linkLabel}
+                  onChange={(linkLabel) => patch({ ...card, linkLabel })}
+                  placeholder={actionMode === 'role' ? 'Empty = no link, e.g. See open roles →' : 'Ask About Solar →'}
+                />
+                <ActionFields value={card} patch={patch} mode={actionMode} />
               </div>
-              <IconEditor label="Icon" value={card.icon || {}} onChange={(icon) => patch({ ...card, icon })} presets={CONTACT_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
+              <IconEditor label="Icon" value={card.icon || {}} onChange={(icon) => patch({ ...card, icon })} presets={presets} previewClassName={ICON_PREVIEW} />
               <div className="admin-form-grid">
                 <TextInput label="Badge text (when no icon)" value={card.badge} onChange={(badge) => patch({ ...card, badge })} placeholder="e.g. 24×7" />
                 <ColorInput label="Badge color" value={card.badgeColor} onChange={(badgeColor) => patch({ ...card, badgeColor })} fallback="var(--cyan)" />
@@ -372,13 +401,7 @@ function ContactHelpEditor({ content: c, onChange }: EditorProps<ContactHelpCont
         <CardStyleFields
           value={cs}
           onChange={setCs}
-          placeholders={{
-            background: '#EAF2FC',
-            border: '1px solid rgba(0,123,214,0.12)',
-            radius: '10px',
-            padding: '1.9rem',
-            shadow: '0 6px 18px -8px rgba(10,22,40,0.18)',
-          }}
+          placeholders={{ ...cardPlaceholders, radius: '10px', padding: '1.9rem' }}
         />
       </Group>
       <Group title="Variant colors" description="Green and emergency card tints">

@@ -10,6 +10,7 @@ import { defaultAboutSectionContent } from '@/lib/about-sections';
 import { defaultLifeSectionContent } from '@/lib/life-sections';
 import { defaultLegacySectionContent } from '@/lib/legacy-sections';
 import { defaultContactSectionContent } from '@/lib/contact-sections';
+import { defaultCareersSectionContent } from '@/lib/careers-sections';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -101,6 +102,7 @@ export default function AdminPageSectionsPage() {
           defaultLifeSectionContent(addType) ||
           defaultLegacySectionContent(addType) ||
           defaultContactSectionContent(addType) ||
+          defaultCareersSectionContent(addType) ||
           {};
     const res = await fetch('/api/admin/sections', {
       method: 'POST',

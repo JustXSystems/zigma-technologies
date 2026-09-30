@@ -67,6 +67,8 @@ export type ContactIconStyle = {
 export type ContactAction = {
   href?: string;
   subject?: string;
+  /** Careers: scrolls to the application form and preselects this role (wins over subject and link). */
+  role?: string;
   newTab?: boolean;
 };
 

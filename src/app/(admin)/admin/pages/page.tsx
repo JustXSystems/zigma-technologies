@@ -72,22 +72,29 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function contactUpgrade(action: 'upgrade' | 'revert') {
+  async function pageUpgrade(page: 'contact' | 'careers', action: 'upgrade' | 'revert') {
+    const upgradeQuestion = {
+      contact:
+        'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
+      careers:
+        'Upgrade the Careers page sections to the fully configurable careers editors? All current text, cards, jobs, roles and custom CSS are kept, and the previous version is saved so it can be restored.',
+    }[page];
+    const name = page === 'contact' ? 'Contact' : 'Careers';
     const question =
       action === 'upgrade'
-        ? 'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.'
-        : 'Restore the Contact page sections to the version saved before the upgrade? Changes made in the new editors will be lost.';
+        ? upgradeQuestion
+        : `Restore the ${name} page sections to the version saved before the upgrade? Changes made in the new editors will be lost.`;
     if (!window.confirm(question)) return;
     setSeedMsg('');
     setError('');
-    const res = await fetch('/api/admin/pages/upgrade-contact', {
+    const res = await fetch(`/api/admin/pages/upgrade-${page}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action }),
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || 'Contact upgrade failed');
+      setError(data.error || `${name} upgrade failed`);
       return;
     }
     setSeedMsg(data.message);
@@ -173,7 +180,7 @@ export default function AdminPagesPage() {
             <button
               type="button"
               className="admin-btn admin-btn-secondary"
-              onClick={() => contactUpgrade('upgrade')}
+              onClick={() => pageUpgrade('contact', 'upgrade')}
               title="Convert the live Contact sections to the configurable contact editors (keeps all content)"
             >
               Upgrade contact page
@@ -181,13 +188,29 @@ export default function AdminPagesPage() {
             <button
               type="button"
               className="admin-btn admin-btn-secondary"
-              onClick={() => contactUpgrade('revert')}
+              onClick={() => pageUpgrade('contact', 'revert')}
               title="Restore the Contact sections saved before the upgrade"
             >
               Restore previous contact
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('careers')}>
               Seed careers
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('careers', 'upgrade')}
+              title="Convert the live Careers sections to the configurable careers editors (keeps all content)"
+            >
+              Upgrade careers page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('careers', 'revert')}
+              title="Restore the Careers sections saved before the upgrade"
+            >
+              Restore previous careers
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('certifications')}>
               Seed certifications
