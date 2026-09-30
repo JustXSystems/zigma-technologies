@@ -93,4 +93,7 @@ export const SECTION_TYPES = [
   { type: 'privacy_hero', label: 'Privacy · Page hero (slideshow, breadcrumb, lead)' },
   { type: 'privacy_policy', label: 'Privacy · Policy text (blocks, table of contents, media)' },
   { type: 'privacy_cta', label: 'Privacy · CTA band (buttons, background media)' },
+  { type: 'terms_hero', label: 'Terms · Page hero (slideshow, breadcrumb, lead)' },
+  { type: 'terms_policy', label: 'Terms · Terms text (blocks, table of contents, media)' },
+  { type: 'terms_cta', label: 'Terms · CTA band (buttons, background media)' },
 ] as const;

@@ -6,7 +6,7 @@ import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
 import { INDUSTRIES_HUB_SEED_SECTIONS, INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
 import { INDUSTRY_DEFS, industryPublicPath } from '@/lib/industries';
 import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
-import { TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
+import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
 
 function industriesHubSeedSections() {
   const cards = INDUSTRY_DEFS.map((ind) => ({
@@ -27,7 +27,7 @@ function seedForSlug(slug: string) {
   if (slug === 'careers') return CAREERS_SEED_SECTIONS_V2;
   if (slug === 'certifications') return CERTIFICATIONS_SEED_SECTIONS_V2;
   if (slug === 'privacy') return PRIVACY_SEED_SECTIONS_V2;
-  if (slug === 'terms') return TERMS_SEED_SECTIONS;
+  if (slug === 'terms') return TERMS_SEED_SECTIONS_V2;
   if (slug === 'industries') return industriesHubSeedSections();
   return null;
 }

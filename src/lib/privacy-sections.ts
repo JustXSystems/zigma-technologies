@@ -249,20 +249,21 @@ type Raw = Record<string, unknown>;
 const str = (v: unknown) => (typeof v === 'string' ? v : v == null ? '' : String(v));
 const s = (v: unknown) => str(v).trim();
 
-function upgradeHero(o: Raw): PrivacyHeroContent {
-  const d = defaultPrivacyHeroContent();
+/** Old page_hero → configurable hero on top of the given page defaults (shared with the Terms page). */
+export function upgradeLegalHero(o: Raw, d: PrivacyHeroContent = defaultPrivacyHeroContent()): PrivacyHeroContent {
   const up = upgradeContactSection('page_hero', o)?.content as ContactHeroContent | undefined;
   if (!up) return d;
+  const fallback = d.breadcrumb.items[d.breadcrumb.items.length - 1]?.label || '';
   return {
     ...up,
     section: d.section,
     background: { ...d.background, items: s(o.image) ? up.background.items : d.background.items, mobileItems: up.background.mobileItems },
-    breadcrumb: { ...d.breadcrumb, items: [{ label: 'Home', href: '/' }, { label: s(o.breadcrumb) || s(o.title) || 'Privacy' }] },
+    breadcrumb: { ...d.breadcrumb, items: [{ label: 'Home', href: '/' }, { label: s(o.breadcrumb) || s(o.title) || fallback }] },
   };
 }
 
-function upgradePolicy(o: Raw): PrivacyPolicyContent {
-  const d = defaultPrivacyPolicyContent();
+/** Old rich_text → policy text with one block (shared with the Terms page). */
+export function upgradeLegalPolicy(o: Raw, d: PrivacyPolicyContent = defaultPrivacyPolicyContent()): PrivacyPolicyContent {
   const title = str(o.title);
   return {
     ...d,
@@ -271,8 +272,8 @@ function upgradePolicy(o: Raw): PrivacyPolicyContent {
   };
 }
 
-function upgradeCta(o: Raw): PrivacyCtaContent {
-  const d = defaultPrivacyCtaContent();
+/** Old cta → CTA band (shared with the Terms page). */
+export function upgradeLegalCta(o: Raw, d: PrivacyCtaContent = defaultPrivacyCtaContent()): PrivacyCtaContent {
   const ctas: CtaButton[] = [];
   if (s(o.primaryCta)) ctas.push({ label: s(o.primaryCta), href: s(o.primaryHref) || '/contact', variant: 'primary' });
   if (s(o.secondaryCta) && s(o.secondaryHref)) ctas.push({ label: s(o.secondaryCta), href: s(o.secondaryHref), variant: 'ghost' });
@@ -291,9 +292,9 @@ export function upgradePrivacySection(oldType: string, content: unknown): { type
   if (!next) return null;
   const o = (content && typeof content === 'object' ? content : {}) as Raw;
   const map: Record<PrivacySectionType, (o: Raw) => object> = {
-    privacy_hero: upgradeHero,
-    privacy_policy: upgradePolicy,
-    privacy_cta: upgradeCta,
+    privacy_hero: (o) => upgradeLegalHero(o),
+    privacy_policy: (o) => upgradeLegalPolicy(o),
+    privacy_cta: (o) => upgradeLegalCta(o),
   };
   return { type: next, content: map[next](o) as Record<string, unknown> };
 }

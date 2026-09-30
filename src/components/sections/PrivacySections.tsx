@@ -29,7 +29,7 @@ export function PrivacyCtaSection({ content, sectionKey }: SectionProps) {
 /* Policy text (blocks + optional table of contents)                   */
 /* ------------------------------------------------------------------ */
 
-export function PrivacyPolicySection({ content, sectionKey }: SectionProps) {
+export function PrivacyPolicySection({ content, sectionKey, defaultId = 'privacy-body' }: SectionProps & { defaultId?: string }) {
   const c = withPrivacyDefaults<PrivacyPolicyContent>('privacy_policy', content);
   const blocks = (c.blocks || []).filter((b) => !b.hidden && (t(b.title?.text) || t(b.html) || visibleMedia(b.media).length));
   const used = new Set<string>();
@@ -95,7 +95,7 @@ export function PrivacyPolicySection({ content, sectionKey }: SectionProps) {
   ) : null;
 
   return (
-    <LgShell box={c.section} bg={c.background} className="lgy-section pvc-policy" id={sectionKey || 'privacy-body'}>
+    <LgShell box={c.section} bg={c.background} className="lgy-section pvc-policy" id={sectionKey || defaultId}>
       <LgHeader header={c.header} />
       <div
         className={`pvc-layout${showToc ? ' pvc-layout--toc' : ''}${right ? ' pvc-toc-right' : ''}`}

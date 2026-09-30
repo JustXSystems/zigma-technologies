@@ -72,7 +72,7 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications' | 'privacy', action: 'upgrade' | 'revert') {
+  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms', action: 'upgrade' | 'revert') {
     const upgradeQuestion = {
       contact:
         'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
@@ -82,8 +82,10 @@ export default function AdminPagesPage() {
         'Upgrade the Certifications page sections to the fully configurable certifications editors? All current text, certificates, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
       privacy:
         'Upgrade the Privacy page sections to the fully configurable privacy editors? All current text, policy HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      terms:
+        'Upgrade the Terms page sections to the fully configurable terms editors? All current text, terms HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
-    const name = { contact: 'Contact', careers: 'Careers', certifications: 'Certifications', privacy: 'Privacy' }[page];
+    const name = { contact: 'Contact', careers: 'Careers', certifications: 'Certifications', privacy: 'Privacy', terms: 'Terms' }[page];
     const question =
       action === 'upgrade'
         ? upgradeQuestion
@@ -256,6 +258,22 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('terms')}>
               Seed terms
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('terms', 'upgrade')}
+              title="Convert the live Terms sections to the configurable terms editors (keeps all content)"
+            >
+              Upgrade terms page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('terms', 'revert')}
+              title="Restore the Terms sections saved before the upgrade"
+            >
+              Restore previous terms
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={seedIndustries}>
               Seed industries

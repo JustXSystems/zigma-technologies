@@ -39,6 +39,8 @@ import { isCertsSectionType, withCertsDefaults } from '@/lib/certifications-sect
 import CertificationsSectionEditor from '@/components/admin/certifications/CertificationsSectionEditor';
 import { isPrivacySectionType, withPrivacyDefaults } from '@/lib/privacy-sections';
 import PrivacySectionEditor from '@/components/admin/privacy/PrivacySectionEditor';
+import { isTermsSectionType, withTermsDefaults } from '@/lib/terms-sections';
+import TermsSectionEditor from '@/components/admin/terms/TermsSectionEditor';
 import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
 
 type Props = {
@@ -238,6 +240,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     if (isCareersSectionType(section.type)) return withCareersDefaults<Record<string, unknown>>(section.type, raw);
     if (isCertsSectionType(section.type)) return withCertsDefaults<Record<string, unknown>>(section.type, raw);
     if (isPrivacySectionType(section.type)) return withPrivacyDefaults<Record<string, unknown>>(section.type, raw);
+    if (isTermsSectionType(section.type)) return withTermsDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
@@ -540,6 +543,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
             {isPrivacySectionType(section.type) ? (
               <PrivacySectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isTermsSectionType(section.type) ? (
+              <TermsSectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {(section.type === 'cta' ||
               section.type === 'eco' ||

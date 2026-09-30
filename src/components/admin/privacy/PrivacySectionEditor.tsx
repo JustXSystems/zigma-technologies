@@ -47,7 +47,7 @@ const HTML_HINT =
 /* Policy text                                                         */
 /* ------------------------------------------------------------------ */
 
-function PrivacyPolicyEditor({ content: c, onChange }: EditorProps<PrivacyPolicyContent>) {
+export function PrivacyPolicyEditor({ content: c, onChange }: EditorProps<PrivacyPolicyContent>) {
   const set = (patch: Partial<PrivacyPolicyContent>) => onChange({ ...c, ...patch });
   const toc = c.toc || { title: 'On this page' };
   const setToc = (patch: Partial<PrivacyPolicyContent['toc']>) => set({ toc: { ...toc, ...patch } });

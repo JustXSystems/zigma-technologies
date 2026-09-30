@@ -1,5 +1,5 @@
 /* =========================================================
-   Privacy page sections (privacy_*) — scoped .pvc-* classes.
+   Privacy + Terms page sections (privacy_*, terms_*) — scoped .pvc-* classes.
    The hero reuses .ctc-hero and the CTA band reuses .lz-cta / .cer-cta;
    defaults here mirror the live privacy page. CMS values arrive as CSS variables.
    ========================================================= */
