@@ -62,12 +62,12 @@ type SectionProps = { content: Record<string, unknown>; sectionKey?: string | nu
 /* Shared helpers                                                      */
 /* ------------------------------------------------------------------ */
 
-function clampCols(n: unknown, fallback: number): number {
+export function clampCols(n: unknown, fallback: number): number {
   const v = Math.round(Number(n));
   return Number.isFinite(v) && v >= 1 ? Math.min(v, 8) : fallback;
 }
 
-function colVars(cols: LifeColumns | undefined, fb: Required<LifeColumns>) {
+export function colVars(cols: LifeColumns | undefined, fb: Required<LifeColumns>) {
   return {
     '--lz-cols': String(clampCols(cols?.desktop, fb.desktop)),
     '--lz-cols-t': String(clampCols(cols?.tablet, fb.tablet)),
@@ -75,7 +75,7 @@ function colVars(cols: LifeColumns | undefined, fb: Required<LifeColumns>) {
   };
 }
 
-function prefersReducedMotion(): boolean {
+export function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 }
 
@@ -108,7 +108,7 @@ function highlightText(text: string, hl?: LifeHighlight): ReactNode {
 }
 
 /** Heading whose tag / size default to Site Settings → Public typography; element tag / style override. */
-function LzHeading({
+export function LzHeading({
   el,
   role,
   className,
@@ -147,7 +147,7 @@ function LzHeader({ header }: { header?: LifeSectionHeader }) {
 
 /* ---------- Media (image / svg / video) with load-failure fallback ---------- */
 
-type FailFn = (src: string) => void;
+export type FailFn = (src: string) => void;
 
 function LzImg({
   src,
@@ -185,7 +185,7 @@ function LzImg({
   );
 }
 
-function LzMedia({
+export function LzMedia({
   item,
   className = '',
   eager,
@@ -307,7 +307,7 @@ function useLifeMedia(lightbox: boolean) {
 }
 
 /** Auto-advancing index (paused while the tab is hidden or `pausedRef` is set). */
-function useCycle(count: number, intervalMs: number) {
+export function useCycle(count: number, intervalMs: number) {
   const [tick, setTick] = useState(0);
   const pausedRef = useRef(false);
   useEffect(() => {
@@ -472,7 +472,7 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
 /* Stat bar (count-up numbers)                                         */
 /* ------------------------------------------------------------------ */
 
-type CountPhase = 'idle' | 'run' | 'done';
+export type CountPhase = 'idle' | 'run' | 'done';
 
 function parseStat(value: string) {
   const raw = String(value ?? '').trim();
@@ -488,7 +488,7 @@ function formatStat(n: number, p: NonNullable<ReturnType<typeof parseStat>>): st
   return n.toFixed(p.decimals);
 }
 
-function LzCount({ value, phase, duration }: { value: string; phase: CountPhase; duration: number }) {
+export function LzCount({ value, phase, duration }: { value: string; phase: CountPhase; duration: number }) {
   const p = parseStat(value);
   const num = p?.num;
   const [progress, setProgress] = useState(0);
@@ -649,7 +649,7 @@ export function LifeCardsSection({ content, sectionKey }: SectionProps) {
 /* ------------------------------------------------------------------ */
 
 /** Staggered entrance for cards below the fold (data-reveal keeps React-owned className untouched). */
-function useStaggerReveal(ref: RefObject<HTMLElement | null>, selector: string, enabled: boolean, dep: unknown) {
+export function useStaggerReveal(ref: RefObject<HTMLElement | null>, selector: string, enabled: boolean, dep: unknown) {
   useEffect(() => {
     const root = ref.current;
     if (!enabled || !root || typeof IntersectionObserver === 'undefined' || prefersReducedMotion()) return;

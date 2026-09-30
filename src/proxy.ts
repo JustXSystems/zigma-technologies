@@ -71,6 +71,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Friendly aliases for the 20 Years of Legacy CMS page (slug legacy20yrs)
+  const LEGACY_20YRS_ALIASES = new Set(['/legacy', '/legacy.html', '/legacy20yrs.html', '/20-years-of-legacy', '/legacy-20-years']);
+  if (LEGACY_20YRS_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/legacy20yrs';
+    return NextResponse.redirect(url, 308);
+  }
+
   try {
     const hit = await findRedirect(pathname);
     if (hit) {

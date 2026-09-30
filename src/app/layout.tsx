@@ -5,6 +5,7 @@ import { DEFAULT_OG_IMAGE, SITE_NAME, isIndexable, siteOrigin } from "@/lib/seo"
 import "./globals.css";
 import "./about-sections.css";
 import "./life-sections.css";
+import "./legacy-sections.css";
 
 const TITLE = 'Zigma Technologies | Solar EPC, UPS, BESS & EV Charging in India';
 const DESCRIPTION =

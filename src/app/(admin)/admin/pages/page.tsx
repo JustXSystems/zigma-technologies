@@ -54,7 +54,7 @@ export default function AdminPagesPage() {
   }
 
   async function seedInner(
-    slug: 'about-zigma' | 'life-at-zigma' | 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms'
+    slug: 'about-zigma' | 'life-at-zigma' | 'legacy20yrs' | 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms'
   ) {
     setSeedMsg('');
     setError('');
@@ -141,6 +141,9 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('life-at-zigma')}>
               Seed life at zigma
+            </button>
+            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('legacy20yrs')}>
+              Seed legacy 20 yrs
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('contact')}>
               Seed contact

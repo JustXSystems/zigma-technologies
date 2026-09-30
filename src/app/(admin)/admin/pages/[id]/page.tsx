@@ -8,6 +8,7 @@ import { SECTION_TYPES } from '@/lib/cms-types';
 import { defaultIndustryCategoryContent } from '@/lib/industry-category';
 import { defaultAboutSectionContent } from '@/lib/about-sections';
 import { defaultLifeSectionContent } from '@/lib/life-sections';
+import { defaultLegacySectionContent } from '@/lib/legacy-sections';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -95,7 +96,7 @@ export default function AdminPageSectionsPage() {
     const content_json =
       addType === 'industry_category'
         ? defaultIndustryCategoryContent()
-        : defaultAboutSectionContent(addType) || defaultLifeSectionContent(addType) || {};
+        : defaultAboutSectionContent(addType) || defaultLifeSectionContent(addType) || defaultLegacySectionContent(addType) || {};
     const res = await fetch('/api/admin/sections', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

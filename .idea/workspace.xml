@@ -7,11 +7,26 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#43 All hero sections must be full screen.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#43 logo link made editable">
+      <change afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/legacy-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/uploads/careers.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/careers.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/uploads/certifications.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/certifications.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/uploads/contact.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/contact.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/uploads/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/uploads/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,23 +84,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2535073198426756" />
-      <entry key="MS500" value="2.0554002704925383" />
-      <entry key="S2" value="4.651302297337242" />
-      <entry key="S5" value="6.8988462283152945" />
-      <entry key="S10" value="8.42573594534009" />
-      <entry key="S30" value="15.004736990246672" />
-      <entry key="S60" value="23.339476230293347" />
-      <entry key="M2" value="31.327180848630604" />
-      <entry key="M5" value="39.14242972053965" />
-      <entry key="M10" value="59.24017245527995" />
-      <entry key="M15" value="95.58241387522376" />
-      <entry key="M30" value="215.34805322116324" />
-      <entry key="H1" value="387.8615966812729" />
-      <entry key="H2" value="586.8742708675973" />
-      <entry key="H4" value="798.53203714869" />
-      <entry key="D1" value="2000.8745767346263" />
-      <entry key="W1" value="13864.228096946597" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0000000000161595" />
+      <entry key="M2" value="1.0000166232077259" />
+      <entry key="M5" value="1.0785377693090483" />
+      <entry key="M10" value="3.0660406724362472" />
+      <entry key="M15" value="9.466369617478291" />
+      <entry key="M30" value="57.77079137133846" />
+      <entry key="H1" value="199.1163885203256" />
+      <entry key="H2" value="428.7118465711987" />
+      <entry key="H4" value="697.8773862113518" />
+      <entry key="D1" value="1990.1431923303812" />
+      <entry key="W1" value="13854.481380548385" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -99,31 +114,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="3.218607679840485E-256" />
-      <entry key="H1" value="1.794047847701184E-128" />
-      <entry key="H2" value="1.3394207134805967E-64" />
-      <entry key="H4" value="1.1573334495837245E-32" />
-      <entry key="D1" value="4.832264486285512E-6" />
-      <entry key="W1" value="0.269823180513114" />
+      <entry key="M30" value="5.944048723003915E-257" />
+      <entry key="H1" value="7.709765705263241E-129" />
+      <entry key="H2" value="8.780527151180562E-65" />
+      <entry key="H4" value="9.370446708388032E-33" />
+      <entry key="D1" value="4.665172013598673E-6" />
+      <entry key="W1" value="0.2684701258976886" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2074369390381077" />
-      <entry key="MS500" value="2.0385775847960845" />
-      <entry key="S2" value="4.64180108776383" />
-      <entry key="S5" value="6.8933040218458785" />
-      <entry key="S10" value="8.422387366910375" />
-      <entry key="S30" value="15.002789738089167" />
-      <entry key="S60" value="23.33796630081215" />
-      <entry key="M2" value="31.32616650180733" />
-      <entry key="M5" value="39.14191612394745" />
-      <entry key="M10" value="59.23975049293594" />
-      <entry key="M15" value="95.5819336537044" />
-      <entry key="M30" value="215.34749349901728" />
-      <entry key="H1" value="387.8610905519953" />
-      <entry key="H2" value="586.8738838941393" />
-      <entry key="H4" value="798.5317613839983" />
-      <entry key="D1" value="2000.874449748548" />
-      <entry key="W1" value="13864.497778538791" />
+      <entry key="MS100" value="0.9726549474122855" />
+      <entry key="MS500" value="0.9944701686732144" />
+      <entry key="S2" value="0.9986146661010289" />
+      <entry key="S5" value="0.9994456359721023" />
+      <entry key="S10" value="0.9997227795604651" />
+      <entry key="S30" value="0.9999075846464872" />
+      <entry key="S60" value="0.9999537912717774" />
+      <entry key="M2" value="0.9999935177068563" />
+      <entry key="M5" value="1.07852650784842" />
+      <entry key="M10" value="3.0659928926236346" />
+      <entry key="M15" value="9.46624065473246" />
+      <entry key="M30" value="57.7704516090077" />
+      <entry key="H1" value="199.1159233852474" />
+      <entry key="H2" value="428.7114130362225" />
+      <entry key="H4" value="697.8770544715492" />
+      <entry key="D1" value="1990.1430485949993" />
+      <entry key="W1" value="13854.749706693709" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -150,37 +165,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies" />
@@ -278,7 +293,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 Media information updated" />
     <MESSAGE value="#27 Jump links on Site settings now expand the matching section, then scroll to it" />
     <MESSAGE value="#27 hero section enabling  for image/media to select&#10;captcha implemented&#10;enquiry submission issue fixed" />
     <MESSAGE value="#27 mobile display issue fixed" />
@@ -303,7 +317,8 @@
     <MESSAGE value="#42 About sectiom font cconfiguration" />
     <MESSAGE value="#44 LIFE AT ZIGMA implemented" />
     <MESSAGE value="#43 All hero sections must be full screen." />
-    <option name="LAST_COMMIT_MESSAGE" value="#43 All hero sections must be full screen." />
+    <MESSAGE value="#43 logo link made editable" />
+    <option name="LAST_COMMIT_MESSAGE" value="#43 logo link made editable" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -9,6 +9,7 @@ import {
 import { PRIVACY_SEED_SECTIONS, TERMS_SEED_SECTIONS } from '@/lib/legal-page-seeds';
 import { ABOUT_ZIGMA_SEED_SECTIONS } from '@/lib/about-sections';
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
+import { LEGACY_20YRS_SEED_SECTIONS, LEGACY_20YRS_SLUG } from '@/lib/legacy-sections';
 
 const SEEDS = {
   'about-zigma': {
@@ -24,6 +25,13 @@ const SEEDS = {
     meta_description:
       'Life at Zigma Technologies: a 250+ strong team of engineers, technicians and support specialists powering UPS, solar and power electronics across India.',
     sections: LIFE_AT_ZIGMA_SEED_SECTIONS,
+  },
+  [LEGACY_20YRS_SLUG]: {
+    title: '20 Years of Legacy',
+    meta_title: '20 Years of Legacy | Zigma Technologies',
+    meta_description:
+      'Since 2006, Zigma Technologies has kept Indian industry powered and protected. Explore twenty years of milestones in UPS, solar, storage and EV charging.',
+    sections: LEGACY_20YRS_SEED_SECTIONS,
   },
   contact: {
     title: 'Contact',
@@ -63,7 +71,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const slug = String(body.slug || '') as keyof typeof SEEDS;
     if (!SEEDS[slug]) {
-      return jsonError('slug must be about-zigma, life-at-zigma, contact, careers, certifications, privacy, or terms');
+      return jsonError('slug must be about-zigma, life-at-zigma, legacy20yrs, contact, careers, certifications, privacy, or terms');
     }
 
     const seedDef = SEEDS[slug];

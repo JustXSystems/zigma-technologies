@@ -66,4 +66,13 @@ export const SECTION_TYPES = [
   { type: 'life_events', label: 'Life · Events & moments (marquee / albums / grid)' },
   { type: 'life_gallery', label: 'Life · Gallery (mosaic + auto slider)' },
   { type: 'life_cta', label: 'Life · CTA band' },
+  { type: 'legacy_hero', label: 'Legacy · Page hero (slideshow + years ring)' },
+  { type: 'legacy_stats', label: 'Legacy · Stat bar (count-up numbers)' },
+  { type: 'legacy_marquee', label: 'Legacy · Capabilities marquee' },
+  { type: 'legacy_story', label: 'Legacy · Our story (photo collage)' },
+  { type: 'legacy_journey', label: 'Legacy · Journey (animated timeline)' },
+  { type: 'legacy_values', label: 'Legacy · Values (glass cards)' },
+  { type: 'legacy_caps', label: 'Legacy · Capabilities grid' },
+  { type: 'legacy_next', label: 'Legacy · Next twenty years (roadmap)' },
+  { type: 'legacy_cta', label: 'Legacy · CTA band' },
 ] as const;

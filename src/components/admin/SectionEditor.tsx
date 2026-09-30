@@ -29,6 +29,8 @@ import { isAboutSectionType, withAboutDefaults } from '@/lib/about-sections';
 import AboutSectionEditor from '@/components/admin/about/AboutSectionEditor';
 import { isLifeSectionType, withLifeDefaults } from '@/lib/life-sections';
 import LifeSectionEditor from '@/components/admin/life/LifeSectionEditor';
+import { isLegacySectionType, withLegacyDefaults } from '@/lib/legacy-sections';
+import LegacySectionEditor from '@/components/admin/legacy/LegacySectionEditor';
 import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
 
 type Props = {
@@ -223,6 +225,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     if (section.type === 'split') return migrateSplitContent(raw);
     if (isAboutSectionType(section.type)) return withAboutDefaults<Record<string, unknown>>(section.type, raw);
     if (isLifeSectionType(section.type)) return withLifeDefaults<Record<string, unknown>>(section.type, raw);
+    if (isLegacySectionType(section.type)) return withLegacyDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
@@ -510,6 +513,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
             {isLifeSectionType(section.type) ? (
               <LifeSectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isLegacySectionType(section.type) ? (
+              <LegacySectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {(section.type === 'cta' ||
               section.type === 'eco' ||

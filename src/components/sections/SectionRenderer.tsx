@@ -8,6 +8,7 @@ import CertMarquee, { normalizeCertItems } from '@/components/sections/CertMarqu
 import EcoVisual from '@/components/sections/EcoVisual';
 import { renderAboutSection } from '@/components/sections/AboutSections';
 import { renderLifeSection } from '@/components/sections/LifeSections';
+import { renderLegacySection } from '@/components/sections/LegacySections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2185,6 +2186,16 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
             case 'life_gallery':
             case 'life_cta':
               return wrap(renderLifeSection(section.type, { key, content, sectionKey: section.section_key }));
+            case 'legacy_hero':
+            case 'legacy_stats':
+            case 'legacy_marquee':
+            case 'legacy_story':
+            case 'legacy_journey':
+            case 'legacy_values':
+            case 'legacy_caps':
+            case 'legacy_next':
+            case 'legacy_cta':
+              return wrap(renderLegacySection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">
