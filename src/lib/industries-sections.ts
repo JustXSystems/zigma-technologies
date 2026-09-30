@@ -509,19 +509,24 @@ const EYEBROW_CLASS_COLOR: Record<string, string> = {
 const INNER_HERO_SCRIM =
   'linear-gradient(105deg, rgba(4,10,20,0.92) 0%, rgba(4,10,20,0.72) 38%, rgba(4,10,20,0.35) 68%, rgba(4,10,20,0.18) 100%), radial-gradient(ellipse at 78% 30%, rgba(255,107,26,0.18), transparent 55%)';
 
-function upgradeHero(o: Raw): IndustriesHeroContent {
-  const up = upgradeLegalHero(o, defaultIndustriesHeroContent());
-  const proof = Array.isArray(o.proofRail) ? (o.proofRail as unknown[]).filter((x) => s(x)) : [];
-  const inner = Boolean(s(o.primaryCta) || s(o.secondaryCta) || proof.length || s(o.variant) === 'inner');
-  if (!inner) return up;
-  /* Heroes with buttons / proof rail used the compact inner-page layout with a left scrim. */
+/** Inner-page hero look (heroes with buttons / proof rail): its own padding and a left scrim. */
+export function withInnerHeroLook(c: IndustriesHeroContent): IndustriesHeroContent {
   return {
-    ...up,
-    heroHeight: 'auto',
-    section: { ...up.section, paddingTop: '9.5rem', paddingBottom: '4.25rem', paddingTopMobile: '7.25rem', paddingBottomMobile: '2.75rem' },
-    background: { ...up.background, overlay: INNER_HERO_SCRIM },
+    ...c,
+    section: { ...c.section, paddingTop: '9.5rem', paddingBottom: '4.25rem', paddingTopMobile: '7.25rem', paddingBottomMobile: '2.75rem' },
+    background: { ...c.background, overlay: INNER_HERO_SCRIM },
   };
 }
+
+/** Old page_hero → configurable hero on top of the given page defaults (also used by the industry pages). */
+export function upgradeInnerHero(o: Raw, d: IndustriesHeroContent = defaultIndustriesHeroContent()): IndustriesHeroContent {
+  const up = upgradeLegalHero(o, d);
+  const proof = Array.isArray(o.proofRail) ? (o.proofRail as unknown[]).filter((x) => s(x)) : [];
+  const inner = Boolean(s(o.primaryCta) || s(o.secondaryCta) || proof.length || s(o.variant) === 'inner');
+  return inner ? withInnerHeroLook(up) : up;
+}
+
+const upgradeHero = (o: Raw) => upgradeInnerHero(o);
 
 function upgradeStats(o: Raw): IndustriesStatsContent {
   const d = defaultIndustriesStatsContent();
@@ -621,8 +626,8 @@ function upgradeCategory(o: Raw): IndustriesCategoryContent {
   };
 }
 
-function upgradeCta(o: Raw): IndustriesCtaContent {
-  const d = defaultIndustriesCtaContent();
+/** Old cta → CTA band on top of the given page defaults (also used by the industry pages). */
+export function upgradeInnerCta(o: Raw, d: IndustriesCtaContent = defaultIndustriesCtaContent()): IndustriesCtaContent {
   const ctas: CtaButton[] = [];
   if (s(o.primaryCta)) ctas.push({ label: s(o.primaryCta), href: s(o.primaryHref) || '/contact', variant: 'primary' });
   if (s(o.secondaryCta) && s(o.secondaryHref)) ctas.push({ label: s(o.secondaryCta), href: s(o.secondaryHref), variant: 'ghost' });
@@ -662,7 +667,7 @@ export function upgradeIndustriesSection(oldType: string, content: unknown): { t
     industries_stats: upgradeStats,
     industries_hub: upgradeHub,
     industries_category: upgradeCategory,
-    industries_cta: upgradeCta,
+    industries_cta: (o) => upgradeInnerCta(o),
   };
   return { type: next, content: map[next](o) as Record<string, unknown> };
 }

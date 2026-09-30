@@ -15,6 +15,7 @@ import { defaultCertsSectionContent } from '@/lib/certifications-sections';
 import { defaultPrivacySectionContent } from '@/lib/privacy-sections';
 import { defaultTermsSectionContent } from '@/lib/terms-sections';
 import { defaultIndustriesSectionContent } from '@/lib/industries-sections';
+import { defaultIndustryPageSectionContent } from '@/lib/industry-page-sections';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -111,6 +112,7 @@ export default function AdminPageSectionsPage() {
           defaultPrivacySectionContent(addType) ||
           defaultTermsSectionContent(addType) ||
           defaultIndustriesSectionContent(addType) ||
+          defaultIndustryPageSectionContent(addType, page?.slug) ||
           {};
     const res = await fetch('/api/admin/sections', {
       method: 'POST',

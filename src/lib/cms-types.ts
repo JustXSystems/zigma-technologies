@@ -101,4 +101,7 @@ export const SECTION_TYPES = [
   { type: 'industries_hub', label: 'Industries · Sector cards (picker, image / video cards)' },
   { type: 'industries_category', label: 'Industries · Category grid (icons, cards, links, media)' },
   { type: 'industries_cta', label: 'Industries · CTA band (split / stacked, buttons, media)' },
+  { type: 'industry_page_hero', label: 'Industry page · Hero (slideshow, breadcrumb, lead, buttons)' },
+  { type: 'industry_page_overview', label: 'Industry page · Overview text (blocks, table of contents, media)' },
+  { type: 'industry_page_cta', label: 'Industry page · CTA band (split / stacked, buttons, media)' },
 ] as const;

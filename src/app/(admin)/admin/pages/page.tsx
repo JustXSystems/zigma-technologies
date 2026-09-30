@@ -72,7 +72,10 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms' | 'industries', action: 'upgrade' | 'revert') {
+  async function pageUpgrade(
+    page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms' | 'industries' | 'industries-healthcare',
+    action: 'upgrade' | 'revert'
+  ) {
     const upgradeQuestion = {
       contact:
         'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
@@ -86,6 +89,8 @@ export default function AdminPagesPage() {
         'Upgrade the Terms page sections to the fully configurable terms editors? All current text, terms HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
       industries:
         'Upgrade the Industries page sections to the fully configurable industries editors? All current text, stats, sector and industry cards, icons, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      'industries-healthcare':
+        'Upgrade the Healthcare industry page (/industries-healthcare) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
     const name = {
       contact: 'Contact',
@@ -94,7 +99,9 @@ export default function AdminPagesPage() {
       privacy: 'Privacy',
       terms: 'Terms',
       industries: 'Industries',
+      'industries-healthcare': 'Healthcare industry',
     }[page];
+    const industryPage = page.startsWith('industries-');
     const question =
       action === 'upgrade'
         ? upgradeQuestion
@@ -102,10 +109,10 @@ export default function AdminPagesPage() {
     if (!window.confirm(question)) return;
     setSeedMsg('');
     setError('');
-    const res = await fetch(`/api/admin/pages/upgrade-${page}`, {
+    const res = await fetch(`/api/admin/pages/upgrade-${industryPage ? 'industry-page' : page}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action }),
+      body: JSON.stringify(industryPage ? { action, slug: page } : { action }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -302,6 +309,22 @@ export default function AdminPagesPage() {
               title="Restore the Industries sections saved before the upgrade"
             >
               Restore previous industries
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-healthcare', 'upgrade')}
+              title="Convert the live /industries-healthcare sections to the configurable industry page editors (keeps all content)"
+            >
+              Upgrade healthcare page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-healthcare', 'revert')}
+              title="Restore the /industries-healthcare sections saved before the upgrade"
+            >
+              Restore previous healthcare
             </button>
           </div>
         </div>

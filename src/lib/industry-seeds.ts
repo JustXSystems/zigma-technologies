@@ -1,6 +1,6 @@
-import { INDUSTRY_DEFS, industryPageSlug, industryPublicPath } from '@/lib/industries';
-import { INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
+import { INDUSTRY_DEFS, industryPageSlug } from '@/lib/industries';
 import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
+import { industryPageSeedSections } from '@/lib/industry-page-sections';
 import { createPage, createSection, getPageBySlug, listSections, updatePage } from '@/lib/cms';
 
 async function seedIndustriesHubPage() {
@@ -67,45 +67,7 @@ export async function seedIndustryPages() {
       continue;
     }
 
-    const sections = [
-      {
-        type: 'page_hero',
-        section_key: 'hero',
-        title: ind.name,
-        content_json: {
-          eyebrow: ind.eyebrow,
-          title: ind.name,
-          lead: ind.lead,
-          breadcrumb: 'Industries',
-          image: INDUSTRY_HUB_IMAGES[ind.key] || '/assets/images/city-skyline-with-solar-panels-and-indus.jpg',
-          primaryCta: 'Request industry consultation →',
-          primaryHref: `/contact?consult=1&consult_subject=${encodeURIComponent(ind.subject)}`,
-          secondaryCta: 'Browse projects',
-          secondaryHref: '/projects',
-        },
-      },
-      {
-        type: 'rich_text',
-        section_key: 'overview',
-        title: 'Overview',
-        content_json: {
-          html: `<p>${ind.lead}</p><p>Public landing: <a href="${industryPublicPath(ind.key)}">${industryPublicPath(ind.key)}</a></p>`,
-        },
-      },
-      {
-        type: 'cta',
-        section_key: 'cta',
-        title: 'CTA',
-        content_json: {
-          variant: 'inner',
-          title: `Talk to us about ${ind.name}`,
-          body: 'Share your load profile, site constraints, and timeline — we will propose a clear path.',
-          primaryCta: 'Request consultation',
-          primaryHref: `/contact?consult=1&consult_subject=${encodeURIComponent(ind.subject)}`,
-        },
-      },
-    ];
-
+    const sections = industryPageSeedSections(ind.key);
     for (let i = 0; i < sections.length; i++) {
       const seed = sections[i];
       await createSection({

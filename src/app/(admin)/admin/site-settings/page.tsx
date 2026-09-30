@@ -192,7 +192,7 @@ const SECTIONS: SectionDef[] = [
     id: 'typography',
     title: 'Public typography',
     description:
-      'Page hero / section heading levels (H1–H3) and eyebrow (uppercase mono) sizes. Also the defaults for About, Life at Zigma, 20 Years of Legacy, Contact, Careers, Certifications, Privacy, Terms and Industries section titles and eyebrows (each can be overridden in the section editor).',
+      'Page hero / section heading levels (H1–H3) and eyebrow (uppercase mono) sizes. Also the defaults for About, Life at Zigma, 20 Years of Legacy, Contact, Careers, Certifications, Privacy, Terms, Industries and industry page section titles and eyebrows (each can be overridden in the section editor).',
     fields: [],
   },
   {

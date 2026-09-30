@@ -8,18 +8,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 similar admin page design for terms">
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/pages/upgrade-industry-page/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/industries/IndustryPageSectionEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/sections/IndustryPageSections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/industry-page-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/certifications-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/certifications-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/CertificationsSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/CertificationsSections.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/certifications-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/certifications-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-public-page.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-public-page.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/industries-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industries-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/industry-seeds.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industry-seeds.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
