@@ -111,6 +111,8 @@ export type CertsGalleryContent = {
 export type CertsCtaContent = {
   section: SectionBox;
   background: LegacyBgMedia;
+  /** stacked = text above buttons; split = text left, buttons right (stacks on phones) */
+  layout?: 'stacked' | 'split';
   align?: 'left' | 'center' | 'right';
   maxWidth?: string;
   eyebrow: EyebrowEl;

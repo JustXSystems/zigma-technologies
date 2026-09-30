@@ -282,19 +282,39 @@ export function CertsCtaSection({
 }: SectionProps & { defaultId?: string; className?: string }) {
   const c = withCertsDefaults<CertsCtaContent>('certs_cta', content);
   const align = c.align || 'center';
+  const split = c.layout === 'split';
+  const copy = (
+    <>
+      <AzEyebrow el={c.eyebrow} scale="lg" />
+      <LzHeading el={c.title} role="section" className="lz-cta-title" highlight={c.highlight} />
+      <AzText el={c.body} defaultTag="p" className="lz-cta-body" />
+    </>
+  );
+  const actions = (
+    <>
+      <AzCtas ctas={c.ctas} className="lz-cta-actions" />
+      <AzText el={c.note} defaultTag="p" className="cer-cta-note" />
+    </>
+  );
   return (
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`lz-cta lz-cta--${align} cer-cta${className ? ` ${className}` : ''}`}
+      className={`lz-cta lz-cta--${split ? 'left' : align} cer-cta${split ? ' cer-cta--split' : ''}${className ? ` ${className}` : ''}`}
       id={sectionKey || defaultId}
     >
       <div className="lz-cta-inner" style={vars({ maxWidth: c.maxWidth })}>
-        <AzEyebrow el={c.eyebrow} scale="lg" />
-        <LzHeading el={c.title} role="section" className="lz-cta-title" highlight={c.highlight} />
-        <AzText el={c.body} defaultTag="p" className="lz-cta-body" />
-        <AzCtas ctas={c.ctas} className="lz-cta-actions" />
-        <AzText el={c.note} defaultTag="p" className="cer-cta-note" />
+        {split ? (
+          <>
+            <div className="cer-cta-copy">{copy}</div>
+            <div className="cer-cta-side">{actions}</div>
+          </>
+        ) : (
+          <>
+            {copy}
+            {actions}
+          </>
+        )}
       </div>
     </LgShell>
   );

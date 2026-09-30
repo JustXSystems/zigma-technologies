@@ -3,24 +3,9 @@ import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { HOMEPAGE_SEED_SECTIONS } from '@/lib/homepage-seed';
 import { CAREERS_SEED_SECTIONS_V2 } from '@/lib/careers-sections';
 import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
-import { INDUSTRIES_HUB_SEED_SECTIONS, INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
-import { INDUSTRY_DEFS, industryPublicPath } from '@/lib/industries';
+import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
 import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
 import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
-
-function industriesHubSeedSections() {
-  const cards = INDUSTRY_DEFS.map((ind) => ({
-    key: ind.key,
-    eyebrow: ind.eyebrow,
-    name: ind.name,
-    lead: ind.lead,
-    image: INDUSTRY_HUB_IMAGES[ind.key] || '/assets/images/city-skyline-with-solar-panels-and-indus.jpg',
-    href: industryPublicPath(ind.key),
-  }));
-  return INDUSTRIES_HUB_SEED_SECTIONS.map((s) =>
-    s.type === 'industry_hub' ? { ...s, content_json: { ...s.content_json, cards } } : s
-  );
-}
 
 function seedForSlug(slug: string) {
   if (slug === 'home') return HOMEPAGE_SEED_SECTIONS;
@@ -28,7 +13,7 @@ function seedForSlug(slug: string) {
   if (slug === 'certifications') return CERTIFICATIONS_SEED_SECTIONS_V2;
   if (slug === 'privacy') return PRIVACY_SEED_SECTIONS_V2;
   if (slug === 'terms') return TERMS_SEED_SECTIONS_V2;
-  if (slug === 'industries') return industriesHubSeedSections();
+  if (slug === 'industries') return INDUSTRIES_SEED_SECTIONS_V2;
   return null;
 }
 
@@ -54,7 +39,7 @@ function seedPage(slug: string, sections: ReturnType<typeof seedForSlug>): CmsPa
       section_key: s.section_key,
       title: s.title,
       sort_order: i,
-      enabled: 1,
+      enabled: 'enabled' in s && s.enabled === false ? 0 : 1,
       content_json: s.content_json,
       style_json: {},
     })) as CmsSection[],

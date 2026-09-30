@@ -96,4 +96,9 @@ export const SECTION_TYPES = [
   { type: 'terms_hero', label: 'Terms · Page hero (slideshow, breadcrumb, lead)' },
   { type: 'terms_policy', label: 'Terms · Terms text (blocks, table of contents, media)' },
   { type: 'terms_cta', label: 'Terms · CTA band (buttons, background media)' },
+  { type: 'industries_hero', label: 'Industries · Page hero (slideshow, breadcrumb, lead, buttons)' },
+  { type: 'industries_stats', label: 'Industries · Stats strip (numbers, icons, media)' },
+  { type: 'industries_hub', label: 'Industries · Sector cards (picker, image / video cards)' },
+  { type: 'industries_category', label: 'Industries · Category grid (icons, cards, links, media)' },
+  { type: 'industries_cta', label: 'Industries · CTA band (split / stacked, buttons, media)' },
 ] as const;

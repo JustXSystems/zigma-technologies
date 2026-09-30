@@ -72,7 +72,7 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms', action: 'upgrade' | 'revert') {
+  async function pageUpgrade(page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms' | 'industries', action: 'upgrade' | 'revert') {
     const upgradeQuestion = {
       contact:
         'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
@@ -84,8 +84,17 @@ export default function AdminPagesPage() {
         'Upgrade the Privacy page sections to the fully configurable privacy editors? All current text, policy HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
       terms:
         'Upgrade the Terms page sections to the fully configurable terms editors? All current text, terms HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      industries:
+        'Upgrade the Industries page sections to the fully configurable industries editors? All current text, stats, sector and industry cards, icons, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
-    const name = { contact: 'Contact', careers: 'Careers', certifications: 'Certifications', privacy: 'Privacy', terms: 'Terms' }[page];
+    const name = {
+      contact: 'Contact',
+      careers: 'Careers',
+      certifications: 'Certifications',
+      privacy: 'Privacy',
+      terms: 'Terms',
+      industries: 'Industries',
+    }[page];
     const question =
       action === 'upgrade'
         ? upgradeQuestion
@@ -277,6 +286,22 @@ export default function AdminPagesPage() {
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={seedIndustries}>
               Seed industries
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries', 'upgrade')}
+              title="Convert the live Industries sections to the configurable industries editors (keeps all content)"
+            >
+              Upgrade industries page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries', 'revert')}
+              title="Restore the Industries sections saved before the upgrade"
+            >
+              Restore previous industries
             </button>
           </div>
         </div>

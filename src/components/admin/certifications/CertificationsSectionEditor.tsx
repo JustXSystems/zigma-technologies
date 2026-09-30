@@ -49,6 +49,11 @@ const START_OPTIONS = [
   { value: 'left', label: 'First certificate at the left edge' },
 ] as const;
 
+const CTA_LAYOUT_OPTIONS = [
+  { value: 'stacked', label: 'Stacked (text above buttons)' },
+  { value: 'split', label: 'Split (text left, buttons right)' },
+] as const;
+
 const FIT_OPTIONS = [
   { value: 'contain', label: 'Contain (whole certificate visible)' },
   { value: 'cover', label: 'Cover (fill the box, may crop)' },
@@ -214,8 +219,16 @@ export function CertsCtaEditor({ content: c, onChange }: EditorProps<CertsCtaCon
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="CTA background images / videos" />
       <Group title="Layout">
         <div className="admin-form-grid">
-          <AlignButtons label="Content align" value={c.align} onChange={(align) => set({ align: (align || 'center') as CertsCtaContent['align'] })} />
-          <TextInput label="Content max width" value={c.maxWidth} onChange={(maxWidth) => set({ maxWidth })} placeholder="780px" />
+          <SelectInput label="Arrangement" value={c.layout || 'stacked'} options={CTA_LAYOUT_OPTIONS} onChange={(layout) => set({ layout })} />
+          {c.layout === 'split' ? null : (
+            <AlignButtons label="Content align" value={c.align} onChange={(align) => set({ align: (align || 'center') as CertsCtaContent['align'] })} />
+          )}
+          <TextInput
+            label="Content max width"
+            value={c.maxWidth}
+            onChange={(maxWidth) => set({ maxWidth })}
+            placeholder={c.layout === 'split' ? 'None (container width)' : '780px'}
+          />
         </div>
       </Group>
       <Group title="Eyebrow">

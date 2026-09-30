@@ -1,5 +1,6 @@
 import { INDUSTRY_DEFS, industryPageSlug, industryPublicPath } from '@/lib/industries';
-import { INDUSTRIES_HUB_SEED_SECTIONS, INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
+import { INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
+import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
 import { createPage, createSection, getPageBySlug, listSections, updatePage } from '@/lib/cms';
 
 async function seedIndustriesHubPage() {
@@ -22,29 +23,16 @@ async function seedIndustriesHubPage() {
     return { hubCreated: false, hubSeeded: false, hubSkipped: true, page };
   }
 
-  const cards = INDUSTRY_DEFS.map((ind) => ({
-    key: ind.key,
-    eyebrow: ind.eyebrow,
-    name: ind.name,
-    lead: ind.lead,
-    image: INDUSTRY_HUB_IMAGES[ind.key] || '/assets/images/city-skyline-with-solar-panels-and-indus.jpg',
-    href: industryPublicPath(ind.key),
-  }));
-
-  for (let i = 0; i < INDUSTRIES_HUB_SEED_SECTIONS.length; i++) {
-    const seed = INDUSTRIES_HUB_SEED_SECTIONS[i];
-    const content =
-      seed.type === 'industry_hub'
-        ? { ...seed.content_json, cards }
-        : { ...seed.content_json };
+  for (let i = 0; i < INDUSTRIES_SEED_SECTIONS_V2.length; i++) {
+    const seed = INDUSTRIES_SEED_SECTIONS_V2[i];
     await createSection({
       page_id: page.id,
       type: seed.type,
       section_key: seed.section_key,
       title: seed.title,
-      content_json: content as Record<string, unknown>,
+      content_json: seed.content_json,
       sort_order: i,
-      enabled: true,
+      enabled: seed.enabled !== false,
     });
   }
 
