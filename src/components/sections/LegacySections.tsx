@@ -84,7 +84,7 @@ export function useInView(ref: RefObject<HTMLElement | null>, enabled = true) {
 }
 
 /** Count-up phase for numbers inside `ref` (starts when visible, skipped for reduced motion). */
-function useCountPhase(ref: RefObject<HTMLElement | null>, enabled: boolean): CountPhase {
+export function useCountPhase(ref: RefObject<HTMLElement | null>, enabled: boolean): CountPhase {
   const [phase, setPhase] = useState<CountPhase>('idle');
   useEffect(() => {
     if (!enabled) return;
@@ -293,7 +293,7 @@ export function cardVars(cs: { background?: string; hoverBackground?: string; bo
   };
 }
 
-function StatNumber({
+export function StatNumber({
   value,
   prefix,
   suffix,

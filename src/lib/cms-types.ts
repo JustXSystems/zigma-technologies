@@ -104,4 +104,9 @@ export const SECTION_TYPES = [
   { type: 'industry_page_hero', label: 'Industry page · Hero (slideshow, breadcrumb, lead, buttons)' },
   { type: 'industry_page_overview', label: 'Industry page · Overview text (blocks, table of contents, media)' },
   { type: 'industry_page_cta', label: 'Industry page · CTA band (split / stacked, buttons, media)' },
+  { type: 'ind101_hero', label: 'Industries 101 · Page hero (sliding slideshow, breadcrumb, lead, buttons)' },
+  { type: 'ind101_subnav', label: 'Industries 101 · Sticky category sub-nav (scroll-spy pills)' },
+  { type: 'ind101_stats', label: 'Industries 101 · Quick stat strip (numbers, icons, colors)' },
+  { type: 'ind101_category', label: 'Industries 101 · Category block (collage media, sector cards)' },
+  { type: 'ind101_cta', label: 'Industries 101 · CTA band (buttons, background media)' },
 ] as const;

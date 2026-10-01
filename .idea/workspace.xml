@@ -7,19 +7,19 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 similar admin page design for terms">
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/pages/upgrade-industry-page/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/industries/IndustryPageSectionEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/sections/IndustryPageSections.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/industry-page-sections.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 similar admin page design for industries-data-centres">
+      <change afterPath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/industries101-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/pages/seed-inner/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/industries-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industries-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/industry-seeds.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industry-seeds.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -286,7 +286,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#27 buils error fixed" />
     <MESSAGE value="#27 Hero section slide timer configured in admin" />
     <MESSAGE value="#27 catalog card gap customization done" />
     <MESSAGE value="#28 Contact Map issues" />
@@ -311,7 +310,8 @@
     <MESSAGE value="#45 similar admin page design for career" />
     <MESSAGE value="#45 similar admin page design for certifications" />
     <MESSAGE value="#45 similar admin page design for terms" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 similar admin page design for terms" />
+    <MESSAGE value="#45 similar admin page design for industries-data-centres" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 similar admin page design for industries-data-centres" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

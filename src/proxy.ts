@@ -79,6 +79,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Friendly aliases for the Industries 101 CMS page (slug industries101)
+  const INDUSTRIES101_ALIASES = new Set(['/industries101.html', '/industries-101']);
+  if (INDUSTRIES101_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/industries101';
+    return NextResponse.redirect(url, 308);
+  }
+
   try {
     const hit = await findRedirect(pathname);
     if (hit) {
