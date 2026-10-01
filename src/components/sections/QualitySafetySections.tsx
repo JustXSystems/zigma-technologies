@@ -3,6 +3,8 @@
 import { Fragment, useRef, useState } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzPills, AzText, hasText, vars } from '@/components/sections/AboutSections';
 import { LzHeading, LzLightbox, LzMedia, colVars, useStaggerReveal, type LbState } from '@/components/sections/LifeSections';
 import { LgHeader, LgScrollBar, LgShell, StatNumber, cardVars, useCountPhase, useInView, useOkMedia, useSlides } from '@/components/sections/LegacySections';
@@ -65,15 +67,19 @@ export function QsHeroSection({ content, sectionKey }: SectionProps) {
   const layout = c.layout || {};
   const scroll = c.scrollBar || {};
   const credit = hasText(c.credit) ? <AzText el={c.credit} defaultTag="span" className="qs-credit" /> : null;
+  const place = heroPlacement(c.placement);
   return (
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`az-hero qs-hero ${heroHeightClass(c.heroHeight, 'auto')} qs-hero--h-${layout.hAlign || 'left'}${c.entrance === false ? '' : ' lgy-enter'}`}
+      className={`az-hero qs-hero ${heroHeightClass(c.heroHeight, 'auto')} ${place.rootClass} qs-hero--h-${layout.hAlign || 'left'}${
+        c.entrance === false ? '' : ' lgy-enter'
+      }`}
       id={sectionKey || 'top'}
       layers={credit}
     >
       {!scroll.hidden ? <LgScrollBar gradient={scroll.gradient} /> : null}
+      <HeroSlot place={place} name="text">
       <div className="az-hero-copy qs-hero-copy" style={vars({ maxWidth: layout.maxWidth })}>
         {!c.breadcrumb?.hidden && crumbs.length ? (
           <nav
@@ -102,6 +108,7 @@ export function QsHeroSection({ content, sectionKey }: SectionProps) {
         <AzPills pills={c.pills} />
         <AzCtas ctas={c.ctas} />
       </div>
+      </HeroSlot>
     </LgShell>
   );
 }

@@ -3,6 +3,8 @@
 import { Fragment, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -346,8 +348,10 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
   const float = c.floatCard;
   const showFloat = float && !float.hidden && (hasText(float.number) || hasText(float.label));
   const showVisual = !c.image?.hidden || showFloat;
+  const place = heroPlacement(c.placement);
 
   const copy = (
+    <HeroSlot place={place} name="text">
     <div className="az-hero-copy">
       {!c.breadcrumb?.hidden && crumbs.length ? (
         <nav
@@ -372,9 +376,11 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
       <AzPills pills={c.pills} />
       <AzCtas ctas={c.ctas} />
     </div>
+    </HeroSlot>
   );
 
   const visual = showVisual ? (
+    <HeroSlot place={place} name="media">
     <div className="az-hero-visual">
       <AzImage image={c.image} className="az-hero-image" eager />
       {showFloat ? (
@@ -387,10 +393,11 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
         </div>
       ) : null}
     </div>
+    </HeroSlot>
   ) : null;
 
   return (
-    <AzShell box={c.section} className={`az-hero ${heroHeightClass(c.heroHeight)}`} id={sectionKey || 'top'}>
+    <AzShell box={c.section} className={`az-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}`} id={sectionKey || 'top'}>
       <div
         className={`az-hero-grid${visual ? '' : ' az-hero-grid--single'} ${
           c.layout?.mobileImageFirst ? 'az-mobile-img-first' : 'az-mobile-img-last'

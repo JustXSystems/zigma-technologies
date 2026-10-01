@@ -1,4 +1,5 @@
 import type { HeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
   ABOUT_TYPOGRAPHY_VERSION,
@@ -42,6 +43,7 @@ export type Ind101VAlign = 'top' | 'center' | 'bottom';
 export type Ind101HeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
+  placement?: HeroPlacement;
   /** Slides, motion (zoom / Ken Burns…), overlay, dots toggle + active dot color */
   background: LegacyBgMedia;
   slider: {

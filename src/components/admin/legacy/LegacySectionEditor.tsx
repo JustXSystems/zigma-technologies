@@ -61,6 +61,7 @@ import {
   type LegacyValuesContent,
 } from '@/lib/legacy-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -266,6 +267,14 @@ function LegacyHeroEditor({ content: c, onChange }: EditorProps<LegacyHeroConten
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroPlacementEditor
+            value={c.placement}
+            onChange={(placement) => set({ placement })}
+            slots={[
+              { name: 'text', label: 'Text block' },
+              { name: 'media', label: 'Badge' },
+            ]}
+          />
           <AlignButtons
             label="Badge position"
             value={layout.badgeSide}

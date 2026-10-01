@@ -24,6 +24,7 @@ import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, 
 import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup, VALIGN_OPTIONS } from '@/components/admin/legacy/LegacySectionEditor';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import {
   QS_ALL_ICON_PRESETS,
   defaultQsCert,
@@ -103,6 +104,7 @@ function QsHeroEditor({ content: c, onChange }: EditorProps<QsHeroContent>) {
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} fallback="auto" onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <AlignButtons label="Text align" value={layout.hAlign} onChange={(v) => setLayout({ hAlign: (v || undefined) as QsHeroContent['layout']['hAlign'] })} />
           <TextInput label="Content max width" value={layout.maxWidth} onChange={(maxWidth) => setLayout({ maxWidth })} placeholder="820px" />
           <Field label="Behaviour">

@@ -13,6 +13,8 @@ import {
 import { createPortal } from 'react-dom';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -415,8 +417,10 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
   const crumbs = normalizeLinkItems(c.breadcrumb?.items);
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
   const hasMedia = !c.media?.hidden && visibleMedia(c.media?.items).length > 0;
+  const place = heroPlacement(c.placement);
 
   const copy = (
+    <HeroSlot place={place} name="text">
     <div className="az-hero-copy">
       {!c.breadcrumb?.hidden && crumbs.length ? (
         <nav
@@ -441,11 +445,16 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
       <AzPills pills={c.pills} />
       <AzCtas ctas={c.ctas} />
     </div>
+    </HeroSlot>
   );
-  const visual = hasMedia ? <LzHeroMedia c={c} /> : null;
+  const visual = hasMedia ? (
+    <HeroSlot place={place} name="media">
+      <LzHeroMedia c={c} />
+    </HeroSlot>
+  ) : null;
 
   return (
-    <AzShell box={c.section} className={`az-hero lz-hero ${heroHeightClass(c.heroHeight)}`} id={sectionKey || 'top'}>
+    <AzShell box={c.section} className={`az-hero lz-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}`} id={sectionKey || 'top'}>
       <div
         className={`az-hero-grid${visual ? '' : ' az-hero-grid--single'} ${
           c.layout?.mobileImageFirst ? 'az-mobile-img-first' : 'az-mobile-img-last'

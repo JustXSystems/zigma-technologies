@@ -963,6 +963,125 @@
   width: 72px;
 }
 
+/* Hero container placement (anchor pad + offsets) */
+.hp-editor .hp-slot {
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  background: var(--admin-panel-2);
+  padding: 0.6rem 0.75rem 0.75rem;
+  margin: 0.65rem 0 0;
+  min-width: 0;
+}
+.hp-editor .hp-slot legend {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--admin-text);
+  padding: 0 0.3rem;
+}
+.hp-editor .hp-device {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+}
+.hp-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+.hp-pad-wrap {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+}
+.hp-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 26px);
+  grid-template-rows: repeat(3, 18px);
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  background:
+    linear-gradient(160deg, rgba(15, 31, 61, 0.92), rgba(12, 18, 34, 0.96)),
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 255, 255, 0.05) 7px 8px);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+.hp-pad-cell {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease;
+}
+.hp-pad-cell span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.55);
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.hp-pad-cell:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+.hp-pad-cell.on {
+  background: rgba(194, 65, 12, 0.28);
+}
+.hp-pad-cell.on span {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+  background: #fb923c;
+  box-shadow: 0 0 8px rgba(251, 146, 60, 0.75);
+}
+.hp-pad-cell:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 1px;
+}
+.hp-pad-cell:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.hp-pad-caption {
+  font-size: 0.68rem;
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+.hp-inputs {
+  flex: 1 1 220px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+}
+.hp-editor .hp-inputs label {
+  margin: 0;
+  white-space: nowrap;
+}
+.hp-inputs label small {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--admin-muted-light);
+  margin-left: 0.25rem;
+}
+.hp-editor .hp-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.7rem 0 0.45rem;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.78rem;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+}
+
 .admin-picker-list {
   border: 1px solid var(--admin-border);
   border-radius: 12px;

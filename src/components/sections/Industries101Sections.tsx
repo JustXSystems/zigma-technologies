@@ -3,6 +3,8 @@
 import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzPills, AzText, AzVideo, hasText, vars } from '@/components/sections/AboutSections';
 import { LzHeading, LzMedia, colVars, prefersReducedMotion, useStaggerReveal } from '@/components/sections/LifeSections';
 import { LgShell, StatNumber, cardVars, useCountPhase, useInView, useOkMedia, useSlides } from '@/components/sections/LegacySections';
@@ -182,15 +184,17 @@ export function Ind101HeroSection({ content, sectionKey }: SectionProps) {
   const crumbs = normalizeLinkItems(c.breadcrumb?.items);
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
   const layout = c.layout || {};
+  const place = heroPlacement(c.placement);
   return (
     <I101HeroShell
       box={c.section}
-      className={`az-hero i101-hero ${heroHeightClass(c.heroHeight)} i101-hero--v-${layout.vAlign || 'bottom'} i101-hero--h-${
-        layout.hAlign || 'left'
-      }${c.entrance === false ? '' : ' lgy-enter'}`}
+      className={`az-hero i101-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass} i101-hero--v-${
+        layout.vAlign || 'bottom'
+      } i101-hero--h-${layout.hAlign || 'left'}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
       layers={<I101HeroBg bg={c.background} slider={c.slider} dots={c.dots} />}
     >
+      <HeroSlot place={place} name="text">
       <div className="az-hero-copy i101-hero-copy" style={vars({ maxWidth: layout.maxWidth })}>
         {!c.breadcrumb?.hidden && crumbs.length ? (
           <nav
@@ -219,6 +223,7 @@ export function Ind101HeroSection({ content, sectionKey }: SectionProps) {
         <AzPills pills={c.pills} />
         <AzCtas ctas={c.ctas} />
       </div>
+      </HeroSlot>
     </I101HeroShell>
   );
 }

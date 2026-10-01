@@ -12,6 +12,7 @@ import { CAREERS_ALL_ICON_PRESETS } from '@/lib/careers-sections';
 import type { LegacyBgMedia, LegacyCardStyle, LegacySectionHeader } from '@/lib/legacy-sections';
 import type { LifeColumns, LifeHighlight, LifeMediaItem } from '@/lib/life-sections';
 import { normalizeHeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 
 /**
  * Fully configurable Certifications page section family (page /certifications):
@@ -339,6 +340,7 @@ function upgradeHero(o: Raw): CertsHeroContent {
   return {
     ...d,
     heroHeight: normalizeHeroHeight(o.heroHeight),
+    placement: o.placement as HeroPlacement | undefined,
     background: {
       ...d.background,
       items: image ? [{ src: image, title: '' }] : [],

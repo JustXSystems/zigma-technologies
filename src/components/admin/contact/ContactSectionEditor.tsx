@@ -33,6 +33,7 @@ import {
 import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
 import { normalizeLinkItems } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import {
   CONTACT_ALL_ICON_PRESETS,
   createContactLocation,
@@ -143,6 +144,7 @@ export function ContactHeroEditor({ content: c, onChange }: EditorProps<ContactH
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <AlignButtons
             label="Content align"
             value={c.align}

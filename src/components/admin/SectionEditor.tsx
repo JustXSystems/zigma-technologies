@@ -52,6 +52,7 @@ import QualitySafetySectionEditor from '@/components/admin/qualitysafety/Quality
 import { isHomeSectionType, withHomeDefaults } from '@/lib/home-sections';
 import HomeSectionEditor from '@/components/admin/home/HomeSectionEditor';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 
 type Props = {
   section: CmsSection;
@@ -631,6 +632,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                   <input className="admin-input" value={String(content.breadcrumb || '')} onChange={(e) => setField('breadcrumb', e.target.value)} />
                 </Field>
                 <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
                 <div className="full">
                   <MediaPicker
                     value={String(content.image || '')}
@@ -692,6 +694,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                   <input className="admin-input" value={String(content.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} />
                 </Field>
                 <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
                 <div className="full">
                   <MediaPicker
                     value={String(content.image || '')}

@@ -1,5 +1,6 @@
 import { isVideoMediaPath } from '@/lib/media-url';
 import type { HeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_HERO_IMAGE,
   ABOUT_ICON_PRESETS,
@@ -95,6 +96,7 @@ export type LifeHeroContent = {
   section: SectionBox;
   layout: SplitLayout;
   heroHeight?: HeroHeight;
+  placement?: HeroPlacement;
   breadcrumb: {
     hidden?: boolean;
     items: Array<{ label: string; href?: string }>;

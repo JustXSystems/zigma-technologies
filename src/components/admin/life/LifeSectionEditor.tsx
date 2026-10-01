@@ -53,6 +53,7 @@ import {
   type LifeStatsContent,
 } from '@/lib/life-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -181,6 +182,14 @@ function LifeHeroEditor({ content: c, onChange }: EditorProps<LifeHeroContent>) 
         </div>
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroPlacementEditor
+            value={c.placement}
+            onChange={(placement) => set({ placement })}
+            slots={[
+              { name: 'text', label: 'Text block' },
+              { name: 'media', label: 'Image / video' },
+            ]}
+          />
         </div>
         <SplitLayoutEditor value={c.layout} onChange={(layout) => set({ layout })} />
         <div className="admin-form-grid">

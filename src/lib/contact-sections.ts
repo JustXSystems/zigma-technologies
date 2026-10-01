@@ -1,4 +1,5 @@
 import { normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
   ABOUT_TYPOGRAPHY_VERSION,
@@ -79,6 +80,7 @@ export type ContactAction = {
 export type ContactHeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
+  placement?: HeroPlacement;
   background: LegacyBgMedia;
   /** Fade-up entrance for breadcrumb, heading, leads, pills and buttons */
   entrance?: boolean;
@@ -794,6 +796,7 @@ function upgradeHero(o: Raw): ContactHeroContent {
   return {
     ...d,
     heroHeight: normalizeHeroHeight(o.heroHeight),
+    placement: o.placement as HeroPlacement | undefined,
     background: {
       ...d.background,
       items: image ? [{ src: image, title: alt }] : d.background.items,

@@ -1,4 +1,5 @@
 import type { HeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
   ABOUT_TYPOGRAPHY_VERSION,
@@ -39,6 +40,7 @@ export function isQsSectionType(type: string): type is QsSectionType {
 export type QsHeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
+  placement?: HeroPlacement;
   /** Slides, Ken Burns motion, overlay, progress dots + counter */
   background: LegacyBgMedia;
   layout: { hAlign?: 'left' | 'center' | 'right'; maxWidth?: string };

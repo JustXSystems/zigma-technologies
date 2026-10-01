@@ -10,6 +10,8 @@ import { trackEvent } from '@/lib/analytics';
 import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { CONTACT_SUBJECT_EVENT, focusContactSubject } from '@/lib/contact-subject';
 import { focusApplyRole } from '@/lib/careers-apply';
 import { AzCtas, AzEyebrow, AzIcon, AzImage, AzPills, AzText, vars } from '@/components/sections/AboutSections';
@@ -146,15 +148,17 @@ export function ContactHeroSection({ content, sectionKey, defaultId = 'contact-h
   const c = withContactDefaults<ContactHeroContent>('contact_hero', content);
   const crumbs = normalizeLinkItems(c.breadcrumb?.items);
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
+  const place = heroPlacement(c.placement);
   return (
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`az-hero ctc-hero ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(c.heroHeight)}${
-        c.entrance === false ? '' : ' lgy-enter'
-      }`}
+      className={`az-hero ctc-hero ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(c.heroHeight)} ${
+        place.rootClass
+      }${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || defaultId}
     >
+      <HeroSlot place={place} name="text">
       <div className="az-hero-copy ctc-hero-copy" style={vars({ maxWidth: c.contentMaxWidth })}>
         {!c.breadcrumb?.hidden && crumbs.length ? (
           <nav
@@ -191,6 +195,7 @@ export function ContactHeroSection({ content, sectionKey, defaultId = 'contact-h
         <AzPills pills={c.pills} />
         <AzCtas ctas={c.ctas} />
       </div>
+      </HeroSlot>
     </LgShell>
   );
 }

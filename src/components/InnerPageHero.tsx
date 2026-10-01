@@ -5,6 +5,8 @@ import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import JsonLd from '@/components/JsonLd';
 import { breadcrumbJsonLd } from '@/lib/seo';
 import { heroHeightClass, type HeroHeight } from '@/lib/hero-height';
+import { heroPlacement, type HeroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 
 export type InnerBreadcrumb = { label: string; href?: string };
 
@@ -20,6 +22,7 @@ type Props = {
   /** Soft cyan vs orange eyebrow accent */
   accent?: 'orange' | 'cyan';
   height?: HeroHeight;
+  placement?: HeroPlacement;
 };
 
 const DEFAULT_IMAGE = '/assets/images/engineers-in-hard-hats-reviewing-a-digit.jpg';
@@ -36,9 +39,11 @@ export default function InnerPageHero({
   children,
   accent = 'orange',
   height,
+  placement,
 }: Props) {
+  const place = heroPlacement(placement);
   return (
-    <section className={`page-hero page-hero--inner ${heroHeightClass(height)}`}>
+    <section className={`page-hero page-hero--inner ${heroHeightClass(height)} ${place.rootClass}`}>
       <div className="hero-bg">
         <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />
         <div className="hero-overlay" />
@@ -49,6 +54,7 @@ export default function InnerPageHero({
         {breadcrumb?.length ? (
           <JsonLd data={breadcrumbJsonLd(breadcrumb.map((c) => ({ name: c.label, path: c.href })))} />
         ) : null}
+        <HeroSlot place={place} name="text">
         {breadcrumb?.length ? (
           <nav className="breadcrumb" aria-label="Breadcrumb">
             {breadcrumb.map((crumb, i) => {
@@ -71,6 +77,7 @@ export default function InnerPageHero({
         {lead ? <p className="lead">{lead}</p> : null}
         {actions ? <div className="page-hero-actions">{actions}</div> : null}
         {children}
+        </HeroSlot>
       </div>
     </section>
   );

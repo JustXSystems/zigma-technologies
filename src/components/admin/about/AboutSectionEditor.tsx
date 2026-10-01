@@ -42,6 +42,7 @@ import {
   type TextEl,
 } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -137,6 +138,14 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
       <Group title="Layout" description="Hero height, image side, column widths, gap, alignment">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(v) => set('heroHeight', v)} />
+          <HeroPlacementEditor
+            value={c.placement}
+            onChange={(v) => set('placement', v)}
+            slots={[
+              { name: 'text', label: 'Text block' },
+              { name: 'media', label: 'Image / video' },
+            ]}
+          />
         </div>
         <SplitLayoutEditor value={c.layout} onChange={(v) => set('layout', v)} columnsPlaceholder="1.15fr 0.98fr" />
       </Group>

@@ -13,6 +13,8 @@ import {
 } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzImage, AzPills, AzText, AzVideo, hasText, vars } from '@/components/sections/AboutSections';
 import {
   LzCount,
@@ -424,8 +426,10 @@ export function LegacyHeroSection({ content, sectionKey }: SectionProps) {
   const crumbs = normalizeLinkItems(c.breadcrumb?.items);
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
   const scroll = c.scrollBar || {};
+  const place = heroPlacement(c.placement);
 
   const copy = (
+    <HeroSlot place={place} name="text">
     <div className="az-hero-copy lgy-hero-copy">
       {!c.breadcrumb?.hidden && crumbs.length ? (
         <nav
@@ -450,14 +454,19 @@ export function LegacyHeroSection({ content, sectionKey }: SectionProps) {
       <AzPills pills={c.pills} />
       <AzCtas ctas={c.ctas} />
     </div>
+    </HeroSlot>
   );
-  const badge = showBadge ? <LgRing badge={b} /> : null;
+  const badge = showBadge ? (
+    <HeroSlot place={place} name="media">
+      <LgRing badge={b} />
+    </HeroSlot>
+  ) : null;
 
   return (
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`az-hero lgy-hero ${heroHeightClass(c.heroHeight)}${c.entrance === false ? '' : ' lgy-enter'}`}
+      className={`az-hero lgy-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
     >
       {!scroll.hidden ? <LgScrollBar gradient={scroll.gradient} /> : null}

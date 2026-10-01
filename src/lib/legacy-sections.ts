@@ -1,4 +1,5 @@
 import type { HeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
   ABOUT_TYPOGRAPHY_VERSION,
@@ -119,6 +120,7 @@ export type LegacyRingBadge = {
 export type LegacyHeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
+  placement?: HeroPlacement;
   background: LegacyBgMedia;
   layout: {
     badgeSide: 'left' | 'right';

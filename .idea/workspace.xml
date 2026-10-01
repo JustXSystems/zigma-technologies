@@ -7,11 +7,31 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 hero section compact render enhanced">
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 hero section full screen with multiple section">
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/HeroHeightPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/HeroHeightPicker.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/hero-height.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/hero-height.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/QualitySafetySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/QualitySafetySections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/certifications-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/certifications-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/contact-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/contact-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/industries101-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industries101-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/legacy-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/legacy-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/life-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/life-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/qualitysafety-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/qualitysafety-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,23 +89,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2784386616237682" />
-      <entry key="MS500" value="3.402267651918446" />
-      <entry key="S2" value="6.142549116838558" />
-      <entry key="S5" value="7.269317080268465" />
-      <entry key="S10" value="8.349412401953536" />
-      <entry key="S30" value="20.267408048194604" />
-      <entry key="S60" value="47.54597577255775" />
-      <entry key="M2" value="87.32246223542764" />
-      <entry key="M5" value="154.24752119144506" />
-      <entry key="M10" value="245.1553036190868" />
-      <entry key="M15" value="327.2583189861584" />
-      <entry key="M30" value="521.8584337785527" />
-      <entry key="H1" value="749.611148319394" />
-      <entry key="H2" value="985.1866764515554" />
-      <entry key="H4" value="1314.0677787922546" />
-      <entry key="D1" value="3014.070064472554" />
-      <entry key="W1" value="14910.488920914651" />
+      <entry key="MS100" value="1.2509925852912587" />
+      <entry key="MS500" value="2.9362504265171294" />
+      <entry key="S2" value="8.122102380416415" />
+      <entry key="S5" value="14.181520339661539" />
+      <entry key="S10" value="21.049745040309165" />
+      <entry key="S30" value="44.23447627644369" />
+      <entry key="S60" value="69.74941378852397" />
+      <entry key="M2" value="106.11005112757545" />
+      <entry key="M5" value="168.727912534398" />
+      <entry key="M10" value="211.83595554959004" />
+      <entry key="M15" value="233.0655438777347" />
+      <entry key="M30" value="296.8312230195148" />
+      <entry key="H1" value="482.76294614330027" />
+      <entry key="H2" value="802.5214306461676" />
+      <entry key="H4" value="1239.7191345507172" />
+      <entry key="D1" value="3140.9121428574613" />
+      <entry key="W1" value="15079.904467759758" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -99,31 +119,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="3.244166990162773E-262" />
-      <entry key="H1" value="1.8011571253401356E-131" />
-      <entry key="H2" value="4.244004153320074E-66" />
-      <entry key="H4" value="2.0600980931648994E-33" />
-      <entry key="D1" value="3.6242843394802438E-6" />
-      <entry key="W1" value="0.25895979226638144" />
+      <entry key="M30" value="2.7258993406830064E-263" />
+      <entry key="H1" value="5.221014595539513E-132" />
+      <entry key="H2" value="2.284953959172601E-66" />
+      <entry key="H4" value="1.5116064167794566E-33" />
+      <entry key="D1" value="3.442025369016098E-6" />
+      <entry key="W1" value="0.2570580254278964" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2398760056235951" />
-      <entry key="MS500" value="3.3779865846144337" />
-      <entry key="S2" value="6.131218967131629" />
-      <entry key="S5" value="7.263929718030396" />
-      <entry key="S10" value="8.346305769219956" />
-      <entry key="S30" value="20.264981280186568" />
-      <entry key="S60" value="47.54321308830535" />
-      <entry key="M2" value="87.31994621250703" />
-      <entry key="M5" value="154.2456390267681" />
-      <entry key="M10" value="245.1536540423436" />
-      <entry key="M15" value="327.25677071964566" />
-      <entry key="M30" value="521.8571080107079" />
-      <entry key="H1" value="749.6101448300512" />
-      <entry key="H2" value="985.1859746212099" />
-      <entry key="H4" value="1314.067271181846" />
-      <entry key="D1" value="3014.069853396456" />
-      <entry key="W1" value="14910.747726606676" />
+      <entry key="MS100" value="1.223178888334812" />
+      <entry key="MS500" value="2.9189719816960484" />
+      <entry key="S2" value="8.10863401201631" />
+      <entry key="S5" value="14.171934919936067" />
+      <entry key="S10" value="21.042594089007533" />
+      <entry key="S30" value="44.22944804084922" />
+      <entry key="S60" value="69.7454417196329" />
+      <entry key="M2" value="106.1070191458897" />
+      <entry key="M5" value="168.72597142412104" />
+      <entry key="M10" value="211.83473309060489" />
+      <entry key="M15" value="233.06464433201734" />
+      <entry key="M30" value="296.83062399404224" />
+      <entry key="H1" value="482.7623992737883" />
+      <entry key="H2" value="802.5209215596747" />
+      <entry key="H4" value="1239.7186956451828" />
+      <entry key="D1" value="3140.911931204288" />
+      <entry key="W1" value="15080.16137121487" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -278,7 +298,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#31 ind-item border style (color, size/width) to be able to control in admin" />
     <MESSAGE value="#34 SEO Implementation" />
     <MESSAGE value="#34 SEO Implementation basic issues fixing pre requisite" />
     <MESSAGE value="#42 About Zigma" />
@@ -303,7 +322,8 @@
     <MESSAGE value="#45 seend consolidation" />
     <MESSAGE value="#45 hero section render issue fixed" />
     <MESSAGE value="#45 hero section compact render enhanced" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 hero section compact render enhanced" />
+    <MESSAGE value="#45 hero section full screen with multiple section" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 hero section full screen with multiple section" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

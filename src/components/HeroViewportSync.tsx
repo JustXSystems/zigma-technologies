@@ -42,9 +42,27 @@ export default function HeroViewportSync() {
     let lastWidth = 0;
     let lastViewH = 0;
     let lastValue = '';
+    let lastNavValue = '';
     let frame = 0;
     let ctaObserved: HTMLElement | null = null;
+    let navObserved: HTMLElement | null = null;
     const timers = new Set<number>();
+
+    /** Header row height (unaffected by the scrolled state), so positioned hero content clears a wrapped header. */
+    const measureNav = () => {
+      const nav = document.querySelector<HTMLElement>('#siteHeader > .nav-wrap');
+      if (nav !== navObserved) {
+        if (navObserved) ro?.unobserve(navObserved);
+        if (nav) ro?.observe(nav);
+        navObserved = nav;
+      }
+      const h = nav?.getBoundingClientRect().height ?? 0;
+      const value = h > 0 ? `${Math.round(h)}px` : '';
+      if (value === lastNavValue) return;
+      lastNavValue = value;
+      if (value) root.style.setProperty('--site-nav-h', value);
+      else root.style.removeProperty('--site-nav-h');
+    };
 
     const viewportHeight = () => {
       const inner = Math.min(window.innerHeight, root.clientHeight || Infinity);
@@ -57,6 +75,7 @@ export default function HeroViewportSync() {
     const measure = (force: boolean) => {
       frame = 0;
       if ((window.visualViewport?.scale ?? 1) > 1.01) return;
+      measureNav();
       const width = window.innerWidth;
       const viewH = viewportHeight();
       if (!viewH) return;
@@ -139,6 +158,7 @@ export default function HeroViewportSync() {
       document.removeEventListener('focusout', onFocusOut);
       coarse.removeEventListener?.('change', settle);
       root.style.removeProperty('--hero-vh');
+      root.style.removeProperty('--site-nav-h');
     };
   }, []);
 

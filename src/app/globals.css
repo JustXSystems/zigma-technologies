@@ -245,7 +245,7 @@
     position:fixed;top:0;left:0;right:0;z-index:1000;
     background:rgba(10,22,40,0.0);
     transition:background .35s ease, box-shadow .35s ease, padding .35s ease;
-    padding:1.2rem 0;
+    padding:var(--header-pad, 1.2rem) 0;
     will-change:background, box-shadow;
   }
   header.scrolled{
@@ -6718,6 +6718,51 @@ footer .foot-powered{font-size:0.8em;}
   .hero-club-item{animation:heroClubRise 0.85s cubic-bezier(0.16,1,0.3,1) both;animation-delay:calc(160ms + var(--hero-club-i, 0) * 110ms);}
 }
 @keyframes heroClubRise{from{opacity:0;translate:0 28px;}to{opacity:1;translate:none;}}
+
+/* ========== Hero container placement (anchor + X/Y offsets per text / media container) ==========
+   heroPlacement() marks the hero (.hero-place, --d desktop+tablet, --m phones, --edge frame) and wraps each container
+   in .hero-slot with --hp-* (desktop) / --hp-m-* (phone) vars. The hero's content wrapper becomes a one-cell overlay
+   grid and every wrapper between it and the slots is flattened, so slots anchor anywhere yet still size the hero.
+   Content frame: inside the page gutters, below the fixed header (its measured height, so a header that wraps to
+   two rows on phones / tablets is still cleared). Edge frame: the hero's own edges.
+   Phones, and phones in landscape (short screens up to 1024px wide), stack the containers instead (top → middle →
+   bottom by anchor, ties keep page order) so two containers never overlap; the edge frame there still clears the
+   fixed header. Centre-line nudges are margins, and widths are clamped to the space left after the offsets, so a
+   container never leaves the hero sideways or causes horizontal scrolling. */
+.hero-place{--hp-header:max(var(--header-h, 82px), calc(var(--site-nav-h, 0px) + 2 * var(--header-pad, 1.2rem)));}
+.hero-place .hero-slot{display:contents;}
+.hero-slot[data-hero-slot="text"]{--hp-w-auto:min(100%, 46rem);}
+.hero-slot[data-hero-slot="media"]{--hp-w-auto:min(100%, 44%);}
+@supports selector(:has(*)){
+  .hero-place:has(.hero-slot[data-hero-slot="media"]) .hero-slot[data-hero-slot="text"]{--hp-w-auto:min(100%, 46rem, 52%);}
+  @media (min-width:761px) and (orientation:portrait), (min-width:761px) and (min-height:521px), (min-width:1025px){
+    .hero-place--d{display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;padding-block:var(--hp-header) 0 !important;overflow-x:clip;}
+    .hero-place--d > :has(.hero-slot){display:grid !important;grid-template:minmax(0,1fr) / minmax(0,1fr) !important;flex:1 1 auto;width:100%;gap:0 !important;align-items:start;justify-items:start;}
+    .hero-place--d > * :has(.hero-slot){display:contents !important;}
+    .hero-place--d .hero-slot{
+      display:block;grid-area:1 / 1;position:relative;min-width:0;
+      max-width:calc(100% - var(--hp-ml, 0px) - var(--hp-mr, 0px));
+      align-self:var(--hp-ay);justify-self:var(--hp-ax);width:var(--hp-w, var(--hp-w-auto));z-index:var(--hp-z, 2);
+      margin:var(--hp-mt, 0px) var(--hp-mr, 0px) var(--hp-mb, 0px) var(--hp-ml, 0px);
+    }
+    .hero-place--d.hero-place--edge{padding:0 !important;}
+    .hero-place--d.hero-place--edge > :has(.hero-slot){max-width:none !important;padding:0 !important;margin:0 !important;}
+  }
+  @media (max-width:760px), (orientation:landscape) and (max-height:520px) and (max-width:1024px){
+    .hero-place--m{display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;padding-block:var(--hp-header) 0 !important;overflow-x:clip;}
+    .hero-place--m > :has(.hero-slot){display:flex !important;flex-direction:column !important;flex:1 1 auto;width:100%;gap:var(--hp-m-gap, 1.75rem) !important;align-items:stretch !important;justify-content:flex-start !important;}
+    .hero-place--m > * :has(.hero-slot){display:contents !important;}
+    .hero-place--m .hero-slot{
+      display:block;position:relative;min-width:0;flex:0 0 auto;order:var(--hp-m-order, 2);
+      max-width:calc(100% - var(--hp-m-ml, 0px) - var(--hp-m-mr, 0px));
+      align-self:var(--hp-m-ax, stretch);width:var(--hp-m-w, 100%);z-index:var(--hp-m-z, 2);
+      margin:var(--hp-m-mt, 0px) var(--hp-m-mr, 0px) var(--hp-m-mb, 0px) var(--hp-m-ml, 0px);
+      translate:0 var(--hp-m-ty, 0px);
+    }
+    .hero-place--m.hero-place--edge{padding:var(--hp-header) 0 0 !important;}
+    .hero-place--m.hero-place--edge > :has(.hero-slot){max-width:none !important;padding:0 !important;margin:0 !important;}
+  }
+}
 
 /* Short screens (landscape phones, small laptop windows): the active slide sits in flow so the slider fills
    the available height yet grows instead of clipping when its content needs more room. */

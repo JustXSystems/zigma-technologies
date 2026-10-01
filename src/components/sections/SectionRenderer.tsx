@@ -25,6 +25,8 @@ import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
 import { heroHeightClass, normalizeHeroHeight } from '@/lib/hero-height';
+import { heroPlacement, type HeroPlacement } from '@/lib/hero-placement';
+import HeroSlot from '@/components/HeroSlot';
 import { featIconFor } from '@/lib/feat-icons';
 import { indIconFor } from '@/lib/ind-icons';
 import {
@@ -974,11 +976,13 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
     String(content.image || '') || '/assets/images/engineers-reviewing-electrical-design-dr.jpg';
   const imageMobile = String(content.imageMobile || '') || undefined;
   const height = normalizeHeroHeight(content.heroHeight);
+  const placement = content.placement as HeroPlacement | undefined;
 
   if (useInner) {
     return (
       <InnerPageHero
         height={height}
+        placement={placement}
         eyebrow={String(content.eyebrow || '')}
         title={String(content.title || '')}
         lead={content.lead ? String(content.lead) : undefined}
@@ -1016,8 +1020,9 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
     );
   }
 
+  const place = heroPlacement(placement);
   return (
-    <section className={`page-hero ${heroHeightClass(height)}`}>
+    <section className={`page-hero ${heroHeightClass(height)} ${place.rootClass}`}>
       <div className="hero-bg">
         <HeroBackgroundMedia
           src={image}
@@ -1030,6 +1035,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
       <div className="hero-overlay"></div>
       <div className="grid-overlay"></div>
       <div className="container">
+        <HeroSlot place={place} name="text">
         <div className="breadcrumb">
           <a href={hrefOf('/')}>Home</a>
           <span className="sep">/</span>
@@ -1040,6 +1046,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
         {content.leadEmphasis ? <p className="lead lead-emphasis">{String(content.leadEmphasis)}</p> : null}
         {content.lead ? <p className="lead">{String(content.lead)}</p> : null}
         {content.leadAccent ? <p className="lead lead-accent">{String(content.leadAccent)}</p> : null}
+        </HeroSlot>
       </div>
     </section>
   );
@@ -1511,8 +1518,9 @@ function CertTeaserSection({ content }: { content: Record<string, unknown> }) {
 function CertHeroSection({ content }: { content: Record<string, unknown> }) {
   const image = String(content.image || '').trim();
   const imageMobile = String(content.imageMobile || '').trim() || undefined;
+  const place = heroPlacement(content.placement as HeroPlacement | undefined);
   return (
-    <section className={`cert-hero${image ? ' cert-hero--media' : ''} ${heroHeightClass(content.heroHeight)}`}>
+    <section className={`cert-hero${image ? ' cert-hero--media' : ''} ${heroHeightClass(content.heroHeight)} ${place.rootClass}`}>
       {image ? (
         <div className="hero-bg cert-hero-bg">
           <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />
@@ -1521,11 +1529,13 @@ function CertHeroSection({ content }: { content: Record<string, unknown> }) {
         </div>
       ) : null}
       <div className="container">
+        <HeroSlot place={place} name="text">
         <div className="eyebrow">{String(content.eyebrow || 'CERTIFICATIONS')}</div>
         <SiteHeading role="pageHero">{String(content.title || '')}</SiteHeading>
         {content.sub ? <div className="sub">{String(content.sub)}</div> : null}
         <p>{String(content.lead || content.body || '')}</p>
         {content.tagline ? <div className="cert-tagline">{String(content.tagline)}</div> : null}
+        </HeroSlot>
       </div>
     </section>
   );

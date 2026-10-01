@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { publicMediaUrl } from '@/lib/media-url';
 import type { HeroHeight } from '@/lib/hero-height';
+import type { HeroPlacement } from '@/lib/hero-placement';
 
 /**
  * Fully configurable "About" section family (About Zigma page):
@@ -218,6 +219,7 @@ export type AboutHeroContent = {
   section: SectionBox;
   layout: SplitLayout;
   heroHeight?: HeroHeight;
+  placement?: HeroPlacement;
   breadcrumb: {
     hidden?: boolean;
     items: LinkItem[];
