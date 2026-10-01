@@ -73,7 +73,7 @@ export default function AdminPagesPage() {
   }
 
   async function pageUpgrade(
-    page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms' | 'industries' | 'industries-healthcare',
+    page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms' | 'industries' | 'industries-healthcare' | 'industries-data-centres',
     action: 'upgrade' | 'revert'
   ) {
     const upgradeQuestion = {
@@ -91,6 +91,8 @@ export default function AdminPagesPage() {
         'Upgrade the Industries page sections to the fully configurable industries editors? All current text, stats, sector and industry cards, icons, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
       'industries-healthcare':
         'Upgrade the Healthcare industry page (/industries-healthcare) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      'industries-data-centres':
+        'Upgrade the Data centres industry page (/industries-data-centres) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
     const name = {
       contact: 'Contact',
@@ -100,6 +102,7 @@ export default function AdminPagesPage() {
       terms: 'Terms',
       industries: 'Industries',
       'industries-healthcare': 'Healthcare industry',
+      'industries-data-centres': 'Data centres industry',
     }[page];
     const industryPage = page.startsWith('industries-');
     const question =
@@ -325,6 +328,22 @@ export default function AdminPagesPage() {
               title="Restore the /industries-healthcare sections saved before the upgrade"
             >
               Restore previous healthcare
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-data-centres', 'upgrade')}
+              title="Convert the live /industries-data-centres sections to the configurable industry page editors (keeps all content)"
+            >
+              Upgrade data centres page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-data-centres', 'revert')}
+              title="Restore the /industries-data-centres sections saved before the upgrade"
+            >
+              Restore previous data centres
             </button>
           </div>
         </div>

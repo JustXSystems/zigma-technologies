@@ -17,7 +17,7 @@ function previousOf(content: unknown): Previous | null {
 }
 
 /**
- * POST { action: 'upgrade' | 'revert' | 'status', slug?: 'industries-healthcare' }
+ * POST { action: 'upgrade' | 'revert' | 'status', slug?: 'industries-healthcare' | 'industries-data-centres' }
  * upgrade: converts an industry page's generic sections (page_hero, rich_text, cta) in place to the configurable
  *   industry_page_* types, keeping order, visibility, key, title, custom CSS and every content field.
  *   Only the given industry page is touched (the same types on other pages stay as they are).
