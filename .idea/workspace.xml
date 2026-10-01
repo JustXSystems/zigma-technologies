@@ -7,19 +7,10 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 hero section render issue fixed">
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 hero section compact render enhanced">
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/layout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/industries101-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/industries101-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/HeroHeightPicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/HeroHeightPicker.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/hero-height.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/hero-height.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -78,23 +69,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000000158749827" />
-      <entry key="S2" value="1.0572964712014552" />
-      <entry key="S5" value="2.3676641127182982" />
-      <entry key="S10" value="5.16722464722571" />
-      <entry key="S30" value="17.162823637215034" />
-      <entry key="S60" value="40.38898639684114" />
-      <entry key="M2" value="80.93529671542699" />
-      <entry key="M5" value="165.49933395670365" />
-      <entry key="M10" value="254.51698165218573" />
-      <entry key="M15" value="316.4524847897062" />
-      <entry key="M30" value="440.91359907168305" />
-      <entry key="H1" value="569.057312064534" />
-      <entry key="H2" value="718.1098524924381" />
-      <entry key="H4" value="994.8632753151082" />
-      <entry key="D1" value="2626.5969043024184" />
-      <entry key="W1" value="14511.082798880694" />
+      <entry key="MS100" value="1.2784386616237682" />
+      <entry key="MS500" value="3.402267651918446" />
+      <entry key="S2" value="6.142549116838558" />
+      <entry key="S5" value="7.269317080268465" />
+      <entry key="S10" value="8.349412401953536" />
+      <entry key="S30" value="20.267408048194604" />
+      <entry key="S60" value="47.54597577255775" />
+      <entry key="M2" value="87.32246223542764" />
+      <entry key="M5" value="154.24752119144506" />
+      <entry key="M10" value="245.1553036190868" />
+      <entry key="M15" value="327.2583189861584" />
+      <entry key="M30" value="521.8584337785527" />
+      <entry key="H1" value="749.611148319394" />
+      <entry key="H2" value="985.1866764515554" />
+      <entry key="H4" value="1314.0677787922546" />
+      <entry key="D1" value="3014.070064472554" />
+      <entry key="W1" value="14910.488920914651" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -108,31 +99,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="7.873573894804782E-262" />
-      <entry key="H1" value="2.805988933479005E-131" />
-      <entry key="H2" value="5.29715860955522E-66" />
-      <entry key="H4" value="2.3015556933804652E-33" />
-      <entry key="D1" value="3.6918540793573227E-6" />
-      <entry key="W1" value="0.25964405063980783" />
+      <entry key="M30" value="3.244166990162773E-262" />
+      <entry key="H1" value="1.8011571253401356E-131" />
+      <entry key="H2" value="4.244004153320074E-66" />
+      <entry key="H4" value="2.0600980931648994E-33" />
+      <entry key="D1" value="3.6242843394802438E-6" />
+      <entry key="W1" value="0.25895979226638144" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9592641193252643" />
-      <entry key="MS500" value="0.9917167464775726" />
-      <entry key="S2" value="1.0550885239888035" />
-      <entry key="S5" value="2.3655805638943734" />
-      <entry key="S10" value="5.16490076308313" />
-      <entry key="S30" value="17.160135248239392" />
-      <entry key="S60" value="40.385727960392956" />
-      <entry key="M2" value="80.93200634580272" />
-      <entry key="M5" value="165.49664936965746" />
-      <entry key="M10" value="254.51490613263516" />
-      <entry key="M15" value="316.4507456614633" />
-      <entry key="M30" value="440.91235033818094" />
-      <entry key="H1" value="569.0564774111499" />
-      <entry key="H2" value="718.1092909541659" />
-      <entry key="H4" value="994.8628543906053" />
-      <entry key="D1" value="2626.5967122288093" />
-      <entry key="W1" value="14511.342291667112" />
+      <entry key="MS100" value="1.2398760056235951" />
+      <entry key="MS500" value="3.3779865846144337" />
+      <entry key="S2" value="6.131218967131629" />
+      <entry key="S5" value="7.263929718030396" />
+      <entry key="S10" value="8.346305769219956" />
+      <entry key="S30" value="20.264981280186568" />
+      <entry key="S60" value="47.54321308830535" />
+      <entry key="M2" value="87.31994621250703" />
+      <entry key="M5" value="154.2456390267681" />
+      <entry key="M10" value="245.1536540423436" />
+      <entry key="M15" value="327.25677071964566" />
+      <entry key="M30" value="521.8571080107079" />
+      <entry key="H1" value="749.6101448300512" />
+      <entry key="H2" value="985.1859746212099" />
+      <entry key="H4" value="1314.067271181846" />
+      <entry key="D1" value="3014.069853396456" />
+      <entry key="W1" value="14910.747726606676" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -287,7 +278,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#33 in /contact can remove hard coded sections and I want only the sections configured in /admin/pages/2" />
     <MESSAGE value="#31 ind-item border style (color, size/width) to be able to control in admin" />
     <MESSAGE value="#34 SEO Implementation" />
     <MESSAGE value="#34 SEO Implementation basic issues fixing pre requisite" />
@@ -312,7 +302,8 @@
     <MESSAGE value="#45 similar admin page design for homepage" />
     <MESSAGE value="#45 seend consolidation" />
     <MESSAGE value="#45 hero section render issue fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 hero section render issue fixed" />
+    <MESSAGE value="#45 hero section compact render enhanced" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 hero section compact render enhanced" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

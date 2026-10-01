@@ -1,10 +1,16 @@
 /**
- * Public page hero sizing: `full` fills the viewport (industries-style), `auto` fits its content, and
- * `auto-<n>` is compact with a minimum of n% of the visible screen (still grows when content needs more room).
+ * Public page hero sizing:
+ * - `full` fills the viewport (industries-style);
+ * - `full-<n>` / `full-<n>g` shares the first screen with as many of the next n sections as fit (stack / glass
+ *   dock), falling back to `full` on screens where none fit (see HeroClubSync); not offered on the home slider;
+ * - `auto` fits its content;
+ * - `auto-<n>` is compact with a minimum of n% of the visible screen (still grows when content needs more room).
  */
-export type HeroHeight = 'full' | 'auto' | `auto-${number}`;
+export type HeroHeight = 'full' | 'auto' | `auto-${number}` | `full-${number}` | `full-${number}g`;
 
-export type HeroHeightMode = 'full' | 'auto' | 'custom';
+export type HeroHeightMode = 'full' | 'club' | 'auto' | 'custom';
+
+export type HeroClubStyle = 'stack' | 'glass';
 
 export const DEFAULT_HERO_HEIGHT: HeroHeight = 'full';
 
@@ -13,11 +19,22 @@ export const HERO_COMPACT_MAX = 90;
 export const HERO_COMPACT_STEP = 5;
 export const DEFAULT_HERO_COMPACT_PERCENT = 50;
 
+export const HERO_CLUB_MAX = 3;
+
 export const HERO_HEIGHT_MODE_OPTIONS: ReadonlyArray<{ value: HeroHeightMode; label: string }> = [
   { value: 'full', label: 'Full screen' },
+  { value: 'club', label: 'Full screen + next sections' },
   { value: 'auto', label: 'Compact (fit content)' },
   { value: 'custom', label: 'Compact (custom height)' },
 ];
+
+export const HERO_CLUB_STYLE_OPTIONS: ReadonlyArray<{ value: HeroClubStyle; label: string }> = [
+  { value: 'stack', label: 'Stack — hero shrinks, sections keep their design' },
+  { value: 'glass', label: 'Glass dock — sections float over the hero backdrop' },
+];
+
+const COMPACT_RE = /^auto-(\d{1,3})$/;
+const CLUB_RE = /^full-(\d)(g?)$/;
 
 export function clampHeroCompactPercent(value: unknown): number {
   const n = Number(value);
@@ -26,34 +43,56 @@ export function clampHeroCompactPercent(value: unknown): number {
   return Math.min(HERO_COMPACT_MAX, Math.max(HERO_COMPACT_MIN, stepped));
 }
 
+export function clampHeroClubCount(value: unknown): number {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? Math.min(HERO_CLUB_MAX, Math.max(1, n)) : 1;
+}
+
 export function compactHeroHeight(percent: unknown): HeroHeight {
   return `auto-${clampHeroCompactPercent(percent)}`;
 }
 
+export function clubHeroHeight(count: unknown, style: HeroClubStyle = 'stack'): HeroHeight {
+  const n = clampHeroClubCount(count);
+  return style === 'glass' ? `full-${n}g` : `full-${n}`;
+}
+
 /** Compact height in % of the visible screen, or null for full screen / fit content. */
 export function heroCompactPercent(value: HeroHeight): number | null {
-  const match = /^auto-(\d{1,3})$/.exec(value);
+  const match = COMPACT_RE.exec(value);
   return match ? Number(match[1]) : null;
+}
+
+/** Sections sharing the first screen with a full-screen hero, or null when the hero stands alone. */
+export function heroClub(value: HeroHeight): { count: number; style: HeroClubStyle } | null {
+  const match = CLUB_RE.exec(value);
+  return match ? { count: Number(match[1]), style: match[2] ? 'glass' : 'stack' } : null;
 }
 
 export function heroHeightMode(value: HeroHeight): HeroHeightMode {
   if (value === 'full' || value === 'auto') return value;
-  return 'custom';
+  return heroClub(value) ? 'club' : 'custom';
 }
 
 export function isHeroHeight(value: unknown): value is HeroHeight {
-  return typeof value === 'string' && (value === 'full' || value === 'auto' || /^auto-\d{1,3}$/.test(value));
+  return typeof value === 'string' && (value === 'full' || value === 'auto' || COMPACT_RE.test(value) || CLUB_RE.test(value));
 }
 
 export function normalizeHeroHeight(value: unknown, fallback: HeroHeight = DEFAULT_HERO_HEIGHT): HeroHeight {
   if (value === 'full' || value === 'auto') return value;
-  if (typeof value === 'string' && /^auto-\d{1,3}$/.test(value)) return compactHeroHeight(value.slice(5));
+  if (typeof value !== 'string') return fallback;
+  const compact = COMPACT_RE.exec(value);
+  if (compact) return compactHeroHeight(compact[1]);
+  const club = CLUB_RE.exec(value);
+  if (club) return clubHeroHeight(club[1], club[2] ? 'glass' : 'stack');
   return fallback;
 }
 
 export function heroHeightClass(value: unknown, fallback?: HeroHeight): string {
   const height = normalizeHeroHeight(value, fallback);
   if (height === 'full') return 'hero-full';
+  const club = heroClub(height);
+  if (club) return `hero-full hero-club hero-club-${club.count}${club.style === 'glass' ? ' hero-club--glass' : ''}`;
   const percent = heroCompactPercent(height);
   return percent ? `hero-auto hero-compact hero-h-${percent}` : 'hero-auto';
 }

@@ -4,6 +4,7 @@ import OrganizationJsonLd from '@/components/OrganizationJsonLd';
 import CookieConsent from '@/components/CookieConsent';
 import SiteProviders from '@/components/SiteProviders';
 import HeroViewportSync from '@/components/HeroViewportSync';
+import HeroClubSync from '@/components/HeroClubSync';
 import { loadSiteShell } from '@/lib/site-shell';
 import { logoSizingCss } from '@/lib/site-settings';
 import { navTypographyCss } from '@/lib/nav-typography';
@@ -38,6 +39,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       {children}
       <Footer />
       <HeroViewportSync />
+      <HeroClubSync />
       <CookieConsent settings={shell.settings} />
       <PwaRegister />
     </SiteProviders>
