@@ -14,8 +14,8 @@ import { useSiteShell } from '@/components/SiteProviders';
 import { filterNavForFeatures } from '@/lib/nav-features';
 import { appHref } from '@/lib/base-path';
 
-/** Matches CSS mobile nav breakpoint (`max-width: 760px`). */
-const MOBILE_NAV_MQ = '(max-width: 760px)';
+/** Matches the CSS drawer-nav breakpoint (`max-width: 1199px`). */
+const MOBILE_NAV_MQ = '(max-width: 1199px)';
 
 const DEFAULT_NAV: NavItem[] = [
   {

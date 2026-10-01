@@ -61,7 +61,7 @@ export default function NavTypographyEditor({ settings, onChange }: Props) {
       <p className="admin-muted" style={{ marginTop: 0, maxWidth: 680 }}>
         Override header navigation fonts. Leave a field blank (or <em>Preset default</em>) to keep the look of the
         selected navigation menu style. Sizes accept <code>px</code>, <code>rem</code> or <code>em</code>; mobile
-        sizes apply at 760px and below.
+        sizes apply to the drawer menu (1199px and below).
       </p>
 
       <div className="nav-type-preview" aria-hidden>

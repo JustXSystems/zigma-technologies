@@ -10,6 +10,7 @@ import {
   CATALOG_TOOLBAR_DISPLAY_VALUES,
 } from '@/lib/types';
 import { isHeroHeight, normalizeHeroHeight } from '@/lib/hero-height';
+import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 
 const heroHeightSchema = z
   .string()
@@ -67,6 +68,11 @@ const putSchema = z.object({
   detail_template: z.enum(CATALOG_DETAIL_TEMPLATE_VALUES).optional(),
   detail_elements_json: z.array(z.string()).optional(),
   hero_variant: z.enum(['standard', 'spotlight']).optional(),
+  hero_bg_json: z
+    .record(z.string(), z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : normalizeCatalogHeroBg(v))),
   hero_height: heroHeightSchema.optional(),
   detail_hero_height: heroHeightSchema.optional(),
   toolbar_display: z.enum(CATALOG_TOOLBAR_DISPLAY_VALUES).optional(),

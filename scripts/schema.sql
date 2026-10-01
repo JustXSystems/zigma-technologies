@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   hero_autoplay_ms INT UNSIGNED NOT NULL DEFAULT 6000,
   hero_item_ids_json JSON NULL,
   hero_item_durations_json JSON NULL,
+  hero_bg_json JSON NULL,
   hero_eyebrow VARCHAR(160) NULL,
   hero_title VARCHAR(255) NULL,
   hero_lead TEXT NULL,

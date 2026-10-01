@@ -34,6 +34,8 @@ import { catalogPublicPath, caseStudyLabel } from '@/lib/catalog-case-study';
 import { publicMediaUrl } from '@/lib/media-url';
 import { heroHas, toolbarHas, resolveDetailElements } from '@/lib/catalog-page-elements';
 import { heroHeightClass } from '@/lib/hero-height';
+import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import SiteHeading from '@/components/SiteHeading';
 import { catalogListingKey, type CatalogListingData } from '@/lib/catalog-listing-key';
 
@@ -228,6 +230,7 @@ function CatalogHero({
     )
   );
   const heroEnabled = settings?.hero_enabled !== 0 && slides.length > 0;
+  const heroBg = useMemo(() => normalizeCatalogHeroBg(settings?.hero_bg_json), [settings?.hero_bg_json]);
 
   useEffect(() => {
     setCurrent(0);
@@ -249,12 +252,7 @@ function CatalogHero({
   if (!heroEnabled) {
     return (
       <section className={cx('page-hero', heightClass)} style={docked ? undefined : { padding: '10rem 0 4rem' }}>
-        <div className="hero-bg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/images/engineers-reviewing-electrical-design-dr.jpg" alt="" />
-          <div className="hero-overlay"></div>
-          <div className="grid-overlay"></div>
-        </div>
+        <CatalogHeroBackground bg={heroBg} spotlight={[]} activeIndex={0} />
         <div className="container">
           <div className="section-head">
             {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
@@ -345,13 +343,7 @@ function CatalogHero({
 
   return (
     <section className={cx('page-hero catalog-hero', `catalog-hero--${variant}`, heightClass)}>
-      <div className="hero-bg catalog-hero-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={publicMediaUrl(active.primary_image || '/assets/images/engineers-reviewing-electrical-design-dr.jpg')} alt="" />
-        <div className="hero-overlay"></div>
-        <div className="grid-overlay"></div>
-        <div className="catalog-hero-tint"></div>
-      </div>
+      <CatalogHeroBackground bg={heroBg} spotlight={slides.map((s) => s.primary_image)} activeIndex={current} />
       <div className={cx('container catalog-hero-layout', variant === 'standard' && 'catalog-hero-layout--standard')}>
         <div className={cx('catalog-hero-copy', revealEnabled && 'reveal')}>
           {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
@@ -398,10 +390,11 @@ function CatalogLoadingSkeleton({
   return (
     <div
       className={layout === 'list' ? 'catalog-list catalog-skeleton-list' : 'proj-grid catalog-skeleton-grid'}
+      data-catalog-cols={layout === 'list' ? undefined : columns}
       style={
         layout === 'list'
           ? { display: 'grid', gap: `${gapPx}px` }
-          : { gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: `${gapPx}px` }
+          : ({ '--catalog-cols': columns, '--catalog-cols-md': Math.min(columns, 2), gap: `${gapPx}px` } as CSSProperties)
       }
     >
       {Array.from({ length: layout === 'list' ? 4 : Math.max(columns, 3) }).map((_, index) => (
@@ -931,19 +924,14 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
     const colCount = Math.min(gridColumns, Math.max(1, itemCount));
     const justifyContent =
       listingAlign === 'center' ? 'center' : listingAlign === 'right' ? 'end' : 'start';
+    // Column tracks come from CSS (.proj-grid[data-catalog-cols]) so tablets and phones can step down.
+    const cols = { '--catalog-cols': colCount, '--catalog-cols-md': Math.min(colCount, 2) } as CSSProperties;
     // Custom card width: size tracks to the card so leftover row space is not
     // mistaken for gap when few items are shown.
     if (cardSizeMode === 'custom') {
-      return {
-        gridTemplateColumns: `repeat(${colCount}, minmax(0, ${cardFixedWidthPx}px))`,
-        gap,
-        justifyContent,
-      };
+      return { ...cols, ['--catalog-col-w' as string]: `${cardFixedWidthPx}px`, gap, justifyContent } as CSSProperties;
     }
-    return {
-      gridTemplateColumns: `repeat(${colCount}, 1fr)`,
-      gap,
-    };
+    return { ...cols, gap };
   }
 
   const gridStyle = buildGridStyle(columns);
@@ -1278,6 +1266,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
                         <div
                           className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
                           data-listing-align={listingAlign}
+                          data-catalog-cols={layout === 'list' ? undefined : Math.min(gridColumns, Math.max(1, preview.length || 1))}
                           style={buildGridStyle(preview.length || 1)}
                         >
                           {preview.map((item, index) => (
@@ -1311,6 +1300,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
                 <div
                   className={layout === 'list' ? 'catalog-list' : 'proj-grid'}
                   data-listing-align={listingAlign}
+                  data-catalog-cols={layout === 'list' ? undefined : Math.min(gridColumns, Math.max(1, columns))}
                   style={gridStyle}
                 >
                   {items.map((item, index) => (

@@ -7,28 +7,24 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 In hero section, for any text or image/vedio container must be configurable for its position/alignment with precision like Example (bottom left, -10px, -20px) means leaving 10px from bottom left and leaving 20px from bottom, this might helps me to put the container to the desired position in hero section of any page">
-      <change afterPath="$PROJECT_DIR$/src/components/admin/HeroMotionFields.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 catalog settings in hero section customizattion">
+      <change afterPath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/catalog-hero-bg.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InnerPageHero.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/QualitySafetySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/QualitySafetySections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/contact-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/contact-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/hero-height.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/hero-height.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/industries101-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industries101-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/life-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/life-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/qualitysafety-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/qualitysafety-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/NavTypographyEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/NavTypographyEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/nav-typography.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-typography.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,23 +82,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000002202711" />
-      <entry key="MS500" value="1.0117192302188538" />
-      <entry key="S2" value="1.431699665447809" />
-      <entry key="S5" value="3.745953651987754" />
-      <entry key="S10" value="10.833057091344418" />
-      <entry key="S30" value="37.89794587043768" />
-      <entry key="S60" value="61.37714134467766" />
-      <entry key="M2" value="95.78706054221504" />
-      <entry key="M5" value="152.66569503914965" />
-      <entry key="M10" value="187.1684080362194" />
-      <entry key="M15" value="202.87768846773358" />
-      <entry key="M30" value="241.58937238082922" />
-      <entry key="H1" value="363.4568244228816" />
-      <entry key="H2" value="660.0590327365684" />
-      <entry key="H4" value="1145.3379210258092" />
-      <entry key="D1" value="3241.007301809729" />
-      <entry key="W1" value="15233.484275299421" />
+      <entry key="MS100" value="1.5540831177787413" />
+      <entry key="MS500" value="3.1464825415436755" />
+      <entry key="S2" value="4.515471391645449" />
+      <entry key="S5" value="5.279389838537001" />
+      <entry key="S10" value="5.829792314493637" />
+      <entry key="S30" value="7.324548733732759" />
+      <entry key="S60" value="8.332283791924617" />
+      <entry key="M2" value="9.059153869602158" />
+      <entry key="M5" value="9.598081114028492" />
+      <entry key="M10" value="10.873655574161045" />
+      <entry key="M15" value="17.40035372440142" />
+      <entry key="M30" value="69.69158848805294" />
+      <entry key="H1" value="216.5380940255713" />
+      <entry key="H2" value="526.7446267017133" />
+      <entry key="H4" value="1056.8999365118748" />
+      <entry key="D1" value="3356.527476265868" />
+      <entry key="W1" value="15415.054144988468" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -116,31 +112,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.774519855258523E-264" />
-      <entry key="H1" value="1.3321110521495416E-132" />
-      <entry key="H2" value="1.1541711537502974E-66" />
-      <entry key="H4" value="1.0743235796485094E-33" />
-      <entry key="D1" value="3.251597620693547E-6" />
-      <entry key="W1" value="0.254976484323433" />
+      <entry key="M30" value="1.1452930650901587E-265" />
+      <entry key="H1" value="3.3842178787578764E-133" />
+      <entry key="H2" value="5.817403096534767E-67" />
+      <entry key="H4" value="7.627190240664488E-34" />
+      <entry key="D1" value="3.071154810869895E-6" />
+      <entry key="W1" value="0.2529053247513849" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9592641195395122" />
-      <entry key="MS500" value="1.003371132755181" />
-      <entry key="S2" value="1.4289701315141163" />
-      <entry key="S5" value="3.743258370589575" />
-      <entry key="S10" value="10.829225741325276" />
-      <entry key="S30" value="37.8935048777601" />
-      <entry key="S60" value="61.373499627404854" />
-      <entry key="M2" value="95.7840932890426" />
-      <entry key="M5" value="152.6637002580468" />
-      <entry key="M10" value="187.16715944719093" />
-      <entry key="M15" value="202.87678005855676" />
-      <entry key="M30" value="241.5888306444778" />
-      <entry key="H1" value="363.45641095007613" />
-      <entry key="H2" value="660.0586295376621" />
-      <entry key="H4" value="1145.3375330446659" />
-      <entry key="D1" value="3241.0070886854305" />
-      <entry key="W1" value="15233.73909656838" />
+      <entry key="MS100" value="1.4891557378465503" />
+      <entry key="MS500" value="3.1225823555808887" />
+      <entry key="S2" value="4.5052388627831395" />
+      <entry key="S5" value="5.273924896101199" />
+      <entry key="S10" value="5.8229022565086" />
+      <entry key="S30" value="7.3071734947953795" />
+      <entry key="S60" value="8.31643131382054" />
+      <entry key="M2" value="9.04839124967393" />
+      <entry key="M5" value="9.5929026207636" />
+      <entry key="M10" value="10.87089179918889" />
+      <entry key="M15" value="17.398428738140144" />
+      <entry key="M30" value="69.69040480764112" />
+      <entry key="H1" value="216.5372220771289" />
+      <entry key="H2" value="526.7439350082783" />
+      <entry key="H4" value="1056.899377424877" />
+      <entry key="D1" value="3356.527220632882" />
+      <entry key="W1" value="15415.306888398489" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -295,9 +291,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#34 SEO Implementation" />
-    <MESSAGE value="#34 SEO Implementation basic issues fixing pre requisite" />
-    <MESSAGE value="#42 About Zigma" />
     <MESSAGE value="#42 Menu options fonts customization" />
     <MESSAGE value="#42 About sectiom font cconfiguration" />
     <MESSAGE value="#44 LIFE AT ZIGMA implemented" />
@@ -320,7 +313,10 @@
     <MESSAGE value="#45 hero section render issue fixed" />
     <MESSAGE value="#45 hero section compact render enhanced" />
     <MESSAGE value="#45 hero section full screen with multiple section" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 hero section full screen with multiple section" />
+    <MESSAGE value="#45 In hero section, for any text or image/vedio container must be configurable for its position/alignment with precision like Example (bottom left, -10px, -20px) means leaving 10px from bottom left and leaving 20px from bottom, this might helps me to put the container to the desired position in hero section of any page" />
+    <MESSAGE value="#45 layout settings  missing in few hero section editing" />
+    <MESSAGE value="#45 catalog settings in hero section customizattion" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 catalog settings in hero section customizattion" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

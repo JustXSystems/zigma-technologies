@@ -46,6 +46,9 @@ import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import { normalizeHeroHeight } from '@/lib/hero-height';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
+import CatalogHeroBgEditor from '@/components/admin/CatalogHeroBgEditor';
+import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
+import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import {
   CATALOG_SETTINGS_BLOCKS,
   CATALOG_SETTINGS_PAGE_INTRO,
@@ -117,6 +120,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
   return {
     ...raw!,
     hero_item_durations_json: raw?.hero_item_durations_json || null,
+    hero_bg_json: normalizeCatalogHeroBg(raw?.hero_bg_json),
     hero_height: normalizeHeroHeight(raw?.hero_height),
     detail_hero_height: normalizeHeroHeight(raw?.detail_hero_height),
     toolbar_display: normalizeToolbarDisplay(raw?.toolbar_display),
@@ -139,6 +143,18 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     card_fields_json: normalizeAdminCardFields(raw?.card_fields_json),
     modal_fields_json: raw?.modal_fields_json?.length ? raw.modal_fields_json : [...DEFAULT_MODAL_FIELDS],
   };
+}
+
+type HeroPreviewItem = { id: number; title: string; status: string; featured: number; primary_image?: string | null };
+
+/** Items the public hero rotates through: curated picks, else featured items (as the listing does). */
+function heroPreviewItems(settings: CatalogPageSettings, items: HeroPreviewItem[]): HeroPreviewItem[] {
+  const picked = (settings.hero_item_ids_json || [])
+    .map((id) => items.find((item) => item.id === id))
+    .filter((item): item is HeroPreviewItem => Boolean(item));
+  if (picked.length) return picked;
+  const featured = items.filter((item) => item.featured);
+  return (featured.length ? featured : items).slice(0, 4);
 }
 
 function toggleInList(list: string[] | null | undefined, value: string, on: boolean) {
@@ -513,13 +529,11 @@ function CatalogAppearancePreview({
           className={`page-hero catalog-hero catalog-hero--${settings.hero_variant}`}
           style={{ minHeight: 360, padding: '4rem 1.25rem 1.5rem', position: 'relative' }}
         >
-          <div className="hero-bg catalog-hero-bg">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={active.primary_image || '/assets/images/engineers-reviewing-electrical-design-dr.jpg'} alt="" />
-            <div className="hero-overlay"></div>
-            <div className="grid-overlay"></div>
-            <div className="catalog-hero-tint"></div>
-          </div>
+          <CatalogHeroBackground
+            bg={normalizeCatalogHeroBg(settings.hero_bg_json)}
+            spotlight={previewItems.map((item) => item.primary_image)}
+            activeIndex={0}
+          />
           <div
             className={`container catalog-hero-layout ${
               settings.hero_variant === 'standard' ? 'catalog-hero-layout--standard' : ''
@@ -710,6 +724,7 @@ export default function CatalogSettingsPage() {
           detail_template: normalizeDetailTemplate(settings.detail_template),
           detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
+          hero_bg_json: normalizeCatalogHeroBg(settings.hero_bg_json),
           hero_height: normalizeHeroHeight(settings.hero_height),
           detail_hero_height: normalizeHeroHeight(settings.detail_hero_height),
           toolbar_display: normalizeToolbarDisplay(settings.toolbar_display),
@@ -971,6 +986,15 @@ export default function CatalogSettingsPage() {
 
                     </div>
                   </div>
+                </SettingsBlock>
+
+                <SettingsBlock blockId="hero_background">
+                  <CatalogHeroBgEditor
+                    value={normalizeCatalogHeroBg(settings.hero_bg_json)}
+                    onChange={(hero_bg_json) => setSettings({ ...settings, hero_bg_json })}
+                    spotlightImages={heroPreviewItems(settings, items).map((item) => item.primary_image)}
+                    autoplayMs={settings.hero_autoplay_ms || 6000}
+                  />
                 </SettingsBlock>
 
                 <SettingsBlock blockId="hero_elements">

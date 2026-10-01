@@ -33,6 +33,7 @@ import {
 } from '@/lib/types';
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { normalizeHeroHeight } from '@/lib/hero-height';
+import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
 
 export function normalizeBackgroundShading(value: unknown): CatalogShadowStyle {
@@ -695,6 +696,7 @@ export async function getPageSettings(itemType: CatalogItemType) {
     detail_template: normalizeDetailTemplate(row.detail_template ?? DEFAULT_DETAIL_TEMPLATE),
     detail_elements_json: parseJsonField<string[] | null>(row.detail_elements_json, null),
     hero_variant: row.hero_variant ?? 'spotlight',
+    hero_bg_json: normalizeCatalogHeroBg(parseJsonField<unknown>(row.hero_bg_json, null)),
     hero_height: normalizeHeroHeight(row.hero_height),
     detail_hero_height: normalizeHeroHeight(row.detail_hero_height),
     toolbar_display: normalizeToolbarDisplay(row.toolbar_display),
@@ -788,6 +790,8 @@ export async function updatePageSettings(
         ? JSON.stringify(normalizeDetailElements(input.detail_elements_json))
         : undefined,
     hero_variant: input.hero_variant,
+    hero_bg_json:
+      input.hero_bg_json !== undefined ? JSON.stringify(normalizeCatalogHeroBg(input.hero_bg_json)) : undefined,
     hero_height: input.hero_height !== undefined ? normalizeHeroHeight(input.hero_height) : undefined,
     detail_hero_height:
       input.detail_hero_height !== undefined ? normalizeHeroHeight(input.detail_hero_height) : undefined,

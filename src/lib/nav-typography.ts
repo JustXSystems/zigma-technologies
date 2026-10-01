@@ -175,7 +175,7 @@ export function navTypographyCss(raw: string | undefined): string {
   }
   return [
     all.join(''),
-    desktop.length ? `@media (min-width:761px){${desktop.join('')}}` : '',
-    mobile.length ? `@media (max-width:760px){${mobile.join('')}}` : '',
+    desktop.length ? `@media (min-width:1200px){${desktop.join('')}}` : '',
+    mobile.length ? `@media (max-width:1199px){${mobile.join('')}}` : '',
   ].join('');
 }

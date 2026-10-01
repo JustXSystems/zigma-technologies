@@ -111,6 +111,15 @@ export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: Set
       tip: 'Spotlight variant emphasises one featured card; Standard keeps copy more compact with an optional panel.',
     },
   },
+  hero_background: {
+    title: 'Background media',
+    guide: {
+      purpose: 'Control what plays behind the hero and how it is sized, framed, animated and colour-graded.',
+      when: 'Use when product photos crop badly, when you want campaign imagery or video instead of item photos, or to give the hero a distinct mood.',
+      how: 'Start from a Quick look, then fine-tune per tab: Media source, Size & framing (display style, zoom, focal point, media area), Motion, Colour & atmosphere, and Phones. Click the preview to set the focal point.',
+      tip: '“Ambient fit” shows whole product photos without cropping. Keep the Readability shade high when using bright images so the headline stays legible.',
+    },
+  },
   hero_elements: {
     title: 'Elements',
     guide: {
