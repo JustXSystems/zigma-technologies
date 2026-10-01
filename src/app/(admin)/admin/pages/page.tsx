@@ -73,7 +73,16 @@ export default function AdminPagesPage() {
   }
 
   async function pageUpgrade(
-    page: 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms' | 'industries' | 'industries-healthcare' | 'industries-data-centres',
+    page:
+      | 'contact'
+      | 'careers'
+      | 'certifications'
+      | 'privacy'
+      | 'terms'
+      | 'industries'
+      | 'industries-healthcare'
+      | 'industries-data-centres'
+      | 'industries-manufacturing',
     action: 'upgrade' | 'revert'
   ) {
     const upgradeQuestion = {
@@ -93,6 +102,8 @@ export default function AdminPagesPage() {
         'Upgrade the Healthcare industry page (/industries-healthcare) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
       'industries-data-centres':
         'Upgrade the Data centres industry page (/industries-data-centres) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      'industries-manufacturing':
+        'Upgrade the Manufacturing industry page (/industries-manufacturing) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
     const name = {
       contact: 'Contact',
@@ -103,6 +114,7 @@ export default function AdminPagesPage() {
       industries: 'Industries',
       'industries-healthcare': 'Healthcare industry',
       'industries-data-centres': 'Data centres industry',
+      'industries-manufacturing': 'Manufacturing industry',
     }[page];
     const industryPage = page.startsWith('industries-');
     const question =
@@ -350,6 +362,22 @@ export default function AdminPagesPage() {
               title="Restore the /industries-data-centres sections saved before the upgrade"
             >
               Restore previous data centres
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-manufacturing', 'upgrade')}
+              title="Convert the live /industries-manufacturing sections to the configurable industry page editors (keeps all content)"
+            >
+              Upgrade manufacturing page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-manufacturing', 'revert')}
+              title="Restore the /industries-manufacturing sections saved before the upgrade"
+            >
+              Restore previous manufacturing
             </button>
           </div>
         </div>

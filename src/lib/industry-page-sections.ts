@@ -38,7 +38,11 @@ export const INDUSTRY_PAGE_UPGRADE_MAP: Record<string, IndustryPageSectionType> 
 };
 
 /** Industry pages the admin upgrade / restore buttons may convert. */
-export const INDUSTRY_PAGE_UPGRADE_SLUGS = [industryPageSlug('healthcare'), industryPageSlug('data-centres')] as const;
+export const INDUSTRY_PAGE_UPGRADE_SLUGS = [
+  industryPageSlug('healthcare'),
+  industryPageSlug('data-centres'),
+  industryPageSlug('manufacturing'),
+] as const;
 
 export type IndustryPageHeroContent = IndustriesHeroContent;
 export type IndustryPageOverviewContent = PrivacyPolicyContent;

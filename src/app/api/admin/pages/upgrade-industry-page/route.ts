@@ -17,7 +17,7 @@ function previousOf(content: unknown): Previous | null {
 }
 
 /**
- * POST { action: 'upgrade' | 'revert' | 'status', slug?: 'industries-healthcare' | 'industries-data-centres' }
+ * POST { action: 'upgrade' | 'revert' | 'status', slug?: one of INDUSTRY_PAGE_UPGRADE_SLUGS (default industries-healthcare) }
  * upgrade: converts an industry page's generic sections (page_hero, rich_text, cta) in place to the configurable
  *   industry_page_* types, keeping order, visibility, key, title, custom CSS and every content field.
  *   Only the given industry page is touched (the same types on other pages stay as they are).
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const action = String(body.action || 'status');
     const slug = String(body.slug || INDUSTRY_PAGE_UPGRADE_SLUGS[0]);
     if (!(INDUSTRY_PAGE_UPGRADE_SLUGS as readonly string[]).includes(slug)) {
-      return jsonError(`slug must be ${INDUSTRY_PAGE_UPGRADE_SLUGS.join(' or ')}`);
+      return jsonError(`slug must be one of: ${INDUSTRY_PAGE_UPGRADE_SLUGS.join(', ')}`);
     }
     const page = await getPageBySlug(slug, true);
     if (!page) return jsonError(`The ${slug} page does not exist yet. Use "Seed industries" first.`, 404);
