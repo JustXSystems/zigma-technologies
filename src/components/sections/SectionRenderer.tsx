@@ -8,7 +8,7 @@ import CertMarquee, { normalizeCertItems } from '@/components/sections/CertMarqu
 import EcoVisual from '@/components/sections/EcoVisual';
 import { renderAboutSection } from '@/components/sections/AboutSections';
 import { renderLifeSection } from '@/components/sections/LifeSections';
-import { renderLegacySection } from '@/components/sections/LegacySections';
+import { LgScrollBar, renderLegacySection } from '@/components/sections/LegacySections';
 import { renderContactSection } from '@/components/sections/ContactSections';
 import { renderCareersSection } from '@/components/sections/CareersSections';
 import { renderCertsSection } from '@/components/sections/CertificationsSections';
@@ -24,7 +24,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
-import { heroHeightClass, normalizeHeroHeight } from '@/lib/hero-height';
+import { heroHeightClass, heroScrollBarOn, heroVAlignClass, normalizeHeroHeight } from '@/lib/hero-height';
 import { heroPlacement, type HeroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { featIconFor } from '@/lib/feat-icons';
@@ -964,6 +964,20 @@ function RichTextSection({ content, sectionKey }: { content: Record<string, unkn
   );
 }
 
+/** Layout & motion options shared by the classic page / certifications heroes (see the "Layout & motion" editor fields). */
+function classicHeroLayout(content: Record<string, unknown>) {
+  const align = content.align === 'left' || content.align === 'center' ? content.align : '';
+  const maxWidth = String(content.contentMaxWidth || '').trim();
+  const scroll = content.scrollBar as { hidden?: boolean; gradient?: string } | undefined;
+  return {
+    className: [align && `hero-text-${align}`, heroVAlignClass(content.vAlign), maxWidth && 'hero-copy-max', content.entrance ? 'hero-enter' : '']
+      .filter(Boolean)
+      .join(' '),
+    style: maxWidth ? ({ '--hero-copy-max': maxWidth } as CSSProperties) : undefined,
+    scrollBar: heroScrollBarOn(scroll) ? <LgScrollBar gradient={scroll?.gradient} /> : null,
+  };
+}
+
 function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   const crumb = String(content.breadcrumb || content.title || '');
   const proofRail = Array.isArray(content.proofRail)
@@ -977,12 +991,16 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
   const imageMobile = String(content.imageMobile || '') || undefined;
   const height = normalizeHeroHeight(content.heroHeight);
   const placement = content.placement as HeroPlacement | undefined;
+  const layout = classicHeroLayout(content);
 
   if (useInner) {
     return (
       <InnerPageHero
         height={height}
         placement={placement}
+        className={layout.className}
+        style={layout.style}
+        overlay={layout.scrollBar}
         eyebrow={String(content.eyebrow || '')}
         title={String(content.title || '')}
         lead={content.lead ? String(content.lead) : undefined}
@@ -1022,7 +1040,8 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
 
   const place = heroPlacement(placement);
   return (
-    <section className={`page-hero ${heroHeightClass(height)} ${place.rootClass}`}>
+    <section className={`page-hero ${heroHeightClass(height)} ${place.rootClass} ${layout.className}`} style={layout.style}>
+      {layout.scrollBar}
       <div className="hero-bg">
         <HeroBackgroundMedia
           src={image}
@@ -1519,8 +1538,13 @@ function CertHeroSection({ content }: { content: Record<string, unknown> }) {
   const image = String(content.image || '').trim();
   const imageMobile = String(content.imageMobile || '').trim() || undefined;
   const place = heroPlacement(content.placement as HeroPlacement | undefined);
+  const layout = classicHeroLayout(content);
   return (
-    <section className={`cert-hero${image ? ' cert-hero--media' : ''} ${heroHeightClass(content.heroHeight)} ${place.rootClass}`}>
+    <section
+      className={`cert-hero${image ? ' cert-hero--media' : ''} ${heroHeightClass(content.heroHeight)} ${place.rootClass} ${layout.className}`}
+      style={layout.style}
+    >
+      {layout.scrollBar}
       {image ? (
         <div className="hero-bg cert-hero-bg">
           <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />

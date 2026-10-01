@@ -1,4 +1,4 @@
-import { normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
+import { normalizeHeroHeight, type HeroHeight, type HeroVAlign } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
@@ -85,7 +85,11 @@ export type ContactHeroContent = {
   /** Fade-up entrance for breadcrumb, heading, leads, pills and buttons */
   entrance?: boolean;
   align?: 'left' | 'center';
+  /** Vertical position of the copy in a full-screen / custom-height hero; empty = centre */
+  vAlign?: HeroVAlign;
   contentMaxWidth?: string;
+  /** Page-scroll progress bar pinned to the top of the viewport (off unless enabled) */
+  scrollBar?: { hidden?: boolean; gradient?: string };
   breadcrumb: {
     hidden?: boolean;
     items: LinkItem[];

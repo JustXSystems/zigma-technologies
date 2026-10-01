@@ -12,9 +12,10 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { appHref } from '@/lib/base-path';
-import { heroHeightClass } from '@/lib/hero-height';
+import { heroHeightClass, heroScrollBarOn } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
+import { LgScrollBar, LgShell } from '@/components/sections/LegacySections';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -454,7 +455,13 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
   ) : null;
 
   return (
-    <AzShell box={c.section} className={`az-hero lz-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}`} id={sectionKey || 'top'}>
+    <LgShell
+      box={c.section}
+      bg={c.background}
+      className={`az-hero lz-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}${c.entrance ? ' lgy-enter' : ''}`}
+      id={sectionKey || 'top'}
+    >
+      {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <div
         className={`az-hero-grid${visual ? '' : ' az-hero-grid--single'} ${
           c.layout?.mobileImageFirst ? 'az-mobile-img-first' : 'az-mobile-img-last'
@@ -473,7 +480,7 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
           </>
         )}
       </div>
-    </AzShell>
+    </LgShell>
   );
 }
 

@@ -54,6 +54,8 @@ import {
 } from '@/lib/life-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import HeroMotionFields from '@/components/admin/HeroMotionFields';
+import { BgMediaGroup } from '@/components/admin/legacy/LegacySectionEditor';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -119,9 +121,36 @@ function LifeHeroEditor({ content: c, onChange }: EditorProps<LifeHeroContent>) 
   const frame = media.frame || {};
   const setFrame = (patch: Partial<LifeHeroContent['media']['frame']>) => setMedia({ frame: { ...frame, ...patch } });
   const bc = c.breadcrumb || { items: [], separator: '/' };
+  const scroll = c.scrollBar || {};
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
+      <BgMediaGroup
+        value={c.background || { items: [] }}
+        onChange={(background) => set({ background })}
+        title="Background slideshow (images / videos)"
+        withIndicators
+      />
+      <Group title="Layout, height & motion" description="Hero height, container position, media side, columns, entrance and scroll bar">
+        <div className="admin-form-grid">
+          <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroPlacementEditor
+            value={c.placement}
+            onChange={(placement) => set({ placement })}
+            slots={[
+              { name: 'text', label: 'Text block' },
+              { name: 'media', label: 'Image / video' },
+            ]}
+          />
+        </div>
+        <SplitLayoutEditor value={c.layout} onChange={(layout) => set({ layout })} />
+        <HeroMotionFields
+          entrance={Boolean(c.entrance)}
+          onEntrance={(entrance) => set({ entrance })}
+          scrollBar={scroll}
+          onScrollBar={(scrollBar) => set({ scrollBar })}
+        />
+      </Group>
       <Group title="Breadcrumb">
         <Toggle label="Show breadcrumb" checked={!bc.hidden} onChange={(v) => set({ breadcrumb: { ...bc, hidden: !v } })} />
         <LinkListEditor
@@ -180,18 +209,6 @@ function LifeHeroEditor({ content: c, onChange }: EditorProps<LifeHeroContent>) 
             <Toggle label="Show slide dots" checked={media.showDots !== false} onChange={(showDots) => setMedia({ showDots })} />
           </Field>
         </div>
-        <div className="admin-form-grid">
-          <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
-          <HeroPlacementEditor
-            value={c.placement}
-            onChange={(placement) => set({ placement })}
-            slots={[
-              { name: 'text', label: 'Text block' },
-              { name: 'media', label: 'Image / video' },
-            ]}
-          />
-        </div>
-        <SplitLayoutEditor value={c.layout} onChange={(layout) => set({ layout })} />
         <div className="admin-form-grid">
           <SelectInput
             label="Fit"

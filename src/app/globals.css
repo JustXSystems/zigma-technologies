@@ -6677,6 +6677,23 @@ footer .foot-powered{font-size:0.8em;}
 /* Compact with a custom height: n% of the measured visible screen; min-height so content is never clipped. */
 .hero-compact{min-height:calc(var(--hero-vh) * var(--hero-compact, 0.5));display:flex;align-items:center;}
 .hero-compact > :is(.container,.az-inner){width:100%;}
+/* Vertical position of the copy in a full-screen / custom-height hero (admin "Vertical position"). */
+:is(.hero-full,.hero-compact).hero-v-top{align-items:flex-start;}
+:is(.hero-full,.hero-compact).hero-v-center{align-items:center;}
+:is(.hero-full,.hero-compact).hero-v-bottom{align-items:flex-end;}
+/* Classic page / certifications hero: text align, copy max width and fade-up entrance from the editor. */
+.hero-text-center :is(.container,.page-hero-inner){text-align:center;}
+.hero-text-center :is(h1,h2,h3,p){margin-left:auto;margin-right:auto;}
+.hero-text-center :is(.breadcrumb,.page-hero-actions,.proof-rail,.eyebrow){justify-content:center;}
+.hero-text-left :is(.container,.page-hero-inner){text-align:left;}
+.hero-text-left :is(h1,h2,h3,p){margin-left:0;margin-right:0;}
+.hero-text-left :is(.breadcrumb,.page-hero-actions,.proof-rail,.eyebrow){justify-content:flex-start;}
+.hero-copy-max :is(h1,h2,h3,p){max-width:var(--hero-copy-max);}
+.hero-enter :is(.breadcrumb,.eyebrow,h1,h2,h3,p,.sub,.cert-tagline,.page-hero-actions,.proof-rail){animation:lgy-fade-up .8s ease backwards;}
+.hero-enter :is(h1,h2,h3){animation-delay:.12s;}
+.hero-enter :is(p,.sub){animation-delay:.26s;}
+.hero-enter :is(.cert-tagline,.page-hero-actions,.proof-rail){animation-delay:.42s;}
+@media (prefers-reduced-motion:reduce){.hero-enter *{animation:none !important;}}
 .hero-h-20{--hero-compact:0.2;}.hero-h-25{--hero-compact:0.25;}.hero-h-30{--hero-compact:0.3;}
 .hero-h-35{--hero-compact:0.35;}.hero-h-40{--hero-compact:0.4;}.hero-h-45{--hero-compact:0.45;}
 .hero-h-50{--hero-compact:0.5;}.hero-h-55{--hero-compact:0.55;}.hero-h-60{--hero-compact:0.6;}

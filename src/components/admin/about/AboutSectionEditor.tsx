@@ -43,6 +43,8 @@ import {
 } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import HeroMotionFields from '@/components/admin/HeroMotionFields';
+import { BgMediaGroup } from '@/components/admin/legacy/LegacySectionEditor';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -135,7 +137,13 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
       <Group title="Background, spacing & glow" description="Section color, gradient, image, grid pattern, orbs, padding">
         <SectionBoxEditor value={c.section} onChange={(v) => set('section', v)} />
       </Group>
-      <Group title="Layout" description="Hero height, image side, column widths, gap, alignment">
+      <BgMediaGroup
+        value={c.background || { items: [] }}
+        onChange={(v) => set('background', v)}
+        title="Background slideshow (images / videos)"
+        withIndicators
+      />
+      <Group title="Layout, height & motion" description="Hero height, container position, image side, columns, entrance and scroll bar">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(v) => set('heroHeight', v)} />
           <HeroPlacementEditor
@@ -148,6 +156,12 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
           />
         </div>
         <SplitLayoutEditor value={c.layout} onChange={(v) => set('layout', v)} columnsPlaceholder="1.15fr 0.98fr" />
+        <HeroMotionFields
+          entrance={Boolean(c.entrance)}
+          onEntrance={(v) => set('entrance', v)}
+          scrollBar={c.scrollBar}
+          onScrollBar={(v) => set('scrollBar', v)}
+        />
       </Group>
       <Group title="Breadcrumb">
         <div style={{ marginBottom: '0.6rem' }}>

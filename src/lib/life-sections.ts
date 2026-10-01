@@ -1,6 +1,7 @@
 import { isVideoMediaPath } from '@/lib/media-url';
 import type { HeroHeight } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
+import type { LegacyBgMedia } from '@/lib/legacy-sections';
 import {
   ABOUT_HERO_IMAGE,
   ABOUT_ICON_PRESETS,
@@ -97,6 +98,12 @@ export type LifeHeroContent = {
   layout: SplitLayout;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** Background image / video slideshow behind the hero (same engine as the Legacy hero) */
+  background?: LegacyBgMedia;
+  /** Fade-up entrance for breadcrumb, heading, lead, pills and buttons (off unless enabled) */
+  entrance?: boolean;
+  /** Page-scroll progress bar pinned to the top of the viewport (off unless enabled) */
+  scrollBar?: { hidden?: boolean; gradient?: string };
   breadcrumb: {
     hidden?: boolean;
     items: Array<{ label: string; href?: string }>;

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import SiteHeading from '@/components/SiteHeading';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import JsonLd from '@/components/JsonLd';
@@ -23,6 +23,11 @@ type Props = {
   accent?: 'orange' | 'cyan';
   height?: HeroHeight;
   placement?: HeroPlacement;
+  /** Extra hero classes (alignment, vertical position, entrance…) and CSS variables from the editor */
+  className?: string;
+  style?: CSSProperties;
+  /** Fixed / absolutely positioned extras rendered inside the section, e.g. the scroll progress bar */
+  overlay?: ReactNode;
 };
 
 const DEFAULT_IMAGE = '/assets/images/engineers-in-hard-hats-reviewing-a-digit.jpg';
@@ -40,10 +45,17 @@ export default function InnerPageHero({
   accent = 'orange',
   height,
   placement,
+  className,
+  style,
+  overlay,
 }: Props) {
   const place = heroPlacement(placement);
   return (
-    <section className={`page-hero page-hero--inner ${heroHeightClass(height)} ${place.rootClass}`}>
+    <section
+      className={`page-hero page-hero--inner ${heroHeightClass(height)} ${place.rootClass}${className ? ` ${className}` : ''}`}
+      style={style}
+    >
+      {overlay}
       <div className="hero-bg">
         <HeroBackgroundMedia src={image} mobileSrc={imageMobile} className="hero-bg-media" eager alt="" />
         <div className="hero-overlay" />

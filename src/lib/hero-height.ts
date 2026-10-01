@@ -97,6 +97,30 @@ export function heroHeightClass(value: unknown, fallback?: HeroHeight): string {
   return percent ? `hero-auto hero-compact hero-h-${percent}` : 'hero-auto';
 }
 
+/** Vertical position of the hero copy inside a full-screen / custom-height hero. */
+export type HeroVAlign = 'top' | 'center' | 'bottom';
+
+export const HERO_VALIGN_CHOICES: ReadonlyArray<{ value: '' | HeroVAlign; label: string }> = [
+  { value: '', label: 'Default (centre)' },
+  { value: 'top', label: 'Top' },
+  { value: 'center', label: 'Centre' },
+  { value: 'bottom', label: 'Bottom' },
+];
+
+export function isHeroVAlign(value: unknown): value is HeroVAlign {
+  return value === 'top' || value === 'center' || value === 'bottom';
+}
+
+/** `hero-v-*` class (see globals.css); empty keeps the hero's own default. */
+export function heroVAlignClass(value: unknown): string {
+  return isHeroVAlign(value) ? `hero-v-${value}` : '';
+}
+
+/** Opt-in page-scroll progress bar: shown once enabled in the editor (`{ hidden: false }`). */
+export function heroScrollBarOn(bar: { hidden?: boolean } | undefined | null): boolean {
+  return Boolean(bar) && !bar!.hidden;
+}
+
 /** Rewrites viewport-height units (`vh`/`svh`/`dvh`/`lvh`) to the measured `--hero-vh`, e.g. `min(100dvh, 920px)`. */
 export function fitHeroViewportUnits(value: string | undefined): string | undefined {
   if (!value) return value;

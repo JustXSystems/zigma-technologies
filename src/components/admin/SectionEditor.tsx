@@ -53,6 +53,8 @@ import { isHomeSectionType, withHomeDefaults } from '@/lib/home-sections';
 import HomeSectionEditor from '@/components/admin/home/HomeSectionEditor';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import HeroMotionFields, { type HeroScrollBar } from '@/components/admin/HeroMotionFields';
+import { HERO_VALIGN_CHOICES, isHeroVAlign } from '@/lib/hero-height';
 
 type Props = {
   section: CmsSection;
@@ -72,6 +74,59 @@ function Field({
       <label>{label}</label>
       {children}
     </div>
+  );
+}
+
+/** Classic page / certifications hero: alignment, vertical position, copy width, entrance and scroll bar (as on the Legacy hero). */
+function ClassicHeroLayoutFields({
+  content,
+  setField,
+  defaultAlign,
+}: {
+  content: Record<string, unknown>;
+  setField: (key: string, value: unknown) => void;
+  defaultAlign: 'left' | 'center';
+}) {
+  const align = content.align === 'left' || content.align === 'center' ? content.align : '';
+  return (
+    <>
+      <Field label="Text align">
+        <select className="admin-select" value={align} onChange={(e) => setField('align', e.target.value || undefined)}>
+          <option value="">Default ({defaultAlign === 'center' ? 'centre' : 'left'})</option>
+          <option value="left">Left</option>
+          <option value="center">Centre</option>
+        </select>
+      </Field>
+      <Field label="Vertical position (full / custom height)">
+        <select
+          className="admin-select"
+          value={isHeroVAlign(content.vAlign) ? content.vAlign : ''}
+          onChange={(e) => setField('vAlign', e.target.value || undefined)}
+        >
+          {HERO_VALIGN_CHOICES.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Content max width">
+        <input
+          className="admin-input"
+          value={String(content.contentMaxWidth || '')}
+          onChange={(e) => setField('contentMaxWidth', e.target.value)}
+          placeholder={defaultAlign === 'center' ? '820px' : '900px'}
+        />
+      </Field>
+      <div className="full">
+        <HeroMotionFields
+          entrance={Boolean(content.entrance)}
+          onEntrance={(v) => setField('entrance', v)}
+          scrollBar={content.scrollBar as HeroScrollBar | undefined}
+          onScrollBar={(v) => setField('scrollBar', v)}
+        />
+      </div>
+    </>
   );
 }
 
@@ -633,6 +688,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 </Field>
                 <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
                 <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
+                <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="left" />
                 <div className="full">
                   <MediaPicker
                     value={String(content.image || '')}
@@ -695,6 +751,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 </Field>
                 <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
                 <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
+                <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="center" />
                 <div className="full">
                   <MediaPicker
                     value={String(content.image || '')}

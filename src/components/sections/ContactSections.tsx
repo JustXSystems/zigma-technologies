@@ -9,14 +9,14 @@ import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import { appHref } from '@/lib/base-path';
-import { heroHeightClass } from '@/lib/hero-height';
+import { heroHeightClass, heroScrollBarOn, heroVAlignClass } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { CONTACT_SUBJECT_EVENT, focusContactSubject } from '@/lib/contact-subject';
 import { focusApplyRole } from '@/lib/careers-apply';
 import { AzCtas, AzEyebrow, AzIcon, AzImage, AzPills, AzText, vars } from '@/components/sections/AboutSections';
 import { LzHeading, LzMedia, colVars, useStaggerReveal } from '@/components/sections/LifeSections';
-import { LgHeader, LgShell, cardVars, useOkMedia, useSlides } from '@/components/sections/LegacySections';
+import { LgHeader, LgScrollBar, LgShell, cardVars, useOkMedia, useSlides } from '@/components/sections/LegacySections';
 import { elementCss, normalizeLinkItems, type ElementStyle } from '@/lib/about-sections';
 import { visibleMedia, type LifeMediaItem } from '@/lib/life-sections';
 import {
@@ -153,11 +153,12 @@ export function ContactHeroSection({ content, sectionKey, defaultId = 'contact-h
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`az-hero ctc-hero ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(c.heroHeight)} ${
-        place.rootClass
-      }${c.entrance === false ? '' : ' lgy-enter'}`}
+      className={`az-hero ctc-hero ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(c.heroHeight)} ${heroVAlignClass(
+        c.vAlign
+      )} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || defaultId}
     >
+      {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <HeroSlot place={place} name="text">
       <div className="az-hero-copy ctc-hero-copy" style={vars({ maxWidth: c.contentMaxWidth })}>
         {!c.breadcrumb?.hidden && crumbs.length ? (

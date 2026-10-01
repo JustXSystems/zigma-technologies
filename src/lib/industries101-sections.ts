@@ -68,6 +68,8 @@ export type Ind101HeroContent = {
   };
   /** Fade-up entrance for breadcrumb, heading, lead, pills and buttons */
   entrance?: boolean;
+  /** Page-scroll progress bar pinned to the top of the viewport (off unless enabled) */
+  scrollBar?: { hidden?: boolean; gradient?: string };
   breadcrumb: {
     hidden?: boolean;
     items: LinkItem[];

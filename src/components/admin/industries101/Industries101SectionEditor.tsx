@@ -25,6 +25,7 @@ import { BgMediaGroup, CardStyleFields, SectionBoxGroup, VALIGN_OPTIONS } from '
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import HeroMotionFields from '@/components/admin/HeroMotionFields';
 import {
   IND101_ALL_ICON_PRESETS,
   defaultInd101Card,
@@ -130,17 +131,20 @@ function Ind101HeroEditor({ content: c, onChange }: EditorProps<Ind101HeroConten
         </div>
         <p className="az-admin-hint">Turn the dots on / off and set the active dot color in the slideshow group above.</p>
       </Group>
-      <Group title="Layout, height & entrance">
+      <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
           <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <SelectInput label="Vertical position (full height)" value={layout.vAlign || 'bottom'} options={HERO_VALIGN_OPTIONS} onChange={(vAlign) => setLayout({ vAlign })} />
           <AlignButtons label="Text align" value={layout.hAlign} onChange={(v) => setLayout({ hAlign: (v || undefined) as Ind101HeroContent['layout']['hAlign'] })} />
           <TextInput label="Content max width" value={layout.maxWidth} onChange={(maxWidth) => setLayout({ maxWidth })} placeholder="760px" />
-          <Field label="Animation">
-            <Toggle label="Fade-up entrance animation" checked={c.entrance !== false} onChange={(entrance) => set({ entrance })} />
-          </Field>
         </div>
+        <HeroMotionFields
+          entrance={c.entrance !== false}
+          onEntrance={(entrance) => set({ entrance })}
+          scrollBar={c.scrollBar}
+          onScrollBar={(scrollBar) => set({ scrollBar })}
+        />
         <p className="az-admin-hint">Spacing above / below the text is the section padding (defaults 9rem / 7.4rem, phones 7rem / 4.75rem).</p>
       </Group>
       <Group title="Breadcrumb">

@@ -34,6 +34,8 @@ import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup } fr
 import { normalizeLinkItems } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import HeroMotionFields from '@/components/admin/HeroMotionFields';
+import { HERO_VALIGN_CHOICES } from '@/lib/hero-height';
 import {
   CONTACT_ALL_ICON_PRESETS,
   createContactLocation,
@@ -151,11 +153,20 @@ export function ContactHeroEditor({ content: c, onChange }: EditorProps<ContactH
             options={['left', 'center']}
             onChange={(v) => set({ align: (v || undefined) as ContactHeroContent['align'] })}
           />
+          <SelectInput
+            label="Vertical position (full / custom height)"
+            value={c.vAlign || ''}
+            options={HERO_VALIGN_CHOICES}
+            onChange={(v) => set({ vAlign: v || undefined })}
+          />
           <TextInput label="Content max width" value={c.contentMaxWidth} onChange={(contentMaxWidth) => set({ contentMaxWidth })} placeholder="900px" />
-          <Field label="Motion">
-            <Toggle label="Fade-up entrance animation" checked={c.entrance !== false} onChange={(entrance) => set({ entrance })} />
-          </Field>
         </div>
+        <HeroMotionFields
+          entrance={c.entrance !== false}
+          onEntrance={(entrance) => set({ entrance })}
+          scrollBar={c.scrollBar}
+          onScrollBar={(scrollBar) => set({ scrollBar })}
+        />
       </Group>
       <Group title="Breadcrumb">
         <Toggle label="Show breadcrumb" checked={!bc.hidden} onChange={(v) => setBc({ hidden: !v })} />

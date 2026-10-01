@@ -2,7 +2,7 @@
 
 import { Fragment, useRef, useState } from 'react';
 import { appHref } from '@/lib/base-path';
-import { heroHeightClass } from '@/lib/hero-height';
+import { heroHeightClass, heroVAlignClass } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzPills, AzText, hasText, vars } from '@/components/sections/AboutSections';
@@ -72,9 +72,9 @@ export function QsHeroSection({ content, sectionKey }: SectionProps) {
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`az-hero qs-hero ${heroHeightClass(c.heroHeight, 'auto')} ${place.rootClass} qs-hero--h-${layout.hAlign || 'left'}${
-        c.entrance === false ? '' : ' lgy-enter'
-      }`}
+      className={`az-hero qs-hero ${heroHeightClass(c.heroHeight, 'auto')} ${heroVAlignClass(layout.vAlign)} ${place.rootClass} qs-hero--h-${
+        layout.hAlign || 'left'
+      }${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
       layers={credit}
     >

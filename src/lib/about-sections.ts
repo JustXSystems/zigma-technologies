@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { publicMediaUrl } from '@/lib/media-url';
 import type { HeroHeight } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
+import type { LegacyBgMedia } from '@/lib/legacy-sections';
 
 /**
  * Fully configurable "About" section family (About Zigma page):
@@ -220,6 +221,12 @@ export type AboutHeroContent = {
   layout: SplitLayout;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** Background image / video slideshow behind the hero (same engine as the Legacy hero) */
+  background?: LegacyBgMedia;
+  /** Fade-up entrance for breadcrumb, heading, lead, pills and buttons (off unless enabled) */
+  entrance?: boolean;
+  /** Page-scroll progress bar pinned to the top of the viewport (off unless enabled) */
+  scrollBar?: { hidden?: boolean; gradient?: string };
   breadcrumb: {
     hidden?: boolean;
     items: LinkItem[];

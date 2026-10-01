@@ -1,4 +1,4 @@
-import type { HeroHeight } from '@/lib/hero-height';
+import type { HeroHeight, HeroVAlign } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
@@ -43,7 +43,8 @@ export type QsHeroContent = {
   placement?: HeroPlacement;
   /** Slides, Ken Burns motion, overlay, progress dots + counter */
   background: LegacyBgMedia;
-  layout: { hAlign?: 'left' | 'center' | 'right'; maxWidth?: string };
+  /** vAlign: vertical position of the copy in a full-screen / custom-height hero; empty = centre */
+  layout: { hAlign?: 'left' | 'center' | 'right'; vAlign?: HeroVAlign; maxWidth?: string };
   /** Fade-up entrance for breadcrumb, heading, lead, chips and buttons */
   entrance?: boolean;
   /** Page-scroll progress bar pinned to the top of the viewport */

@@ -25,6 +25,7 @@ import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup, VAL
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import { HERO_VALIGN_CHOICES } from '@/lib/hero-height';
 import {
   QS_ALL_ICON_PRESETS,
   defaultQsCert,
@@ -106,6 +107,12 @@ function QsHeroEditor({ content: c, onChange }: EditorProps<QsHeroContent>) {
           <HeroHeightPicker value={c.heroHeight} fallback="auto" onChange={(heroHeight) => set({ heroHeight })} />
           <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <AlignButtons label="Text align" value={layout.hAlign} onChange={(v) => setLayout({ hAlign: (v || undefined) as QsHeroContent['layout']['hAlign'] })} />
+          <SelectInput
+            label="Vertical position (full / custom height)"
+            value={layout.vAlign || ''}
+            options={HERO_VALIGN_CHOICES}
+            onChange={(v) => setLayout({ vAlign: v || undefined })}
+          />
           <TextInput label="Content max width" value={layout.maxWidth} onChange={(maxWidth) => setLayout({ maxWidth })} placeholder="820px" />
           <Field label="Behaviour">
             <Toggle label="Fade-up entrance animation" checked={c.entrance !== false} onChange={(entrance) => set({ entrance })} />

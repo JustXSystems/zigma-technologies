@@ -2,12 +2,12 @@
 
 import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { appHref } from '@/lib/base-path';
-import { heroHeightClass } from '@/lib/hero-height';
+import { heroHeightClass, heroScrollBarOn } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzPills, AzText, AzVideo, hasText, vars } from '@/components/sections/AboutSections';
 import { LzHeading, LzMedia, colVars, prefersReducedMotion, useStaggerReveal } from '@/components/sections/LifeSections';
-import { LgShell, StatNumber, cardVars, useCountPhase, useInView, useOkMedia, useSlides } from '@/components/sections/LegacySections';
+import { LgScrollBar, LgShell, StatNumber, cardVars, useCountPhase, useInView, useOkMedia, useSlides } from '@/components/sections/LegacySections';
 import { elementCss, mediaSrc, normalizeLinkItems, orbCss, sectionBoxCss, type SectionBox } from '@/lib/about-sections';
 import { visibleMedia, type LifeMediaItem } from '@/lib/life-sections';
 import type { LegacyBgMedia } from '@/lib/legacy-sections';
@@ -194,6 +194,7 @@ export function Ind101HeroSection({ content, sectionKey }: SectionProps) {
       id={sectionKey || 'top'}
       layers={<I101HeroBg bg={c.background} slider={c.slider} dots={c.dots} />}
     >
+      {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <HeroSlot place={place} name="text">
       <div className="az-hero-copy i101-hero-copy" style={vars({ maxWidth: layout.maxWidth })}>
         {!c.breadcrumb?.hidden && crumbs.length ? (
