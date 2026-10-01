@@ -17,3 +17,11 @@ export function normalizeHeroHeight(value: unknown, fallback: HeroHeight = DEFAU
 export function heroHeightClass(value: unknown, fallback?: HeroHeight): string {
   return normalizeHeroHeight(value, fallback) === 'full' ? 'hero-full' : 'hero-auto';
 }
+
+/** Rewrites viewport-height units (`vh`/`svh`/`dvh`/`lvh`) to the measured `--hero-vh`, e.g. `min(100dvh, 920px)`. */
+export function fitHeroViewportUnits(value: string | undefined): string | undefined {
+  if (!value) return value;
+  return value.replace(/(\d*\.?\d+)[sdl]?vh\b/gi, (_, n: string) =>
+    Number(n) === 100 ? 'var(--hero-vh)' : `calc(var(--hero-vh) * ${Number(n) / 100})`
+  );
+}

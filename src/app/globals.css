@@ -8,6 +8,7 @@
 
   :root{
     --header-h:82px;
+    --hero-vh:100vh;
     --navy-950:#0A1628;
     --navy-900:#0F1F3D;
     --navy-850:#122647;
@@ -980,7 +981,7 @@
   .menu-toggle{display:none;color:var(--white);font-size:1.5rem;}
 
   /* ================= HERO SLIDER ================= */
-  .hero-slider{position:relative;height:100vh;min-height:640px;overflow:hidden;background:var(--navy-950);box-shadow:0 30px 50px -20px rgba(5,12,24,0.45);}
+  .hero-slider{position:relative;height:var(--hero-vh);min-height:640px;overflow:hidden;background:var(--navy-950);box-shadow:0 30px 50px -20px rgba(5,12,24,0.45);}
   .slide{
     position:absolute;inset:0;
     display:flex;align-items:flex-end;
@@ -2037,7 +2038,7 @@
       position:relative;
       inset:auto;
       display:flex;
-      min-height:min(100dvh, 920px);
+      min-height:var(--hero-vh);
       pointer-events:auto;
       z-index:2;
     }
@@ -2465,7 +2466,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 }
 
 /* ---------- PAGE HERO (reuse .page-hero/.breadcrumb pattern) ---------- */
-.page-hero{background:linear-gradient(160deg,var(--navy-950),var(--navy-900));color:var(--white);min-height:100vh;display:flex;align-items:center;padding:8rem 0 4rem;position:relative;overflow:hidden;}
+.page-hero{background:linear-gradient(160deg,var(--navy-950),var(--navy-900));color:var(--white);min-height:var(--hero-vh);display:flex;align-items:center;padding:8rem 0 4rem;position:relative;overflow:hidden;}
 .hero-bg{position:absolute;inset:0;overflow:hidden;z-index:0;}
 .hero-bg img,
 .hero-bg video,
@@ -6667,10 +6668,22 @@ footer .foot-powered{font-size:0.8em;}
 }
 
 /* ========== Hero height (admin-configurable: full | auto) ==========
-   Kept last so it wins over per-hero min-height rules and their mobile overrides. */
-.hero-full{min-height:100vh;min-height:100svh;display:flex;align-items:center;}
+   Kept last so it wins over per-hero min-height rules and their mobile overrides.
+   HeroViewportSync replaces --hero-vh with the measured visible height (minus the fixed mobile CTA bar). */
+@supports (height:100svh){:root{--hero-vh:100svh;}}
+.hero-full{min-height:var(--hero-vh);display:flex;align-items:center;}
 .hero-full > :is(.container,.az-inner){width:100%;}
 .hero-auto{min-height:auto;display:block;}
+/* Short screens (landscape phones, small laptop windows): the active slide sits in flow so the slider fills
+   the available height yet grows instead of clipping when its content needs more room. */
+@media (min-width:761px) and (max-height:720px){
+  .hero-slider{height:auto;min-height:0;}
+  .hero-slider .slide.active{position:relative;inset:auto;min-height:var(--hero-vh);}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .hero-full{padding-top:calc(var(--header-h, 82px) + 1rem);padding-bottom:1.5rem;}
+  .hero-slider .slide > .container{padding-top:calc(var(--header-h, 82px) + 1rem);padding-bottom:2rem;}
+}
 
 /* ========== Catalog hero dock (catalog setting: toolbar_display = hero_dock) ==========
    The dock must stay a direct child of main: sticky can't leave its containing block.
@@ -6681,7 +6694,7 @@ footer .foot-powered{font-size:0.8em;}
   --catalog-dock-bottom:0.75rem;
 }
 .page-hero.catalog-hero--docked{
-  min-height:100vh;min-height:100svh;
+  min-height:var(--hero-vh);
   display:flex;align-items:center;
   padding-bottom:calc(var(--catalog-dock-h) + var(--catalog-dock-bottom) + 1.5rem);
 }

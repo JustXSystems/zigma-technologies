@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode, type TouchEvent } from 'react';
 import { appHref } from '@/lib/base-path';
+import { fitHeroViewportUnits } from '@/lib/hero-height';
 import { useSiteShell } from '@/components/SiteProviders';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { headingTagForRole, logoAltText } from '@/lib/site-settings';
@@ -546,9 +547,9 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
       style={{
         ...sectionBoxCss(c.section),
         ...vars({
-          '--hm-hero-h': c.height?.desktop,
-          '--hm-hero-min': c.height?.minHeight,
-          '--hm-hero-min-m': c.height?.mobileMinHeight,
+          '--hm-hero-h': fitHeroViewportUnits(c.height?.desktop),
+          '--hm-hero-min': fitHeroViewportUnits(c.height?.minHeight),
+          '--hm-hero-min-m': fitHeroViewportUnits(c.height?.mobileMinHeight),
           '--hm-fade': Number(c.fadeMs) > 0 ? `${c.fadeMs}ms` : undefined,
           '--hm-tag-color': tagColor,
           '--hm-tag-bg': tagBg,

@@ -529,7 +529,7 @@ function HomeHeroEditor({ content: c, onChange }: EditorProps<HomeHeroContent>) 
             label="Min height (phone)"
             value={height.mobileMinHeight}
             onChange={(mobileMinHeight) => set({ height: { ...height, mobileMinHeight } })}
-            placeholder="min(100dvh, 920px)"
+            placeholder="100dvh"
           />
           <NumberInput label="Cross-fade (ms)" value={c.fadeMs} min={0} step={100} placeholder="1100" onChange={(fadeMs) => set({ fadeMs })} />
           <Field label="Behaviour">

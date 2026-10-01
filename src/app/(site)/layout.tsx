@@ -3,6 +3,7 @@ import Footer from '@/components/Footer';
 import OrganizationJsonLd from '@/components/OrganizationJsonLd';
 import CookieConsent from '@/components/CookieConsent';
 import SiteProviders from '@/components/SiteProviders';
+import HeroViewportSync from '@/components/HeroViewportSync';
 import { loadSiteShell } from '@/lib/site-shell';
 import { logoSizingCss } from '@/lib/site-settings';
 import { navTypographyCss } from '@/lib/nav-typography';
@@ -36,6 +37,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <ConsultationModalHost />
       {children}
       <Footer />
+      <HeroViewportSync />
       <CookieConsent settings={shell.settings} />
       <PwaRegister />
     </SiteProviders>
