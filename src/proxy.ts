@@ -87,6 +87,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Friendly aliases for the Quality & Safety CMS page (slug qualitysafety)
+  const QS_ALIASES = new Set(['/qualitysafety.html', '/quality-safety', '/quality-safety.html', '/quality-and-safety']);
+  if (QS_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/qualitysafety';
+    return NextResponse.redirect(url, 308);
+  }
+
   try {
     const hit = await findRedirect(pathname);
     if (hit) {

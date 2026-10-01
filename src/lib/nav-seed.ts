@@ -35,7 +35,7 @@ export const HEADER_NAV_SEED: NavSeedNode[] = [
         meta_json: { kind: 'column' },
         children: [
           { label: 'Certifications', href: '/certifications' },
-          { label: 'Quality & Safety', href: '/certifications#industry-certs' },
+          { label: 'Quality & Safety', href: '/qualitysafety' },
           { label: 'Case studies', href: '/projects' },
           { label: 'Service levels', href: '/sla' },
           { label: 'Press', href: '/press' },

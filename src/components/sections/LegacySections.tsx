@@ -214,6 +214,7 @@ export function LgShell({
   id,
   children,
   noContainer,
+  layers,
 }: {
   box?: SectionBox;
   bg?: LegacyBgMedia;
@@ -221,6 +222,8 @@ export function LgShell({
   id?: string | null;
   children: ReactNode;
   noContainer?: boolean;
+  /** Extra absolutely-positioned layers anchored to the section (outside the content container) */
+  layers?: ReactNode;
 }) {
   const tone = box?.tone === 'dark' ? 'dark' : 'light';
   const pattern = box?.pattern && box.pattern !== 'none' ? box.pattern : null;
@@ -234,6 +237,7 @@ export function LgShell({
         </div>
       ) : null}
       <LgBackground bg={bg} />
+      {layers}
       {pattern ? (
         <div
           aria-hidden="true"
@@ -323,7 +327,7 @@ export function StatNumber({
 }
 
 /** Thin page-scroll progress bar pinned to the top of the viewport. */
-function LgScrollBar({ gradient }: { gradient?: string }) {
+export function LgScrollBar({ gradient }: { gradient?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;

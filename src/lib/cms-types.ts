@@ -109,4 +109,11 @@ export const SECTION_TYPES = [
   { type: 'ind101_stats', label: 'Industries 101 · Quick stat strip (numbers, icons, colors)' },
   { type: 'ind101_category', label: 'Industries 101 · Category block (collage media, sector cards)' },
   { type: 'ind101_cta', label: 'Industries 101 · CTA band (buttons, background media)' },
+  { type: 'qs_hero', label: 'Quality & Safety · Page hero (Ken Burns slideshow, breadcrumb, chips)' },
+  { type: 'qs_stats', label: 'Quality & Safety · Stat bar (count-up numbers)' },
+  { type: 'qs_quality', label: 'Quality & Safety · Quality approach (photo / video panel + process steps)' },
+  { type: 'qs_safety', label: 'Quality & Safety · Safety first (photo gallery + habit cards)' },
+  { type: 'qs_certs', label: 'Quality & Safety · Certificates & approvals (seals, checklists, request bar)' },
+  { type: 'qs_commit', label: 'Quality & Safety · Our commitment (photo background + checklist)' },
+  { type: 'qs_cta', label: 'Quality & Safety · CTA band (buttons, background media)' },
 ] as const;

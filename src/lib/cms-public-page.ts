@@ -6,6 +6,7 @@ import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
 import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
 import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
 import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
+import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
 
 function seedForSlug(slug: string) {
   if (slug === 'home') return HOMEPAGE_SEED_SECTIONS;
@@ -14,6 +15,7 @@ function seedForSlug(slug: string) {
   if (slug === 'privacy') return PRIVACY_SEED_SECTIONS_V2;
   if (slug === 'terms') return TERMS_SEED_SECTIONS_V2;
   if (slug === 'industries') return INDUSTRIES_SEED_SECTIONS_V2;
+  if (slug === QS_SLUG) return QS_SEED_SECTIONS;
   return null;
 }
 
@@ -22,6 +24,7 @@ function seedPage(slug: string, sections: ReturnType<typeof seedForSlug>): CmsPa
     home: 'Home',
     industries: 'Industries',
     certifications: 'Certifications',
+    [QS_SLUG]: 'Quality & Safety',
   };
   return {
     id: 0,

@@ -35,7 +35,7 @@ const DEFAULT_NAV: NavItem[] = [
         headingHref: '/certifications',
         links: [
           { label: 'Certifications', href: '/certifications' },
-          { label: 'Quality & Safety', href: '/certifications#industry-certs' },
+          { label: 'Quality & Safety', href: '/qualitysafety' },
           { label: 'Case studies', href: '/projects' },
           { label: 'Service levels', href: '/sla' },
           { label: 'Press', href: '/press' },

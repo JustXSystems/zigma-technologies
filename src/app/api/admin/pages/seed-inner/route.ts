@@ -10,6 +10,7 @@ import { ABOUT_ZIGMA_SEED_SECTIONS } from '@/lib/about-sections';
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
 import { LEGACY_20YRS_SEED_SECTIONS, LEGACY_20YRS_SLUG } from '@/lib/legacy-sections';
 import { INDUSTRIES101_SEED_SECTIONS, INDUSTRIES101_SLUG } from '@/lib/industries101-sections';
+import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
 
 const SEEDS = {
   'about-zigma': {
@@ -39,6 +40,13 @@ const SEEDS = {
     meta_description:
       'Zigma Technologies delivers Solar, UPS, BESS, EV Charging, and engineering power solutions across 24+ industries in India — from data centers and hospitals to manufacturing, EPC, and renewable energy developers.',
     sections: INDUSTRIES101_SEED_SECTIONS,
+  },
+  [QS_SLUG]: {
+    title: 'Quality & Safety',
+    meta_title: 'Quality & Safety | Zigma Technologies',
+    meta_description:
+      'How Zigma Technologies builds quality and safety into every UPS, solar and battery project: a four-stage quality process, six site safety habits, and certificates you can verify.',
+    sections: QS_SEED_SECTIONS,
   },
   contact: {
     title: 'Contact',
@@ -78,7 +86,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const slug = String(body.slug || '') as keyof typeof SEEDS;
     if (!SEEDS[slug]) {
-      return jsonError('slug must be about-zigma, life-at-zigma, legacy20yrs, industries101, contact, careers, certifications, privacy, or terms');
+      return jsonError('slug must be about-zigma, life-at-zigma, legacy20yrs, industries101, qualitysafety, contact, careers, certifications, privacy, or terms');
     }
 
     const seedDef = SEEDS[slug];
