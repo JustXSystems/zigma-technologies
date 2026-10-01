@@ -5,20 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { SECTION_TYPES } from '@/lib/cms-types';
-import { defaultIndustryCategoryContent } from '@/lib/industry-category';
-import { defaultAboutSectionContent } from '@/lib/about-sections';
-import { defaultLifeSectionContent } from '@/lib/life-sections';
-import { defaultLegacySectionContent } from '@/lib/legacy-sections';
-import { defaultContactSectionContent } from '@/lib/contact-sections';
-import { defaultCareersSectionContent } from '@/lib/careers-sections';
-import { defaultCertsSectionContent } from '@/lib/certifications-sections';
-import { defaultPrivacySectionContent } from '@/lib/privacy-sections';
-import { defaultTermsSectionContent } from '@/lib/terms-sections';
-import { defaultIndustriesSectionContent } from '@/lib/industries-sections';
-import { defaultIndustryPageSectionContent } from '@/lib/industry-page-sections';
-import { defaultIndustries101SectionContent } from '@/lib/industries101-sections';
-import { defaultQsSectionContent } from '@/lib/qualitysafety-sections';
-import { defaultHomeSectionContent } from '@/lib/home-sections';
+import { defaultCmsSectionContent } from '@/lib/cms-section-defaults';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -103,23 +90,7 @@ export default function AdminPageSectionsPage() {
 
   async function addSection(e: FormEvent) {
     e.preventDefault();
-    const content_json =
-      addType === 'industry_category'
-        ? defaultIndustryCategoryContent()
-        : defaultAboutSectionContent(addType) ||
-          defaultLifeSectionContent(addType) ||
-          defaultLegacySectionContent(addType) ||
-          defaultContactSectionContent(addType) ||
-          defaultCareersSectionContent(addType) ||
-          defaultCertsSectionContent(addType) ||
-          defaultPrivacySectionContent(addType) ||
-          defaultTermsSectionContent(addType) ||
-          defaultIndustriesSectionContent(addType) ||
-          defaultIndustryPageSectionContent(addType, page?.slug) ||
-          defaultIndustries101SectionContent(addType) ||
-          defaultQsSectionContent(addType) ||
-          defaultHomeSectionContent(addType) ||
-          {};
+    const content_json = defaultCmsSectionContent(addType, page?.slug);
     const res = await fetch('/api/admin/sections', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

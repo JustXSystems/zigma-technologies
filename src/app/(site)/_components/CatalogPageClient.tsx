@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, Suspense, type CSSProperties } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  Suspense,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type {
@@ -38,6 +48,10 @@ import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import SiteHeading from '@/components/SiteHeading';
 import { catalogListingKey, type CatalogListingData } from '@/lib/catalog-listing-key';
+import { catalogSectionToCms, normalizeCatalogSections } from '@/lib/catalog-sections';
+import { cmsSectionsCss, renderCmsSection } from '@/components/sections/SectionRenderer';
+import { useSiteShell } from '@/components/SiteProviders';
+import { napValues, resolveNapDeep } from '@/lib/nap';
 
 type Props = {
   itemType: CatalogItemType;
@@ -47,6 +61,8 @@ type Props = {
   /** Server-rendered first page so crawlers get real item links in the initial HTML. */
   initialData?: CatalogListingData | null;
   initialKey?: string;
+  /** Server-rendered "Trusted partners" strip, placed wherever the social_proof section sits. */
+  partnersStrip?: ReactNode;
 };
 
 const DEFAULT_CARD = [
@@ -567,7 +583,8 @@ export default function CatalogPageClient(props: Props) {
   );
 }
 
-function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, initialKey }: Props) {
+function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, initialKey, partnersStrip }: Props) {
+  const { settings: siteSettings } = useSiteShell();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -622,7 +639,29 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
   const facetRailEnabled = settings?.discovery_facet_rail_enabled !== 0;
   const groupedResultsEnabled = settings?.discovery_grouped_results_enabled !== 0;
   const stickyToolbarEnabled = settings?.discovery_sticky_toolbar_enabled !== 0;
-  const docked = normalizeToolbarDisplay(settings?.toolbar_display) === 'hero_dock';
+  const pageSections = useMemo(
+    () => normalizeCatalogSections(settings?.sections_json).filter((s) => s.enabled),
+    [settings?.sections_json]
+  );
+  const showsBuiltin = (key: string) => pageSections.some((s) => s.kind === 'builtin' && s.type === key);
+  const heroShown = showsBuiltin('hero');
+  const listingShown = showsBuiltin('listing');
+  // The dock hangs off the bottom of the hero and carries the listing toolbar, so it needs both.
+  const docked =
+    heroShown && listingShown && normalizeToolbarDisplay(settings?.toolbar_display) === 'hero_dock';
+  const firstSection = pageSections[0];
+  const leadsWithHero =
+    !!firstSection && (firstSection.kind === 'builtin' ? firstSection.type === 'hero' : firstSection.type.includes('hero'));
+  const cmsSections = useMemo(() => {
+    const nap = napValues(siteSettings);
+    return new Map(
+      pageSections
+        .map((entry, index) => [entry, index] as const)
+        .filter(([entry]) => entry.kind === 'cms')
+        .map(([entry, index]) => [entry.id, resolveNapDeep(catalogSectionToCms(entry, index), nap)])
+    );
+  }, [pageSections, siteSettings]);
+  const cmsCss = useMemo(() => cmsSectionsCss([...cmsSections.values()]), [cmsSections]);
   const groupPreviewCount = Math.min(
     12,
     Math.max(1, Number(settings?.discovery_group_preview_count || 4) || 4)
@@ -730,10 +769,11 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
     scrollToResults();
   }, [pathname, router, scrollToResults]);
 
+  const sectionsSignature = pageSections.map((s) => s.id).join(',');
   useScrollReveal(
     revealEnabled
-      ? `${itemType}-${layout}-${items.length}-${stylePreset}-${sort}-${category}-${tag}-${q}-${loading}`
-      : `disabled-${itemType}`
+      ? `${itemType}-${layout}-${items.length}-${stylePreset}-${sort}-${category}-${tag}-${q}-${loading}-${sectionsSignature}`
+      : `disabled-${itemType}-${sectionsSignature}`
   );
 
   useEffect(() => {
@@ -816,6 +856,7 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
     premiumBordersEnabled && 'catalog-premium-borders',
     revealEnabled && 'catalog-reveal-enabled',
     docked && 'catalog-page--dock',
+    !leadsWithHero && 'catalog-page--no-hero',
     mobileFiltersOpen && 'catalog-page--filters-open'
   );
 
@@ -1046,8 +1087,8 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
     </div>
   );
 
-  return (
-    <main id="main-content" className={pageClassName} ref={pageRef}>
+  const heroSection = (
+    <>
       <CatalogHero
         itemType={itemType}
         title={title}
@@ -1064,7 +1105,10 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
           <div className="container">{toolbar}</div>
         </div>
       ) : null}
+    </>
+  );
 
+  const listingSection = (
       <section
         ref={listingRef}
         className="section section-light catalog-listing"
@@ -1337,6 +1381,25 @@ function CatalogPageClientInner({ itemType, title, eyebrow, lead, initialData, i
           </div>
         </div>
       </section>
+  );
+
+  return (
+    <main id="main-content" className={pageClassName} ref={pageRef}>
+      {cmsCss ? <style dangerouslySetInnerHTML={{ __html: cmsCss }} /> : null}
+      {pageSections.map((entry) => {
+        let node: ReactNode = null;
+        if (entry.kind === 'cms') {
+          const cms = cmsSections.get(entry.id);
+          node = cms ? renderCmsSection(cms) : null;
+        } else if (entry.type === 'hero') {
+          node = heroSection;
+        } else if (entry.type === 'listing') {
+          node = listingSection;
+        } else if (entry.type === 'social_proof') {
+          node = partnersStrip;
+        }
+        return <Fragment key={entry.id}>{node}</Fragment>;
+      })}
 
       {active ? (
         <CatalogDetailModal

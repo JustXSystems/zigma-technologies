@@ -56,10 +56,14 @@ import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields, { type HeroScrollBar } from '@/components/admin/HeroMotionFields';
 import { HERO_VALIGN_CHOICES, isHeroVAlign } from '@/lib/hero-height';
 
+export type SectionEditorPatch = Pick<CmsSection, 'title' | 'section_key' | 'content_json' | 'style_json'>;
+
 type Props = {
   section: CmsSection;
   onClose: () => void;
   onSaved: () => void;
+  /** Hand the edits back instead of PATCHing /api/admin/sections (for sections stored outside page_sections). */
+  onApply?: (patch: SectionEditorPatch) => void;
 };
 
 function Field({
@@ -274,7 +278,7 @@ function migrateSplitContent(raw: Record<string, unknown>): Record<string, unkno
   return { ...rest, ctas: [] };
 }
 
-export default function SectionEditor({ section, onClose, onSaved }: Props) {
+export default function SectionEditor({ section, onClose, onSaved, onApply }: Props) {
   const [title, setTitle] = useState(section.title || '');
   const [sectionKey, setSectionKey] = useState(section.section_key || '');
   const [content, setContent] = useState<Record<string, unknown>>(() => {
@@ -340,18 +344,24 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
           })),
         };
       }
+      const patch: SectionEditorPatch = {
+        title,
+        section_key: sectionKey || null,
+        content_json,
+        style_json: {
+          className: extraClass || undefined,
+          css: customCss || undefined,
+        },
+      };
+      if (onApply) {
+        onApply(patch);
+        onSaved();
+        return;
+      }
       const res = await fetch(`/api/admin/sections/${section.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          section_key: sectionKey || null,
-          content_json,
-          style_json: {
-            className: extraClass || undefined,
-            css: customCss || undefined,
-          },
-        }),
+        body: JSON.stringify(patch),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
@@ -544,7 +554,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             Cancel
           </button>
           <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-            {saving ? 'Saving…' : 'Save section'}
+            {saving ? 'Saving…' : onApply ? 'Apply changes' : 'Save section'}
           </button>
         </div>
         {error ? <div className="admin-error">{error}</div> : null}

@@ -10,12 +10,12 @@ export type SettingsGuide = {
   tip?: string;
 };
 
-export type SettingsSectionId = 'hero' | 'listing' | 'popup' | 'discovery' | 'categories';
+export type SettingsSectionId = 'sections' | 'hero' | 'listing' | 'popup' | 'discovery' | 'categories';
 
 export const CATALOG_SETTINGS_PAGE_INTRO = {
   title: 'Catalog settings',
   lead:
-    'Each catalog type (products, projects, services) has its own settings. Changes apply to the public listing page after you Save. Work one section at a time: Hero → Listing → Quick view → Discovery → Categories.',
+    'Each catalog type (products, projects, services) has its own settings. Changes apply to the public listing page after you Save. Work one section at a time: Page sections → Hero → Listing → Quick view → Discovery → Categories.',
 };
 
 export const CATALOG_SETTINGS_SECTIONS: Array<{
@@ -25,6 +25,21 @@ export const CATALOG_SETTINGS_SECTIONS: Array<{
   summary: string;
   guide: SettingsGuide;
 }> = [
+  {
+    id: 'sections',
+    label: 'Page sections',
+    title: 'Page sections',
+    summary:
+      'Which blocks make up the public catalog page and in what order: show, hide, add, remove and reorder sections, like /admin/pages.',
+    guide: {
+      purpose:
+        'Shape the whole catalog page: drop blocks you do not need and add content sections (CTA bands, why cards, rich text, FAQs…) around the catalogue.',
+      when:
+        'Use when a section is unwanted on this catalog, when marketing wants an extra message above or below the grid, or to change the page order.',
+      how: 'Toggle Visible to hide a section without losing it. Use Remove to drop it (built-ins can be added back). Add any /admin/pages section type, choose its position, then Edit its content. Drag rows or use ↑ ↓ to reorder. Save settings to publish.',
+      tip: 'Hero and Catalogue listing styling still lives in the Hero / Listing tabs. The docked search bar needs the hero and the listing to be visible.',
+    },
+  },
   {
     id: 'hero',
     label: 'Hero',
@@ -102,6 +117,15 @@ export const CATALOG_SETTINGS_SECTIONS: Array<{
 ];
 
 export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: SettingsGuide }> = {
+  page_sections: {
+    title: 'Sections on this page',
+    guide: {
+      purpose: 'The ordered list of blocks rendered on the public catalog page.',
+      when: 'Hide or remove unwanted blocks, add content sections, or change their order.',
+      how: 'Built-in = catalog components (hero, listing, partners strip). Content = the same section types as /admin/pages; click Edit to change their copy and images.',
+      tip: 'Edits here are staged — press Save settings to publish them. Duplicated sections start hidden.',
+    },
+  },
   hero_presentation: {
     title: 'Presentation',
     guide: {

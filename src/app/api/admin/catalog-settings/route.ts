@@ -11,6 +11,7 @@ import {
 } from '@/lib/types';
 import { isHeroHeight, normalizeHeroHeight } from '@/lib/hero-height';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import { CATALOG_SECTIONS_MAX, normalizeCatalogSections } from '@/lib/catalog-sections';
 
 const heroHeightSchema = z
   .string()
@@ -73,6 +74,11 @@ const putSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v === undefined ? undefined : normalizeCatalogHeroBg(v))),
+  sections_json: z
+    .array(z.record(z.string(), z.unknown()))
+    .max(CATALOG_SECTIONS_MAX)
+    .optional()
+    .transform((v) => (v === undefined ? undefined : normalizeCatalogSections(v))),
   hero_height: heroHeightSchema.optional(),
   detail_hero_height: heroHeightSchema.optional(),
   toolbar_display: z.enum(CATALOG_TOOLBAR_DISPLAY_VALUES).optional(),

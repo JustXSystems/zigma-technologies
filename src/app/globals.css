@@ -6879,6 +6879,8 @@ footer .foot-powered{font-size:0.8em;}
 /* ========== Catalog hero dock (catalog setting: toolbar_display = hero_dock) ==========
    The dock must stay a direct child of main: sticky can't leave its containing block.
    JS keeps the three vars in sync with the header, dock and mobile CTA bar sizes. */
+/* First section is not a hero: keep it clear of the fixed header */
+.catalog-page--no-hero{padding-top:var(--catalog-sticky-top, 5.5rem);}
 .catalog-page--dock{
   --catalog-sticky-top:5rem;
   --catalog-dock-h:4.5rem;

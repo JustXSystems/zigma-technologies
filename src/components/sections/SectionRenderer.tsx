@@ -62,7 +62,7 @@ function contrastTextForHex(hex: string): string {
   const g = parseInt(raw.slice(2, 4), 16);
   const b = parseInt(raw.slice(4, 6), 16);
   if ([r, g, b].some((n) => Number.isNaN(n))) return '#ffffff';
-  // Relative luminance — dark text on light backgrounds
+  // Relative luminance â€” dark text on light backgrounds
   const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luma > 0.55 ? '#0A1628' : '#ffffff';
 }
@@ -623,10 +623,10 @@ function projectHighlight(item: CatalogItem): string | null {
   }
   if (s['Grid dependency'] && s.Payback) {
     const pay = String(s.Payback).replace(/\s*years?/i, '-yr');
-    return `${s['Grid dependency']} grid dependency · ${pay} payback`;
+    return `${s['Grid dependency']} grid dependency Â· ${pay} payback`;
   }
   const vals = Object.values(s).filter(Boolean);
-  return vals.length ? vals.slice(0, 2).join(' · ') : null;
+  return vals.length ? vals.slice(0, 2).join(' Â· ') : null;
 }
 
 function ProjectsTeaserSection({
@@ -644,7 +644,7 @@ function ProjectsTeaserSection({
     if (!scope) return null;
     const s = String(scope).replace(/\s+/g, ' ').trim();
     if (!s) return null;
-    return s.length > 90 ? `${s.slice(0, 88)}…` : s;
+    return s.length > 90 ? `${s.slice(0, 88)}â€¦` : s;
   }
 
   useEffect(() => {
@@ -735,7 +735,7 @@ function ProjectsTeaserSection({
                   ) : (
                     <p>{item.summary}</p>
                   )}
-                  <span className="hub-card-link">View case study →</span>
+                  <span className="hub-card-link">View case study â†’</span>
                 </div>
               </a>
             );
@@ -743,7 +743,7 @@ function ProjectsTeaserSection({
         </div>
         <div className="text-center mt-26">
           <a href={hrefOf(content.ctaHref, '/projects')} className="btn btn-ghost-dark btn-sm">
-            {String(content.cta || 'View All Projects →')}
+            {String(content.cta || 'View All Projects â†’')}
           </a>
         </div>
       </div>
@@ -1131,7 +1131,7 @@ function IndustryHubSection({
                   {card.eyebrow ? <div className="eyebrow">{card.eyebrow}</div> : null}
                   <h3>{card.name}</h3>
                   {card.lead ? <p>{card.lead}</p> : null}
-                  <span className="hub-card-link">View industry page →</span>
+                  <span className="hub-card-link">View industry page â†’</span>
                 </div>
               </Link>
             );
@@ -1464,7 +1464,7 @@ function TestimonialsSection({ content }: { content: Record<string, unknown> }) 
               <p className="testi-quote">&ldquo;{item.quote}&rdquo;</p>
               <div className="testi-person">
                 {item.name}
-                {item.role ? <span> · {item.role}</span> : null}
+                {item.role ? <span> Â· {item.role}</span> : null}
               </div>
             </div>
           ))}
@@ -1715,7 +1715,7 @@ function LocationsSection({ content, sectionKey }: { content: Record<string, unk
     : null;
   const mapSrc = (activeLoc?.mapEmbedUrl || defaultMap.src).trim();
   const mapTitle = (activeLoc?.mapTitle || activeLoc?.title || defaultMap.title).trim() || 'Office map';
-  const directionsFallback = String(content.directionsLabel || 'Get Directions →');
+  const directionsFallback = String(content.directionsLabel || 'Get Directions â†’');
 
   useEffect(() => {
     const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -1952,7 +1952,7 @@ function JobListSection({ content, sectionKey }: { content: Record<string, unkno
                   data-role={job.title}
                   onClick={() => focusApplyRole(job.title)}
                 >
-                  Apply Now →
+                  Apply Now â†’
                 </button>
               </div>
             );
@@ -2035,7 +2035,7 @@ function ComparisonTableSection({
   const sectionClass = tone === 'dark' ? '' : tone === 'gray' ? 'section-gray' : 'section-light';
 
   function renderCell(val: string | boolean | null, colHighlight?: boolean) {
-    if (val === true || val === 'true' || val === '✓') {
+    if (val === true || val === 'true' || val === 'âœ“') {
       return (
         <td key={String(val)} className={`ctbl-cell ctbl-cell--yes${colHighlight ? ' ctbl-cell--hl' : ''}`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-label="Yes">
@@ -2044,7 +2044,7 @@ function ComparisonTableSection({
         </td>
       );
     }
-    if (val === false || val === 'false' || val === '✗' || val === null) {
+    if (val === false || val === 'false' || val === 'âœ—' || val === null) {
       return (
         <td key={String(val)} className={`ctbl-cell ctbl-cell--no${colHighlight ? ' ctbl-cell--hl' : ''}`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-label="No">
@@ -2055,7 +2055,7 @@ function ComparisonTableSection({
     }
     return (
       <td key={String(val)} className={`ctbl-cell${colHighlight ? ' ctbl-cell--hl' : ''}`}>
-        {String(val ?? '—')}
+        {String(val ?? 'â€”')}
       </td>
     );
   }
@@ -2112,7 +2112,7 @@ function ComparisonTableSection({
         {content.cta || content.ctaHref ? (
           <div className="comparison-cta">
             <a href={hrefOf(content.ctaHref, '/contact')} className="btn btn-primary">
-              {String(content.cta || 'Get a tailored quote →')}
+              {String(content.cta || 'Get a tailored quote â†’')}
             </a>
             {content.ctaNote ? <p className="comparison-cta-note">{String(content.ctaNote)}</p> : null}
           </div>
@@ -2122,16 +2122,18 @@ function ComparisonTableSection({
   );
 }
 
+/** Per-section custom CSS (style_json.css) joined for a single <style> tag. */
+export function cmsSectionsCss(sections: CmsSection[]): string {
+  return sections
+    .map((s) => String((s.style_json as { css?: string })?.css || '').trim())
+    .filter(Boolean)
+    .join('\n');
+}
+
 export default function SectionRenderer({ sections }: { sections: CmsSection[] }) {
   useScrollReveal(sections);
 
-  const scopedCss = sections
-    .map((s) => {
-      const css = String((s.style_json as { css?: string })?.css || '').trim();
-      return css;
-    })
-    .filter(Boolean)
-    .join('\n');
+  const scopedCss = cmsSectionsCss(sections);
 
   const bodyClass = sections
     .filter((s) => s.enabled && s.type === 'page_hero')
@@ -2141,178 +2143,179 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
   return (
     <main id="main-content" className={bodyClass || undefined}>
       {scopedCss ? <style dangerouslySetInnerHTML={{ __html: scopedCss }} /> : null}
-      {sections
-        .filter((s) => s.enabled)
-        .map((section) => {
-          const content = section.content_json || {};
-          const key = section.id;
-          const extraClass = String((section.style_json as { className?: string })?.className || '');
-          const wrap = (node: React.ReactNode) =>
-            extraClass ? (
-              <div key={key} className={extraClass} data-section-type={section.type}>
-                {node}
-              </div>
-            ) : (
-              node
-            );
-
-          switch (section.type) {
-            case 'hero':
-              return wrap(<HeroSection key={key} content={content} />);
-            case 'page_hero':
-              return wrap(<PageHeroSection key={key} content={content} />);
-            case 'eco':
-              return wrap(<EcoSection key={key} content={content} />);
-            case 'stats':
-              return wrap(<StatsSection key={key} content={content} />);
-            case 'culture_stats':
-              return wrap(<CultureStatsSection key={key} content={content} />);
-            case 'quick_contact':
-              return wrap(<QuickContactSection key={key} content={content} />);
-            case 'why':
-              return wrap(<WhySection key={key} content={content} sectionKey={section.section_key} />);
-            case 'timeline':
-              return wrap(<TimelineSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'projects_teaser':
-              return wrap(<ProjectsTeaserSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'industries':
-              return wrap(<IndustriesSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'industry_hub':
-              return wrap(<IndustryHubSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'industry_category':
-              return wrap(
-                <IndustryCategorySection key={key} content={content} sectionKey={section.section_key} />
-              );
-            case 'testimonials':
-              return wrap(<TestimonialsSection key={key} content={content} />);
-            case 'partners':
-              return wrap(<PartnersSection key={key} content={content} />);
-            case 'cert_teaser':
-              return wrap(<CertTeaserSection key={key} content={content} />);
-            case 'cert_hero':
-              return wrap(<CertHeroSection key={key} content={content} />);
-            case 'logo_marquee':
-              return wrap(<LogoMarqueeSection key={key} content={content} />);
-            case 'feature_grid':
-              return wrap(<FeatureGridSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'locations':
-              return wrap(<LocationsSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'job_list':
-              return wrap(<JobListSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'internship':
-              return wrap(<InternshipSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'careers_apply':
-              return wrap(<CareersApplySection key={key} content={content} sectionKey={section.section_key} />);
-            case 'cert_cta':
-              return wrap(<CertCtaSection key={key} content={content} />);
-            case 'enquiry_form':
-              return wrap(<EnquiryFormSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'cta':
-              return wrap(<CtaSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'split':
-              return wrap(<SplitSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'rich_text':
-              return wrap(<RichTextSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'comparison_table':
-              return wrap(<ComparisonTableSection key={key} content={content} sectionKey={section.section_key} />);
-            case 'about_hero':
-            case 'services_marquee':
-            case 'story':
-            case 'purpose':
-            case 'founder_note':
-            case 'facilities':
-              return wrap(renderAboutSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'life_hero':
-            case 'life_stats':
-            case 'life_cards':
-            case 'life_roles':
-            case 'life_events':
-            case 'life_gallery':
-            case 'life_cta':
-              return wrap(renderLifeSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'legacy_hero':
-            case 'legacy_stats':
-            case 'legacy_marquee':
-            case 'legacy_story':
-            case 'legacy_journey':
-            case 'legacy_values':
-            case 'legacy_caps':
-            case 'legacy_next':
-            case 'legacy_cta':
-              return wrap(renderLegacySection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'contact_hero':
-            case 'contact_quick':
-            case 'contact_help':
-            case 'contact_locations':
-            case 'contact_form':
-              return wrap(renderContactSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'careers_hero':
-            case 'careers_stats':
-            case 'careers_cards':
-            case 'careers_why':
-            case 'careers_jobs':
-            case 'careers_internship':
-            case 'careers_application':
-              return wrap(renderCareersSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'certs_hero':
-            case 'certs_gallery':
-            case 'certs_cta':
-              return wrap(renderCertsSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'privacy_hero':
-            case 'privacy_policy':
-            case 'privacy_cta':
-              return wrap(renderPrivacySection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'terms_hero':
-            case 'terms_policy':
-            case 'terms_cta':
-              return wrap(renderTermsSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'industries_hero':
-            case 'industries_stats':
-            case 'industries_hub':
-            case 'industries_category':
-            case 'industries_cta':
-              return wrap(renderIndustriesSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'industry_page_hero':
-            case 'industry_page_overview':
-            case 'industry_page_cta':
-              return wrap(renderIndustryPageSection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'ind101_hero':
-            case 'ind101_subnav':
-            case 'ind101_stats':
-            case 'ind101_category':
-            case 'ind101_cta':
-              return wrap(renderIndustries101Section(section.type, { key, content, sectionKey: section.section_key }));
-            case 'qs_hero':
-            case 'qs_stats':
-            case 'qs_quality':
-            case 'qs_safety':
-            case 'qs_certs':
-            case 'qs_commit':
-            case 'qs_cta':
-              return wrap(renderQualitySafetySection(section.type, { key, content, sectionKey: section.section_key }));
-            case 'home_hero':
-            case 'home_eco':
-            case 'home_stats':
-            case 'home_why':
-            case 'home_split':
-            case 'home_timeline':
-            case 'home_projects':
-            case 'home_industries':
-            case 'home_testimonials':
-            case 'home_partners':
-            case 'home_cert':
-            case 'home_cta':
-              return wrap(renderHomeSection(section.type, { key, content, sectionKey: section.section_key }));
-            default:
-              return (
-                <section key={key} className="section section-light">
-                  <div className="container">
-                    <p>Unknown section type: {section.type}</p>
-                  </div>
-                </section>
-              );
-          }
-        })}
+      {sections.filter((s) => s.enabled).map(renderCmsSection)}
     </main>
   );
+}
+
+/** One CMS section (no <main> wrapper) â€” lets other pages interleave CMS blocks with their own. */
+export function renderCmsSection(section: CmsSection) {
+  const content = section.content_json || {};
+  const key = section.id;
+  const extraClass = String((section.style_json as { className?: string })?.className || '');
+  const wrap = (node: React.ReactNode) =>
+    extraClass ? (
+      <div key={key} className={extraClass} data-section-type={section.type}>
+        {node}
+      </div>
+    ) : (
+      node
+    );
+
+  switch (section.type) {
+    case 'hero':
+      return wrap(<HeroSection key={key} content={content} />);
+    case 'page_hero':
+      return wrap(<PageHeroSection key={key} content={content} />);
+    case 'eco':
+      return wrap(<EcoSection key={key} content={content} />);
+    case 'stats':
+      return wrap(<StatsSection key={key} content={content} />);
+    case 'culture_stats':
+      return wrap(<CultureStatsSection key={key} content={content} />);
+    case 'quick_contact':
+      return wrap(<QuickContactSection key={key} content={content} />);
+    case 'why':
+      return wrap(<WhySection key={key} content={content} sectionKey={section.section_key} />);
+    case 'timeline':
+      return wrap(<TimelineSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'projects_teaser':
+      return wrap(<ProjectsTeaserSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'industries':
+      return wrap(<IndustriesSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'industry_hub':
+      return wrap(<IndustryHubSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'industry_category':
+      return wrap(
+        <IndustryCategorySection key={key} content={content} sectionKey={section.section_key} />
+      );
+    case 'testimonials':
+      return wrap(<TestimonialsSection key={key} content={content} />);
+    case 'partners':
+      return wrap(<PartnersSection key={key} content={content} />);
+    case 'cert_teaser':
+      return wrap(<CertTeaserSection key={key} content={content} />);
+    case 'cert_hero':
+      return wrap(<CertHeroSection key={key} content={content} />);
+    case 'logo_marquee':
+      return wrap(<LogoMarqueeSection key={key} content={content} />);
+    case 'feature_grid':
+      return wrap(<FeatureGridSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'locations':
+      return wrap(<LocationsSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'job_list':
+      return wrap(<JobListSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'internship':
+      return wrap(<InternshipSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'careers_apply':
+      return wrap(<CareersApplySection key={key} content={content} sectionKey={section.section_key} />);
+    case 'cert_cta':
+      return wrap(<CertCtaSection key={key} content={content} />);
+    case 'enquiry_form':
+      return wrap(<EnquiryFormSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'cta':
+      return wrap(<CtaSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'split':
+      return wrap(<SplitSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'rich_text':
+      return wrap(<RichTextSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'comparison_table':
+      return wrap(<ComparisonTableSection key={key} content={content} sectionKey={section.section_key} />);
+    case 'about_hero':
+    case 'services_marquee':
+    case 'story':
+    case 'purpose':
+    case 'founder_note':
+    case 'facilities':
+      return wrap(renderAboutSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'life_hero':
+    case 'life_stats':
+    case 'life_cards':
+    case 'life_roles':
+    case 'life_events':
+    case 'life_gallery':
+    case 'life_cta':
+      return wrap(renderLifeSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'legacy_hero':
+    case 'legacy_stats':
+    case 'legacy_marquee':
+    case 'legacy_story':
+    case 'legacy_journey':
+    case 'legacy_values':
+    case 'legacy_caps':
+    case 'legacy_next':
+    case 'legacy_cta':
+      return wrap(renderLegacySection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'contact_hero':
+    case 'contact_quick':
+    case 'contact_help':
+    case 'contact_locations':
+    case 'contact_form':
+      return wrap(renderContactSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'careers_hero':
+    case 'careers_stats':
+    case 'careers_cards':
+    case 'careers_why':
+    case 'careers_jobs':
+    case 'careers_internship':
+    case 'careers_application':
+      return wrap(renderCareersSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'certs_hero':
+    case 'certs_gallery':
+    case 'certs_cta':
+      return wrap(renderCertsSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'privacy_hero':
+    case 'privacy_policy':
+    case 'privacy_cta':
+      return wrap(renderPrivacySection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'terms_hero':
+    case 'terms_policy':
+    case 'terms_cta':
+      return wrap(renderTermsSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'industries_hero':
+    case 'industries_stats':
+    case 'industries_hub':
+    case 'industries_category':
+    case 'industries_cta':
+      return wrap(renderIndustriesSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'industry_page_hero':
+    case 'industry_page_overview':
+    case 'industry_page_cta':
+      return wrap(renderIndustryPageSection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'ind101_hero':
+    case 'ind101_subnav':
+    case 'ind101_stats':
+    case 'ind101_category':
+    case 'ind101_cta':
+      return wrap(renderIndustries101Section(section.type, { key, content, sectionKey: section.section_key }));
+    case 'qs_hero':
+    case 'qs_stats':
+    case 'qs_quality':
+    case 'qs_safety':
+    case 'qs_certs':
+    case 'qs_commit':
+    case 'qs_cta':
+      return wrap(renderQualitySafetySection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'home_hero':
+    case 'home_eco':
+    case 'home_stats':
+    case 'home_why':
+    case 'home_split':
+    case 'home_timeline':
+    case 'home_projects':
+    case 'home_industries':
+    case 'home_testimonials':
+    case 'home_partners':
+    case 'home_cert':
+    case 'home_cta':
+      return wrap(renderHomeSection(section.type, { key, content, sectionKey: section.section_key }));
+    default:
+      return (
+        <section key={key} className="section section-light">
+          <div className="container">
+            <p>Unknown section type: {section.type}</p>
+          </div>
+        </section>
+      );
+  }
 }

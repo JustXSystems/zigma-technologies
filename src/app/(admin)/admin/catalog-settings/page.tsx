@@ -49,6 +49,9 @@ import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
 import CatalogHeroBgEditor from '@/components/admin/CatalogHeroBgEditor';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import { catalogSectionToCms, normalizeCatalogSections } from '@/lib/catalog-sections';
+import CatalogSectionsEditor from '@/components/admin/CatalogSectionsEditor';
+import SectionEditor from '@/components/admin/SectionEditor';
 import {
   CATALOG_SETTINGS_BLOCKS,
   CATALOG_SETTINGS_PAGE_INTRO,
@@ -121,6 +124,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     ...raw!,
     hero_item_durations_json: raw?.hero_item_durations_json || null,
     hero_bg_json: normalizeCatalogHeroBg(raw?.hero_bg_json),
+    sections_json: normalizeCatalogSections(raw?.sections_json),
     hero_height: normalizeHeroHeight(raw?.hero_height),
     detail_hero_height: normalizeHeroHeight(raw?.detail_hero_height),
     toolbar_display: normalizeToolbarDisplay(raw?.toolbar_display),
@@ -621,6 +625,7 @@ export default function CatalogSettingsPage() {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [section, setSection] = useState<SettingsSectionId>('hero');
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
 
   async function load() {
     const [catsRes, settingsRes, itemsRes] = await Promise.all([
@@ -725,6 +730,7 @@ export default function CatalogSettingsPage() {
           detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
           hero_bg_json: normalizeCatalogHeroBg(settings.hero_bg_json),
+          sections_json: normalizeCatalogSections(settings.sections_json),
           hero_height: normalizeHeroHeight(settings.hero_height),
           detail_hero_height: normalizeHeroHeight(settings.detail_hero_height),
           toolbar_display: normalizeToolbarDisplay(settings.toolbar_display),
@@ -834,6 +840,33 @@ export default function CatalogSettingsPage() {
             void saveSettings(e);
           }}
         >
+          {section === 'sections' ? (
+            <div className="admin-settings-panel">
+              <div className="admin-settings-panel-head">
+                <div>
+                  <div className="admin-settings-panel-head-copy">
+                    <h2>
+                      {sectionMeta('sections').title}
+                      <HelpTip guide={sectionMeta('sections').guide} label="Help: Page sections" />
+                    </h2>
+                    <p>{sectionMeta('sections').summary}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="admin-settings-panel-body">
+                <SettingsBlock blockId="page_sections">
+                  <CatalogSectionsEditor
+                    value={normalizeCatalogSections(settings.sections_json)}
+                    onChange={(sections_json) => setSettings({ ...settings, sections_json })}
+                    onEdit={setEditingSectionId}
+                    onConfigure={(key) => setSection(key === 'listing' ? 'listing' : 'hero')}
+                    pagePath={`/${type}s`}
+                  />
+                </SettingsBlock>
+              </div>
+            </div>
+          ) : null}
+
           {section === 'hero' ? (
             <div className="admin-settings-panel">
               <div className="admin-settings-panel-head">
@@ -1656,6 +1689,37 @@ export default function CatalogSettingsPage() {
           ) : null}
         </form>
       )}
+
+      {(() => {
+        const entries = settings ? normalizeCatalogSections(settings.sections_json) : [];
+        const index = entries.findIndex((s) => s.id === editingSectionId && s.kind === 'cms');
+        if (!settings || index < 0) return null;
+        return (
+          <SectionEditor
+            key={`${type}-${editingSectionId}`}
+            section={catalogSectionToCms(entries[index], index)}
+            onClose={() => setEditingSectionId(null)}
+            onSaved={() => setEditingSectionId(null)}
+            onApply={(patch) => {
+              setMessage('Section updated. Press Save settings to publish it.');
+              setSettings({
+                ...settings,
+                sections_json: entries.map((s, i) =>
+                  i === index
+                    ? {
+                        ...s,
+                        title: patch.title,
+                        section_key: patch.section_key,
+                        content_json: patch.content_json,
+                        style_json: JSON.parse(JSON.stringify(patch.style_json)),
+                      }
+                    : s
+                ),
+              });
+            }}
+          />
+        );
+      })()}
 
       {section === 'categories' ? (
         <div className="admin-settings-panel">

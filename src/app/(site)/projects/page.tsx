@@ -32,8 +32,8 @@ export default async function ProjectsPage({ searchParams }: Props) {
         lead={chrome.lead}
         initialData={initial.initialData}
         initialKey={initial.initialKey}
+        partnersStrip={<SocialProofStrip title={chrome.socialProofTitle} />}
       />
-      <SocialProofStrip title={chrome.socialProofTitle} />
     </>
   );
 }

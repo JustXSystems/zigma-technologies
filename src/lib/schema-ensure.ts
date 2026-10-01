@@ -144,6 +144,10 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_bg_json JSON NULL AFTER hero_item_durations_json`,
   },
   {
+    name: 'sections_json',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN sections_json JSON NULL AFTER hero_bg_json`,
+  },
+  {
     name: 'hero_standard_panel_enabled',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_standard_panel_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER hero_variant`,
   },
