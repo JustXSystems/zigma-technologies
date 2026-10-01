@@ -42,6 +42,7 @@ export const INDUSTRY_PAGE_UPGRADE_SLUGS = [
   industryPageSlug('healthcare'),
   industryPageSlug('data-centres'),
   industryPageSlug('manufacturing'),
+  industryPageSlug('banking'),
 ] as const;
 
 export type IndustryPageHeroContent = IndustriesHeroContent;
