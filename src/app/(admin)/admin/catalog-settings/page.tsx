@@ -43,7 +43,8 @@ import {
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
+import { normalizeHeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
 import {
   CATALOG_SETTINGS_BLOCKS,
@@ -898,39 +899,23 @@ export default function CatalogSettingsPage() {
                         <option value="inline">Classic (below profile rail)</option>
                       </select>
                     </div>
-                    <div className="admin-field">
-                      <LabelWithHelp help="Full screen fills the browser window (like the Industries page). Compact fits the hero content. Ignored when the search toolbar is docked to the hero (always full screen).">Listing hero height</LabelWithHelp>
-                      <select
-                        className="admin-select"
-                        disabled={normalizeToolbarDisplay(settings.toolbar_display) === 'hero_dock'}
-                        value={normalizeHeroHeight(settings.hero_height)}
-                        onChange={(e) =>
-                          setSettings({ ...settings, hero_height: normalizeHeroHeight(e.target.value) })
-                        }
-                      >
-                        {HERO_HEIGHT_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="admin-field">
-                      <LabelWithHelp help={`Hero on each /${type}s/[slug] case-study page.`}>Detail page hero height</LabelWithHelp>
-                      <select
-                        className="admin-select"
-                        value={normalizeHeroHeight(settings.detail_hero_height)}
-                        onChange={(e) =>
-                          setSettings({ ...settings, detail_hero_height: normalizeHeroHeight(e.target.value) })
-                        }
-                      >
-                        {HERO_HEIGHT_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <HeroHeightPicker
+                      label={
+                        <LabelWithHelp help="Full screen fills the browser window (like the Industries page). Compact fits the hero content, or a custom % of the screen. Ignored when the search toolbar is docked to the hero (always full screen).">
+                          Listing hero height
+                        </LabelWithHelp>
+                      }
+                      disabled={normalizeToolbarDisplay(settings.toolbar_display) === 'hero_dock'}
+                      value={settings.hero_height}
+                      onChange={(hero_height) => setSettings({ ...settings, hero_height })}
+                    />
+                    <HeroHeightPicker
+                      label={
+                        <LabelWithHelp help={`Hero on each /${type}s/[slug] case-study page.`}>Detail page hero height</LabelWithHelp>
+                      }
+                      value={settings.detail_hero_height}
+                      onChange={(detail_hero_height) => setSettings({ ...settings, detail_hero_height })}
+                    />
                     <div className="admin-field">
                       <LabelWithHelp help="Small label above the title (e.g. “Product Spotlight”). Keep short.">Hero eyebrow</LabelWithHelp>
                       <input

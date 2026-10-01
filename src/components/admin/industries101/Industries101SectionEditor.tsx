@@ -23,7 +23,7 @@ import {
 import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
 import { BgMediaGroup, CardStyleFields, SectionBoxGroup, VALIGN_OPTIONS } from '@/components/admin/legacy/LegacySectionEditor';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import {
   IND101_ALL_ICON_PRESETS,
   defaultInd101Card,
@@ -131,12 +131,7 @@ function Ind101HeroEditor({ content: c, onChange }: EditorProps<Ind101HeroConten
       </Group>
       <Group title="Layout, height & entrance">
         <div className="admin-form-grid">
-          <SelectInput
-            label="Hero height"
-            value={normalizeHeroHeight(c.heroHeight)}
-            options={HERO_HEIGHT_OPTIONS}
-            onChange={(v) => set({ heroHeight: normalizeHeroHeight(v) })}
-          />
+          <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
           <SelectInput label="Vertical position (full height)" value={layout.vAlign || 'bottom'} options={HERO_VALIGN_OPTIONS} onChange={(vAlign) => setLayout({ vAlign })} />
           <AlignButtons label="Text align" value={layout.hAlign} onChange={(v) => setLayout({ hAlign: (v || undefined) as Ind101HeroContent['layout']['hAlign'] })} />
           <TextInput label="Content max width" value={layout.maxWidth} onChange={(maxWidth) => setLayout({ maxWidth })} placeholder="760px" />

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_SITE_COPY, HERO_HEIGHT_PAGES, type SiteCopy } from '@/lib/site-copy';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import type { IndustryDef } from '@/lib/industries';
 import type { LocationDef } from '@/lib/locations';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
@@ -429,31 +429,19 @@ export default function SiteCopyAdminPage() {
         {tab === 'heroHeights' ? (
           <div className="admin-form-grid">
             <p className="full theme-help" style={{ marginTop: 0 }}>
-              Full screen fills the browser window (like the Industries page); Compact fits the hero content. CMS
+              Full screen fills the browser window (like the Industries page); Compact fits the hero content or a
+              custom % of the screen height. CMS
               pages (Home, About, Contact, Careers, Industries, …) set this on their hero section in{' '}
               <Link href="/admin/pages">Pages</Link>; product, project and service pages in{' '}
               <Link href="/admin/catalog-settings">Catalog settings → Hero</Link>.
             </p>
             {HERO_HEIGHT_PAGES.map(({ key, label }) => (
-              <div key={key} className="admin-field">
-                <label>{label}</label>
-                <select
-                  className="admin-select"
-                  value={normalizeHeroHeight(copy.heroHeights?.[key])}
-                  onChange={(e) =>
-                    setCopy({
-                      ...copy,
-                      heroHeights: { ...copy.heroHeights, [key]: normalizeHeroHeight(e.target.value) },
-                    })
-                  }
-                >
-                  {HERO_HEIGHT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <HeroHeightPicker
+                key={key}
+                label={label}
+                value={copy.heroHeights?.[key]}
+                onChange={(height) => setCopy({ ...copy, heroHeights: { ...copy.heroHeights, [key]: height } })}
+              />
             ))}
           </div>
         ) : null}

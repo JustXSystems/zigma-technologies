@@ -9,7 +9,12 @@ import {
   CATALOG_DETAIL_TEMPLATE_VALUES,
   CATALOG_TOOLBAR_DISPLAY_VALUES,
 } from '@/lib/types';
-import { HERO_HEIGHT_VALUES } from '@/lib/hero-height';
+import { isHeroHeight, normalizeHeroHeight } from '@/lib/hero-height';
+
+const heroHeightSchema = z
+  .string()
+  .refine(isHeroHeight, 'Invalid hero height')
+  .transform((v) => normalizeHeroHeight(v));
 
 export async function GET(request: Request) {
   try {
@@ -62,8 +67,8 @@ const putSchema = z.object({
   detail_template: z.enum(CATALOG_DETAIL_TEMPLATE_VALUES).optional(),
   detail_elements_json: z.array(z.string()).optional(),
   hero_variant: z.enum(['standard', 'spotlight']).optional(),
-  hero_height: z.enum(HERO_HEIGHT_VALUES).optional(),
-  detail_hero_height: z.enum(HERO_HEIGHT_VALUES).optional(),
+  hero_height: heroHeightSchema.optional(),
+  detail_hero_height: heroHeightSchema.optional(),
   toolbar_display: z.enum(CATALOG_TOOLBAR_DISPLAY_VALUES).optional(),
   hero_standard_panel_enabled: z.boolean().optional(),
   hero_meta_enabled: z.boolean().optional(),

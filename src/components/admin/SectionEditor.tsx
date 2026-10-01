@@ -51,7 +51,7 @@ import { isQsSectionType, withQsDefaults } from '@/lib/qualitysafety-sections';
 import QualitySafetySectionEditor from '@/components/admin/qualitysafety/QualitySafetySectionEditor';
 import { isHomeSectionType, withHomeDefaults } from '@/lib/home-sections';
 import HomeSectionEditor from '@/components/admin/home/HomeSectionEditor';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 
 type Props = {
   section: CmsSection;
@@ -71,24 +71,6 @@ function Field({
       <label>{label}</label>
       {children}
     </div>
-  );
-}
-
-function HeroHeightField({ value, onChange }: { value: unknown; onChange: (v: HeroHeight) => void }) {
-  return (
-    <Field label="Hero height">
-      <select
-        className="admin-select"
-        value={normalizeHeroHeight(value)}
-        onChange={(e) => onChange(normalizeHeroHeight(e.target.value))}
-      >
-        {HERO_HEIGHT_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </Field>
   );
 }
 
@@ -648,7 +630,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 <Field label="Breadcrumb label">
                   <input className="admin-input" value={String(content.breadcrumb || '')} onChange={(e) => setField('breadcrumb', e.target.value)} />
                 </Field>
-                <HeroHeightField value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
                 <div className="full">
                   <MediaPicker
                     value={String(content.image || '')}
@@ -709,7 +691,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
                 <Field label="Tagline">
                   <input className="admin-input" value={String(content.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} />
                 </Field>
-                <HeroHeightField value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
                 <div className="full">
                   <MediaPicker
                     value={String(content.image || '')}

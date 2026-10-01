@@ -60,7 +60,7 @@ import {
   type LegacyValueCard,
   type LegacyValuesContent,
 } from '@/lib/legacy-sections';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -265,12 +265,7 @@ function LegacyHeroEditor({ content: c, onChange }: EditorProps<LegacyHeroConten
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Background slideshow (images / videos)" withIndicators />
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
-          <SelectInput
-            label="Hero height"
-            value={normalizeHeroHeight(c.heroHeight)}
-            options={HERO_HEIGHT_OPTIONS}
-            onChange={(v) => set({ heroHeight: normalizeHeroHeight(v) })}
-          />
+          <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
           <AlignButtons
             label="Badge position"
             value={layout.badgeSide}

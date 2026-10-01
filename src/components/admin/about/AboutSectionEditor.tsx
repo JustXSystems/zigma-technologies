@@ -41,7 +41,7 @@ import {
   type StoryContent,
   type TextEl,
 } from '@/lib/about-sections';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -136,12 +136,7 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
       </Group>
       <Group title="Layout" description="Hero height, image side, column widths, gap, alignment">
         <div className="admin-form-grid">
-          <SelectInput
-            label="Hero height"
-            value={normalizeHeroHeight(c.heroHeight)}
-            options={HERO_HEIGHT_OPTIONS}
-            onChange={(v) => set('heroHeight', normalizeHeroHeight(v))}
-          />
+          <HeroHeightPicker value={c.heroHeight} onChange={(v) => set('heroHeight', v)} />
         </div>
         <SplitLayoutEditor value={c.layout} onChange={(v) => set('layout', v)} columnsPlaceholder="1.15fr 0.98fr" />
       </Group>

@@ -6674,6 +6674,14 @@ footer .foot-powered{font-size:0.8em;}
 .hero-full{min-height:var(--hero-vh);display:flex;align-items:center;}
 .hero-full > :is(.container,.az-inner){width:100%;}
 .hero-auto{min-height:auto;display:block;}
+/* Compact with a custom height: n% of the measured visible screen; min-height so content is never clipped. */
+.hero-compact{min-height:calc(var(--hero-vh) * var(--hero-compact, 0.5));display:flex;align-items:center;}
+.hero-compact > :is(.container,.az-inner){width:100%;}
+.hero-h-20{--hero-compact:0.2;}.hero-h-25{--hero-compact:0.25;}.hero-h-30{--hero-compact:0.3;}
+.hero-h-35{--hero-compact:0.35;}.hero-h-40{--hero-compact:0.4;}.hero-h-45{--hero-compact:0.45;}
+.hero-h-50{--hero-compact:0.5;}.hero-h-55{--hero-compact:0.55;}.hero-h-60{--hero-compact:0.6;}
+.hero-h-65{--hero-compact:0.65;}.hero-h-70{--hero-compact:0.7;}.hero-h-75{--hero-compact:0.75;}
+.hero-h-80{--hero-compact:0.8;}.hero-h-85{--hero-compact:0.85;}.hero-h-90{--hero-compact:0.9;}
 /* Short screens (landscape phones, small laptop windows): the active slide sits in flow so the slider fills
    the available height yet grows instead of clipping when its content needs more room. */
 @media (min-width:761px) and (max-height:720px){
@@ -6681,7 +6689,7 @@ footer .foot-powered{font-size:0.8em;}
   .hero-slider .slide.active{position:relative;inset:auto;min-height:var(--hero-vh);}
 }
 @media (max-height:520px) and (orientation:landscape){
-  .hero-full{padding-top:calc(var(--header-h, 82px) + 1rem);padding-bottom:1.5rem;}
+  :is(.hero-full,.hero-compact){padding-top:calc(var(--header-h, 82px) + 1rem);padding-bottom:1.5rem;}
   .hero-slider .slide > .container{padding-top:calc(var(--header-h, 82px) + 1rem);padding-bottom:2rem;}
 }
 

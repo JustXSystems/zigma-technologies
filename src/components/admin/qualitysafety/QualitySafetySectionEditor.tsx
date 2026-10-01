@@ -23,7 +23,7 @@ import {
 import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
 import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup, VALIGN_OPTIONS } from '@/components/admin/legacy/LegacySectionEditor';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
-import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight } from '@/lib/hero-height';
+import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import {
   QS_ALL_ICON_PRESETS,
   defaultQsCert,
@@ -102,12 +102,7 @@ function QsHeroEditor({ content: c, onChange }: EditorProps<QsHeroContent>) {
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Background slideshow (images / videos)" withIndicators />
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
-          <SelectInput
-            label="Hero height"
-            value={normalizeHeroHeight(c.heroHeight, 'auto')}
-            options={HERO_HEIGHT_OPTIONS}
-            onChange={(v) => set({ heroHeight: normalizeHeroHeight(v, 'auto') })}
-          />
+          <HeroHeightPicker value={c.heroHeight} fallback="auto" onChange={(heroHeight) => set({ heroHeight })} />
           <AlignButtons label="Text align" value={layout.hAlign} onChange={(v) => setLayout({ hAlign: (v || undefined) as QsHeroContent['layout']['hAlign'] })} />
           <TextInput label="Content max width" value={layout.maxWidth} onChange={(maxWidth) => setLayout({ maxWidth })} placeholder="820px" />
           <Field label="Behaviour">

@@ -7,9 +7,9 @@
 
 /* ---------- Page hero ---------- */
 .az-hero.i101-hero{padding:var(--az-pt,9rem) 0 var(--az-pb,7.4rem);background-color:var(--navy-950,#0A1628);}
-.i101-hero.hero-full.i101-hero--v-bottom{align-items:flex-end;}
-.i101-hero.hero-full.i101-hero--v-top{align-items:flex-start;}
-.i101-hero.hero-full.i101-hero--v-center{align-items:center;}
+.i101-hero:is(.hero-full,.hero-compact).i101-hero--v-bottom{align-items:flex-end;}
+.i101-hero:is(.hero-full,.hero-compact).i101-hero--v-top{align-items:flex-start;}
+.i101-hero:is(.hero-full,.hero-compact).i101-hero--v-center{align-items:center;}
 .i101-hero-copy{position:relative;max-width:760px;}
 .i101-hero--h-center .i101-hero-copy{margin-left:auto;margin-right:auto;text-align:center;}
 .i101-hero--h-right .i101-hero-copy{margin-left:auto;text-align:right;}
