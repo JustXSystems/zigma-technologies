@@ -6,6 +6,7 @@ import "./globals.css";
 import "./about-sections.css";
 import "./life-sections.css";
 import "./legacy-sections.css";
+import "./home-sections.css";
 import "./contact-sections.css";
 import "./careers-sections.css";
 import "./certifications-sections.css";

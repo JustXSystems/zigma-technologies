@@ -18,6 +18,7 @@ import { defaultIndustriesSectionContent } from '@/lib/industries-sections';
 import { defaultIndustryPageSectionContent } from '@/lib/industry-page-sections';
 import { defaultIndustries101SectionContent } from '@/lib/industries101-sections';
 import { defaultQsSectionContent } from '@/lib/qualitysafety-sections';
+import { defaultHomeSectionContent } from '@/lib/home-sections';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
@@ -117,6 +118,7 @@ export default function AdminPageSectionsPage() {
           defaultIndustryPageSectionContent(addType, page?.slug) ||
           defaultIndustries101SectionContent(addType) ||
           defaultQsSectionContent(addType) ||
+          defaultHomeSectionContent(addType) ||
           {};
     const res = await fetch('/api/admin/sections', {
       method: 'POST',

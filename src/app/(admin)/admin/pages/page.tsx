@@ -74,6 +74,7 @@ export default function AdminPagesPage() {
 
   async function pageUpgrade(
     page:
+      | 'home'
       | 'contact'
       | 'careers'
       | 'certifications'
@@ -89,6 +90,7 @@ export default function AdminPagesPage() {
     action: 'upgrade' | 'revert'
   ) {
     const upgradeQuestion = {
+      home: 'Upgrade the Homepage (/) sections to the fully configurable homepage editors? All current slides, text, images, cards, stats, logos, buttons and custom CSS are kept (the page looks the same), and the previous version is saved so it can be restored.',
       contact:
         'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
       careers:
@@ -115,6 +117,7 @@ export default function AdminPagesPage() {
         'Upgrade the Airports industry page (/industries-airports) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
     const name = {
+      home: 'Homepage',
       contact: 'Contact',
       careers: 'Careers',
       certifications: 'Certifications',
@@ -213,6 +216,22 @@ export default function AdminPagesPage() {
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button type="button" className="admin-btn admin-btn-primary" onClick={seedHome}>
               Seed homepage
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('home', 'upgrade')}
+              title="Convert the live homepage sections to the configurable homepage editors (keeps all content and the current look)"
+            >
+              Upgrade homepage
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('home', 'revert')}
+              title="Restore the homepage sections saved before the upgrade"
+            >
+              Restore previous homepage
             </button>
             <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('about-zigma')}>
               Seed about zigma

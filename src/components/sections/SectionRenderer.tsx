@@ -18,6 +18,7 @@ import { renderIndustriesSection } from '@/components/sections/IndustriesSection
 import { renderIndustryPageSection } from '@/components/sections/IndustryPageSections';
 import { renderIndustries101Section } from '@/components/sections/Industries101Sections';
 import { renderQualitySafetySection } from '@/components/sections/QualitySafetySections';
+import { renderHomeSection } from '@/components/sections/HomeSections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -2255,6 +2256,19 @@ export default function SectionRenderer({ sections }: { sections: CmsSection[] }
             case 'qs_commit':
             case 'qs_cta':
               return wrap(renderQualitySafetySection(section.type, { key, content, sectionKey: section.section_key }));
+            case 'home_hero':
+            case 'home_eco':
+            case 'home_stats':
+            case 'home_why':
+            case 'home_split':
+            case 'home_timeline':
+            case 'home_projects':
+            case 'home_industries':
+            case 'home_testimonials':
+            case 'home_partners':
+            case 'home_cert':
+            case 'home_cta':
+              return wrap(renderHomeSection(section.type, { key, content, sectionKey: section.section_key }));
             default:
               return (
                 <section key={key} className="section section-light">

@@ -1,7 +1,7 @@
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/api';
 import { createPage, createSection, getPageBySlug, listSections, updatePage } from '@/lib/cms';
-import { HOMEPAGE_SEED_SECTIONS } from '@/lib/homepage-seed';
+import { HOME_SEED_SECTIONS } from '@/lib/home-sections';
 
 export async function POST() {
   try {
@@ -34,8 +34,8 @@ export async function POST() {
     }
 
     const created = [];
-    for (let i = 0; i < HOMEPAGE_SEED_SECTIONS.length; i++) {
-      const seed = HOMEPAGE_SEED_SECTIONS[i];
+    for (let i = 0; i < HOME_SEED_SECTIONS.length; i++) {
+      const seed = HOME_SEED_SECTIONS[i];
       const section = await createSection({
         page_id: page.id,
         type: seed.type,

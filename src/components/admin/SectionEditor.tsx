@@ -49,6 +49,8 @@ import { isIndustries101SectionType, withIndustries101Defaults } from '@/lib/ind
 import Industries101SectionEditor from '@/components/admin/industries101/Industries101SectionEditor';
 import { isQsSectionType, withQsDefaults } from '@/lib/qualitysafety-sections';
 import QualitySafetySectionEditor from '@/components/admin/qualitysafety/QualitySafetySectionEditor';
+import { isHomeSectionType, withHomeDefaults } from '@/lib/home-sections';
+import HomeSectionEditor from '@/components/admin/home/HomeSectionEditor';
 import { HERO_HEIGHT_OPTIONS, normalizeHeroHeight, type HeroHeight } from '@/lib/hero-height';
 
 type Props = {
@@ -253,6 +255,7 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
     if (isIndustryPageSectionType(section.type)) return withIndustryPageDefaults<Record<string, unknown>>(section.type, raw);
     if (isIndustries101SectionType(section.type)) return withIndustries101Defaults<Record<string, unknown>>(section.type, raw);
     if (isQsSectionType(section.type)) return withQsDefaults<Record<string, unknown>>(section.type, raw);
+    if (isHomeSectionType(section.type)) return withHomeDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
@@ -570,6 +573,9 @@ export default function SectionEditor({ section, onClose, onSaved }: Props) {
             ) : null}
             {isQsSectionType(section.type) ? (
               <QualitySafetySectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isHomeSectionType(section.type) ? (
+              <HomeSectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {(section.type === 'cta' ||
               section.type === 'eco' ||

@@ -254,7 +254,7 @@ function mediaAllowed(path: string, mime: string | null, allowVideo: boolean) {
   return isImageMediaPath(path, mime) || mime === 'image/svg+xml' || /\.svg(\?|$)/i.test(path);
 }
 
-function titleFromPath(path: string) {
+export function titleFromPath(path: string) {
   const file = path.split(/[/?#]/).filter(Boolean).pop() || '';
   return decodeURIComponent(file.replace(/\.[a-z0-9]+$/i, ''))
     .replace(/[-_]+/g, ' ')
@@ -367,7 +367,7 @@ function LibraryModal({
 }
 
 /** Bulk add: multi-file upload, media-library multi-select, or pasted URLs. */
-function MediaBulkAdd({ allowVideo, onAdd }: { allowVideo: boolean; onAdd: (paths: string[]) => void }) {
+export function MediaBulkAdd({ allowVideo, onAdd }: { allowVideo: boolean; onAdd: (paths: string[]) => void }) {
   const [library, setLibrary] = useState(false);
   const [paste, setPaste] = useState(false);
   const [pasteText, setPasteText] = useState('');

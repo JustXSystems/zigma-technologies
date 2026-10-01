@@ -1,6 +1,6 @@
 import { getPageBySlug } from '@/lib/cms';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
-import { HOMEPAGE_SEED_SECTIONS } from '@/lib/homepage-seed';
+import { HOME_SEED_SECTIONS } from '@/lib/home-sections';
 import { CAREERS_SEED_SECTIONS_V2 } from '@/lib/careers-sections';
 import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
 import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
@@ -9,7 +9,7 @@ import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
 
 function seedForSlug(slug: string) {
-  if (slug === 'home') return HOMEPAGE_SEED_SECTIONS;
+  if (slug === 'home') return HOME_SEED_SECTIONS;
   if (slug === 'careers') return CAREERS_SEED_SECTIONS_V2;
   if (slug === 'certifications') return CERTIFICATIONS_SEED_SECTIONS_V2;
   if (slug === 'privacy') return PRIVACY_SEED_SECTIONS_V2;
