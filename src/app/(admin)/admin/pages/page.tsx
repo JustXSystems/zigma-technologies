@@ -1,26 +1,148 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { CmsPage } from '@/lib/cms-types';
+import type { PageSeedResult, PageSeedStatus } from '@/lib/page-seeds';
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+async function fetchPagesAndSeeds(): Promise<{ pages: CmsPage[]; seeds: PageSeedStatus[] }> {
+  const [pagesRes, seedRes] = await Promise.all([fetch('/api/admin/pages'), fetch('/api/admin/pages/seed')]);
+  const [pagesData, seedData] = await Promise.all([pagesRes.json(), seedRes.json()]);
+  if (!pagesRes.ok) throw new Error(pagesData.error || 'Failed to load pages');
+  if (!seedRes.ok) throw new Error(seedData.error || 'Failed to load seed status');
+  return { pages: pagesData.pages, seeds: seedData.pages };
+}
+
+function seedPlanLines(s: PageSeedStatus) {
+  const lines: string[] = [];
+  if (s.plan.createPage) lines.push(`Create the page at ${s.path} (published)`);
+  if (s.plan.insert) lines.push(`Add ${plural(s.plan.insert, 'section')} from the seed`);
+  if (s.plan.upgrade) {
+    lines.push(
+      `Upgrade ${plural(s.plan.upgrade, 'older section')} to the configurable editors. Content and look are kept, and the previous version is saved so it can be restored`
+    );
+  }
+  if (s.plan.add.length) {
+    lines.push(`Add ${plural(s.plan.add.length, 'new section')}: ${s.plan.add.map((a) => a.title).join(', ')}`);
+  }
+  return lines;
+}
+
+function seedSummary(s: PageSeedStatus) {
+  if (s.state === 'missing') return `Seed creates it with ${plural(s.seedSections, 'section')}`;
+  if (s.state === 'empty') return `No sections yet. Seed adds ${s.seedSections}`;
+  if (s.state === 'pending') {
+    return [s.plan.upgrade ? `${s.plan.upgrade} to upgrade` : '', s.plan.add.length ? `${s.plan.add.length} new` : '']
+      .filter(Boolean)
+      .join(' · ');
+  }
+  return s.lastRun ? `Last seeded ${new Date(s.lastRun.at).toLocaleDateString()}${s.lastRun.by ? ` by ${s.lastRun.by}` : ''}` : '';
+}
+
+const SEED_BADGE: Record<PageSeedStatus['state'], { className: string; label: string }> = {
+  missing: { className: 'new', label: 'Not created' },
+  empty: { className: 'new', label: 'Empty' },
+  pending: { className: 'new', label: 'Update available' },
+  current: { className: 'published', label: 'Up to date' },
+};
+
+const groupRowStyle = {
+  background: 'var(--admin-panel-2)',
+  fontSize: '0.68rem',
+  fontWeight: 600,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase' as const,
+  color: 'var(--admin-muted)',
+  padding: '0.45rem 1rem',
+};
 
 export default function AdminPagesPage() {
   const [pages, setPages] = useState<CmsPage[]>([]);
+  const [seeds, setSeeds] = useState<PageSeedStatus[]>([]);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [seedMsg, setSeedMsg] = useState('');
 
-  async function load() {
-    const res = await fetch('/api/admin/pages');
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to load');
+  const load = useCallback(async () => {
+    const data = await fetchPagesAndSeeds();
     setPages(data.pages);
-  }
+    setSeeds(data.seeds);
+  }, []);
 
   useEffect(() => {
-    load().catch((e) => setError(e.message));
+    let cancelled = false;
+    fetchPagesAndSeeds()
+      .then((data) => {
+        if (cancelled) return;
+        setPages(data.pages);
+        setSeeds(data.seeds);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const pageBySlug = useMemo(() => new Map(pages.map((p) => [p.slug, p])), [pages]);
+  const customPages = useMemo(() => {
+    const builtIn = new Set(seeds.map((s) => s.slug));
+    return pages.filter((p) => !builtIn.has(p.slug));
+  }, [pages, seeds]);
+  const pendingSeeds = seeds.filter((s) => s.state !== 'current');
+
+  async function runSeed(body: { action: 'sync' | 'restore'; slug?: string }, busyKey: string) {
+    setBusy(busyKey);
+    setError('');
+    setNotice('');
+    try {
+      const res = await fetch('/api/admin/pages/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Seed failed');
+      const failed = (data.results as PageSeedResult[]).filter((r) => !r.ok);
+      setNotice(data.message);
+      if (failed.length) setError(failed.map((r) => r.message).join(' '));
+      if (data.pages) setSeeds(data.pages);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Seed failed');
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function seedPage(s: PageSeedStatus) {
+    const lines = seedPlanLines(s);
+    if (lines.length) {
+      const question = `Seed ${s.label} (${s.path})?\n\n${lines.map((l) => `• ${l}`).join('\n')}\n\nNothing you have edited is overwritten.`;
+      if (!window.confirm(question)) return;
+    }
+    void runSeed({ action: 'sync', slug: s.slug }, s.slug);
+  }
+
+  function seedAll() {
+    if (pendingSeeds.length) {
+      const list = pendingSeeds.map((s) => `• ${s.label}: ${seedPlanLines(s).join('; ')}`).join('\n');
+      const question = `Seed all built-in pages? ${plural(pendingSeeds.length, 'page')} will change:\n\n${list}\n\nPages that are up to date are left as they are, and nothing you have edited is overwritten.`;
+      if (!window.confirm(question)) return;
+    }
+    void runSeed({ action: 'sync' }, '*');
+  }
+
+  function restorePage(s: PageSeedStatus) {
+    const question = `Restore ${plural(s.restorable, 'upgraded section')} on ${s.label} to the version saved before the upgrade? Changes made in the new editors since then will be lost.`;
+    if (!window.confirm(question)) return;
+    void runSeed({ action: 'restore', slug: s.slug }, s.slug);
+  }
 
   async function createPage(e: FormEvent) {
     e.preventDefault();
@@ -40,132 +162,6 @@ export default function AdminPagesPage() {
     await load();
   }
 
-  async function seedHome() {
-    setSeedMsg('');
-    setError('');
-    const res = await fetch('/api/admin/pages/seed-home', { method: 'POST' });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Seed failed');
-      return;
-    }
-    setSeedMsg(data.message);
-    await load();
-  }
-
-  async function seedInner(
-    slug: 'about-zigma' | 'life-at-zigma' | 'legacy20yrs' | 'industries101' | 'qualitysafety' | 'contact' | 'careers' | 'certifications' | 'privacy' | 'terms'
-  ) {
-    setSeedMsg('');
-    setError('');
-    const res = await fetch('/api/admin/pages/seed-inner', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Seed failed');
-      return;
-    }
-    setSeedMsg(data.message);
-    await load();
-  }
-
-  async function pageUpgrade(
-    page:
-      | 'home'
-      | 'contact'
-      | 'careers'
-      | 'certifications'
-      | 'privacy'
-      | 'terms'
-      | 'industries'
-      | 'industries-healthcare'
-      | 'industries-data-centres'
-      | 'industries-manufacturing'
-      | 'industries-banking'
-      | 'industries-education'
-      | 'industries-airports',
-    action: 'upgrade' | 'revert'
-  ) {
-    const upgradeQuestion = {
-      home: 'Upgrade the Homepage (/) sections to the fully configurable homepage editors? All current slides, text, images, cards, stats, logos, buttons and custom CSS are kept (the page looks the same), and the previous version is saved so it can be restored.',
-      contact:
-        'Upgrade the Contact page sections to the fully configurable contact editors? All current text, cards, offices, maps and custom CSS are kept, and the previous version is saved so it can be restored.',
-      careers:
-        'Upgrade the Careers page sections to the fully configurable careers editors? All current text, cards, jobs, roles and custom CSS are kept, and the previous version is saved so it can be restored.',
-      certifications:
-        'Upgrade the Certifications page sections to the fully configurable certifications editors? All current text, certificates, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      privacy:
-        'Upgrade the Privacy page sections to the fully configurable privacy editors? All current text, policy HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      terms:
-        'Upgrade the Terms page sections to the fully configurable terms editors? All current text, terms HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      industries:
-        'Upgrade the Industries page sections to the fully configurable industries editors? All current text, stats, sector and industry cards, icons, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      'industries-healthcare':
-        'Upgrade the Healthcare industry page (/industries-healthcare) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      'industries-data-centres':
-        'Upgrade the Data centres industry page (/industries-data-centres) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      'industries-manufacturing':
-        'Upgrade the Manufacturing industry page (/industries-manufacturing) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      'industries-banking':
-        'Upgrade the Banking industry page (/industries-banking) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      'industries-education':
-        'Upgrade the Education industry page (/industries-education) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-      'industries-airports':
-        'Upgrade the Airports industry page (/industries-airports) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
-    }[page];
-    const name = {
-      home: 'Homepage',
-      contact: 'Contact',
-      careers: 'Careers',
-      certifications: 'Certifications',
-      privacy: 'Privacy',
-      terms: 'Terms',
-      industries: 'Industries',
-      'industries-healthcare': 'Healthcare industry',
-      'industries-data-centres': 'Data centres industry',
-      'industries-manufacturing': 'Manufacturing industry',
-      'industries-banking': 'Banking industry',
-      'industries-education': 'Education industry',
-      'industries-airports': 'Airports industry',
-    }[page];
-    const industryPage = page.startsWith('industries-');
-    const question =
-      action === 'upgrade'
-        ? upgradeQuestion
-        : `Restore the ${name} page sections to the version saved before the upgrade? Changes made in the new editors will be lost.`;
-    if (!window.confirm(question)) return;
-    setSeedMsg('');
-    setError('');
-    const res = await fetch(`/api/admin/pages/upgrade-${industryPage ? 'industry-page' : page}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(industryPage ? { action, slug: page } : { action }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || `${name} upgrade failed`);
-      return;
-    }
-    setSeedMsg(data.message);
-    await load();
-  }
-
-  async function seedIndustries() {
-    setSeedMsg('');
-    setError('');
-    const res = await fetch('/api/admin/pages/seed-industries', { method: 'POST' });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Seed failed');
-      return;
-    }
-    setSeedMsg(data.message);
-    await load();
-  }
-
   async function openPreview(page: CmsPage) {
     setError('');
     const res = await fetch(`/api/admin/pages/${page.id}/preview`, { method: 'POST' });
@@ -177,35 +173,68 @@ export default function AdminPagesPage() {
     window.open(data.url, '_blank', 'noopener,noreferrer');
   }
 
-  async function toggle(page: CmsPage) {
+  async function patchPage(page: CmsPage, body: Partial<Pick<CmsPage, 'status'>> & { enabled?: boolean }) {
     await fetch(`/api/admin/pages/${page.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled: !page.enabled }),
+      body: JSON.stringify(body),
     });
     await load();
   }
 
-  async function setStatus(page: CmsPage, status: 'draft' | 'published') {
-    await fetch(`/api/admin/pages/${page.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-    await load();
+  function pageStatus(page: CmsPage | undefined) {
+    if (!page) return <span style={{ color: 'var(--admin-muted)', fontSize: '0.8rem' }}>—</span>;
+    return (
+      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+        <span className={`admin-badge ${page.status}`}>{page.status}</span>
+        {page.enabled ? null : <span className="admin-badge closed">disabled</span>}
+      </div>
+    );
   }
+
+  function pageActions(page: CmsPage) {
+    return (
+      <>
+        <Link className="admin-btn admin-btn-secondary" href={`/admin/pages/${page.id}`}>
+          Sections
+        </Link>
+        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => openPreview(page)}>
+          Preview
+        </button>
+        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => patchPage(page, { enabled: !page.enabled })}>
+          {page.enabled ? 'Disable' : 'Enable'}
+        </button>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary"
+          onClick={() => patchPage(page, { status: page.status === 'published' ? 'draft' : 'published' })}
+        >
+          {page.status === 'published' ? 'Unpublish' : 'Publish'}
+        </button>
+      </>
+    );
+  }
+
+  const groups = seeds.reduce<Array<{ group: string; items: PageSeedStatus[] }>>((acc, s) => {
+    const last = acc[acc.length - 1];
+    if (last && last.group === s.group) last.items.push(s);
+    else acc.push({ group: s.group, items: [s] });
+    return acc;
+  }, []);
 
   return (
     <div>
       {error ? <div className="admin-error">{error}</div> : null}
-      {seedMsg ? <div className="admin-success">{seedMsg}</div> : null}
+      {notice ? <div className="admin-success">{notice}</div> : null}
 
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
         <div className="admin-toolbar" style={{ marginBottom: 0 }}>
-          <div>
+          <div style={{ flex: '1 1 420px' }}>
             <h2 style={{ margin: 0, fontSize: '1.05rem' }}>Pages & sections</h2>
             <p style={{ margin: '0.4rem 0 0', color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
-              Manage public pages, reorder sections, enable/disable blocks.
+              Manage public pages, reorder sections, enable/disable blocks. <strong>Seed</strong> brings a built-in page up to
+              date: it creates the page if needed, fills it when empty, upgrades older sections to the configurable editors
+              and adds sections that are new in the seed. It never overwrites your edits and is safe to run any number of times.
             </p>
             <p style={{ margin: '0.3rem 0 0', color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
               Company details: type <code>{'{{phone}}'}</code>, <code>{'{{emergencyPhone}}'}</code>,{' '}
@@ -213,253 +242,97 @@ export default function AdminPagesPage() {
               <code>{'tel:{{phone}}'}</code>) and the site fills them from Site Settings.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button type="button" className="admin-btn admin-btn-primary" onClick={seedHome}>
-              Seed homepage
-            </button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ color: 'var(--admin-muted)', fontSize: '0.82rem' }}>
+              {seeds.length
+                ? pendingSeeds.length
+                  ? `${plural(pendingSeeds.length, 'built-in page')} can be seeded`
+                  : 'All built-in pages are up to date'
+                : null}
+            </span>
             <button
               type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('home', 'upgrade')}
-              title="Convert the live homepage sections to the configurable homepage editors (keeps all content and the current look)"
+              className={`admin-btn ${pendingSeeds.length ? 'admin-btn-primary' : 'admin-btn-secondary'}`}
+              onClick={seedAll}
+              disabled={busy !== null || !seeds.length}
             >
-              Upgrade homepage
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('home', 'revert')}
-              title="Restore the homepage sections saved before the upgrade"
-            >
-              Restore previous homepage
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('about-zigma')}>
-              Seed about zigma
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('life-at-zigma')}>
-              Seed life at zigma
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('legacy20yrs')}>
-              Seed legacy 20 yrs
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('industries101')}>
-              Seed industries 101
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('qualitysafety')}>
-              Seed quality &amp; safety
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('contact')}>
-              Seed contact
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('contact', 'upgrade')}
-              title="Convert the live Contact sections to the configurable contact editors (keeps all content)"
-            >
-              Upgrade contact page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('contact', 'revert')}
-              title="Restore the Contact sections saved before the upgrade"
-            >
-              Restore previous contact
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('careers')}>
-              Seed careers
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('careers', 'upgrade')}
-              title="Convert the live Careers sections to the configurable careers editors (keeps all content)"
-            >
-              Upgrade careers page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('careers', 'revert')}
-              title="Restore the Careers sections saved before the upgrade"
-            >
-              Restore previous careers
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('certifications')}>
-              Seed certifications
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('certifications', 'upgrade')}
-              title="Convert the live Certifications sections to the configurable certifications editors (keeps all content)"
-            >
-              Upgrade certifications page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('certifications', 'revert')}
-              title="Restore the Certifications sections saved before the upgrade"
-            >
-              Restore previous certifications
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('privacy')}>
-              Seed privacy
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('privacy', 'upgrade')}
-              title="Convert the live Privacy sections to the configurable privacy editors (keeps all content)"
-            >
-              Upgrade privacy page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('privacy', 'revert')}
-              title="Restore the Privacy sections saved before the upgrade"
-            >
-              Restore previous privacy
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={() => seedInner('terms')}>
-              Seed terms
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('terms', 'upgrade')}
-              title="Convert the live Terms sections to the configurable terms editors (keeps all content)"
-            >
-              Upgrade terms page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('terms', 'revert')}
-              title="Restore the Terms sections saved before the upgrade"
-            >
-              Restore previous terms
-            </button>
-            <button type="button" className="admin-btn admin-btn-secondary" onClick={seedIndustries}>
-              Seed industries
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries', 'upgrade')}
-              title="Convert the live Industries sections to the configurable industries editors (keeps all content)"
-            >
-              Upgrade industries page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries', 'revert')}
-              title="Restore the Industries sections saved before the upgrade"
-            >
-              Restore previous industries
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-healthcare', 'upgrade')}
-              title="Convert the live /industries-healthcare sections to the configurable industry page editors (keeps all content)"
-            >
-              Upgrade healthcare page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-healthcare', 'revert')}
-              title="Restore the /industries-healthcare sections saved before the upgrade"
-            >
-              Restore previous healthcare
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-data-centres', 'upgrade')}
-              title="Convert the live /industries-data-centres sections to the configurable industry page editors (keeps all content)"
-            >
-              Upgrade data centres page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-data-centres', 'revert')}
-              title="Restore the /industries-data-centres sections saved before the upgrade"
-            >
-              Restore previous data centres
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-manufacturing', 'upgrade')}
-              title="Convert the live /industries-manufacturing sections to the configurable industry page editors (keeps all content)"
-            >
-              Upgrade manufacturing page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-manufacturing', 'revert')}
-              title="Restore the /industries-manufacturing sections saved before the upgrade"
-            >
-              Restore previous manufacturing
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-banking', 'upgrade')}
-              title="Convert the live /industries-banking sections to the configurable industry page editors (keeps all content)"
-            >
-              Upgrade banking page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-banking', 'revert')}
-              title="Restore the /industries-banking sections saved before the upgrade"
-            >
-              Restore previous banking
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-education', 'upgrade')}
-              title="Convert the live /industries-education sections to the configurable industry page editors (keeps all content)"
-            >
-              Upgrade education page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-education', 'revert')}
-              title="Restore the /industries-education sections saved before the upgrade"
-            >
-              Restore previous education
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-airports', 'upgrade')}
-              title="Convert the live /industries-airports sections to the configurable industry page editors (keeps all content)"
-            >
-              Upgrade airports page
-            </button>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary"
-              onClick={() => pageUpgrade('industries-airports', 'revert')}
-              title="Restore the /industries-airports sections saved before the upgrade"
-            >
-              Restore previous airports
+              {busy === '*' ? 'Seeding…' : 'Seed all built-in pages'}
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="admin-table-wrap admin-card" style={{ padding: 0, marginBottom: '1rem' }}>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Built-in page</th>
+              <th>Status</th>
+              <th>Seed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {seeds.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="admin-empty">
+                  Loading built-in pages…
+                </td>
+              </tr>
+            ) : (
+              groups.map(({ group, items }) => [
+                <tr key={`g-${group}`}>
+                  <td colSpan={4} style={groupRowStyle}>
+                    {group}
+                  </td>
+                </tr>,
+                ...items.map((s) => {
+                  const page = pageBySlug.get(s.slug);
+                  const badge = SEED_BADGE[s.state];
+                  const rowBusy = busy === s.slug || busy === '*';
+                  return (
+                    <tr key={s.slug}>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{page?.title || s.label}</div>
+                        <code style={{ fontSize: '0.78rem' }}>{s.path}</code>
+                      </td>
+                      <td>{pageStatus(page)}</td>
+                      <td>
+                        <span className={`admin-badge ${badge.className}`}>{badge.label}</span>
+                        <div style={{ color: 'var(--admin-muted)', fontSize: '0.76rem', marginTop: '0.25rem' }}>{seedSummary(s)}</div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className={`admin-btn ${s.state === 'current' ? 'admin-btn-secondary' : 'admin-btn-primary'}`}
+                            onClick={() => seedPage(s)}
+                            disabled={busy !== null}
+                            title={seedPlanLines(s).join('\n') || 'Up to date. Running it again changes nothing.'}
+                          >
+                            {rowBusy ? 'Seeding…' : 'Seed'}
+                          </button>
+                          {page ? pageActions(page) : null}
+                          {s.restorable ? (
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-danger"
+                              onClick={() => restorePage(s)}
+                              disabled={busy !== null}
+                              title="Put the upgraded sections back to the version saved before the upgrade"
+                            >
+                              Restore previous ({s.restorable})
+                            </button>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                }),
+              ])
+            )}
+          </tbody>
+        </table>
       </div>
 
       <div className="admin-card" style={{ marginBottom: '1rem' }}>
@@ -485,50 +358,29 @@ export default function AdminPagesPage() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Title</th>
+              <th>Other pages</th>
               <th>Slug</th>
               <th>Status</th>
-              <th>Enabled</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {pages.length === 0 ? (
+            {customPages.length === 0 ? (
               <tr>
-                <td colSpan={5} className="admin-empty">
-                  No pages yet. Seed the homepage to get started.
+                <td colSpan={4} className="admin-empty">
+                  No other pages yet. Create one above.
                 </td>
               </tr>
             ) : (
-              pages.map((page) => (
+              customPages.map((page) => (
                 <tr key={page.id}>
                   <td style={{ fontWeight: 600 }}>{page.title}</td>
                   <td>
-                    <code>/{page.slug === 'home' ? '' : page.slug}</code>
+                    <code>/{page.slug}</code>
                   </td>
+                  <td>{pageStatus(page)}</td>
                   <td>
-                    <span className={`admin-badge ${page.status}`}>{page.status}</span>
-                  </td>
-                  <td>{page.enabled ? 'Yes' : 'No'}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <Link className="admin-btn admin-btn-secondary" href={`/admin/pages/${page.id}`}>
-                        Sections
-                      </Link>
-                      <button type="button" className="admin-btn admin-btn-secondary" onClick={() => openPreview(page)}>
-                        Preview
-                      </button>
-                      <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggle(page)}>
-                        {page.enabled ? 'Disable' : 'Enable'}
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-secondary"
-                        onClick={() => setStatus(page, page.status === 'published' ? 'draft' : 'published')}
-                      >
-                        {page.status === 'published' ? 'Unpublish' : 'Publish'}
-                      </button>
-                    </div>
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>{pageActions(page)}</div>
                   </td>
                 </tr>
               ))

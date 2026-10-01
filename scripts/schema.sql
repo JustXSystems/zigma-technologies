@@ -54,6 +54,17 @@ CREATE TABLE IF NOT EXISTS page_sections (
   INDEX idx_page_sections_page_sort (page_id, sort_order)
 ) ENGINE=InnoDB;
 
+-- Built-in page seeder ledger (also created on demand by src/lib/page-seeds.ts).
+CREATE TABLE IF NOT EXISTS page_seed_state (
+  slug VARCHAR(120) NOT NULL PRIMARY KEY,
+  known_keys TEXT NULL,
+  last_action VARCHAR(20) NULL,
+  last_summary VARCHAR(500) NULL,
+  last_run_by VARCHAR(190) NULL,
+  last_run_at TIMESTAMP NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS nav_items (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   location ENUM('header','footer') NOT NULL DEFAULT 'header',

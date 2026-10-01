@@ -1,12 +1,15 @@
 import { requireAdmin } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
+import { PAGE_SEEDS, getPageSeed } from '@/lib/page-seed-registry';
+import { syncPageSeed } from '@/lib/page-seeds';
 
 /**
- * Orchestrates common seed actions from the dashboard by calling existing route handlers.
+ * Orchestrates common seed actions from the dashboard. Built-in pages go through the idempotent page seeder
+ * (`seed-<slug>`, `seed-industries`, or every built-in page for `bootstrap`).
  */
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
     const body = (await readJson(request).catch(() => ({}))) as { action?: string };
     const action = body.action || '';
     const results: Array<{ action: string; ok: boolean; message: string }> = [];
@@ -24,51 +27,19 @@ export async function POST(request: Request) {
       }
     }
 
-    if (action === 'seed-home' || action === 'bootstrap') {
-      await run('seed-home', async () => {
-        const mod = await import('@/app/api/admin/pages/seed-home/route');
-        const res = await mod.POST();
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Home seed failed');
-        return data;
-      });
-    }
-
-    if (
-      action === 'seed-contact' ||
-      action === 'seed-careers' ||
-      action === 'seed-certifications' ||
-      action === 'seed-privacy' ||
-      action === 'seed-terms' ||
+    const pageSlugs =
       action === 'bootstrap'
-    ) {
-      const slugs =
-        action === 'bootstrap'
-          ? (['contact', 'careers', 'certifications', 'privacy', 'terms'] as const)
-          : ([
-              action.replace('seed-', '') as
-                | 'contact'
-                | 'careers'
-                | 'certifications'
-                | 'privacy'
-                | 'terms',
-            ] as const);
-
-      for (const slug of slugs) {
-        await run(`seed-${slug}`, async () => {
-          const mod = await import('@/app/api/admin/pages/seed-inner/route');
-          const res = await mod.POST(
-            new Request('http://local/api/admin/pages/seed-inner', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ slug }),
-            })
-          );
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || `${slug} seed failed`);
-          return data;
-        });
-      }
+        ? PAGE_SEEDS.map((d) => d.slug)
+        : action === 'seed-industries'
+          ? PAGE_SEEDS.filter((d) => d.group === 'Industries').map((d) => d.slug)
+          : action.startsWith('seed-') && getPageSeed(action.slice(5))
+            ? [action.slice(5)]
+            : [];
+    for (const slug of pageSlugs) {
+      await run(`seed-${slug}`, async () => {
+        const result = await syncPageSeed(slug, session.email || null);
+        return { message: result.message };
+      });
     }
 
     if (action === 'seed-header-nav' || action === 'bootstrap') {
@@ -179,16 +150,6 @@ export async function POST(request: Request) {
         }
         await upsertThemeSetting('site', mergeSiteSettings(DEFAULT_SITE_SETTINGS));
         return { message: 'Seeded default site settings.' };
-      });
-    }
-
-    if (action === 'seed-industries' || action === 'bootstrap') {
-      await run('seed-industries', async () => {
-        const mod = await import('@/app/api/admin/pages/seed-industries/route');
-        const res = await mod.POST();
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Industries seed failed');
-        return data;
       });
     }
 
