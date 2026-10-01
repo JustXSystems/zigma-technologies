@@ -83,7 +83,8 @@ export default function AdminPagesPage() {
       | 'industries-healthcare'
       | 'industries-data-centres'
       | 'industries-manufacturing'
-      | 'industries-banking',
+      | 'industries-banking'
+      | 'industries-education',
     action: 'upgrade' | 'revert'
   ) {
     const upgradeQuestion = {
@@ -107,6 +108,8 @@ export default function AdminPagesPage() {
         'Upgrade the Manufacturing industry page (/industries-manufacturing) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
       'industries-banking':
         'Upgrade the Banking industry page (/industries-banking) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
+      'industries-education':
+        'Upgrade the Education industry page (/industries-education) sections to the fully configurable industry page editors? All current text, overview HTML, images, buttons and custom CSS are kept, and the previous version is saved so it can be restored.',
     }[page];
     const name = {
       contact: 'Contact',
@@ -119,6 +122,7 @@ export default function AdminPagesPage() {
       'industries-data-centres': 'Data centres industry',
       'industries-manufacturing': 'Manufacturing industry',
       'industries-banking': 'Banking industry',
+      'industries-education': 'Education industry',
     }[page];
     const industryPage = page.startsWith('industries-');
     const question =
@@ -398,6 +402,22 @@ export default function AdminPagesPage() {
               title="Restore the /industries-banking sections saved before the upgrade"
             >
               Restore previous banking
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-education', 'upgrade')}
+              title="Convert the live /industries-education sections to the configurable industry page editors (keeps all content)"
+            >
+              Upgrade education page
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => pageUpgrade('industries-education', 'revert')}
+              title="Restore the /industries-education sections saved before the upgrade"
+            >
+              Restore previous education
             </button>
           </div>
         </div>
