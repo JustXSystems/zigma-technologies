@@ -236,18 +236,18 @@ const SECTIONS: SectionDef[] = [
       {
         key: 'enquiryNotifyEmail',
         label: 'Enquiry notify emails',
-        hint: 'Comma-separated. Requires SMTP_* in .env',
+        hint: 'Comma-separated. Used as {{notify_emails}} in Admin → Email templates (delivery is configured there)',
         full: true,
       },
       {
         key: 'enquiryNotifyEnabled',
         label: 'Enquiry email notify (true/false)',
-        hint: 'Set to false to silence notifications without clearing addresses',
+        hint: 'Legacy switch — once Admin → Email is saved, each template’s Enabled toggle controls this',
       },
       {
         key: 'visitorAutoReplyEnabled',
         label: 'Visitor auto-reply (true/false)',
-        hint: 'Confirmation email to submitter on enquiry/careers (requires SMTP)',
+        hint: 'Legacy switch — once Admin → Email is saved, the auto-reply templates control this',
       },
       {
         key: 'crmWebhookUrl',

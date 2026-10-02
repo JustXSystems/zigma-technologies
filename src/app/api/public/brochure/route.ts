@@ -1,15 +1,8 @@
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
-import { getThemeSettings } from '@/lib/cms';
 import { guardPublicForm } from '@/lib/form-guard';
-import {
-  formatEnquiryEmail,
-  formatVisitorEnquiryReply,
-  sendMail,
-  sendVisitorAutoReply,
-} from '@/lib/mail';
-import { mergeSiteSettings } from '@/lib/site-settings';
+import { notifySubmission } from '@/lib/mail';
 
 const schema = z.object({
   brochure_url: z.string().min(1),
@@ -69,7 +62,7 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
-    void notify(id, itemType, payload);
+    void notifySubmission({ kind: 'enquiry', id, itemType, payload });
 
     return jsonOk(
       { id, download_url: body.brochure_url, message: 'Brochure unlocked' },
@@ -79,29 +72,5 @@ export async function POST(request: Request) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
     console.error(error);
     return jsonError(error instanceof Error ? error.message : 'Submit failed', 500);
-  }
-}
-
-async function notify(id: number, itemType: string, payload: Record<string, unknown>) {
-  try {
-    const theme = await getThemeSettings();
-    const settings = mergeSiteSettings(theme.site);
-    if (settings.enquiryNotifyEnabled.trim().toLowerCase() !== 'false') {
-      const recipients = settings.enquiryNotifyEmail
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (recipients.length) {
-        const mail = formatEnquiryEmail(payload, { id, item_type: itemType });
-        await sendMail({ to: recipients, ...mail });
-      }
-    }
-    const visitorEmail = typeof payload.email === 'string' ? payload.email.trim() : '';
-    const visitorName = typeof payload.name === 'string' ? payload.name : undefined;
-    if (visitorEmail) {
-      await sendVisitorAutoReply(settings, visitorEmail, formatVisitorEnquiryReply(settings, visitorName));
-    }
-  } catch (err) {
-    console.error('[brochure-notify]', err);
   }
 }

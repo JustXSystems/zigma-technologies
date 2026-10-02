@@ -1,16 +1,9 @@
 import path from 'path';
 import { jsonError, jsonOk } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
-import { getThemeSettings } from '@/lib/cms';
 import { guardPublicForm } from '@/lib/form-guard';
-import {
-  formatEnquiryEmail,
-  formatVisitorCareersReply,
-  sendMail,
-  sendVisitorAutoReply,
-} from '@/lib/mail';
+import { notifySubmission } from '@/lib/mail';
 import { saveResumeFile } from '@/lib/resumes';
-import { mergeSiteSettings } from '@/lib/site-settings';
 
 const ALLOWED_RESUME = new Set([
   'application/pdf',
@@ -83,62 +76,18 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
-    void notifyApplication(id, payload);
+    void notifySubmission({
+      kind: 'careers',
+      id,
+      itemType: 'careers',
+      payload,
+      resume: { stored: storedName, name: resume.name, mime: payload.resume_mime },
+    });
 
     return jsonOk({ id, message: 'Application submitted successfully' }, { status: 201 });
   } catch (error) {
     console.error(error);
     return jsonError(error instanceof Error ? error.message : 'Submit failed', 500);
-  }
-}
-
-async function notifyApplication(id: number, payload: Record<string, unknown>) {
-  try {
-    const theme = await getThemeSettings();
-    const settings = mergeSiteSettings(theme.site);
-
-    if (settings.enquiryNotifyEnabled.trim().toLowerCase() !== 'false') {
-      const recipients = settings.enquiryNotifyEmail
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (recipients.length) {
-        const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-        const mail = formatEnquiryEmail(
-          {
-            name: payload.name,
-            email: payload.email,
-            phone: payload.phone,
-            role: payload.role,
-            experience: payload.experience,
-            message: payload.message,
-            resume_name: payload.resume_name,
-          },
-          { id, item_type: 'careers' }
-        );
-        let text = mail.text;
-        text += `\nResume: download from Admin → Enquiries #${id}`;
-        if (site) text += `\n${site}/admin/enquiries`;
-        await sendMail({
-          to: recipients,
-          subject: `Careers application #${id}: ${String(payload.role || 'Role')} — ${String(payload.name || '')}`,
-          text,
-        });
-      }
-    }
-
-    const visitorEmail = typeof payload.email === 'string' ? payload.email.trim() : '';
-    const visitorName = typeof payload.name === 'string' ? payload.name : undefined;
-    const visitorRole = typeof payload.role === 'string' ? payload.role : undefined;
-    if (visitorEmail) {
-      await sendVisitorAutoReply(
-        settings,
-        visitorEmail,
-        formatVisitorCareersReply(settings, visitorName, visitorRole)
-      );
-    }
-  } catch (err) {
-    console.error('[careers-notify]', err);
   }
 }
 

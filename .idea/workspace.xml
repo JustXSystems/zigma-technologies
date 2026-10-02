@@ -7,23 +7,19 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 catalog settings in hero section customizattion">
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#45 catalog settings section customizattion">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/products/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/projects/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/services/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/brochure/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/brochure/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/callback/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/callback/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/careers/apply/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/careers/apply/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/enquiries/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/enquiries/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-screens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-screens.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/mail.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/mail.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,23 +77,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4233726561812636" />
-      <entry key="MS500" value="1.842062953608416" />
-      <entry key="S2" value="1.9579352208267373" />
-      <entry key="S5" value="1.9850728462767737" />
-      <entry key="S10" value="2.2169069797697194" />
-      <entry key="S30" value="9.648259990317365" />
-      <entry key="S60" value="27.627505652787963" />
-      <entry key="M2" value="55.098299057488624" />
-      <entry key="M5" value="88.05586438398461" />
-      <entry key="M10" value="103.89954647857826" />
-      <entry key="M15" value="110.28005581636504" />
-      <entry key="M30" value="127.41579675845377" />
-      <entry key="H1" value="206.40611110280415" />
-      <entry key="H2" value="454.8722220905853" />
-      <entry key="H4" value="963.2411177050461" />
-      <entry key="D1" value="3354.028772096084" />
-      <entry key="W1" value="15454.444386938008" />
+      <entry key="MS100" value="1.5034040458212736" />
+      <entry key="MS500" value="2.57005425842151" />
+      <entry key="S2" value="5.319305724167975" />
+      <entry key="S5" value="8.950687455620207" />
+      <entry key="S10" value="12.763677874040539" />
+      <entry key="S30" value="21.048426663202278" />
+      <entry key="S60" value="36.002154587285595" />
+      <entry key="M2" value="85.12601388254559" />
+      <entry key="M5" value="227.33660550108738" />
+      <entry key="M10" value="353.28656108456534" />
+      <entry key="M15" value="415.59378503901024" />
+      <entry key="M30" value="493.0109244719617" />
+      <entry key="H1" value="539.36587764301" />
+      <entry key="H2" value="588.9578489601228" />
+      <entry key="H4" value="803.9547216177458" />
+      <entry key="D1" value="3224.411979999205" />
+      <entry key="W1" value="15521.85758084174" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -111,31 +107,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.84284735169701E-266" />
-      <entry key="H1" value="1.3575151386623558E-133" />
-      <entry key="H2" value="3.6844472294526E-67" />
-      <entry key="H4" value="6.0699647689055434E-34" />
-      <entry key="D1" value="2.9564597730954975E-6" />
-      <entry key="W1" value="0.25153393358970144" />
+      <entry key="M30" value="1.7740108405023882E-271" />
+      <entry key="H1" value="4.211900806646387E-136" />
+      <entry key="H2" value="2.0522915988342337E-68" />
+      <entry key="H4" value="1.4325821438586445E-34" />
+      <entry key="D1" value="2.3241324158705867E-6" />
+      <entry key="W1" value="0.24303365846826544" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3559588776550004" />
-      <entry key="MS500" value="1.8242739157579886" />
-      <entry key="S2" value="1.9531909974601624" />
-      <entry key="S5" value="1.9831477510802096" />
-      <entry key="S10" value="2.2158483345714277" />
-      <entry key="S30" value="9.646846882210374" />
-      <entry key="S60" value="27.62540174935686" />
-      <entry key="M2" value="55.096117476216264" />
-      <entry key="M5" value="88.0544325124247" />
-      <entry key="M10" value="103.89868312990048" />
-      <entry key="M15" value="110.2794036467062" />
-      <entry key="M30" value="127.41528672356417" />
-      <entry key="H1" value="206.4055967120972" />
-      <entry key="H2" value="454.87170045425904" />
-      <entry key="H4" value="963.2406306750624" />
-      <entry key="D1" value="3354.0285189509123" />
-      <entry key="W1" value="15454.69575882533" />
+      <entry key="MS100" value="1.4656765536037382" />
+      <entry key="MS500" value="2.555122349224358" />
+      <entry key="S2" value="5.31107969882062" />
+      <entry key="S5" value="8.944932016731812" />
+      <entry key="S10" value="12.759460025851537" />
+      <entry key="S30" value="21.046016910098963" />
+      <entry key="S60" value="36.00001139032147" />
+      <entry key="M2" value="85.12341407656909" />
+      <entry key="M5" value="227.33376029939149" />
+      <entry key="M10" value="353.28431051498563" />
+      <entry key="M15" value="415.5920060235868" />
+      <entry key="M30" value="493.00985968576686" />
+      <entry key="H1" value="539.3652913990684" />
+      <entry key="H2" value="588.9575132788553" />
+      <entry key="H4" value="803.9544496172624" />
+      <entry key="D1" value="3224.411754285975" />
+      <entry key="W1" value="15522.100454100972" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -290,8 +286,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#42 Menu options fonts customization" />
-    <MESSAGE value="#42 About sectiom font cconfiguration" />
     <MESSAGE value="#44 LIFE AT ZIGMA implemented" />
     <MESSAGE value="#43 All hero sections must be full screen." />
     <MESSAGE value="#43 logo link made editable" />
@@ -315,7 +309,9 @@
     <MESSAGE value="#45 In hero section, for any text or image/vedio container must be configurable for its position/alignment with precision like Example (bottom left, -10px, -20px) means leaving 10px from bottom left and leaving 20px from bottom, this might helps me to put the container to the desired position in hero section of any page" />
     <MESSAGE value="#45 layout settings  missing in few hero section editing" />
     <MESSAGE value="#45 catalog settings in hero section customizattion" />
-    <option name="LAST_COMMIT_MESSAGE" value="#45 catalog settings in hero section customizattion" />
+    <MESSAGE value="#45 catalog settings in section customizattion" />
+    <MESSAGE value="#45 catalog settings section customizattion" />
+    <option name="LAST_COMMIT_MESSAGE" value="#45 catalog settings section customizattion" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

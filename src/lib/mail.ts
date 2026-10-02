@@ -1,114 +1,238 @@
-import nodemailer from 'nodemailer';
-import type { SiteSettings } from '@/lib/site-settings';
+import { getThemeSettings } from '@/lib/cms';
+import { mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
+import {
+  MAIL_EVENTS,
+  parseAddressList,
+  type MailConfig,
+  type MailEventKey,
+  type MailProvider,
+  type MailSecrets,
+  type MailTemplate,
+} from '@/lib/mail-config';
+import {
+  SAMPLE_PAYLOADS,
+  bodyToHtml,
+  buildMailVars,
+  escapeHtml,
+  htmlToText,
+  renderTemplate,
+  wrapEmailHtml,
+  type MailVars,
+} from '@/lib/mail-template';
+import { getMailSettings, getMailLogMessage, insertMailLog, readMailAttachment, updateMailLog } from '@/lib/mail-store';
+import { deliver, effectiveProvider, type OutgoingAttachment, type OutgoingMail } from '@/lib/mail-transport';
+import { readResumeFile } from '@/lib/resumes';
 
-export type MailPayload = {
-  to: string | string[];
-  subject: string;
-  text: string;
-  html?: string;
+type AttachmentRef = { kind: 'resume'; stored: string; name: string; mime: string } | { kind: 'static'; id: string; name: string; mime: string };
+
+/** What the log keeps so a failed send can be retried without re-rendering. */
+type LoggedMessage = Omit<OutgoingMail, 'attachments'> & { attachments: AttachmentRef[] };
+
+type MailContext = {
+  config: MailConfig;
+  secrets: MailSecrets;
+  provider: MailProvider;
+  /** No saved Email settings yet: honour the legacy Site Settings switches. */
+  legacy: boolean;
+  site: SiteSettings;
 };
 
-export function isMailConfigured() {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM);
+async function loadContext(): Promise<MailContext> {
+  const [stored, theme] = await Promise.all([getMailSettings(), getThemeSettings()]);
+  return {
+    config: stored.config,
+    secrets: stored.secrets,
+    provider: effectiveProvider(stored.config, stored.saved),
+    legacy: !stored.saved,
+    site: mergeSiteSettings(theme.site),
+  };
 }
 
-function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const from = process.env.SMTP_FROM;
-  if (!host || !from) return null;
-
-  const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER || '';
-  const pass = process.env.SMTP_PASS || '';
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: user ? { user, pass } : undefined,
-  });
+function siteUrl() {
+  return (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 }
 
-/** Sends email when SMTP is configured; otherwise logs and returns skipped. */
-export async function sendMail(payload: MailPayload): Promise<{ sent: boolean; skipped?: boolean }> {
-  const transporter = getTransporter();
-  const from = process.env.SMTP_FROM;
-  if (!transporter || !from) {
-    console.info('[mail] SMTP not configured; skipping send:', payload.subject);
-    return { sent: false, skipped: true };
+function fieldMatches(rule: MailTemplate['routes'][number], vars: MailVars) {
+  const actual = (vars[rule.field] || '').trim().toLowerCase();
+  const expected = rule.value.trim().toLowerCase();
+  if (rule.op === 'not_empty') return actual !== '';
+  if (rule.op === 'contains') return expected !== '' && actual.includes(expected);
+  return actual === expected;
+}
+
+function resolveRecipients(tpl: MailTemplate, vars: MailVars) {
+  let to = parseAddressList(renderTemplate(tpl.to, vars, false));
+  let cc = parseAddressList(renderTemplate(tpl.cc, vars, false));
+  for (const rule of tpl.routes) {
+    if (!rule.field || !fieldMatches(rule, vars)) continue;
+    const ruleTo = parseAddressList(renderTemplate(rule.to, vars, false));
+    const ruleCc = parseAddressList(renderTemplate(rule.cc, vars, false));
+    if (rule.mode === 'replace') {
+      to = ruleTo.length ? ruleTo : to;
+      cc = ruleCc;
+    } else {
+      to = [...new Set([...to, ...ruleTo])];
+      cc = [...new Set([...cc, ...ruleCc])];
+    }
   }
-
-  await transporter.sendMail({
-    from,
-    to: payload.to,
-    subject: payload.subject,
-    text: payload.text,
-    html: payload.html || payload.text.replace(/\n/g, '<br/>'),
-  });
-  return { sent: true };
+  const bcc = parseAddressList(renderTemplate(tpl.bcc, vars, false));
+  const replyTo = parseAddressList(renderTemplate(tpl.replyTo, vars, false)).slice(0, 1);
+  return { to, cc: cc.filter((a) => !to.includes(a)), bcc, replyTo };
 }
 
-export function formatEnquiryEmail(payload: Record<string, unknown>, meta: { id: number; item_type: string }) {
-  const lines = Object.entries(payload).map(([key, value]) => `${key}: ${String(value ?? '')}`);
-  const text = [
-    `New enquiry #${meta.id}`,
-    `Type: ${meta.item_type}`,
-    '',
-    ...lines,
-    '',
-    `Review in admin: ${(process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')}/admin/enquiries`,
-  ].join('\n');
-
-  return {
-    subject: `New enquiry #${meta.id} — Zigma Technologies`,
-    text,
-  };
+export function renderMail(tpl: MailTemplate, vars: MailVars, config: MailConfig, companyName: string) {
+  const subject = renderTemplate(tpl.subject, vars, false).replace(/\s+/g, ' ').trim();
+  const bodyHtml = bodyToHtml(renderTemplate(tpl.body, vars, true), config.brandColor);
+  const html = wrapEmailHtml({ bodyHtml, subject, companyName, siteUrl: vars.site_url || siteUrl(), accent: config.brandColor });
+  return { subject, html, text: htmlToText(bodyHtml) };
 }
 
-export function formatVisitorEnquiryReply(settings: SiteSettings, name?: string) {
-  const greeting = name?.trim() ? `Hi ${name.trim()},` : 'Hello,';
-  const text = [
-    greeting,
-    '',
-    `Thank you for contacting ${settings.companyName}. We have received your enquiry and a member of our team will respond within one business day.`,
-    '',
-    `For urgent support, call ${settings.phone}.`,
-    '',
-    settings.companyName,
-    settings.supportEmail,
-  ].join('\n');
-
-  return {
-    subject: `We received your enquiry — ${settings.companyName}`,
-    text,
-  };
+async function loadAttachments(refs: AttachmentRef[]): Promise<{ files: OutgoingAttachment[]; missing: string[] }> {
+  const files: OutgoingAttachment[] = [];
+  const missing: string[] = [];
+  for (const ref of refs) {
+    const content =
+      ref.kind === 'resume' ? (await readResumeFile(ref.stored))?.buffer ?? null : await readMailAttachment(ref.id);
+    if (content) files.push({ name: ref.name, contentType: ref.mime || 'application/octet-stream', content });
+    else missing.push(ref.name);
+  }
+  return { files, missing };
 }
 
-export function formatVisitorCareersReply(settings: SiteSettings, name?: string, role?: string) {
-  const greeting = name?.trim() ? `Hi ${name.trim()},` : 'Hello,';
-  const roleLine = role?.trim() ? ` for the ${role.trim()} role` : '';
-  const text = [
-    greeting,
-    '',
-    `Thank you for applying${roleLine} at ${settings.companyName}. Our recruitment team will review your application within 3–5 business days.`,
-    '',
-    `If you have questions, email ${settings.supportEmail} or call ${settings.phone}.`,
-    '',
-    settings.companyName,
-  ].join('\n');
-
-  return {
-    subject: `Application received — ${settings.companyName}`,
-    text,
-  };
+async function sendAndLog(ctx: MailContext, event: string, message: LoggedMessage, refId: number | null) {
+  const { files, missing } = await loadAttachments(message.attachments);
+  const result = await deliver(ctx.provider, ctx.config, ctx.secrets, { ...message, attachments: files });
+  const error = result.ok ? (missing.length ? `Sent without missing attachment(s): ${missing.join(', ')}` : null) : result.error;
+  await insertMailLog({
+    event,
+    provider: ctx.provider,
+    status: result.ok ? 'sent' : ctx.provider === 'off' ? 'skipped' : 'failed',
+    to: message.to,
+    cc: message.cc,
+    subject: message.subject,
+    error,
+    refId,
+    message,
+  }).catch((err) => console.error('[mail-log]', err));
+  if (!result.ok && ctx.provider !== 'off') console.error(`[mail] ${event} failed:`, result.error);
+  return result;
 }
 
-export async function sendVisitorAutoReply(
-  settings: SiteSettings,
-  to: string,
-  mail: { subject: string; text: string }
+async function dispatchEvent(
+  ctx: MailContext,
+  event: MailEventKey,
+  vars: MailVars,
+  refId: number,
+  resume?: { stored: string; name: string; mime: string }
 ) {
-  if (settings.visitorAutoReplyEnabled.trim().toLowerCase() === 'false') return;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return;
-  await sendMail({ to, ...mail });
+  const tpl = ctx.config.templates[event];
+  const audience = MAIL_EVENTS.find((e) => e.key === event)?.audience;
+  if (!tpl.enabled) return;
+  if (ctx.legacy) {
+    if (audience === 'team' && ctx.site.enquiryNotifyEnabled.trim().toLowerCase() === 'false') return;
+    if (audience === 'visitor' && ctx.site.visitorAutoReplyEnabled.trim().toLowerCase() === 'false') return;
+  }
+  const rcpt = resolveRecipients(tpl, vars);
+  // Visitors without an email address (e.g. callback requests) simply get no auto-reply.
+  if (!rcpt.to.length) {
+    if (audience === 'team') {
+      await insertMailLog({
+        event,
+        provider: ctx.provider,
+        status: 'skipped',
+        to: [],
+        cc: [],
+        subject: renderTemplate(tpl.subject, vars, false),
+        error: 'No valid recipients — check the To field / Site Settings notify list.',
+        refId,
+      }).catch(() => undefined);
+    }
+    return;
+  }
+  const rendered = renderMail(tpl, vars, ctx.config, ctx.site.companyName);
+  const attachments: AttachmentRef[] = [
+    ...(tpl.attachResume && resume ? [{ kind: 'resume' as const, ...resume }] : []),
+    ...tpl.attachments.map((a) => ({ kind: 'static' as const, id: a.id, name: a.name, mime: a.mime })),
+  ];
+  await sendAndLog(ctx, event, { ...rcpt, ...rendered, attachments }, refId);
+}
+
+/** Fire-and-forget notifications for a stored website submission (enquiry, callback, brochure, careers). */
+export async function notifySubmission(input: {
+  kind: 'enquiry' | 'careers';
+  id: number;
+  itemType: string;
+  payload: Record<string, unknown>;
+  resume?: { stored: string; name: string; mime: string };
+}) {
+  try {
+    const ctx = await loadContext();
+    const vars = buildMailVars({
+      kind: input.kind,
+      id: input.id,
+      itemType: input.itemType,
+      payload: input.payload,
+      site: {
+        companyName: ctx.site.companyName,
+        phone: ctx.site.phone,
+        supportEmail: ctx.site.supportEmail,
+        notifyEmails: ctx.site.enquiryNotifyEmail,
+        siteUrl: siteUrl(),
+      },
+    });
+    for (const e of MAIL_EVENTS.filter((ev) => ev.kind === input.kind)) {
+      await dispatchEvent(ctx, e.key, vars, input.id, input.resume);
+    }
+  } catch (err) {
+    console.error(`[mail] ${input.kind} #${input.id} notification failed`, err);
+  }
+}
+
+/** Admin test: render `event` (or a plain test message) with sample data and send it to `to`. */
+export async function sendTestEmail(to: string, event?: MailEventKey) {
+  const ctx = await loadContext();
+  const recipients = parseAddressList(to);
+  if (!recipients.length) throw new Error('Enter a valid test recipient.');
+  const meta = MAIL_EVENTS.find((e) => e.key === event);
+  let rendered: { subject: string; html: string; text: string };
+  const attachments: AttachmentRef[] = [];
+  if (meta && event) {
+    const vars = buildMailVars({
+      kind: meta.kind,
+      id: 1024,
+      itemType: 'product',
+      payload: SAMPLE_PAYLOADS[meta.kind],
+      site: {
+        companyName: ctx.site.companyName,
+        phone: ctx.site.phone,
+        supportEmail: ctx.site.supportEmail,
+        notifyEmails: ctx.site.enquiryNotifyEmail,
+        siteUrl: siteUrl(),
+      },
+    });
+    const tpl = ctx.config.templates[event];
+    rendered = renderMail(tpl, vars, ctx.config, ctx.site.companyName);
+    rendered.subject = `[TEST] ${rendered.subject}`;
+    attachments.push(...tpl.attachments.map((a) => ({ kind: 'static' as const, id: a.id, name: a.name, mime: a.mime })));
+  } else {
+    const body = `<p>This is a test email from the <strong>${escapeHtml(ctx.site.companyName)}</strong> website.</p><p>Provider: <strong>${
+      ctx.provider === 'graph' ? 'Microsoft 365 (Graph API)' : ctx.provider.toUpperCase()
+    }</strong>${ctx.provider === 'graph' ? ` · Sender: ${escapeHtml(ctx.config.graph.senderMailbox)}` : ''}</p><p>If you can read this, website email delivery is working.</p>`;
+    const html = wrapEmailHtml({ bodyHtml: body, subject: 'Website email test', companyName: ctx.site.companyName, siteUrl: siteUrl(), accent: ctx.config.brandColor });
+    rendered = { subject: `Website email test — ${ctx.site.companyName}`, html, text: htmlToText(body) };
+  }
+  return sendAndLog(ctx, event ? `test:${event}` : 'test', { to: recipients, cc: [], bcc: [], replyTo: [], ...rendered, attachments }, null);
+}
+
+/** Re-send a logged message exactly as rendered originally. */
+export async function retryLoggedMail(id: number) {
+  const entry = await getMailLogMessage(id);
+  if (!entry?.message) throw new Error('This log entry has no stored message to retry.');
+  const ctx = await loadContext();
+  const message = entry.message as LoggedMessage;
+  const { files, missing } = await loadAttachments(message.attachments || []);
+  const result = await deliver(ctx.provider, ctx.config, ctx.secrets, { ...message, attachments: files });
+  const error = result.ok ? (missing.length ? `Sent without missing attachment(s): ${missing.join(', ')}` : null) : result.error;
+  await updateMailLog(id, result.ok ? 'sent' : 'failed', error);
+  return result;
 }

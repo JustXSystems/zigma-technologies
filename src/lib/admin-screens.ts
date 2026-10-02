@@ -14,6 +14,7 @@ export type AdminScreenKey =
   | 'newsletter'
   | 'nav'
   | 'siteSettings'
+  | 'email'
   | 'siteCopy'
   | 'media'
   | 'theme'
@@ -49,6 +50,7 @@ export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
   { key: 'newsletter', label: 'Newsletter', href: '/admin/newsletter', group: 'Leads' },
   { key: 'nav', label: 'Navigation', href: '/admin/nav', group: 'Configuration' },
   { key: 'siteSettings', label: 'Site Settings', href: '/admin/site-settings', group: 'Configuration' },
+  { key: 'email', label: 'Email', href: '/admin/email', group: 'Configuration', superAdminOnly: true },
   { key: 'siteCopy', label: 'Site Copy', href: '/admin/site-copy', group: 'Configuration' },
   { key: 'media', label: 'Media', href: '/admin/media', group: 'Configuration' },
   { key: 'theme', label: 'Theme Studio', href: '/admin/theme', group: 'Configuration' },

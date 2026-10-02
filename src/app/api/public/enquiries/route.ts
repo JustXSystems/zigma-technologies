@@ -3,12 +3,7 @@ import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
 import { getThemeSettings } from '@/lib/cms';
 import { guardPublicForm } from '@/lib/form-guard';
-import {
-  formatEnquiryEmail,
-  formatVisitorEnquiryReply,
-  sendMail,
-  sendVisitorAutoReply,
-} from '@/lib/mail';
+import { notifySubmission } from '@/lib/mail';
 import { pushCrmLead } from '@/lib/crm';
 import { mergeSiteSettings } from '@/lib/site-settings';
 import { verifyTurnstile } from '@/lib/turnstile';
@@ -121,27 +116,10 @@ export async function POST(request: Request) {
 }
 
 async function notifyEnquiry(id: number, itemType: string, payload: Record<string, unknown>) {
+  await notifySubmission({ kind: 'enquiry', id, itemType, payload });
   try {
     const theme = await getThemeSettings();
     const settings = mergeSiteSettings(theme.site);
-
-    if (settings.enquiryNotifyEnabled.trim().toLowerCase() !== 'false') {
-      const recipients = settings.enquiryNotifyEmail
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (recipients.length) {
-        const mail = formatEnquiryEmail(payload, { id, item_type: itemType });
-        await sendMail({ to: recipients, ...mail });
-      }
-    }
-
-    const visitorEmail = typeof payload.email === 'string' ? payload.email.trim() : '';
-    const visitorName = typeof payload.name === 'string' ? payload.name : undefined;
-    if (visitorEmail) {
-      await sendVisitorAutoReply(settings, visitorEmail, formatVisitorEnquiryReply(settings, visitorName));
-    }
-
     await pushCrmLead(settings, {
       id,
       source: String(payload.source || 'enquiry'),

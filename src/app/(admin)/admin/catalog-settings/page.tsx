@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
 import {
   slugify,
@@ -1694,7 +1695,8 @@ export default function CatalogSettingsPage() {
         const entries = settings ? normalizeCatalogSections(settings.sections_json) : [];
         const index = entries.findIndex((s) => s.id === editingSectionId && s.kind === 'cms');
         if (!settings || index < 0) return null;
-        return (
+        // Portal: the settings layout would otherwise paint over the fixed modal.
+        return createPortal(
           <SectionEditor
             key={`${type}-${editingSectionId}`}
             section={catalogSectionToCms(entries[index], index)}
@@ -1717,7 +1719,8 @@ export default function CatalogSettingsPage() {
                 ),
               });
             }}
-          />
+          />,
+          document.body
         );
       })()}
 

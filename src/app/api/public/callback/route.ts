@@ -3,7 +3,7 @@ import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
 import { getThemeSettings } from '@/lib/cms';
 import { guardPublicForm } from '@/lib/form-guard';
-import { formatEnquiryEmail, sendMail } from '@/lib/mail';
+import { notifySubmission } from '@/lib/mail';
 import { pushCrmLead } from '@/lib/crm';
 import { mergeSiteSettings } from '@/lib/site-settings';
 import { verifyTurnstile } from '@/lib/turnstile';
@@ -55,16 +55,10 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
+    void notifySubmission({ kind: 'enquiry', id, itemType: 'general', payload });
     try {
       const theme = await getThemeSettings();
       const settings = mergeSiteSettings(theme.site);
-      if (settings.enquiryNotifyEnabled.trim().toLowerCase() !== 'false') {
-        const recipients = settings.enquiryNotifyEmail.split(',').map((s) => s.trim()).filter(Boolean);
-        if (recipients.length) {
-          const mail = formatEnquiryEmail(payload, { id, item_type: 'general' });
-          await sendMail({ to: recipients, ...mail });
-        }
-      }
       await pushCrmLead(settings, { id, source: 'callback_request', item_type: 'general', payload });
     } catch (err) {
       console.error('[callback-notify]', err);
