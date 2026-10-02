@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
@@ -55,14 +56,15 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
-    void notifySubmission({ kind: 'enquiry', id, itemType: 'general', payload });
-    try {
-      const theme = await getThemeSettings();
-      const settings = mergeSiteSettings(theme.site);
-      await pushCrmLead(settings, { id, source: 'callback_request', item_type: 'general', payload });
-    } catch (err) {
-      console.error('[callback-notify]', err);
-    }
+    after(() => notifySubmission({ kind: 'enquiry', id, itemType: 'general', payload }));
+    after(async () => {
+      try {
+        const settings = mergeSiteSettings((await getThemeSettings()).site);
+        await pushCrmLead(settings, { id, source: 'callback_request', item_type: 'general', payload });
+      } catch (err) {
+        console.error('[callback-crm]', err);
+      }
+    });
 
     return jsonOk({ id, message: 'Callback requested' }, { status: 201 });
   } catch (error) {

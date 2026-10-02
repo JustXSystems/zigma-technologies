@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
@@ -91,7 +92,8 @@ export async function POST(request: Request) {
       payload_json: body.payload,
     });
 
-    void notifyEnquiry(id, itemType, body.payload);
+    after(() => notifySubmission({ kind: 'enquiry', id, itemType, payload: body.payload }));
+    after(() => pushToCrm(id, itemType, body.payload));
 
     return jsonOk({ id, message: 'Enquiry submitted successfully' }, { status: 201 });
   } catch (error) {
@@ -115,8 +117,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function notifyEnquiry(id: number, itemType: string, payload: Record<string, unknown>) {
-  await notifySubmission({ kind: 'enquiry', id, itemType, payload });
+async function pushToCrm(id: number, itemType: string, payload: Record<string, unknown>) {
   try {
     const theme = await getThemeSettings();
     const settings = mergeSiteSettings(theme.site);
@@ -127,6 +128,6 @@ async function notifyEnquiry(id: number, itemType: string, payload: Record<strin
       payload,
     });
   } catch (err) {
-    console.error('[enquiry-notify]', err);
+    console.error('[enquiry-crm]', err);
   }
 }

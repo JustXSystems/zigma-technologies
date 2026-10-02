@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
-    void notifySubmission({ kind: 'enquiry', id, itemType, payload });
+    after(() => notifySubmission({ kind: 'enquiry', id, itemType, payload }));
 
     return jsonOk(
       { id, download_url: body.brochure_url, message: 'Brochure unlocked' },

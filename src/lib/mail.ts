@@ -100,7 +100,10 @@ async function loadAttachments(refs: AttachmentRef[]): Promise<{ files: Outgoing
 }
 
 async function sendAndLog(ctx: MailContext, event: string, message: LoggedMessage, refId: number | null) {
-  const { files, missing } = await loadAttachments(message.attachments);
+  const { files, missing } = await loadAttachments(message.attachments).catch(() => ({
+    files: [] as OutgoingAttachment[],
+    missing: message.attachments.map((a) => a.name),
+  }));
   const result = await deliver(ctx.provider, ctx.config, ctx.secrets, { ...message, attachments: files });
   const error = result.ok ? (missing.length ? `Sent without missing attachment(s): ${missing.join(', ')}` : null) : result.error;
   await insertMailLog({
@@ -157,7 +160,10 @@ async function dispatchEvent(
   await sendAndLog(ctx, event, { ...rcpt, ...rendered, attachments }, refId);
 }
 
-/** Fire-and-forget notifications for a stored website submission (enquiry, callback, brochure, careers). */
+/**
+ * Best-effort notifications for a submission that is already stored in `enquiries`.
+ * Never throws: email being off, misconfigured or down must not affect the visitor or the admin inbox.
+ */
 export async function notifySubmission(input: {
   kind: 'enquiry' | 'careers';
   id: number;
@@ -167,6 +173,7 @@ export async function notifySubmission(input: {
 }) {
   try {
     const ctx = await loadContext();
+    if (ctx.provider === 'off') return;
     const vars = buildMailVars({
       kind: input.kind,
       id: input.id,
@@ -181,7 +188,11 @@ export async function notifySubmission(input: {
       },
     });
     for (const e of MAIL_EVENTS.filter((ev) => ev.kind === input.kind)) {
-      await dispatchEvent(ctx, e.key, vars, input.id, input.resume);
+      try {
+        await dispatchEvent(ctx, e.key, vars, input.id, input.resume);
+      } catch (err) {
+        console.error(`[mail] ${e.key} for ${input.kind} #${input.id} failed`, err);
+      }
     }
   } catch (err) {
     console.error(`[mail] ${input.kind} #${input.id} notification failed`, err);

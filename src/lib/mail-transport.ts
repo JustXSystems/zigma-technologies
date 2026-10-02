@@ -40,8 +40,21 @@ function friendlyGraphError(status: number, code: string, message: string): stri
   return `${status} ${code}: ${message}`.trim();
 }
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 async function graphFetch(url: string, init: RequestInit, attempt = 1): Promise<Response> {
-  const res = await fetch(url, init);
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+  } catch (err) {
+    if (attempt < 3) return graphFetch(url, init, attempt + 1);
+    const timedOut = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
+    throw new Error(
+      timedOut
+        ? 'Microsoft 365 did not respond in time. Check the server’s outbound HTTPS access.'
+        : `Could not reach Microsoft 365: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
   if ((res.status === 429 || res.status >= 500) && attempt < 3) {
     const retryAfter = Number(res.headers.get('retry-after')) || attempt * 2;
     await new Promise((r) => setTimeout(r, Math.min(retryAfter, 10) * 1000));
@@ -189,16 +202,23 @@ function smtpSettings(config: MailConfig, secrets: MailSecrets) {
   return envSmtp();
 }
 
-async function sendViaSmtp(config: MailConfig, secrets: MailSecrets, mail: OutgoingMail) {
-  const s = smtpSettings(config, secrets);
-  if (!s) throw new Error('SMTP is not configured.');
-  const transporter = nodemailer.createTransport({
+function smtpTransport(s: NonNullable<ReturnType<typeof smtpSettings>>) {
+  return nodemailer.createTransport({
     host: s.host,
     port: s.port,
     secure: s.security === 'ssl' || (s.security === 'auto' && s.port === 465),
     requireTLS: s.security === 'starttls',
     auth: s.user ? { user: s.user, pass: s.pass } : undefined,
+    connectionTimeout: 15_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 45_000,
   });
+}
+
+async function sendViaSmtp(config: MailConfig, secrets: MailSecrets, mail: OutgoingMail) {
+  const s = smtpSettings(config, secrets);
+  if (!s) throw new Error('SMTP is not configured.');
+  const transporter = smtpTransport(s);
   const from = config.fromName && !s.from.includes('<') ? `"${config.fromName.replace(/"/g, '')}" <${s.from}>` : s.from;
   await transporter.sendMail({
     from,
@@ -244,15 +264,7 @@ export async function verifyConnection(provider: MailProvider, config: MailConfi
   if (provider === 'smtp') {
     const s = smtpSettings(config, secrets);
     if (!s) throw new Error('SMTP is not configured.');
-    await nodemailer
-      .createTransport({
-        host: s.host,
-        port: s.port,
-        secure: s.security === 'ssl' || (s.security === 'auto' && s.port === 465),
-        requireTLS: s.security === 'starttls',
-        auth: s.user ? { user: s.user, pass: s.pass } : undefined,
-      })
-      .verify();
+    await smtpTransport(s).verify();
     return `Connected to ${s.host}:${s.port} and authenticated.`;
   }
   throw new Error('Email sending is turned off.');

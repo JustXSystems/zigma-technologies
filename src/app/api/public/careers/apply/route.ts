@@ -1,4 +1,5 @@
 import path from 'path';
+import { after } from 'next/server';
 import { jsonError, jsonOk } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
 import { guardPublicForm } from '@/lib/form-guard';
@@ -76,13 +77,15 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
-    void notifySubmission({
-      kind: 'careers',
-      id,
-      itemType: 'careers',
-      payload,
-      resume: { stored: storedName, name: resume.name, mime: payload.resume_mime },
-    });
+    after(() =>
+      notifySubmission({
+        kind: 'careers',
+        id,
+        itemType: 'careers',
+        payload,
+        resume: { stored: storedName, name: resume.name, mime: payload.resume_mime },
+      })
+    );
 
     return jsonOk({ id, message: 'Application submitted successfully' }, { status: 201 });
   } catch (error) {
