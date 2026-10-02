@@ -4,6 +4,9 @@ import type { MailConfig, MailProvider, MailSecrets } from '@/lib/mail-config';
 export type OutgoingAttachment = { name: string; contentType: string; content: Buffer };
 
 export type OutgoingMail = {
+  /** From address (blank = the transmitting mailbox). Different mailboxes need "Send As". */
+  from?: string;
+  fromName?: string;
   to: string[];
   cc: string[];
   bcc: string[];
@@ -23,8 +26,11 @@ const UPLOAD_CHUNK = 320 * 1024 * 10;
 
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
-function friendlyGraphError(status: number, code: string, message: string): string {
+function friendlyGraphError(status: number, code: string, message: string, ctx?: { sender: string; from: string }): string {
   const raw = `${code} ${message}`;
+  if (/SendAs|ErrorSendAsDenied|on behalf of/i.test(raw) && ctx) {
+    return `${ctx.sender} is not allowed to send as ${ctx.from}. In Exchange admin, give ${ctx.sender} “Send As” on ${ctx.from} (Admin → Email → Connection shows the exact command), or clear the From address.`;
+  }
   if (/AADSTS7000215|AADSTS7000222/.test(raw)) return 'Client secret is invalid or expired. Create a new secret and paste it in Connection.';
   if (/AADSTS700016/.test(raw)) return 'Client (application) ID was not found in this tenant. Check the Client ID and Tenant ID.';
   if (/AADSTS90002|AADSTS900023/.test(raw)) return 'Tenant ID not found. Use the Directory (tenant) ID GUID or your tenant domain.';
@@ -63,13 +69,13 @@ async function graphFetch(url: string, init: RequestInit, attempt = 1): Promise<
   return res;
 }
 
-async function graphError(res: Response): Promise<string> {
+async function graphError(res: Response, ctx?: { sender: string; from: string }): Promise<string> {
   const data = (await res.json().catch(() => ({}))) as {
     error?: { code?: string; message?: string } | string;
     error_description?: string;
   };
   if (typeof data.error === 'string') return friendlyGraphError(res.status, data.error, data.error_description || '');
-  return friendlyGraphError(res.status, data.error?.code || '', data.error?.message || res.statusText);
+  return friendlyGraphError(res.status, data.error?.code || '', data.error?.message || res.statusText, ctx);
 }
 
 export async function getGraphToken(config: MailConfig, secrets: MailSecrets): Promise<string> {
@@ -104,10 +110,12 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
   const token = await getGraphToken(config, secrets);
   const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
   const base = `${GRAPH}/users/${encodeURIComponent(sender)}`;
+  const from = mail.from || sender;
+  const errCtx = { sender, from };
   const message = {
     subject: mail.subject,
     body: { contentType: 'HTML', content: mail.html },
-    from: { emailAddress: { address: sender, name: config.fromName || undefined } },
+    from: { emailAddress: { address: from, name: mail.fromName || config.fromName || undefined } },
     toRecipients: recipients(mail.to),
     ccRecipients: recipients(mail.cc),
     bccRecipients: recipients(mail.bcc),
@@ -130,7 +138,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
         saveToSentItems: config.saveToSentItems,
       }),
     });
-    if (!res.ok) throw new Error(await graphError(res));
+    if (!res.ok) throw new Error(await graphError(res, errCtx));
     return;
   }
 
@@ -142,7 +150,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
     headers: auth,
     body: JSON.stringify({ ...message, attachments: small.map(fileAttachment) }),
   });
-  if (!draftRes.ok) throw new Error(await graphError(draftRes));
+  if (!draftRes.ok) throw new Error(await graphError(draftRes, errCtx));
   const draft = (await draftRes.json()) as { id: string };
   const msgUrl = `${base}/messages/${encodeURIComponent(draft.id)}`;
 
@@ -171,7 +179,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
   }
 
   const sendRes = await graphFetch(`${msgUrl}/send`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-  if (!sendRes.ok) throw new Error(await graphError(sendRes));
+  if (!sendRes.ok) throw new Error(await graphError(sendRes, errCtx));
 }
 
 function envSmtp() {
@@ -219,9 +227,13 @@ async function sendViaSmtp(config: MailConfig, secrets: MailSecrets, mail: Outgo
   const s = smtpSettings(config, secrets);
   if (!s) throw new Error('SMTP is not configured.');
   const transporter = smtpTransport(s);
-  const from = config.fromName && !s.from.includes('<') ? `"${config.fromName.replace(/"/g, '')}" <${s.from}>` : s.from;
+  const address = mail.from || s.from;
+  const name = (mail.fromName || config.fromName).replace(/"/g, '');
+  const mailbox = (s.from.match(/<([^>]+)>/)?.[1] || s.from).trim();
   await transporter.sendMail({
-    from,
+    from: name && !address.includes('<') ? `"${name}" <${address}>` : address,
+    // Bounces and SPF stay on the authenticated mailbox; the header From can be any address it may Send As.
+    envelope: address !== mailbox ? { from: mailbox, to: [...mail.to, ...mail.cc, ...mail.bcc] } : undefined,
     to: mail.to,
     cc: mail.cc.length ? mail.cc : undefined,
     bcc: mail.bcc.length ? mail.bcc : undefined,
@@ -253,6 +265,58 @@ export async function deliver(
   } catch (err) {
     return { ok: false, provider, error: err instanceof Error ? err.message : String(err) };
   }
+}
+
+export type FromCheck = {
+  status: 'ok' | 'rewritten' | 'unverified';
+  expected: string;
+  actual?: string;
+  note: string;
+};
+
+/**
+ * Reads the just-sent message back from Sent Items and compares its From with what we asked for.
+ * Exchange silently falls back to the sending mailbox when "Send As" is missing, so this is the only reliable check.
+ */
+export async function verifySentFrom(config: MailConfig, secrets: MailSecrets, subject: string, expected: string): Promise<FromCheck> {
+  const sender = config.graph.senderMailbox;
+  if (!config.saveToSentItems) {
+    return { status: 'unverified', expected, note: 'Turn on “Keep a copy in Sent Items” to verify the From address automatically.' };
+  }
+  try {
+    const token = await getGraphToken(config, secrets);
+    const url =
+      `${GRAPH}/users/${encodeURIComponent(sender)}/mailFolders/sentitems/messages` +
+      `?$top=15&$select=subject,from,sender,sentDateTime&$orderby=sentDateTime desc`;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      await new Promise((r) => setTimeout(r, attempt ? 2500 : 1500));
+      const res = await graphFetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 403) {
+        return {
+          status: 'unverified',
+          expected,
+          note: `Sent, but the app can’t read ${sender}’s Sent Items to confirm the From address (needs Mail.ReadWrite on the mailbox). Check the received email.`,
+        };
+      }
+      if (!res.ok) break;
+      const data = (await res.json()) as { value?: Array<{ subject?: string; from?: { emailAddress?: { address?: string } } }> };
+      const hit = data.value?.find((m) => m.subject === subject);
+      if (hit) {
+        const actual = (hit.from?.emailAddress?.address || '').toLowerCase();
+        return actual === expected.toLowerCase()
+          ? { status: 'ok', expected, actual, note: `Delivered from ${actual}.` }
+          : {
+              status: 'rewritten',
+              expected,
+              actual,
+              note: `Exchange sent this from ${actual}, not ${expected}. Give ${sender} “Send As” on ${expected} (Connection shows the command).`,
+            };
+      }
+    }
+  } catch {
+    // fall through
+  }
+  return { status: 'unverified', expected, note: 'Sent; the copy in Sent Items wasn’t visible yet, so the From address couldn’t be confirmed.' };
 }
 
 /** Connectivity check without sending: Graph token acquisition, or SMTP handshake + auth. */

@@ -5,7 +5,7 @@ export type MailVars = Record<string, string>;
 /** Values inserted without escaping (already-safe HTML produced by the server). */
 const RAW_TOKENS = new Set(['fields_table']);
 
-const HIDDEN_FIELDS = new Set([
+export const HIDDEN_FIELDS: ReadonlySet<string> = new Set([
   '_hp',
   'turnstileToken',
   'resume_file',
@@ -68,13 +68,24 @@ export function fieldsTableHtml(payload: Record<string, unknown>): string {
     : '';
 }
 
-/** Flat variables for one submission: every payload field plus computed tokens. */
+export type SubmissionKind = 'enquiry' | 'careers';
+
+export type SiteVars = { companyName: string; phone: string; supportEmail: string; notifyEmails: string; siteUrl: string };
+
+export function submissionKind(payload: Record<string, unknown>): SubmissionKind {
+  return payload.source === 'careers_apply' ? 'careers' : 'enquiry';
+}
+
+const IST = 'Asia/Kolkata';
+
+/** Flat variables for one submission: every payload field plus the built-in values (SYSTEM_VARIABLES). */
 export function buildMailVars(input: {
-  kind: 'enquiry' | 'careers';
+  kind: SubmissionKind;
   id: number;
   itemType: string;
+  itemTitle?: string;
   payload: Record<string, unknown>;
-  site: { companyName: string; phone: string; supportEmail: string; notifyEmails: string; siteUrl: string };
+  site: SiteVars;
   submittedAt?: Date;
 }): MailVars {
   const vars: MailVars = {};
@@ -82,20 +93,25 @@ export function buildMailVars(input: {
     if (/^[\w]+$/.test(key) && !HIDDEN_FIELDS.has(key)) vars[key] = stringify(value);
   }
   const site = input.site.siteUrl.replace(/\/$/, '');
+  const at = input.submittedAt || new Date();
+  const admin = `${site}/admin/enquiries`;
   return {
     ...vars,
     name: vars.name || vars.full_name || '',
     email: vars.email || '',
+    phone: vars.phone || '',
+    kind: input.kind,
+    source: String(input.payload.source || (input.kind === 'careers' ? 'careers_apply' : 'enquiry')),
     source_label: sourceLabel(input.payload.source, input.kind),
     item_type: input.itemType,
+    item_title: input.itemTitle || '',
     submission_id: String(input.id),
-    submitted_at: (input.submittedAt || new Date()).toLocaleString('en-IN', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-      timeZone: 'Asia/Kolkata',
-    }),
+    submitted_at: at.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: IST }),
+    submitted_date: at.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: IST }),
+    submitted_time: at.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: IST }),
     fields_table: fieldsTableHtml(input.payload),
-    admin_url: site ? `${site}/admin/enquiries` : '/admin/enquiries',
+    admin_url: admin,
+    enquiry_url: `${admin}?id=${input.id}`,
     company_name: input.site.companyName,
     company_phone: input.site.phone,
     support_email: input.site.supportEmail,
@@ -104,18 +120,150 @@ export function buildMailVars(input: {
   };
 }
 
-/** {{token}}, {{#if token}}…{{else}}…{{/if}} (non-nested). html=true escapes values. */
-export function renderTemplate(tpl: string, vars: MailVars, html: boolean): string {
-  let out = tpl;
-  const ifBlock = /\{\{#if\s+([\w]+)\s*\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/if\}\}/;
-  for (let guard = 0; guard < 100 && ifBlock.test(out); guard++) {
-    out = out.replace(ifBlock, (_m, key: string, yes: string, no = '') => ((vars[key] || '').trim() ? yes : no));
+// ---------------------------------------------------------------- template language
+
+export const TEMPLATE_FILTERS: Array<{ name: string; usage: string; description: string }> = [
+  { name: 'default', usage: '{{company | default:"—"}}', description: 'Fallback text when the value is empty.' },
+  { name: 'first', usage: '{{name | first}}', description: 'First word, e.g. first name.' },
+  { name: 'upper', usage: '{{role | upper}}', description: 'UPPERCASE.' },
+  { name: 'lower', usage: '{{email | lower}}', description: 'lowercase.' },
+  { name: 'title', usage: '{{name | title}}', description: 'Title Case Each Word.' },
+  { name: 'truncate', usage: '{{message | truncate:200}}', description: 'Shorten to N characters with “…”.' },
+  { name: 'nl2br', usage: '{{message | nl2br}}', description: 'Keep line breaks in the HTML body.' },
+  { name: 'trim', usage: '{{subject | trim}}', description: 'Remove surrounding spaces.' },
+];
+
+const FILTER_NAMES = new Set(TEMPLATE_FILTERS.map((f) => f.name));
+
+const TOKEN_RE = /\{\{\s*(\w+)((?:\s*\|\s*\w+(?:\s*:\s*(?:"[^"]*"|'[^']*'|[^|}\s]+))?)*)\s*\}\}/g;
+const FILTER_RE = /\|\s*(\w+)(?:\s*:\s*("[^"]*"|'[^']*'|[^|}\s]+))?/g;
+/** Innermost block first, so blocks can nest. */
+const IF_RE = /\{\{#if\s+([^}]+?)\s*\}\}((?:(?!\{\{#if\s)[\s\S])*?)\{\{\/if\}\}/;
+const EXPR_RE = /^(!|not\s+)?\s*(\w+)(?:\s*(==|!=|contains|starts_with|ends_with)\s*("[^"]*"|'[^']*'|\S+))?$/i;
+
+const unquote = (s = '') => s.replace(/^(["'])([\s\S]*)\1$/, '$2');
+
+function evalCondition(expr: string, vars: MailVars): boolean {
+  const m = expr.trim().match(EXPR_RE);
+  if (!m) return false;
+  const [, negate, key, op, rawArg] = m;
+  const actual = (vars[key] || '').trim().toLowerCase();
+  const arg = unquote(rawArg).trim().toLowerCase();
+  let result: boolean;
+  switch ((op || '').toLowerCase()) {
+    case '==':
+      result = actual === arg;
+      break;
+    case '!=':
+      result = actual !== arg;
+      break;
+    case 'contains':
+      result = arg !== '' && actual.includes(arg);
+      break;
+    case 'starts_with':
+      result = arg !== '' && actual.startsWith(arg);
+      break;
+    case 'ends_with':
+      result = arg !== '' && actual.endsWith(arg);
+      break;
+    default:
+      result = actual !== '';
   }
-  return out.replace(/\{\{\s*([\w]+)\s*\}\}/g, (_m, key: string) => {
-    const value = vars[key] ?? '';
-    if (!html) return RAW_TOKENS.has(key) ? '' : value;
-    return RAW_TOKENS.has(key) ? value : escapeHtml(value);
+  return negate ? !result : result;
+}
+
+function applyFilters(value: string, chain: string): { value: string; nl2br: boolean } {
+  let out = value;
+  let nl2br = false;
+  for (const f of chain.matchAll(FILTER_RE)) {
+    const arg = unquote(f[2]);
+    switch (f[1]) {
+      case 'default':
+        if (!out.trim()) out = arg;
+        break;
+      case 'first':
+        out = out.trim().split(/\s+/)[0] || '';
+        break;
+      case 'upper':
+        out = out.toUpperCase();
+        break;
+      case 'lower':
+        out = out.toLowerCase();
+        break;
+      case 'title':
+        out = out.toLowerCase().replace(/(^|[\s\-'(])(\p{L})/gu, (_m, p: string, c: string) => p + c.toUpperCase());
+        break;
+      case 'truncate': {
+        const n = Math.max(1, Number(arg) || 100);
+        if (out.length > n) out = `${out.slice(0, n).trimEnd()}…`;
+        break;
+      }
+      case 'nl2br':
+        nl2br = true;
+        break;
+      case 'trim':
+        out = out.trim();
+        break;
+    }
+  }
+  return { value: out, nl2br };
+}
+
+/**
+ * {{token}}, {{token | filter:arg | …}}, {{#if expr}}…{{else}}…{{/if}} (nestable).
+ * expr: `key`, `not key`, `key == "x"`, `key != "x"`, `key contains "x"`, `key starts_with "x"`, `key ends_with "x"`.
+ * html=true escapes values except `rawKeys` (server-built tables and admin HTML snippets).
+ */
+export function renderTemplate(tpl: string, vars: MailVars, html: boolean, rawKeys: ReadonlySet<string> = RAW_TOKENS): string {
+  let out = tpl;
+  for (let guard = 0; guard < 200 && IF_RE.test(out); guard++) {
+    out = out.replace(IF_RE, (_m, expr: string, inner: string) => {
+      const at = inner.indexOf('{{else}}');
+      const yes = at < 0 ? inner : inner.slice(0, at);
+      const no = at < 0 ? '' : inner.slice(at + 8);
+      return evalCondition(expr, vars) ? yes : no;
+    });
+  }
+  return out.replace(TOKEN_RE, (_m, key: string, chain: string) => {
+    const raw = rawKeys.has(key);
+    const base = vars[key] ?? '';
+    if (raw) return html ? base : htmlToText(base).replace(/\s+/g, ' ').trim();
+    const { value, nl2br } = applyFilters(base, chain || '');
+    if (!html) return value;
+    const escaped = escapeHtml(value);
+    return nl2br ? escaped.replace(/\r?\n/g, '<br>') : escaped;
   });
+}
+
+/** Variable keys referenced by a template string (tokens and {{#if}} expressions). */
+export function extractTokens(text: string): string[] {
+  const keys = new Set<string>();
+  for (const m of text.matchAll(TOKEN_RE)) keys.add(m[1]);
+  for (const m of text.matchAll(/\{\{#if\s+([^}]+?)\s*\}\}/g)) {
+    const e = m[1].trim().match(EXPR_RE);
+    if (e) keys.add(e[2]);
+  }
+  return [...keys];
+}
+
+/** Syntax problems a reader can fix: unbalanced blocks, unknown filters, malformed tokens. */
+export function templateSyntaxIssues(text: string): string[] {
+  const issues: string[] = [];
+  const opens = (text.match(/\{\{#if\s/g) || []).length;
+  const closes = (text.match(/\{\{\/if\}\}/g) || []).length;
+  if (opens !== closes) issues.push(`${opens} {{#if}} but ${closes} {{/if}}`);
+  for (const m of text.matchAll(/\{\{#if\s+([^}]+?)\s*\}\}/g)) {
+    if (!EXPR_RE.test(m[1].trim())) issues.push(`Can’t read condition “${m[1].trim()}”`);
+  }
+  for (const m of text.matchAll(TOKEN_RE)) {
+    for (const f of (m[2] || '').matchAll(FILTER_RE)) {
+      if (!FILTER_NAMES.has(f[1])) issues.push(`Unknown filter “${f[1]}” in {{${m[1]}}}`);
+    }
+  }
+  const stripped = text.replace(TOKEN_RE, '').replace(/\{\{#if\s+[^}]+\}\}|\{\{else\}\}|\{\{\/if\}\}/g, '');
+  const stray = stripped.match(/\{\{[^}]*\}\}/);
+  if (stray) issues.push(`Can’t read “${stray[0]}”`);
+  return [...new Set(issues)];
 }
 
 function looksLikeHtml(text: string) {

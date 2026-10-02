@@ -18,6 +18,10 @@
   .\scripts\m365\setup-website-mailer.ps1 -SenderMailbox website@zigma-technologies.com
 
 .EXAMPLE
+  # Send through one mailbox but show a shared mailbox as From
+  .\scripts\m365\setup-website-mailer.ps1 -SenderMailbox website@zigma-technologies.com -FromAddress webmaster@zigma-technologies.com
+
+.EXAMPLE
   # Secret renewal (Admin -> Email shows a countdown): adds a new secret, prints JSON to import.
   .\scripts\m365\setup-website-mailer.ps1 -SenderMailbox website@zigma-technologies.com -RotateSecret -PruneOldSecrets
 #>
@@ -34,7 +38,9 @@ param(
   [int]$SecretMonths = 24,
   [switch]$RotateSecret,
   [switch]$PruneOldSecrets,
-  [switch]$SkipMailboxCreation
+  [switch]$SkipMailboxCreation,
+  # Addresses recipients should see as From (each gets "Send As" for the sender mailbox).
+  [string[]]$FromAddress = @()
 )
 
 $ErrorActionPreference = 'Stop'
@@ -166,6 +172,21 @@ try {
 }
 Write-Note 'Exchange can take 30 minutes to 2 hours to apply new app permissions. A 403 in the admin test until then is expected.'
 
+$fromTargets = @($FromAddress | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim().ToLowerInvariant() } | Where-Object { $_ -and $_ -ne $SenderMailbox })
+foreach ($addr in $fromTargets) {
+  Write-Step "Send As $addr"
+  if (-not (Get-EXOMailbox -Identity $addr -ErrorAction SilentlyContinue)) {
+    Write-Warning "$addr is not a mailbox; skipping. Create it as a shared mailbox, then run grant-send-as.ps1."
+    continue
+  }
+  $has = Get-RecipientPermission -Identity $addr -Trustee $SenderMailbox -ErrorAction SilentlyContinue |
+    Where-Object { $_.AccessRights -contains 'SendAs' }
+  if (-not $has) {
+    Add-RecipientPermission -Identity $addr -Trustee $SenderMailbox -AccessRights SendAs -Confirm:$false | Out-Null
+  }
+  Write-Ok "$SenderMailbox can send as $addr"
+}
+
 Disconnect-ExchangeOnline -Confirm:$false | Out-Null
 Disconnect-MgGraph | Out-Null
 
@@ -175,6 +196,7 @@ $result = [ordered]@{
   clientId      = $app.AppId
   senderMailbox = $SenderMailbox
 }
+if ($fromTargets.Count) { $result.fromAddress = $fromTargets[0] }
 if ($secretText) {
   $result.clientSecret = $secretText
   $result.secretExpiresOn = $secretExpires

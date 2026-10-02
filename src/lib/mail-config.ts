@@ -18,8 +18,39 @@ export type MailRouteRule = {
 
 export type MailStaticAttachment = { id: string; name: string; size: number; mime: string };
 
+export type MailConditionOp = 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'not_empty' | 'empty';
+
+/** "Send only when" gate: every condition must hold for the template to send. */
+export type MailCondition = { field: string; op: MailConditionOp; value: string };
+
+export type MailVariableType = 'constant' | 'fallback' | 'lookup' | 'html';
+
+/**
+ * Admin-defined variable, resolved per submission after the built-in and form-field values.
+ * Values may contain {{tokens}} (including variables defined above it).
+ */
+export type MailVariable = {
+  key: string;
+  type: MailVariableType;
+  label: string;
+  description: string;
+  /** constant / html: the value · fallback / lookup: the default when nothing matches */
+  value: string;
+  /** fallback: fields tried in order; the first non-empty wins */
+  sources: string[];
+  /** lookup: the field whose value is matched against `cases` */
+  source: string;
+  match: 'equals' | 'contains' | 'starts_with';
+  cases: Array<{ when: string; value: string }>;
+};
+
 export type MailTemplate = {
   enabled: boolean;
+  /** Fixed From address for this template (blank = the default From address). */
+  from: string;
+  /** Display name override; tokens allowed, e.g. "{{name}} via Website". */
+  fromName: string;
+  conditions: MailCondition[];
   to: string;
   cc: string;
   bcc: string;
@@ -44,7 +75,10 @@ export type MailConfig = {
     secretExpiresOn: string;
   };
   smtp: { host: string; port: number; security: 'auto' | 'ssl' | 'starttls'; user: string; from: string };
+  /** Default From address (blank = the sender mailbox / SMTP from). Must be a mailbox the sender can "Send As". */
+  fromAddress: string;
   fromName: string;
+  variables: MailVariable[];
   saveToSentItems: boolean;
   testRecipient: string;
   /** Accent colour for the branded email layout */
@@ -92,28 +126,59 @@ export const MAIL_EVENTS: Array<{
   },
 ];
 
-export const MAIL_VARIABLES: Array<{ token: string; label: string; kinds?: Array<'enquiry' | 'careers'> }> = [
-  { token: 'name', label: 'Name' },
-  { token: 'email', label: 'Email' },
-  { token: 'phone', label: 'Phone' },
-  { token: 'company', label: 'Company', kinds: ['enquiry'] },
-  { token: 'subject', label: 'Subject', kinds: ['enquiry'] },
-  { token: 'message', label: 'Message' },
-  { token: 'role', label: 'Applied role', kinds: ['careers'] },
-  { token: 'experience', label: 'Experience', kinds: ['careers'] },
-  { token: 'resume_name', label: 'CV file name', kinds: ['careers'] },
-  { token: 'source_label', label: 'Source (enquiry, callback…)' },
-  { token: 'item_type', label: 'Catalog type', kinds: ['enquiry'] },
-  { token: 'submission_id', label: 'Submission #' },
-  { token: 'submitted_at', label: 'Submitted at' },
-  { token: 'fields_table', label: 'All fields (table)' },
-  { token: 'admin_url', label: 'Admin link' },
-  { token: 'company_name', label: 'Company name' },
-  { token: 'company_phone', label: 'Company phone' },
-  { token: 'support_email', label: 'Support email' },
-  { token: 'site_url', label: 'Website URL' },
-  { token: 'notify_emails', label: 'Site Settings notify list' },
+export type SystemVariable = {
+  key: string;
+  label: string;
+  group: 'Contact' | 'Submission' | 'Links' | 'Company';
+  description: string;
+  /** Inserted as HTML (not escaped) in the body. */
+  html?: boolean;
+};
+
+/** Computed for every submission. Custom variables can't reuse these keys. */
+export const SYSTEM_VARIABLES: SystemVariable[] = [
+  { key: 'name', label: 'Name', group: 'Contact', description: 'Visitor name (name, else full_name).' },
+  { key: 'email', label: 'Email', group: 'Contact', description: 'Visitor email; empty for callback requests.' },
+  { key: 'phone', label: 'Phone', group: 'Contact', description: 'Visitor phone number.' },
+  { key: 'submission_id', label: 'Submission #', group: 'Submission', description: 'Enquiry ID in Admin → Enquiries.' },
+  { key: 'submitted_at', label: 'Submitted at', group: 'Submission', description: 'Date and time (IST), e.g. 2 Oct 2026, 5:35 pm.' },
+  { key: 'submitted_date', label: 'Submitted date', group: 'Submission', description: 'Date only (IST), e.g. 02 Oct 2026.' },
+  { key: 'submitted_time', label: 'Submitted time', group: 'Submission', description: 'Time only (IST), e.g. 5:35 pm.' },
+  { key: 'kind', label: 'Kind', group: 'Submission', description: '“enquiry” or “careers”.' },
+  {
+    key: 'source',
+    label: 'Source code',
+    group: 'Submission',
+    description: 'Which form: enquiry, callback_request, brochure_download, consultation or careers_apply.',
+  },
+  { key: 'source_label', label: 'Source label', group: 'Submission', description: 'Readable source: enquiry, callback request, brochure request, job application.' },
+  { key: 'item_type', label: 'Catalog type', group: 'Submission', description: 'product, project, service, general or careers.' },
+  { key: 'item_title', label: 'Catalog item', group: 'Submission', description: 'Product, project or service the visitor enquired about (if any).' },
+  { key: 'fields_table', label: 'All fields (table)', group: 'Submission', description: 'Every submitted field as a formatted table.', html: true },
+  { key: 'admin_url', label: 'Admin inbox link', group: 'Links', description: 'Admin → Enquiries.' },
+  { key: 'enquiry_url', label: 'Enquiry link', group: 'Links', description: 'Opens this exact submission in admin.' },
+  { key: 'site_url', label: 'Website URL', group: 'Links', description: 'NEXT_PUBLIC_SITE_URL.' },
+  { key: 'company_name', label: 'Company name', group: 'Company', description: 'Site Settings → company name.' },
+  { key: 'company_phone', label: 'Company phone', group: 'Company', description: 'Site Settings → phone.' },
+  { key: 'support_email', label: 'Support email', group: 'Company', description: 'Site Settings → support email.' },
+  { key: 'notify_emails', label: 'Notify list', group: 'Company', description: 'Site Settings → enquiry notification emails.' },
 ];
+
+export const RESERVED_VARIABLE_KEYS = new Set(SYSTEM_VARIABLES.map((v) => v.key));
+
+/** Fields each fixed website form always submits (custom Enquiry Forms fields are discovered from the database). */
+export const KNOWN_FORM_FIELDS: Array<{ key: string; label: string; forms: string[]; kind: 'enquiry' | 'careers' }> = [
+  { key: 'company', label: 'Company', forms: ['Enquiry', 'Brochure'], kind: 'enquiry' },
+  { key: 'subject', label: 'Subject / topic', forms: ['Enquiry', 'Callback', 'Brochure'], kind: 'enquiry' },
+  { key: 'message', label: 'Message', forms: ['Enquiry', 'Callback', 'Brochure', 'Careers'], kind: 'enquiry' },
+  { key: 'preferred_time', label: 'Preferred call time', forms: ['Callback'], kind: 'enquiry' },
+  { key: 'brochure_url', label: 'Brochure link', forms: ['Brochure'], kind: 'enquiry' },
+  { key: 'role', label: 'Applied role', forms: ['Careers'], kind: 'careers' },
+  { key: 'experience', label: 'Experience', forms: ['Careers'], kind: 'careers' },
+  { key: 'resume_name', label: 'CV file name', forms: ['Careers'], kind: 'careers' },
+];
+
+export const VARIABLE_KEY_RE = /^[a-z][a-z0-9_]{0,39}$/;
 
 const TEAM_BODY_ENQUIRY = `<p>A new <strong>{{source_label}}</strong> was submitted on the website.</p>
 {{fields_table}}
@@ -137,6 +202,9 @@ const VISITOR_BODY_CAREERS = `<p>Hi {{name}},</p>
 function template(partial: Partial<MailTemplate>): MailTemplate {
   return {
     enabled: true,
+    from: '',
+    fromName: '',
+    conditions: [],
     to: '',
     cc: '',
     bcc: '',
@@ -183,7 +251,9 @@ export function defaultMailConfig(): MailConfig {
     provider: 'off',
     graph: { tenantId: '', clientId: '', senderMailbox: '', secretExpiresOn: '' },
     smtp: { host: '', port: 587, security: 'auto', user: '', from: '' },
+    fromAddress: '',
     fromName: '',
+    variables: [],
     saveToSentItems: true,
     testRecipient: '',
     brandColor: '#FF6B1A',
@@ -194,11 +264,60 @@ export function defaultMailConfig(): MailConfig {
 const str = (v: unknown, max = 500) => (typeof v === 'string' ? v.slice(0, max) : '');
 const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
 
+const CONDITION_OPS: MailConditionOp[] = ['equals', 'not_equals', 'contains', 'not_contains', 'not_empty', 'empty'];
+
+/** A single plain address, or '' (From can never come from a token or a visitor). */
+export function cleanAddress(v: unknown): string {
+  const addr = str(v, 200).trim().toLowerCase();
+  return EMAIL_RE.test(addr) ? addr : '';
+}
+
+function normalizeVariables(raw: unknown): MailVariable[] {
+  const seen = new Set<string>();
+  const out: MailVariable[] = [];
+  for (const item of (Array.isArray(raw) ? raw : []).slice(0, 100)) {
+    const v = obj(item);
+    const key = str(v.key, 40).trim().toLowerCase();
+    if (!VARIABLE_KEY_RE.test(key) || RESERVED_VARIABLE_KEYS.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    const type: MailVariableType = v.type === 'fallback' || v.type === 'lookup' || v.type === 'html' ? v.type : 'constant';
+    out.push({
+      key,
+      type,
+      label: str(v.label, 120),
+      description: str(v.description, 500),
+      value: str(v.value, type === 'html' ? 50_000 : 5000),
+      sources: (Array.isArray(v.sources) ? v.sources : [])
+        .map((s) => str(s, 40).trim().toLowerCase())
+        .filter((s) => /^\w+$/.test(s))
+        .slice(0, 12),
+      source: /^\w+$/.test(str(v.source, 40).trim()) ? str(v.source, 40).trim().toLowerCase() : '',
+      match: v.match === 'contains' || v.match === 'starts_with' ? v.match : 'equals',
+      cases: (Array.isArray(v.cases) ? v.cases : [])
+        .map((c) => obj(c))
+        .slice(0, 100)
+        .map((c) => ({ when: str(c.when, 300), value: str(c.value, 5000) })),
+    });
+  }
+  return out;
+}
+
 function normalizeTemplate(raw: unknown, fallback: MailTemplate): MailTemplate {
   const t = obj(raw);
   if (!Object.keys(t).length) return fallback;
   return {
     enabled: t.enabled !== false,
+    from: cleanAddress(t.from),
+    fromName: str(t.fromName, 120),
+    conditions: (Array.isArray(t.conditions) ? t.conditions : [])
+      .map((c) => obj(c))
+      .slice(0, 10)
+      .map((c) => ({
+        field: str(c.field, 60).trim(),
+        op: CONDITION_OPS.includes(c.op as MailConditionOp) ? (c.op as MailConditionOp) : 'equals',
+        value: str(c.value, 300),
+      }))
+      .filter((c) => /^\w+$/.test(c.field)),
     to: str(t.to, 1000),
     cc: str(t.cc, 1000),
     bcc: str(t.bcc, 1000),
@@ -247,7 +366,9 @@ export function normalizeMailConfig(raw: unknown): MailConfig {
       user: str(s.user, 200).trim(),
       from: str(s.from, 200).trim(),
     },
+    fromAddress: cleanAddress(c.fromAddress),
     fromName: str(c.fromName, 120),
+    variables: normalizeVariables(c.variables),
     saveToSentItems: c.saveToSentItems !== false,
     testRecipient: str(c.testRecipient, 200).trim(),
     brandColor: /^#[0-9a-f]{6}$/i.test(str(c.brandColor)) ? str(c.brandColor) : base.brandColor,
@@ -268,6 +389,24 @@ export function parseAddressList(raw: string): string[] {
     if (EMAIL_RE.test(addr) && !out.includes(addr)) out.push(addr);
   }
   return out;
+}
+
+/** Mailbox that actually transmits (Graph sender mailbox or SMTP login/from). */
+export function transmittingMailbox(config: MailConfig): string {
+  if (config.provider === 'graph') return config.graph.senderMailbox.toLowerCase();
+  return (config.smtp.from || config.smtp.user).toLowerCase();
+}
+
+/** From address for a template: template override → default From → the transmitting mailbox. */
+export function effectiveFrom(config: MailConfig, tpl?: Pick<MailTemplate, 'from'>): string {
+  return (tpl?.from || config.fromAddress || transmittingMailbox(config)).toLowerCase();
+}
+
+/** Every distinct From address that differs from the transmitting mailbox (each needs "Send As"). */
+export function sendAsAddresses(config: MailConfig): string[] {
+  const mailbox = transmittingMailbox(config);
+  const all = [config.fromAddress, ...Object.values(config.templates).map((t) => t.from)].filter(Boolean);
+  return [...new Set(all.map((a) => a.toLowerCase()))].filter((a) => a !== mailbox);
 }
 
 /** Days until the Graph client secret expires (null when unknown). */

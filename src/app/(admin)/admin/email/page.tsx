@@ -2,25 +2,36 @@
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EMAIL_RE,
   GUID_RE,
   MAIL_EVENTS,
-  MAIL_VARIABLES,
   defaultMailTemplates,
+  effectiveFrom,
+  normalizeMailConfig,
   parseAddressList,
   secretDaysLeft,
+  sendAsAddresses,
+  transmittingMailbox,
+  type MailCondition,
   type MailConfig,
   type MailEventKey,
   type MailProvider,
   type MailRouteRule,
   type MailTemplate,
 } from '@/lib/mail-config';
+import { composeMail } from '@/lib/mail-engine';
 import {
   SAMPLE_PAYLOADS,
-  bodyToHtml,
   buildMailVars,
-  renderTemplate,
-  wrapEmailHtml,
+  extractTokens,
+  templateSyntaxIssues,
+  type MailVars,
+  type SubmissionKind,
 } from '@/lib/mail-template';
+import SamplePicker from '@/components/admin/email/SamplePicker';
+import VariablePicker from '@/components/admin/email/VariablePicker';
+import VariablesTab from '@/components/admin/email/VariablesTab';
+import { knownKeys, type Discovery } from '@/components/admin/email/shared';
 
 type SettingsView = {
   config: MailConfig;
@@ -48,12 +59,34 @@ type LogRow = {
   created_at: string;
 };
 
-type Tab = 'overview' | 'connection' | 'templates' | 'log' | 'guide';
+type Tab = 'overview' | 'connection' | 'templates' | 'variables' | 'log' | 'guide';
+
+type TextField = 'to' | 'cc' | 'bcc' | 'replyTo' | 'subject' | 'body' | 'fromName';
+
+const TEXT_FIELD_LABEL: Record<TextField, string> = {
+  to: 'To',
+  cc: 'CC',
+  bcc: 'BCC',
+  replyTo: 'Reply-To',
+  subject: 'Subject',
+  body: 'Body',
+  fromName: 'From name',
+};
+
+const CONDITION_OPS: Array<{ id: MailCondition['op']; label: string }> = [
+  { id: 'equals', label: 'is' },
+  { id: 'not_equals', label: 'is not' },
+  { id: 'contains', label: 'contains' },
+  { id: 'not_contains', label: 'does not contain' },
+  { id: 'not_empty', label: 'is filled' },
+  { id: 'empty', label: 'is empty' },
+];
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'overview', label: 'Overview' },
   { id: 'connection', label: 'Connection' },
   { id: 'templates', label: 'Templates' },
+  { id: 'variables', label: 'Variables' },
   { id: 'log', label: 'Delivery log' },
   { id: 'guide', label: 'Microsoft 365 setup' },
 ];
@@ -72,8 +105,6 @@ const PROVIDERS: Array<{ id: MailProvider; title: string; badge?: string; text: 
   },
   { id: 'off', title: 'Off', text: 'Submissions are still saved in Admin → Enquiries; no email is sent.' },
 ];
-
-const ROUTE_FIELDS = ['role', 'source', 'item_type', 'subject', 'company', 'message', 'preferred_time', 'email'];
 
 const SETUP_SCRIPT = '.\\scripts\\m365\\setup-website-mailer.ps1 -SenderMailbox website@zigma-technologies.com';
 
@@ -111,7 +142,15 @@ export default function EmailSettingsPage() {
   const [log, setLog] = useState<{ rows: LogRow[]; last7Days: Partial<Record<LogRow['status'], number>> } | null>(null);
   const [logFilter, setLogFilter] = useState('');
   const [uploading, setUploading] = useState(false);
-  const bodyRef = useRef<HTMLTextAreaElement | null>(null);
+  const [discovery, setDiscovery] = useState<Discovery | null>(null);
+  const [discoveryError, setDiscoveryError] = useState('');
+  const [sampleIds, setSampleIds] = useState<Record<SubmissionKind, number | null>>({ enquiry: null, careers: null });
+  const [realVars, setRealVars] = useState<Record<number, MailVars>>({});
+  const [sampleLoading, setSampleLoading] = useState(false);
+  const [varsKind, setVarsKind] = useState<SubmissionKind>('enquiry');
+  const [focusField, setFocusField] = useState<TextField>('body');
+  const [transferMsg, setTransferMsg] = useState('');
+  const discoveryRequested = useRef(false);
 
   const applyView = useCallback((v: SettingsView) => {
     setView(v);
@@ -136,6 +175,41 @@ export default function EmailSettingsPage() {
       await loadLog();
     })().catch((e: Error) => setError(e.message));
   }, [applyView, loadLog]);
+
+  const loadDiscovery = useCallback(async () => {
+    discoveryRequested.current = true;
+    setDiscoveryError('');
+    try {
+      const res = await fetch('/api/admin/email/variables');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not scan form fields');
+      setDiscovery(data);
+    } catch (e) {
+      setDiscoveryError(e instanceof Error ? e.message : 'Could not scan form fields');
+    }
+  }, []);
+
+  function openTab(next: Tab) {
+    setTab(next);
+    if ((next === 'templates' || next === 'variables') && !discoveryRequested.current) void loadDiscovery();
+  }
+
+  async function selectSample(kind: SubmissionKind, id: number | null) {
+    setSampleIds((s) => ({ ...s, [kind]: id }));
+    if (!id || realVars[id]) return;
+    setSampleLoading(true);
+    try {
+      const res = await fetch(`/api/admin/email/variables?submission=${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load submission');
+      setRealVars((m) => ({ ...m, [id]: data.vars }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not load submission');
+      setSampleIds((s) => ({ ...s, [kind]: null }));
+    } finally {
+      setSampleLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!dirty) return;
@@ -195,11 +269,13 @@ export default function EmailSettingsPage() {
     }
     setTesting(event ? `send:${event}` : action);
     setTestResult(null);
+    const kind = MAIL_EVENTS.find((e) => e.key === event)?.kind;
+    const submissionId = kind ? sampleIds[kind] || undefined : undefined;
     try {
       const res = await fetch('/api/admin/email/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, to, event }),
+        body: JSON.stringify({ action, to, event, submissionId }),
       });
       const data = await res.json();
       setTestResult(res.ok ? data : { ok: false, message: data.error || 'Test failed' });
@@ -227,10 +303,12 @@ export default function EmailSettingsPage() {
       const tenantId = raw.tenantId || raw.TenantId || '';
       const clientId = raw.clientId || raw.ClientId || raw.appId || '';
       const senderMailbox = raw.senderMailbox || raw.SenderMailbox || '';
+      const fromAddress = (raw.fromAddress || raw.FromAddress || '').trim().toLowerCase();
       if (!tenantId || !clientId) throw new Error('JSON must contain tenantId and clientId');
       update((c) => ({
         ...c,
         provider: 'graph',
+        fromAddress: EMAIL_RE.test(fromAddress) ? fromAddress : c.fromAddress,
         graph: {
           tenantId,
           clientId,
@@ -268,43 +346,109 @@ export default function EmailSettingsPage() {
     }
   }
 
-  function insertToken(token: string) {
+  function exportSettings() {
     if (!config) return;
-    const el = bodyRef.current;
-    const tpl = config.templates[activeEvent];
-    const snippet = `{{${token}}}`;
-    if (!el) {
-      updateTemplate(activeEvent, { body: tpl.body + snippet });
-      return;
+    const blob = new Blob(
+      [JSON.stringify({ schema: 'zigma.email-settings/v1', exportedAt: new Date().toISOString(), config }, null, 2)],
+      { type: 'application/json' }
+    );
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `email-settings_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+    setTransferMsg('Exported. Secrets are never included — re-enter the client secret on the other environment.');
+  }
+
+  async function importSettings(e: ChangeEvent<HTMLInputElement>, includeConnection: boolean) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !config) return;
+    try {
+      const raw = JSON.parse(await file.text()) as { config?: unknown };
+      const incoming = normalizeMailConfig(raw.config ?? raw);
+      update((c) =>
+        includeConnection
+          ? { ...incoming }
+          : { ...incoming, provider: c.provider, graph: c.graph, smtp: c.smtp, saveToSentItems: c.saveToSentItems, testRecipient: c.testRecipient }
+      );
+      const files = Object.values(incoming.templates).reduce((n, t) => n + t.attachments.length, 0);
+      setTransferMsg(
+        `Imported templates, variables and sender settings${includeConnection ? ' and connection' : ''}. Review, then Save.` +
+          (files ? ` ${files} template attachment(s) must be re-uploaded on this server.` : '')
+      );
+    } catch {
+      setError('That file isn’t an email settings export.');
     }
-    const start = el.selectionStart ?? tpl.body.length;
-    const end = el.selectionEnd ?? start;
-    updateTemplate(activeEvent, { body: tpl.body.slice(0, start) + snippet + tpl.body.slice(end) });
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(start + snippet.length, start + snippet.length);
-    });
+  }
+
+  const textFocus = (field: TextField) => ({
+    id: `em-f-${field}`,
+    onFocus: () => setFocusField(field),
+  });
+
+  function insertToken(snippet: string) {
+    if (!config) return;
+    const field = focusField;
+    const current = config.templates[activeEvent][field];
+    const el = document.getElementById(`em-f-${field}`) as HTMLInputElement | HTMLTextAreaElement | null;
+    const start = el?.selectionStart ?? current.length;
+    const end = el?.selectionEnd ?? start;
+    const sep = field !== 'body' && field !== 'subject' && field !== 'fromName' && current.slice(0, start).trim() && !/[,;]\s*$/.test(current.slice(0, start)) ? ', ' : '';
+    const text = sep + snippet;
+    updateTemplate(activeEvent, { [field]: current.slice(0, start) + text + current.slice(end) });
+    if (el) {
+      requestAnimationFrame(() => {
+        el.focus();
+        el.setSelectionRange(start + text.length, start + text.length);
+      });
+    }
   }
 
   const activeMeta = MAIL_EVENTS.find((e) => e.key === activeEvent)!;
 
+  const baseVarsFor = useCallback(
+    (kind: SubmissionKind): MailVars => {
+      const id = sampleIds[kind];
+      if (id && realVars[id]) return realVars[id];
+      return buildMailVars({
+        kind,
+        id: 1024,
+        itemType: kind === 'careers' ? 'careers' : 'product',
+        itemTitle: kind === 'careers' ? '' : '200 kVA Modular UPS',
+        payload: SAMPLE_PAYLOADS[kind],
+        site: view?.site || { companyName: '', phone: '', supportEmail: '', notifyEmails: '', siteUrl: '' },
+      });
+    },
+    [sampleIds, realVars, view]
+  );
+
   const preview = useMemo(() => {
     if (!config || !view) return null;
-    const tpl = config.templates[activeEvent];
-    const vars = buildMailVars({
-      kind: activeMeta.kind,
-      id: 1024,
-      itemType: activeMeta.kind === 'careers' ? 'careers' : 'product',
-      payload: SAMPLE_PAYLOADS[activeMeta.kind],
-      site: view.site,
+    return composeMail({
+      config,
+      tpl: config.templates[activeEvent],
+      base: baseVarsFor(activeMeta.kind),
+      companyName: view.site.companyName,
+      siteUrl: view.site.siteUrl,
     });
-    const subject = renderTemplate(tpl.subject, vars, false);
-    const bodyHtml = bodyToHtml(renderTemplate(tpl.body, vars, true), config.brandColor);
-    const html = wrapEmailHtml({ bodyHtml, subject, companyName: view.site.companyName, siteUrl: view.site.siteUrl, accent: config.brandColor });
-    const to = parseAddressList(renderTemplate(tpl.to, vars, false));
-    const cc = parseAddressList(renderTemplate(tpl.cc, vars, false));
-    return { subject, html, to, cc };
-  }, [config, view, activeEvent, activeMeta]);
+  }, [config, view, activeEvent, activeMeta, baseVarsFor]);
+
+  const lint = useMemo(() => {
+    if (!config || !discovery) return [];
+    const t = config.templates[activeEvent];
+    const known = knownKeys(config, discovery.fields, baseVarsFor(activeMeta.kind));
+    const out: string[] = [];
+    for (const field of Object.keys(TEXT_FIELD_LABEL) as TextField[]) {
+      const unknown = extractTokens(t[field]).filter((k) => !known.has(k));
+      if (unknown.length) out.push(`${TEXT_FIELD_LABEL[field]}: ${unknown.map((k) => `{{${k}}}`).join(', ')} — not a known variable, will be blank`);
+      templateSyntaxIssues(t[field]).forEach((s) => out.push(`${TEXT_FIELD_LABEL[field]}: ${s}`));
+    }
+    t.conditions.filter((c) => !known.has(c.field)).forEach((c) => out.push(`Send only when: “${c.field}” is not a known field`));
+    t.routes.filter((r) => r.field && !known.has(r.field)).forEach((r) => out.push(`Routing: “${r.field}” is not a known field`));
+    if (t.from && !EMAIL_RE.test(t.from)) out.push('From: must be a single email address (no variables).');
+    return out;
+  }, [config, discovery, activeEvent, activeMeta, baseVarsFor]);
 
   if (!config || !view) {
     return error ? <div className="admin-error">{error}</div> : <div className="admin-card">Loading email settings…</div>;
@@ -314,6 +458,9 @@ export default function EmailSettingsPage() {
   const stats = log?.last7Days || {};
   const recentFailures = (log?.rows || []).filter((r) => r.status === 'failed').slice(0, 5);
   const tpl = config.templates[activeEvent];
+  const sendAs = sendAsAddresses(config);
+  const mailbox = transmittingMailbox(config);
+  const fromInvalid = config.fromAddress !== '' && !EMAIL_RE.test(config.fromAddress);
   const graphIssues = [
     config.graph.tenantId && !GUID_RE.test(config.graph.tenantId) && !config.graph.tenantId.includes('.')
       ? 'Tenant ID should be a GUID or a domain like contoso.onmicrosoft.com'
@@ -368,7 +515,7 @@ export default function EmailSettingsPage() {
             role="tab"
             aria-selected={tab === t.id}
             className={`em-tab${tab === t.id ? ' is-active' : ''}`}
-            onClick={() => setTab(t.id)}
+            onClick={() => openTab(t.id)}
           >
             {t.label}
             {t.id === 'log' && stats.failed ? <span className="em-tab-count">{stats.failed}</span> : null}
@@ -434,14 +581,15 @@ export default function EmailSettingsPage() {
                       className="em-flow"
                       onClick={() => {
                         setActiveEvent(e.key);
-                        setTab('templates');
+                        openTab('templates');
                       }}
                     >
                       <span className={`em-dot em-dot--${t.enabled && view.activeProvider !== 'off' ? 'on' : 'off'}`} />
                       <span className="em-flow-text">
                         <strong>{e.label}</strong>
                         <small>
-                          {t.enabled ? `To ${t.to || '—'}${t.cc ? ` · CC ${t.cc}` : ''}` : 'Disabled'}
+                          {t.enabled ? `From ${effectiveFrom(config, t) || '—'} · To ${t.to || '—'}${t.cc ? ` · CC ${t.cc}` : ''}` : 'Disabled'}
+                          {t.conditions.length ? ` · ${t.conditions.length} condition${t.conditions.length > 1 ? 's' : ''}` : ''}
                           {t.routes.length ? ` · ${t.routes.length} routing rule${t.routes.length > 1 ? 's' : ''}` : ''}
                           {t.attachResume ? ' · CV attached' : ''}
                           {t.attachments.length ? ` · ${t.attachments.length} file(s)` : ''}
@@ -472,11 +620,20 @@ export default function EmailSettingsPage() {
                 <strong>Microsoft Graph</strong>
                 <small>App-only · scoped by Exchange RBAC</small>
               </div>
-              <span className="em-arch-link">sends as</span>
+              <span className="em-arch-link">signs in to</span>
               <div className="em-arch-node em-arch-node--ms">
                 <strong>{config.graph.senderMailbox || 'website@…'}</strong>
-                <small>Shared mailbox · no licence · Sent Items audit</small>
+                <small>Sending mailbox · Sent Items audit</small>
               </div>
+              {sendAs.length ? (
+                <>
+                  <span className="em-arch-link">Send As</span>
+                  <div className="em-arch-node em-arch-node--ms">
+                    <strong>{sendAs.join(', ')}</strong>
+                    <small>From address{sendAs.length > 1 ? 'es' : ''} recipients see</small>
+                  </div>
+                </>
+              ) : null}
             </div>
             {recentFailures.length ? (
               <>
@@ -580,14 +737,17 @@ export default function EmailSettingsPage() {
                   />
                 </div>
                 <div className="admin-field">
-                  <label>Sender mailbox</label>
+                  <label>Sending mailbox</label>
                   <input
                     className="admin-input"
                     value={config.graph.senderMailbox}
                     onChange={(e) => update((c) => ({ ...c, graph: { ...c.graph, senderMailbox: e.target.value.trim() } }))}
-                    placeholder="website@zigma-technologies.com"
+                    placeholder="quotation@zigma-technologies.com"
                   />
-                  <span className="admin-hint">A shared mailbox (free, no licence). The app can send only as this address.</span>
+                  <span className="admin-hint">
+                    The mailbox the app is authorised for (a real mailbox, not an alias). Recipients see the From address
+                    below.
+                  </span>
                 </div>
                 <div className="admin-field">
                   <label className="em-check">
@@ -703,18 +863,63 @@ export default function EmailSettingsPage() {
             </section>
           ) : null}
 
+          {config.provider !== 'off' ? (
+            <section className="em-card">
+              <h3>Sender identity</h3>
+              <div className="admin-form-grid">
+                <div className="admin-field">
+                  <label>Default From address</label>
+                  <input
+                    className="admin-input"
+                    value={config.fromAddress}
+                    onChange={(e) => update((c) => ({ ...c, fromAddress: e.target.value.trim().toLowerCase() }))}
+                    placeholder={mailbox || 'webmaster@zigma-technologies.com'}
+                  />
+                  {fromInvalid ? <span className="em-field-error">Enter one email address.</span> : null}
+                  <span className="admin-hint">
+                    What recipients see. Blank = {mailbox || 'the sending mailbox'}. Each template can override it.
+                  </span>
+                </div>
+                <div className="admin-field">
+                  <label>Default display name</label>
+                  <input
+                    className="admin-input"
+                    value={config.fromName}
+                    onChange={(e) => update((c) => ({ ...c, fromName: e.target.value }))}
+                    placeholder={view.site.companyName}
+                  />
+                  <span className="admin-hint">Variables allowed, e.g. <code>{'{{company_name}} Website'}</code>.</span>
+                </div>
+              </div>
+              {sendAs.length && mailbox ? (
+                <div className="em-sendas">
+                  <div className="em-sendas-head">
+                    <strong>One-time Exchange step</strong>
+                    <span>
+                      {mailbox} must have <b>Send As</b> permission on {sendAs.join(', ')}. Without it Exchange either
+                      rejects the email or quietly sends it from {mailbox} — the test email checks this for you.
+                    </span>
+                  </div>
+                  {sendAs.map((addr) => (
+                    <CopyCode
+                      key={addr}
+                      code={`Add-RecipientPermission -Identity ${addr} -Trustee ${mailbox} -AccessRights SendAs -Confirm:$false`}
+                    />
+                  ))}
+                  <span className="admin-hint">
+                    Optional — also keep a copy in the shared mailbox’s own Sent Items:{' '}
+                    <code>{`Set-Mailbox ${sendAs[0]} -MessageCopyForSentAsEnabled $true`}</code>. Or run{' '}
+                    <code>{`.\\scripts\\m365\\grant-send-as.ps1 -SenderMailbox ${mailbox} -FromAddress ${sendAs.join(',')}`}</code>{' '}
+                    which does both. Exchange can take up to an hour to apply it.
+                  </span>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
           <section className="em-card">
             <h3>Branding & testing</h3>
             <div className="admin-form-grid">
-              <div className="admin-field">
-                <label>Sender display name</label>
-                <input
-                  className="admin-input"
-                  value={config.fromName}
-                  onChange={(e) => update((c) => ({ ...c, fromName: e.target.value }))}
-                  placeholder={view.site.companyName}
-                />
-              </div>
               <div className="admin-field">
                 <label>Accent colour</label>
                 <div className="em-inline">
@@ -749,6 +954,28 @@ export default function EmailSettingsPage() {
                 {testing === 'send' ? 'Sending…' : 'Save & send test email'}
               </button>
             </div>
+          </section>
+
+          <section className="em-card">
+            <h3>Move settings between environments</h3>
+            <p className="admin-hint">
+              Build templates and variables on your local site, then move them to production in one step. Secrets are never
+              exported.
+            </p>
+            <div className="em-actions">
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={exportSettings}>
+                Export settings (.json)
+              </button>
+              <label className="admin-btn admin-btn-secondary em-upload">
+                Import templates & variables
+                <input type="file" hidden accept="application/json,.json" onChange={(e) => void importSettings(e, false)} />
+              </label>
+              <label className="admin-btn admin-btn-secondary em-upload">
+                Import everything incl. connection
+                <input type="file" hidden accept="application/json,.json" onChange={(e) => void importSettings(e, true)} />
+              </label>
+            </div>
+            {transferMsg ? <p className="admin-hint em-transfer-msg">{transferMsg}</p> : null}
           </section>
         </div>
       ) : null}
@@ -785,34 +1012,61 @@ export default function EmailSettingsPage() {
                   <span>{tpl.enabled ? 'Enabled' : 'Disabled'}</span>
                 </label>
               </div>
+              <div className="em-sender-row">
+                <div className="admin-field">
+                  <label>From address</label>
+                  <input
+                    className="admin-input"
+                    value={tpl.from}
+                    onChange={(e) => updateTemplate(activeEvent, { from: e.target.value.trim().toLowerCase() })}
+                    placeholder={`Default: ${effectiveFrom(config) || 'sending mailbox'}`}
+                  />
+                </div>
+                <div className="admin-field">
+                  <label>From name</label>
+                  <input
+                    className="admin-input"
+                    value={tpl.fromName}
+                    {...textFocus('fromName')}
+                    onChange={(e) => updateTemplate(activeEvent, { fromName: e.target.value })}
+                    placeholder={`Default: ${config.fromName || view.site.companyName}`}
+                  />
+                </div>
+              </div>
               <div className="admin-form-grid">
                 {(['to', 'cc', 'bcc', 'replyTo'] as const).map((field) => (
-                  <div className="admin-field" key={field}>
-                    <label>{field === 'replyTo' ? 'Reply-To' : field.toUpperCase()}</label>
+                  <div className={`admin-field${focusField === field ? ' em-focused' : ''}`} key={field}>
+                    <label>{TEXT_FIELD_LABEL[field]}</label>
                     <input
                       className="admin-input"
                       value={tpl[field]}
+                      {...textFocus(field)}
                       onChange={(e) => updateTemplate(activeEvent, { [field]: e.target.value })}
-                      placeholder={field === 'to' ? 'hr@…, {{notify_emails}}' : field === 'replyTo' ? '{{email}}' : 'Comma-separated'}
+                      placeholder={field === 'to' ? 'hr@…, {{notify_emails}}' : field === 'replyTo' ? '{{email}}' : 'a@…, b@…, {{cc_emails}}'}
                     />
                   </div>
                 ))}
-                <div className="admin-field full">
+                <div className={`admin-field full${focusField === 'subject' ? ' em-focused' : ''}`}>
                   <label>Subject</label>
                   <input
                     className="admin-input"
                     value={tpl.subject}
+                    {...textFocus('subject')}
                     onChange={(e) => updateTemplate(activeEvent, { subject: e.target.value })}
                   />
                 </div>
               </div>
               <p className="admin-hint">
                 Separate addresses with commas. <code>{'{{notify_emails}}'}</code> = Site Settings notify list (
-                {view.site.notifyEmails || 'empty'}), <code>{'{{email}}'}</code> = the visitor.
+                {view.site.notifyEmails || 'empty'}), <code>{'{{email}}'}</code> = the visitor. Reusable lists live in{' '}
+                <button type="button" className="em-link" onClick={() => openTab('variables')}>
+                  Variables
+                </button>
+                .
               </p>
 
               <div className="em-body-head">
-                <label htmlFor="em-body">Body</label>
+                <label htmlFor="em-f-body">Body</label>
                 <button
                   type="button"
                   className="em-link"
@@ -826,25 +1080,87 @@ export default function EmailSettingsPage() {
                   Reset to default
                 </button>
               </div>
-              <div className="em-tokens">
-                {MAIL_VARIABLES.filter((v) => !v.kinds || v.kinds.includes(activeMeta.kind)).map((v) => (
-                  <button key={v.token} type="button" className="em-token" title={v.label} onClick={() => insertToken(v.token)}>
-                    {`{{${v.token}}}`}
-                  </button>
-                ))}
-              </div>
+              <VariablePicker
+                kind={activeMeta.kind}
+                custom={config.variables}
+                fields={discovery?.fields || []}
+                target={TEXT_FIELD_LABEL[focusField]}
+                onInsert={insertToken}
+              />
               <textarea
-                id="em-body"
-                ref={bodyRef}
-                className="admin-textarea em-mono em-body"
+                className={`admin-textarea em-mono em-body${focusField === 'body' ? ' em-focused-input' : ''}`}
                 rows={12}
                 value={tpl.body}
+                {...textFocus('body')}
                 onChange={(e) => updateTemplate(activeEvent, { body: e.target.value })}
               />
               <p className="admin-hint">
-                Plain text or HTML. Conditionals: <code>{'{{#if company}}…{{else}}…{{/if}}'}</code>. Buttons:{' '}
-                <code>{'<a class="btn" href="{{admin_url}}">Open</a>'}</code>.
+                Plain text or HTML. Buttons: <code>{'<a class="btn" href="{{enquiry_url}}">Open</a>'}</code>. Formatting and
+                conditions: open <em>Syntax</em> above.
               </p>
+              {lint.length ? (
+                <ul className="em-lint">
+                  {lint.map((l) => (
+                    <li key={l}>{l}</li>
+                  ))}
+                </ul>
+              ) : discovery ? (
+                <p className="em-lint-ok">✓ All variables resolve</p>
+              ) : null}
+            </section>
+
+            <section className="em-card">
+              <div className="em-card-head">
+                <h3>Send only when</h3>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary"
+                  onClick={() =>
+                    updateTemplate(activeEvent, {
+                      conditions: [...tpl.conditions, { field: 'source', op: 'not_equals', value: '' }],
+                    })
+                  }
+                >
+                  + Add condition
+                </button>
+              </div>
+              <p className="admin-hint">
+                {tpl.conditions.length
+                  ? 'All conditions must match, otherwise this email is skipped. Use a|b to match either value.'
+                  : 'Sends for every submission. Add a condition to limit it — e.g. source is not “callback_request”, or role contains “Engineer”.'}
+              </p>
+              {tpl.conditions.map((c, i) => {
+                const setCond = (patch: Partial<MailCondition>) =>
+                  updateTemplate(activeEvent, { conditions: tpl.conditions.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+                return (
+                  <div className="em-rule em-rule--cond" key={i}>
+                    <span className="em-rule-if">{i ? 'and' : 'If'}</span>
+                    <input className="admin-input" list="em-route-fields" value={c.field} onChange={(e) => setCond({ field: e.target.value.trim() })} placeholder="field" />
+                    <select className="admin-select" value={c.op} onChange={(e) => setCond({ op: e.target.value as MailCondition['op'] })}>
+                      {CONDITION_OPS.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      className="admin-input"
+                      value={c.value}
+                      disabled={c.op === 'empty' || c.op === 'not_empty'}
+                      onChange={(e) => setCond({ value: e.target.value })}
+                      placeholder="value (a|b)"
+                    />
+                    <button
+                      type="button"
+                      className="em-link em-link--danger"
+                      aria-label="Remove condition"
+                      onClick={() => updateTemplate(activeEvent, { conditions: tpl.conditions.filter((_, j) => j !== i) })}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
             </section>
 
             <section className="em-card">
@@ -901,7 +1217,7 @@ export default function EmailSettingsPage() {
                 “callback_request” → replace with sales@….
               </p>
               <datalist id="em-route-fields">
-                {ROUTE_FIELDS.map((f) => (
+                {[...knownKeys(config, discovery?.fields || [])].sort().map((f) => (
                   <option key={f} value={f} />
                 ))}
               </datalist>
@@ -946,14 +1262,43 @@ export default function EmailSettingsPage() {
 
           <aside className="em-preview">
             <div className="em-preview-head">
-              <span className="em-eyebrow">Live preview · sample data</span>
+              <div className="em-preview-top">
+                <span className="em-eyebrow">Live preview</span>
+                <SamplePicker
+                  kind={activeMeta.kind}
+                  recent={discovery?.recent || []}
+                  value={sampleIds[activeMeta.kind]}
+                  loading={sampleLoading}
+                  onChange={(id) => void selectSample(activeMeta.kind, id)}
+                />
+              </div>
+              {preview && !preview.send ? <div className="em-skip">Would not send · {preview.skipReason}</div> : null}
               <div className="em-preview-meta">
+                <div>
+                  <b>From</b> {preview?.fromName ? `${preview.fromName} ` : ''}
+                  <span className="em-muted">&lt;{preview?.from || 'sending mailbox'}&gt;</span>
+                  {preview?.from && mailbox && preview.from !== mailbox && config.provider === 'graph' ? (
+                    <span className="em-sendas-pill" title={`Sent through ${mailbox} using Send As`}>
+                      via {mailbox}
+                    </span>
+                  ) : null}
+                </div>
                 <div>
                   <b>To</b> {preview?.to.join(', ') || <em>no valid recipient</em>}
                 </div>
                 {preview?.cc.length ? (
                   <div>
                     <b>CC</b> {preview.cc.join(', ')}
+                  </div>
+                ) : null}
+                {preview?.bcc.length ? (
+                  <div>
+                    <b>BCC</b> {preview.bcc.join(', ')}
+                  </div>
+                ) : null}
+                {preview?.replyTo.length ? (
+                  <div>
+                    <b>Reply-To</b> {preview.replyTo.join(', ')}
                   </div>
                 ) : null}
                 <div>
@@ -970,8 +1315,32 @@ export default function EmailSettingsPage() {
             >
               {testing === `send:${activeEvent}` ? 'Sending…' : `Save & send this template to ${config.testRecipient || 'test recipient'}`}
             </button>
+            <p className="admin-hint">
+              {sampleIds[activeMeta.kind]
+                ? `Uses submission #${sampleIds[activeMeta.kind]}${activeMeta.kind === 'careers' && tpl.attachResume ? ' and attaches its CV' : ''}. Sent only to the test recipient.`
+                : 'Uses sample data. Pick a recent submission above to test with real values. Sent only to the test recipient.'}
+            </p>
           </aside>
         </div>
+      ) : null}
+
+      {tab === 'variables' ? (
+        <VariablesTab
+          config={config}
+          update={update}
+          discovery={discovery}
+          discoveryError={discoveryError}
+          onRefresh={() => void loadDiscovery()}
+          kind={varsKind}
+          onKind={setVarsKind}
+          sampleId={sampleIds[varsKind]}
+          onSample={(id) => void selectSample(varsKind, id)}
+          sampleLoading={sampleLoading}
+          baseVars={baseVarsFor(varsKind)}
+          companyName={view.site.companyName}
+          siteUrl={view.site.siteUrl}
+          accent={config.brandColor}
+        />
       ) : null}
 
       {tab === 'log' ? (
@@ -1051,7 +1420,7 @@ export default function EmailSettingsPage() {
         </section>
       ) : null}
 
-      {tab === 'guide' ? <SetupGuide senderMailbox={config.graph.senderMailbox} /> : null}
+      {tab === 'guide' ? <SetupGuide senderMailbox={config.graph.senderMailbox} sendAs={sendAs} /> : null}
 
       {dirty ? (
         <div className="em-savebar">
@@ -1068,8 +1437,30 @@ export default function EmailSettingsPage() {
   );
 }
 
-function SetupGuide({ senderMailbox }: { senderMailbox: string }) {
+function CopyCode({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
+  return (
+    <div className="em-code">
+      <code>{code}</code>
+      <button
+        type="button"
+        className="em-link"
+        onClick={() => {
+          void navigator.clipboard?.writeText(code);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }}
+      >
+        {copied ? 'Copied' : 'Copy'}
+      </button>
+    </div>
+  );
+}
+
+function SetupGuide({ senderMailbox, sendAs }: { senderMailbox: string; sendAs: string[] }) {
+  const [copied, setCopied] = useState(false);
+  const mailbox = senderMailbox || 'quotation@zigma-technologies.com';
+  const from = sendAs[0] || 'webmaster@zigma-technologies.com';
   return (
     <div className="em-stack">
       <section className="em-card">
@@ -1120,6 +1511,23 @@ function SetupGuide({ senderMailbox }: { senderMailbox: string }) {
             <strong>Templates</strong>: set the recipients (for example HR for careers and sales for enquiries), CC lists and routing rules, then send a test of each template.
           </li>
         </ol>
+      </section>
+
+      <section className="em-card">
+        <h3>Already have an app registration? Sending as a shared mailbox</h3>
+        <p>
+          If your infra team already registered an app, skip the setup script: paste the tenant ID, client ID and a new
+          client secret <em>value</em> in Connection. Use the mailbox the app is authorised for as the{' '}
+          <strong>Sending mailbox</strong> (e.g. <code>{mailbox}</code>) and the address recipients should see as the{' '}
+          <strong>From address</strong> (e.g. <code>{from}</code>).
+        </p>
+        <p>An Exchange admin then grants Send As once (PowerShell, ExchangeOnlineManagement module):</p>
+        <CopyCode code={`.\\scripts\\m365\\grant-send-as.ps1 -SenderMailbox ${mailbox} -FromAddress ${sendAs.length ? sendAs.join(',') : from}`} />
+        <p className="admin-hint">
+          Or manually: <code>{`Add-RecipientPermission -Identity ${from} -Trustee ${mailbox} -AccessRights SendAs`}</code>. If the
+          app’s permission is scoped to one mailbox, that is still enough — Exchange checks Send As on the sending mailbox. The
+          test email reads Sent Items back and tells you if Exchange rewrote the From address.
+        </p>
       </section>
 
       <section className="em-card">

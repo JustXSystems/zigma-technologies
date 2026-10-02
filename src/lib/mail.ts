@@ -1,26 +1,31 @@
+import type { RowDataPacket } from 'mysql2';
+import pool from '@/lib/db';
 import { getThemeSettings } from '@/lib/cms';
 import { mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
   MAIL_EVENTS,
+  effectiveFrom,
   parseAddressList,
   type MailConfig,
   type MailEventKey,
   type MailProvider,
   type MailSecrets,
-  type MailTemplate,
 } from '@/lib/mail-config';
+import { composeMail } from '@/lib/mail-engine';
 import {
   SAMPLE_PAYLOADS,
-  bodyToHtml,
   buildMailVars,
   escapeHtml,
   htmlToText,
-  renderTemplate,
+  submissionKind,
   wrapEmailHtml,
   type MailVars,
+  type SiteVars,
+  type SubmissionKind,
 } from '@/lib/mail-template';
 import { getMailSettings, getMailLogMessage, insertMailLog, readMailAttachment, updateMailLog } from '@/lib/mail-store';
-import { deliver, effectiveProvider, type OutgoingAttachment, type OutgoingMail } from '@/lib/mail-transport';
+import { deliver, effectiveProvider, verifySentFrom, type FromCheck, type OutgoingAttachment, type OutgoingMail } from '@/lib/mail-transport';
+import { parseJsonField } from '@/lib/types';
 import { readResumeFile } from '@/lib/resumes';
 
 type AttachmentRef = { kind: 'resume'; stored: string; name: string; mime: string } | { kind: 'static'; id: string; name: string; mime: string };
@@ -37,6 +42,8 @@ type MailContext = {
   site: SiteSettings;
 };
 
+type ResumeRef = { stored: string; name: string; mime: string };
+
 async function loadContext(): Promise<MailContext> {
   const [stored, theme] = await Promise.all([getMailSettings(), getThemeSettings()]);
   return {
@@ -52,39 +59,51 @@ function siteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 }
 
-function fieldMatches(rule: MailTemplate['routes'][number], vars: MailVars) {
-  const actual = (vars[rule.field] || '').trim().toLowerCase();
-  const expected = rule.value.trim().toLowerCase();
-  if (rule.op === 'not_empty') return actual !== '';
-  if (rule.op === 'contains') return expected !== '' && actual.includes(expected);
-  return actual === expected;
+function siteVars(site: SiteSettings): SiteVars {
+  return {
+    companyName: site.companyName,
+    phone: site.phone,
+    supportEmail: site.supportEmail,
+    notifyEmails: site.enquiryNotifyEmail,
+    siteUrl: siteUrl(),
+  };
 }
 
-function resolveRecipients(tpl: MailTemplate, vars: MailVars) {
-  let to = parseAddressList(renderTemplate(tpl.to, vars, false));
-  let cc = parseAddressList(renderTemplate(tpl.cc, vars, false));
-  for (const rule of tpl.routes) {
-    if (!rule.field || !fieldMatches(rule, vars)) continue;
-    const ruleTo = parseAddressList(renderTemplate(rule.to, vars, false));
-    const ruleCc = parseAddressList(renderTemplate(rule.cc, vars, false));
-    if (rule.mode === 'replace') {
-      to = ruleTo.length ? ruleTo : to;
-      cc = ruleCc;
-    } else {
-      to = [...new Set([...to, ...ruleTo])];
-      cc = [...new Set([...cc, ...ruleCc])];
-    }
+async function catalogTitle(itemId: number | null | undefined): Promise<string> {
+  if (!itemId) return '';
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT title FROM catalog_items WHERE id = ? LIMIT 1', [itemId]);
+    return rows[0]?.title ? String(rows[0].title) : '';
+  } catch {
+    return '';
   }
-  const bcc = parseAddressList(renderTemplate(tpl.bcc, vars, false));
-  const replyTo = parseAddressList(renderTemplate(tpl.replyTo, vars, false)).slice(0, 1);
-  return { to, cc: cc.filter((a) => !to.includes(a)), bcc, replyTo };
 }
 
-export function renderMail(tpl: MailTemplate, vars: MailVars, config: MailConfig, companyName: string) {
-  const subject = renderTemplate(tpl.subject, vars, false).replace(/\s+/g, ' ').trim();
-  const bodyHtml = bodyToHtml(renderTemplate(tpl.body, vars, true), config.brandColor);
-  const html = wrapEmailHtml({ bodyHtml, subject, companyName, siteUrl: vars.site_url || siteUrl(), accent: config.brandColor });
-  return { subject, html, text: htmlToText(bodyHtml) };
+/** Built-in + form-field variables for a stored submission (admin preview and "test with this submission"). */
+export async function loadSubmissionVars(id: number, site?: SiteSettings) {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT id, item_id, item_type, payload_json, created_at FROM enquiries WHERE id = ? LIMIT 1',
+    [id]
+  );
+  const row = rows[0];
+  if (!row) return null;
+  const payload = parseJsonField<Record<string, unknown>>(row.payload_json, {});
+  const kind = submissionKind(payload);
+  const resolvedSite = site || mergeSiteSettings((await getThemeSettings()).site);
+  const vars = buildMailVars({
+    kind,
+    id: Number(row.id),
+    itemType: kind === 'careers' ? 'careers' : String(row.item_type || 'general'),
+    itemTitle: await catalogTitle(row.item_id),
+    payload,
+    site: siteVars(resolvedSite),
+    submittedAt: row.created_at ? new Date(row.created_at) : undefined,
+  });
+  const resume: ResumeRef | undefined =
+    typeof payload.resume_file === 'string' && payload.resume_file
+      ? { stored: payload.resume_file, name: String(payload.resume_name || payload.resume_file), mime: String(payload.resume_mime || '') }
+      : undefined;
+  return { kind, vars, resume };
 }
 
 async function loadAttachments(refs: AttachmentRef[]): Promise<{ files: OutgoingAttachment[]; missing: string[] }> {
@@ -121,13 +140,15 @@ async function sendAndLog(ctx: MailContext, event: string, message: LoggedMessag
   return result;
 }
 
-async function dispatchEvent(
-  ctx: MailContext,
-  event: MailEventKey,
-  vars: MailVars,
-  refId: number,
-  resume?: { stored: string; name: string; mime: string }
-) {
+function attachmentRefs(ctx: MailContext, event: MailEventKey, resume?: ResumeRef): AttachmentRef[] {
+  const tpl = ctx.config.templates[event];
+  return [
+    ...(tpl.attachResume && resume ? [{ kind: 'resume' as const, ...resume }] : []),
+    ...tpl.attachments.map((a) => ({ kind: 'static' as const, id: a.id, name: a.name, mime: a.mime })),
+  ];
+}
+
+async function dispatchEvent(ctx: MailContext, event: MailEventKey, base: MailVars, refId: number, resume?: ResumeRef) {
   const tpl = ctx.config.templates[event];
   const audience = MAIL_EVENTS.find((e) => e.key === event)?.audience;
   if (!tpl.enabled) return;
@@ -135,29 +156,40 @@ async function dispatchEvent(
     if (audience === 'team' && ctx.site.enquiryNotifyEnabled.trim().toLowerCase() === 'false') return;
     if (audience === 'visitor' && ctx.site.visitorAutoReplyEnabled.trim().toLowerCase() === 'false') return;
   }
-  const rcpt = resolveRecipients(tpl, vars);
-  // Visitors without an email address (e.g. callback requests) simply get no auto-reply.
-  if (!rcpt.to.length) {
-    if (audience === 'team') {
+  const mail = composeMail({ config: ctx.config, tpl, base, companyName: ctx.site.companyName, siteUrl: siteUrl() });
+  if (!mail.send) {
+    // Visitors without an email address (e.g. callback requests) simply get no auto-reply; conditions are intentional.
+    if (audience === 'team' && mail.to.length === 0) {
       await insertMailLog({
         event,
         provider: ctx.provider,
         status: 'skipped',
         to: [],
         cc: [],
-        subject: renderTemplate(tpl.subject, vars, false),
+        subject: mail.subject,
         error: 'No valid recipients — check the To field / Site Settings notify list.',
         refId,
       }).catch(() => undefined);
     }
     return;
   }
-  const rendered = renderMail(tpl, vars, ctx.config, ctx.site.companyName);
-  const attachments: AttachmentRef[] = [
-    ...(tpl.attachResume && resume ? [{ kind: 'resume' as const, ...resume }] : []),
-    ...tpl.attachments.map((a) => ({ kind: 'static' as const, id: a.id, name: a.name, mime: a.mime })),
-  ];
-  await sendAndLog(ctx, event, { ...rcpt, ...rendered, attachments }, refId);
+  await sendAndLog(
+    ctx,
+    event,
+    {
+      from: mail.from,
+      fromName: mail.fromName,
+      to: mail.to,
+      cc: mail.cc,
+      bcc: mail.bcc,
+      replyTo: mail.replyTo,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
+      attachments: attachmentRefs(ctx, event, resume),
+    },
+    refId
+  );
 }
 
 /**
@@ -165,11 +197,13 @@ async function dispatchEvent(
  * Never throws: email being off, misconfigured or down must not affect the visitor or the admin inbox.
  */
 export async function notifySubmission(input: {
-  kind: 'enquiry' | 'careers';
+  kind: SubmissionKind;
   id: number;
   itemType: string;
+  itemId?: number | null;
+  itemTitle?: string;
   payload: Record<string, unknown>;
-  resume?: { stored: string; name: string; mime: string };
+  resume?: ResumeRef;
 }) {
   try {
     const ctx = await loadContext();
@@ -178,14 +212,9 @@ export async function notifySubmission(input: {
       kind: input.kind,
       id: input.id,
       itemType: input.itemType,
+      itemTitle: input.itemTitle || (await catalogTitle(input.itemId)),
       payload: input.payload,
-      site: {
-        companyName: ctx.site.companyName,
-        phone: ctx.site.phone,
-        supportEmail: ctx.site.supportEmail,
-        notifyEmails: ctx.site.enquiryNotifyEmail,
-        siteUrl: siteUrl(),
-      },
+      site: siteVars(ctx.site),
     });
     for (const e of MAIL_EVENTS.filter((ev) => ev.kind === input.kind)) {
       try {
@@ -199,40 +228,70 @@ export async function notifySubmission(input: {
   }
 }
 
-/** Admin test: render `event` (or a plain test message) with sample data and send it to `to`. */
-export async function sendTestEmail(to: string, event?: MailEventKey) {
+export type TestSendResult = { ok: boolean; error?: string; fromCheck?: FromCheck; from: string; note?: string };
+
+/**
+ * Admin test: render `event` with sample data (or a real submission) and send it only to `to`.
+ * Without an event, sends a plain connectivity message from the default From address.
+ */
+export async function sendTestEmail(to: string, event?: MailEventKey, submissionId?: number): Promise<TestSendResult> {
   const ctx = await loadContext();
   const recipients = parseAddressList(to);
   if (!recipients.length) throw new Error('Enter a valid test recipient.');
   const meta = MAIL_EVENTS.find((e) => e.key === event);
-  let rendered: { subject: string; html: string; text: string };
-  const attachments: AttachmentRef[] = [];
+  const ref = Math.random().toString(36).slice(2, 6).toUpperCase();
+  let message: LoggedMessage;
+  let note: string | undefined;
+
   if (meta && event) {
-    const vars = buildMailVars({
-      kind: meta.kind,
-      id: 1024,
-      itemType: 'product',
-      payload: SAMPLE_PAYLOADS[meta.kind],
-      site: {
-        companyName: ctx.site.companyName,
-        phone: ctx.site.phone,
-        supportEmail: ctx.site.supportEmail,
-        notifyEmails: ctx.site.enquiryNotifyEmail,
-        siteUrl: siteUrl(),
-      },
-    });
     const tpl = ctx.config.templates[event];
-    rendered = renderMail(tpl, vars, ctx.config, ctx.site.companyName);
-    rendered.subject = `[TEST] ${rendered.subject}`;
-    attachments.push(...tpl.attachments.map((a) => ({ kind: 'static' as const, id: a.id, name: a.name, mime: a.mime })));
+    let base: MailVars;
+    let resume: ResumeRef | undefined;
+    const real = submissionId ? await loadSubmissionVars(submissionId, ctx.site) : null;
+    if (real && real.kind === meta.kind) {
+      base = real.vars;
+      resume = real.resume;
+    } else {
+      base = buildMailVars({
+        kind: meta.kind,
+        id: 1024,
+        itemType: meta.kind === 'careers' ? 'careers' : 'product',
+        itemTitle: meta.kind === 'careers' ? '' : '200 kVA Modular UPS',
+        payload: SAMPLE_PAYLOADS[meta.kind],
+        site: siteVars(ctx.site),
+      });
+    }
+    const mail = composeMail({ config: ctx.config, tpl: { ...tpl, enabled: true }, base, companyName: ctx.site.companyName, siteUrl: siteUrl() });
+    if (!mail.send && mail.skipReason) note = `In production this would be skipped: ${mail.skipReason}`;
+    message = {
+      from: mail.from,
+      fromName: mail.fromName,
+      to: recipients,
+      cc: [],
+      bcc: [],
+      replyTo: mail.replyTo,
+      subject: `[TEST ${ref}] ${mail.subject}`,
+      html: mail.html,
+      text: mail.text,
+      attachments: attachmentRefs(ctx, event, resume),
+    };
   } else {
+    const from = effectiveFrom(ctx.config);
     const body = `<p>This is a test email from the <strong>${escapeHtml(ctx.site.companyName)}</strong> website.</p><p>Provider: <strong>${
       ctx.provider === 'graph' ? 'Microsoft 365 (Graph API)' : ctx.provider.toUpperCase()
-    }</strong>${ctx.provider === 'graph' ? ` · Sender: ${escapeHtml(ctx.config.graph.senderMailbox)}` : ''}</p><p>If you can read this, website email delivery is working.</p>`;
-    const html = wrapEmailHtml({ bodyHtml: body, subject: 'Website email test', companyName: ctx.site.companyName, siteUrl: siteUrl(), accent: ctx.config.brandColor });
-    rendered = { subject: `Website email test — ${ctx.site.companyName}`, html, text: htmlToText(body) };
+    }</strong>${ctx.provider === 'graph' ? ` · Sending mailbox: ${escapeHtml(ctx.config.graph.senderMailbox)}` : ''} · From: ${escapeHtml(from)}</p><p>If you can read this, website email delivery is working.</p>`;
+    const subject = `[TEST ${ref}] Website email test — ${ctx.site.companyName}`;
+    const html = wrapEmailHtml({ bodyHtml: body, subject, companyName: ctx.site.companyName, siteUrl: siteUrl(), accent: ctx.config.brandColor });
+    message = { from, fromName: ctx.config.fromName, to: recipients, cc: [], bcc: [], replyTo: [], subject, html, text: htmlToText(body), attachments: [] };
   }
-  return sendAndLog(ctx, event ? `test:${event}` : 'test', { to: recipients, cc: [], bcc: [], replyTo: [], ...rendered, attachments }, null);
+
+  const result = await sendAndLog(ctx, event ? `test:${event}` : 'test', message, submissionId || null);
+  if (!result.ok) return { ok: false, error: result.error, from: message.from || '' };
+  const fromCheck =
+    ctx.provider === 'graph' && message.from
+      ? await verifySentFrom(ctx.config, ctx.secrets, message.subject, message.from)
+      : undefined;
+  return { ok: true, fromCheck, from: message.from || '', note };
 }
 
 /** Re-send a logged message exactly as rendered originally. */

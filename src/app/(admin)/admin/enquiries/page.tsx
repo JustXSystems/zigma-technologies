@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import EnquiryExportCentre, { type ExportScope } from '@/components/admin/EnquiryExportCentre';
 import type { Enquiry } from '@/lib/types';
 
@@ -42,12 +42,22 @@ export default function EnquiriesPage() {
   const [picked, setPicked] = useState<Set<number>>(new Set());
   const [exportScope, setExportScope] = useState<ExportScope | null>(null);
   const [exportIds, setExportIds] = useState<number[]>([]);
+  const deepLinked = useRef(false);
 
   async function load(status = statusFilter) {
     const res = await fetch(`/api/admin/enquiries?status=${status}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to load');
     setEnquiries(data.enquiries);
+    if (!deepLinked.current) {
+      deepLinked.current = true;
+      const id = Number(new URLSearchParams(window.location.search).get('id'));
+      const hit = id ? (data.enquiries as Enquiry[]).find((e) => e.id === id) : undefined;
+      if (hit) {
+        setSelected(hit);
+        setNotes(hit.admin_notes || '');
+      }
+    }
   }
 
   useEffect(() => {

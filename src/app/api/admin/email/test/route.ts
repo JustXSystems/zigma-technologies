@@ -13,6 +13,7 @@ const schema = z.object({
     .string()
     .refine((v) => MAIL_EVENTS.some((e) => e.key === v), 'Unknown template')
     .optional(),
+  submissionId: z.number().int().positive().optional(),
 });
 
 /** Tests run against the *saved* settings, so Save first, then Test. */
@@ -30,12 +31,16 @@ export async function POST(request: Request) {
       }
     }
     if (!body.to) return jsonError('Test recipient is required');
-    const result = await sendTestEmail(body.to, body.event as MailEventKey | undefined);
-    return jsonOk(
-      result.ok
-        ? { ok: true, message: `Test email sent to ${body.to}. Check the inbox (and Junk) in a minute.` }
-        : { ok: false, message: result.error }
-    );
+    const result = await sendTestEmail(body.to, body.event as MailEventKey | undefined, body.submissionId);
+    if (!result.ok) return jsonOk({ ok: false, message: result.error });
+    const parts = [`Test email sent to ${body.to} from ${result.from}. Check the inbox (and Junk) in a minute.`];
+    if (result.fromCheck) parts.push(result.fromCheck.note);
+    if (result.note) parts.push(result.note);
+    return jsonOk({
+      ok: result.fromCheck?.status !== 'rewritten',
+      message: parts.join(' '),
+      fromCheck: result.fromCheck,
+    });
   } catch (error) {
     return emailRouteError(error, 'Test failed');
   }

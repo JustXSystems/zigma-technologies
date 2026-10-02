@@ -92,7 +92,7 @@ export async function POST(request: Request) {
       payload_json: body.payload,
     });
 
-    after(() => notifySubmission({ kind: 'enquiry', id, itemType, payload: body.payload }));
+    after(() => notifySubmission({ kind: 'enquiry', id, itemType, itemId: body.item_id, payload: body.payload }));
     after(() => pushToCrm(id, itemType, body.payload));
 
     return jsonOk({ id, message: 'Enquiry submitted successfully' }, { status: 201 });

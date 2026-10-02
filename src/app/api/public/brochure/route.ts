@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       payload_json: payload,
     });
 
-    after(() => notifySubmission({ kind: 'enquiry', id, itemType, payload }));
+    after(() => notifySubmission({ kind: 'enquiry', id, itemType, itemId: body.item_id, itemTitle: body.item_title, payload }));
 
     return jsonOk(
       { id, download_url: body.brochure_url, message: 'Brochure unlocked' },
