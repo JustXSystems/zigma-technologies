@@ -31,8 +31,8 @@ export async function saveResumeFile(storedName: string, buffer: Buffer) {
   return absolute;
 }
 
-/** Read resume from /assets/uploads/resumes with legacy fallbacks. */
-export async function readResumeFile(stored: string): Promise<{ buffer: Buffer; absolute: string } | null> {
+/** Absolute path of a stored resume (current location, then legacy fallbacks), or null. */
+export async function locateResumeFile(stored: string): Promise<string | null> {
   const name = path.basename(stored);
   const candidates = [
     resolveResumeDiskPath(name),
@@ -40,25 +40,27 @@ export async function readResumeFile(stored: string): Promise<{ buffer: Buffer; 
     path.join(process.cwd(), 'storage', 'resumes', name),
     path.join(process.cwd(), 'public', 'uploads', 'resumes', name),
   ];
+  const fromPublic = resolvePublicAssetDiskPath(stored);
+  if (fromPublic) candidates.push(fromPublic);
 
   for (const candidate of [...new Set(candidates)]) {
     try {
       await access(candidate, constants.R_OK);
-      return { buffer: await readFile(candidate), absolute: candidate };
+      return candidate;
     } catch {
       /* try next */
     }
   }
-
-  const fromPublic = resolvePublicAssetDiskPath(stored);
-  if (fromPublic) {
-    try {
-      await access(fromPublic, constants.R_OK);
-      return { buffer: await readFile(fromPublic), absolute: fromPublic };
-    } catch {
-      return null;
-    }
-  }
-
   return null;
+}
+
+/** Read resume from /assets/uploads/resumes with legacy fallbacks. */
+export async function readResumeFile(stored: string): Promise<{ buffer: Buffer; absolute: string } | null> {
+  const absolute = await locateResumeFile(stored);
+  if (!absolute) return null;
+  try {
+    return { buffer: await readFile(absolute), absolute };
+  } catch {
+    return null;
+  }
 }

@@ -1,7 +1,34 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import EnquiryExportCentre, { type ExportScope } from '@/components/admin/EnquiryExportCentre';
 import type { Enquiry } from '@/lib/types';
+
+type EnquiryKind = 'enquiry' | 'careers' | 'callback' | 'brochure';
+
+const KIND_LABEL: Record<EnquiryKind, string> = {
+  enquiry: 'Enquiry',
+  careers: 'Careers',
+  callback: 'Callback',
+  brochure: 'Brochure',
+};
+
+function enquiryKind(e: Enquiry): EnquiryKind {
+  switch (String(e.payload_json?.source || '')) {
+    case 'careers_apply':
+      return 'careers';
+    case 'callback_request':
+      return 'callback';
+    case 'brochure_download':
+      return 'brochure';
+    default:
+      return 'enquiry';
+  }
+}
+
+function hasAttachment(e: Enquiry) {
+  return Object.entries(e.payload_json || {}).some(([k, v]) => (/_file$/.test(k) || k === 'resume_url') && typeof v === 'string' && v !== '');
+}
 
 export default function EnquiriesPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
@@ -10,7 +37,11 @@ export default function EnquiriesPage() {
   const [selected, setSelected] = useState<Enquiry | null>(null);
   const [notes, setNotes] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | Enquiry['status']>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | EnquiryKind>('all');
   const [q, setQ] = useState('');
+  const [picked, setPicked] = useState<Set<number>>(new Set());
+  const [exportScope, setExportScope] = useState<ExportScope | null>(null);
+  const [exportIds, setExportIds] = useState<number[]>([]);
 
   async function load(status = statusFilter) {
     const res = await fetch(`/api/admin/enquiries?status=${status}`);
@@ -25,8 +56,9 @@ export default function EnquiriesPage() {
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    if (!term) return enquiries;
     return enquiries.filter((e) => {
+      if (typeFilter !== 'all' && enquiryKind(e) !== typeFilter) return false;
+      if (!term) return true;
       const blob = JSON.stringify(e.payload_json).toLowerCase();
       return (
         blob.includes(term) ||
@@ -34,7 +66,32 @@ export default function EnquiriesPage() {
         String(e.admin_notes || '').toLowerCase().includes(term)
       );
     });
-  }, [enquiries, q]);
+  }, [enquiries, q, typeFilter]);
+
+  const pickedIds = useMemo(() => filtered.filter((e) => picked.has(e.id)).map((e) => e.id), [filtered, picked]);
+  const allPicked = filtered.length > 0 && pickedIds.length === filtered.length;
+
+  function togglePick(id: number) {
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function openExport(scope: ExportScope, ids: number[] = pickedIds) {
+    setExportIds(ids);
+    setExportScope(scope);
+  }
+
+  const viewLabel = [
+    statusFilter === 'all' ? 'Any status' : statusFilter.replace('_', ' '),
+    typeFilter === 'all' ? 'all types' : KIND_LABEL[typeFilter].toLowerCase(),
+    q.trim() ? `“${q.trim()}”` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   async function setStatus(id: number, status: Enquiry['status']) {
     const res = await fetch(`/api/admin/enquiries/${id}`, {
@@ -82,10 +139,6 @@ export default function EnquiriesPage() {
     await load();
   }
 
-  function exportCsv() {
-    window.open(`/api/admin/enquiries?status=${statusFilter}&format=csv`, '_blank');
-  }
-
   return (
     <div>
       {error ? <div className="admin-error">{error}</div> : null}
@@ -103,6 +156,18 @@ export default function EnquiriesPage() {
               {s}
             </button>
           ))}
+          <select
+            className="admin-select"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as 'all' | EnquiryKind)}
+            aria-label="Type"
+          >
+            <option value="all">All types</option>
+            <option value="enquiry">Enquiries</option>
+            <option value="careers">Careers</option>
+            <option value="callback">Callbacks</option>
+            <option value="brochure">Brochure requests</option>
+          </select>
           <input
             className="admin-input"
             placeholder="Search payload…"
@@ -110,15 +175,35 @@ export default function EnquiriesPage() {
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
-        <button type="button" className="admin-btn admin-btn-secondary" onClick={exportCsv}>
-          Export CSV
+        <button type="button" className="admin-btn admin-btn-primary enq-export-btn" onClick={() => openExport('view')}>
+          <span aria-hidden>⇩</span> Export…
         </button>
       </div>
+
+      {pickedIds.length ? (
+        <div className="enq-selbar">
+          <strong>{pickedIds.length} selected</strong>
+          <button type="button" className="admin-btn admin-btn-primary" onClick={() => openExport('selected')}>
+            Export selected with attachments
+          </button>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setPicked(new Set())}>
+            Clear
+          </button>
+        </div>
+      ) : null}
 
       <div className="admin-table-wrap admin-card" style={{ padding: 0 }}>
         <table className="admin-table">
           <thead>
             <tr>
+              <th className="enq-check">
+                <input
+                  type="checkbox"
+                  aria-label="Select all"
+                  checked={allPicked}
+                  onChange={() => setPicked(allPicked ? new Set() : new Set(filtered.map((e) => e.id)))}
+                />
+              </th>
               <th>When</th>
               <th>Item</th>
               <th>Contact</th>
@@ -129,17 +214,35 @@ export default function EnquiriesPage() {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="admin-empty">
+                <td colSpan={6} className="admin-empty">
                   No enquiries match.
                 </td>
               </tr>
             ) : (
               filtered.map((enq) => (
-                <tr key={enq.id}>
+                <tr key={enq.id} className={picked.has(enq.id) ? 'admin-table-row--highlight' : undefined}>
+                  <td className="enq-check">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select enquiry ${enq.id}`}
+                      checked={picked.has(enq.id)}
+                      onChange={() => togglePick(enq.id)}
+                    />
+                  </td>
                   <td>{new Date(enq.created_at).toLocaleString()}</td>
-                  <td>{enq.item_title || enq.item_type || 'General'}</td>
+                  <td>
+                    {enq.item_title || enq.item_type || 'General'}
+                    {enquiryKind(enq) !== 'enquiry' && enquiryKind(enq) !== 'careers' ? (
+                      <div className="enq-kind">{KIND_LABEL[enquiryKind(enq)]}</div>
+                    ) : null}
+                  </td>
                   <td>
                     {String(enq.payload_json.name || '—')}
+                    {hasAttachment(enq) ? (
+                      <span className="enq-clip" title="Has attachment">
+                        📎
+                      </span>
+                    ) : null}
                     <div style={{ color: 'var(--admin-muted)', fontSize: '0.8rem' }}>
                       {String(enq.payload_json.email || '')}
                     </div>
@@ -240,6 +343,17 @@ export default function EnquiriesPage() {
               <button type="button" className="admin-btn admin-btn-danger" onClick={() => remove(selected.id)}>
                 Delete
               </button>
+              <button
+                type="button"
+                className="admin-btn admin-btn-secondary"
+                onClick={() => {
+                  const id = selected.id;
+                  setSelected(null);
+                  openExport('selected', [id]);
+                }}
+              >
+                Export this enquiry
+              </button>
               <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setSelected(null)}>
                 Close
               </button>
@@ -249,6 +363,19 @@ export default function EnquiriesPage() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {exportScope ? (
+        <EnquiryExportCentre
+          open
+          initialScope={exportScope}
+          view={{ status: statusFilter, type: typeFilter, q, label: viewLabel }}
+          selectedIds={exportIds}
+          onClose={() => setExportScope(null)}
+          onExported={(marked) => {
+            if (marked) load().catch(() => undefined);
+          }}
+        />
       ) : null}
     </div>
   );
