@@ -7,19 +7,8 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#48 admin export for enquiry">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#48 admin email">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/m365/setup-website-mailer.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/m365/setup-website-mailer.ps1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/email/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/email/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/enquiries/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/enquiries/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/email/test/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/email/test/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/brochure/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/brochure/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/enquiries/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/enquiries/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/mail-config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/mail-config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/mail-template.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/mail-template.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/mail-transport.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/mail-transport.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/mail.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/mail.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,23 +66,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000007407823" />
-      <entry key="MS500" value="1.04072346816319" />
-      <entry key="S2" value="3.4465487254664997" />
-      <entry key="S5" value="7.619859204504253" />
-      <entry key="S10" value="11.924308779971176" />
-      <entry key="S30" value="25.562560224552346" />
-      <entry key="S60" value="48.83950895464163" />
-      <entry key="M2" value="86.12019060897221" />
-      <entry key="M5" value="139.36225208602636" />
-      <entry key="M10" value="191.43530222948965" />
-      <entry key="M15" value="238.5071328909396" />
-      <entry key="M30" value="343.88694534399593" />
-      <entry key="H1" value="462.42598999402696" />
-      <entry key="H2" value="580.6653776299808" />
-      <entry key="H4" value="735.7742860702442" />
-      <entry key="D1" value="2974.8219688730806" />
-      <entry key="W1" value="15597.234741149003" />
+      <entry key="MS100" value="1.000000000546786" />
+      <entry key="MS500" value="1.0512624309733294" />
+      <entry key="S2" value="4.388310328991665" />
+      <entry key="S5" value="11.51761964270459" />
+      <entry key="S10" value="18.74487313739314" />
+      <entry key="S30" value="32.36354021821721" />
+      <entry key="S60" value="40.43561131347448" />
+      <entry key="M2" value="46.28338597743796" />
+      <entry key="M5" value="50.645908713571814" />
+      <entry key="M10" value="52.27415640305799" />
+      <entry key="M15" value="52.838255242684006" />
+      <entry key="M30" value="53.4180760280703" />
+      <entry key="H1" value="55.40242306243471" />
+      <entry key="H2" value="89.06773445291113" />
+      <entry key="H4" value="235.290264163907" />
+      <entry key="D1" value="2410.009182081484" />
+      <entry key="W1" value="15140.632172410924" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -107,31 +96,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.3036618123594682E-281" />
-      <entry key="H1" value="3.6106257246629934E-141" />
-      <entry key="H2" value="6.008848246263414E-71" />
-      <entry key="H4" value="7.751676106793627E-36" />
-      <entry key="D1" value="1.429355362836016E-6" />
-      <entry key="W1" value="0.22672861301761255" />
+      <entry key="M30" value="1.735622833410397E-286" />
+      <entry key="H1" value="1.3174303903473836E-143" />
+      <entry key="H2" value="3.629642393331788E-72" />
+      <entry key="H4" value="1.9051620386341547E-36" />
+      <entry key="D1" value="1.1312613052174634E-6" />
+      <entry key="W1" value="0.21927811584135162" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9592641200404631" />
-      <entry key="MS500" value="1.032144361892014" />
-      <entry key="S2" value="3.439830769174132" />
-      <entry key="S5" value="7.613991384591934" />
-      <entry key="S10" value="11.91975593178436" />
-      <entry key="S30" value="25.559428633060598" />
-      <entry key="S60" value="48.836607020267515" />
-      <entry key="M2" value="86.11766240182061" />
-      <entry key="M5" value="139.360613223556" />
-      <entry key="M10" value="191.43415585309083" />
-      <entry key="M15" value="238.50615846048566" />
-      <entry key="M30" value="343.8862060636698" />
-      <entry key="H1" value="462.42546395666784" />
-      <entry key="H2" value="580.6650296553843" />
-      <entry key="H4" value="735.7740556109017" />
-      <entry key="D1" value="2974.821776486687" />
-      <entry key="W1" value="15597.461311458885" />
+      <entry key="MS100" value="0.9526379985572089" />
+      <entry key="MS500" value="1.0408577216454704" />
+      <entry key="S2" value="4.371604886591219" />
+      <entry key="S5" value="11.498016477909534" />
+      <entry key="S10" value="18.728842028418917" />
+      <entry key="S30" value="32.35470232354144" />
+      <entry key="S60" value="40.43021543766096" />
+      <entry key="M2" value="46.28033854976611" />
+      <entry key="M5" value="50.64458591573288" />
+      <entry key="M10" value="52.27347565964092" />
+      <entry key="M15" value="52.837796947882104" />
+      <entry key="M30" value="53.41784459408076" />
+      <entry key="H1" value="55.40230481581977" />
+      <entry key="H2" value="89.06765487318272" />
+      <entry key="H4" value="235.29017783133148" />
+      <entry key="D1" value="2410.0090246917052" />
+      <entry key="W1" value="15140.851296685558" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -286,7 +275,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#43 logo link made editable" />
     <MESSAGE value="#45 20+ years lagacy page implementation" />
     <MESSAGE value="#45 similar admin page design for contact" />
     <MESSAGE value="#45 similar admin page design for career" />
@@ -311,7 +299,8 @@
     <MESSAGE value="#45 catalog settings section customizattion" />
     <MESSAGE value="#48 career enquiry email integration and configuration from admin" />
     <MESSAGE value="#48 admin export for enquiry" />
-    <option name="LAST_COMMIT_MESSAGE" value="#48 admin export for enquiry" />
+    <MESSAGE value="#48 admin email" />
+    <option name="LAST_COMMIT_MESSAGE" value="#48 admin email" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

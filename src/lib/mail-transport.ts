@@ -26,7 +26,34 @@ const UPLOAD_CHUNK = 320 * 1024 * 10;
 
 const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
-function friendlyGraphError(status: number, code: string, message: string, ctx?: { sender: string; from: string }): string {
+type GraphErrorContext = { sender: string; from: string; clientId?: string; roles?: string[] };
+
+/** Entra application permissions (e.g. Mail.Send) carried in an app-only access token. Exchange RBAC grants never appear here. */
+function tokenRoles(token: string): string[] {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8')) as { roles?: string[] };
+    return Array.isArray(payload.roles) ? payload.roles : [];
+  } catch {
+    return [];
+  }
+}
+
+function accessDeniedHelp(code: string, message: string, ctx: GraphErrorContext): string {
+  const ms = `Microsoft: ${[code, message].filter(Boolean).join(' — ')}`;
+  const roles = ctx.roles ?? [];
+  const hasTenantMail = roles.some((r) => /^Mail\.(Send|ReadWrite)$/i.test(r));
+  const cmd = `.\\scripts\\m365\\diagnose-mailer.ps1 -ClientId ${ctx.clientId || '<client id>'} -SenderMailbox ${ctx.sender}${
+    ctx.from !== ctx.sender ? ` -FromAddress ${ctx.from}` : ''
+  }`;
+  const cause = /OData is disabled/i.test(message)
+    ? `REST/EWS access is turned off for ${ctx.sender} or for the organisation.`
+    : hasTenantMail
+      ? `The app has Entra permission ${roles.filter((r) => /^Mail\./i.test(r)).join(', ')}, so an Exchange Application Access Policy is most likely excluding ${ctx.sender}.`
+      : `The app has no Entra mail permission (token roles: ${roles.length ? roles.join(', ') : 'none'}) and Exchange has not granted it “Application Mail.Send” on ${ctx.sender} — or that grant has not applied yet.`;
+  return `Access denied for ${ctx.sender}. ${cause} Run ${cmd} on your PC to check and fix it. (${ms})`;
+}
+
+function friendlyGraphError(status: number, code: string, message: string, ctx?: GraphErrorContext): string {
   const raw = `${code} ${message}`;
   if (/SendAs|ErrorSendAsDenied|on behalf of/i.test(raw) && ctx) {
     return `${ctx.sender} is not allowed to send as ${ctx.from}. In Exchange admin, give ${ctx.sender} “Send As” on ${ctx.from} (Admin → Email → Connection shows the exact command), or clear the From address.`;
@@ -37,6 +64,7 @@ function friendlyGraphError(status: number, code: string, message: string, ctx?:
   if (/AADSTS53003/.test(raw)) {
     return 'Blocked by an Entra Conditional Access policy for workload identities. Exclude this app (or allow the server’s IP) in Entra → Conditional Access.';
   }
+  if ((status === 403 || /ErrorAccessDenied|AccessDenied/i.test(raw)) && ctx) return accessDeniedHelp(code, message, ctx);
   if (status === 403 || /ErrorAccessDenied|AccessDenied/i.test(raw)) {
     return 'Access denied for this mailbox. Grant the app “Application Mail.Send” (and Mail.ReadWrite for large attachments) on the sender mailbox — the setup script does this. New permissions can take up to 2 hours to apply.';
   }
@@ -69,7 +97,7 @@ async function graphFetch(url: string, init: RequestInit, attempt = 1): Promise<
   return res;
 }
 
-async function graphError(res: Response, ctx?: { sender: string; from: string }): Promise<string> {
+async function graphError(res: Response, ctx?: GraphErrorContext): Promise<string> {
   const data = (await res.json().catch(() => ({}))) as {
     error?: { code?: string; message?: string } | string;
     error_description?: string;
@@ -111,7 +139,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
   const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
   const base = `${GRAPH}/users/${encodeURIComponent(sender)}`;
   const from = mail.from || sender;
-  const errCtx = { sender, from };
+  const errCtx: GraphErrorContext = { sender, from, clientId: config.graph.clientId, roles: tokenRoles(token) };
   const message = {
     subject: mail.subject,
     body: { contentType: 'HTML', content: mail.html },
@@ -160,7 +188,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
       headers: auth,
       body: JSON.stringify({ AttachmentItem: { attachmentType: 'file', name: a.name, size: a.content.length, contentType: a.contentType } }),
     });
-    if (!sessionRes.ok) throw new Error(await graphError(sessionRes));
+    if (!sessionRes.ok) throw new Error(await graphError(sessionRes, errCtx));
     const { uploadUrl } = (await sessionRes.json()) as { uploadUrl: string };
     for (let start = 0; start < a.content.length; start += UPLOAD_CHUNK) {
       const chunk = a.content.subarray(start, Math.min(start + UPLOAD_CHUNK, a.content.length));
@@ -322,8 +350,11 @@ export async function verifySentFrom(config: MailConfig, secrets: MailSecrets, s
 /** Connectivity check without sending: Graph token acquisition, or SMTP handshake + auth. */
 export async function verifyConnection(provider: MailProvider, config: MailConfig, secrets: MailSecrets) {
   if (provider === 'graph') {
-    await getGraphToken(config, secrets);
-    return 'Signed in to Microsoft 365 (token issued). Send a test email to confirm mailbox permission.';
+    const roles = tokenRoles(await getGraphToken(config, secrets));
+    const grants = roles.length
+      ? `Entra permissions on the app: ${roles.join(', ')}.`
+      : 'No Entra permissions on the app, so mailbox access must come from Exchange (“Application Mail.Send” on the sender mailbox).';
+    return `Signed in to Microsoft 365 (token issued). ${grants} Send a test email to confirm mailbox permission.`;
   }
   if (provider === 'smtp') {
     const s = smtpSettings(config, secrets);
