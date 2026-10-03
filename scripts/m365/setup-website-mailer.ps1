@@ -127,16 +127,25 @@ $mbx = Get-EXOMailbox -Identity $SenderMailbox -ErrorAction SilentlyContinue
 if (-not $mbx) {
   if ($SkipMailboxCreation) { throw "Mailbox $SenderMailbox not found and -SkipMailboxCreation was set." }
   $alias = ($SenderMailbox.Split('@')[0] -replace '[^a-zA-Z0-9._-]', '')
-  $mbx = New-Mailbox -Shared -Name $MailboxDisplayName -DisplayName $MailboxDisplayName -Alias $alias -PrimarySmtpAddress $SenderMailbox
+  $mbx = New-Mailbox -Shared -Name $MailboxDisplayName -DisplayName $MailboxDisplayName -Alias $alias -PrimarySmtpAddress $SenderMailbox -ErrorAction Stop
   Write-Ok 'Created shared mailbox (no licence required)'
 } else {
   Write-Ok "Mailbox exists ($($mbx.RecipientTypeDetails))"
 }
 
 Write-Step 'Registering the app with Exchange'
+# Exchange Online cmdlets only stop on failure when asked per call; the preference variable is not enough.
+if ((Get-OrganizationConfig -ErrorAction Stop).IsDehydrated) {
+  try {
+    Enable-OrganizationCustomization -Confirm:$false -ErrorAction Stop
+    Write-Ok 'Organization customization enabled (one-time tenant setting)'
+  } catch {
+    throw "Enable-OrganizationCustomization failed: $($_.Exception.Message). If it says it is still processing, wait up to an hour and re-run."
+  }
+}
 $exoSp = Get-ServicePrincipal -Identity $app.AppId -ErrorAction SilentlyContinue
 if (-not $exoSp) {
-  $exoSp = New-ServicePrincipal -AppId $app.AppId -ObjectId $sp.Id -DisplayName $AppName
+  $exoSp = New-ServicePrincipal -AppId $app.AppId -ObjectId $sp.Id -DisplayName $AppName -ErrorAction Stop
   Write-Ok 'Exchange service principal created'
 } else {
   Write-Ok 'Exchange service principal exists'
@@ -145,7 +154,7 @@ if (-not $exoSp) {
 $scopeName = "Website mailer - $SenderMailbox"
 $scope = Get-ManagementScope -Identity $scopeName -ErrorAction SilentlyContinue
 if (-not $scope) {
-  $scope = New-ManagementScope -Name $scopeName -RecipientRestrictionFilter "PrimarySmtpAddress -eq '$SenderMailbox'"
+  $scope = New-ManagementScope -Name $scopeName -RecipientRestrictionFilter "PrimarySmtpAddress -eq '$SenderMailbox'" -ErrorAction Stop
   Write-Ok "Management scope '$scopeName' created"
 } else {
   Write-Ok "Management scope '$scopeName' exists"
@@ -156,7 +165,7 @@ foreach ($role in @('Application Mail.Send', 'Application Mail.ReadWrite')) {
     Where-Object { $_.CustomResourceScope -eq $scopeName }
   if (-not $existing) {
     New-ManagementRoleAssignment -App $app.AppId -Role $role -CustomResourceScope $scopeName `
-      -Name "$AppName - $role" | Out-Null
+      -Name "$AppName - $role" -ErrorAction Stop | Out-Null
     Write-Ok "Granted '$role' on $SenderMailbox only"
   } else {
     Write-Ok "'$role' already granted"
@@ -182,7 +191,7 @@ foreach ($addr in $fromTargets) {
   $has = Get-RecipientPermission -Identity $addr -Trustee $SenderMailbox -ErrorAction SilentlyContinue |
     Where-Object { $_.AccessRights -contains 'SendAs' }
   if (-not $has) {
-    Add-RecipientPermission -Identity $addr -Trustee $SenderMailbox -AccessRights SendAs -Confirm:$false | Out-Null
+    Add-RecipientPermission -Identity $addr -Trustee $SenderMailbox -AccessRights SendAs -Confirm:$false -ErrorAction Stop | Out-Null
   }
   Write-Ok "$SenderMailbox can send as $addr"
 }

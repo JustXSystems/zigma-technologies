@@ -106,6 +106,18 @@ async function graphError(res: Response, ctx?: GraphErrorContext): Promise<strin
   return friendlyGraphError(res.status, data.error?.code || '', data.error?.message || res.statusText, ctx);
 }
 
+class GraphRequestError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function graphFailure(res: Response, ctx?: GraphErrorContext) {
+  return new GraphRequestError(await graphError(res, ctx), res.status);
+}
+
 export async function getGraphToken(config: MailConfig, secrets: MailSecrets): Promise<string> {
   const { tenantId, clientId } = config.graph;
   const secret = secrets.graphClientSecret;
@@ -124,7 +136,7 @@ export async function getGraphToken(config: MailConfig, secrets: MailSecrets): P
       grant_type: 'client_credentials',
     }),
   });
-  if (!res.ok) throw new Error(await graphError(res));
+  if (!res.ok) throw (await graphFailure(res));
   const data = (await res.json()) as { access_token: string; expires_in: number };
   tokenCache.set(cacheKey, { token: data.access_token, expiresAt: Date.now() + data.expires_in * 1000 });
   return data.access_token;
@@ -133,6 +145,17 @@ export async function getGraphToken(config: MailConfig, secrets: MailSecrets): P
 const recipients = (list: string[]) => list.map((address) => ({ emailAddress: { address } }));
 
 async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: OutgoingMail) {
+  try {
+    await sendViaGraphOnce(config, secrets, mail);
+  } catch (err) {
+    if (!(err instanceof GraphRequestError) || err.status !== 403) throw err;
+    // Permissions are frozen into a token when it is issued; a cached one can predate a new grant.
+    tokenCache.clear();
+    await sendViaGraphOnce(config, secrets, mail);
+  }
+}
+
+async function sendViaGraphOnce(config: MailConfig, secrets: MailSecrets, mail: OutgoingMail) {
   const sender = config.graph.senderMailbox;
   if (!sender) throw new Error('Sender mailbox is not set.');
   const token = await getGraphToken(config, secrets);
@@ -166,7 +189,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
         saveToSentItems: config.saveToSentItems,
       }),
     });
-    if (!res.ok) throw new Error(await graphError(res, errCtx));
+    if (!res.ok) throw (await graphFailure(res, errCtx));
     return;
   }
 
@@ -178,7 +201,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
     headers: auth,
     body: JSON.stringify({ ...message, attachments: small.map(fileAttachment) }),
   });
-  if (!draftRes.ok) throw new Error(await graphError(draftRes, errCtx));
+  if (!draftRes.ok) throw (await graphFailure(draftRes, errCtx));
   const draft = (await draftRes.json()) as { id: string };
   const msgUrl = `${base}/messages/${encodeURIComponent(draft.id)}`;
 
@@ -188,7 +211,7 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
       headers: auth,
       body: JSON.stringify({ AttachmentItem: { attachmentType: 'file', name: a.name, size: a.content.length, contentType: a.contentType } }),
     });
-    if (!sessionRes.ok) throw new Error(await graphError(sessionRes, errCtx));
+    if (!sessionRes.ok) throw (await graphFailure(sessionRes, errCtx));
     const { uploadUrl } = (await sessionRes.json()) as { uploadUrl: string };
     for (let start = 0; start < a.content.length; start += UPLOAD_CHUNK) {
       const chunk = a.content.subarray(start, Math.min(start + UPLOAD_CHUNK, a.content.length));
@@ -202,12 +225,12 @@ async function sendViaGraph(config: MailConfig, secrets: MailSecrets, mail: Outg
         },
         body: new Uint8Array(chunk),
       });
-      if (!put.ok) throw new Error(await graphError(put));
+      if (!put.ok) throw (await graphFailure(put));
     }
   }
 
   const sendRes = await graphFetch(`${msgUrl}/send`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-  if (!sendRes.ok) throw new Error(await graphError(sendRes, errCtx));
+  if (!sendRes.ok) throw (await graphFailure(sendRes, errCtx));
 }
 
 function envSmtp() {
@@ -350,6 +373,7 @@ export async function verifySentFrom(config: MailConfig, secrets: MailSecrets, s
 /** Connectivity check without sending: Graph token acquisition, or SMTP handshake + auth. */
 export async function verifyConnection(provider: MailProvider, config: MailConfig, secrets: MailSecrets) {
   if (provider === 'graph') {
+    tokenCache.clear();
     const roles = tokenRoles(await getGraphToken(config, secrets));
     const grants = roles.length
       ? `Entra permissions on the app: ${roles.join(', ')}.`

@@ -77,11 +77,11 @@ foreach ($addr in $targets) {
   if ($existing) {
     Write-Ok "Send As already granted to $SenderMailbox"
   } else {
-    Add-RecipientPermission -Identity $addr -Trustee $SenderMailbox -AccessRights SendAs -Confirm:$false | Out-Null
+    Add-RecipientPermission -Identity $addr -Trustee $SenderMailbox -AccessRights SendAs -Confirm:$false -ErrorAction Stop | Out-Null
     Write-Ok "Granted Send As to $SenderMailbox"
   }
   if (-not $SkipSentItemsCopy -and $mbx.RecipientTypeDetails -eq 'SharedMailbox') {
-    Set-Mailbox -Identity $addr -MessageCopyForSentAsEnabled $true
+    Set-Mailbox -Identity $addr -MessageCopyForSentAsEnabled $true -ErrorAction Stop
     Write-Ok "Copies of sent mail will also appear in $addr Sent Items"
   }
 }
@@ -92,3 +92,4 @@ Write-Step 'Done'
 Write-Note 'Exchange can take up to an hour to apply Send As.'
 Write-Host "Next: Admin -> Email -> Connection -> Default From address = $($targets[0]) -> Save -> Send test email." -ForegroundColor Cyan
 Write-Host 'The test reads Sent Items back and confirms the From address recipients will see.' -ForegroundColor Cyan
+Write-Host "Send As only controls the From address. If the test says 'Access denied', the app itself lacks access to $SenderMailbox; run diagnose-mailer.ps1." -ForegroundColor DarkYellow
