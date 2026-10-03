@@ -382,7 +382,7 @@ export const EMAIL_PHASES: EmailPhase[] = [
     steps: [
       'Watch Google Admin alerts and bounce reports daily for one week.',
       'Check that newsletters, printers, scanners, CCTV, and CRM “from” addresses still send (update SMTP there too — prefer smtp.gmail.com or Workspace SMTP relay).',
-      'Confirm website contact forms still notify staff (Site Settings + SMTP_*).',
+      'Confirm website contact forms still notify staff (Admin → Email → send test email).',
       'Export a final CWP/server backup (home directory + email) to cold storage, then cancel the UrbanVendo / Exigo hosting+email plan — do not renew in September.',
       'Document super-admin, recovery email, DNS logins, and licence count in the password manager.',
       'Plan quarterly licence review — add seats toward 150 only when people join.',

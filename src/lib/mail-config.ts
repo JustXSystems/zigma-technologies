@@ -78,6 +78,8 @@ export type MailConfig = {
   /** Default From address (blank = the sender mailbox / SMTP from). Must be a mailbox the sender can "Send As". */
   fromAddress: string;
   fromName: string;
+  /** Team notification list, exposed as {{notify_emails}}. null = never saved; the legacy Site Settings value applies. */
+  notifyEmails: string | null;
   variables: MailVariable[];
   saveToSentItems: boolean;
   testRecipient: string;
@@ -161,7 +163,7 @@ export const SYSTEM_VARIABLES: SystemVariable[] = [
   { key: 'company_name', label: 'Company name', group: 'Company', description: 'Site Settings → company name.' },
   { key: 'company_phone', label: 'Company phone', group: 'Company', description: 'Site Settings → phone.' },
   { key: 'support_email', label: 'Support email', group: 'Company', description: 'Site Settings → support email.' },
-  { key: 'notify_emails', label: 'Notify list', group: 'Company', description: 'Site Settings → enquiry notification emails.' },
+  { key: 'notify_emails', label: 'Notify list', group: 'Company', description: 'Team notification list — edit in Email → Variables.' },
 ];
 
 export const RESERVED_VARIABLE_KEYS = new Set(SYSTEM_VARIABLES.map((v) => v.key));
@@ -253,6 +255,7 @@ export function defaultMailConfig(): MailConfig {
     smtp: { host: '', port: 587, security: 'auto', user: '', from: '' },
     fromAddress: '',
     fromName: '',
+    notifyEmails: null,
     variables: [],
     saveToSentItems: true,
     testRecipient: '',
@@ -368,6 +371,7 @@ export function normalizeMailConfig(raw: unknown): MailConfig {
     },
     fromAddress: cleanAddress(c.fromAddress),
     fromName: str(c.fromName, 120),
+    notifyEmails: typeof c.notifyEmails === 'string' ? str(c.notifyEmails, 1000).trim() : null,
     variables: normalizeVariables(c.variables),
     saveToSentItems: c.saveToSentItems !== false,
     testRecipient: str(c.testRecipient, 200).trim(),
@@ -407,6 +411,11 @@ export function sendAsAddresses(config: MailConfig): string[] {
   const mailbox = transmittingMailbox(config);
   const all = [config.fromAddress, ...Object.values(config.templates).map((t) => t.from)].filter(Boolean);
   return [...new Set(all.map((a) => a.toLowerCase()))].filter((a) => a !== mailbox);
+}
+
+/** {{notify_emails}}: the Email-settings list, or the legacy Site Settings value until that has been saved once. */
+export function resolveNotifyEmails(config: MailConfig, legacySiteValue: string): string {
+  return config.notifyEmails ?? legacySiteValue;
 }
 
 /** Days until the Graph client secret expires (null when unknown). */

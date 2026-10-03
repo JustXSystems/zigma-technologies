@@ -91,7 +91,7 @@ export const GUIDE_QUICK_START: GuideStep[] = [
   },
   {
     title: 'Configure site identity',
-    detail: 'Site Settings: company name, logo, phones, emails, footer links, enquiry notify.',
+    detail: 'Site Settings: company name, logo, phones, emails, footer links, CRM webhook.',
     href: '/admin/site-settings',
   },
   {
@@ -161,7 +161,7 @@ export const GUIDE_FLOWS: GuideFlow[] = [
       'Visitor submits public form (honeypot + rate limit + optional Turnstile)',
       'POST /api/public/enquiries (or careers/apply, callback)',
       'Row inserted in enquiries with payload_json and source',
-      'If SMTP + Site Settings notify enabled → staff email + optional visitor auto-reply',
+      'Admin → Email templates send the team notification and visitor auto-reply (each template has its own Enabled toggle)',
       'If crmWebhookUrl set → lead pushed with score',
       'Admin triages at /admin/enquiries → notes → status closed',
     ],
@@ -212,7 +212,7 @@ export const GUIDE_WORKFLOWS: GuideWorkflow[] = [
     steps: [
       'schema.sql + migrations → dev server → seed admin',
       'Dashboard bootstrap (or individual seeds)',
-      'Site Settings: real company details + notify emails',
+      'Site Settings: real company details; Email → Variables: team notify list',
       'Navigation seed → verify header/footer',
       'Inventory seed → publish key items → Catalog Settings',
       'Test enquiry + optional SMTP',

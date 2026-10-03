@@ -42,7 +42,7 @@ type SettingsView = {
   hasSmtpPassword: boolean;
   activeProvider: MailProvider;
   legacyEnvSmtp: boolean;
-  site: { companyName: string; phone: string; supportEmail: string; notifyEmails: string; siteUrl: string };
+  site: { companyName: string; phone: string; supportEmail: string; siteUrl: string };
 };
 
 type LogRow = {
@@ -367,11 +367,12 @@ export default function EmailSettingsPage() {
     try {
       const raw = JSON.parse(await file.text()) as { config?: unknown };
       const incoming = normalizeMailConfig(raw.config ?? raw);
-      update((c) =>
-        includeConnection
-          ? { ...incoming }
-          : { ...incoming, provider: c.provider, graph: c.graph, smtp: c.smtp, saveToSentItems: c.saveToSentItems, testRecipient: c.testRecipient }
-      );
+      update((c) => {
+        const merged = { ...incoming, notifyEmails: incoming.notifyEmails ?? c.notifyEmails };
+        return includeConnection
+          ? merged
+          : { ...merged, provider: c.provider, graph: c.graph, smtp: c.smtp, saveToSentItems: c.saveToSentItems, testRecipient: c.testRecipient };
+      });
       const files = Object.values(incoming.templates).reduce((n, t) => n + t.attachments.length, 0);
       setTransferMsg(
         `Imported templates, variables and sender settings${includeConnection ? ' and connection' : ''}. Review, then Save.` +
@@ -409,18 +410,19 @@ export default function EmailSettingsPage() {
 
   const baseVarsFor = useCallback(
     (kind: SubmissionKind): MailVars => {
+      const notifyEmails = config?.notifyEmails ?? '';
       const id = sampleIds[kind];
-      if (id && realVars[id]) return realVars[id];
+      if (id && realVars[id]) return { ...realVars[id], notify_emails: notifyEmails };
       return buildMailVars({
         kind,
         id: 1024,
         itemType: kind === 'careers' ? 'careers' : 'product',
         itemTitle: kind === 'careers' ? '' : '200 kVA Modular UPS',
         payload: SAMPLE_PAYLOADS[kind],
-        site: view?.site || { companyName: '', phone: '', supportEmail: '', notifyEmails: '', siteUrl: '' },
+        site: { ...(view?.site || { companyName: '', phone: '', supportEmail: '', siteUrl: '' }), notifyEmails },
       });
     },
-    [sampleIds, realVars, view]
+    [sampleIds, realVars, view, config?.notifyEmails]
   );
 
   const preview = useMemo(() => {
@@ -1057,8 +1059,8 @@ export default function EmailSettingsPage() {
                 </div>
               </div>
               <p className="admin-hint">
-                Separate addresses with commas. <code>{'{{notify_emails}}'}</code> = Site Settings notify list (
-                {view.site.notifyEmails || 'empty'}), <code>{'{{email}}'}</code> = the visitor. Reusable lists live in{' '}
+                Separate addresses with commas. <code>{'{{notify_emails}}'}</code> = team notify list (
+                {config.notifyEmails || 'empty'}), <code>{'{{email}}'}</code> = the visitor. The notify list and reusable lists live in{' '}
                 <button type="button" className="em-link" onClick={() => openTab('variables')}>
                   Variables
                 </button>

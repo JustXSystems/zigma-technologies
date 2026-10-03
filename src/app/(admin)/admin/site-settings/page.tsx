@@ -229,26 +229,11 @@ const SECTIONS: SectionDef[] = [
     ],
   },
   {
-    id: 'enquiries',
-    title: 'Enquiries & CRM',
-    description: 'Notification emails, visitor auto-reply, and CRM webhook.',
+    id: 'crm',
+    title: 'CRM integration',
+    description:
+      'Push every enquiry and callback request to your CRM. Email notifications, recipients and auto-replies are managed in Admin → Email.',
     fields: [
-      {
-        key: 'enquiryNotifyEmail',
-        label: 'Enquiry notify emails',
-        hint: 'Comma-separated. Used as {{notify_emails}} in Admin → Email templates (delivery is configured there)',
-        full: true,
-      },
-      {
-        key: 'enquiryNotifyEnabled',
-        label: 'Enquiry email notify (true/false)',
-        hint: 'Legacy switch — once Admin → Email is saved, each template’s Enabled toggle controls this',
-      },
-      {
-        key: 'visitorAutoReplyEnabled',
-        label: 'Visitor auto-reply (true/false)',
-        hint: 'Legacy switch — once Admin → Email is saved, the auto-reply templates control this',
-      },
       {
         key: 'crmWebhookUrl',
         label: 'CRM webhook URL',
@@ -314,7 +299,8 @@ export default function SiteSettingsPage() {
     const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
     const prefix = 'site-settings-';
     if (!hash.startsWith(prefix)) return;
-    const sectionId = hash.slice(prefix.length);
+    const requested = hash.slice(prefix.length);
+    const sectionId = requested === 'enquiries' ? 'crm' : requested;
     if (!SECTIONS.some((s) => s.id === sectionId)) return;
     expandSection(sectionId, true);
   }, [expandSection]);

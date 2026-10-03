@@ -6,6 +6,7 @@ import {
   MAIL_EVENTS,
   effectiveFrom,
   parseAddressList,
+  resolveNotifyEmails,
   type MailConfig,
   type MailEventKey,
   type MailProvider,
@@ -37,8 +38,6 @@ type MailContext = {
   config: MailConfig;
   secrets: MailSecrets;
   provider: MailProvider;
-  /** No saved Email settings yet: honour the legacy Site Settings switches. */
-  legacy: boolean;
   site: SiteSettings;
 };
 
@@ -50,7 +49,6 @@ async function loadContext(): Promise<MailContext> {
     config: stored.config,
     secrets: stored.secrets,
     provider: effectiveProvider(stored.config, stored.saved),
-    legacy: !stored.saved,
     site: mergeSiteSettings(theme.site),
   };
 }
@@ -59,12 +57,12 @@ function siteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 }
 
-function siteVars(site: SiteSettings): SiteVars {
+function siteVars(site: SiteSettings, config: MailConfig): SiteVars {
   return {
     companyName: site.companyName,
     phone: site.phone,
     supportEmail: site.supportEmail,
-    notifyEmails: site.enquiryNotifyEmail,
+    notifyEmails: resolveNotifyEmails(config, site.enquiryNotifyEmail),
     siteUrl: siteUrl(),
   };
 }
@@ -80,7 +78,7 @@ async function catalogTitle(itemId: number | null | undefined): Promise<string> 
 }
 
 /** Built-in + form-field variables for a stored submission (admin preview and "test with this submission"). */
-export async function loadSubmissionVars(id: number, site?: SiteSettings) {
+export async function loadSubmissionVars(id: number, context?: Pick<MailContext, 'site' | 'config'>) {
   const [rows] = await pool.query<RowDataPacket[]>(
     'SELECT id, item_id, item_type, payload_json, created_at FROM enquiries WHERE id = ? LIMIT 1',
     [id]
@@ -89,14 +87,14 @@ export async function loadSubmissionVars(id: number, site?: SiteSettings) {
   if (!row) return null;
   const payload = parseJsonField<Record<string, unknown>>(row.payload_json, {});
   const kind = submissionKind(payload);
-  const resolvedSite = site || mergeSiteSettings((await getThemeSettings()).site);
+  const { site, config } = context || (await loadContext());
   const vars = buildMailVars({
     kind,
     id: Number(row.id),
     itemType: kind === 'careers' ? 'careers' : String(row.item_type || 'general'),
     itemTitle: await catalogTitle(row.item_id),
     payload,
-    site: siteVars(resolvedSite),
+    site: siteVars(site, config),
     submittedAt: row.created_at ? new Date(row.created_at) : undefined,
   });
   const resume: ResumeRef | undefined =
@@ -152,10 +150,6 @@ async function dispatchEvent(ctx: MailContext, event: MailEventKey, base: MailVa
   const tpl = ctx.config.templates[event];
   const audience = MAIL_EVENTS.find((e) => e.key === event)?.audience;
   if (!tpl.enabled) return;
-  if (ctx.legacy) {
-    if (audience === 'team' && ctx.site.enquiryNotifyEnabled.trim().toLowerCase() === 'false') return;
-    if (audience === 'visitor' && ctx.site.visitorAutoReplyEnabled.trim().toLowerCase() === 'false') return;
-  }
   const mail = composeMail({ config: ctx.config, tpl, base, companyName: ctx.site.companyName, siteUrl: siteUrl() });
   if (!mail.send) {
     // Visitors without an email address (e.g. callback requests) simply get no auto-reply; conditions are intentional.
@@ -167,7 +161,7 @@ async function dispatchEvent(ctx: MailContext, event: MailEventKey, base: MailVa
         to: [],
         cc: [],
         subject: mail.subject,
-        error: 'No valid recipients — check the To field / Site Settings notify list.',
+        error: 'No valid recipients — check the To field / the notify list in Email → Variables.',
         refId,
       }).catch(() => undefined);
     }
@@ -214,7 +208,7 @@ export async function notifySubmission(input: {
       itemType: input.itemType,
       itemTitle: input.itemTitle || (await catalogTitle(input.itemId)),
       payload: input.payload,
-      site: siteVars(ctx.site),
+      site: siteVars(ctx.site, ctx.config),
     });
     for (const e of MAIL_EVENTS.filter((ev) => ev.kind === input.kind)) {
       try {
@@ -247,7 +241,7 @@ export async function sendTestEmail(to: string, event?: MailEventKey, submission
     const tpl = ctx.config.templates[event];
     let base: MailVars;
     let resume: ResumeRef | undefined;
-    const real = submissionId ? await loadSubmissionVars(submissionId, ctx.site) : null;
+    const real = submissionId ? await loadSubmissionVars(submissionId, ctx) : null;
     if (real && real.kind === meta.kind) {
       base = real.vars;
       resume = real.resume;
@@ -258,7 +252,7 @@ export async function sendTestEmail(to: string, event?: MailEventKey, submission
         itemType: meta.kind === 'careers' ? 'careers' : 'product',
         itemTitle: meta.kind === 'careers' ? '' : '200 kVA Modular UPS',
         payload: SAMPLE_PAYLOADS[meta.kind],
-        site: siteVars(ctx.site),
+        site: siteVars(ctx.site, ctx.config),
       });
     }
     const mail = composeMail({ config: ctx.config, tpl: { ...tpl, enabled: true }, base, companyName: ctx.site.companyName, siteUrl: siteUrl() });

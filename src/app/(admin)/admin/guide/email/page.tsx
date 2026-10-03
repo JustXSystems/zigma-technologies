@@ -528,8 +528,8 @@ export default function AdminEmailMigrationGuidePage() {
             </div>
             <CodeBlock>{EMAIL_SMTP_SITE}</CodeBlock>
             <p className="admin-guide-section-footnote">
-              Then confirm <Link href="/admin/site-settings">Site Settings</Link> enquiry notify addresses still match
-              live inboxes.
+              Then confirm the team notify list in <Link href="/admin/email">Email → Variables</Link> still matches live
+              inboxes.
             </p>
           </section>
 

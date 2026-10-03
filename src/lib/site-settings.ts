@@ -141,9 +141,8 @@ export type SiteSettings = {
   poweredByUrl: string;
   defaultMetaDescription: string;
   ogImage: string;
+  /** Legacy, not shown in Site Settings: seeds {{notify_emails}} until Admin → Email has been saved. */
   enquiryNotifyEmail: string;
-  enquiryNotifyEnabled: string;
-  visitorAutoReplyEnabled: string;
   logoUrl: string;
   /** Where the header/footer logo links to (blank = home page) */
   logoHref: string;
@@ -332,8 +331,6 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     'Zigma Technologies delivers Solar EPC, UPS, BESS, EV charging, and industrial engineering solutions across India.',
   ogImage: '/og.png',
   enquiryNotifyEmail: 'info@zigma-technologies.com',
-  enquiryNotifyEnabled: 'true',
-  visitorAutoReplyEnabled: 'true',
   logoUrl: '/assets/images/zigma-technologies-logo.png',
   logoHref: '/',
   logoAlt: 'Zigma Technologies logo',

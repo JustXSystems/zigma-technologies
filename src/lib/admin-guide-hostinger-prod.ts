@@ -1070,7 +1070,7 @@ sudo certbot renew --dry-run
       'Fresh DB: Seed default admin from ADMIN_* in .env, then change password under Account.',
       'Imported DB: log in and rotate all admin passwords.',
       'Dashboard → Bootstrap missing seeds if content empty.',
-      'Site Settings → contacts, analytics, enquiry notify email.',
+      'Site Settings → contacts, analytics. Email → Variables → team notify list.',
       'Submit test enquiry → Enquiries + SMTP.',
       'Confirm /api/public/theme.css and catalog pages (/products, /projects, /services).',
       'Keep BigRock/old hosting active 7–14 days; rollback = restore A records to 14.195.24.149.',

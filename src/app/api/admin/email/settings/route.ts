@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { jsonOk, readJson } from '@/lib/api';
 import { getThemeSettings } from '@/lib/cms';
-import { normalizeMailConfig, type MailConfig } from '@/lib/mail-config';
+import { normalizeMailConfig, resolveNotifyEmails, type MailConfig } from '@/lib/mail-config';
 import { deleteMailAttachment, getMailSettings, saveMailSettings, type StoredMailSettings } from '@/lib/mail-store';
 import { effectiveProvider } from '@/lib/mail-transport';
 import { mergeSiteSettings } from '@/lib/site-settings';
@@ -11,16 +11,12 @@ async function view(stored: StoredMailSettings) {
   const site = mergeSiteSettings((await getThemeSettings()).site);
   const config = stored.config;
   if (!stored.saved) {
-    // First visit: reflect what the site does today (Site Settings switches + SMTP_* env).
-    const teamOn = site.enquiryNotifyEnabled.trim().toLowerCase() !== 'false';
-    const visitorOn = site.visitorAutoReplyEnabled.trim().toLowerCase() !== 'false';
+    // First visit: reflect what the site does today (SMTP_* env).
     config.provider = effectiveProvider(config, false);
-    config.templates.enquiry_team.enabled = teamOn;
-    config.templates.careers_team.enabled = teamOn;
-    config.templates.enquiry_visitor.enabled = visitorOn;
-    config.templates.careers_applicant.enabled = visitorOn;
     config.fromName = config.fromName || site.companyName;
   }
+  // Carry the notify list over from Site Settings; the next save stores it here for good.
+  config.notifyEmails = resolveNotifyEmails(config, site.enquiryNotifyEmail);
   return {
     config,
     saved: stored.saved,
@@ -34,7 +30,6 @@ async function view(stored: StoredMailSettings) {
       companyName: site.companyName,
       phone: site.phone,
       supportEmail: site.supportEmail,
-      notifyEmails: site.enquiryNotifyEmail,
       siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, ''),
     },
   };

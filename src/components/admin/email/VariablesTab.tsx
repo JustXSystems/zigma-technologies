@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import {
+  EMAIL_RE,
   RESERVED_VARIABLE_KEYS,
   SYSTEM_VARIABLES,
+  parseAddressList,
   VARIABLE_KEY_RE,
   type MailConfig,
   type MailVariable,
@@ -98,6 +100,12 @@ export default function VariablesTab(props: Props) {
   }
 
   const invalid = config.variables.filter((v, i) => keyProblem(v, i).error).length;
+  const notifyRaw = config.notifyEmails ?? '';
+  const notifyValid = parseAddressList(notifyRaw);
+  const notifyInvalid = notifyRaw
+    .split(/[,;\n]+/)
+    .map((s) => s.trim())
+    .filter((s) => s && !EMAIL_RE.test(s.match(/<([^>]+)>/)?.[1]?.trim() || s));
 
   return (
     <div className="em-stack em-vars">
@@ -124,6 +132,42 @@ export default function VariablesTab(props: Props) {
             loading={props.sampleLoading}
             onChange={props.onSample}
           />
+        </div>
+      </section>
+
+      <section className="em-card em-notify">
+        <div className="em-card-head">
+          <h3>
+            Team notify list <code>{'{{notify_emails}}'}</code>
+          </h3>
+          <UsageBadge usage={usage.get('notify_emails')} />
+        </div>
+        <p className="admin-hint">
+          Who receives new enquiries and applications. The team templates send To <code>{'{{notify_emails}}'}</code> by
+          default, so changing this list here updates every one of them.
+        </p>
+        <div className="admin-field">
+          <label htmlFor="em-notify">Addresses (comma-separated)</label>
+          <input
+            id="em-notify"
+            className="admin-input"
+            value={notifyRaw}
+            placeholder="info@zigma-technologies.com, sales@zigma-technologies.com"
+            onChange={(e) => update((c) => ({ ...c, notifyEmails: e.target.value }))}
+          />
+        </div>
+        <div className="em-chips">
+          {notifyValid.map((a) => (
+            <span key={a} className="em-chip">
+              {a}
+            </span>
+          ))}
+          {notifyInvalid.map((a) => (
+            <span key={a} className="em-chip em-chip--bad" title="Not a valid email address; it will be skipped">
+              {a}
+            </span>
+          ))}
+          {!notifyValid.length ? <span className="admin-hint">Empty: team emails that use this list will be skipped.</span> : null}
         </div>
       </section>
 
