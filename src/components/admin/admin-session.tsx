@@ -4,6 +4,7 @@ import { createContext, useContext } from 'react';
 import type { AdminScreenKey } from '@/lib/admin-screens';
 
 export type AdminUser = {
+  id: number;
   name: string;
   email: string;
   role: 'admin' | 'editor';

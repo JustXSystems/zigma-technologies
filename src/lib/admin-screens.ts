@@ -38,6 +38,8 @@ export type AdminScreenDef = {
   openWith?: AdminScreenKey[];
   /** Role editor label when the permission covers only part of a hub. */
   accessLabel?: string;
+  /** Every signed-in user may open it (not assignable in the role editor). */
+  alwaysOpen?: boolean;
 };
 
 export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
@@ -92,10 +94,12 @@ export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
   { key: 'ztools', label: 'ZTools', href: '/admin/ztools', group: 'Platform' },
   { key: 'users', label: 'Users', href: '/admin/users', group: 'Platform', superAdminOnly: true },
   { key: 'roles', label: 'Roles', href: '/admin/roles', group: 'Platform', superAdminOnly: true },
-  { key: 'account', label: 'Account', href: '/admin/account', group: 'Platform' },
+  { key: 'account', label: 'Account', href: '/admin/account', group: 'Platform', alwaysOpen: true },
 ];
 
 export const ADMIN_SCREEN_KEYS = ADMIN_SCREEN_DEFS.map((s) => s.key);
+
+const ALWAYS_OPEN = new Set(ADMIN_SCREEN_DEFS.filter((s) => s.alwaysOpen).map((s) => s.key));
 
 /** Old admin URLs and where they live now (redirected by the proxy). */
 export const MOVED_ADMIN_PATHS: Readonly<Record<string, string>> = {
@@ -127,7 +131,13 @@ export function hasScreenAccess(
   key: AdminScreenKey
 ): boolean {
   if (screens === '*') return true;
-  return screens.includes(key);
+  return ALWAYS_OPEN.has(key) || screens.includes(key);
+}
+
+/** Where a user lands: the dashboard, else the first screen they may open (Account at worst). */
+export function adminHomeHref(screens: AdminScreenKey[] | '*'): string {
+  const home = ADMIN_SCREEN_DEFS.find((s) => !s.alwaysOpen && canOpenScreen(screens, s.key));
+  return home?.href ?? '/admin/account';
 }
 
 /** Page-level access: the screen itself, or any screen listed in its `openWith`. */

@@ -17,7 +17,7 @@ type AdminRole = {
   userCount: number;
 };
 
-const ASSIGNABLE_SCREENS = ADMIN_SCREEN_DEFS.filter((s) => !s.superAdminOnly);
+const ASSIGNABLE_SCREENS = ADMIN_SCREEN_DEFS.filter((s) => !s.superAdminOnly && !s.alwaysOpen);
 
 /** `null` when the signed-in user may not manage roles. */
 async function fetchRoles(): Promise<AdminRole[] | null> {

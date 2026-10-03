@@ -8,15 +8,10 @@ export async function POST() {
       ...result,
       message: result.created
         ? `Created admin ${result.email}. Default password from ADMIN_PASSWORD (or ChangeMeNow!123).`
-        : `Admin ${result.email} already exists.`,
+        : 'Admin accounts already exist. Sign in, or ask a full admin to reset your password.',
     });
   } catch (error) {
     console.error(error);
-    return jsonError(
-      error instanceof Error
-        ? error.message
-        : 'Seed failed. Ensure MySQL is running and schema is applied.',
-      500
-    );
+    return jsonError('Seed failed. Ensure MySQL is running and schema is applied.', 500);
   }
 }

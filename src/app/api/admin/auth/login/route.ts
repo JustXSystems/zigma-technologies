@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       role: user.role,
       role_id: user.role_id,
       role_name: user.role_name,
+      password_hash: user.password_hash,
     });
     const token = await createSessionToken(session);
     await setSessionCookie(token);
@@ -49,6 +50,6 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
     console.error(error);
-    return jsonError(error instanceof Error ? error.message : 'Login failed', 500);
+    return jsonError('Login failed. Please try again.', 500);
   }
 }

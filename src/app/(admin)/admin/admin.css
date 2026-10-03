@@ -4317,6 +4317,31 @@
   background:#fff;
   cursor:pointer;
 }
+.admin-users-table tr.is-editing td{background:var(--admin-accent-soft);}
+.admin-users-you{margin-left:0.45rem;vertical-align:middle;}
+.admin-users-detail{display:block;margin-top:0.2rem;font-size:0.74rem;color:var(--admin-muted);}
+.admin-users-email{word-break:break-all;}
+.admin-users-actions{white-space:nowrap;text-align:right;}
+.admin-users-actions .admin-btn + .admin-btn{margin-left:0.35rem;}
+.admin-user-card{max-width:760px;}
+.admin-user-access-note{display:flex;align-items:flex-end;}
+.admin-user-screens > span{
+  display:block;
+  margin-bottom:0.35rem;
+  font-size:0.68rem;
+  font-weight:600;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  color:var(--admin-muted);
+}
+.admin-user-screen-list{display:flex;flex-wrap:wrap;gap:0.35rem;}
+.admin-user-password{display:flex;gap:0.4rem;}
+.admin-user-password .admin-input{flex:1;min-width:0;}
+.admin-user-actions{display:flex;flex-wrap:wrap;gap:0.5rem;}
+@media (max-width:640px){
+  .admin-user-password{flex-wrap:wrap;}
+  .admin-user-password .admin-input{flex-basis:100%;}
+}
 .admin-role-screens{
   display:grid;
   gap:0.85rem;

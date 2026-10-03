@@ -1,16 +1,12 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useAdminUser } from '@/components/admin/admin-session';
+import { useUnsavedChanges } from '@/components/admin/unsaved-changes';
+import UserForm, { EMPTY_USER_FORM, type AdminRoleOption, type UserFormValues } from '@/components/admin/users/UserForm';
 
-type AdminRole = {
-  id: number;
-  name: string;
-  slug: string;
-  is_system: boolean;
-};
-
-type AdminUser = {
+type AdminUserRow = {
   id: number;
   email: string;
   name: string;
@@ -21,51 +17,69 @@ type AdminUser = {
   created_at: string;
 };
 
-type UsersData = { meId: number | null; list: { users: AdminUser[]; roles: AdminRole[] } | null };
+type UsersData = { users: AdminUserRow[]; roles: AdminRoleOption[] } | null;
 
-/** `list` is `null` when the signed-in user may not manage users. */
+/** `null` when the signed-in user may not manage users. */
 async function fetchUsers(): Promise<UsersData> {
-  const [meRes, listRes] = await Promise.all([fetch('/api/admin/auth/me'), fetch('/api/admin/users')]);
-  const meData = await meRes.json();
-  const meId: number | null = meRes.ok ? (meData.user?.id ?? null) : null;
-  if (listRes.status === 403) return { meId, list: null };
-  const listData = await listRes.json();
-  if (!listRes.ok) throw new Error(listData.error || 'Failed to load users');
-  return { meId, list: { users: listData.users || [], roles: listData.roles || [] } };
+  const res = await fetch('/api/admin/users');
+  if (res.status === 403) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to load users');
+  return { users: data.users || [], roles: data.roles || [] };
+}
+
+async function send(method: 'POST' | 'PATCH' | 'DELETE', body: object) {
+  const res = await fetch('/api/admin/users', {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function formFor(user: AdminUserRow, roles: AdminRoleOption[]): UserFormValues {
+  const editorRole = roles.find((r) => r.slug === 'editor');
+  const roleId = user.role === 'editor' ? (user.role_id ?? editorRole?.id ?? null) : null;
+  return { name: user.name, email: user.email, role: user.role, role_id: roleId ? String(roleId) : '', password: '' };
+}
+
+function accessLabel(user: AdminUserRow, roles: AdminRoleOption[]) {
+  if (user.role === 'admin') return { text: 'Full admin', detail: 'All screens' };
+  const role = roles.find((r) => r.id === user.role_id);
+  if (!role) return { text: 'Editor', detail: 'Default role' };
+  return { text: role.name, detail: `${role.screens.length} screen${role.screens.length === 1 ? '' : 's'}` };
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [roles, setRoles] = useState<AdminRole[]>([]);
-  const [meId, setMeId] = useState<number | null>(null);
+  const me = useAdminUser();
+  const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [roles, setRoles] = useState<AdminRoleOption[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [forbidden, setForbidden] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'editor' as 'admin' | 'editor',
-    role_id: '' as string,
-  });
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<UserFormValues>(EMPTY_USER_FORM);
+  const [initialForm, setInitialForm] = useState<UserFormValues>(EMPTY_USER_FORM);
+  const formRef = useRef<HTMLDivElement>(null);
+  useUnsavedChanges(JSON.stringify(form) !== JSON.stringify(initialForm));
 
-  const editorRoles = roles.filter((r) => r.slug !== 'admin');
+  const editing = users.find((u) => u.id === editingId) ?? null;
 
-  const apply = useCallback(({ meId: id, list }: UsersData) => {
-    if (id !== null) setMeId(id);
-    if (!list) {
+  const apply = useCallback((data: UsersData) => {
+    setLoaded(true);
+    if (!data) {
       setForbidden(true);
       return;
     }
-    setUsers(list.users);
-    setRoles(list.roles);
+    setUsers(data.users);
+    setRoles(data.roles);
   }, []);
 
-  const load = useCallback(async () => {
-    setError('');
-    apply(await fetchUsers());
-  }, [apply]);
+  const load = useCallback(async () => apply(await fetchUsers()), [apply]);
 
   useEffect(() => {
     fetchUsers()
@@ -73,83 +87,66 @@ export default function UsersPage() {
       .catch((e: Error) => setError(e.message));
   }, [apply]);
 
-  async function createUser(e: FormEvent) {
-    e.preventDefault();
+  function openForm(values: UserFormValues, id: number | null) {
+    setEditingId(id);
+    setForm(values);
+    setInitialForm(values);
+    window.setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+  }
+
+  function startEdit(user: AdminUserRow) {
+    if (JSON.stringify(form) !== JSON.stringify(initialForm) && !window.confirm('Discard the unsaved changes in the form?')) return;
+    setError('');
+    setMessage('');
+    openForm(formFor(user, roles), user.id);
+  }
+
+  function resetForm() {
+    setEditingId(null);
+    setForm(EMPTY_USER_FORM);
+    setInitialForm(EMPTY_USER_FORM);
+  }
+
+  async function save() {
     setSaving(true);
     setError('');
     setMessage('');
     try {
-      const res = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          role_id: form.role === 'editor' && form.role_id ? Number(form.role_id) : null,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Create failed');
-      setMessage(data.message || 'User created');
-      setForm({ name: '', email: '', password: '', role: 'editor', role_id: '' });
+      const access =
+        editing && editing.id === me?.id
+          ? {}
+          : { role: form.role, role_id: form.role === 'editor' && form.role_id ? Number(form.role_id) : null };
+      const details = { name: form.name, email: form.email, ...access, ...(form.password ? { password: form.password } : {}) };
+      if (editing) await send('PATCH', { id: editing.id, ...details });
+      else await send('POST', details);
+      resetForm();
       await load();
+      setMessage(
+        !editing
+          ? `${form.name} created. Share the temporary password securely.`
+          : form.password
+            ? `${form.name} updated and signed out of other sessions. Share the new password securely.`
+            : `${form.name} updated. Changes apply on their next click.`
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Create failed');
+      setError(err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
   }
 
-  async function setRole(id: number, role: 'admin' | 'editor', role_id: number | null) {
+  async function remove(user: AdminUserRow) {
+    if (!window.confirm(`Delete ${user.name} (${user.email})? They are signed out immediately.`)) return;
     setError('');
     setMessage('');
-    const res = await fetch('/api/admin/users', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, role, role_id }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Update failed');
-      return;
+    try {
+      await send('DELETE', { id: user.id });
+      if (editingId === user.id) resetForm();
+      await load();
+      setMessage(`${user.name} deleted.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
     }
-    setMessage('User updated — they must sign in again for screen changes to apply.');
-    await load();
-  }
-
-  async function resetPassword(id: number) {
-    const password = window.prompt('New password (min 10 characters):');
-    if (!password) return;
-    setError('');
-    setMessage('');
-    const res = await fetch('/api/admin/users', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Reset failed');
-      return;
-    }
-    setMessage('Password reset');
-  }
-
-  async function removeUser(id: number) {
-    if (!window.confirm('Delete this admin user?')) return;
-    setError('');
-    setMessage('');
-    const res = await fetch('/api/admin/users', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Delete failed');
-      return;
-    }
-    setMessage('User deleted');
-    await load();
   }
 
   if (forbidden) {
@@ -163,167 +160,84 @@ export default function UsersPage() {
 
   return (
     <div className="admin-page-stack">
-      <div className="admin-card">
-        <h2 style={{ marginTop: 0 }}>Admin users</h2>
-        <p style={{ color: 'var(--admin-muted)' }}>
-          Assign a role to control which admin screens each user can access. Full admins always see every screen.
-          Manage role definitions on the <Link href="/admin/roles">Roles</Link> page.
+      <div className="admin-card admin-page-intro">
+        <h2>Admin users</h2>
+        <p>
+          Full admins see every screen; role-based users see only the screens of their role (define roles on the{' '}
+          <Link href="/admin/roles">Roles</Link> page). Access and password changes apply straight away, and deleted users
+          are signed out at once.
         </p>
-        {error ? <div className="admin-error">{error}</div> : null}
-        {message ? <div className="admin-success">{message}</div> : null}
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Access</th>
-                <th>Last login</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
+      </div>
+
+      {error ? <div className="admin-error">{error}</div> : null}
+      {message ? <div className="admin-success">{message}</div> : null}
+
+      <div className="admin-table-wrap">
+        <table className="admin-table admin-users-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Access</th>
+              <th>Last sign-in</th>
+              <th aria-label="Actions" />
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => {
+              const access = accessLabel(u, roles);
+              const isMe = u.id === me?.id;
+              return (
+                <tr key={u.id} className={u.id === editingId ? 'is-editing' : undefined}>
                   <td>
-                    {u.name}
-                    {u.id === meId ? ' (you)' : ''}
+                    <strong>{u.name}</strong>
+                    {isMe ? <span className="admin-badge new admin-users-you">You</span> : null}
                   </td>
-                  <td>{u.email}</td>
+                  <td className="admin-users-email">{u.email}</td>
                   <td>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                      <select
-                        className="admin-input"
-                        value={u.role}
-                        disabled={u.id === meId}
-                        onChange={(e) => {
-                          const role = e.target.value as 'admin' | 'editor';
-                          const role_id =
-                            role === 'admin'
-                              ? roles.find((r) => r.slug === 'admin')?.id ?? null
-                              : u.role_id;
-                          void setRole(u.id, role, role_id);
-                        }}
-                        style={{ width: 'auto', minWidth: 100 }}
-                      >
-                        <option value="admin">Full admin</option>
-                        <option value="editor">Role-based</option>
-                      </select>
-                      {u.role === 'editor' ? (
-                        <select
-                          className="admin-input"
-                          value={u.role_id ?? ''}
-                          disabled={u.id === meId}
-                          onChange={(e) => {
-                            const role_id = e.target.value ? Number(e.target.value) : null;
-                            void setRole(u.id, 'editor', role_id);
-                          }}
-                          style={{ width: 'auto', minWidth: 160 }}
-                        >
-                          <option value="">Select role…</option>
-                          {editorRoles.map((r) => (
-                            <option key={r.id} value={r.id}>
-                              {r.name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.88rem', alignSelf: 'center' }}>
-                          All screens
-                        </span>
-                      )}
-                    </div>
+                    <span className={`admin-badge ${u.role === 'admin' ? 'new' : 'draft'}`}>{access.text}</span>
+                    <small className="admin-users-detail">{access.detail}</small>
                   </td>
-                  <td>{u.last_login ? new Date(u.last_login).toLocaleString() : '—'}</td>
-                  <td style={{ whiteSpace: 'nowrap' }}>
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => resetPassword(u.id)}>
-                      Reset password
-                    </button>{' '}
+                  <td>{u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</td>
+                  <td className="admin-users-actions">
+                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => startEdit(u)}>
+                      Edit
+                    </button>
                     <button
                       type="button"
                       className="admin-btn admin-btn-danger"
-                      disabled={u.id === meId}
-                      onClick={() => removeUser(u.id)}
+                      disabled={isMe}
+                      title={isMe ? 'You cannot delete your own account' : undefined}
+                      onClick={() => void remove(u)}
                     >
                       Delete
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              );
+            })}
+            {loaded && !users.length ? (
+              <tr>
+                <td colSpan={5}>No users yet.</td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
       </div>
 
-      <div className="admin-card" style={{ maxWidth: 560 }}>
-        <h3 style={{ marginTop: 0 }}>Add user</h3>
-        <form onSubmit={createUser} className="admin-form-grid">
-          <div className="admin-field">
-            <label>Name</label>
-            <input
-              className="admin-input"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </div>
-          <div className="admin-field">
-            <label>Access level</label>
-            <select
-              className="admin-input"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as 'admin' | 'editor', role_id: '' })}
-            >
-              <option value="editor">Role-based</option>
-              <option value="admin">Full admin</option>
-            </select>
-          </div>
-          {form.role === 'editor' ? (
-            <div className="admin-field full">
-              <label>Role</label>
-              <select
-                className="admin-input"
-                value={form.role_id}
-                onChange={(e) => setForm({ ...form, role_id: e.target.value })}
-                required
-              >
-                <option value="">Select role…</option>
-                {editorRoles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : null}
-          <div className="admin-field full">
-            <label>Email</label>
-            <input
-              className="admin-input"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
-          </div>
-          <div className="admin-field full">
-            <label>Temporary password</label>
-            <input
-              className="admin-input"
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-              minLength={10}
-              autoComplete="new-password"
-            />
-          </div>
-          <div className="full">
-            <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-              {saving ? 'Creating…' : 'Create user'}
-            </button>
-          </div>
-        </form>
+      <div className="admin-card admin-user-card" ref={formRef}>
+        <h3 style={{ marginTop: 0 }}>{editing ? `Edit ${editing.name}` : 'Add user'}</h3>
+        <UserForm
+          key={editingId ?? 'new'}
+          mode={editing ? 'edit' : 'create'}
+          values={form}
+          onChange={setForm}
+          roles={roles}
+          saving={saving}
+          lockAccess={!!editing && editing.id === me?.id}
+          onSubmit={() => void save()}
+          onCancel={editing ? resetForm : undefined}
+        />
       </div>
     </div>
   );

@@ -9,24 +9,48 @@ import {
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { listAdminRoles } from '@/lib/admin-roles';
 
+const KNOWN_ERRORS: Record<string, [message: string, status: number]> = {
+  UNAUTHORIZED: ['Unauthorized', 401],
+  FORBIDDEN: ['Forbidden', 403],
+  NOT_FOUND: ['User not found', 404],
+  EMAIL_EXISTS: ['An account with that email already exists', 409],
+  ROLE_NOT_FOUND: ['That role no longer exists — pick another', 400],
+  ROLE_IS_ADMIN: ['Choose "Full admin" access instead of the Full Admin role', 400],
+  OWN_ACCESS: ['You cannot change your own access', 400],
+  LAST_ADMIN: ['At least one full admin must remain', 400],
+  CANNOT_DELETE_SELF: ['You cannot delete your own account', 400],
+};
+
+function errorResponse(error: unknown, fallback: string, invalid: string) {
+  if (error instanceof z.ZodError) return jsonError(invalid, 400);
+  const known = error instanceof Error ? KNOWN_ERRORS[error.message] : undefined;
+  if (known) return jsonError(known[0], known[1]);
+  console.error(error);
+  return jsonError(fallback, 500);
+}
+
+const email = z.string().trim().email();
+const name = z.string().trim().min(1).max(120);
+const password = z.string().min(10).max(200);
+const role = z.enum(['admin', 'editor']);
+const roleId = z.number().int().positive().nullable();
+
 export async function GET() {
   try {
     await requireAdmin();
     const [users, roles] = await Promise.all([listAdminUsers(), listAdminRoles()]);
     return jsonOk({ users, roles });
   } catch (error) {
-    if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
-    if (error instanceof Error && error.message === 'FORBIDDEN') return jsonError('Forbidden', 403);
-    return jsonError('Failed to list users', 500);
+    return errorResponse(error, 'Failed to list users', 'Invalid request');
   }
 }
 
 const createSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(1),
-  password: z.string().min(10),
-  role: z.enum(['admin', 'editor']).default('editor'),
-  role_id: z.number().int().positive().nullable().optional(),
+  email,
+  name,
+  password,
+  role: role.default('editor'),
+  role_id: roleId.optional(),
 });
 
 export async function POST(request: Request) {
@@ -36,22 +60,17 @@ export async function POST(request: Request) {
     const id = await createAdminUser(body);
     return jsonOk({ id, message: 'User created' }, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) return jsonError('Invalid payload (password min 10 chars)', 400);
-    if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
-    if (error instanceof Error && error.message === 'FORBIDDEN') return jsonError('Forbidden', 403);
-    if (error instanceof Error && error.message === 'EMAIL_EXISTS') {
-      return jsonError('An account with that email already exists', 409);
-    }
-    return jsonError('Failed to create user', 500);
+    return errorResponse(error, 'Failed to create user', 'Check the details (password at least 10 characters)');
   }
 }
 
 const patchSchema = z.object({
   id: z.number().int().positive(),
-  name: z.string().min(1).optional(),
-  role: z.enum(['admin', 'editor']).optional(),
-  role_id: z.number().int().positive().nullable().optional(),
-  password: z.string().min(10).optional(),
+  name: name.optional(),
+  email: email.optional(),
+  role: role.optional(),
+  role_id: roleId.optional(),
+  password: password.optional(),
 });
 
 export async function PATCH(request: Request) {
@@ -61,14 +80,7 @@ export async function PATCH(request: Request) {
     await updateAdminUser(body.id, body, session.sub);
     return jsonOk({ ok: true, message: 'User updated' });
   } catch (error) {
-    if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
-    if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
-    if (error instanceof Error && error.message === 'FORBIDDEN') return jsonError('Forbidden', 403);
-    if (error instanceof Error && error.message === 'NOT_FOUND') return jsonError('User not found', 404);
-    if (error instanceof Error && error.message === 'LAST_ADMIN') {
-      return jsonError('Cannot demote the last admin', 400);
-    }
-    return jsonError('Failed to update user', 500);
+    return errorResponse(error, 'Failed to update user', 'Check the details (password at least 10 characters)');
   }
 }
 
@@ -83,16 +95,6 @@ export async function DELETE(request: Request) {
     await deleteAdminUser(body.id, session.sub);
     return jsonOk({ ok: true, message: 'User deleted' });
   } catch (error) {
-    if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
-    if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
-    if (error instanceof Error && error.message === 'FORBIDDEN') return jsonError('Forbidden', 403);
-    if (error instanceof Error && error.message === 'CANNOT_DELETE_SELF') {
-      return jsonError('You cannot delete your own account', 400);
-    }
-    if (error instanceof Error && error.message === 'LAST_ADMIN') {
-      return jsonError('Cannot delete the last admin', 400);
-    }
-    if (error instanceof Error && error.message === 'NOT_FOUND') return jsonError('User not found', 404);
-    return jsonError('Failed to delete user', 500);
+    return errorResponse(error, 'Failed to delete user', 'Invalid request');
   }
 }

@@ -44,9 +44,9 @@ src/app/api/partner/*       → Dealer portal (separate JWT cookie)
 ### Auth flow (`src/proxy.ts`)
 
 1. Request to `/admin/*` or `/api/admin/*` (except login + seed)
-2. Read `zigma_admin_session` cookie → verify JWT
-3. Missing/invalid → redirect to `/admin/login` or 401 JSON
-4. Editor role → UI hides admin-only nav; redirect if hitting admin-only route
+2. Read `zigma_admin_session` cookie → verify JWT → re-read the account from `admin_users` (role, screens, password version)
+3. Missing/invalid, deleted account, or password changed since sign-in → redirect to `/admin/login` or 401 JSON
+4. Role-based user → nav shows only their screens; a screen they cannot open redirects to their first allowed screen (Dashboard if granted, Account at worst)
 
 ### Data model split
 
@@ -169,7 +169,7 @@ Change admin passwords after import from shared environments.
 | **Editor** | Pages, inventory, catalog settings, resources, press, testimonials, enquiries, forms, nav, site settings, media, account |
 | **Admin** | Everything + Site Copy (write), Theme Studio (publish), New Client, newsletter, redirects, partners, users, dashboard bootstrap |
 
-Last admin cannot be deleted or demoted. Editors hitting admin-only routes are redirected to dashboard.
+Custom roles (Roles screen) pick any mix of non-admin screens; Account is always available. Access, name/email, password and deletion take effect on the user's next request — no sign-out needed. The last full admin cannot be deleted or demoted, and nobody can change their own access. Users opening a screen they lack are redirected to their first allowed screen.
 
 ---
 
@@ -382,15 +382,19 @@ Visitor uploads (resumes) under `/assets/uploads/` — **not** in library; block
 | | |
 |---|---|
 | **Why** | Delegate editing without full admin access |
-| **When** | Add team; rotate credentials |
+| **When** | Add team; rotate credentials; remove leavers |
+| **How** | One form for add/edit: name, email, access (Role-based + role, or Full admin), password (Generate button). Edit to change any field; a new password signs the user out everywhere; Delete signs them out at once |
 | **DB** | `admin_users` |
+
+Seed default admin (login page) only works on first run, while `admin_users` is empty.
 
 ### Account — `/admin/account`
 
 | | |
 |---|---|
-| **Why** | Self-service password change |
-| **When** | After seed login or db:import |
+| **Why** | Self-service password change (open to every signed-in user) |
+| **When** | After first sign-in or db:import |
+| **How** | Changing your password keeps this session and signs out your other sessions |
 
 ---
 

@@ -26,7 +26,8 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
-      router.replace(search.get('next') || '/admin');
+      const next = search.get('next') ?? '';
+      router.replace(/^\/admin(\/|$)/.test(next) && next !== '/admin/login' ? next : '/admin');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canCallAdminApi } from '@/lib/admin-api-access';
-import { MOVED_ADMIN_PATHS, canOpenScreen, screenKeyFromPath } from '@/lib/admin-screens';
-import { COOKIE_NAME, resolveSessionScreens, verifySessionToken } from '@/lib/auth';
+import { MOVED_ADMIN_PATHS, adminHomeHref, canOpenScreen, screenKeyFromPath } from '@/lib/admin-screens';
+import { COOKIE_NAME, resolveLiveSession, verifySessionToken } from '@/lib/auth';
 import { findRedirect } from '@/lib/redirects';
 
 export async function proxy(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function proxy(request: NextRequest) {
 
     const token = request.cookies.get(COOKIE_NAME)?.value;
     const verified = token ? await verifySessionToken(token) : null;
-    const session = verified ? await resolveSessionScreens(verified) : null;
+    const session = verified ? await resolveLiveSession(verified) : null;
 
     if (!session) {
       if (isAdminApi) {
@@ -45,10 +45,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    const screen = isAdminPage && pathname !== '/admin' ? screenKeyFromPath(pathname) : null;
+    const screen = isAdminPage ? screenKeyFromPath(pathname) : null;
     if (screen && !canOpenScreen(session.screens, screen)) {
       const url = request.nextUrl.clone();
-      url.pathname = '/admin';
+      url.pathname = adminHomeHref(session.screens);
       url.search = '';
       return NextResponse.redirect(url);
     }

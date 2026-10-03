@@ -1,8 +1,11 @@
 import { z } from 'zod';
 import {
+  buildSessionForUser,
+  createSessionToken,
   findAdminById,
   hashPassword,
   requireSession,
+  setSessionCookie,
   updateAdminPassword,
   verifyPassword,
 } from '@/lib/auth';
@@ -25,7 +28,9 @@ export async function POST(request: Request) {
 
     const password_hash = await hashPassword(body.newPassword);
     await updateAdminPassword(user.id, password_hash);
-    return jsonOk({ ok: true, message: 'Password updated.' });
+    // Other sessions end with the old password; keep this one signed in.
+    await setSessionCookie(await createSessionToken(await buildSessionForUser({ ...user, password_hash })));
+    return jsonOk({ ok: true, message: 'Password updated. Other signed-in sessions have been signed out.' });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return jsonError('New password must be at least 10 characters', 400);

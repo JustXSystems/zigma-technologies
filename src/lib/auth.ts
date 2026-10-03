@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies, headers } from 'next/headers';
 import bcrypt from 'bcryptjs';
@@ -5,7 +6,7 @@ import pool from '@/lib/db';
 import type { RowDataPacket } from 'mysql2';
 import type { AdminScreenKey } from '@/lib/admin-screens';
 import { hasScreenAccess } from '@/lib/admin-screens';
-import { ensureAdminRolesSchema, getScreensForUser } from '@/lib/admin-roles';
+import { ensureAdminRolesSchema, getScreensForUser, resolveRoleIdFor } from '@/lib/admin-roles';
 import { cookiePathsForAuth } from '@/lib/base-path';
 
 const COOKIE_NAME = 'zigma_admin_session';
@@ -19,6 +20,8 @@ export type AdminSession = {
   roleId: number | null;
   roleName: string | null;
   screens: AdminScreenKey[] | '*';
+  /** Fingerprint of the password the session was issued for; a password change ends the session. */
+  pv?: string;
 };
 
 function getSecret() {
@@ -37,6 +40,10 @@ export async function verifyPassword(password: string, hash: string) {
   return bcrypt.compare(password, hash);
 }
 
+function passwordVersion(passwordHash: string) {
+  return createHash('sha256').update(passwordHash).digest('base64url').slice(0, 16);
+}
+
 export async function createSessionToken(payload: AdminSession) {
   return new SignJWT({
     email: payload.email,
@@ -45,6 +52,7 @@ export async function createSessionToken(payload: AdminSession) {
     roleId: payload.roleId,
     roleName: payload.roleName,
     screens: payload.screens,
+    ...(payload.pv ? { pv: payload.pv } : {}),
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(String(payload.sub))
@@ -77,6 +85,7 @@ export async function verifySessionToken(token: string): Promise<AdminSession | 
       roleId: Number.isFinite(roleId) ? roleId : null,
       roleName,
       screens,
+      pv: typeof payload.pv === 'string' ? payload.pv : undefined,
     };
   } catch {
     return null;
@@ -134,24 +143,33 @@ export async function getSession(): Promise<AdminSession | null> {
   if (!token) return null;
   const session = await verifySessionToken(token);
   if (!session) return null;
-  return resolveSessionScreens(session);
+  return resolveLiveSession(session);
 }
 
-/** Tokens issued without a screens claim get their screens from the user's current role. */
-export async function resolveSessionScreens(session: AdminSession): Promise<AdminSession | null> {
-  if (session.role === 'editor' && session.screens !== '*' && session.screens.length === 0) {
-    const user = await findAdminById(session.sub);
-    if (!user) return null;
-    const screens = await getScreensForUser({ role: user.role, role_id: user.role_id });
+/**
+ * The account as it is now: deleted users and sessions from before a password change are
+ * rejected, and role / screen changes apply on the next request without signing in again.
+ * Read fresh every time — the proxy and route handlers do not share memory, so a cache could
+ * not be cleared from both when an account changes.
+ */
+export async function resolveLiveSession(session: AdminSession): Promise<AdminSession | null> {
+  try {
+    const row = await findAdminById(session.sub);
+    if (!row || (session.pv && session.pv !== passwordVersion(row.password_hash))) return null;
     return {
-      ...session,
-      roleId: user.role_id,
-      roleName: user.role_name,
-      screens,
+      sub: row.id,
+      email: row.email,
+      name: row.name,
+      role: row.role,
+      roleId: row.role_id,
+      roleName: row.role_name,
+      screens: await getScreensForUser({ role: row.role, role_id: row.role_id }),
+      pv: session.pv,
     };
+  } catch (error) {
+    console.error('Admin session lookup failed', error);
+    return null;
   }
-
-  return session;
 }
 
 export async function requireSession(): Promise<AdminSession> {
@@ -196,6 +214,7 @@ export async function buildSessionForUser(user: {
   role: 'admin' | 'editor';
   role_id: number | null;
   role_name?: string | null;
+  password_hash: string;
 }): Promise<AdminSession> {
   const screens = await getScreensForUser({ role: user.role, role_id: user.role_id });
   return {
@@ -206,6 +225,7 @@ export async function buildSessionForUser(user: {
     roleId: user.role_id,
     roleName: user.role_name ?? null,
     screens,
+    pv: passwordVersion(user.password_hash),
   };
 }
 
@@ -227,24 +247,11 @@ export async function createAdminUser(input: {
   role: 'admin' | 'editor';
   role_id?: number | null;
 }) {
-  await ensureAdminRolesSchema();
   const email = input.email.toLowerCase().trim();
   const existing = await findAdminByEmail(email);
   if (existing) throw new Error('EMAIL_EXISTS');
+  const role_id = await resolveRoleIdFor(input.role, input.role_id);
   const password_hash = await hashPassword(input.password);
-
-  let role_id = input.role_id ?? null;
-  if (input.role === 'admin') {
-    const [adminRole] = await pool.query<RowDataPacket[]>(
-      "SELECT id FROM admin_roles WHERE slug = 'admin' LIMIT 1"
-    );
-    role_id = (adminRole[0]?.id as number) ?? role_id;
-  } else if (!role_id) {
-    const [editorRole] = await pool.query<RowDataPacket[]>(
-      "SELECT id FROM admin_roles WHERE slug = 'editor' LIMIT 1"
-    );
-    role_id = (editorRole[0]?.id as number) ?? null;
-  }
 
   const [result] = await pool.query(
     'INSERT INTO admin_users (email, password_hash, name, role, role_id) VALUES (?, ?, ?, ?, ?)',
@@ -255,55 +262,71 @@ export async function createAdminUser(input: {
 
 export async function deleteAdminUser(id: number, actorId: number) {
   if (id === actorId) throw new Error('CANNOT_DELETE_SELF');
-  const [countRows] = await pool.query<RowDataPacket[]>(
-    "SELECT COUNT(*) AS c FROM admin_users WHERE role = 'admin'"
-  );
-  const adminCount = Number(countRows[0]?.c || 0);
   const target = await findAdminById(id);
   if (!target) throw new Error('NOT_FOUND');
-  if (target.role === 'admin' && adminCount <= 1) throw new Error('LAST_ADMIN');
+  if (target.role === 'admin' && (await countFullAdmins()) <= 1) throw new Error('LAST_ADMIN');
   await pool.query('DELETE FROM admin_users WHERE id = ?', [id]);
 }
 
+/**
+ * Updates an account in one write. Access is validated (existing non-admin role for role-based
+ * accounts, never your own, never the last full admin); a new password ends the user's sessions.
+ */
 export async function updateAdminUser(
   id: number,
-  input: { name?: string; role?: 'admin' | 'editor'; role_id?: number | null; password?: string },
+  input: {
+    name?: string;
+    email?: string;
+    role?: 'admin' | 'editor';
+    role_id?: number | null;
+    password?: string;
+  },
   actorId: number
 ) {
   const target = await findAdminById(id);
   if (!target) throw new Error('NOT_FOUND');
 
-  if (input.role && input.role !== target.role) {
-    if (target.role === 'admin' && input.role === 'editor') {
-      const [countRows] = await pool.query<RowDataPacket[]>(
-        "SELECT COUNT(*) AS c FROM admin_users WHERE role = 'admin'"
-      );
-      if (Number(countRows[0]?.c || 0) <= 1) throw new Error('LAST_ADMIN');
+  const sets: string[] = [];
+  const values: unknown[] = [];
+  const set = (column: string, value: unknown) => {
+    sets.push(`${column} = ?`);
+    values.push(value);
+  };
+
+  if (input.name != null) set('name', input.name.trim());
+
+  if (input.email != null) {
+    const email = input.email.toLowerCase().trim();
+    if (email !== target.email) {
+      if (await findAdminByEmail(email)) throw new Error('EMAIL_EXISTS');
+      set('email', email);
     }
   }
 
-  if (input.name != null) {
-    await pool.query('UPDATE admin_users SET name = ? WHERE id = ?', [input.name.trim(), id]);
-  }
-  if (input.role != null) {
-    await pool.query('UPDATE admin_users SET role = ? WHERE id = ?', [input.role, id]);
-    if (input.role === 'admin') {
-      const [adminRole] = await pool.query<RowDataPacket[]>(
-        "SELECT id FROM admin_roles WHERE slug = 'admin' LIMIT 1"
-      );
-      if (adminRole[0]?.id) {
-        await pool.query('UPDATE admin_users SET role_id = ? WHERE id = ?', [adminRole[0].id, id]);
+  if (input.role !== undefined || input.role_id !== undefined) {
+    const role = input.role ?? target.role;
+    const requested = input.role_id !== undefined ? input.role_id : target.role === 'editor' ? target.role_id : null;
+    const roleId = await resolveRoleIdFor(role, requested);
+    if (role !== target.role || roleId !== target.role_id) {
+      if (id === actorId) throw new Error('OWN_ACCESS');
+      if (target.role === 'admin' && role === 'editor' && (await countFullAdmins()) <= 1) {
+        throw new Error('LAST_ADMIN');
       }
+      set('role', role);
+      set('role_id', roleId);
     }
   }
-  if (input.role_id !== undefined) {
-    await pool.query('UPDATE admin_users SET role_id = ? WHERE id = ?', [input.role_id, id]);
+
+  if (input.password) set('password_hash', await hashPassword(input.password));
+
+  if (sets.length) {
+    await pool.query(`UPDATE admin_users SET ${sets.join(', ')} WHERE id = ?`, [...values, id]);
   }
-  if (input.password) {
-    const password_hash = await hashPassword(input.password);
-    await updateAdminPassword(id, password_hash);
-  }
-  void actorId;
+}
+
+async function countFullAdmins() {
+  const [rows] = await pool.query<RowDataPacket[]>("SELECT COUNT(*) AS c FROM admin_users WHERE role = 'admin'");
+  return Number(rows[0]?.c || 0);
 }
 
 export async function findAdminByEmail(email: string) {
@@ -364,8 +387,9 @@ export async function ensureSeedAdmin() {
   const password = process.env.ADMIN_PASSWORD || 'ChangeMeNow!123';
   const name = process.env.ADMIN_NAME || 'Site Admin';
 
-  const existing = await findAdminByEmail(email);
-  if (existing) return { created: false, email };
+  // First-run only: once any account exists, deleting the default one must not let it be recreated.
+  const [countRows] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) AS c FROM admin_users');
+  if (Number(countRows[0]?.c || 0) > 0) return { created: false, email };
 
   const [adminRole] = await pool.query<RowDataPacket[]>(
     "SELECT id FROM admin_roles WHERE slug = 'admin' LIMIT 1"

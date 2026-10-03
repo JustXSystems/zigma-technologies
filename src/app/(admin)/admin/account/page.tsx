@@ -2,8 +2,10 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { useAdminUser } from '@/components/admin/admin-session';
 
 export default function AccountPage() {
+  const user = useAdminUser();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -89,15 +91,17 @@ export default function AccountPage() {
           </div>
         </form>
       </div>
-      <div className="admin-card">
-        <p style={{ margin: 0, color: 'var(--admin-muted)' }}>
-          Manage additional admins and editors under{' '}
-          <Link href="/admin/users" style={{ color: 'var(--admin-accent)' }}>
-            Users
-          </Link>
-          .
-        </p>
-      </div>
+      {user?.role === 'admin' ? (
+        <div className="admin-card">
+          <p style={{ margin: 0, color: 'var(--admin-muted)' }}>
+            Manage additional admins and editors under{' '}
+            <Link href="/admin/users" style={{ color: 'var(--admin-accent)' }}>
+              Users
+            </Link>
+            .
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { canOpenScreen, navGroupsFromScreens, screenKeyFromPath } from '@/lib/admin-screens';
+import { adminHomeHref, canOpenScreen, navGroupsFromScreens, screenKeyFromPath } from '@/lib/admin-screens';
 import { AdminUserContext, type AdminUser } from '@/components/admin/admin-session';
 import { AdminLink, UnsavedChangesProvider, useUnsavedChangesState } from '@/components/admin/unsaved-changes';
 import './admin.css';
@@ -65,7 +65,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     const key = screenKeyFromPath(pathname);
     if (!key) return;
     if (!canOpenScreen(user.screens, key)) {
-      void router.replace('/admin');
+      void router.replace(adminHomeHref(user.screens));
     }
   }, [user, pathname, router]);
 

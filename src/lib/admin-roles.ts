@@ -47,7 +47,18 @@ function slugify(name: string) {
     .slice(0, 60);
 }
 
-export async function ensureAdminRolesSchema() {
+let schemaReady: Promise<void> | null = null;
+
+/** Creates / backfills the roles schema once per server process (retried after a failure). */
+export function ensureAdminRolesSchema(): Promise<void> {
+  schemaReady ??= migrateAdminRolesSchema().catch((error) => {
+    schemaReady = null;
+    throw error;
+  });
+  return schemaReady;
+}
+
+async function migrateAdminRolesSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS admin_roles (
       id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -254,6 +265,24 @@ export async function deleteAdminRole(id: number) {
   if (Number(userRows[0]?.c || 0) > 0) throw new Error('ROLE_IN_USE');
 
   await pool.query('DELETE FROM admin_roles WHERE id = ?', [id]);
+}
+
+/**
+ * Resolves the role an account should be stored with. Full admins always get the system admin
+ * role; role-based accounts need an existing non-admin role (the system Editor role by default).
+ */
+export async function resolveRoleIdFor(role: 'admin' | 'editor', roleId: number | null | undefined) {
+  if (role === 'editor' && roleId) {
+    const found = await findAdminRoleById(roleId);
+    if (!found) throw new Error('ROLE_NOT_FOUND');
+    if (found.slug === SYSTEM_ADMIN_SLUG) throw new Error('ROLE_IS_ADMIN');
+    return found.id;
+  }
+  await ensureAdminRolesSchema();
+  const [rows] = await pool.query<RowDataPacket[]>('SELECT id FROM admin_roles WHERE slug = ? LIMIT 1', [
+    role === 'admin' ? SYSTEM_ADMIN_SLUG : SYSTEM_EDITOR_SLUG,
+  ]);
+  return (rows[0]?.id as number | undefined) ?? null;
 }
 
 export async function countUsersWithRole(roleId: number) {
