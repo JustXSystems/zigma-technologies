@@ -101,6 +101,20 @@ export const ADMIN_SCREEN_KEYS = ADMIN_SCREEN_DEFS.map((s) => s.key);
 
 const ALWAYS_OPEN = new Set(ADMIN_SCREEN_DEFS.filter((s) => s.alwaysOpen).map((s) => s.key));
 
+/** Screens a custom role may grant: full-admin-only and always-open screens are never assignable. */
+export const ASSIGNABLE_SCREEN_DEFS = ADMIN_SCREEN_DEFS.filter((s) => !s.superAdminOnly && !s.alwaysOpen);
+const ASSIGNABLE = new Set<string>(ASSIGNABLE_SCREEN_DEFS.map((s) => s.key));
+
+/** Unique assignable screens in nav order — what a role stores. */
+export function normalizeRoleScreens(keys: readonly string[]): AdminScreenKey[] {
+  const wanted = new Set(keys);
+  return ASSIGNABLE_SCREEN_DEFS.filter((s) => wanted.has(s.key)).map((s) => s.key);
+}
+
+export function isAssignableScreen(key: string): key is AdminScreenKey {
+  return ASSIGNABLE.has(key);
+}
+
 /** Old admin URLs and where they live now (redirected by the proxy). */
 export const MOVED_ADMIN_PATHS: Readonly<Record<string, string>> = {
   '/admin/nav': '/admin/header-footer?tab=menus',

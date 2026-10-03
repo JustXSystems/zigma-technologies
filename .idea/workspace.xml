@@ -7,25 +7,26 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#48 admin consoliation">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#48 user management issue fixed">
+      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminDrawer.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/AccessShell.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/Avatar.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/ConfirmDialog.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/PermissionMatrix.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/RoleForm.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/UserForm.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/access/use-access-directory.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ADMIN.md" beforeDir="false" afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/account/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/account/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/login/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/roles/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/roles/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/auth/login/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/auth/login/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/auth/password/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/auth/password/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/auth/seed/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/auth/seed/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/roles/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/roles/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/users/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/users/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/admin-session.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/admin-session.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/users/UserForm.tsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-roles.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-roles.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-screens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-screens.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,23 +84,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000000000000009" />
-      <entry key="S2" value="1.0001697853969373" />
-      <entry key="S5" value="1.031042746884501" />
-      <entry key="S10" value="1.1762372869462692" />
-      <entry key="S30" value="1.7176692287823916" />
-      <entry key="S60" value="3.244251143069711" />
-      <entry key="M2" value="6.762569997200296" />
-      <entry key="M5" value="13.059223104268854" />
-      <entry key="M10" value="17.693972345891982" />
-      <entry key="M15" value="20.025902351521957" />
-      <entry key="M30" value="25.866387232063413" />
-      <entry key="H1" value="45.05160823834321" />
-      <entry key="H2" value="100.75502994380632" />
-      <entry key="H4" value="225.80007119684512" />
-      <entry key="D1" value="2077.7683426549283" />
-      <entry key="W1" value="14851.161754091941" />
+      <entry key="MS100" value="1.000220086807725" />
+      <entry key="MS500" value="1.2949724367032938" />
+      <entry key="S2" value="2.894399149481851" />
+      <entry key="S5" value="4.421645435113959" />
+      <entry key="S10" value="5.417153941523883" />
+      <entry key="S30" value="6.381069242511339" />
+      <entry key="S60" value="6.6897701890926005" />
+      <entry key="M2" value="7.261716527103592" />
+      <entry key="M5" value="11.258263933606788" />
+      <entry key="M10" value="17.149267867769215" />
+      <entry key="M15" value="20.833067304544677" />
+      <entry key="M30" value="28.504243993715825" />
+      <entry key="H1" value="48.082660030265444" />
+      <entry key="H2" value="103.21834976029587" />
+      <entry key="H4" value="227.6598103239158" />
+      <entry key="D1" value="2076.8111963008614" />
+      <entry key="W1" value="14850.023608096897" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -113,31 +114,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="2.659167506528296E-295" />
-      <entry key="H1" value="5.156711652331345E-148" />
-      <entry key="H2" value="2.2708394157954755E-74" />
-      <entry key="H4" value="1.5069304615247016E-37" />
-      <entry key="D1" value="7.411790715276458E-7" />
-      <entry key="W1" value="0.20642440236466675" />
+      <entry key="M30" value="2.2118781031241154E-295" />
+      <entry key="H1" value="4.703060815176318E-148" />
+      <entry key="H2" value="2.16865414835455E-74" />
+      <entry key="H4" value="1.472635103624358E-37" />
+      <entry key="D1" value="7.38340691379699E-7" />
+      <entry key="W1" value="0.2063112862980017" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.339151081861918" />
-      <entry key="MS500" value="0.8055242910487509" />
-      <entry key="S2" value="0.94753390205474" />
-      <entry key="S5" value="1.0092086196682064" />
-      <entry key="S10" value="1.1642272465657595" />
-      <entry key="S30" value="1.7104915395178644" />
-      <entry key="S60" value="3.2317765790765933" />
-      <entry key="M2" value="6.746261224103874" />
-      <entry key="M5" value="13.046860021563706" />
-      <entry key="M10" value="17.686259455629763" />
-      <entry key="M15" value="20.020360414471263" />
-      <entry key="M30" value="25.863387502078258" />
-      <entry key="H1" value="45.05001087876052" />
-      <entry key="H2" value="100.7541392126335" />
-      <entry key="H4" value="225.79953482533062" />
-      <entry key="D1" value="2077.768116695772" />
-      <entry key="W1" value="14851.368014575708" />
+      <entry key="MS100" value="0.9594780663402501" />
+      <entry key="MS500" value="1.2846518823132604" />
+      <entry key="S2" value="2.8886074290376045" />
+      <entry key="S5" value="4.417848405390208" />
+      <entry key="S10" value="5.414692034254147" />
+      <entry key="S30" value="6.380049233867046" />
+      <entry key="S60" value="6.689178508860019" />
+      <entry key="M2" value="7.260407307793696" />
+      <entry key="M5" value="11.254055220414376" />
+      <entry key="M10" value="17.144771699701224" />
+      <entry key="M15" value="20.82919460577302" />
+      <entry key="M30" value="28.501729625632052" />
+      <entry key="H1" value="48.081193578426465" />
+      <entry key="H2" value="103.21749430013332" />
+      <entry key="H4" value="227.65928375326234" />
+      <entry key="D1" value="2076.8109708059183" />
+      <entry key="W1" value="14850.229755497117" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -292,7 +293,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 similar admin page design for certifications" />
     <MESSAGE value="#45 similar admin page design for terms" />
     <MESSAGE value="#45 similar admin page design for industries-data-centres" />
     <MESSAGE value="#46 Industries page redesign" />
@@ -317,7 +317,8 @@
     <MESSAGE value="#48 admin email fix" />
     <MESSAGE value="#48 admin email fixed" />
     <MESSAGE value="#48 admin consoliation" />
-    <option name="LAST_COMMIT_MESSAGE" value="#48 admin consoliation" />
+    <MESSAGE value="#48 user management issue fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="#48 user management issue fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

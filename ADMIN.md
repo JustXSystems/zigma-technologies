@@ -169,7 +169,7 @@ Change admin passwords after import from shared environments.
 | **Editor** | Pages, inventory, catalog settings, resources, press, testimonials, enquiries, forms, nav, site settings, media, account |
 | **Admin** | Everything + Site Copy (write), Theme Studio (publish), New Client, newsletter, redirects, partners, users, dashboard bootstrap |
 
-Custom roles (Roles screen) pick any mix of non-admin screens; Account is always available. Access, name/email, password and deletion take effect on the user's next request — no sign-out needed. The last full admin cannot be deleted or demoted, and nobody can change their own access. Users opening a screen they lack are redirected to their first allowed screen.
+Custom roles (Roles screen) pick any mix of non-admin screens (Users, Roles, Email and New Client are never grantable); Account is always available. Access, name/email, password and deletion take effect on the user's next request — no sign-out needed. The last full admin cannot be deleted or demoted, and nobody can change their own access. Users opening a screen they lack are redirected to their first allowed screen.
 
 ---
 
@@ -383,10 +383,21 @@ Visitor uploads (resumes) under `/assets/uploads/` — **not** in library; block
 |---|---|
 | **Why** | Delegate editing without full admin access |
 | **When** | Add team; rotate credentials; remove leavers |
-| **How** | One form for add/edit: name, email, access (Role-based + role, or Full admin), password (Generate button). Edit to change any field; a new password signs the user out everywhere; Delete signs them out at once |
+| **How** | Team & Access: search, filter by access type or role, last sign-in per user. One side panel for add/edit: name, email, access (Role-based + role, or Full admin; shows the screens the role opens), password (Generate + strength meter). A new password signs the user out everywhere; Remove signs them out at once |
 | **DB** | `admin_users` |
 
 Seed default admin (login page) only works on first run, while `admin_users` is empty.
+
+### Roles & permissions — `/admin/roles` *(admin)*
+
+| | |
+|---|---|
+| **Why** | Reusable screen sets per team |
+| **When** | New team; grant/revoke a screen for everyone in a role; retire a role |
+| **How** | New role or Duplicate → unique name, description, per-group screen switches (Select all / Clear). Edits apply to members on their next click. Full Admin is locked; Editor's screens are editable but not its name. Deleting a role with members asks which role to move them to |
+| **DB** | `admin_roles`, `admin_users` |
+
+Users, Roles, Email and New Client are full-admin only and can never be granted to a role.
 
 ### Account — `/admin/account`
 
