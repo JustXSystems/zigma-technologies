@@ -3,6 +3,7 @@
 import {
   DEFAULT_SITE_SETTINGS,
   describeFooterLogoInherit,
+  isSettingEnabled,
   sanitizeFooterLogoMode,
   sanitizeFooterOfficeAlign,
   type FooterLogoMode,
@@ -10,6 +11,8 @@ import {
   type SiteSettings,
 } from '@/lib/site-settings';
 import LogoTypeEditor from '@/components/admin/LogoTypeEditor';
+import MediaPicker from '@/components/admin/MediaPicker';
+import { ToggleCard } from '@/components/admin/form/controls';
 
 type Props = {
   settings: SiteSettings;
@@ -22,36 +25,13 @@ const ALIGNS: Array<{ id: FooterOfficeAlign; label: string; hint: string }> = [
   { id: 'end', label: 'End', hint: 'Right-aligned brand column' },
 ];
 
-function isOn(value: string | undefined, fallback: boolean) {
-  const v = value?.trim().toLowerCase();
-  if (v === 'true' || v === '1' || v === 'yes') return true;
-  if (v === 'false' || v === '0' || v === 'no') return false;
-  return fallback;
-}
-
-function Toggle({
-  id,
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  hint: string;
-  value: boolean;
-  onChange: (next: boolean) => void;
-}) {
-  return (
-    <label className="admin-footer-office-toggle" htmlFor={id}>
-      <input id={id} type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
-      <span>
-        <strong>{label}</strong>
-        <small>{hint}</small>
-      </span>
-    </label>
-  );
-}
+const VISIBILITY: Array<{ key: keyof SiteSettings; label: string; hint: string }> = [
+  { key: 'footerBrandShowLogo', label: 'Show logo chip', hint: 'Image mark in the footer brand lockup' },
+  { key: 'footerBrandShowName', label: 'Show company name', hint: 'From Brand & identity · Company name' },
+  { key: 'footerBrandShowTagline', label: 'Show logo tagline', hint: 'Small line under the company name' },
+  { key: 'footerBrandShowBlurb', label: 'Show footer blurb', hint: 'Paragraph under the logo lockup' },
+  { key: 'footerBrandShowNewsletter', label: 'Show newsletter', hint: 'Subscribe form under the blurb' },
+];
 
 /**
  * Full control for footer .foot-brand — visibility, alignment, and logo type
@@ -71,41 +51,16 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
       </p>
 
       <div className="admin-footer-office-toggles">
-        <Toggle
-          id="footerBrandShowLogo"
-          label="Show logo chip"
-          hint="Image mark in the footer brand lockup"
-          value={isOn(settings.footerBrandShowLogo, true)}
-          onChange={(on) => onChange({ footerBrandShowLogo: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerBrandShowName"
-          label="Show company name"
-          hint="From Brand & identity · Company name"
-          value={isOn(settings.footerBrandShowName, true)}
-          onChange={(on) => onChange({ footerBrandShowName: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerBrandShowTagline"
-          label="Show logo tagline"
-          hint="Small line under the company name"
-          value={isOn(settings.footerBrandShowTagline, true)}
-          onChange={(on) => onChange({ footerBrandShowTagline: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerBrandShowBlurb"
-          label="Show footer blurb"
-          hint="Paragraph under the logo lockup"
-          value={isOn(settings.footerBrandShowBlurb, true)}
-          onChange={(on) => onChange({ footerBrandShowBlurb: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerBrandShowNewsletter"
-          label="Show newsletter"
-          hint="Subscribe form under the blurb"
-          value={isOn(settings.footerBrandShowNewsletter, true)}
-          onChange={(on) => onChange({ footerBrandShowNewsletter: on ? 'true' : 'false' })}
-        />
+        {VISIBILITY.map((t) => (
+          <ToggleCard
+            key={t.key}
+            id={t.key}
+            label={t.label}
+            hint={t.hint}
+            checked={isSettingEnabled(settings[t.key], true)}
+            onChange={(on) => onChange({ [t.key]: on ? 'true' : 'false' })}
+          />
+        ))}
       </div>
 
       <div className="admin-field full">
@@ -153,18 +108,16 @@ export default function FooterBrandEditor({ settings, onChange }: Props) {
           />
           <small style={{ color: 'var(--admin-muted)' }}>Default none (full width under 760px)</small>
         </div>
-        <div className="admin-field full">
-          <label htmlFor="footerLogoUrl">Footer logo image URL (optional)</label>
-          <input
+        <div className="full">
+          <MediaPicker
             id="footerLogoUrl"
-            className="admin-input"
+            label="Footer logo image (optional)"
             value={settings.footerLogoUrl}
-            placeholder="Blank = use Brand & identity logo"
-            onChange={(e) => onChange({ footerLogoUrl: e.target.value })}
+            onChange={(footerLogoUrl) => onChange({ footerLogoUrl })}
+            kinds={['image', 'svg']}
+            allowUpload
+            hint="Blank = use the Brand & identity logo. Overrides only the footer mark; the header keeps the main logo."
           />
-          <small style={{ color: 'var(--admin-muted)' }}>
-            Override only the footer mark; header keeps the main logo URL
-          </small>
         </div>
         <div className="admin-field full">
           <label htmlFor="footerBlurb">Footer blurb</label>

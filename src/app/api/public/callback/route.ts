@@ -2,11 +2,9 @@ import { after } from 'next/server';
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
-import { getThemeSettings } from '@/lib/cms';
 import { guardPublicForm } from '@/lib/form-guard';
 import { notifySubmission } from '@/lib/mail';
-import { pushCrmLead } from '@/lib/crm';
-import { mergeSiteSettings } from '@/lib/site-settings';
+import { sendLeadToCrm } from '@/lib/crm';
 import { verifyTurnstile } from '@/lib/turnstile';
 
 const schema = z.object({
@@ -57,14 +55,7 @@ export async function POST(request: Request) {
     });
 
     after(() => notifySubmission({ kind: 'enquiry', id, itemType: 'general', payload }));
-    after(async () => {
-      try {
-        const settings = mergeSiteSettings((await getThemeSettings()).site);
-        await pushCrmLead(settings, { id, source: 'callback_request', item_type: 'general', payload });
-      } catch (err) {
-        console.error('[callback-crm]', err);
-      }
-    });
+    after(() => sendLeadToCrm('callback', { id, source: 'callback_request', item_type: 'general', payload }));
 
     return jsonOk({ id, message: 'Callback requested' }, { status: 201 });
   } catch (error) {

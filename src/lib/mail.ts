@@ -2,9 +2,11 @@ import type { RowDataPacket } from 'mysql2';
 import pool from '@/lib/db';
 import { getThemeSettings } from '@/lib/cms';
 import { mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
+import { brandAccentHex } from '@/lib/theme-tokens';
 import {
   MAIL_EVENTS,
   effectiveFrom,
+  emailAccent,
   parseAddressList,
   resolveNotifyEmails,
   type MailConfig,
@@ -39,6 +41,7 @@ type MailContext = {
   secrets: MailSecrets;
   provider: MailProvider;
   site: SiteSettings;
+  accent: string;
 };
 
 type ResumeRef = { stored: string; name: string; mime: string };
@@ -50,6 +53,7 @@ async function loadContext(): Promise<MailContext> {
     secrets: stored.secrets,
     provider: effectiveProvider(stored.config, stored.saved),
     site: mergeSiteSettings(theme.site),
+    accent: emailAccent(stored.config, brandAccentHex(theme.tokens)),
   };
 }
 
@@ -150,7 +154,7 @@ async function dispatchEvent(ctx: MailContext, event: MailEventKey, base: MailVa
   const tpl = ctx.config.templates[event];
   const audience = MAIL_EVENTS.find((e) => e.key === event)?.audience;
   if (!tpl.enabled) return;
-  const mail = composeMail({ config: ctx.config, tpl, base, companyName: ctx.site.companyName, siteUrl: siteUrl() });
+  const mail = composeMail({ config: ctx.config, tpl, base, companyName: ctx.site.companyName, siteUrl: siteUrl(), accent: ctx.accent });
   if (!mail.send) {
     // Visitors without an email address (e.g. callback requests) simply get no auto-reply; conditions are intentional.
     if (audience === 'team' && mail.to.length === 0) {
@@ -255,7 +259,14 @@ export async function sendTestEmail(to: string, event?: MailEventKey, submission
         site: siteVars(ctx.site, ctx.config),
       });
     }
-    const mail = composeMail({ config: ctx.config, tpl: { ...tpl, enabled: true }, base, companyName: ctx.site.companyName, siteUrl: siteUrl() });
+    const mail = composeMail({
+      config: ctx.config,
+      tpl: { ...tpl, enabled: true },
+      base,
+      companyName: ctx.site.companyName,
+      siteUrl: siteUrl(),
+      accent: ctx.accent,
+    });
     if (!mail.send && mail.skipReason) note = `In production this would be skipped: ${mail.skipReason}`;
     message = {
       from: mail.from,
@@ -275,7 +286,7 @@ export async function sendTestEmail(to: string, event?: MailEventKey, submission
       ctx.provider === 'graph' ? 'Microsoft 365 (Graph API)' : ctx.provider.toUpperCase()
     }</strong>${ctx.provider === 'graph' ? ` · Sending mailbox: ${escapeHtml(ctx.config.graph.senderMailbox)}` : ''} · From: ${escapeHtml(from)}</p><p>If you can read this, website email delivery is working.</p>`;
     const subject = `[TEST ${ref}] Website email test — ${ctx.site.companyName}`;
-    const html = wrapEmailHtml({ bodyHtml: body, subject, companyName: ctx.site.companyName, siteUrl: siteUrl(), accent: ctx.config.brandColor });
+    const html = wrapEmailHtml({ bodyHtml: body, subject, companyName: ctx.site.companyName, siteUrl: siteUrl(), accent: ctx.accent });
     message = { from, fromName: ctx.config.fromName, to: recipients, cc: [], bcc: [], replyTo: [], subject, html, text: htmlToText(body), attachments: [] };
   }
 

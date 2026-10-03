@@ -65,8 +65,8 @@ src/app/api/partner/*       → Dealer portal (separate JWT cookie)
 
 | Key | Admin module | Purpose |
 |-----|--------------|---------|
-| `site` | Site Settings | Company identity, contact, analytics, CRM, SLA, enquiry notify |
-| `site_copy` | Site Copy | Marketing strings, feature flags, modal/hub copy |
+| `site` | Site Settings | Company identity, contact, analytics, CRM, SLA |
+| `site_copy` | Site Copy | Marketing strings, feature flags, modal/hub copy (some paths edited on topic screens) |
 | `industries` | Site Copy | `/industries/*` JSON content |
 | `locations` | Site Copy | `/locations/*` JSON content |
 | `tokens` | Theme Studio | Design tokens → `/api/public/theme.css` |
@@ -130,7 +130,7 @@ mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-background.sql
 | `PREVIEW_SECRET` | Draft preview tokens (falls back to `AUTH_SECRET`) |
 | `SMTP_HOST`, `SMTP_FROM`, … | Enquiry email notifications |
 
-**Optional:** Turnstile keys, `MEDIA_BASE_URL`, CRM webhook (also configurable in Site Settings).
+**Optional:** Turnstile keys, `MEDIA_BASE_URL`, CRM webhook (also configurable in Forms & CRM → CRM).
 
 ### 3. First login
 
@@ -222,9 +222,9 @@ Each module: **Why** (business purpose), **When** (trigger), **How** (steps), **
 |---|---|
 | **Why** | Presentation layer for listings without re-entering items |
 | **When** | After inventory seed; rebrand preset; hero spotlight tuning |
-| **How** | Select type → style preset → hero → layout/filters/appearance toggles → Save |
+| **How** | Select type → style preset → hero → layout/filters/appearance toggles → Save. Hero eyebrow / title / lead left blank show the default in grey. Page sections → Trusted partners strip edits the strip titles (needs Site Copy access) |
 | **Public** | Listing chrome at `/projects`, `/products`, `/services` |
-| **DB** | `catalog_page_settings` |
+| **DB** | `catalog_page_settings`; hero defaults and partner strip text in `theme_settings.site_copy` (`catalog`, `socialProof`) |
 
 Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls back to featured items if none selected.
 
@@ -262,13 +262,13 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 
 | | |
 |---|---|
-| **Why** | Single source for identity, notifications, analytics, CRM |
-| **When** | Launch; rebrand; enable email/CRM/analytics |
-| **How** | Company, logo, phones, emails, WhatsApp, footer, social, notify emails, GA4, CRM webhook, SLA JSON |
-| **Public** | Header, Footer, JSON-LD, mail, `/thank-you`, `/sla` |
-| **DB** | `theme_settings.site` |
+| **Why** | Single source for identity, contact, address, analytics |
+| **When** | Launch; rebrand; enable analytics |
+| **How** | Company, logo, phones, emails, WhatsApp, social, address & SLA. Analytics & cookies: GA4 / Plausible, consent switches, and the cookie banner and `/cookies` wording (wording needs Site Copy access). Header and footer options: Header & Footer. Default meta / share image: SEO. CRM webhook: Forms & CRM. Heading levels and eyebrow sizes: Theme Studio → Typography |
+| **Public** | Header, Footer, JSON-LD, mail, `/thank-you`, `/sla`, cookie banner, `/cookies` |
+| **DB** | `theme_settings.site`; cookie wording in `theme_settings.site_copy` |
 
-**Enquiry email:** Requires `SMTP_*` + notify enabled. Visitor auto-reply optional.
+**Enquiry email:** Email → Connection (Microsoft 365 or SMTP), team notify list in Email → Variables, visitor auto-reply on/off per template in Email → Templates.
 
 ### Site Copy — `/admin/site-copy` *(admin write)*
 
@@ -276,7 +276,7 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 |---|---|
 | **Why** | White-label marketing strings without code changes |
 | **When** | New client; toggle tools/locales/partners; edit wizard/calculator copy |
-| **How** | Tabs: Chrome, Hubs, Consultation, Tools, Catalog, Locales, Features |
+| **How** | Tabs: Hub pages, Features, Hero height, Tools, Locales, Industries / Locations JSON. Header/footer labels: Header & Footer → Labels. Page titles: SEO. Enquiry pop-up and thank-you: Forms & CRM. Catalog page headings and partner strip: Catalog Settings. Cookie banner and `/cookies` text: Site Settings → Analytics & cookies |
 | **Public** | All chrome; `GET /api/public/site-copy` |
 | **DB** | `site_copy`, `industries`, `locations` |
 
@@ -288,15 +288,15 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 | `localesEnabled` | `/hi`, `/kn` |
 | `partnersEnabled` | Partner portal |
 
-### Navigation — `/admin/nav`
+### Header & Footer — `/admin/header-footer` *(was `/admin/nav`)*
 
 | | |
 |---|---|
-| **Why** | Editable mega-menu and footer |
+| **Why** | Everything in the site header and footer on one screen |
 | **When** | Launch; new hub; rebrand; reset corrupted nav |
-| **How** | Seed header/footer → nested columns/links → ↑↓ reorder → Clear+Seed to reset |
+| **How** | Tabs: Menus (seed header/footer → nested columns/links → ↑↓ reorder), Header and Footer (Site Settings), Labels (Site Copy). Each tab needs its own permission |
 | **Public** | Header/Footer; `GET /api/public/nav` |
-| **DB** | `nav_items` |
+| **DB** | `nav_items`, `theme_settings.site`, `theme_settings.site_copy` |
 
 ### Theme Studio — `/admin/theme` *(admin publish)*
 
@@ -304,9 +304,9 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 |---|---|
 | **Why** | Brand theming without editing globals.css |
 | **When** | Rebrand; client CSS overrides |
-| **How** | Tokens → Save; CSS draft → Publish; optional sync to disk |
-| **Public** | `/api/public/theme.css` |
-| **DB** | `tokens`, `css_overrides` |
+| **How** | Tabs: Colours & layout (tokens → Save), Typography (type scale, heading levels, eyebrow sizes → one Save; levels and eyebrows also need Site Settings permission), Site CSS (draft → Publish; optional sync to disk). Email accent follows the Orange brand colour unless Email sets its own |
+| **Public** | `/api/public/theme.css`; heading levels / eyebrow sizes via site settings |
+| **DB** | `tokens`, `css_overrides`, `theme_settings.site` (heading levels, eyebrow sizes) |
 
 ### New Client — `/admin/new-client` *(admin)*
 
@@ -327,15 +327,15 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 | **Public** | Fed by contact, careers, catalog, callback APIs |
 | **DB** | `enquiries` |
 
-### Enquiry Forms — `/admin/forms`
+### Forms & CRM — `/admin/forms`
 
 | | |
 |---|---|
-| **Why** | Configurable form fields |
-| **When** | Subject options; reorder; disable field |
-| **How** | Edit `enquiry_default` → fields ↑↓, labels, required |
-| **Public** | `GET /api/public/forms/enquiry` |
-| **DB** | `form_definitions`, `form_fields` |
+| **Why** | How leads are collected and where they go, in one place |
+| **When** | Subject options; reorder; reword the pop-up or thank-you page; connect a CRM |
+| **How** | Tabs: Form fields (`enquiry_default` → fields ↑↓, labels, required), Pop-up & thank-you (Site Copy), CRM (Site Settings: webhook, which submission kinds to send, test send) |
+| **Public** | `GET /api/public/forms/enquiry`; `/thank-you`; CRM webhook after each enabled submission |
+| **DB** | `form_definitions`, `form_fields`, `theme_settings.site_copy`, `theme_settings.site` |
 
 ### Newsletter — `/admin/newsletter` *(admin)*
 
@@ -358,15 +358,15 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 
 Visitor uploads (resumes) under `/assets/uploads/` — **not** in library; blocked from direct URLs.
 
-### Redirects — `/admin/redirects` *(admin)*
+### SEO — `/admin/seo` *(redirects were `/admin/redirects`)*
 
 | | |
 |---|---|
-| **Why** | SEO preservation on migration |
-| **When** | Legacy HTML; slug changes |
-| **How** | from_path → to_path, status, enabled |
-| **Public** | Applied in `proxy.ts` (~30s cache) |
-| **DB** | `redirects` |
+| **Why** | Search appearance and SEO preservation on migration |
+| **When** | Launch; legacy HTML; manual moves |
+| **How** | Tabs: Defaults (Site Settings), Page titles (Site Copy), Redirects (from_path → to_path, status, enabled). Renaming a published page, catalog item, resource or press post adds its 301 automatically |
+| **Public** | Meta tags; redirects applied in `proxy.ts` (~30s cache) |
+| **DB** | `redirects`, `theme_settings.site`, `theme_settings.site_copy` |
 
 ### Partners — `/admin/partners` *(admin)*
 
@@ -401,7 +401,7 @@ Visitor uploads (resumes) under `/assets/uploads/` — **not** in library; block
 1. schema.sql + migrations
 2. Seed admin → sign in
 3. Dashboard bootstrap
-4. Site Settings (real details + notify emails)
+4. Site Settings (real details) + Email → Variables (team notify list)
 5. Navigation seed
 6. Inventory seed → publish → Catalog Settings
 7. Test enquiry + SMTP
@@ -440,12 +440,12 @@ These public routes are configured from admin modules:
 | Locations | Site Copy JSON | `/locations`, `/locations/{slug}`, city×service matrix |
 | SLA dashboard | Site Settings `slaMetricsJson` | `/sla` |
 | Search | — | `/search` |
-| Cookie policy | Site Copy | `/cookies` |
+| Cookie policy | Site Settings → Analytics & cookies | `/cookies` |
 | Careers | Pages seed + Forms | `/careers` (resume upload → enquiries) |
 
-### Analytics & consent
+### Analytics & cookies
 
-Site Settings: GA4, Plausible, `analyticsConsentRequired`. Cookie banner gates scripts.
+Site Settings → Analytics & cookies: GA4, Plausible, `analyticsConsentRequired`, `marketingConsentEnabled`, and the banner / `/cookies` wording. Cookie banner gates scripts.
 
 ### Form protection
 

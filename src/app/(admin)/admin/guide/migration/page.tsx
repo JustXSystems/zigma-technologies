@@ -44,7 +44,7 @@ export default function AdminMigrationGuidePage() {
               <Link href="/admin/guide/hostinger-prod" className="admin-btn admin-btn-secondary">
                 KVM 2 production
               </Link>
-              <Link href="/admin/redirects" className="admin-btn admin-btn-primary">
+              <Link href="/admin/seo?tab=redirects" className="admin-btn admin-btn-primary">
                 Redirects module
               </Link>
             </div>
@@ -386,7 +386,7 @@ export default function AdminMigrationGuidePage() {
                 <h4>Legacy URL redirects</h4>
                 <ul>
                   <li>
-                    Add rules in <Link href="/admin/redirects">Redirects</Link> for old .html paths
+                    Add rules in <Link href="/admin/seo?tab=redirects">Redirects</Link> for old .html paths
                   </li>
                   <li>Hardcoded legacy paths also exist in src/proxy.ts</li>
                   <li>Submit updated sitemap after cutover</li>

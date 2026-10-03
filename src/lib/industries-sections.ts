@@ -24,7 +24,7 @@ import { indIconFor } from '@/lib/ind-icons';
  *
  * Hero / stats / CTA reuse the Contact hero, Legacy stat bar and Certifications CTA renderers with industries
  * defaults; the sector cards and category grids render with scoped `.ind-*` CSS. Defaults mirror the live
- * industries page. Headings / eyebrows follow Site Settings → Public typography.
+ * industries page. Headings / eyebrows follow Theme Studio → Typography.
  */
 
 export const INDUSTRIES_SECTION_TYPES = [

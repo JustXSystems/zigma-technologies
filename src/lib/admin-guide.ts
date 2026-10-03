@@ -91,13 +91,13 @@ export const GUIDE_QUICK_START: GuideStep[] = [
   },
   {
     title: 'Configure site identity',
-    detail: 'Site Settings: company name, logo, phones, emails, footer links, CRM webhook.',
+    detail: 'Site Settings: company name, logo, phones, emails. Header & Footer: header buttons, footer legal links. Forms & CRM → CRM: webhook.',
     href: '/admin/site-settings',
   },
   {
     title: 'Review navigation & publish catalog',
-    detail: 'Navigation → seed header/footer. Inventory → publish items. Catalog Settings → tune listing UX.',
-    href: '/admin/nav',
+    detail: 'Header & Footer → Menus → seed header/footer. Inventory → publish items. Catalog Settings → tune listing UX.',
+    href: '/admin/header-footer?tab=menus',
   },
   {
     title: 'Verify public site & lead path',
@@ -162,7 +162,7 @@ export const GUIDE_FLOWS: GuideFlow[] = [
       'POST /api/public/enquiries (or careers/apply, callback)',
       'Row inserted in enquiries with payload_json and source',
       'Admin → Email templates send the team notification and visitor auto-reply (each template has its own Enabled toggle)',
-      'If crmWebhookUrl set → lead pushed with score',
+      'If a CRM webhook is set and that kind is switched on (Forms & CRM → CRM) → lead pushed with score',
       'Admin triages at /admin/enquiries → notes → status closed',
     ],
   },
@@ -323,11 +323,11 @@ export const GUIDE_ROLES: Array<{ area: string; editor: boolean; admin: boolean 
   { area: 'Dashboard bootstrap', editor: false, admin: true },
   { area: 'Pages, Inventory, Catalog Settings', editor: true, admin: true },
   { area: 'Resources, Press, Testimonials', editor: true, admin: true },
-  { area: 'Enquiries, Enquiry Forms', editor: true, admin: true },
-  { area: 'Navigation, Site Settings, Media', editor: true, admin: true },
+  { area: 'Enquiries, Forms & CRM', editor: true, admin: true },
+  { area: 'Header & Footer, Site Settings, Media', editor: true, admin: true },
   { area: 'Account (own password)', editor: true, admin: true },
   { area: 'Site Copy (write), Theme Studio (write/publish)', editor: false, admin: true },
-  { area: 'New Client, Newsletter, Redirects, Partners, Users', editor: false, admin: true },
+  { area: 'New Client, Newsletter, SEO redirects, Partners, Users', editor: false, admin: true },
 ];
 
 export function modulesForSection(sectionId: string): GuideModuleDetail[] {

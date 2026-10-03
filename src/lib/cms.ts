@@ -66,6 +66,10 @@ export async function getPageBySlug(slug: string, admin = false) {
   }
 }
 
+export function pagePublicPath(slug: string) {
+  return slug === 'home' ? '/' : `/${slug}`;
+}
+
 export async function getPageById(id: number) {
   const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM pages WHERE id = ? LIMIT 1', [id]);
   if (!rows[0]) return null;

@@ -20,7 +20,7 @@ import { INDUSTRY_HUB_IMAGES } from '@/lib/industry-hub-seed';
  *
  * The hero reuses the Contact hero renderer, the overview the Privacy text section (blocks, media, optional
  * table of contents) and the CTA the Certifications CTA band, with defaults per industry (INDUSTRY_DEFS) that
- * mirror the live industry pages. Headings / eyebrows follow Site Settings → Public typography.
+ * mirror the live industry pages. Headings / eyebrows follow Theme Studio → Typography.
  */
 
 export const INDUSTRY_PAGE_SECTION_TYPES = ['industry_page_hero', 'industry_page_overview', 'industry_page_cta'] as const;

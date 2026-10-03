@@ -331,7 +331,7 @@ function LifeCardsEditor({ content: c, onChange }: EditorProps<LifeCardsContent>
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle">
         <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Cards" open>
@@ -434,7 +434,7 @@ function LifeRolesEditor({ content: c, onChange }: EditorProps<LifeRolesContent>
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle">
         <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Roles" open>
@@ -705,7 +705,7 @@ function LifeGalleryEditor({ content: c, onChange }: EditorProps<LifeGalleryCont
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle">
         <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Photos & videos" open>

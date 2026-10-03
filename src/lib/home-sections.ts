@@ -27,7 +27,7 @@ import { ecoGroupColorKey } from '@/lib/eco-section';
  * Built on the About / Life / Legacy element primitives. The renderer keeps the live homepage
  * markup and classes (hero-slider, eco-section, stat-bar…), so empty fields reproduce the
  * production design exactly; every admin value arrives as an inline style or --hm-* variable.
- * Headings / eyebrows follow Site Settings → Public typography, colors default to theme tokens.
+ * Headings / eyebrows follow Theme Studio → Typography, colors default to theme tokens.
  */
 
 export const HOME_SECTION_TYPES = [

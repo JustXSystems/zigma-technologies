@@ -110,7 +110,7 @@ function highlightText(text: string, hl?: LifeHighlight): ReactNode {
   });
 }
 
-/** Heading whose tag / size default to Site Settings → Public typography; element tag / style override. */
+/** Heading whose tag / size default to Theme Studio → Typography; element tag / style override. */
 export function LzHeading({
   el,
   role,

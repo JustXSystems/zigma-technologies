@@ -95,14 +95,14 @@ export async function GET() {
         id: 'header-nav',
         label: 'Header navigation seeded',
         done: Number(headerNav?.c || 0) > 0,
-        href: '/admin/nav',
+        href: '/admin/header-footer?tab=menus',
         action: 'seed-header-nav',
       },
       {
         id: 'footer-nav',
         label: 'Footer navigation seeded',
         done: Number(footerNav?.c || 0) > 0,
-        href: '/admin/nav',
+        href: '/admin/header-footer?tab=menus',
         action: 'seed-footer-nav',
       },
       {

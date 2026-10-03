@@ -1,7 +1,6 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { buildFooterColumns } from '@/lib/nav-tree';
 
 type NavRow = {
@@ -47,7 +46,8 @@ function treeOrdered(items: NavRow[]): NavRow[] {
   return out;
 }
 
-export default function NavAdminPage() {
+/** Header mega-menu and footer link columns (each change saves immediately). */
+export default function NavMenusEditor({ onOpenMenuFonts }: { onOpenMenuFonts?: () => void }) {
   const [items, setItems] = useState<NavRow[]>([]);
   const [location, setLocation] = useState<'header' | 'footer'>('header');
   const [label, setLabel] = useState('');
@@ -327,12 +327,12 @@ export default function NavAdminPage() {
           <code>{'{{email}}'}</code> instead of the number or address, e.g. Label <code>{'{{phone}}'}</code> and Href{' '}
           <code>{'tel:{{phone}}'}</code>. The site fills them from Site Settings → Contact details.
         </p>
-        {location === 'header' ? (
+        {location === 'header' && onOpenMenuFonts ? (
           <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
             <strong>Fonts:</strong> menu and submenu font, size, weight, style and letter case are set in{' '}
-            <Link href="/admin/site-settings#site-settings-nav-menu-style">
-              Site Settings → Navigation menu style &amp; fonts
-            </Link>
+            <button type="button" className="admin-link-btn" onClick={onOpenMenuFonts}>
+              Header → Navigation menu style &amp; fonts
+            </button>
             .
           </p>
         ) : null}

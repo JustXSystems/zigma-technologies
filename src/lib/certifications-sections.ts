@@ -20,7 +20,7 @@ import type { HeroPlacement } from '@/lib/hero-placement';
  *
  * The hero reuses the Contact hero renderer with certifications defaults; the certificate gallery
  * (marquee or grid + lightbox) and the CTA band render with scoped `.cer-*` CSS whose defaults mirror
- * the live certifications design. Headings / eyebrows follow Site Settings → Public typography.
+ * the live certifications design. Headings / eyebrows follow Theme Studio → Typography.
  */
 
 export const CERTS_SECTION_TYPES = ['certs_hero', 'certs_gallery', 'certs_cta'] as const;

@@ -1,6 +1,9 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import MediaPicker from '@/components/admin/MediaPicker';
+import SeoFieldsEditor from '@/components/admin/SeoFieldsEditor';
+import { movedAddressNote } from '@/lib/moved-address';
 
 type Post = {
   id: number;
@@ -91,7 +94,7 @@ export default function ResourcesAdminPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
-      setMessage(editor.id ? 'Updated' : 'Created');
+      setMessage(editor.id ? `Updated.${movedAddressNote(data.redirect)}` : 'Created');
       setEditor({ ...empty, id: 0 });
       await load();
     } catch (err) {
@@ -162,9 +165,14 @@ export default function ResourcesAdminPage() {
           <label>Body HTML</label>
           <textarea className="admin-textarea" rows={8} value={editor.body_html} onChange={(e) => setEditor({ ...editor, body_html: e.target.value })} />
         </div>
-        <div className="admin-field">
-          <label>Cover URL</label>
-          <input className="admin-input" value={editor.cover_url} onChange={(e) => setEditor({ ...editor, cover_url: e.target.value })} />
+        <div className="full">
+          <MediaPicker
+            label="Cover image"
+            value={editor.cover_url}
+            onChange={(cover_url) => setEditor({ ...editor, cover_url })}
+            kinds={['image', 'svg']}
+            allowUpload
+          />
         </div>
         <div className="admin-field">
           <label>Tags (comma)</label>
@@ -177,13 +185,14 @@ export default function ResourcesAdminPage() {
             <option value="published">published</option>
           </select>
         </div>
-        <div className="admin-field">
-          <label>Meta title</label>
-          <input className="admin-input" value={editor.meta_title} onChange={(e) => setEditor({ ...editor, meta_title: e.target.value })} />
-        </div>
-        <div className="admin-field full">
-          <label>Meta description</label>
-          <input className="admin-input" value={editor.meta_description} onChange={(e) => setEditor({ ...editor, meta_description: e.target.value })} />
+        <div className="full">
+          <SeoFieldsEditor
+            value={{ title: editor.meta_title, description: editor.meta_description }}
+            onChange={(next) => setEditor({ ...editor, meta_title: next.title, meta_description: next.description })}
+            fallbackTitle={editor.title}
+            fallbackDescription={editor.excerpt || editor.body_html}
+            path={`/resources/${editor.slug || 'slug'}`}
+          />
         </div>
         <div className="admin-field full" style={{ display: 'flex', gap: '0.6rem' }}>
           <button type="submit" className="admin-btn" disabled={busy}>

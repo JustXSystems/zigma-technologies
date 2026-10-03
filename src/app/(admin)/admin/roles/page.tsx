@@ -5,6 +5,7 @@ import {
   ADMIN_SCREEN_DEFS,
   type AdminScreenKey,
 } from '@/lib/admin-screens';
+import { ToggleCard } from '@/components/admin/form/controls';
 
 type AdminRole = {
   id: number;
@@ -17,6 +18,15 @@ type AdminRole = {
 };
 
 const ASSIGNABLE_SCREENS = ADMIN_SCREEN_DEFS.filter((s) => !s.superAdminOnly);
+
+/** `null` when the signed-in user may not manage roles. */
+async function fetchRoles(): Promise<AdminRole[] | null> {
+  const res = await fetch('/api/admin/roles');
+  if (res.status === 403) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to load roles');
+  return data.roles || [];
+}
 
 export default function RolesPage() {
   const [roles, setRoles] = useState<AdminRole[]>([]);
@@ -31,21 +41,21 @@ export default function RolesPage() {
   });
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    setError('');
-    const res = await fetch('/api/admin/roles');
-    if (res.status === 403) {
-      setForbidden(true);
-      return;
-    }
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to load roles');
-    setRoles(data.roles || []);
+  const apply = useCallback((loaded: AdminRole[] | null) => {
+    if (loaded) setRoles(loaded);
+    else setForbidden(true);
   }, []);
 
+  const load = useCallback(async () => {
+    setError('');
+    apply(await fetchRoles());
+  }, [apply]);
+
   useEffect(() => {
-    load().catch((e) => setError(e.message));
-  }, [load]);
+    fetchRoles()
+      .then(apply)
+      .catch((e: Error) => setError(e.message));
+  }, [apply]);
 
   const groupedScreens = useMemo(() => {
     const map = new Map<string, typeof ASSIGNABLE_SCREENS>();
@@ -142,7 +152,7 @@ export default function RolesPage() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1rem' }}>
+    <div className="admin-page-stack">
       <div className="admin-card">
         <h2 style={{ marginTop: 0 }}>Admin roles</h2>
         <p style={{ color: 'var(--admin-muted)' }}>
@@ -233,28 +243,25 @@ export default function RolesPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
-          <div className="admin-field full">
-            <label>Screen access</label>
-            <div style={{ display: 'grid', gap: '0.85rem', marginTop: '0.35rem' }}>
-              {groupedScreens.map(([group, screens]) => (
-                <div key={group}>
-                  <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.35rem' }}>{group}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.35rem 0.75rem' }}>
-                    {screens.map((screen) => (
-                      <label key={screen.key} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.9rem' }}>
-                        <input
-                          type="checkbox"
-                          checked={form.screens.includes(screen.key)}
-                          onChange={(e) => toggleScreen(screen.key, e.target.checked)}
-                        />
-                        {screen.label}
-                      </label>
-                    ))}
-                  </div>
+          <fieldset className="full admin-role-screens">
+            <legend>Screen access</legend>
+            {groupedScreens.map(([group, screens]) => (
+              <div key={group}>
+                <h4>{group}</h4>
+                <div className="admin-footer-office-toggles">
+                  {screens.map((screen) => (
+                    <ToggleCard
+                      key={screen.key}
+                      id={`role-screen-${screen.key}`}
+                      label={screen.accessLabel ?? screen.label}
+                      checked={form.screens.includes(screen.key)}
+                      onChange={(on) => toggleScreen(screen.key, on)}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            ))}
+          </fieldset>
           <div className="full" style={{ display: 'flex', gap: '0.5rem' }}>
             <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
               {saving ? 'Saving…' : editingId ? 'Update role' : 'Create role'}

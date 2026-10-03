@@ -1,121 +1,129 @@
 'use client';
 
+import { useId } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
+import { Field, ToggleCard } from '@/components/admin/form/controls';
+import { SITE_NAME, clampDescription, siteOrigin } from '@/lib/seo';
 
+/** `image` and `noindex` render only when present — leave them out for records that do not store them. */
 export type SeoFieldsValue = {
-  meta_title: string;
-  meta_description: string;
-  og_image_url: string;
-  seo_noindex: boolean;
+  title: string;
+  description: string;
+  image?: string;
+  noindex?: boolean;
 };
 
 type Props = {
   value: SeoFieldsValue;
   onChange: (next: SeoFieldsValue) => void;
-  /** Shown in the preview when the override is empty. */
-  fallbackTitle: string;
-  fallbackDescription: string;
   /** Public path, e.g. `/projects/my-slug`. */
   path: string;
+  /** What the site uses when a field is empty; omit when that text is generated automatically. */
+  fallbackTitle?: string;
+  fallbackDescription?: string;
+  imageHint?: string;
 };
 
-const BRAND = 'Zigma Technologies';
+type Limit = { good: [number, number]; warn: number; target: number };
+const TITLE_LIMIT: Limit = { good: [30, 60], warn: 65, target: 60 };
+const DESCRIPTION_LIMIT: Limit = { good: [120, 160], warn: 180, target: 160 };
 
-function counterColor(length: number, good: [number, number], warnMax: number) {
-  if (length === 0) return 'var(--admin-muted, #6b7280)';
-  if (length >= good[0] && length <= good[1]) return '#12B76A';
-  if (length <= warnMax) return '#d97706';
-  return '#EF4444';
+function lengthState(length: number, { good, warn }: Limit) {
+  if (length === 0) return 'empty';
+  if (length >= good[0] && length <= good[1]) return 'good';
+  return length <= warn ? 'warn' : 'over';
 }
 
-export default function SeoFieldsEditor({ value, onChange, fallbackTitle, fallbackDescription, path }: Props) {
-  const title = value.meta_title.trim() || fallbackTitle;
-  const previewTitle = title.toLowerCase().includes(BRAND.toLowerCase()) ? title : `${title} | ${BRAND}`;
-  const previewDescription = (value.meta_description.trim() || fallbackDescription || '').replace(/<[^>]*>/g, ' ');
-  const titleLen = value.meta_title.trim().length;
-  const descLen = value.meta_description.trim().length;
+function Counter({ text, limit, note }: { text: string; limit: Limit; note?: string }) {
+  const length = text.trim().length;
+  return (
+    <span className="admin-seo-count" data-state={lengthState(length, limit)}>
+      {length}/{limit.target}
+      {note ? ` — ${note}` : ''}
+    </span>
+  );
+}
+
+/** Mirrors `pageTitle()` and the root "%s | brand" title template. */
+function serpTitle(title: string) {
+  return title.toLowerCase().includes(SITE_NAME.toLowerCase()) ? title : `${title} | ${SITE_NAME}`;
+}
+
+/** Meta title / description (+ share image and noindex where stored) with a live Google preview. */
+export default function SeoFieldsEditor({ value, onChange, path, fallbackTitle, fallbackDescription, imageHint }: Props) {
+  const id = useId();
+  const set = (patch: Partial<SeoFieldsValue>) => onChange({ ...value, ...patch });
+
+  const title = value.title.trim() || fallbackTitle?.trim() || '';
+  const description = clampDescription(value.description.trim() || fallbackDescription);
+  const host = siteOrigin().replace(/^https?:\/\//, '');
 
   return (
     <div className="admin-form-grid">
-      <div className="admin-field full">
-        <label>
-          Meta title{' '}
-          <small style={{ color: counterColor(titleLen, [30, 60], 65) }}>
-            {titleLen}/60 — brand is appended automatically
-          </small>
-        </label>
+      <Field
+        label="Meta title"
+        full
+        htmlFor={`${id}-title`}
+        hint={<Counter text={value.title} limit={TITLE_LIMIT} note="the brand is added automatically" />}
+      >
         <input
+          id={`${id}-title`}
           className="admin-input"
-          value={value.meta_title}
+          value={value.title}
           maxLength={255}
-          onChange={(e) => onChange({ ...value, meta_title: e.target.value })}
-          placeholder={fallbackTitle}
+          placeholder={fallbackTitle || 'Automatic title'}
+          onChange={(e) => set({ title: e.target.value })}
         />
-      </div>
-      <div className="admin-field full">
-        <label>
-          Meta description{' '}
-          <small style={{ color: counterColor(descLen, [120, 160], 180) }}>{descLen}/160</small>
-        </label>
+      </Field>
+      <Field
+        label="Meta description"
+        full
+        htmlFor={`${id}-description`}
+        hint={<Counter text={value.description} limit={DESCRIPTION_LIMIT} />}
+      >
         <textarea
+          id={`${id}-description`}
           className="admin-textarea"
-          value={value.meta_description}
+          value={value.description}
           maxLength={320}
-          onChange={(e) => onChange({ ...value, meta_description: e.target.value })}
-          placeholder={fallbackDescription ? fallbackDescription.slice(0, 160) : 'What the page offers + proof + call to action'}
+          placeholder={fallbackDescription ? clampDescription(fallbackDescription) : 'What the page offers, proof, and a call to action'}
+          onChange={(e) => set({ description: e.target.value })}
         />
-      </div>
-      <div style={{ gridColumn: '1 / -1' }}>
-        <MediaPicker
-          value={value.og_image_url}
-          onChange={(url) => onChange({ ...value, og_image_url: url })}
-          label="Social share image (1200×630 recommended; defaults to the primary image)"
-          compact
-        />
-      </div>
-      <div className="admin-field full">
-        <label>
-          <input
-            type="checkbox"
-            checked={value.seo_noindex}
-            onChange={(e) => onChange({ ...value, seo_noindex: e.target.checked })}
-          />{' '}
-          Hide from search engines (noindex) and the sitemap
-        </label>
-      </div>
-      <div className="admin-field full">
-        <label>Google preview</label>
-        <div
-          style={{
-            border: '1px solid #e5e7eb',
-            borderRadius: 8,
-            padding: '12px 14px',
-            background: '#fff',
-            fontFamily: 'Arial, sans-serif',
-            maxWidth: 620,
-          }}
-        >
-          <div style={{ fontSize: 12, color: '#202124' }}>zigma-technologies.com{path}</div>
-          <div
-            style={{
-              fontSize: 19,
-              color: '#1a0dab',
-              lineHeight: 1.3,
-              margin: '2px 0',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {previewTitle}
-          </div>
-          <div style={{ fontSize: 13, color: '#4d5156', lineHeight: 1.5 }}>
-            {previewDescription.length > 160 ? `${previewDescription.slice(0, 157)}…` : previewDescription}
-          </div>
+      </Field>
+      {value.image !== undefined ? (
+        <div className="full">
+          <MediaPicker
+            id={`${id}-image`}
+            label="Social share image"
+            hint={imageHint ?? '1200×630 recommended.'}
+            value={value.image}
+            onChange={(image) => set({ image })}
+            compact
+          />
         </div>
-        {value.seo_noindex ? (
-          <small style={{ color: '#EF4444' }}>This page will not appear in search results.</small>
-        ) : null}
+      ) : null}
+      {value.noindex !== undefined ? (
+        <div className="full">
+          <ToggleCard
+            id={`${id}-noindex`}
+            label="Hide from search engines"
+            hint="Adds noindex and leaves this page out of the sitemap."
+            checked={value.noindex}
+            onChange={(noindex) => set({ noindex })}
+          />
+        </div>
+      ) : null}
+      <div className="admin-field full">
+        <span className="admin-seo-preview-label">Google preview</span>
+        <div className="admin-seo-preview" aria-label="Google preview">
+          <div className="admin-seo-preview-url">
+            {host}
+            {path === '/' ? '' : path}
+          </div>
+          <div className="admin-seo-preview-title">{title ? serpTitle(title) : `Automatic title | ${SITE_NAME}`}</div>
+          <div className="admin-seo-preview-desc">{description || 'Automatic description'}</div>
+        </div>
+        {value.noindex ? <p className="admin-seo-noindex">This page will not appear in search results.</p> : null}
       </div>
     </div>
   );

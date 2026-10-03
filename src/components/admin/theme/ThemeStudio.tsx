@@ -3,23 +3,50 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DEFAULT_THEME_TOKENS,
+  TYPOGRAPHY_TOKEN_KEYS,
   buildPreviewCss,
   mergeTokens,
+  pickTokens,
   sanitizeCssOverride,
+  type ThemeTokenGroup,
 } from '@/lib/theme-tokens';
 import TokenEditor from './TokenEditor';
 import SiteCssEditor from './SiteCssEditor';
 import ThemePreviewPane from './ThemePreviewPane';
 import ThemeVersionHistory, { type ThemeHistoryRow } from './ThemeVersionHistory';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import { useDirtyTracker } from '@/components/admin/unsaved-changes';
 
-type Tab = 'tokens' | 'css';
+export type ThemeStudioView = 'tokens' | 'css';
 
-export default function ThemeStudio() {
+/** The type scale is edited in Theme Studio → Typography. */
+const COLOUR_GROUPS: readonly ThemeTokenGroup[] = ['brand', 'neutrals', 'layout'];
+
+type Props = {
+  view: ThemeStudioView;
+  onViewChange: (view: ThemeStudioView) => void;
+};
+
+type ThemeData = {
+  tokens?: unknown;
+  draft?: { css_text?: string } | null;
+  published?: { id?: number; css_text?: string } | null;
+  history?: ThemeHistoryRow[];
+  hasFullStylesheet?: boolean;
+};
+
+async function fetchTheme(): Promise<ThemeData> {
+  const res = await fetch('/api/admin/theme');
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to load');
+  return data;
+}
+
+/** Colour / layout tokens and the full site stylesheet, sharing one live preview. */
+export default function ThemeStudio({ view, onViewChange }: Props) {
   const [tokens, setTokens] = useState<Record<string, string>>({ ...DEFAULT_THEME_TOKENS });
   const [cssText, setCssText] = useState('');
   const [notes, setNotes] = useState('');
-  const [tab, setTab] = useState<Tab>('tokens');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [history, setHistory] = useState<ThemeHistoryRow[]>([]);
@@ -28,21 +55,28 @@ export default function ThemeStudio() {
   const [saving, setSaving] = useState(false);
   const [loadingRepo, setLoadingRepo] = useState(false);
   const [debouncedCss, setDebouncedCss] = useState('');
+  const { markClean: markTokensClean } = useDirtyTracker(tokens);
+  const { markClean: markCssClean } = useDirtyTracker(cssText);
 
-  const load = useCallback(async () => {
-    const res = await fetch('/api/admin/theme');
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to load');
-    setTokens(mergeTokens(data.tokens));
-    setCssText(data.draft?.css_text || data.published?.css_text || '');
-    setHistory(data.history || []);
-    setPublishedId(data.published?.id || null);
-    setHasFullStylesheet(Boolean(data.hasFullStylesheet));
-  }, []);
+  const apply = useCallback(
+    (data: ThemeData) => {
+      setTokens(mergeTokens(data.tokens));
+      setCssText(data.draft?.css_text || data.published?.css_text || '');
+      markTokensClean();
+      markCssClean();
+      setHistory(data.history || []);
+      setPublishedId(data.published?.id || null);
+      setHasFullStylesheet(Boolean(data.hasFullStylesheet));
+    },
+    [markTokensClean, markCssClean]
+  );
+  const load = useCallback(async () => apply(await fetchTheme()), [apply]);
 
   useEffect(() => {
-    load().catch((e) => setError(e.message));
-  }, [load]);
+    fetchTheme()
+      .then(apply)
+      .catch((e: Error) => setError(e.message));
+  }, [apply]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -61,14 +95,17 @@ export default function ThemeStudio() {
     setMessage('');
     setSaving(true);
     try {
+      const latest = await fetchTheme();
+      const next = { ...tokens, ...pickTokens(mergeTokens(latest.tokens), TYPOGRAPHY_TOKEN_KEYS) };
       const res = await fetch('/api/admin/theme', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tokens }),
+        body: JSON.stringify({ tokens: next }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
       setTokens(mergeTokens(data.tokens));
+      markTokensClean();
       setMessage('Tokens saved. Live via /api/public/theme.css (cache ~30s).');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed');
@@ -177,7 +214,7 @@ export default function ThemeStudio() {
       if (!res.ok) throw new Error(data.error || 'Failed to load globals.css');
       setCssText(data.css || '');
       setNotes('Loaded from src/app/globals.css');
-      setTab('css');
+      onViewChange('css');
       setMessage(
         `Loaded globals.css (${data.sections?.length || 0} sections, ${(data.bytes / 1024).toFixed(1)} KB). Save draft / publish when ready.`
       );
@@ -201,71 +238,59 @@ export default function ThemeStudio() {
   return (
     <div className="theme-studio admin-page-stack">
       <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
-        <button
-          type="button"
-          className="admin-btn admin-btn-secondary"
-          onClick={() => {
-            setTokens({ ...DEFAULT_THEME_TOKENS });
-            setMessage('Tokens reset to defaults (not saved yet).');
-          }}
-        >
-          Reset tokens
-        </button>
-        <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void saveTokens()}>
-          Save tokens
-        </button>
-        <button type="button" className="admin-btn admin-btn-secondary" disabled={saving} onClick={() => void saveDraft()}>
-          Save CSS draft
-        </button>
-        <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void publishDraft()}>
-          Publish CSS
-        </button>
+        {view === 'tokens' ? (
+          <>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              onClick={() => {
+                setTokens((prev) => ({ ...DEFAULT_THEME_TOKENS, ...pickTokens(prev, TYPOGRAPHY_TOKEN_KEYS) }));
+                setMessage('Colours and layout reset to defaults (not saved yet).');
+              }}
+            >
+              Reset tokens
+            </button>
+            <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void saveTokens()}>
+              Save tokens
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="admin-btn admin-btn-secondary" disabled={saving} onClick={() => void saveDraft()}>
+              Save CSS draft
+            </button>
+            <button type="button" className="admin-btn admin-btn-primary" disabled={saving} onClick={() => void publishDraft()}>
+              Publish CSS
+            </button>
+          </>
+        )}
       </AdminFloatingActions>
 
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
-      <div className="theme-studio-intro admin-card admin-page-intro">
-        <div>
-          <h2>Theme Studio</h2>
-          <p className="theme-help" style={{ marginBottom: 0 }}>
-            Tokens for brand variables, plus the full site stylesheet (globals.css body) with section navigation,
-            version history, and live preview.
-            {hasFullStylesheet
-              ? ' A full stylesheet is currently published.'
-              : ' No full stylesheet published yet — Load from globals.css to start.'}
-          </p>
-        </div>
-      </div>
-
       <div className="theme-studio-grid theme-studio-grid--wide">
         <div className="theme-studio-controls">
-          <div className="theme-tabs">
-            <button
-              type="button"
-              className={tab === 'tokens' ? 'is-active' : ''}
-              onClick={() => setTab('tokens')}
-            >
-              Tokens
-            </button>
-            <button type="button" className={tab === 'css' ? 'is-active' : ''} onClick={() => setTab('css')}>
-              Site CSS (globals)
-            </button>
-          </div>
-
           <div className="admin-card theme-studio-panel theme-studio-panel--css">
-            {tab === 'tokens' ? (
-              <TokenEditor tokens={tokens} onChange={setTokens} />
+            {view === 'tokens' ? (
+              <TokenEditor tokens={tokens} onChange={setTokens} groups={COLOUR_GROUPS} />
             ) : (
-              <SiteCssEditor
-                value={cssText}
-                notes={notes}
-                onChange={setCssText}
-                onNotesChange={setNotes}
-                onLoadFromRepo={loadFromRepo}
-                onDownload={downloadCss}
-                loadingRepo={loadingRepo}
-              />
+              <>
+                <p className="theme-help" style={{ marginTop: 0 }}>
+                  {hasFullStylesheet
+                    ? 'A full stylesheet is currently published.'
+                    : 'No full stylesheet published yet — Load from globals.css to start.'}
+                </p>
+                <SiteCssEditor
+                  value={cssText}
+                  notes={notes}
+                  onChange={setCssText}
+                  onNotesChange={setNotes}
+                  onLoadFromRepo={loadFromRepo}
+                  onDownload={downloadCss}
+                  loadingRepo={loadingRepo}
+                />
+              </>
             )}
           </div>
 
@@ -277,7 +302,7 @@ export default function ThemeStudio() {
               if (typeof row.css_text === 'string') {
                 setCssText(row.css_text);
                 setNotes(row.notes || '');
-                setTab('css');
+                onViewChange('css');
                 setMessage(`Loaded v${row.version} into editor.`);
               }
             }}

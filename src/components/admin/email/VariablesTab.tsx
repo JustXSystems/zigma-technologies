@@ -113,7 +113,7 @@ export default function VariablesTab(props: Props) {
         <div>
           <h3>Variables</h3>
           <p className="admin-hint">
-            Everything a template can use. Form fields appear automatically when you add them in Enquiry Forms; define your
+            Everything a template can use. Form fields appear automatically when you add them in Forms &amp; CRM; define your
             own below. Values update live with the data you pick.
           </p>
         </div>
@@ -449,7 +449,7 @@ export default function VariablesTab(props: Props) {
           </button>
         </div>
         <p className="admin-hint">
-          Found in Enquiry Forms and the last {discovery?.scanned ?? '…'} submissions. Any field a form submits is available
+          Found in Forms &amp; CRM and the last {discovery?.scanned ?? '…'} submissions. Any field a form submits is available
           as a variable automatically — no code change.
         </p>
         {props.discoveryError ? <div className="admin-error">{props.discoveryError}</div> : null}

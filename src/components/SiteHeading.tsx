@@ -22,7 +22,7 @@ type Props = {
 };
 
 /**
- * Renders headings from Site Settings → Typography heading levels.
+ * Renders headings from Theme Studio → Typography heading levels.
  * `pageHero` is always an <h1> (one per page, for SEO / accessibility); the configured
  * level only sets its visual size via `heading-size-h*`. `section` headings use the
  * configured tag directly.

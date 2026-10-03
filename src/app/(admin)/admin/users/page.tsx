@@ -21,6 +21,19 @@ type AdminUser = {
   created_at: string;
 };
 
+type UsersData = { meId: number | null; list: { users: AdminUser[]; roles: AdminRole[] } | null };
+
+/** `list` is `null` when the signed-in user may not manage users. */
+async function fetchUsers(): Promise<UsersData> {
+  const [meRes, listRes] = await Promise.all([fetch('/api/admin/auth/me'), fetch('/api/admin/users')]);
+  const meData = await meRes.json();
+  const meId: number | null = meRes.ok ? (meData.user?.id ?? null) : null;
+  if (listRes.status === 403) return { meId, list: null };
+  const listData = await listRes.json();
+  if (!listRes.ok) throw new Error(listData.error || 'Failed to load users');
+  return { meId, list: { users: listData.users || [], roles: listData.roles || [] } };
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<AdminRole[]>([]);
@@ -39,27 +52,26 @@ export default function UsersPage() {
 
   const editorRoles = roles.filter((r) => r.slug !== 'admin');
 
-  const load = useCallback(async () => {
-    setError('');
-    const [meRes, listRes] = await Promise.all([
-      fetch('/api/admin/auth/me'),
-      fetch('/api/admin/users'),
-    ]);
-    const meData = await meRes.json();
-    if (meRes.ok) setMeId(meData.user?.id ?? null);
-    if (listRes.status === 403) {
+  const apply = useCallback(({ meId: id, list }: UsersData) => {
+    if (id !== null) setMeId(id);
+    if (!list) {
       setForbidden(true);
       return;
     }
-    const listData = await listRes.json();
-    if (!listRes.ok) throw new Error(listData.error || 'Failed to load users');
-    setUsers(listData.users || []);
-    setRoles(listData.roles || []);
+    setUsers(list.users);
+    setRoles(list.roles);
   }, []);
 
+  const load = useCallback(async () => {
+    setError('');
+    apply(await fetchUsers());
+  }, [apply]);
+
   useEffect(() => {
-    load().catch((e) => setError(e.message));
-  }, [load]);
+    fetchUsers()
+      .then(apply)
+      .catch((e: Error) => setError(e.message));
+  }, [apply]);
 
   async function createUser(e: FormEvent) {
     e.preventDefault();
@@ -150,7 +162,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1rem' }}>
+    <div className="admin-page-stack">
       <div className="admin-card">
         <h2 style={{ marginTop: 0 }}>Admin users</h2>
         <p style={{ color: 'var(--admin-muted)' }}>

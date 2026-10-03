@@ -16,7 +16,7 @@ import type { LifeMediaItem } from '@/lib/life-sections';
  *
  * The hero reuses the Contact hero renderer and the CTA band reuses the Certifications CTA renderer, both with
  * privacy defaults; the policy body renders with scoped `.pvc-*` CSS. Defaults mirror the live privacy page.
- * Headings / eyebrows follow Site Settings → Public typography; section padding follows the theme --section-pad.
+ * Headings / eyebrows follow Theme Studio → Typography; section padding follows the theme --section-pad.
  */
 
 export const PRIVACY_SECTION_TYPES = ['privacy_hero', 'privacy_policy', 'privacy_cta'] as const;

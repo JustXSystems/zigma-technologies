@@ -162,7 +162,7 @@ const INDUSTRY_PAGES: PageSeedDef[] = [
     label: 'Industries hub',
     group: 'Industries',
     path: `/${INDUSTRIES_SLUG}`,
-    // Meta fields stay empty so Site Copy → SEO supplies the search title/description.
+    // Meta fields stay empty so SEO → Page titles supplies the search title/description.
     page: { title: 'Industries' },
     sections: () => INDUSTRIES_SEED_SECTIONS_V2,
     upgrade: (type, content) => upgradeIndustriesSection(type, content),

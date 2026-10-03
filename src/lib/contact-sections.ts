@@ -23,7 +23,7 @@ import { normalizeLocationOfficeCards, resolveDefaultLocationMap } from '@/lib/l
  *
  * Built on the About / Life / Legacy element primitives. Empty style fields fall back to the
  * scoped `.ctc-*` CSS defaults, which mirror the live contact page design. Headings / eyebrows
- * follow Site Settings → Public typography; phone / email / address use NAP tokens
+ * follow Theme Studio → Typography; phone / email / address use NAP tokens
  * ({{phone}}, {{supportEmail}}…) resolved from Site Settings.
  */
 

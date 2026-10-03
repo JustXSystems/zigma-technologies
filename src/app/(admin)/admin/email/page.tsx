@@ -7,6 +7,7 @@ import {
   MAIL_EVENTS,
   defaultMailTemplates,
   effectiveFrom,
+  emailAccent,
   normalizeMailConfig,
   parseAddressList,
   secretDaysLeft,
@@ -28,6 +29,8 @@ import {
   type MailVars,
   type SubmissionKind,
 } from '@/lib/mail-template';
+import { ColorInput } from '@/components/admin/form/controls';
+import { useUnsavedChanges } from '@/components/admin/unsaved-changes';
 import SamplePicker from '@/components/admin/email/SamplePicker';
 import VariablePicker from '@/components/admin/email/VariablePicker';
 import VariablesTab from '@/components/admin/email/VariablesTab';
@@ -42,7 +45,7 @@ type SettingsView = {
   hasSmtpPassword: boolean;
   activeProvider: MailProvider;
   legacyEnvSmtp: boolean;
-  site: { companyName: string; phone: string; supportEmail: string; siteUrl: string };
+  site: { companyName: string; phone: string; supportEmail: string; siteUrl: string; brandAccent: string };
 };
 
 type LogRow = {
@@ -211,12 +214,7 @@ export default function EmailSettingsPage() {
     }
   }
 
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  useUnsavedChanges(dirty);
 
   const update = useCallback((fn: (c: MailConfig) => MailConfig) => {
     setConfig((c) => (c ? fn(c) : c));
@@ -425,6 +423,8 @@ export default function EmailSettingsPage() {
     [sampleIds, realVars, view, config?.notifyEmails]
   );
 
+  const accent = config && view ? emailAccent(config, view.site.brandAccent) : '';
+
   const preview = useMemo(() => {
     if (!config || !view) return null;
     return composeMail({
@@ -433,8 +433,9 @@ export default function EmailSettingsPage() {
       base: baseVarsFor(activeMeta.kind),
       companyName: view.site.companyName,
       siteUrl: view.site.siteUrl,
+      accent,
     });
-  }, [config, view, activeEvent, activeMeta, baseVarsFor]);
+  }, [config, view, activeEvent, activeMeta, baseVarsFor, accent]);
 
   const lint = useMemo(() => {
     if (!config || !discovery) return [];
@@ -922,22 +923,16 @@ export default function EmailSettingsPage() {
           <section className="em-card">
             <h3>Branding & testing</h3>
             <div className="admin-form-grid">
-              <div className="admin-field">
-                <label>Accent colour</label>
-                <div className="em-inline">
-                  <input
-                    type="color"
-                    className="em-color"
-                    value={config.brandColor}
-                    onChange={(e) => update((c) => ({ ...c, brandColor: e.target.value }))}
-                  />
-                  <input
-                    className="admin-input em-mono"
-                    value={config.brandColor}
-                    onChange={(e) => update((c) => ({ ...c, brandColor: e.target.value }))}
-                  />
-                </div>
-              </div>
+              <ColorInput
+                label="Accent colour"
+                value={config.brandColor}
+                onChange={(brandColor) => update((c) => ({ ...c, brandColor }))}
+                hexOnly
+                clearable
+                fallback={view.site.brandAccent}
+                placeholder={`Brand colour ${view.site.brandAccent}`}
+                hint="Leave empty to follow the site brand colour (Theme Studio → Brand colors → Orange)."
+              />
               <div className="admin-field">
                 <label>Test recipient</label>
                 <input
@@ -1341,7 +1336,7 @@ export default function EmailSettingsPage() {
           baseVars={baseVarsFor(varsKind)}
           companyName={view.site.companyName}
           siteUrl={view.site.siteUrl}
-          accent={config.brandColor}
+          accent={accent}
         />
       ) : null}
 

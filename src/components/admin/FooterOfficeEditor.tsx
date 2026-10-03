@@ -4,6 +4,7 @@ import {
   DEFAULT_SITE_SETTINGS,
   FOOTER_COLUMN_H6_TOKENS,
   FOOTER_OFFICE_ACCENT_LABEL_TOKENS,
+  isSettingEnabled,
   sanitizeFooterOfficeAlign,
   sanitizeFooterOfficeLabelMode,
   type FooterOfficeAlign,
@@ -11,6 +12,7 @@ import {
   type SiteSettings,
 } from '@/lib/site-settings';
 import FooterOfficeLayoutEditor from '@/components/admin/FooterOfficeLayoutEditor';
+import { ToggleCard } from '@/components/admin/form/controls';
 import LogoFontPicker from '@/components/admin/LogoFontPicker';
 import { LOGO_WEIGHT_OPTIONS } from '@/lib/logo-fonts';
 
@@ -50,36 +52,13 @@ const TRANSFORM_OPTIONS = [
   { value: 'lowercase', label: 'Lowercase' },
 ] as const;
 
-function Toggle({
-  id,
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  hint: string;
-  value: boolean;
-  onChange: (next: boolean) => void;
-}) {
-  return (
-    <label className="admin-footer-office-toggle" htmlFor={id}>
-      <input id={id} type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
-      <span>
-        <strong>{label}</strong>
-        <small>{hint}</small>
-      </span>
-    </label>
-  );
-}
-
-function isOn(value: string | undefined, fallback: boolean) {
-  const v = value?.trim().toLowerCase();
-  if (v === 'true' || v === '1' || v === 'yes') return true;
-  if (v === 'false' || v === '0' || v === 'no') return false;
-  return fallback;
-}
+const VISIBILITY: Array<{ key: keyof SiteSettings; label: string; hint: string; fallback: boolean }> = [
+  { key: 'footerOfficeEnabled', label: 'Show in footer', hint: 'Master switch for the office block in the footer', fallback: true },
+  { key: 'footerOfficeShowLabel', label: 'Show office heading', hint: 'Office / address block title above the lines', fallback: true },
+  { key: 'footerOfficeShowAddress', label: 'Include address fields', hint: 'Street, city, region, postal, country in the layout', fallback: true },
+  { key: 'footerOfficeShowHours', label: 'Include office hours', hint: 'Only if hours is in the layout', fallback: true },
+  { key: 'footerOfficeShowSla', label: 'Include response SLA', hint: 'Only if SLA is in the layout', fallback: false },
+];
 
 function ModePicker({
   name,
@@ -224,41 +203,16 @@ export default function FooterOfficeEditor({ settings, onChange }: Props) {
       </p>
 
       <div className="admin-footer-office-toggles">
-        <Toggle
-          id="footerOfficeEnabled"
-          label="Show in footer"
-          hint="Master switch for the office block in the footer"
-          value={isOn(settings.footerOfficeEnabled, true)}
-          onChange={(on) => onChange({ footerOfficeEnabled: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerOfficeShowLabel"
-          label="Show office heading"
-          hint="Office / address block title above the lines"
-          value={isOn(settings.footerOfficeShowLabel, true)}
-          onChange={(on) => onChange({ footerOfficeShowLabel: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerOfficeShowAddress"
-          label="Include address fields"
-          hint="Street, city, region, postal, country in the layout"
-          value={isOn(settings.footerOfficeShowAddress, true)}
-          onChange={(on) => onChange({ footerOfficeShowAddress: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerOfficeShowHours"
-          label="Include office hours"
-          hint="Only if hours is in the layout"
-          value={isOn(settings.footerOfficeShowHours, true)}
-          onChange={(on) => onChange({ footerOfficeShowHours: on ? 'true' : 'false' })}
-        />
-        <Toggle
-          id="footerOfficeShowSla"
-          label="Include response SLA"
-          hint="Only if SLA is in the layout"
-          value={isOn(settings.footerOfficeShowSla, false)}
-          onChange={(on) => onChange({ footerOfficeShowSla: on ? 'true' : 'false' })}
-        />
+        {VISIBILITY.map((t) => (
+          <ToggleCard
+            key={t.key}
+            id={t.key}
+            label={t.label}
+            hint={t.hint}
+            checked={isSettingEnabled(settings[t.key], t.fallback)}
+            onChange={(on) => onChange({ [t.key]: on ? 'true' : 'false' })}
+          />
+        ))}
       </div>
 
       <div className="admin-form-grid">

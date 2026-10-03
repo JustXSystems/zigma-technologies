@@ -34,6 +34,10 @@ export type AdminScreenDef = {
   group: string;
   /** Shown only to super-admins in the role editor (always granted to role=admin users). */
   superAdminOnly?: boolean;
+  /** Hub screens: holders of these screens may open it too and see only their tabs. */
+  openWith?: AdminScreenKey[];
+  /** Role editor label when the permission covers only part of a hub. */
+  accessLabel?: string;
 };
 
 export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
@@ -46,15 +50,43 @@ export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
   { key: 'press', label: 'Press', href: '/admin/press', group: 'Content' },
   { key: 'testimonials', label: 'Testimonials', href: '/admin/testimonials', group: 'Content' },
   { key: 'enquiries', label: 'Enquiries', href: '/admin/enquiries', group: 'Leads' },
-  { key: 'forms', label: 'Enquiry Forms', href: '/admin/forms', group: 'Leads' },
+  {
+    key: 'forms',
+    label: 'Forms & CRM',
+    href: '/admin/forms',
+    group: 'Leads',
+    openWith: ['siteCopy', 'siteSettings'],
+    accessLabel: 'Enquiry form fields',
+  },
   { key: 'newsletter', label: 'Newsletter', href: '/admin/newsletter', group: 'Leads' },
-  { key: 'nav', label: 'Navigation', href: '/admin/nav', group: 'Configuration' },
+  {
+    key: 'nav',
+    label: 'Header & Footer',
+    href: '/admin/header-footer',
+    group: 'Configuration',
+    openWith: ['siteSettings', 'siteCopy'],
+    accessLabel: 'Header & Footer menus',
+  },
   { key: 'siteSettings', label: 'Site Settings', href: '/admin/site-settings', group: 'Configuration' },
   { key: 'email', label: 'Email', href: '/admin/email', group: 'Configuration', superAdminOnly: true },
   { key: 'siteCopy', label: 'Site Copy', href: '/admin/site-copy', group: 'Configuration' },
   { key: 'media', label: 'Media', href: '/admin/media', group: 'Configuration' },
-  { key: 'theme', label: 'Theme Studio', href: '/admin/theme', group: 'Configuration' },
-  { key: 'redirects', label: 'Redirects', href: '/admin/redirects', group: 'Configuration' },
+  {
+    key: 'theme',
+    label: 'Theme Studio',
+    href: '/admin/theme',
+    group: 'Configuration',
+    openWith: ['siteSettings'],
+    accessLabel: 'Theme Studio colours, type scale & CSS',
+  },
+  {
+    key: 'redirects',
+    label: 'SEO',
+    href: '/admin/seo',
+    group: 'Configuration',
+    openWith: ['siteSettings', 'siteCopy'],
+    accessLabel: 'SEO redirects',
+  },
   { key: 'newClient', label: 'New Client', href: '/admin/new-client', group: 'Platform', superAdminOnly: true },
   { key: 'partners', label: 'Partners', href: '/admin/partners', group: 'Platform' },
   { key: 'ztools', label: 'ZTools', href: '/admin/ztools', group: 'Platform' },
@@ -64,6 +96,12 @@ export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
 ];
 
 export const ADMIN_SCREEN_KEYS = ADMIN_SCREEN_DEFS.map((s) => s.key);
+
+/** Old admin URLs and where they live now (redirected by the proxy). */
+export const MOVED_ADMIN_PATHS: Readonly<Record<string, string>> = {
+  '/admin/nav': '/admin/header-footer?tab=menus',
+  '/admin/redirects': '/admin/seo?tab=redirects',
+};
 
 const SCREEN_BY_HREF = ADMIN_SCREEN_DEFS.slice().sort((a, b) => b.href.length - a.href.length);
 
@@ -92,11 +130,17 @@ export function hasScreenAccess(
   return screens.includes(key);
 }
 
+/** Page-level access: the screen itself, or any screen listed in its `openWith`. */
+export function canOpenScreen(screens: AdminScreenKey[] | '*', key: AdminScreenKey): boolean {
+  if (hasScreenAccess(screens, key)) return true;
+  const def = ADMIN_SCREEN_DEFS.find((s) => s.key === key);
+  return !!def?.openWith?.some((k) => hasScreenAccess(screens, k));
+}
+
 export function navGroupsFromScreens(screens: AdminScreenKey[] | '*') {
-  const allowed = screens === '*' ? new Set(ADMIN_SCREEN_KEYS) : new Set(screens);
   const groups = new Map<string, AdminScreenDef[]>();
   for (const def of ADMIN_SCREEN_DEFS) {
-    if (!allowed.has(def.key)) continue;
+    if (!canOpenScreen(screens, def.key)) continue;
     const list = groups.get(def.group) || [];
     list.push(def);
     groups.set(def.group, list);

@@ -1,15 +1,23 @@
-import type { SiteSettings } from '@/lib/site-settings';
+import { getThemeSettings } from '@/lib/cms';
+import { parseCrmLeadKinds, type CrmLeadKind } from '@/lib/crm-kinds';
+import { mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 
 export type CrmLeadPayload = {
   id: number;
+  kind?: CrmLeadKind;
   source: string;
   item_type?: string;
   payload: Record<string, unknown>;
   created_at?: string;
 };
 
+type CrmWebhookConfig = Pick<SiteSettings, 'crmWebhookUrl' | 'crmWebhookSecret' | 'crmProvider' | 'companyName'>;
+
+/** Server-only details that must not leave this server (stored file names, MIME sniffing). */
+const INTERNAL_PAYLOAD_KEYS = ['resume_file', 'resume_mime'];
+
 /** Push lead to generic CRM webhook (HubSpot/Zapier/Make/custom). Never throws to caller. */
-export async function pushCrmLead(settings: SiteSettings, lead: CrmLeadPayload) {
+export async function pushCrmLead(settings: CrmWebhookConfig, lead: CrmLeadPayload) {
   const url = settings.crmWebhookUrl?.trim();
   if (!url) return { skipped: true as const };
 
@@ -38,6 +46,24 @@ export async function pushCrmLead(settings: SiteSettings, lead: CrmLeadPayload) 
     return { ok: true as const };
   } catch (err) {
     console.error('[crm-webhook]', err);
+    return { ok: false as const };
+  }
+}
+
+/**
+ * Forward a stored website submission when Site Settings → CRM has its kind switched on.
+ * Call from `after()` so the visitor never waits on the webhook. Never throws.
+ */
+export async function sendLeadToCrm(kind: CrmLeadKind, lead: Omit<CrmLeadPayload, 'kind'>) {
+  try {
+    const settings = mergeSiteSettings((await getThemeSettings()).site);
+    if (!parseCrmLeadKinds(settings.crmLeadKinds).has(kind)) return { skipped: true as const };
+    const payload = Object.fromEntries(
+      Object.entries(lead.payload).filter(([key]) => !INTERNAL_PAYLOAD_KEYS.includes(key))
+    );
+    return await pushCrmLead(settings, { ...lead, kind, payload });
+  } catch (err) {
+    console.error(`[crm-${kind}]`, err);
     return { ok: false as const };
   }
 }

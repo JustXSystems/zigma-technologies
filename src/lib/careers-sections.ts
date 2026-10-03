@@ -38,7 +38,7 @@ import type { LifeColumns, LifeMediaItem } from '@/lib/life-sections';
  *
  * Hero, stat bar and icon cards reuse the Contact / Legacy renderers with careers defaults; the rest render
  * with scoped `.crs-*` CSS whose defaults mirror the live careers design. Headings / eyebrows follow
- * Site Settings → Public typography.
+ * Theme Studio → Typography.
  */
 
 export const CAREERS_SECTION_TYPES = [

@@ -1,5 +1,7 @@
 /** Footer office address line layout — stored as JSON in Site Settings. */
 
+import { isSettingEnabled } from '@/lib/site-settings';
+
 export const FOOTER_OFFICE_FIELDS = [
   { id: 'street', label: 'Street line 1', group: 'address' },
   { id: 'street2', label: 'Street line 2', group: 'address' },
@@ -210,13 +212,6 @@ export type FooterOfficeValueSource = {
   footerOfficeShowSla?: string;
 };
 
-function isOn(value: string | undefined, fallback: boolean): boolean {
-  const v = value?.trim().toLowerCase();
-  if (v === 'true' || v === '1' || v === 'yes') return true;
-  if (v === 'false' || v === '0' || v === 'no') return false;
-  return fallback;
-}
-
 function resolveFieldValue(field: FooterOfficeFieldId, site: FooterOfficeValueSource, customText?: string): string {
   switch (field) {
     case 'street':
@@ -251,10 +246,10 @@ function resolveFieldValue(field: FooterOfficeFieldId, site: FooterOfficeValueSo
 }
 
 function fieldAllowed(field: FooterOfficeFieldId, site: FooterOfficeValueSource): boolean {
-  if (field === 'hours') return isOn(site.footerOfficeShowHours, true);
-  if (field === 'sla') return isOn(site.footerOfficeShowSla, false);
+  if (field === 'hours') return isSettingEnabled(site.footerOfficeShowHours, true);
+  if (field === 'sla') return isSettingEnabled(site.footerOfficeShowSla, false);
   if (field === 'custom') return true;
-  return isOn(site.footerOfficeShowAddress, true);
+  return isSettingEnabled(site.footerOfficeShowAddress, true);
 }
 
 function lineKind(parts: FooterOfficeLinePart[]): FooterOfficeRenderedLine['kind'] {

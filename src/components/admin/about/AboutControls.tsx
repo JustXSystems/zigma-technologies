@@ -2,8 +2,16 @@
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
+import {
+  ColorInput,
+  Field,
+  SelectInput,
+  TextArea,
+  TextInput,
+  ThemeColorDatalist,
+  Toggle,
+} from '@/components/admin/form/controls';
 import { DEFAULT_SITE_SETTINGS, headingTagForRole, type SiteSettings } from '@/lib/site-settings';
-import { DEFAULT_THEME_TOKENS, THEME_TOKEN_META } from '@/lib/theme-tokens';
 import {
   ABOUT_ICON_PRESETS,
   FONT_FAMILY_OPTIONS,
@@ -24,9 +32,7 @@ import {
   type TextEl,
 } from '@/lib/about-sections';
 
-const HEX6 = /^#[0-9A-Fa-f]{6}$/;
-
-/** Site Settings → Public typography values shown as the inherited defaults in About editors. */
+/** Theme Studio → Typography values shown as the inherited defaults in About editors. */
 export const AboutSiteSettingsContext = createContext<SiteSettings>(DEFAULT_SITE_SETTINGS);
 
 const ROLE_LABEL: Record<AboutHeadingRole, string> = { pageHero: 'Page hero', section: 'Section' };
@@ -37,187 +43,9 @@ const EYEBROW_SCALES: Array<{ value: EyebrowScale; label: string; key: 'eyebrowS
   { value: 'lg', label: 'Large', key: 'eyebrowSizeLg' },
 ];
 
-const SITE_TYPOGRAPHY_LINK = 'Site Settings → Public typography';
+const SITE_TYPOGRAPHY_LINK = 'Theme Studio → Typography';
 
-export function Field({
-  label,
-  children,
-  full,
-  hint,
-}: {
-  label: string;
-  children: ReactNode;
-  full?: boolean;
-  hint?: string;
-}) {
-  return (
-    <div className={`admin-field${full ? ' full' : ''}`}>
-      <label>{label}</label>
-      {children}
-      {hint ? <p className="az-admin-hint">{hint}</p> : null}
-    </div>
-  );
-}
-
-export function TextInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-  full,
-  hint,
-}: {
-  label: string;
-  value?: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  full?: boolean;
-  hint?: string;
-}) {
-  return (
-    <Field label={label} full={full} hint={hint}>
-      <input
-        className="admin-input"
-        value={value || ''}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </Field>
-  );
-}
-
-export function TextArea({
-  label,
-  value,
-  onChange,
-  placeholder,
-  rows = 3,
-  hint,
-}: {
-  label: string;
-  value?: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  rows?: number;
-  hint?: string;
-}) {
-  return (
-    <Field label={label} full hint={hint}>
-      <textarea
-        className="admin-textarea"
-        rows={rows}
-        style={{ minHeight: rows * 22 }}
-        value={value || ''}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </Field>
-  );
-}
-
-export function SelectInput<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  full,
-}: {
-  label: string;
-  value?: T | '';
-  options: ReadonlyArray<{ value: T | ''; label: string }>;
-  onChange: (v: T) => void;
-  full?: boolean;
-}) {
-  return (
-    <Field label={label} full={full}>
-      <select className="admin-select" value={value || ''} onChange={(e) => onChange(e.target.value as T)}>
-        {options.map((o) => (
-          <option key={o.value || 'default'} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </Field>
-  );
-}
-
-export function Toggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="az-admin-toggle">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span>{label}</span>
-    </label>
-  );
-}
-
-const THEME_COLOR_LIST_ID = 'az-theme-colors';
-
-/** Default hex for `var(--token)` / `var(--token, #hex)` so theme colors get a swatch. */
-function themeTokenHex(value?: string): string | undefined {
-  const m = (value || '').trim().match(/^var\(\s*(--[\w-]+)\s*(?:,\s*(#[0-9A-Fa-f]{6})\s*)?\)$/);
-  if (!m) return undefined;
-  return DEFAULT_THEME_TOKENS[m[1]] || m[2];
-}
-
-/** Theme Studio color tokens offered as suggestions in every ColorInput; render once per editor. */
-export function ThemeColorDatalist() {
-  return (
-    <datalist id={THEME_COLOR_LIST_ID}>
-      {THEME_TOKEN_META.filter((t) => t.type === 'color').map((t) => (
-        <option key={t.key} value={`var(${t.key})`}>
-          {t.label}
-        </option>
-      ))}
-    </datalist>
-  );
-}
-
-/** Color picker + free text (accepts hex, rgba(), var(), gradients). */
-export function ColorInput({
-  label,
-  value,
-  onChange,
-  fallback = '#000000',
-  hint,
-  full,
-}: {
-  label: string;
-  value?: string;
-  onChange: (v: string) => void;
-  fallback?: string;
-  hint?: string;
-  full?: boolean;
-}) {
-  const v = value || '';
-  const swatch = [v, themeTokenHex(v), fallback, themeTokenHex(fallback)].find((c) => c && HEX6.test(c)) || '#000000';
-  return (
-    <Field label={label} hint={hint} full={full}>
-      <div className="admin-color-field">
-        <input type="color" aria-label={label} value={swatch} onChange={(e) => onChange(e.target.value)} />
-        <input
-          className="admin-input"
-          list={THEME_COLOR_LIST_ID}
-          value={v}
-          placeholder={fallback ? `default ${fallback}` : 'default'}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        {v ? (
-          <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => onChange('')}>
-            Clear
-          </button>
-        ) : null}
-      </div>
-    </Field>
-  );
-}
+export { Field, TextInput, TextArea, SelectInput, Toggle, ColorInput, ThemeColorDatalist };
 
 export function AlignButtons({
   label = 'Align',
@@ -411,9 +239,9 @@ export function TextElementEditor({
   headingTag?: boolean;
   eyebrow?: boolean;
   hint?: string;
-  /** Heading tag + size default to Site Settings → Public typography for this role. */
+  /** Heading tag + size default to Theme Studio → Typography for this role. */
   siteRole?: AboutHeadingRole;
-  /** Eyebrow placement default scale (Site Settings eyebrow sizes). */
+  /** Eyebrow placement default scale (Theme Studio → Typography eyebrow sizes). */
   siteScale?: EyebrowScale;
 }) {
   const site = useContext(AboutSiteSettingsContext);

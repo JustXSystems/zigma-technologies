@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   isImageMediaPath,
   isVideoMediaPath,
@@ -35,6 +35,8 @@ type Props = {
   /** Allow uploading into the media library from this picker. */
   allowUpload?: boolean;
   hint?: string;
+  /** id for the path input (the label points at it). */
+  id?: string;
 };
 
 function normalizeKinds(kinds?: MediaPickerKind | MediaPickerKind[]): MediaPickerKind[] {
@@ -60,6 +62,7 @@ export default function MediaPicker({
   kinds,
   allowUpload = false,
   hint,
+  id,
 }: Props) {
   const kindList = normalizeKinds(kinds);
   const [open, setOpen] = useState(false);
@@ -84,10 +87,10 @@ export default function MediaPicker({
     }
   }
 
-  useEffect(() => {
-    if (!open) return;
+  function openLibrary() {
+    setOpen(true);
     void loadAssets();
-  }, [open]);
+  }
 
   const previewIsVideo = value ? isVideoMediaPath(value) : false;
   const previewSrc = !compact && value && isImageMediaPath(value) ? publicMediaUrl(value) : '';
@@ -130,16 +133,17 @@ export default function MediaPicker({
 
   return (
     <div className={`admin-field${compact ? ' admin-field--compact' : ''}`}>
-      {label ? <label>{label}</label> : null}
+      {label ? <label htmlFor={id}>{label}</label> : null}
       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <input
+          id={id}
           className="admin-input"
           style={{ flex: 1, minWidth: compact ? 140 : 180 }}
           value={value}
           onChange={(e) => onChange(toStorageMediaPath(e.target.value) || e.target.value)}
           placeholder="/assets/images/… · /assets/svg/… · /assets/video/…"
         />
-        <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setOpen(true)}>
+        <button type="button" className="admin-btn admin-btn-secondary" onClick={openLibrary}>
           Browse
         </button>
         {allowUpload ? (

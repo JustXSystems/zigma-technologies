@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { COOKIE_NAME, verifySessionToken } from '@/lib/auth';
+import { canCallAdminApi } from '@/lib/admin-api-access';
+import { MOVED_ADMIN_PATHS, canOpenScreen, screenKeyFromPath } from '@/lib/admin-screens';
+import { COOKIE_NAME, resolveSessionScreens, verifySessionToken } from '@/lib/auth';
 import { findRedirect } from '@/lib/redirects';
 
 export async function proxy(request: NextRequest) {
@@ -17,7 +19,8 @@ export async function proxy(request: NextRequest) {
     }
 
     const token = request.cookies.get(COOKIE_NAME)?.value;
-    const session = token ? await verifySessionToken(token) : null;
+    const verified = token ? await verifySessionToken(token) : null;
+    const session = verified ? await resolveSessionScreens(verified) : null;
 
     if (!session) {
       if (isAdminApi) {
@@ -26,6 +29,27 @@ export async function proxy(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';
       url.searchParams.set('next', pathname);
+      return NextResponse.redirect(url);
+    }
+
+    if (isAdminApi && !canCallAdminApi(session.screens, pathname, request.method)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const moved = isAdminPage ? MOVED_ADMIN_PATHS[pathname] : undefined;
+    if (moved) {
+      const target = new URL(moved, request.url);
+      const url = request.nextUrl.clone();
+      url.pathname = target.pathname;
+      url.search = target.search;
+      return NextResponse.redirect(url);
+    }
+
+    const screen = isAdminPage && pathname !== '/admin' ? screenKeyFromPath(pathname) : null;
+    if (screen && !canOpenScreen(session.screens, screen)) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin';
+      url.search = '';
       return NextResponse.redirect(url);
     }
 

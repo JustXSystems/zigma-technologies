@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
 import {
@@ -44,6 +44,8 @@ import {
   resolveToolbarElements,
 } from '@/lib/catalog-page-elements';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import { useDirtyTracker, useUnsavedChangesState } from '@/components/admin/unsaved-changes';
+import { ColorControl } from '@/components/admin/form/controls';
 import { normalizeHeroHeight } from '@/lib/hero-height';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
@@ -51,8 +53,14 @@ import CatalogHeroBgEditor from '@/components/admin/CatalogHeroBgEditor';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import { catalogSectionToCms, normalizeCatalogSections } from '@/lib/catalog-sections';
-import CatalogSectionsEditor from '@/components/admin/CatalogSectionsEditor';
+import CatalogSectionsEditor, { CONFIGURABLE } from '@/components/admin/CatalogSectionsEditor';
 import SectionEditor from '@/components/admin/SectionEditor';
+import { hasScreenAccess } from '@/lib/admin-screens';
+import type { CatalogChrome, SiteCopy } from '@/lib/site-copy';
+import { useAdminUser } from '@/components/admin/admin-session';
+import { useSiteCopySlice } from '@/components/admin/site-copy/use-site-copy-slice';
+import CatalogPartnerStripFields from '@/components/admin/catalog/CatalogPartnerStripFields';
+import { PARTNER_STRIP_PATHS, catalogCopyKey } from '@/components/admin/catalog/catalog-copy';
 import {
   CATALOG_SETTINGS_BLOCKS,
   CATALOG_SETTINGS_PAGE_INTRO,
@@ -151,6 +159,23 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
 }
 
 type HeroPreviewItem = { id: number; title: string; status: string; featured: number; primary_image?: string | null };
+
+type CatalogAdminData = { categories: CatalogCategory[]; settings: CatalogPageSettings; items: HeroPreviewItem[] };
+
+async function fetchCatalogAdmin(type: CatalogItemType): Promise<CatalogAdminData> {
+  const [catsRes, settingsRes, itemsRes] = await Promise.all([
+    fetch(`/api/admin/categories?type=${type}`),
+    fetch(`/api/admin/catalog-settings?type=${type}`),
+    fetch(`/api/admin/catalog?type=${type}`),
+  ]);
+  const catsData = await catsRes.json();
+  const settingsData = await settingsRes.json();
+  const itemsData = await itemsRes.json();
+  if (!catsRes.ok) throw new Error(catsData.error || 'Failed categories');
+  if (!settingsRes.ok) throw new Error(settingsData.error || 'Failed settings');
+  if (!itemsRes.ok) throw new Error(itemsData.error || 'Failed items');
+  return { categories: catsData.categories, settings: settingsData.settings, items: itemsData.items || [] };
+}
 
 /** Items the public hero rotates through: curated picks, else featured items (as the listing does). */
 function heroPreviewItems(settings: CatalogPageSettings, items: HeroPreviewItem[]): HeroPreviewItem[] {
@@ -378,14 +403,10 @@ function ColorField({
   onChange: (next: string) => void;
   hint?: string;
 }) {
-  const hex = /^#[0-9A-Fa-f]{6}$/.test(value || '') ? value! : fallback;
   return (
     <div className="admin-field">
       <LabelWithHelp help={hint}>{label}</LabelWithHelp>
-      <div className="admin-color-field">
-        <input type="color" value={hex} onChange={(e) => onChange(e.target.value)} aria-label={label} />
-        <input className="admin-input" value={value || fallback} onChange={(e) => onChange(e.target.value)} placeholder={fallback} />
-      </div>
+      <ColorControl label={label} value={value || fallback} fallback={fallback} placeholder={fallback} onChange={onChange} clearable={false} />
     </div>
   );
 }
@@ -438,10 +459,13 @@ function CatalogAppearancePreview({
   type,
   settings,
   items,
+  heroDefaults,
 }: {
   type: CatalogItemType;
   settings: CatalogPageSettings;
   items: Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>;
+  /** What the public hero shows when the eyebrow / title / lead fields are blank. */
+  heroDefaults?: CatalogChrome;
 }) {
   const [open, setOpen] = useState(false);
   const selectedIds = settings.hero_item_ids_json || [];
@@ -547,14 +571,16 @@ function CatalogAppearancePreview({
           >
             <div className="catalog-hero-copy">
               {heroEls.has('eyebrow') ? (
-                <div className="eyebrow">{settings.hero_eyebrow || `${type} spotlight`}</div>
+                <div className="eyebrow">{settings.hero_eyebrow?.trim() || heroDefaults?.eyebrow}</div>
               ) : null}
               {heroEls.has('title') ? (
-                <h1 style={{ maxWidth: 480, marginBottom: '0.6rem' }}>{settings.hero_title || `Preview /${type}s`}</h1>
+                <h1 style={{ maxWidth: 480, marginBottom: '0.6rem' }}>
+                  {settings.hero_title?.trim() || heroDefaults?.title}
+                </h1>
               ) : null}
               {heroEls.has('lead') ? (
                 <p className="lead" style={{ maxWidth: 480, marginTop: 0 }}>
-                  {settings.hero_lead || 'Curated hero presentation with controlled visual presets.'}
+                  {settings.hero_lead?.trim() || heroDefaults?.lead}
                 </p>
               ) : null}
               {heroEls.has('meta') ? (
@@ -627,27 +653,49 @@ export default function CatalogSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [section, setSection] = useState<SettingsSectionId>('hero');
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const { markClean } = useDirtyTracker(settings);
+  const { confirmDiscard } = useUnsavedChangesState();
+  const user = useAdminUser();
+  const partnerStrip = useSiteCopySlice(PARTNER_STRIP_PATHS, 'Partner strip saved.', {
+    enabled: !!user && hasScreenAccess(user.screens, 'siteCopy'),
+  });
+  const [catalogCopy, setCatalogCopy] = useState<SiteCopy['catalog'] | null>(null);
+  const heroDefaults = catalogCopy?.[catalogCopyKey(type)];
+
+  useEffect(() => {
+    fetch('/api/public/site-copy')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setCatalogCopy(data?.copy?.catalog ?? null))
+      .catch(() => setCatalogCopy(null));
+  }, []);
+
+  const apply = useCallback(
+    (data: CatalogAdminData) => {
+      setCategories(data.categories);
+      setSettings(hydratePageSettings(data.settings));
+      markClean();
+      setItems(data.items);
+    },
+    [markClean]
+  );
 
   async function load() {
-    const [catsRes, settingsRes, itemsRes] = await Promise.all([
-      fetch(`/api/admin/categories?type=${type}`),
-      fetch(`/api/admin/catalog-settings?type=${type}`),
-      fetch(`/api/admin/catalog?type=${type}`),
-    ]);
-    const catsData = await catsRes.json();
-    const settingsData = await settingsRes.json();
-    const itemsData = await itemsRes.json();
-    if (!catsRes.ok) throw new Error(catsData.error || 'Failed categories');
-    if (!settingsRes.ok) throw new Error(settingsData.error || 'Failed settings');
-    if (!itemsRes.ok) throw new Error(itemsData.error || 'Failed items');
-    setCategories(catsData.categories);
-    setSettings(hydratePageSettings(settingsData.settings));
-    setItems(itemsData.items || []);
+    apply(await fetchCatalogAdmin(type));
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e.message));
-  }, [type]);
+    let current = true;
+    fetchCatalogAdmin(type)
+      .then((data) => {
+        if (current) apply(data);
+      })
+      .catch((e: Error) => {
+        if (current) setError(e.message);
+      });
+    return () => {
+      current = false;
+    };
+  }, [type, apply]);
 
   async function addCategory(e: FormEvent) {
     e.preventDefault();
@@ -755,8 +803,10 @@ export default function CatalogSettingsPage() {
         setError(data.error || 'Save failed');
         return;
       }
-      setMessage('Catalog page settings saved. Public listing updates on next load.');
       setSettings(hydratePageSettings(data.settings));
+      markClean();
+      if (partnerStrip.dirty && !(await partnerStrip.save())) return;
+      setMessage('Catalog page settings saved. Public listing updates on next load.');
     } finally {
       setSaving(false);
     }
@@ -787,7 +837,7 @@ export default function CatalogSettingsPage() {
         </button>
       </AdminFloatingActions>
 
-      {error ? <div className="admin-error">{error}</div> : null}
+      {error || partnerStrip.error ? <div className="admin-error">{error || partnerStrip.error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
       <header className="admin-settings-masthead">
@@ -807,7 +857,9 @@ export default function CatalogSettingsPage() {
               role="tab"
               aria-selected={type === t}
               className={`admin-settings-type${type === t ? ' is-active' : ''}`}
-              onClick={() => setType(t)}
+              onClick={() => {
+                if (t !== type && confirmDiscard()) setType(t);
+              }}
             >
               {t}s
             </button>
@@ -860,10 +912,24 @@ export default function CatalogSettingsPage() {
                     value={normalizeCatalogSections(settings.sections_json)}
                     onChange={(sections_json) => setSettings({ ...settings, sections_json })}
                     onEdit={setEditingSectionId}
-                    onConfigure={(key) => setSection(key === 'listing' ? 'listing' : 'hero')}
+                    onConfigure={(key) => {
+                      if (key === 'social_proof') {
+                        document.getElementById('catalog-partner-strip')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      } else {
+                        setSection(key === 'listing' ? 'listing' : 'hero');
+                      }
+                    }}
+                    configureLabels={partnerStrip.copy ? { ...CONFIGURABLE, social_proof: 'Titles' } : CONFIGURABLE}
                     pagePath={`/${type}s`}
                   />
                 </SettingsBlock>
+                {partnerStrip.copy ? (
+                  <div id="catalog-partner-strip">
+                    <SettingsBlock blockId="partner_strip">
+                      <CatalogPartnerStripFields type={type} copy={partnerStrip.copy} onChange={partnerStrip.setCopy} />
+                    </SettingsBlock>
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : null}
@@ -966,18 +1032,18 @@ export default function CatalogSettingsPage() {
                       onChange={(detail_hero_height) => setSettings({ ...settings, detail_hero_height })}
                     />
                     <div className="admin-field">
-                      <LabelWithHelp help="Small label above the title (e.g. “Product Spotlight”). Keep short.">Hero eyebrow</LabelWithHelp>
+                      <LabelWithHelp
+                        htmlFor="catalog-hero-eyebrow"
+                        help="Small label above the title. Keep short. Leave blank to use the default shown in grey."
+                      >
+                        Hero eyebrow
+                      </LabelWithHelp>
                       <input
+                        id="catalog-hero-eyebrow"
                         className="admin-input"
                         value={settings.hero_eyebrow || ''}
                         onChange={(e) => setSettings({ ...settings, hero_eyebrow: e.target.value })}
-                        placeholder={
-                          type === 'product'
-                            ? 'Product Spotlight'
-                            : type === 'project'
-                              ? 'Selected Projects'
-                              : 'Service Spotlight'
-                        }
+                        placeholder={heroDefaults?.eyebrow}
                       />
 
                     </div>
@@ -997,25 +1063,35 @@ export default function CatalogSettingsPage() {
 
                     </div>
                     <div className="admin-field full">
-                      <LabelWithHelp help={`Main headline on the public /${type}s page. Leave blank only if you hide the title element.`}>
+                      <LabelWithHelp
+                        htmlFor="catalog-hero-title"
+                        help={`Main headline on the public /${type}s page. Leave blank to use the default shown in grey.`}
+                      >
                         Hero title
                       </LabelWithHelp>
                       <input
+                        id="catalog-hero-title"
                         className="admin-input"
                         value={settings.hero_title || ''}
                         onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
-                        placeholder={`Headline for /${type}s`}
+                        placeholder={heroDefaults?.title}
                       />
 
                     </div>
                     <div className="admin-field full">
-                      <LabelWithHelp help="One or two sentences under the title. Explain who the catalog is for.">Hero lead</LabelWithHelp>
+                      <LabelWithHelp
+                        htmlFor="catalog-hero-lead"
+                        help="One or two sentences under the title. Explain who the catalog is for. Leave blank to use the default shown in grey."
+                      >
+                        Hero lead
+                      </LabelWithHelp>
                       <textarea
+                        id="catalog-hero-lead"
                         className="admin-input"
                         value={settings.hero_lead || ''}
                         onChange={(e) => setSettings({ ...settings, hero_lead: e.target.value })}
                         rows={3}
-                        placeholder="Supporting copy shown above the spotlight card."
+                        placeholder={heroDefaults?.lead}
                       />
 
                     </div>
@@ -1200,7 +1276,7 @@ export default function CatalogSettingsPage() {
                     <HelpTip text="Optional check that hero style and elements roughly match what you configured. Hidden by default — open only when needed." label="Help: Live preview" />
                   </div>
                   {settings ? (
-                    <CatalogAppearancePreview type={type} settings={settings} items={items} />
+                    <CatalogAppearancePreview type={type} settings={settings} items={items} heroDefaults={heroDefaults} />
                   ) : null}
                 </div>
               </div>

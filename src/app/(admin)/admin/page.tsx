@@ -171,8 +171,8 @@ export default function AdminDashboardPage() {
           <Link className="admin-btn admin-btn-secondary" href="/admin/site-settings">
             Site settings
           </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/nav">
-            Navigation
+          <Link className="admin-btn admin-btn-secondary" href="/admin/header-footer">
+            Header &amp; Footer
           </Link>
           <Link className="admin-btn admin-btn-secondary" href="/admin/guide">
             Admin guide

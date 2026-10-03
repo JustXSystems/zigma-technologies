@@ -29,6 +29,15 @@ type ZtoolsUser = {
 
 type Tab = 'users' | 'tools';
 
+/** `null` when the signed-in user may not manage ZTools. */
+async function fetchZtools(): Promise<{ users: ZtoolsUser[]; tools: ZtoolsTool[] } | null> {
+  const res = await fetch('/api/admin/ztools/users');
+  if (res.status === 403) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to load');
+  return { users: data.users || [], tools: data.tools || [] };
+}
+
 export default function ZtoolsAdminPage() {
   const [tab, setTab] = useState<Tab>('users');
   const [users, setUsers] = useState<ZtoolsUser[]>([]);
@@ -55,22 +64,25 @@ export default function ZtoolsAdminPage() {
     sort_order: 0,
   });
 
-  const load = useCallback(async () => {
-    setError('');
-    const res = await fetch('/api/admin/ztools/users');
-    if (res.status === 403) {
+  const apply = useCallback((loaded: Awaited<ReturnType<typeof fetchZtools>>) => {
+    if (!loaded) {
       setForbidden(true);
       return;
     }
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to load');
-    setUsers(data.users || []);
-    setTools(data.tools || []);
+    setUsers(loaded.users);
+    setTools(loaded.tools);
   }, []);
 
+  const load = useCallback(async () => {
+    setError('');
+    apply(await fetchZtools());
+  }, [apply]);
+
   useEffect(() => {
-    load().catch((e) => setError(e.message));
-  }, [load]);
+    fetchZtools()
+      .then(apply)
+      .catch((e: Error) => setError(e.message));
+  }, [apply]);
 
   function toolName(id: number) {
     return tools.find((t) => t.id === id)?.name || `#${id}`;
@@ -206,7 +218,7 @@ export default function ZtoolsAdminPage() {
   const pending = users.filter((u) => u.status === 'pending_approval');
 
   return (
-    <div style={{ display: 'grid', gap: '1rem' }}>
+    <div className="admin-page-stack">
       <div className="admin-card">
         <h2 style={{ marginTop: 0 }}>ZTools portal</h2>
         <p style={{ color: 'var(--admin-muted)' }}>

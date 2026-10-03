@@ -25,7 +25,7 @@ import type { LifeColumns, LifeCtaContent, LifeHighlight, LifeMediaItem, LifeSec
  * Built on the About / Life element primitives. Empty style fields fall back to the scoped
  * `.lgy-*` CSS defaults, which mirror the approved legacy20yrs HTML design. Colors default to
  * theme tokens (var(--orange)…) so Theme Studio changes flow through; headings / eyebrows follow
- * Site Settings → Public typography; section padding follows the theme --section-pad token.
+ * Theme Studio → Typography; section padding follows the theme --section-pad token.
  */
 
 export const LEGACY_SECTION_TYPES = [

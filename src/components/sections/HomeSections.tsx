@@ -166,7 +166,7 @@ function highlightText(text: string, hl?: LifeHighlight): ReactNode {
 }
 
 /**
- * Heading whose tag and size follow Site Settings → Public typography. When the tag equals the site
+ * Heading whose tag and size follow Theme Studio → Typography. When the tag equals the site
  * level no inline size is set, so the live stylesheet (and its phone sizes) stays in charge.
  */
 function HmHeading({
@@ -203,7 +203,7 @@ function HmHeading({
   );
 }
 
-/** Uppercase mono eyebrow sized by Site Settings → Public typography eyebrow scales. */
+/** Uppercase mono eyebrow sized by Theme Studio → Typography eyebrow scales. */
 function HmEyebrow({ el, scale, className, base }: { el?: EyebrowEl; scale?: EyebrowScale; className?: string; base?: ElementStyle }) {
   if (!hasText(el)) return null;
   const size = el.size || scale;

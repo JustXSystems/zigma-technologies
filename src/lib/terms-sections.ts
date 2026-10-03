@@ -16,7 +16,7 @@ import {
  * Fully configurable Terms of Use section family (page /terms): terms_hero, terms_policy, terms_cta.
  *
  * Same shapes, renderers, editors and `.pvc-*` CSS as the Privacy family, with terms defaults that mirror
- * the live terms page. Headings / eyebrows follow Site Settings → Public typography.
+ * the live terms page. Headings / eyebrows follow Theme Studio → Typography.
  */
 
 export const TERMS_SECTION_TYPES = ['terms_hero', 'terms_policy', 'terms_cta'] as const;

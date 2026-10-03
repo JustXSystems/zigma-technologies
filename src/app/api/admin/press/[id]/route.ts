@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { deletePressPost, getPressPostById, updatePressPost } from '@/lib/press';
+import { keepOldAddress } from '@/lib/redirects';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -23,9 +24,11 @@ export async function PATCH(request: Request, ctx: Ctx) {
     await requireSession();
     const { id } = await ctx.params;
     const body = schema.parse(await readJson(request));
+    const before = body.slug ? await getPressPostById(Number(id)) : null;
     const post = await updatePressPost(Number(id), body);
     if (!post) return jsonError('Not found', 404);
-    return jsonOk({ post });
+    const redirect = await keepOldAddress(before, post, (p) => `/press/${p.slug}`);
+    return jsonOk({ post, redirect });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);

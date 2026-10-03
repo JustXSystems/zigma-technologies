@@ -114,7 +114,7 @@
   h2{font-size:var(--text-h2);}
   h3{font-size:var(--text-h3);}
   h4{font-size:var(--text-h4);}
-  /* Page heroes are always <h1>; Site Settings → heading level only picks the visual size. */
+  /* Page heroes are always <h1>; Theme Studio → Typography heading level only picks the visual size. */
   h1.heading-size-h2{font-size:var(--text-h2);}
   h1.heading-size-h3{font-size:var(--text-h3);}
   h2.heading-size-h1{font-size:var(--text-h1);}

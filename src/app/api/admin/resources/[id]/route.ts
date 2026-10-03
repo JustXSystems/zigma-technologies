@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
+import { keepOldAddress } from '@/lib/redirects';
 import { deleteResourcePost, getResourcePostById, updateResourcePost } from '@/lib/resources';
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -38,9 +39,11 @@ export async function PATCH(request: Request, ctx: Ctx) {
     await requireSession();
     const { id } = await ctx.params;
     const body = patchSchema.parse(await readJson(request));
+    const before = body.slug ? await getResourcePostById(Number(id)) : null;
     await updateResourcePost(Number(id), body);
     const post = await getResourcePostById(Number(id));
-    return jsonOk({ post });
+    const redirect = await keepOldAddress(before, post, (p) => `/resources/${p.slug}`);
+    return jsonOk({ post, redirect });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);

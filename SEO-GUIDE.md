@@ -418,9 +418,9 @@ DNS is the address book of your domain. The verification record must be added wh
 
 1. Open the **production** admin: `https://zigma-technologies.com/admin` and log in.
 2. Left menu → **Site Settings** (`/admin/site-settings`).
-3. Expand the section **Analytics & consent**.
+3. Expand the section **Analytics & cookies**.
 4. **GA4 measurement ID:** paste the ID, for example `G-AB12CD34EF`. Uppercase `G-`, no spaces, no quotes.
-5. **Require analytics consent (true/false):** type `true` (recommended; keeps the cookie banner in front of GA4).
+5. **Require analytics consent:** switch it on (recommended; keeps the cookie banner in front of GA4).
 6. Leave **Plausible domain** empty unless you also use Plausible.
 7. Click **Save** and wait for the success message.
 

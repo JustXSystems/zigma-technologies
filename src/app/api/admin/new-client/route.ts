@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { getThemeSettings, upsertThemeSetting } from '@/lib/cms';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '@/lib/site-settings';
+import { mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import { DEFAULT_SITE_COPY, applyBrandToSiteCopy, mergeSiteCopy } from '@/lib/site-copy';
 import { DEFAULT_THEME_TOKENS } from '@/lib/theme-tokens';
 import { saveSiteCopy } from '@/lib/site-content';
@@ -29,18 +29,23 @@ export async function POST(request: Request) {
       .parse(await readJson(request));
 
     const theme = await getThemeSettings();
+    const filled = (value: string | undefined) => (value?.trim() ? value.trim() : undefined);
+    const email = filled(body.email);
+    const contact: Partial<SiteSettings> = {
+      tagline: filled(body.tagline),
+      phone: filled(body.phone),
+      emergencyPhone: filled(body.emergencyPhone),
+      email,
+      supportEmail: email,
+      enquiryNotifyEmail: email,
+      whatsapp: filled(body.whatsapp),
+    };
     const nextSettings = mergeSiteSettings({
       ...(theme.site as object),
+      ...Object.fromEntries(Object.entries(contact).filter(([, v]) => v !== undefined)),
       companyName: body.companyName,
-      tagline: body.tagline ?? DEFAULT_SITE_SETTINGS.tagline,
-      phone: body.phone ?? DEFAULT_SITE_SETTINGS.phone,
-      emergencyPhone: body.emergencyPhone ?? DEFAULT_SITE_SETTINGS.emergencyPhone,
-      email: body.email ?? DEFAULT_SITE_SETTINGS.email,
-      supportEmail: body.email ?? DEFAULT_SITE_SETTINGS.supportEmail,
-      whatsapp: body.whatsapp ?? DEFAULT_SITE_SETTINGS.whatsapp,
-      footerBlurb: body.footerBlurb ?? `${body.companyName} — power & energy engineering.`,
+      footerBlurb: filled(body.footerBlurb) ?? `${body.companyName} — power & energy engineering.`,
       copyright: `© ${new Date().getFullYear()} ${body.companyName}. All rights reserved.`,
-      enquiryNotifyEmail: body.email ?? DEFAULT_SITE_SETTINGS.enquiryNotifyEmail,
       defaultMetaDescription: `${body.companyName} delivers power, energy, and engineering solutions.`,
       logoAlt: `${body.companyName} logo`,
     });

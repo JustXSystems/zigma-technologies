@@ -6,7 +6,7 @@ import {
   readConsentFromDocument,
   type AnalyticsConsent,
 } from '@/lib/analytics';
-import type { SiteSettings } from '@/lib/site-settings';
+import { isSettingEnabled, type SiteSettings } from '@/lib/site-settings';
 import { useSiteCopy } from '@/lib/use-site-copy';
 
 type Props = {
@@ -50,8 +50,8 @@ export default function CookieConsent({ settings }: Props) {
 
   const ga4 = settings.ga4MeasurementId?.trim() || '';
   const plausible = settings.plausibleDomain?.trim() || '';
-  const required = (settings.analyticsConsentRequired || 'true').toLowerCase() !== 'false';
-  const marketingEnabled = (settings.marketingConsentEnabled || 'true').toLowerCase() !== 'false';
+  const required = isSettingEnabled(settings.analyticsConsentRequired, true);
+  const marketingEnabled = isSettingEnabled(settings.marketingConsentEnabled, true);
   const hasAnalytics = Boolean(ga4 || plausible);
 
   useEffect(() => {

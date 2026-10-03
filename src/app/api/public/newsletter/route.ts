@@ -1,6 +1,8 @@
+import { after } from 'next/server';
 import { z } from 'zod';
 import type { ResultSetHeader } from 'mysql2';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
+import { sendLeadToCrm } from '@/lib/crm';
 import pool from '@/lib/db';
 import { guardPublicForm } from '@/lib/form-guard';
 
@@ -22,11 +24,17 @@ export async function POST(request: Request) {
     }
 
     const email = body.email.toLowerCase().trim();
-    await pool.query<ResultSetHeader>(
+    const source = body.source || 'footer';
+    const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO newsletter_subscribers (email, source) VALUES (?, ?)
        ON DUPLICATE KEY UPDATE source = VALUES(source)`,
-      [email, body.source || 'footer']
+      [email, source]
     );
+    if (result.affectedRows === 1) {
+      after(() =>
+        sendLeadToCrm('newsletter', { id: result.insertId, source: 'newsletter', item_type: 'general', payload: { email, source } })
+      );
+    }
     return jsonOk({ ok: true, message: 'Subscribed' }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Valid email required', 400);

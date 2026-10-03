@@ -43,13 +43,30 @@ export const THEME_TOKEN_META: ThemeTokenMeta[] = [
   { key: '--text-h2', label: 'Heading 2 size', group: 'typography', type: 'text' },
   { key: '--text-h3', label: 'Heading 3 size', group: 'typography', type: 'text' },
   { key: '--text-h4', label: 'Heading 4 size', group: 'typography', type: 'text' },
-  /* Eyebrow sizes are edited in Site Settings → Eyebrow font sizes (injected via logoSizingCss). */
+  /* Eyebrow sizes live in site settings (injected via logoSizingCss); both are edited in Theme Studio → Typography. */
 
   { key: '--section-pad', label: 'Section padding', group: 'layout', type: 'size' },
   { key: '--header-h', label: 'Header height', group: 'layout', type: 'size' },
 ];
 
 export const ALLOWED_THEME_TOKEN_KEYS = new Set(THEME_TOKEN_META.map((t) => t.key));
+
+/** Type scale tokens, edited in Theme Studio → Typography rather than with the colours. */
+export const TYPOGRAPHY_TOKEN_KEYS: readonly string[] = THEME_TOKEN_META.filter((t) => t.group === 'typography').map(
+  (t) => t.key
+);
+
+export function pickTokens(tokens: Record<string, string>, keys: readonly string[]): Record<string, string> {
+  return Object.fromEntries(keys.filter((key) => key in tokens).map((key) => [key, tokens[key]]));
+}
+
+/** The brand accent (`--orange`) as `#rrggbb`, for places without CSS variables such as email. */
+export function brandAccentHex(storedTokens: unknown): string {
+  const value = mergeTokens(storedTokens)['--orange'];
+  const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(value);
+  if (short) return `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}`;
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : DEFAULT_THEME_TOKENS['--orange'];
+}
 
 export const DEFAULT_THEME_TOKENS: Record<string, string> = {
   '--navy-950': '#0A1628',

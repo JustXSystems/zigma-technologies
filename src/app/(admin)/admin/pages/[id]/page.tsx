@@ -1,7 +1,6 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { SECTION_TYPES } from '@/lib/cms-types';
@@ -9,6 +8,9 @@ import { defaultCmsSectionContent } from '@/lib/cms-section-defaults';
 import SectionEditor from '@/components/admin/SectionEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
+import SeoFieldsEditor from '@/components/admin/SeoFieldsEditor';
+import { AdminLink, useDirtyTracker } from '@/components/admin/unsaved-changes';
+import { movedAddressNote } from '@/lib/moved-address';
 
 export default function AdminPageSectionsPage() {
   const params = useParams<{ id: string }>();
@@ -25,6 +27,7 @@ export default function AdminPageSectionsPage() {
   const [pageTitle, setPageTitle] = useState('');
   const [pageSlug, setPageSlug] = useState('');
   const [savingMeta, setSavingMeta] = useState(false);
+  const { markClean } = useDirtyTracker({ pageTitle, pageSlug, metaTitle, metaDescription });
 
   async function load() {
     const res = await fetch(`/api/admin/pages/${pageId}`, { credentials: 'same-origin' });
@@ -36,6 +39,7 @@ export default function AdminPageSectionsPage() {
     setPageSlug(data.page.slug || '');
     setMetaTitle(data.page.meta_title || '');
     setMetaDescription(data.page.meta_description || '');
+    markClean();
   }
 
   useEffect(() => {
@@ -69,7 +73,7 @@ export default function AdminPageSectionsPage() {
         setError(data.error || 'Save failed');
         return;
       }
-      setMessage('Page details saved.');
+      setMessage(`Page details saved.${movedAddressNote(data.redirect)}`);
       await load();
     } finally {
       setSavingMeta(false);
@@ -204,9 +208,9 @@ export default function AdminPageSectionsPage() {
       </AdminFloatingActions>
 
       <div>
-        <Link href="/admin/pages" className="admin-btn admin-btn-secondary">
+        <AdminLink href="/admin/pages" className="admin-btn admin-btn-secondary">
           ← Back to pages
-        </Link>
+        </AdminLink>
       </div>
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
@@ -259,16 +263,15 @@ export default function AdminPageSectionsPage() {
             <label>Slug</label>
             <input className="admin-input" value={pageSlug} onChange={(e) => setPageSlug(e.target.value)} required />
           </div>
-          <div className="admin-field">
-            <label>Meta title (SEO)</label>
-            <input className="admin-input" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} />
-          </div>
-          <div className="admin-field full">
-            <label>Meta description</label>
-            <textarea
-              className="admin-textarea"
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
+          <div className="full">
+            <SeoFieldsEditor
+              value={{ title: metaTitle, description: metaDescription }}
+              onChange={(next) => {
+                setMetaTitle(next.title);
+                setMetaDescription(next.description);
+              }}
+              fallbackTitle={pageSlug === 'home' ? undefined : pageTitle}
+              path={pageSlug === 'home' ? '/' : `/${pageSlug}`}
             />
           </div>
         </form>

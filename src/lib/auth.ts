@@ -134,7 +134,11 @@ export async function getSession(): Promise<AdminSession | null> {
   if (!token) return null;
   const session = await verifySessionToken(token);
   if (!session) return null;
+  return resolveSessionScreens(session);
+}
 
+/** Tokens issued without a screens claim get their screens from the user's current role. */
+export async function resolveSessionScreens(session: AdminSession): Promise<AdminSession | null> {
   if (session.role === 'editor' && session.screens !== '*' && session.screens.length === 0) {
     const user = await findAdminById(session.sub);
     if (!user) return null;

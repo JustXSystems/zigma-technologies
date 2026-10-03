@@ -66,7 +66,7 @@ export type TextEl = {
   tag?: HeadingTag;
 };
 
-/** Site Settings → Public typography eyebrow sizes (base / medium / large). */
+/** Theme Studio → Typography eyebrow sizes (base / medium / large). */
 export type EyebrowScale = 'base' | 'md' | 'lg';
 
 /* --az-eyebrow-cap is set on phones (about-sections.css) so md / lg never outgrow the shrunken headings. */
@@ -83,7 +83,7 @@ export type EyebrowEl = TextEl & {
   size?: EyebrowScale;
 };
 
-/** Headings whose tag / size follow Site Settings → Public typography heading levels. */
+/** Headings whose tag / size follow Theme Studio → Typography heading levels. */
 export type AboutHeadingRole = 'pageHero' | 'section';
 
 export const ABOUT_TYPOGRAPHY_VERSION = 2;

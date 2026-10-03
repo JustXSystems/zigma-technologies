@@ -86,7 +86,7 @@ export function AzText({
   );
 }
 
-/** Heading whose tag and size default to Site Settings → Public typography; element tag / style override. */
+/** Heading whose tag and size default to Theme Studio → Typography; element tag / style override. */
 function AzRoleHeading({ el, role, className }: { el?: TextEl; role: AboutHeadingRole; className: string }) {
   const { settings } = useSiteShell();
   const level = headingTagForRole(settings, role);

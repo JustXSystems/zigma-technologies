@@ -83,7 +83,7 @@ export type MailConfig = {
   variables: MailVariable[];
   saveToSentItems: boolean;
   testRecipient: string;
-  /** Accent colour for the branded email layout */
+  /** Accent colour for the branded email layout; empty follows the site brand colour (see `emailAccent`). */
   brandColor: string;
   templates: Record<MailEventKey, MailTemplate>;
 };
@@ -168,7 +168,7 @@ export const SYSTEM_VARIABLES: SystemVariable[] = [
 
 export const RESERVED_VARIABLE_KEYS = new Set(SYSTEM_VARIABLES.map((v) => v.key));
 
-/** Fields each fixed website form always submits (custom Enquiry Forms fields are discovered from the database). */
+/** Fields each fixed website form always submits (custom Forms & CRM fields are discovered from the database). */
 export const KNOWN_FORM_FIELDS: Array<{ key: string; label: string; forms: string[]; kind: 'enquiry' | 'careers' }> = [
   { key: 'company', label: 'Company', forms: ['Enquiry', 'Brochure'], kind: 'enquiry' },
   { key: 'subject', label: 'Subject / topic', forms: ['Enquiry', 'Callback', 'Brochure'], kind: 'enquiry' },
@@ -259,7 +259,7 @@ export function defaultMailConfig(): MailConfig {
     variables: [],
     saveToSentItems: true,
     testRecipient: '',
-    brandColor: '#FF6B1A',
+    brandColor: '',
     templates: defaultMailTemplates(),
   };
 }
@@ -347,6 +347,13 @@ function normalizeTemplate(raw: unknown, fallback: MailTemplate): MailTemplate {
   };
 }
 
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+/** The colour emails use: the one chosen in Admin → Email, else the site brand colour (`brandAccentHex`). */
+export function emailAccent(config: Pick<MailConfig, 'brandColor'>, brandHex: string): string {
+  return HEX_COLOR.test(config.brandColor) ? config.brandColor : brandHex;
+}
+
 export function normalizeMailConfig(raw: unknown): MailConfig {
   const base = defaultMailConfig();
   const c = obj(raw);
@@ -375,7 +382,7 @@ export function normalizeMailConfig(raw: unknown): MailConfig {
     variables: normalizeVariables(c.variables),
     saveToSentItems: c.saveToSentItems !== false,
     testRecipient: str(c.testRecipient, 200).trim(),
-    brandColor: /^#[0-9a-f]{6}$/i.test(str(c.brandColor)) ? str(c.brandColor) : base.brandColor,
+    brandColor: HEX_COLOR.test(str(c.brandColor)) ? str(c.brandColor) : base.brandColor,
     templates: Object.fromEntries(
       MAIL_EVENTS.map((e) => [e.key, normalizeTemplate(t[e.key], base.templates[e.key])])
     ) as Record<MailEventKey, MailTemplate>,

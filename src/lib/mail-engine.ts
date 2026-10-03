@@ -127,18 +127,20 @@ export function composeMail(input: {
   base: MailVars;
   companyName: string;
   siteUrl: string;
+  /** Resolved with `emailAccent`. */
+  accent: string;
 }): ComposedMail {
   const { config, tpl } = input;
   const r = resolveVariables(input.base, config.variables);
   const render = (s: string) => renderTemplate(s, r.vars, false, r.raw);
   const subject = render(tpl.subject).replace(/\s+/g, ' ').trim();
-  const bodyHtml = bodyToHtml(renderTemplate(tpl.body, r.vars, true, r.raw), config.brandColor);
+  const bodyHtml = bodyToHtml(renderTemplate(tpl.body, r.vars, true, r.raw), input.accent);
   const html = wrapEmailHtml({
     bodyHtml,
     subject,
     companyName: input.companyName,
     siteUrl: r.vars.site_url || input.siteUrl,
-    accent: config.brandColor,
+    accent: input.accent,
   });
   const rcpt = resolveRecipients(tpl, r);
   const failed = failedConditions(tpl.conditions, r.vars);

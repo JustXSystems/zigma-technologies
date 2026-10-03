@@ -25,7 +25,7 @@ import {
  * Built on the About element primitives (ElementStyle, TextEl, SectionBox…). Empty
  * style fields fall back to the scoped `.lz-*` CSS defaults, which mirror the approved
  * Life at Zigma HTML design. Colors default to theme tokens (var(--orange)…) so Theme
- * Studio changes flow through; headings / eyebrows follow Site Settings → Public typography.
+ * Studio changes flow through; headings / eyebrows follow Theme Studio → Typography.
  */
 
 export const LIFE_SECTION_TYPES = [

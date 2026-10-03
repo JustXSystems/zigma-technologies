@@ -1,30 +1,44 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  hasScreenAccess,
-  navGroupsFromScreens,
-  screenKeyFromPath,
-  type AdminScreenKey,
-} from '@/lib/admin-screens';
+import { canOpenScreen, navGroupsFromScreens, screenKeyFromPath } from '@/lib/admin-screens';
+import { AdminUserContext, type AdminUser } from '@/components/admin/admin-session';
+import { AdminLink, UnsavedChangesProvider, useUnsavedChangesState } from '@/components/admin/unsaved-changes';
 import './admin.css';
 
-type AdminUser = {
-  name: string;
-  email: string;
-  role: 'admin' | 'editor';
-  roleId: number | null;
-  roleName: string | null;
-  screens: AdminScreenKey[] | '*';
-};
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <UnsavedChangesProvider>
+      <AdminShell>{children}</AdminShell>
+    </UnsavedChangesProvider>
+  );
+}
+
+function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLogin = pathname === '/admin/login';
   const [user, setUser] = useState<AdminUser | null>(null);
+  const { confirmDiscard } = useUnsavedChangesState();
+  /** Small screens: the sidebar is a drawer, open only on the page it was opened from. */
+  const [navOpenOn, setNavOpenOn] = useState<string | null>(null);
+  const navOpen = navOpenOn === pathname;
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNavOpenOn(null);
+    };
+    const root = document.documentElement;
+    const overflow = root.style.overflow;
+    root.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      root.style.overflow = overflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [navOpen]);
 
   useEffect(() => {
     if (isLogin) return;
@@ -50,12 +64,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!user || user.screens === '*') return;
     const key = screenKeyFromPath(pathname);
     if (!key) return;
-    if (!hasScreenAccess(user.screens, key)) {
+    if (!canOpenScreen(user.screens, key)) {
       void router.replace('/admin');
     }
   }, [user, pathname, router]);
 
   async function logout() {
+    if (!confirmDiscard()) return;
     await fetch('/api/admin/auth/logout', { method: 'POST' });
     router.replace('/admin/login');
   }
@@ -74,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="admin-body">
       <div className="admin-shell">
-        <aside className="admin-sidebar">
+        <aside id="admin-sidebar" className={`admin-sidebar${navOpen ? ' is-open' : ''}`}>
           <div className="admin-brand">
             <div className="admin-brand-mark" aria-hidden="true">
               <span>Z</span>
@@ -94,9 +109,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       ? pathname === item.href
                       : pathname === item.href || pathname.startsWith(`${item.href}/`);
                     return (
-                      <Link key={item.href} href={item.href} className={active ? 'active' : ''}>
+                      <AdminLink
+                        key={item.href}
+                        href={item.href}
+                        className={active ? 'active' : ''}
+                        onClick={() => setNavOpenOn(null)}
+                      >
                         {item.label}
-                      </Link>
+                      </AdminLink>
                     );
                   })}
                 </nav>
@@ -104,14 +124,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ))}
           </div>
           <div className="admin-sidebar-foot">
-            <Link href="/" className="admin-btn admin-btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <AdminLink href="/" className="admin-btn admin-btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
               View site
-            </Link>
+            </AdminLink>
           </div>
         </aside>
+        {navOpen ? <div className="admin-nav-backdrop" aria-hidden="true" onClick={() => setNavOpenOn(null)} /> : null}
         <div className="admin-main">
           <header className="admin-topbar">
-            <div>
+            <button
+              type="button"
+              className="admin-nav-toggle"
+              aria-controls="admin-sidebar"
+              aria-expanded={navOpen}
+              aria-label={navOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setNavOpenOn(navOpen ? null : pathname)}
+            >
+              <span aria-hidden="true" />
+            </button>
+            <div className="admin-topbar-title">
               <h1>{title}</h1>
               <div className="meta">
                 {user ? `${user.name} · ${user.email}` : 'Loading…'}
@@ -128,7 +159,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </button>
             </div>
           </header>
-          <div className="admin-content">{children}</div>
+          <div className="admin-content">
+            <AdminUserContext.Provider value={user}>{children}</AdminUserContext.Provider>
+          </div>
         </div>
       </div>
     </div>

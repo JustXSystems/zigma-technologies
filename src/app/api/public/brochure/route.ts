@@ -2,6 +2,7 @@ import { after } from 'next/server';
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
+import { sendLeadToCrm } from '@/lib/crm';
 import { guardPublicForm } from '@/lib/form-guard';
 import { notifySubmission } from '@/lib/mail';
 
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
     });
 
     after(() => notifySubmission({ kind: 'enquiry', id, itemType, itemId: body.item_id, itemTitle: body.item_title, payload }));
+    after(() => sendLeadToCrm('brochure', { id, source: 'brochure_download', item_type: itemType, payload }));
 
     return jsonOk(
       { id, download_url: body.brochure_url, message: 'Brochure unlocked' },

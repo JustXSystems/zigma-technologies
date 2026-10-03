@@ -19,11 +19,13 @@ type Props = {
   onEdit: (id: string) => void;
   /** Jump to the settings tab that styles a built-in section. */
   onConfigure?: (key: string) => void;
+  /** Button label per configurable built-in section key. */
+  configureLabels?: Record<string, string>;
   pagePath: string;
 };
 
 const TYPE_LABEL = Object.fromEntries(SECTION_TYPES.map((t) => [t.type, t.label])) as Record<string, string>;
-const CONFIGURABLE: Record<string, string> = { hero: 'Hero tab', listing: 'Listing tab' };
+export const CONFIGURABLE: Record<string, string> = { hero: 'Hero tab', listing: 'Listing tab' };
 
 function entryName(entry: CatalogSectionEntry) {
   if (entry.kind === 'builtin') return catalogBuiltinMeta(entry.type)?.label || entry.type;
@@ -37,7 +39,14 @@ function entryDetail(entry: CatalogSectionEntry) {
   return parts.join(' · ');
 }
 
-export default function CatalogSectionsEditor({ value, onChange, onEdit, onConfigure, pagePath }: Props) {
+export default function CatalogSectionsEditor({
+  value,
+  onChange,
+  onEdit,
+  onConfigure,
+  configureLabels = CONFIGURABLE,
+  pagePath,
+}: Props) {
   const [addType, setAddType] = useState('cms:cta');
   const [insertAt, setInsertAt] = useState<number | 'end'>('end');
   const [dragId, setDragId] = useState<string | null>(null);
@@ -151,7 +160,7 @@ export default function CatalogSectionsEditor({ value, onChange, onEdit, onConfi
       ) : (
         <ol className="cse-list">
           {value.map((entry, index) => {
-            const configureLabel = entry.kind === 'builtin' ? CONFIGURABLE[entry.type] : undefined;
+            const configureLabel = entry.kind === 'builtin' ? configureLabels[entry.type] : undefined;
             return (
               <li
                 key={entry.id}

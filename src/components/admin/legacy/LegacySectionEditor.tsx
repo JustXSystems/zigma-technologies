@@ -736,7 +736,7 @@ function LegacyJourneyEditor({ content: c, onChange }: EditorProps<LegacyJourney
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle, accent bar">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Milestones" description="Shown in order; cards alternate above / below the line" open>
@@ -910,7 +910,7 @@ function LegacyValuesEditor({ content: c, onChange }: EditorProps<LegacyValuesCo
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle, accent bar">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Value cards" open>
@@ -1000,7 +1000,7 @@ function LegacyCapsEditor({ content: c, onChange }: EditorProps<LegacyCapsConten
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle, accent bar">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Capability cards" description="A card with a link becomes fully clickable" open>

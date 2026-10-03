@@ -140,7 +140,7 @@ export default function Footer() {
           </div>
           <div className="foot-bottom">
             <span>{site.copyright}</span>
-            {site.poweredByEnabled === 'true' && site.poweredByName.trim() ? (
+            {isSettingEnabled(site.poweredByEnabled, true) && site.poweredByName.trim() ? (
               <span className="foot-powered">
                 {site.poweredByPrefix.trim() ? `${site.poweredByPrefix.trim()} ` : null}
                 {site.poweredByUrl.trim() ? (

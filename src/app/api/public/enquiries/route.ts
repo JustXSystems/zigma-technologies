@@ -2,11 +2,9 @@ import { after } from 'next/server';
 import { z } from 'zod';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
-import { getThemeSettings } from '@/lib/cms';
 import { guardPublicForm } from '@/lib/form-guard';
 import { notifySubmission } from '@/lib/mail';
-import { pushCrmLead } from '@/lib/crm';
-import { mergeSiteSettings } from '@/lib/site-settings';
+import { sendLeadToCrm } from '@/lib/crm';
 import { verifyTurnstile } from '@/lib/turnstile';
 
 const META_KEYS = new Set(['form_id', 'item_id', 'item_type', '_hp', 'turnstileToken', 'payload']);
@@ -93,7 +91,14 @@ export async function POST(request: Request) {
     });
 
     after(() => notifySubmission({ kind: 'enquiry', id, itemType, itemId: body.item_id, payload: body.payload }));
-    after(() => pushToCrm(id, itemType, body.payload));
+    after(() =>
+      sendLeadToCrm('enquiry', {
+        id,
+        source: String(body.payload.source || 'enquiry'),
+        item_type: itemType,
+        payload: body.payload,
+      })
+    );
 
     return jsonOk({ id, message: 'Enquiry submitted successfully' }, { status: 201 });
   } catch (error) {
@@ -114,20 +119,5 @@ export async function POST(request: Request) {
     }
     console.error(error);
     return jsonError(error instanceof Error ? error.message : 'Submit failed', 500);
-  }
-}
-
-async function pushToCrm(id: number, itemType: string, payload: Record<string, unknown>) {
-  try {
-    const theme = await getThemeSettings();
-    const settings = mergeSiteSettings(theme.site);
-    await pushCrmLead(settings, {
-      id,
-      source: String(payload.source || 'enquiry'),
-      item_type: itemType,
-      payload,
-    });
-  } catch (err) {
-    console.error('[enquiry-crm]', err);
   }
 }

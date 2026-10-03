@@ -2,6 +2,7 @@ import path from 'path';
 import { after } from 'next/server';
 import { jsonError, jsonOk } from '@/lib/api';
 import { createEnquiry, getDefaultForm } from '@/lib/catalog';
+import { sendLeadToCrm } from '@/lib/crm';
 import { guardPublicForm } from '@/lib/form-guard';
 import { notifySubmission } from '@/lib/mail';
 import { saveResumeFile } from '@/lib/resumes';
@@ -86,6 +87,7 @@ export async function POST(request: Request) {
         resume: { stored: storedName, name: resume.name, mime: payload.resume_mime },
       })
     );
+    after(() => sendLeadToCrm('careers', { id, source: 'careers_apply', item_type: 'careers', payload }));
 
     return jsonOk({ id, message: 'Application submitted successfully' }, { status: 201 });
   } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useId, useState } from 'react';
 
 type Redirect = {
   id: number;
@@ -10,7 +10,8 @@ type Redirect = {
   enabled: number;
 };
 
-export default function RedirectsPage() {
+export default function RedirectsEditor() {
+  const id = useId();
   const [rows, setRows] = useState<Redirect[]>([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -70,20 +71,22 @@ export default function RedirectsPage() {
   }
 
   return (
-    <div>
+    <div className="admin-page-stack">
       {error ? <div className="admin-error">{error}</div> : null}
       {message ? <div className="admin-success">{message}</div> : null}
 
-      <div className="admin-card" style={{ marginBottom: '1rem' }}>
-        <h2 style={{ marginTop: 0 }}>URL redirects</h2>
-        <p style={{ color: 'var(--admin-muted)' }}>
-          301/302 redirects applied in proxy before page render. Use for slug changes and legacy paths.
-          Run <code>scripts/migrate-redirects.sql</code> if the table is missing.
+      <div className="admin-card">
+        <h3 style={{ marginTop: 0 }}>Add a redirect</h3>
+        <p className="theme-help" style={{ marginTop: 0 }}>
+          Applied before the page renders. Renaming the address of a published page, resource, press post or catalog
+          item adds its redirect automatically — use this for legacy paths and external moves. Run{' '}
+          <code>scripts/migrate-redirects.sql</code> if the table is missing.
         </p>
         <form onSubmit={add} className="admin-form-grid">
           <div className="admin-field">
-            <label>From path</label>
+            <label htmlFor={`${id}-from`}>From path</label>
             <input
+              id={`${id}-from`}
               className="admin-input"
               value={fromPath}
               onChange={(e) => setFromPath(e.target.value)}
@@ -92,8 +95,9 @@ export default function RedirectsPage() {
             />
           </div>
           <div className="admin-field">
-            <label>To path or URL</label>
+            <label htmlFor={`${id}-to`}>To path or URL</label>
             <input
+              id={`${id}-to`}
               className="admin-input"
               value={toPath}
               onChange={(e) => setToPath(e.target.value)}
@@ -102,8 +106,9 @@ export default function RedirectsPage() {
             />
           </div>
           <div className="admin-field">
-            <label>Status</label>
+            <label htmlFor={`${id}-status`}>Status</label>
             <select
+              id={`${id}-status`}
               className="admin-select"
               value={statusCode}
               onChange={(e) => setStatusCode(Number(e.target.value))}

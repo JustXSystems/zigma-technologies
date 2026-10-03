@@ -98,4 +98,44 @@ export async function deleteRedirect(id: number) {
   invalidateRedirectCache();
 }
 
+/**
+ * Keeps an old public address working after it moves: `from` 301s to `to`, redirects that pointed at
+ * `from` now point straight at `to`, and none is left on `to` (it would hide the live page).
+ * Never touches the home page. Returns false when nothing was recorded, e.g. the table is missing.
+ */
+export async function redirectMovedPath(fromPath: string, toPath: string): Promise<boolean> {
+  const from = normalizePath(fromPath);
+  const to = normalizePath(toPath);
+  if (from === to || from === '/' || to === '/') return false;
+  try {
+    await pool.query('DELETE FROM redirects WHERE from_path = ?', [to]);
+    await pool.query('UPDATE redirects SET to_path = ? WHERE to_path = ?', [to, from]);
+    await pool.query(
+      `INSERT INTO redirects (from_path, to_path, status_code, enabled) VALUES (?, ?, 301, 1)
+       ON DUPLICATE KEY UPDATE to_path = VALUES(to_path), status_code = 301, enabled = 1`,
+      [from, to]
+    );
+    return true;
+  } catch (error) {
+    console.error('Could not record redirect', from, '→', to, error);
+    return false;
+  } finally {
+    invalidateRedirectCache();
+  }
+}
+
+type PublishableRecord = { slug: string; status: string; enabled: boolean | number };
+
+/** After a slug edit: redirect the old address if the record was live there. */
+export async function keepOldAddress<T extends PublishableRecord>(
+  before: T | null,
+  after: T | null,
+  publicPath: (record: T) => string
+): Promise<{ from: string; to: string } | null> {
+  if (!before || !after || before.status !== 'published' || !Number(before.enabled)) return null;
+  const from = publicPath(before);
+  const to = publicPath(after);
+  return (await redirectMovedPath(from, to)) ? { from: normalizePath(from), to: normalizePath(to) } : null;
+}
+
 export { normalizePath };

@@ -5,10 +5,12 @@ import { normalizeMailConfig, resolveNotifyEmails, type MailConfig } from '@/lib
 import { deleteMailAttachment, getMailSettings, saveMailSettings, type StoredMailSettings } from '@/lib/mail-store';
 import { effectiveProvider } from '@/lib/mail-transport';
 import { mergeSiteSettings } from '@/lib/site-settings';
+import { brandAccentHex } from '@/lib/theme-tokens';
 import { emailRouteError, requireEmailAdmin } from '../_shared';
 
 async function view(stored: StoredMailSettings) {
-  const site = mergeSiteSettings((await getThemeSettings()).site);
+  const theme = await getThemeSettings();
+  const site = mergeSiteSettings(theme.site);
   const config = stored.config;
   if (!stored.saved) {
     // First visit: reflect what the site does today (SMTP_* env).
@@ -31,6 +33,7 @@ async function view(stored: StoredMailSettings) {
       phone: site.phone,
       supportEmail: site.supportEmail,
       siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, ''),
+      brandAccent: brandAccentHex(theme.tokens),
     },
   };
 }

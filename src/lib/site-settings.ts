@@ -1,4 +1,5 @@
 /** Public header mega-menu visual styles (admin Site Settings). */
+import { DEFAULT_CRM_LEAD_KINDS } from '@/lib/crm-kinds';
 import { ctaLabelFromConfig, parseHeaderCta } from '@/lib/header-cta';
 
 export const NAV_MENU_STYLES = [
@@ -293,6 +294,8 @@ export type SiteSettings = {
   crmWebhookUrl: string;
   crmWebhookSecret: string;
   crmProvider: string;
+  /** Which submission kinds are forwarded (see `crm-kinds.ts`). */
+  crmLeadKinds: string;
   /** Public SLA dashboard metrics (JSON string) */
   slaMetricsJson: string;
   turnstileEnabled: string;
@@ -428,6 +431,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   crmWebhookUrl: '',
   crmWebhookSecret: '',
   crmProvider: 'webhook',
+  crmLeadKinds: DEFAULT_CRM_LEAD_KINDS,
   slaMetricsJson: JSON.stringify([
     { label: 'First response', value: '< 1 business day' },
     { label: 'Emergency UPS callout', value: '4–8 hours (metro)' },

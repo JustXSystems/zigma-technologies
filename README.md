@@ -1130,7 +1130,7 @@ Nginx error log: `/var/log/nginx/error.log`
 |-------|-----|
 | SMTP not configured | Set `SMTP_*` in `.env` |
 | Hostinger mailbox not created | hPanel → Emails → create mailbox |
-| Enquiry notify disabled | Admin → Site Settings → notification toggle |
+| Email turned off or notify list empty | Admin → Email → Connection (choose Microsoft 365 or SMTP) and Variables (team notify list) |
 
 ### Turbopack HMR error overlay (`undefined`) in local dev
 

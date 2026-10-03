@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CmsSection } from '@/lib/cms-types';
 import MediaPicker from '@/components/admin/MediaPicker';
+import { ColorInput, Field } from '@/components/admin/form/controls';
 import {
   createIndustryCategoryCard,
   INDUSTRY_CATEGORY_COLOR_PRESETS,
@@ -66,21 +67,6 @@ type Props = {
   onApply?: (patch: SectionEditorPatch) => void;
 };
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="admin-field">
-      <label>{label}</label>
-      {children}
-    </div>
-  );
-}
-
 /** Classic page / certifications hero: alignment, vertical position, copy width, entrance and scroll bar (as on the Legacy hero). */
 function ClassicHeroLayoutFields({
   content,
@@ -131,57 +117,6 @@ function ClassicHeroLayoutFields({
         />
       </div>
     </>
-  );
-}
-
-const HEX6 = /^#[0-9A-Fa-f]{6}$/;
-
-function ColorPickerField({
-  label,
-  value,
-  fallback,
-  onChange,
-  hint,
-}: {
-  label: string;
-  value: string;
-  fallback: string;
-  onChange: (next: string) => void;
-  hint?: string;
-}) {
-  const pickerValue = HEX6.test(value) ? value : fallback;
-  return (
-    <Field label={label}>
-      <div className="admin-color-field">
-        <input
-          type="color"
-          value={pickerValue}
-          onChange={(e) => onChange(e.target.value)}
-          aria-label={label}
-        />
-        <input
-          className="admin-input"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={fallback}
-          style={{ minWidth: 0, flex: '1 1 8rem' }}
-        />
-        {value ? (
-          <button
-            type="button"
-            className="admin-btn admin-btn-secondary"
-            onClick={() => onChange('')}
-            title="Clear to use tone preset"
-            style={{ padding: '0.35rem 0.65rem', whiteSpace: 'nowrap', flex: '0 0 auto' }}
-          >
-            Clear
-          </button>
-        ) : null}
-      </div>
-      {hint ? (
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: 'var(--admin-muted)' }}>{hint}</p>
-      ) : null}
-    </Field>
   );
 }
 
@@ -843,7 +778,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                     <option value="ice">ice</option>
                   </select>
                 </Field>
-                <ColorPickerField
+                <ColorInput
                   label="Section background"
                   value={String(content.sectionBg || '')}
                   fallback={
@@ -852,7 +787,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                   onChange={(next) => setField('sectionBg', next)}
                   hint="Overrides Tone when set. Clear to use the Tone preset."
                 />
-                <ColorPickerField
+                <ColorInput
                   label="Feature card background"
                   value={String(content.featCardBg || '')}
                   fallback="#FFFFFF"
@@ -1020,14 +955,14 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                       <option value="gray">Gray — cat-commercial / energy</option>
                     </select>
                   </Field>
-                  <ColorPickerField
+                  <ColorInput
                     label="Section background override"
                     value={String(content.sectionBg || '')}
                     fallback={content.tone === 'gray' ? '#F4F6F9' : '#FFFFFF'}
                     onChange={(next) => setField('sectionBg', next)}
                     hint="Overrides Tone when set. Clear to use the Tone preset."
                   />
-                  <ColorPickerField
+                  <ColorInput
                     label="Category accent (--cat-color)"
                     value={String(content.catColor || '')}
                     fallback="#00D4FF"
@@ -1105,7 +1040,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                 >
                   <strong>Typography &amp; colors</strong>
                   <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <ColorPickerField
+                    <ColorInput
                       label="Eyebrow color"
                       value={String(content.eyebrowColor || '')}
                       fallback="#FF6B1A"
@@ -1161,7 +1096,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         <option value="capitalize">capitalize</option>
                       </select>
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Title color"
                       value={String(content.titleColor || '')}
                       fallback="#1E2530"
@@ -1197,7 +1132,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="700"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Body color"
                       value={String(content.bodyColor || '')}
                       fallback="#5B6472"
@@ -1249,7 +1184,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         <option value="0">No</option>
                       </select>
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Accent bar color"
                       value={String(content.accentBarColor || '')}
                       fallback={String(content.catColor || '#00D4FF')}
@@ -1272,13 +1207,13 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="4px"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Card background"
                       value={String(content.cardBg || '')}
                       fallback="#FFFFFF"
                       onChange={(next) => setField('cardBg', next)}
                     />
-                    <ColorPickerField
+                    <ColorInput
                       label="Card border color"
                       value={String(content.cardBorderColor || '')}
                       fallback="#E7EBF1"
@@ -1308,7 +1243,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="48px"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Card title color"
                       value={String(content.cardTitleColor || '')}
                       fallback="#1E2530"
@@ -1336,7 +1271,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="1.04rem"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Card body color"
                       value={String(content.cardBodyColor || '')}
                       fallback="#5B6472"
@@ -1599,7 +1534,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                           <option value="tint-6">tint-6</option>
                         </select>
                       </Field>
-                      <ColorPickerField
+                      <ColorInput
                         label="Card background"
                         value={String(card.bg || '')}
                         fallback={whyCardBgFallback(card)}
@@ -1864,14 +1799,14 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                       placeholder="/industries"
                     />
                   </Field>
-                  <ColorPickerField
+                  <ColorInput
                     label="Industry item background"
                     value={String(content.itemBg || '')}
                     fallback="#FFFFFF"
                     onChange={(next) => setField('itemBg', next || undefined)}
                     hint="Background of each industry tile. Clear to use the default white."
                   />
-                  <ColorPickerField
+                  <ColorInput
                     label="Industry item border color"
                     value={String(content.itemBorderColor || '')}
                     fallback="#E7EBF1"
@@ -2192,7 +2127,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                             onChange={(e) => patchFeatureCard(idx, { title: e.target.value })}
                           />
                         </Field>
-                        <ColorPickerField
+                        <ColorInput
                           label="Card background"
                           value={String(card.bg || '')}
                           fallback={featureCardBgFallback(card)}
@@ -2444,7 +2379,6 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                     </p>
                   ) : null}
                   {timelineCtas.map((cta, idx) => {
-                    const colorValue = /^#[0-9A-Fa-f]{6}$/.test(cta.color || '') ? cta.color! : '#ea580c';
                     return (
                       <div
                         key={idx}
@@ -2505,38 +2439,17 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                               <option value="right">Right</option>
                             </select>
                           </Field>
-                          <Field label="Button color">
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <input
-                                type="color"
-                                value={colorValue}
-                                onChange={(e) => {
-                                  const next = [...timelineCtas];
-                                  next[idx] = { ...next[idx], color: e.target.value };
-                                  setTimelineCtas(next);
-                                }}
-                                aria-label={`CTA ${idx + 1} button color`}
-                                style={{
-                                  width: 44,
-                                  height: 34,
-                                  padding: 0,
-                                  border: '1px solid var(--admin-border)',
-                                  borderRadius: 6,
-                                  background: 'transparent',
-                                }}
-                              />
-                              <input
-                                className="admin-input"
-                                value={cta.color || ''}
-                                onChange={(e) => {
-                                  const next = [...timelineCtas];
-                                  next[idx] = { ...next[idx], color: e.target.value };
-                                  setTimelineCtas(next);
-                                }}
-                                placeholder="Theme default (empty)"
-                              />
-                            </div>
-                          </Field>
+                          <ColorInput
+                            label="Button color"
+                            value={cta.color || ''}
+                            fallback="#ea580c"
+                            placeholder="Theme default (empty)"
+                            onChange={(color) => {
+                              const next = [...timelineCtas];
+                              next[idx] = { ...next[idx], color };
+                              setTimelineCtas(next);
+                            }}
+                          />
                         </div>
                       </div>
                     );
@@ -2784,7 +2697,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         <option value="light">Light</option>
                       </select>
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Section background"
                       value={String(content.sectionBg || '')}
                       fallback={content.tone === 'light' ? '#FFFFFF' : '#F4F6F9'}
@@ -2885,7 +2798,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                 >
                   <strong>Typography &amp; colors</strong>
                   <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <ColorPickerField
+                    <ColorInput
                       label="Eyebrow color"
                       value={String(content.eyebrowColor || '')}
                       fallback="#FF6B1A"
@@ -2913,7 +2826,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="0.72rem"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Title color"
                       value={String(content.titleColor || '')}
                       fallback="#1E2530"
@@ -2941,7 +2854,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="clamp(2.6rem,5vw,4.2rem)"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Body color"
                       value={String(content.bodyColor || '')}
                       fallback="#5B6472"
@@ -2983,19 +2896,19 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                 >
                   <strong>Loc-card style</strong>
                   <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <ColorPickerField
+                    <ColorInput
                       label="Card background"
                       value={String(content.cardBg || '')}
                       fallback="#FFFFFF"
                       onChange={(next) => setField('cardBg', next)}
                     />
-                    <ColorPickerField
+                    <ColorInput
                       label="Card border"
                       value={String(content.cardBorderColor || '')}
                       fallback="#E7EBF1"
                       onChange={(next) => setField('cardBorderColor', next)}
                     />
-                    <ColorPickerField
+                    <ColorInput
                       label="Active / hover border"
                       value={String(content.cardActiveBorderColor || '')}
                       fallback="#FF6B1A"
@@ -3018,13 +2931,13 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="1.6rem 1.7rem"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Icon background"
                       value={String(content.iconBg || '')}
                       fallback="#0A1628"
                       onChange={(next) => setField('iconBg', next)}
                     />
-                    <ColorPickerField
+                    <ColorInput
                       label="Icon color"
                       value={String(content.iconColor || '')}
                       fallback="#00D4FF"
@@ -3038,13 +2951,13 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                         placeholder="40px"
                       />
                     </Field>
-                    <ColorPickerField
+                    <ColorInput
                       label="Tag color"
                       value={String(content.tagColor || '')}
                       fallback="#FF6B1A"
                       onChange={(next) => setField('tagColor', next)}
                     />
-                    <ColorPickerField
+                    <ColorInput
                       label="Tag border"
                       value={String(content.tagBorderColor || '')}
                       fallback="#FFB48A"
@@ -3327,7 +3240,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                           onChange={(e) => patchJobCard(idx, { title: e.target.value })}
                         />
                       </Field>
-                      <ColorPickerField
+                      <ColorInput
                         label="Card background"
                         value={String(job.bg || '')}
                         fallback="#FFFFFF"

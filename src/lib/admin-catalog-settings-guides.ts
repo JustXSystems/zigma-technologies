@@ -126,12 +126,21 @@ export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: Set
       tip: 'Edits here are staged — press Save settings to publish them. Duplicated sections start hidden.',
     },
   },
+  partner_strip: {
+    title: 'Trusted partners strip',
+    guide: {
+      purpose: 'The heading and subtitle above the partner logo strip.',
+      when: 'Retitle the strip for this catalog page, or change the defaults every catalog page shares.',
+      how: 'Leave the title for this page blank to use the default title. The subtitle is shared by all catalog pages.',
+      tip: 'Saved with Save settings. Needs Site Copy access, where this text is stored.',
+    },
+  },
   hero_presentation: {
     title: 'Presentation',
     guide: {
       purpose: 'Define the hero’s look and the main copy visitors read first.',
       when: 'Update for seasonal campaigns, rebrands, or when the headline/message should change.',
-      how: 'Choose visual style and variant, then fill eyebrow, title, lead, and rotation speed.',
+      how: 'Choose visual style and variant, then fill eyebrow, title, lead, and rotation speed. Blank copy fields use the default shown in grey.',
       tip: 'Spotlight variant emphasises one featured card; Standard keeps copy more compact with an optional panel.',
     },
   },

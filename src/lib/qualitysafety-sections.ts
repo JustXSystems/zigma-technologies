@@ -23,7 +23,7 @@ import type { LegacyBgMedia, LegacyCardStyle, LegacySectionHeader } from '@/lib/
  * Built on the About / Life / Legacy element primitives. Empty style fields fall back to the scoped
  * `.qs-*` CSS defaults, which mirror the approved qualitysafety.html design. Colors default to
  * theme tokens (var(--orange)…) so Theme Studio changes flow through; headings / eyebrows follow
- * Site Settings → Public typography; phone / email placeholders follow Site Settings.
+ * Theme Studio → Typography; phone / email placeholders follow Site Settings.
  */
 
 export const QS_SECTION_TYPES = ['qs_hero', 'qs_stats', 'qs_quality', 'qs_safety', 'qs_certs', 'qs_commit', 'qs_cta'] as const;

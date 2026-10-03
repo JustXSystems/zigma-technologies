@@ -245,7 +245,7 @@ function QsQualityEditor({ content: c, onChange }: EditorProps<QsQualityContent>
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle, accent bar">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Layout (photo + steps)">
@@ -392,7 +392,7 @@ function QsSafetyEditor({ content: c, onChange }: EditorProps<QsSafetyContent>) 
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle, accent bar">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Photo gallery (images / videos)" description="Add as many as you like; each tile shows its caption and a small second line">
@@ -515,7 +515,7 @@ function QsCertsEditor({ content: c, onChange }: EditorProps<QsCertsContent>) {
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
-      <Group title="Section header" description="Eyebrow, heading (Site Settings level), subtitle, accent bar">
+      <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Certificates" open description="Seal icon, title, scope, detail rows and optional certificate scans / download link">

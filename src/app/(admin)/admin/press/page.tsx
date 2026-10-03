@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { movedAddressNote } from '@/lib/moved-address';
 
 type Post = {
   id: number;
@@ -83,7 +84,7 @@ export default function PressAdminPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
-      setMessage('Saved');
+      setMessage(`Saved.${movedAddressNote(data.redirect)}`);
       setEditor(empty);
       await load();
     } catch (err) {

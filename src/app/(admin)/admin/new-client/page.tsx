@@ -62,7 +62,8 @@ export default function NewClientAdminPage() {
         <h2 style={{ marginTop: 0 }}>New Client bootstrap</h2>
         <p style={{ color: 'var(--admin-muted)' }}>
           Brand this deployment for another industrial / power-energy client. Applies Site Settings, resets Site Copy with
-          the company name, optionally seeds demo pages/nav, then continue in Theme Studio.
+          the company name, optionally seeds demo pages/nav, then continue in Theme Studio. Contact fields left blank keep
+          their current values.
         </p>
         <p style={{ color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
           Tip: export your finished Zigma site with <code>npm run db:export</code>, import on a fresh DB, then run this

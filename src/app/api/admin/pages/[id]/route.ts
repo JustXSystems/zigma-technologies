@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
-import { deletePage, getPageById, updatePage } from '@/lib/cms';
-import { isBlockedCustomPageSlug } from '@/lib/reserved-slugs';
+import { deletePage, getPageById, pagePublicPath, updatePage } from '@/lib/cms';
+import { keepOldAddress } from '@/lib/redirects';
+import { isBlockedCustomPageSlug, isReservedSiteSlug } from '@/lib/reserved-slugs';
 
 const updateSchema = z.object({
   slug: z.string().min(1).optional(),
@@ -41,9 +42,13 @@ export async function PATCH(request: Request, ctx: Ctx) {
       }
       body.slug = slug;
     }
+    const before = body.slug ? await getPageById(Number(id)) : null;
     const page = await updatePage(Number(id), body);
     if (!page) return jsonError('Not found', 404);
-    return jsonOk({ page });
+    // Dedicated routes (home, contact, careers…) keep their own URL; a redirect there would hide them.
+    const systemRoute = [before?.slug, page.slug].some((s) => s && isReservedSiteSlug(s));
+    const redirect = systemRoute ? null : await keepOldAddress(before, page, (p) => pagePublicPath(p.slug));
+    return jsonOk({ page, redirect });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);

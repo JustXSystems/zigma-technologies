@@ -21,6 +21,7 @@ import MediaPicker from '@/components/admin/MediaPicker';
 import SeoFieldsEditor from '@/components/admin/SeoFieldsEditor';
 import CatalogMediaGallery from '@/components/CatalogMediaGallery';
 import { publicMediaUrl } from '@/lib/media-url';
+import { movedAddressNote } from '@/lib/moved-address';
 
 const TYPES: CatalogItemType[] = ['product', 'project', 'service'];
 
@@ -113,6 +114,7 @@ function InventoryInner() {
   const [categories, setCategories] = useState<CatalogCategory[]>([]);
   const [q, setQ] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editor, setEditor] = useState<EditorState>(emptyEditor());
@@ -220,6 +222,7 @@ function InventoryInner() {
     e.preventDefault();
     setSaving(true);
     setError('');
+    setMessage('');
     try {
       const payload = {
         item_type: type,
@@ -274,6 +277,7 @@ function InventoryInner() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
+      setMessage(movedAddressNote(data.redirect).trim());
       setEditorOpen(false);
       await load();
     } catch (err) {
@@ -630,6 +634,7 @@ function InventoryInner() {
   return (
     <div>
       {error ? <div className="admin-error">{error}</div> : null}
+      {message ? <div className="admin-success">{message}</div> : null}
       <div className="admin-toolbar">
         <div className="left">
           {TYPES.map((t) => (
@@ -908,14 +913,23 @@ function InventoryInner() {
               {editorTab === 'seo' ? (
                 <SeoFieldsEditor
                   value={{
-                    meta_title: editor.meta_title,
-                    meta_description: editor.meta_description,
-                    og_image_url: editor.og_image_url,
-                    seo_noindex: editor.seo_noindex,
+                    title: editor.meta_title,
+                    description: editor.meta_description,
+                    image: editor.og_image_url,
+                    noindex: editor.seo_noindex,
                   }}
-                  onChange={(next) => setEditor({ ...editor, ...next })}
+                  onChange={(next) =>
+                    setEditor({
+                      ...editor,
+                      meta_title: next.title,
+                      meta_description: next.description,
+                      og_image_url: next.image ?? '',
+                      seo_noindex: !!next.noindex,
+                    })
+                  }
                   fallbackTitle={editor.title || 'Item title'}
                   fallbackDescription={editor.summary || editor.description}
+                  imageHint="1200×630 recommended. Empty uses the primary image."
                   path={`/${type}s/${editor.slug || 'slug'}`}
                 />
               ) : null}

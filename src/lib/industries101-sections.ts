@@ -23,7 +23,7 @@ import type { LegacyBgMedia, LegacyCardStyle } from '@/lib/legacy-sections';
  * Built on the About / Life / Legacy element primitives. Empty style fields fall back to the scoped
  * `.i101-*` CSS defaults, which mirror the approved Industries101 HTML design. Colors default to
  * theme tokens (var(--cyan)…) so Theme Studio changes flow through; headings / eyebrows follow
- * Site Settings → Public typography.
+ * Theme Studio → Typography.
  */
 
 export const INDUSTRIES101_SECTION_TYPES = ['ind101_hero', 'ind101_subnav', 'ind101_stats', 'ind101_category', 'ind101_cta'] as const;

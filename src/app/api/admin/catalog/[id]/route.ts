@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { deleteCatalogItem, getCatalogItemById, updateCatalogItem } from '@/lib/catalog';
+import { catalogPublicPath } from '@/lib/catalog-case-study';
+import { keepOldAddress } from '@/lib/redirects';
 import { CATALOG_SHADOW_STYLE_VALUES } from '@/lib/types';
 
 const updateSchema = z.object({
@@ -55,9 +57,11 @@ export async function PATCH(request: Request, ctx: Ctx) {
     await requireSession();
     const { id } = await ctx.params;
     const body = updateSchema.parse(await readJson(request));
+    const before = body.slug ? await getCatalogItemById(Number(id)) : null;
     const item = await updateCatalogItem(Number(id), body);
     if (!item) return jsonError('Not found', 404);
-    return jsonOk({ item });
+    const redirect = await keepOldAddress(before, item, (i) => catalogPublicPath(i.item_type, i.slug));
+    return jsonOk({ item, redirect });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400, { details: error.issues });
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {

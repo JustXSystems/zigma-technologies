@@ -1,7 +1,10 @@
-'use client';
+import ThemeHub from '@/components/admin/theme/ThemeHub';
 
-import ThemeStudio from '@/components/admin/theme/ThemeStudio';
-
-export default function ThemeAdminPage() {
-  return <ThemeStudio />;
+export default async function ThemeAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { tab } = await searchParams;
+  return <ThemeHub initialTab={typeof tab === 'string' ? tab : undefined} />;
 }

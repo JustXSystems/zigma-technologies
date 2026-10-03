@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import { MediaItemsEditor } from '@/components/admin/life/LifeControls';
+import { ColorControl } from '@/components/admin/form/controls';
 import {
   CATALOG_HERO_BG_AREA_OPTIONS,
   CATALOG_HERO_BG_BLEND_OPTIONS,
@@ -383,14 +384,8 @@ export default function CatalogHeroBgEditor({
             />
             <div className="admin-field">
               <label>Tint colour</label>
-              <div className="admin-color-field">
-                <input type="color" value={bg.tintColor} onChange={(e) => set({ tintColor: e.target.value })} aria-label="Tint colour" />
-                <input
-                  className="admin-input"
-                  value={bg.tintColor}
-                  onChange={(e) => /^#[0-9a-f]{6}$/i.test(e.target.value) && set({ tintColor: e.target.value })}
-                />
-              </div>
+              <ColorControl label="Tint colour" value={bg.tintColor} onChange={(tintColor) => set({ tintColor })} hexOnly />
+
             </div>
             <Range label="Tint strength" value={bg.tintOpacity} min={0} max={100} unit="%" onChange={(tintOpacity) => set({ tintOpacity })} />
             <Select label="Tint blend" value={bg.tintBlend} options={CATALOG_HERO_BG_BLEND_OPTIONS} onChange={(tintBlend) => set({ tintBlend })} />
