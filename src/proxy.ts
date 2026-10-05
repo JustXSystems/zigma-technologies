@@ -131,6 +131,13 @@ export async function proxy(request: NextRequest) {
     /* table may be missing before migrate */
   }
 
+  // Resources became the blog. Runs after the redirect table so older /resources slug renames still resolve first.
+  if (pathname === '/resources' || pathname.startsWith('/resources/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/blog${pathname.slice('/resources'.length)}`.replace(/\/+$/, '') || '/blog';
+    return NextResponse.redirect(url, 308);
+  }
+
   return NextResponse.next();
 }
 

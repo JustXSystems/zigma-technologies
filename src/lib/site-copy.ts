@@ -508,7 +508,7 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
       ctaBandPrimaryLabel: 'Request consultation →',
       ctaBandPrimaryHref: '/contact?consult=1',
       ctaBandSecondaryLabel: 'Browse guides',
-      ctaBandSecondaryHref: '/resources',
+      ctaBandSecondaryHref: '/blog',
       needStepTitle: '1. What do you need?',
       scaleStepTitle: '2. Approximate scale',
       scaleSmall: 'Small (< 50 kW/kVA)',

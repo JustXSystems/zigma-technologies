@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
+import { blogPostPath } from '@/lib/blog-sections';
 import { keepOldAddress } from '@/lib/redirects';
 import { deleteResourcePost, getResourcePostById, updateResourcePost } from '@/lib/resources';
 
@@ -42,7 +43,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     const before = body.slug ? await getResourcePostById(Number(id)) : null;
     await updateResourcePost(Number(id), body);
     const post = await getResourcePostById(Number(id));
-    const redirect = await keepOldAddress(before, post, (p) => `/resources/${p.slug}`);
+    const redirect = await keepOldAddress(before, post, (p) => blogPostPath(p.slug));
     return jsonOk({ post, redirect });
   } catch (error) {
     if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);

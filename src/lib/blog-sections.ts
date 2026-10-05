@@ -10,15 +10,16 @@ import {
 } from '@/lib/about-sections';
 import type { HeroHeight, HeroVAlign } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
-import type { LegacyBgMedia, LegacySectionHeader } from '@/lib/legacy-sections';
+import type { LegacyBgMedia, LegacyCardStyle, LegacySectionHeader } from '@/lib/legacy-sections';
 import type { LifeColumns, LifeHighlight } from '@/lib/life-sections';
-import { defaultCertsCtaContent, type CertsCtaContent } from '@/lib/certifications-sections';
 
 /**
  * Blog hub section family (page /blog):
  * blog_hero, blog_featured, blog_topics, blog_feed, blog_cta.
  *
- * Posts live in resource_posts (Admin → Resources / Blog). Public URLs are /blog and /blog/[slug].
+ * Articles are the Resources / Blog posts (resource_posts table, Admin → Resources / Blog) and publish at
+ * /blog/[slug]; /resources and /resources/[slug] redirect here. The hub layout itself is a CMS page
+ * (Admin → Pages → Blog). Empty style fields fall back to the scoped `.blg-*` CSS defaults.
  */
 
 export const BLOG_SECTION_TYPES = ['blog_hero', 'blog_featured', 'blog_topics', 'blog_feed', 'blog_cta'] as const;
@@ -29,8 +30,42 @@ export function isBlogSectionType(type: string): type is BlogSectionType {
 }
 
 export const BLOG_SLUG = 'blog';
-/** Canonical public base for articles (resource_posts). */
-export const BLOG_PUBLIC_BASE = '/blog';
+export const BLOG_BASE_PATH = '/blog';
+
+export function blogPostPath(slug: string) {
+  return `${BLOG_BASE_PATH}/${slug}`;
+}
+
+export function blogTagPath(tag: string) {
+  return `${BLOG_BASE_PATH}?tag=${encodeURIComponent(tag)}`;
+}
+
+/** What a hub card needs from a post (the full body never reaches the browser). */
+export type BlogCardPost = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  cover: string;
+  tags: string[];
+  publishedAt: string | null;
+  readMinutes: number;
+};
+
+export const BLOG_FALLBACK_COVER = '/assets/images/engineers-reviewing-electrical-design-dr.jpg';
+
+/** Posts shown by a Featured section; the feed uses the same pick to avoid repeating them. */
+export function pickFeaturedPosts(posts: BlogCardPost[], c: Pick<BlogFeaturedContent, 'mode' | 'slugs' | 'limit'>): BlogCardPost[] {
+  if (c.mode === 'manual') {
+    const bySlug = new Map(posts.map((p) => [p.slug, p]));
+    return (c.slugs || []).map((s) => bySlug.get(s.trim())).filter((p): p is BlogCardPost => Boolean(p));
+  }
+  return posts.slice(0, Math.max(1, Number(c.limit) || 3));
+}
+
+/* ------------------------------------------------------------------ */
+/* Section content shapes                                              */
+/* ------------------------------------------------------------------ */
 
 export type BlogHeroContent = {
   section: SectionBox;
@@ -56,214 +91,185 @@ export type BlogHeroContent = {
   lead: TextEl;
   pills: PillsEl;
   ctas: CtaButton[];
-  /** Floating mono readout under the hero copy */
-  signal?: { hidden?: boolean; value: string; label: string };
+  /** Live readout chips under the copy (article / topic counts come from published posts) */
+  readout: { hidden?: boolean; articlesLabel: string; topicsLabel: string; latestLabel: string };
 };
 
-export type BlogFeaturedContent = {
-  section: SectionBox;
-  header: LegacySectionHeader;
-  /** auto = latest published; manual = only listed slugs (in order) */
-  mode: 'auto' | 'manual';
-  slugs: string[];
-  limit: number;
-  columns: LifeColumns;
-  gap?: string;
+/** Shared card look for featured + feed grids. */
+export type BlogCardOptions = {
   showExcerpt?: boolean;
   showMeta?: boolean;
+  showTag?: boolean;
   ctaLabel?: string;
+  /** Image height in the card */
+  mediaHeight?: string;
+  cardStyle?: LegacyCardStyle;
+};
+
+export type BlogFeaturedContent = BlogCardOptions & {
+  section: SectionBox;
+  header: LegacySectionHeader;
+  /** latest = newest published posts; manual = the slugs below, in order */
+  mode: 'latest' | 'manual';
+  slugs: string[];
+  limit: number;
+  /** spotlight = one large lead card + stacked side cards; grid = equal cards */
+  layout: 'spotlight' | 'grid';
+  columns: LifeColumns;
+  gap?: string;
 };
 
 export type BlogTopicsContent = {
   section: SectionBox;
   header: LegacySectionHeader;
-  /** empty = derive from published post tags */
+  /** Topics in this order; empty = every tag used by published posts */
   topics: string[];
-  allLabel?: string;
+  allLabel: string;
+  showCounts?: boolean;
   align?: 'left' | 'center';
+  sticky?: boolean;
 };
 
-export type BlogFeedContent = {
+export type BlogFeedContent = BlogCardOptions & {
   section: SectionBox;
   header: LegacySectionHeader;
   columns: LifeColumns;
   gap?: string;
+  /** Skip posts already shown in the Featured section */
+  excludeFeatured?: boolean;
   showSearch?: boolean;
   searchPlaceholder?: string;
-  showExcerpt?: boolean;
-  showMeta?: boolean;
-  ctaLabel?: string;
-  emptyTitle?: string;
-  emptyBody?: string;
-  limit?: number;
+  /** Cards per page; extra posts load with the "Load more" button */
+  pageSize: number;
+  loadMoreLabel?: string;
+  emptyTitle: string;
+  emptyBody: string;
 };
 
-export type BlogCtaContent = CertsCtaContent;
+export type BlogCtaContent = {
+  section: SectionBox;
+  background: LegacyBgMedia;
+  align?: 'left' | 'center';
+  maxWidth?: string;
+  eyebrow: EyebrowEl;
+  title: TextEl;
+  highlight?: LifeHighlight;
+  body: TextEl;
+  ctas: CtaButton[];
+};
 
-function txt(text: string, extra: Partial<TextEl> = {}): TextEl {
-  return { text, ...extra };
-}
+/* ------------------------------------------------------------------ */
+/* Defaults                                                            */
+/* ------------------------------------------------------------------ */
 
-function eyebrow(text: string, color = 'var(--cyan)'): EyebrowEl {
-  return { text, color };
-}
+const NO_BG: LegacyBgMedia = { hidden: false, items: [], mobileItems: [], intervalSeconds: 6, motion: 'none', overlay: '' };
 
 export function defaultBlogHeroContent(): BlogHeroContent {
   return {
-    section: {
-      tone: 'dark',
-      bgColor: 'var(--navy-950)',
-      paddingTop: '8.5rem',
-      paddingBottom: '4.5rem',
-      paddingTopMobile: '6.75rem',
-      paddingBottomMobile: '3rem',
-    },
-    heroHeight: 'screen',
-    placement: { mode: 'full' },
+    section: { tone: 'dark', bgColor: 'var(--navy-950)', pattern: 'grid-fade' },
+    heroHeight: 'auto-70',
     background: {
       hidden: false,
-      items: [
-        {
-          src: '/assets/images/engineers-reviewing-electrical-design-dr.jpg',
-          title: 'Engineering desk',
-        },
-      ],
-      intervalSeconds: 8,
+      items: [{ src: '/assets/images/engineers-reviewing-electrical-design-dr.jpg', title: 'Zigma engineering desk' }],
+      mobileItems: [],
+      intervalSeconds: 7,
       motion: 'kenburns',
-      overlay: 'linear-gradient(105deg, rgba(10,22,40,0.92) 0%, rgba(10,22,40,0.72) 48%, rgba(10,22,40,0.45) 100%)',
+      overlay: 'linear-gradient(105deg, rgba(10,22,40,0.94) 0%, rgba(10,22,40,0.78) 50%, rgba(10,22,40,0.5) 100%)',
     },
     entrance: true,
     align: 'left',
-    vAlign: 'center',
-    contentMaxWidth: '720px',
-    scrollBar: { hidden: false, gradient: 'linear-gradient(90deg, var(--cyan), var(--orange))' },
-    breadcrumb: {
-      hidden: false,
-      items: [
-        { label: 'Home', href: '/' },
-        { label: 'Blog' },
-      ],
-      separator: '/',
+    contentMaxWidth: '760px',
+    scrollBar: { hidden: false },
+    breadcrumb: { items: [{ label: 'Home', href: '/' }, { label: 'Blog' }], separator: '/' },
+    eyebrow: { text: 'ENGINEERING BLOG', line: true, style: { color: 'var(--cyan)' } },
+    title: { text: 'Field notes from the power engineering desk' },
+    highlight: { text: 'power engineering desk', animate: true },
+    lead: {
+      text: 'Practical guidance on UPS, solar, battery storage and power continuity from the engineers who size, install and maintain them across India.',
     },
-    eyebrow: eyebrow('ENGINEERING BRIEFINGS'),
-    title: txt('Field notes from the power desk'),
-    highlight: { text: 'power desk', color: 'var(--cyan)' },
-    lead: txt(
-      'Practical UPS, solar, BESS and continuity guidance from Zigma engineers — sized for commercial and industrial sites across India.'
-    ),
-    pills: {
-      hidden: false,
-      items: [{ label: 'UPS' }, { label: 'Solar' }, { label: 'BESS' }, { label: 'AMC' }],
-    },
+    pills: { items: [{ label: 'UPS' }, { label: 'Solar' }, { label: 'BESS' }, { label: 'AMC' }] },
     ctas: [
-      { label: 'Browse articles', href: '#blog-feed', variant: 'primary' },
+      { label: 'Browse articles ↓', href: '#blog-feed', variant: 'primary' },
       { label: 'Talk to an engineer', href: '/contact?consult=1', variant: 'ghost' },
     ],
-    signal: { hidden: false, value: 'LIVE', label: 'Published engineering guides' },
+    readout: { hidden: false, articlesLabel: 'Articles', topicsLabel: 'Topics', latestLabel: 'Latest' },
   };
 }
 
 export function defaultBlogFeaturedContent(): BlogFeaturedContent {
   return {
-    section: {
-      tone: 'light',
-      bgColor: '#F4F7FB',
-      paddingTop: '3.5rem',
-      paddingBottom: '1.5rem',
-      paddingTopMobile: '2.75rem',
-      paddingBottomMobile: '1.25rem',
-    },
+    section: { tone: 'light', bgColor: '#F4F7FB' },
     header: {
-      eyebrow: eyebrow('FEATURED', 'var(--orange)'),
-      title: txt('Start here'),
-      subtitle: txt('Flagship briefs our engineers send to facilities and EPCs before a site walk.'),
+      eyebrow: { text: 'FEATURED', line: true, style: { color: 'var(--orange)' } },
+      title: { text: 'Start with these' },
+      subtitle: { text: 'The briefs our engineers share with facility teams before a site walk.' },
       align: 'left',
-      maxWidth: '640px',
-      marginBottom: '1.75rem',
+      maxWidth: '680px',
     },
-    mode: 'auto',
+    mode: 'latest',
     slugs: [],
-    limit: 2,
-    columns: { desktop: 2, tablet: 2, mobile: 1 },
-    gap: '1.25rem',
+    limit: 3,
+    layout: 'spotlight',
+    columns: { desktop: 3, tablet: 2, mobile: 1 },
     showExcerpt: true,
     showMeta: true,
-    ctaLabel: 'Read briefing →',
+    showTag: true,
+    ctaLabel: 'Read article →',
   };
 }
 
 export function defaultBlogTopicsContent(): BlogTopicsContent {
   return {
-    section: {
-      tone: 'light',
-      bgColor: '#FFFFFF',
-      paddingTop: '1.25rem',
-      paddingBottom: '0.5rem',
-      paddingTopMobile: '1rem',
-      paddingBottomMobile: '0.35rem',
-    },
-    header: {
-      eyebrow: { text: '', hidden: true },
-      title: { text: '', hidden: true },
-      subtitle: { text: '', hidden: true },
-      align: 'left',
-    },
+    section: { tone: 'light', bgColor: '#FFFFFF', borderBottom: '1px solid rgba(10,22,40,0.08)' },
+    header: { hidden: true, eyebrow: { text: '' }, title: { text: '' }, subtitle: { text: '' } },
     topics: [],
     allLabel: 'All topics',
+    showCounts: true,
     align: 'left',
+    sticky: true,
   };
 }
 
 export function defaultBlogFeedContent(): BlogFeedContent {
   return {
-    section: {
-      tone: 'light',
-      bgColor: '#FFFFFF',
-      paddingTop: '1.5rem',
-      paddingBottom: '4.5rem',
-      paddingTopMobile: '1.25rem',
-      paddingBottomMobile: '3.25rem',
-    },
+    section: { tone: 'light', bgColor: '#FFFFFF' },
     header: {
-      eyebrow: eyebrow('ARCHIVE', 'var(--cyan)'),
-      title: txt('All briefings'),
-      subtitle: txt('Filter by topic or search titles — every article is editable in Admin → Resources / Blog.'),
+      eyebrow: { text: 'ALL ARTICLES', line: true, style: { color: 'var(--cyan)' } },
+      title: { text: 'Latest from the blog' },
+      subtitle: { text: 'Search or filter by topic to find what you need.' },
       align: 'left',
-      maxWidth: '720px',
-      marginBottom: '1.75rem',
+      maxWidth: '680px',
     },
     columns: { desktop: 3, tablet: 2, mobile: 1 },
-    gap: '1.25rem',
+    excludeFeatured: true,
     showSearch: true,
-    searchPlaceholder: 'Search titles, excerpts, tags…',
+    searchPlaceholder: 'Search articles…',
+    pageSize: 9,
+    loadMoreLabel: 'Load more articles',
     showExcerpt: true,
     showMeta: true,
+    showTag: true,
     ctaLabel: 'Read →',
-    emptyTitle: 'No articles in this view',
-    emptyBody: 'Clear the topic filter or publish a post in Admin → Resources / Blog.',
-    limit: 0,
+    emptyTitle: 'No articles found',
+    emptyBody: 'Try another topic or search term.',
   };
 }
 
 export function defaultBlogCtaContent(): BlogCtaContent {
-  const d = defaultCertsCtaContent();
   return {
-    ...d,
-    section: {
-      ...d.section,
-      tone: 'dark',
-      bgColor: 'var(--navy-900)',
-      paddingTop: '4.5rem',
-      paddingBottom: '4.5rem',
-      paddingTopMobile: '3.25rem',
-      paddingBottomMobile: '3.25rem',
+    section: { tone: 'dark', bgColor: 'var(--navy-900)', pattern: 'grid-fade' },
+    background: NO_BG,
+    align: 'center',
+    maxWidth: '760px',
+    eyebrow: { text: 'NEED IT ON SITE?', line: true, style: { color: 'var(--orange)' } },
+    title: { text: 'Turn the guide into a working system' },
+    highlight: { text: 'working system', animate: false },
+    body: {
+      text: 'Our engineers size, install and maintain UPS, solar and storage with documented handover — not generic advice.',
     },
-    eyebrow: eyebrow('NEXT STEP', 'var(--orange)'),
-    title: txt('Need this implemented on site?'),
-    body: txt('Zigma teams size, install and maintain UPS, solar and storage with documented handover — not generic advice.'),
     ctas: [
-      { label: 'Request consultation →', href: '/contact?consult=1', variant: 'primary' },
-      { label: 'Solution finder', href: '/tools/solution-finder', variant: 'ghost' },
+      { label: 'Request a consultation →', href: '/contact?consult=1', variant: 'primary' },
+      { label: 'Call our team', href: 'tel:{{phone}}', variant: 'ghost' },
     ],
   };
 }
@@ -285,6 +291,10 @@ export function defaultBlogSectionContent(type: string): Record<string, unknown>
   }
 }
 
+/**
+ * Fill any missing top-level keys from defaults (one level of object merge) and normalize arrays
+ * so partially saved or hand-edited JSON never crashes the renderer / editor.
+ */
 export function withBlogDefaults<T extends object>(type: BlogSectionType, raw: unknown): T {
   const base = (defaultBlogSectionContent(type) || {}) as Record<string, unknown>;
   const src = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
@@ -299,20 +309,25 @@ export function withBlogDefaults<T extends object>(type: BlogSectionType, raw: u
     }
   }
   const arr = <V>(v: unknown): V[] => (Array.isArray(v) ? (v as V[]).filter((x) => x && typeof x === 'object') : []);
-  const strs = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []);
+  const strs = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && !!x.trim()) : []);
+  const bg = (v: unknown): LegacyBgMedia => {
+    const m = (v && typeof v === 'object' ? v : {}) as LegacyBgMedia;
+    return { ...m, items: arr(m.items), mobileItems: arr(m.mobileItems) };
+  };
   if (type === 'blog_hero') {
+    out.background = bg(out.background);
     const bc = out.breadcrumb as BlogHeroContent['breadcrumb'];
-    out.breadcrumb = { ...((base.breadcrumb as object) || {}), ...bc, items: Array.isArray(bc?.items) ? bc.items : [] };
-    out.pills = { ...((base.pills as object) || {}), ...(out.pills as object), items: arr((out.pills as PillsEl)?.items) };
+    out.breadcrumb = { ...bc, items: arr<LinkItem>(bc?.items) };
+    const pills = out.pills as PillsEl;
+    out.pills = { ...pills, items: arr<LinkItem>(pills?.items) };
     out.ctas = arr<CtaButton>(out.ctas);
   }
-  if (type === 'blog_featured') {
-    out.slugs = strs(out.slugs);
-    out.columns = { ...((base.columns as object) || {}), ...(out.columns as object) };
-  }
+  if (type === 'blog_featured') out.slugs = strs(out.slugs);
   if (type === 'blog_topics') out.topics = strs(out.topics);
-  if (type === 'blog_feed') out.columns = { ...((base.columns as object) || {}), ...(out.columns as object) };
-  if (type === 'blog_cta') out.ctas = arr<CtaButton>(out.ctas);
+  if (type === 'blog_cta') {
+    out.background = bg(out.background);
+    out.ctas = arr<CtaButton>(out.ctas);
+  }
   out.typographyVersion = ABOUT_TYPOGRAPHY_VERSION;
   return out as T;
 }
@@ -325,7 +340,7 @@ export const BLOG_SEED_SECTIONS: Array<{
 }> = [
   { type: 'blog_hero', section_key: 'top', title: 'Blog hero', content_json: defaultBlogHeroContent() },
   { type: 'blog_featured', section_key: 'featured', title: 'Featured articles', content_json: defaultBlogFeaturedContent() },
-  { type: 'blog_topics', section_key: 'topics', title: 'Topic filter', content_json: defaultBlogTopicsContent() },
+  { type: 'blog_topics', section_key: 'topics', title: 'Topic filter bar', content_json: defaultBlogTopicsContent() },
   { type: 'blog_feed', section_key: 'blog-feed', title: 'Article feed', content_json: defaultBlogFeedContent() },
   { type: 'blog_cta', section_key: 'contact', title: 'CTA band', content_json: defaultBlogCtaContent() },
 ];

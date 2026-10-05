@@ -1,24 +1,27 @@
 'use client';
 
 import { createContext, useContext, type ReactNode } from 'react';
-import type { ResourcePost } from '@/lib/resources';
+import type { BlogCardPost } from '@/lib/blog-sections';
 
-export type BlogPostsData = {
-  posts: ResourcePost[];
-  allPosts: ResourcePost[];
-  tags: string[];
+export type BlogHubData = {
+  /** Every published post, newest first */
+  posts: BlogCardPost[];
+  tags: Array<{ tag: string; count: number }>;
   activeTag: string | null;
-  query: string | null;
+  query: string;
+  /** Posts the page's Featured section shows, so the feed can skip them */
+  featuredIds: number[];
 };
 
-const BlogPostsContext = createContext<BlogPostsData | null>(null);
+const EMPTY: BlogHubData = { posts: [], tags: [], activeTag: null, query: '', featuredIds: [] };
 
-export function BlogPostsProvider({ value, children }: { value: BlogPostsData; children: ReactNode }) {
-  return <BlogPostsContext.Provider value={value}>{children}</BlogPostsContext.Provider>;
+const BlogHubContext = createContext<BlogHubData>(EMPTY);
+
+export function BlogHubProvider({ value, children }: { value: BlogHubData; children: ReactNode }) {
+  return <BlogHubContext.Provider value={value}>{children}</BlogHubContext.Provider>;
 }
 
-export function useBlogPosts(): BlogPostsData {
-  const ctx = useContext(BlogPostsContext);
-  if (ctx) return ctx;
-  return { posts: [], allPosts: [], tags: [], activeTag: null, query: null };
+/** Hub data for blog_* sections; outside /blog (e.g. admin preview elsewhere) the sections render empty states. */
+export function useBlogHub(): BlogHubData {
+  return useContext(BlogHubContext);
 }

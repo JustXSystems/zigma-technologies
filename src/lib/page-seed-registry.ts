@@ -16,6 +16,7 @@ import { LEGACY_20YRS_SEED_SECTIONS, LEGACY_20YRS_SLUG } from '@/lib/legacy-sect
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
 import { PRIVACY_SEED_SECTIONS_V2, PRIVACY_SLUG, isPrivacySectionType, upgradePrivacySection } from '@/lib/privacy-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
+import { BLOG_BASE_PATH, BLOG_SEED_SECTIONS, BLOG_SLUG } from '@/lib/blog-sections';
 import { TERMS_SEED_SECTIONS_V2, TERMS_SLUG, isTermsSectionType, upgradeTermsSection } from '@/lib/terms-sections';
 
 export type SeedSection = {
@@ -111,6 +112,19 @@ const CORE_AND_COMPANY: PageSeedDef[] = [
         'How Zigma Technologies builds quality and safety into every UPS, solar and battery project: a four-stage quality process, six site safety habits, and certificates you can verify.',
     },
     sections: () => QS_SEED_SECTIONS,
+  },
+  {
+    slug: BLOG_SLUG,
+    label: 'Blog',
+    group: 'Company',
+    path: BLOG_BASE_PATH,
+    page: {
+      title: 'Blog',
+      meta_title: 'Engineering Blog | Zigma Technologies',
+      meta_description:
+        'Practical UPS, solar, battery storage and power continuity guidance from Zigma Technologies engineers for commercial and industrial sites across India.',
+    },
+    sections: () => BLOG_SEED_SECTIONS,
   },
   {
     slug: CERTS_SLUG,

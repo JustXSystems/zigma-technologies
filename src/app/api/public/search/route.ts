@@ -56,7 +56,7 @@ export async function GET(request: Request) {
       results.push({
         type: 'Resource',
         title: post.title,
-        href: `/resources/${post.slug}`,
+        href: `/blog/${post.slug}`,
         excerpt: post.excerpt || undefined,
       });
     }

@@ -12,6 +12,7 @@ import { defaultIndustryPageSectionContent } from '@/lib/industry-page-sections'
 import { defaultIndustries101SectionContent } from '@/lib/industries101-sections';
 import { defaultQsSectionContent } from '@/lib/qualitysafety-sections';
 import { defaultHomeSectionContent } from '@/lib/home-sections';
+import { defaultBlogSectionContent } from '@/lib/blog-sections';
 
 /** Starter content for a newly added CMS section of `type` (empty object when the type has no seed). */
 export function defaultCmsSectionContent(type: string, pageSlug?: string): Record<string, unknown> {
@@ -30,6 +31,7 @@ export function defaultCmsSectionContent(type: string, pageSlug?: string): Recor
     defaultIndustries101SectionContent(type) ||
     defaultQsSectionContent(type) ||
     defaultHomeSectionContent(type) ||
+    defaultBlogSectionContent(type) ||
     {}
   );
 }

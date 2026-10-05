@@ -44,9 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ? [{ url: `${origin}/industries`, changeFrequency: 'monthly' as const, priority: 0.8 }]
       : []),
     { url: `${origin}/locations`, changeFrequency: 'monthly', priority: 0.8 },
-    ...(copy.features.resourcesEnabled
-      ? [{ url: `${origin}/resources`, changeFrequency: 'weekly' as const, priority: 0.75 }]
-      : []),
+    { url: `${origin}/blog`, changeFrequency: 'weekly', priority: 0.75 },
     { url: `${origin}/press`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${origin}/sla`, changeFrequency: 'monthly', priority: 0.55 },
     ...(copy.features.solutionFinderEnabled
@@ -108,14 +106,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       }));
 
-    const resourceEntries: MetadataRoute.Sitemap = copy.features.resourcesEnabled
-      ? (await listResourcePosts()).map((post) => ({
-          url: `${origin}/resources/${post.slug}`,
-          changeFrequency: 'monthly' as const,
-          priority: 0.7,
-          ...lastModified(post.updated_at, post.published_at),
-        }))
-      : [];
+    const resourceEntries: MetadataRoute.Sitemap = (await listResourcePosts()).map((post) => ({
+      url: `${origin}/blog/${post.slug}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+      ...lastModified(post.updated_at, post.published_at),
+    }));
 
     const pressEntries: MetadataRoute.Sitemap = (await listPressPosts()).map((post) => ({
       url: `${origin}/press/${post.slug}`,

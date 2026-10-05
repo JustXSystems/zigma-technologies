@@ -191,7 +191,7 @@ export default function ResourcesAdminPage() {
             onChange={(next) => setEditor({ ...editor, meta_title: next.title, meta_description: next.description })}
             fallbackTitle={editor.title}
             fallbackDescription={editor.excerpt || editor.body_html}
-            path={`/resources/${editor.slug || 'slug'}`}
+            path={`/blog/${editor.slug || 'slug'}`}
           />
         </div>
         <div className="admin-field full" style={{ display: 'flex', gap: '0.6rem' }}>

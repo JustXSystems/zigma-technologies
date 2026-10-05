@@ -50,6 +50,8 @@ import { isIndustries101SectionType, withIndustries101Defaults } from '@/lib/ind
 import Industries101SectionEditor from '@/components/admin/industries101/Industries101SectionEditor';
 import { isQsSectionType, withQsDefaults } from '@/lib/qualitysafety-sections';
 import QualitySafetySectionEditor from '@/components/admin/qualitysafety/QualitySafetySectionEditor';
+import { isBlogSectionType, withBlogDefaults } from '@/lib/blog-sections';
+import BlogSectionEditor from '@/components/admin/blog/BlogSectionEditor';
 import { isHomeSectionType, withHomeDefaults } from '@/lib/home-sections';
 import HomeSectionEditor from '@/components/admin/home/HomeSectionEditor';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
@@ -232,6 +234,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
     if (isIndustryPageSectionType(section.type)) return withIndustryPageDefaults<Record<string, unknown>>(section.type, raw);
     if (isIndustries101SectionType(section.type)) return withIndustries101Defaults<Record<string, unknown>>(section.type, raw);
     if (isQsSectionType(section.type)) return withQsDefaults<Record<string, unknown>>(section.type, raw);
+    if (isBlogSectionType(section.type)) return withBlogDefaults<Record<string, unknown>>(section.type, raw);
     if (isHomeSectionType(section.type)) return withHomeDefaults<Record<string, unknown>>(section.type, raw);
     return raw;
   });
@@ -556,6 +559,9 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
             ) : null}
             {isQsSectionType(section.type) ? (
               <QualitySafetySectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isBlogSectionType(section.type) ? (
+              <BlogSectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {isHomeSectionType(section.type) ? (
               <HomeSectionEditor type={section.type} content={content} onChange={setContent} />

@@ -3,6 +3,7 @@ export const RESERVED_SITE_SLUGS = new Set([
   'admin',
   'api',
   'assets',
+  'blog',
   'careers',
   'certifications',
   'contact',

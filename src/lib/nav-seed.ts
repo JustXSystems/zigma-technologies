@@ -143,7 +143,7 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
       { label: 'Industries', href: '/industries' },
       { label: 'Locations', href: '/locations' },
       { label: 'Press', href: '/press' },
-      { label: 'Resources', href: '/resources' },
+      { label: 'Blog', href: '/blog' },
     ],
   },
   {

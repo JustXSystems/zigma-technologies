@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
+import { LgScrollBar } from '@/components/sections/LegacySections';
+import { BLOG_BASE_PATH, blogPostPath, blogTagPath } from '@/lib/blog-sections';
 import type { ResourcePost } from '@/lib/resources';
+import { absoluteUrl } from '@/lib/seo';
 import type { SiteCopy } from '@/lib/site-copy';
 import SiteHeading from '@/components/SiteHeading';
 
@@ -61,9 +64,12 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
     : tags.some((t) => /guide/i.test(t))
       ? 'Guide'
       : 'Technical brief';
+  const shareUrl = encodeURIComponent(absoluteUrl(blogPostPath(post.slug)));
+  const shareText = encodeURIComponent(post.title);
 
   return (
-    <main id="main-content" className="resource-detail">
+    <main id="main-content" className="resource-detail blg-article">
+      <LgScrollBar />
       <InnerPageHero
         height={copy.heroHeights.resourceDetail}
         accent="cyan"
@@ -73,7 +79,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
         image={post.cover_url || '/assets/images/engineers-reviewing-electrical-design-dr.jpg'}
         breadcrumb={[
           { label: 'Home', href: '/' },
-          { label: 'Resources', href: '/resources' },
+          { label: 'Blog', href: BLOG_BASE_PATH },
           { label: post.title },
         ]}
         actions={
@@ -101,7 +107,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
         {tags.length ? (
           <div className="resource-hero-tags">
             {tags.map((tag) => (
-              <Link key={tag} href={`/resources?tag=${encodeURIComponent(tag)}`} className="resource-hero-tag">
+              <Link key={tag} href={blogTagPath(tag)} className="resource-hero-tag">
                 {tag}
               </Link>
             ))}
@@ -135,9 +141,22 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
           <article className="resource-article">
             <div className="resource-article-card rich-text resource-prose" dangerouslySetInnerHTML={{ __html: articleHtml }} />
             <div className="resource-article-foot">
-              <Link href="/resources" className="link">
-                ← All resources
+              <Link href={BLOG_BASE_PATH} className="link">
+                ← All articles
               </Link>
+              <div className="blg-share" aria-label="Share this article">
+                <span>Share</span>
+                <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" rel="noopener noreferrer">
+                  LinkedIn
+                </a>
+                <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noopener noreferrer">
+                  WhatsApp
+                </a>
+                <a href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`} target="_blank" rel="noopener noreferrer">
+                  X
+                </a>
+                <a href={`mailto:?subject=${shareText}&body=${shareUrl}`}>Email</a>
+              </div>
             </div>
           </article>
 
@@ -194,7 +213,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
                 <h3>Topics</h3>
                 <div className="resource-sidebar-tags">
                   {tags.map((tag) => (
-                    <Link key={tag} href={`/resources?tag=${encodeURIComponent(tag)}`} className="case-study-tag">
+                    <Link key={tag} href={blogTagPath(tag)} className="case-study-tag">
                       {tag}
                     </Link>
                   ))}
@@ -215,7 +234,7 @@ export default function ResourceDetailView({ post, related, copy }: Props) {
             </div>
             <div className="hub-grid">
               {related.map((r) => (
-                <Link key={r.id} href={`/resources/${r.slug}`} className="hub-card">
+                <Link key={r.id} href={blogPostPath(r.slug)} className="hub-card">
                   <div className="hub-card-media">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
