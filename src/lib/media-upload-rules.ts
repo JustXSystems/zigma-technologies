@@ -54,6 +54,7 @@ export const MEDIA_UPLOAD_RESTRICTIONS = [
   'Only the MIME types listed above are accepted (exact match)',
   'One file per upload from this page',
   'Raster images → /assets/images · SVG → /assets/svg · video → /assets/video',
+  'Files are stored under a search-friendly version of their own name (“UPS Front View.JPG” → ups-front-view.jpg); the original name is kept for mapping',
   'PDF, HEIC, AVIF, MOV, and other formats are not supported',
 ] as const;
 

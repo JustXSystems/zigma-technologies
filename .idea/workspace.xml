@@ -7,34 +7,32 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#50 Blog page creations">
-      <change afterPath="$PROJECT_DIR$/src/app/(site)/blog/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/blog-sections.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/blog.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#51 Caalog products/services/project import / export for setup">
+      <change afterPath="$PROJECT_DIR$/scripts/migrate-catalog-transfer.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-transfer/analyse/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-transfer/commit/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-transfer/jobs/[id]/report/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-transfer/jobs/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-transfer/template/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/catalog/CatalogTransferStudio.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/catalog-transfer-columns.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/catalog-transfer-route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/catalog-transfer.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/media-naming.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/xlsx-reader.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/zip-reader.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/resources/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/resources/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/blog/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/resources/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/resources/[id]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/search/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/search/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/sitemap.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/sitemap.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/blog/BlogPostsContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/blog/BlogPostsContext.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/blog-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/blog-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-public-page.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-public-page.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-section-defaults.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-section-defaults.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/nav-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-seed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/page-seed-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/page-seed-registry.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/reserved-slugs.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/reserved-slugs.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/inventory/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/media/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/media/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-api-access.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-api-access.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/media-library.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-library.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/media-upload-rules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-upload-rules.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/xlsx-writer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/xlsx-writer.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,23 +90,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0095428571420855" />
-      <entry key="MS500" value="1.9066546821661876" />
-      <entry key="S2" value="4.525591749923549" />
-      <entry key="S5" value="6.213318567107557" />
-      <entry key="S10" value="7.01963030080738" />
-      <entry key="S30" value="7.651882154934125" />
-      <entry key="S60" value="8.025177070126741" />
-      <entry key="M2" value="11.977866193573375" />
-      <entry key="M5" value="32.8785495130993" />
-      <entry key="M10" value="58.6018683386036" />
-      <entry key="M15" value="82.55705517697831" />
-      <entry key="M30" value="149.13529358101624" />
-      <entry key="H1" value="244.11421392734323" />
-      <entry key="H2" value="372.23299975108637" />
-      <entry key="H4" value="555.5184514502381" />
-      <entry key="D1" value="2413.847739556948" />
-      <entry key="W1" value="15197.532660869017" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000566784313" />
+      <entry key="S2" value="1.0306810815928389" />
+      <entry key="S5" value="1.7634515492758727" />
+      <entry key="S10" value="4.291586477306269" />
+      <entry key="S30" value="15.16619124464792" />
+      <entry key="S60" value="24.998047896570775" />
+      <entry key="M2" value="33.72657736260779" />
+      <entry key="M5" value="57.594702199843596" />
+      <entry key="M10" value="143.76197421021297" />
+      <entry key="M15" value="229.71983997506058" />
+      <entry key="M30" value="398.83145741050714" />
+      <entry key="H1" value="577.1348761961016" />
+      <entry key="H2" value="782.4195379775574" />
+      <entry key="H4" value="1034.8974697251772" />
+      <entry key="D1" value="2961.8906480711084" />
+      <entry key="W1" value="15763.74431528043" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -122,31 +120,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="7.2588340399735385E-298" />
-      <entry key="H1" value="2.6942223441979337E-149" />
-      <entry key="H2" value="5.190589893448922E-75" />
-      <entry key="H4" value="7.20457486158726E-38" />
-      <entry key="D1" value="6.55403876118793E-7" />
-      <entry key="W1" value="0.20282918432971636" />
+      <entry key="M30" value="4.181156481908823E-299" />
+      <entry key="H1" value="6.466186265419466E-150" />
+      <entry key="H2" value="2.542869691002307E-75" />
+      <entry key="H4" value="5.042687469085131E-38" />
+      <entry key="D1" value="6.175677679118522E-7" />
+      <entry key="W1" value="0.20111351030771357" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9684179101427076" />
-      <entry key="MS500" value="1.890311679378114" />
-      <entry key="S2" value="4.514601881627761" />
-      <entry key="S5" value="6.2069793582066595" />
-      <entry key="S10" value="7.015985849431926" />
-      <entry key="S30" value="7.650542092483832" />
-      <entry key="S60" value="8.024471402170448" />
-      <entry key="M2" value="11.9773299173151" />
-      <entry key="M5" value="32.87794407661247" />
-      <entry key="M10" value="58.601279340221716" />
-      <entry key="M15" value="82.55642740384529" />
-      <entry key="M30" value="149.1346045217915" />
-      <entry key="H1" value="244.11354395411306" />
-      <entry key="H2" value="372.23237767818" />
-      <entry key="H4" value="555.5179339622778" />
-      <entry key="D1" value="2413.8474856311686" />
-      <entry key="W1" value="15197.73532093412" />
+      <entry key="MS100" value="4.7624839542204615E-36" />
+      <entry key="MS500" value="1.1044428027338106E-7" />
+      <entry key="S2" value="0.03825538604087382" />
+      <entry key="S5" value="0.8457365898843858" />
+      <entry key="S10" value="3.4776879906463463" />
+      <entry key="S30" value="14.539574487652175" />
+      <entry key="S60" value="24.531235372030398" />
+      <entry key="M2" value="33.425544805440225" />
+      <entry key="M5" value="57.451238756235725" />
+      <entry key="M10" value="143.68512661207728" />
+      <entry key="M15" value="229.66714127491255" />
+      <entry key="M30" value="398.80414313466355" />
+      <entry key="H1" value="577.1207863365122" />
+      <entry key="H2" value="782.4121849490715" />
+      <entry key="H4" value="1034.8935608186705" />
+      <entry key="D1" value="2961.88981439982" />
+      <entry key="W1" value="15763.945176104524" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -301,7 +299,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#46 Industries page redesign" />
     <MESSAGE value="#47 Quality and Safety Page design" />
     <MESSAGE value="#45 similar admin page design for industries-manufacturing" />
     <MESSAGE value="#45 similar admin page design for industries-banking" />
@@ -326,7 +323,8 @@
     <MESSAGE value="#48 user management issue fixed" />
     <MESSAGE value="#49 Stats section Number font" />
     <MESSAGE value="#50 Blog page creations" />
-    <option name="LAST_COMMIT_MESSAGE" value="#50 Blog page creations" />
+    <MESSAGE value="#51 Caalog products/services/project import / export for setup" />
+    <option name="LAST_COMMIT_MESSAGE" value="#51 Caalog products/services/project import / export for setup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

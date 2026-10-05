@@ -15,6 +15,8 @@ type Asset = {
   path: string;
   mime: string | null;
   alt: string | null;
+  original_name?: string | null;
+  size_bytes?: number | null;
   tags_json?: string[] | null;
   created_at?: string | null;
   category?: string;
@@ -364,7 +366,20 @@ export default function MediaPage() {
                     {asset.mime || 'file'}
                   </div>
                 )}
-                <code style={{ display: 'block', marginTop: '0.55rem', fontSize: '0.72rem', wordBreak: 'break-all' }}>
+                {asset.original_name ? (
+                  <div
+                    title="Original file name — use this in catalog import sheets"
+                    style={{ marginTop: '0.55rem', fontSize: '0.8rem', fontWeight: 600, wordBreak: 'break-all' }}
+                  >
+                    {asset.original_name}
+                    {asset.size_bytes ? (
+                      <span style={{ marginLeft: '0.35rem', fontWeight: 400, color: 'var(--admin-muted)', fontSize: '0.7rem' }}>
+                        {formatMediaBytes(asset.size_bytes)}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+                <code style={{ display: 'block', marginTop: asset.original_name ? '0.2rem' : '0.55rem', fontSize: '0.72rem', wordBreak: 'break-all' }}>
                   {asset.path}
                 </code>
                 {asset.source === 'filesystem' ? (

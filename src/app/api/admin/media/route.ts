@@ -1,4 +1,5 @@
-import { writeFile, mkdir, unlink } from 'fs/promises';
+import { createHash } from 'node:crypto';
+import { access, writeFile, mkdir, readdir, unlink } from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
 import type { RowDataPacket } from 'mysql2';
@@ -15,11 +16,13 @@ import {
   resolvePublicAssetDiskPath,
 } from '@/lib/media-paths';
 import {
+  findMediaByHash,
   findMediaById,
   listMediaLibrary,
   mediaKindFromMime,
   upsertMediaMetadata,
 } from '@/lib/media-library';
+import { baseName, seoFileName } from '@/lib/media-naming';
 import {
   MEDIA_UPLOAD_ACCEPT,
   MEDIA_UPLOAD_MAX_BYTES,
@@ -29,6 +32,13 @@ import {
   formatMediaBytes,
   validateMediaUploadFile,
 } from '@/lib/media-upload-rules';
+
+async function fileExists(diskPath: string) {
+  return access(diskPath).then(
+    () => true,
+    () => false
+  );
+}
 
 export async function GET(request: Request) {
   try {
@@ -83,14 +93,60 @@ export async function POST(request: Request) {
     const uploadsDir = adminMediaDiskDir(category);
     await mkdir(uploadsDir, { recursive: true });
 
-    const ext = path.extname(file.name) || '';
-    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
-    const diskPath = path.join(uploadsDir, safeName);
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(diskPath, buffer);
+    const contentHash = createHash('sha256').update(buffer).digest('hex');
+    // Uploaders may send a folder-relative name ("ups/front.jpg"); keep only the file part.
+    const originalName = baseName(String(form.get('original_name') || file.name)).slice(0, 255) || file.name;
+
+    if (String(form.get('dedupe') || '') === '1') {
+      const existing = await findMediaByHash(contentHash);
+      const existingDisk = existing ? resolvePublicAssetDiskPath(existing.path) : null;
+      if (existing && existingDisk && (await fileExists(existingDisk))) {
+        if (!existing.original_name || (alt && !existing.alt)) {
+          await upsertMediaMetadata({
+            path: existing.path,
+            original_name: existing.original_name || originalName,
+            ...(alt && !existing.alt ? { alt } : {}),
+          });
+        }
+        const reusedMediaId = itemId
+          ? await addItemMedia({ item_id: Number(itemId), kind: mediaKindFromMime(file.type), url: existing.path, alt, is_primary: isPrimary })
+          : null;
+        return jsonOk({
+          id: existing.id,
+          path: existing.path,
+          mediaId: reusedMediaId,
+          category,
+          reused: true,
+          original_name: existing.original_name || originalName,
+        });
+      }
+    }
+
+    const taken = new Set((await readdir(uploadsDir).catch(() => [] as string[])).map((n) => n.toLowerCase()));
+    let safeName = '';
+    for (let attempt = 0; attempt < 20 && !safeName; attempt++) {
+      const candidate = seoFileName(originalName, (c) => taken.has(c.toLowerCase()));
+      try {
+        // `wx` fails instead of overwriting when a parallel upload claimed the same name.
+        await writeFile(path.join(uploadsDir, candidate), buffer, { flag: 'wx' });
+        safeName = candidate;
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
+        taken.add(candidate.toLowerCase());
+      }
+    }
+    if (!safeName) throw new Error('Could not find a free file name');
 
     const publicPath = adminMediaPublicPath(category, safeName);
-    const id = await upsertMediaMetadata({ path: publicPath, alt: alt || null, mime: file.type });
+    const id = await upsertMediaMetadata({
+      path: publicPath,
+      alt: alt || null,
+      mime: file.type,
+      original_name: originalName,
+      content_hash: contentHash,
+      size_bytes: buffer.length,
+    });
 
     let mediaId: number | null = null;
     if (itemId) {
@@ -103,7 +159,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return jsonOk({ id, path: publicPath, mediaId, category }, { status: 201 });
+    return jsonOk({ id, path: publicPath, mediaId, category, reused: false, original_name: originalName }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
       return jsonError('Unauthorized', 401);

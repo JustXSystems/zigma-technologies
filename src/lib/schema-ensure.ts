@@ -265,6 +265,56 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
   },
 ];
 
+let mediaAssetColumnsReady: Promise<void> | null = null;
+
+const MEDIA_ASSET_COLUMNS: Array<{ name: string; ddl: string }> = [
+  {
+    name: 'original_name',
+    ddl: `ALTER TABLE media_assets ADD COLUMN original_name VARCHAR(255) NULL AFTER path, ADD INDEX idx_media_original_name (original_name)`,
+  },
+  {
+    name: 'content_hash',
+    ddl: `ALTER TABLE media_assets ADD COLUMN content_hash CHAR(64) NULL AFTER mime, ADD INDEX idx_media_content_hash (content_hash)`,
+  },
+  {
+    name: 'size_bytes',
+    ddl: `ALTER TABLE media_assets ADD COLUMN size_bytes INT UNSIGNED NULL AFTER content_hash`,
+  },
+];
+
+/**
+ * Idempotent: media_assets keeps the uploader's original file name (for mapping spreadsheets to
+ * files), a SHA-256 of the content (duplicate uploads reuse the stored file) and the byte size.
+ */
+export function ensureMediaAssetColumns(): Promise<void> {
+  if (!mediaAssetColumnsReady) {
+    mediaAssetColumnsReady = (async () => {
+      try {
+        for (const col of MEDIA_ASSET_COLUMNS) {
+          const [rows] = await pool.query<RowDataPacket[]>(
+            `SELECT COUNT(*) AS c
+             FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'media_assets'
+               AND COLUMN_NAME = ?`,
+            [col.name]
+          );
+          if (Number(rows[0]?.c || 0) > 0) continue;
+          await pool.query(col.ddl);
+          console.info(`[schema] added media_assets.${col.name}`);
+        }
+      } catch (err) {
+        if (isDbUnavailableError(err)) throw err;
+        console.error('[schema] could not ensure media_assets columns — run scripts/migrate-catalog-transfer.sql', err);
+      }
+    })().catch((err) => {
+      mediaAssetColumnsReady = null;
+      throw err;
+    });
+  }
+  return mediaAssetColumnsReady;
+}
+
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */
 export function ensureCatalogDiscoveryColumns(): Promise<void> {
   if (!discoveryColumnsReady) {

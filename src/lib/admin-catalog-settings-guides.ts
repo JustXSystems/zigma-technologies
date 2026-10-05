@@ -15,7 +15,7 @@ export type SettingsSectionId = 'sections' | 'hero' | 'listing' | 'popup' | 'dis
 export const CATALOG_SETTINGS_PAGE_INTRO = {
   title: 'Catalog settings',
   lead:
-    'Each catalog type (products, projects, services) has its own settings. Changes apply to the public listing page after you Save. Work one section at a time: Page sections → Hero → Listing → Quick view → Discovery → Categories.',
+    'Each catalog type (products, projects, services) has its own settings. Changes apply to the public listing page after you Save. Work one section at a time: Page sections → Hero → Listing → Quick view → Discovery → Categories. To add or update items in bulk from Excel, use Inventory → Excel import / export.',
 };
 
 export const CATALOG_SETTINGS_SECTIONS: Array<{

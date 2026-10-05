@@ -240,12 +240,32 @@ CREATE TABLE IF NOT EXISTS enquiries (
 CREATE TABLE IF NOT EXISTS media_assets (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   path VARCHAR(500) NOT NULL,
+  original_name VARCHAR(255) NULL,
   mime VARCHAR(120) NULL,
+  content_hash CHAR(64) NULL,
+  size_bytes INT UNSIGNED NULL,
   width INT NULL,
   height INT NULL,
   alt VARCHAR(255) NULL,
   tags_json JSON NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_media_original_name (original_name),
+  INDEX idx_media_content_hash (content_hash)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS catalog_transfer_jobs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  kind VARCHAR(12) NOT NULL DEFAULT 'import',
+  actor VARCHAR(255) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'analysed',
+  workbook_json LONGTEXT NULL,
+  options_json JSON NULL,
+  summary_json JSON NULL,
+  report_json LONGTEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  committed_at TIMESTAMP NULL,
+  INDEX idx_catalog_transfer_created (created_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS newsletter_subscribers (

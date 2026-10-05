@@ -20,6 +20,7 @@ import { getBrochureUrl, withBrochureUrl } from '@/lib/catalog-brochure';
 import MediaPicker from '@/components/admin/MediaPicker';
 import SeoFieldsEditor from '@/components/admin/SeoFieldsEditor';
 import CatalogMediaGallery from '@/components/CatalogMediaGallery';
+import CatalogTransferStudio, { downloadCatalogWorkbook } from '@/components/admin/catalog/CatalogTransferStudio';
 import { publicMediaUrl } from '@/lib/media-url';
 import { movedAddressNote } from '@/lib/moved-address';
 
@@ -138,6 +139,9 @@ function InventoryInner() {
   const [previewSurface, setPreviewSurface] = useState<'detail' | 'card'>('detail');
   const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null);
   const [editorTab, setEditorTab] = useState<'basics' | 'commerce' | 'case' | 'seo'>('basics');
+  const [bulkOpen, setBulkOpen] = useState(() => search.get('bulk') === '1');
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -165,7 +169,30 @@ function InventoryInner() {
   }, [load]);
 
   function setType(next: CatalogItemType) {
+    setSelected(new Set());
     router.push(`/admin/inventory?type=${next}`);
+  }
+
+  function toggleSelected(id: number) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function exportSelected() {
+    setExporting(true);
+    setError('');
+    try {
+      const { name } = await downloadCatalogWorkbook({ types: [type], mode: 'data', ids: [...selected] });
+      setMessage(`Downloaded ${name}. Edit it in Excel, then upload it with Excel import / export.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Export failed');
+    } finally {
+      setExporting(false);
+    }
   }
 
   function openCreate() {
@@ -666,16 +693,54 @@ function InventoryInner() {
           >
             Delete all {type}s
           </button>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setBulkOpen(true)} title="Add or update many items at once from an Excel workbook">
+            Excel import / export
+          </button>
           <button type="button" className="admin-btn admin-btn-primary" onClick={openCreate}>
             Add {type}
           </button>
         </div>
       </div>
 
+      {selected.size ? (
+        <div className="enq-selbar">
+          <strong>
+            {selected.size} {selected.size === 1 ? type : typeLabel.toLowerCase()} selected
+          </strong>
+          <span className="ct-sel-note">Edit them together in Excel, then upload the file back.</span>
+          <button type="button" className="admin-btn admin-btn-primary" disabled={exporting} onClick={() => void exportSelected()}>
+            {exporting ? 'Preparing…' : 'Export selected to Excel'}
+          </button>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setBulkOpen(true)}>
+            Upload edited file
+          </button>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setSelected(new Set())}>
+            Clear
+          </button>
+        </div>
+      ) : null}
+
       <div className="admin-table-wrap admin-card" style={{ padding: 0 }}>
         <table className="admin-table">
           <thead>
             <tr>
+              <th className="enq-check">
+                <input
+                  type="checkbox"
+                  aria-label={`Select all ${typeLabel.toLowerCase()}`}
+                  checked={items.length > 0 && items.every((i) => selected.has(i.id))}
+                  onChange={(e) =>
+                    setSelected((prev) => {
+                      const next = new Set(prev);
+                      for (const i of items) {
+                        if (e.target.checked) next.add(i.id);
+                        else next.delete(i.id);
+                      }
+                      return next;
+                    })
+                  }
+                />
+              </th>
               <th>Item</th>
               <th>Category</th>
               <th>Status</th>
@@ -687,19 +752,26 @@ function InventoryInner() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="admin-empty">
+                <td colSpan={7} className="admin-empty">
                   Loading…
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={6} className="admin-empty">
-                  No {typeLabel.toLowerCase()} yet. Create the first one.
+                <td colSpan={7} className="admin-empty">
+                  No {typeLabel.toLowerCase()} yet. Add the first one, or bring many in at once with{' '}
+                  <button type="button" className="admin-link-btn" onClick={() => setBulkOpen(true)}>
+                    Excel import
+                  </button>
+                  .
                 </td>
               </tr>
             ) : (
               items.map((item) => (
                 <tr key={item.id}>
+                  <td className="enq-check">
+                    <input type="checkbox" aria-label={`Select ${item.title}`} checked={selected.has(item.id)} onChange={() => toggleSelected(item.id)} />
+                  </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                       {item.primary_image ? (
@@ -776,6 +848,8 @@ function InventoryInner() {
           </tbody>
         </table>
       </div>
+
+      <CatalogTransferStudio open={bulkOpen} currentType={type} onClose={() => setBulkOpen(false)} onPublished={() => void load()} />
 
       {editorOpen ? (
         <div className="admin-modal-backdrop" onClick={() => setEditorOpen(false)}>

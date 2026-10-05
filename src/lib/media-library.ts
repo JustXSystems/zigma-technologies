@@ -2,6 +2,7 @@ import { readdir, stat } from 'fs/promises';
 import path from 'path';
 import type { RowDataPacket } from 'mysql2';
 import pool from '@/lib/db';
+import { ensureMediaAssetColumns } from '@/lib/schema-ensure';
 import {
   adminCategoryFromMime,
   adminMediaDiskDir,
@@ -14,9 +15,12 @@ import {
 export type MediaLibraryItem = {
   id: number | null;
   path: string;
+  /** File name as the uploader had it — what spreadsheets and people refer to. */
+  original_name: string | null;
   mime: string | null;
   alt: string | null;
   tags_json: string[] | null;
+  size_bytes: number | null;
   width: number | null;
   height: number | null;
   created_at: string | null;
@@ -93,9 +97,11 @@ function rowToItem(row: RowDataPacket): MediaLibraryItem {
   return {
     id: Number(row.id),
     path: assetPath,
+    original_name: row.original_name ? String(row.original_name) : null,
     mime: row.mime ? String(row.mime) : mimeFromFilename(assetPath),
     alt: row.alt ? String(row.alt) : null,
     tags_json: parseTags(row.tags_json),
+    size_bytes: row.size_bytes != null ? Number(row.size_bytes) : null,
     width: row.width != null ? Number(row.width) : null,
     height: row.height != null ? Number(row.height) : null,
     created_at: row.created_at ? String(row.created_at) : null,
@@ -104,9 +110,12 @@ function rowToItem(row: RowDataPacket): MediaLibraryItem {
   };
 }
 
+const MEDIA_COLUMNS = 'id, path, original_name, mime, alt, tags_json, size_bytes, width, height, created_at';
+
 export async function listMediaLibrary(query = ''): Promise<MediaLibraryItem[]> {
+  await ensureMediaAssetColumns();
   const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id, path, mime, alt, tags_json, width, height, created_at FROM media_assets ORDER BY id DESC LIMIT 1000'
+    `SELECT ${MEDIA_COLUMNS} FROM media_assets ORDER BY id DESC LIMIT 1000`
   );
 
   const dbByPath = new Map<string, MediaLibraryItem>();
@@ -145,9 +154,11 @@ export async function listMediaLibrary(query = ''): Promise<MediaLibraryItem[]> 
       merged.push({
         id: null,
         path: file.path,
+        original_name: null,
         mime: file.mime,
         alt: null,
         tags_json: null,
+        size_bytes: null,
         width: null,
         height: null,
         created_at: null,
@@ -175,6 +186,7 @@ export async function listMediaLibrary(query = ''): Promise<MediaLibraryItem[]> 
     const tags = (item.tags_json || []).join(' ').toLowerCase();
     return (
       item.path.toLowerCase().includes(q) ||
+      String(item.original_name || '').toLowerCase().includes(q) ||
       String(item.alt || '').toLowerCase().includes(q) ||
       tags.includes(q) ||
       item.category.includes(q)
@@ -187,7 +199,11 @@ export async function upsertMediaMetadata(input: {
   alt?: string | null;
   tags?: string[];
   mime?: string | null;
+  original_name?: string | null;
+  content_hash?: string | null;
+  size_bytes?: number | null;
 }) {
+  await ensureMediaAssetColumns();
   const assetPath = toStorageMediaPath(input.path.trim());
   if (!assetPath) throw new Error('path required');
 
@@ -198,27 +214,49 @@ export async function upsertMediaMetadata(input: {
 
   if (rows[0]) {
     const id = Number(rows[0].id);
-    if (input.alt !== undefined) {
-      await pool.query('UPDATE media_assets SET alt = ? WHERE id = ?', [input.alt, id]);
-    }
-    if (input.tags !== undefined) {
-      await pool.query('UPDATE media_assets SET tags_json = ? WHERE id = ?', [JSON.stringify(input.tags), id]);
-    }
+    const sets: string[] = [];
+    const params: unknown[] = [];
+    const set = (column: string, value: unknown) => {
+      sets.push(`${column} = ?`);
+      params.push(value);
+    };
+    if (input.alt !== undefined) set('alt', input.alt);
+    if (input.tags !== undefined) set('tags_json', JSON.stringify(input.tags));
+    if (input.original_name !== undefined) set('original_name', input.original_name?.slice(0, 255) || null);
+    if (input.content_hash !== undefined) set('content_hash', input.content_hash);
+    if (input.size_bytes !== undefined) set('size_bytes', input.size_bytes);
+    if (sets.length) await pool.query(`UPDATE media_assets SET ${sets.join(', ')} WHERE id = ?`, [...params, id]);
     return id;
   }
 
   const mime = input.mime || mimeFromFilename(assetPath);
   const [result] = await pool.query(
-    'INSERT INTO media_assets (path, mime, alt, tags_json) VALUES (?, ?, ?, ?)',
-    [assetPath, mime, input.alt ?? null, input.tags ? JSON.stringify(input.tags) : null]
+    'INSERT INTO media_assets (path, original_name, mime, content_hash, size_bytes, alt, tags_json) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [
+      assetPath,
+      input.original_name?.slice(0, 255) || null,
+      mime,
+      input.content_hash ?? null,
+      input.size_bytes ?? null,
+      input.alt ?? null,
+      input.tags ? JSON.stringify(input.tags) : null,
+    ]
   );
   return (result as { insertId: number }).insertId;
 }
 
 export async function findMediaById(id: number) {
+  await ensureMediaAssetColumns();
+  const [rows] = await pool.query<RowDataPacket[]>(`SELECT ${MEDIA_COLUMNS} FROM media_assets WHERE id = ? LIMIT 1`, [id]);
+  return rows[0] ? rowToItem(rows[0]) : null;
+}
+
+/** Newest library asset with identical content, so a re-upload can reuse the stored file. */
+export async function findMediaByHash(hash: string) {
+  await ensureMediaAssetColumns();
   const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id, path, mime, alt, tags_json, width, height, created_at FROM media_assets WHERE id = ? LIMIT 1',
-    [id]
+    `SELECT ${MEDIA_COLUMNS} FROM media_assets WHERE content_hash = ? ORDER BY id DESC LIMIT 1`,
+    [hash]
   );
   return rows[0] ? rowToItem(rows[0]) : null;
 }
