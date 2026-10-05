@@ -8,25 +8,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#48 user management issue fixed">
-      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminDrawer.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/AccessShell.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/Avatar.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/ConfirmDialog.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/PermissionMatrix.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/RoleForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/UserForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/access/use-access-directory.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ADMIN.md" beforeDir="false" afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/roles/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/roles/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/roles/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/roles/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/users/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/users/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/users/UserForm.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-roles.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-roles.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-screens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-screens.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/industries101-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/industries101-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/legacy-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/life-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/life-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/careers-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/careers-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,23 +75,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000220086807725" />
-      <entry key="MS500" value="1.2949724367032938" />
-      <entry key="S2" value="2.894399149481851" />
-      <entry key="S5" value="4.421645435113959" />
-      <entry key="S10" value="5.417153941523883" />
-      <entry key="S30" value="6.381069242511339" />
-      <entry key="S60" value="6.6897701890926005" />
-      <entry key="M2" value="7.261716527103592" />
-      <entry key="M5" value="11.258263933606788" />
-      <entry key="M10" value="17.149267867769215" />
-      <entry key="M15" value="20.833067304544677" />
-      <entry key="M30" value="28.504243993715825" />
-      <entry key="H1" value="48.082660030265444" />
-      <entry key="H2" value="103.21834976029587" />
-      <entry key="H4" value="227.6598103239158" />
-      <entry key="D1" value="2076.8111963008614" />
-      <entry key="W1" value="14850.023608096897" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.000001622682137" />
+      <entry key="S60" value="1.0087368471006735" />
+      <entry key="M2" value="1.9098875390248224" />
+      <entry key="M5" value="21.88743343739201" />
+      <entry key="M10" value="67.44898364443728" />
+      <entry key="M15" value="100.92571586936677" />
+      <entry key="M30" value="155.16462754669968" />
+      <entry key="H1" value="205.52085742705202" />
+      <entry key="H2" value="276.6600438609895" />
+      <entry key="H4" value="408.8257363006288" />
+      <entry key="D1" value="2257.9864637078745" />
+      <entry key="W1" value="15032.054936857061" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -114,31 +105,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="2.2118781031241154E-295" />
-      <entry key="H1" value="4.703060815176318E-148" />
-      <entry key="H2" value="2.16865414835455E-74" />
-      <entry key="H4" value="1.472635103624358E-37" />
-      <entry key="D1" value="7.38340691379699E-7" />
-      <entry key="W1" value="0.2063112862980017" />
+      <entry key="M30" value="1.292585948941968E-295" />
+      <entry key="H1" value="3.5952551355116695E-148" />
+      <entry key="H2" value="1.8961158022417735E-74" />
+      <entry key="H4" value="1.3769952078002496E-37" />
+      <entry key="D1" value="7.301235396245768E-7" />
+      <entry key="W1" value="0.20598169913990155" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9594780663402501" />
-      <entry key="MS500" value="1.2846518823132604" />
-      <entry key="S2" value="2.8886074290376045" />
-      <entry key="S5" value="4.417848405390208" />
-      <entry key="S10" value="5.414692034254147" />
-      <entry key="S30" value="6.380049233867046" />
-      <entry key="S60" value="6.689178508860019" />
-      <entry key="M2" value="7.260407307793696" />
-      <entry key="M5" value="11.254055220414376" />
-      <entry key="M10" value="17.144771699701224" />
-      <entry key="M15" value="20.82919460577302" />
-      <entry key="M30" value="28.501729625632052" />
-      <entry key="H1" value="48.081193578426465" />
-      <entry key="H2" value="103.21749430013332" />
-      <entry key="H4" value="227.65928375326234" />
-      <entry key="D1" value="2076.8109708059183" />
-      <entry key="W1" value="14850.229755497117" />
+      <entry key="MS100" value="0.9138314502294005" />
+      <entry key="MS500" value="0.9821395952633915" />
+      <entry key="S2" value="0.995504677670617" />
+      <entry key="S5" value="0.9981994402866303" />
+      <entry key="S10" value="0.9990993145261537" />
+      <entry key="S30" value="0.9997013037762923" />
+      <entry key="S60" value="1.008586038557788" />
+      <entry key="M2" value="1.9097768246605884" />
+      <entry key="M5" value="21.88688605665022" />
+      <entry key="M10" value="67.44750429687835" />
+      <entry key="M15" value="100.92381605949839" />
+      <entry key="M30" value="155.16272456753464" />
+      <entry key="H1" value="205.51946974310343" />
+      <entry key="H2" value="276.6591479264095" />
+      <entry key="H4" value="408.8251659614106" />
+      <entry key="D1" value="2257.986227147403" />
+      <entry key="W1" value="15032.26075297805" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

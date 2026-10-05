@@ -450,7 +450,7 @@ export function LegacyStatsEditor({ content: c, onChange }: EditorProps<LegacySt
       </Group>
       <Group title="Number, label & icon style">
         <ColorInput label="Prefix / suffix color" value={c.suffixColor} onChange={(suffixColor) => set({ suffixColor })} fallback="var(--orange)" />
-        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="clamp(1.7rem,2.9vw,2.5rem)" />
+        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="1.3rem (mono)" />
         <StyleEditor title="Label style" value={c.labelStyle} onChange={(labelStyle) => set({ labelStyle })} allowHide={false} fontSizePlaceholder="0.82rem" />
         <div className="admin-form-grid">
           <TextInput label="Icon size (all stats)" value={is.size} onChange={(size) => setIcon({ size })} placeholder="30px" />

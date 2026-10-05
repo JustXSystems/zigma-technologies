@@ -297,7 +297,7 @@ function LifeStatsEditor({ content: c, onChange }: EditorProps<LifeStatsContent>
       </Group>
       <Group title="Number & label style">
         <ColorInput label="Prefix / suffix color" value={c.suffixColor} onChange={(suffixColor) => set({ suffixColor })} fallback="var(--orange)" />
-        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="clamp(0.95rem,1.4vw,1.15rem)" />
+        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="1.3rem (mono)" />
         <StyleEditor title="Label style" value={c.labelStyle} onChange={(labelStyle) => set({ labelStyle })} allowHide={false} fontSizePlaceholder="0.6rem" />
       </Group>
       <Group title="Icon style (all stats)" description="Per-stat icon settings override these">

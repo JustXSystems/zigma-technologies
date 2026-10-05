@@ -901,7 +901,7 @@ function HomeStatsEditor({ content: c, onChange }: EditorProps<HomeStatsContent>
       </Group>
       <Group title="Number, label & icon style">
         <ColorInput label="Prefix / suffix color" value={c.suffixColor} onChange={(suffixColor) => set({ suffixColor })} fallback="var(--orange)" />
-        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} />
+        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="1.3rem (mono)" />
         <StyleEditor title="Label style" value={c.labelStyle} onChange={(labelStyle) => set({ labelStyle })} allowHide={false} />
         <div className="admin-form-grid">
           <Field label="Icons">

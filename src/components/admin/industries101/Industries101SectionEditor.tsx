@@ -365,7 +365,7 @@ function Ind101StatsEditor({ content: c, onChange }: EditorProps<Ind101StatsCont
           <TextInput label="Icon opacity" value={is.opacity} onChange={(opacity) => setIcon({ opacity })} placeholder="0.9" />
           <TextInput label="Icon stroke width" value={is.strokeWidth} onChange={(strokeWidth) => setIcon({ strokeWidth })} placeholder="1.6" />
         </div>
-        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="2.1rem (1.6rem on phones)" />
+        <StyleEditor title="Number style" value={c.numberStyle} onChange={(numberStyle) => set({ numberStyle })} allowHide={false} fontSizePlaceholder="1.3rem (mono)" />
         <StyleEditor title="Label style" value={c.labelStyle} onChange={(labelStyle) => set({ labelStyle })} allowHide={false} fontSizePlaceholder="0.7rem" />
       </Group>
     </>

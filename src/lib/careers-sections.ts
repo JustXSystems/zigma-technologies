@@ -391,7 +391,7 @@ export function defaultCareersStatsContent(): CareersStatsContent {
     countDurationMs: 1800,
     hoverLift: false,
     suffixColor: 'var(--cyan)',
-    numberStyle: { color: 'var(--cyan)', fontSize: '2rem', marginBottom: '0.3rem' },
+    numberStyle: { color: 'var(--cyan)', marginBottom: '0.3rem' },
     labelStyle: {
       fontFamily: 'mono',
       fontSize: '0.72rem',

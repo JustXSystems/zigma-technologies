@@ -1143,7 +1143,7 @@
   .cap-group-red .cap-check:hover{color:var(--red);}
   .cap-group-lime .cap-check:hover{color:var(--lime);}
   .mini-trust{display:flex;gap:2.2rem;flex-wrap:wrap;margin-bottom:2.2rem;padding-top:1.8rem;border-top:1px solid rgba(255,255,255,0.1);}
-  .mini-trust .mstat .num{font-family:var(--font-mono);font-weight:600;font-size:1.5rem;color:var(--white);}
+  .mini-trust .mstat .num{font-family:var(--font-mono);font-weight:700;font-size:1.3rem;line-height:1.35;color:var(--white);}
   .mini-trust .mstat .num .plus{color:var(--orange);}
   .mini-trust .mstat .lbl{font-size:0.72rem;color:#8FA3C2;margin-top:0.2rem;}
   .badge-iso{font-family:var(--font-mono);font-size:0.68rem;border:1px solid var(--green);color:var(--green);padding:0.3rem 0.6rem;border-radius:4px;align-self:flex-start;}
@@ -1156,7 +1156,7 @@
   .stat:hover .stat-icon{color:var(--orange);opacity:1;}
   .stat-icon{width:26px;height:26px;color:var(--cyan);opacity:0.85;margin-bottom:0.5rem;flex-shrink:0;transition:color .25s ease, opacity .25s ease;}
   .stat-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
-  .stat .num{font-family:var(--font-mono);font-weight:600;font-size:clamp(1.3rem,2.2vw,1.9rem);color:var(--white);}
+  .stat .num{font-family:var(--font-mono);font-weight:700;font-size:1.3rem;line-height:1.35;color:var(--white);}
   .stat .num .plus{color:var(--orange);}
   .stat .label{font-size:0.72rem;color:#8FA3C2;margin-top:0.3rem;letter-spacing:0.02em;}
 
@@ -3597,7 +3597,7 @@ body.careers-page .why-card.is-animated svg.card-outline rect.outline-highlight{
 .culture-bar{background:var(--navy-900);border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);padding:2rem 0;}
 .culture-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
 .culture-item{text-align:center;color:var(--white);}
-.culture-item .cn{font-family:var(--font-display);font-weight:700;font-size:2rem;color:var(--cyan);margin-bottom:0.3rem;}
+.culture-item .cn{font-family:var(--font-mono);font-weight:700;font-size:1.3rem;line-height:1.35;color:var(--cyan);margin-bottom:0.3rem;}
 .culture-item .cl{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:#8FA3C2;}
 
 /* ---------- CURRENT OPENINGS — job cards ---------- */
