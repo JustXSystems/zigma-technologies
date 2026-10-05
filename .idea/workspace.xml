@@ -7,17 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#48 user management issue fixed">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#49 Stats section Number font">
+      <change afterPath="$PROJECT_DIR$/src/components/blog/BlogPostsContext.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/blog-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/industries101-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/industries101-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/legacy-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/life-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/life-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/careers-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/careers-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,23 +69,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.000001622682137" />
-      <entry key="S60" value="1.0087368471006735" />
-      <entry key="M2" value="1.9098875390248224" />
-      <entry key="M5" value="21.88743343739201" />
-      <entry key="M10" value="67.44898364443728" />
-      <entry key="M15" value="100.92571586936677" />
-      <entry key="M30" value="155.16462754669968" />
-      <entry key="H1" value="205.52085742705202" />
-      <entry key="H2" value="276.6600438609895" />
-      <entry key="H4" value="408.8257363006288" />
-      <entry key="D1" value="2257.9864637078745" />
-      <entry key="W1" value="15032.054936857061" />
+      <entry key="MS100" value="1.5961415507102956" />
+      <entry key="MS500" value="3.5244744993470385" />
+      <entry key="S2" value="9.117164175345863" />
+      <entry key="S5" value="17.53517999786297" />
+      <entry key="S10" value="27.46036709294502" />
+      <entry key="S30" value="55.73540381788788" />
+      <entry key="S60" value="86.48289416749205" />
+      <entry key="M2" value="123.29878548620255" />
+      <entry key="M5" value="166.7928968124551" />
+      <entry key="M10" value="194.58527568832528" />
+      <entry key="M15" value="211.74316000943037" />
+      <entry key="M30" value="244.01446218753358" />
+      <entry key="H1" value="293.9030951656756" />
+      <entry key="H2" value="385.3988862666749" />
+      <entry key="H4" value="542.2806781449456" />
+      <entry key="D1" value="2382.1442989538373" />
+      <entry key="W1" value="15160.755165034032" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -105,31 +99,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="1.292585948941968E-295" />
-      <entry key="H1" value="3.5952551355116695E-148" />
-      <entry key="H2" value="1.8961158022417735E-74" />
-      <entry key="H4" value="1.3769952078002496E-37" />
-      <entry key="D1" value="7.301235396245768E-7" />
-      <entry key="W1" value="0.20598169913990155" />
+      <entry key="M30" value="2.416658511570879E-297" />
+      <entry key="H1" value="4.9159521067352766E-149" />
+      <entry key="H2" value="7.011385103340368E-75" />
+      <entry key="H4" value="8.373401401804126E-38" />
+      <entry key="D1" value="6.720340286473392E-7" />
+      <entry key="W1" value="0.20355653639480487" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9138314502294005" />
-      <entry key="MS500" value="0.9821395952633915" />
-      <entry key="S2" value="0.995504677670617" />
-      <entry key="S5" value="0.9981994402866303" />
-      <entry key="S10" value="0.9990993145261537" />
-      <entry key="S30" value="0.9997013037762923" />
-      <entry key="S60" value="1.008586038557788" />
-      <entry key="M2" value="1.9097768246605884" />
-      <entry key="M5" value="21.88688605665022" />
-      <entry key="M10" value="67.44750429687835" />
-      <entry key="M15" value="100.92381605949839" />
-      <entry key="M30" value="155.16272456753464" />
-      <entry key="H1" value="205.51946974310343" />
-      <entry key="H2" value="276.6591479264095" />
-      <entry key="H4" value="408.8251659614106" />
-      <entry key="D1" value="2257.986227147403" />
-      <entry key="W1" value="15032.26075297805" />
+      <entry key="MS100" value="1.50130642085353" />
+      <entry key="MS500" value="3.478027984849285" />
+      <entry key="S2" value="9.088300846098063" />
+      <entry key="S5" value="17.51397214783428" />
+      <entry key="S10" value="27.44408453584296" />
+      <entry key="S30" value="55.724354940594175" />
+      <entry key="S60" value="86.47366484518916" />
+      <entry key="M2" value="123.29075515995962" />
+      <entry key="M5" value="166.7873175983991" />
+      <entry key="M10" value="194.58171756946234" />
+      <entry key="M15" value="211.74054008972013" />
+      <entry key="M30" value="244.012948085018" />
+      <entry key="H1" value="293.9021068964162" />
+      <entry key="H2" value="385.39813674405053" />
+      <entry key="H4" value="542.2801166628639" />
+      <entry key="D1" value="2382.144044575081" />
+      <entry key="W1" value="15160.958552685026" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -284,7 +278,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 similar admin page design for terms" />
     <MESSAGE value="#45 similar admin page design for industries-data-centres" />
     <MESSAGE value="#46 Industries page redesign" />
     <MESSAGE value="#47 Quality and Safety Page design" />
@@ -309,7 +302,8 @@
     <MESSAGE value="#48 admin email fixed" />
     <MESSAGE value="#48 admin consoliation" />
     <MESSAGE value="#48 user management issue fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="#48 user management issue fixed" />
+    <MESSAGE value="#49 Stats section Number font" />
+    <option name="LAST_COMMIT_MESSAGE" value="#49 Stats section Number font" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
