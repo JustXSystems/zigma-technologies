@@ -718,6 +718,7 @@ export async function getPageSettings(itemType: CatalogItemType) {
       12,
       Math.max(1, Number(row.discovery_group_preview_count ?? 4) || 4)
     ),
+    listing_design: row.listing_design === 'projects101' ? 'projects101' : 'classic',
   } satisfies CatalogPageSettings;
 }
 
@@ -855,6 +856,8 @@ export async function updatePageSettings(
       input.discovery_group_preview_count === undefined
         ? undefined
         : Math.min(12, Math.max(1, Number(input.discovery_group_preview_count) || 4)),
+    listing_design:
+      input.listing_design === undefined ? undefined : input.listing_design === 'projects101' ? 'projects101' : 'classic',
   };
   for (const [key, value] of Object.entries(map)) {
     if (value !== undefined) {

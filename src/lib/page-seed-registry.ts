@@ -17,6 +17,7 @@ import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sect
 import { PRIVACY_SEED_SECTIONS_V2, PRIVACY_SLUG, isPrivacySectionType, upgradePrivacySection } from '@/lib/privacy-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
 import { BLOG_BASE_PATH, BLOG_SEED_SECTIONS, BLOG_SLUG } from '@/lib/blog-sections';
+import { PROJECTS101_SEED_SECTIONS, PROJECTS101_SLUG } from '@/lib/projects101-sections';
 import { TERMS_SEED_SECTIONS_V2, TERMS_SLUG, isTermsSectionType, upgradeTermsSection } from '@/lib/terms-sections';
 
 export type SeedSection = {
@@ -60,6 +61,19 @@ const CORE_AND_COMPANY: PageSeedDef[] = [
     sections: () => HOME_SEED_SECTIONS,
     upgrade: (type, content) => upgradeHomeSection(type, content),
     isUpgradedType: isHomeSectionType,
+  },
+  {
+    slug: PROJECTS101_SLUG,
+    label: 'Projects 101',
+    group: 'Core',
+    path: `/${PROJECTS101_SLUG}`,
+    page: {
+      title: 'Projects',
+      meta_title: 'Projects | Zigma Technologies',
+      meta_description:
+        'Recent solar EPC, UPS, hybrid power and solar maintenance projects delivered by Zigma Technologies across India — capacities, locations and scope of work.',
+    },
+    sections: () => PROJECTS101_SEED_SECTIONS,
   },
   {
     slug: 'about-zigma',

@@ -537,7 +537,12 @@ export type CatalogPageSettings = {
   discovery_sticky_toolbar_enabled: number;
   /** Cards shown per group before “View all” */
   discovery_group_preview_count: number;
+  /** Which page design the public listing URL serves (projects101 = the Projects 101 CMS page; projects only). */
+  listing_design: CatalogListingDesign;
 };
+
+export const CATALOG_LISTING_DESIGN_VALUES = ['classic', 'projects101'] as const;
+export type CatalogListingDesign = (typeof CATALOG_LISTING_DESIGN_VALUES)[number];
 
 export type FormField = {
   id: number;

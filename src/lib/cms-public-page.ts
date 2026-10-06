@@ -8,9 +8,11 @@ import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
 import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
 import { BLOG_SEED_SECTIONS, BLOG_SLUG } from '@/lib/blog-sections';
+import { PROJECTS101_SEED_SECTIONS, PROJECTS101_SLUG } from '@/lib/projects101-sections';
 
 function seedForSlug(slug: string) {
   if (slug === BLOG_SLUG) return BLOG_SEED_SECTIONS;
+  if (slug === PROJECTS101_SLUG) return PROJECTS101_SEED_SECTIONS;
   if (slug === 'home') return HOME_SEED_SECTIONS;
   if (slug === 'careers') return CAREERS_SEED_SECTIONS_V2;
   if (slug === 'certifications') return CERTIFICATIONS_SEED_SECTIONS_V2;
@@ -28,6 +30,7 @@ function seedPage(slug: string, sections: ReturnType<typeof seedForSlug>): CmsPa
     certifications: 'Certifications',
     [QS_SLUG]: 'Quality & Safety',
     [BLOG_SLUG]: 'Blog',
+    [PROJECTS101_SLUG]: 'Projects',
   };
   return {
     id: 0,

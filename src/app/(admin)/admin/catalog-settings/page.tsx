@@ -2,7 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import type { CatalogCategory, CatalogItemType, CatalogPageSettings } from '@/lib/types';
+import type { CatalogCategory, CatalogItemType, CatalogListingDesign, CatalogPageSettings } from '@/lib/types';
 import {
   slugify,
   CARD_MEDIA_INSET_OPTIONS,
@@ -60,6 +60,7 @@ import type { CatalogChrome, SiteCopy } from '@/lib/site-copy';
 import { useAdminUser } from '@/components/admin/admin-session';
 import { useSiteCopySlice } from '@/components/admin/site-copy/use-site-copy-slice';
 import CatalogPartnerStripFields from '@/components/admin/catalog/CatalogPartnerStripFields';
+import Projects101Settings from '@/components/admin/catalog/Projects101Settings';
 import { PARTNER_STRIP_PATHS, catalogCopyKey } from '@/components/admin/catalog/catalog-copy';
 import {
   CATALOG_SETTINGS_BLOCKS,
@@ -642,6 +643,8 @@ function CatalogAppearancePreview({
 
 export default function CatalogSettingsPage() {
   const [type, setType] = useState<CatalogItemType>('product');
+  const [projects101, setProjects101] = useState(false);
+  const [servedDesign, setServedDesign] = useState<CatalogListingDesign | null>(null);
   const [categories, setCategories] = useState<CatalogCategory[]>([]);
   const [items, setItems] = useState<Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>>(
     []
@@ -826,26 +829,28 @@ export default function CatalogSettingsPage() {
   }
   return (
     <div className="admin-settings">
-      <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
-        <button
-          type="button"
-          className="admin-btn admin-btn-primary"
-          disabled={saving || !settings}
-          onClick={() => void saveSettings()}
-        >
-          {saving ? 'Saving…' : 'Save settings'}
-        </button>
-      </AdminFloatingActions>
+      {!projects101 ? (
+        <AdminFloatingActions status={message || (saving ? 'Saving…' : undefined)}>
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            disabled={saving || !settings}
+            onClick={() => void saveSettings()}
+          >
+            {saving ? 'Saving…' : 'Save settings'}
+          </button>
+        </AdminFloatingActions>
+      ) : null}
 
-      {error || partnerStrip.error ? <div className="admin-error">{error || partnerStrip.error}</div> : null}
-      {message ? <div className="admin-success">{message}</div> : null}
+      {!projects101 && (error || partnerStrip.error) ? <div className="admin-error">{error || partnerStrip.error}</div> : null}
+      {!projects101 && message ? <div className="admin-success">{message}</div> : null}
 
       <header className="admin-settings-masthead">
         <h1>{CATALOG_SETTINGS_PAGE_INTRO.title}</h1>
         <p>
           {CATALOG_SETTINGS_PAGE_INTRO.lead} Currently editing{' '}
           <strong>
-            <code>/{type}s</code>
+            <code>{projects101 ? '/projects101' : `/${type}s`}</code>
           </strong>
           .
         </p>
@@ -855,22 +860,49 @@ export default function CatalogSettingsPage() {
               key={t}
               type="button"
               role="tab"
-              aria-selected={type === t}
-              className={`admin-settings-type${type === t ? ' is-active' : ''}`}
+              aria-selected={!projects101 && type === t}
+              className={`admin-settings-type${!projects101 && type === t ? ' is-active' : ''}`}
               onClick={() => {
+                setProjects101(false);
                 if (t !== type && confirmDiscard()) setType(t);
               }}
             >
               {t}s
             </button>
           ))}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={projects101}
+            className={`admin-settings-type${projects101 ? ' is-active' : ''}`}
+            title="Redesigned projects page (/projects101); can replace /projects"
+            onClick={() => setProjects101(true)}
+          >
+            projects101
+          </button>
         </div>
         <p className="admin-hint" style={{ marginTop: '0.85rem', display: 'inline-flex', alignItems: 'center' }}>
           Catalog type
-          <HelpTip text="Each type (products, projects, services) has its own settings profile. Saving products does not change projects or services." label="Help: Catalog type" />
+          <HelpTip
+            text="Each type (products, projects, services) has its own settings profile. Saving products does not change projects or services. projects101 is the redesigned projects page; switch /projects between the two on that tab."
+            label="Help: Catalog type"
+          />
         </p>
+        {!projects101 && type === 'project' && (servedDesign ?? settings?.listing_design) === 'projects101' ? (
+          <p className="admin-hint" style={{ marginTop: '0.35rem' }}>
+            /projects currently shows the Projects 101 page, so these listing settings apply only after switching back on the{' '}
+            <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => setProjects101(true)}>
+              projects101
+            </button>{' '}
+            tab. Project detail pages (/projects/…) still use them.
+          </p>
+        ) : null}
       </header>
 
+      {projects101 ? (
+        <Projects101Settings onDesignChange={setServedDesign} />
+      ) : (
+      <>
       <nav className="admin-settings-nav" aria-label="Settings sections">
         {CATALOG_SETTINGS_SECTIONS.map((s) => (
           <button
@@ -1878,6 +1910,8 @@ export default function CatalogSettingsPage() {
           </div>
         </div>
       ) : null}
+      </>
+      )}
     </div>
   );
 }

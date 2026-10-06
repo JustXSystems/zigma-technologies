@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import CatalogPageClient from '../_components/CatalogPageClient';
 import SocialProofStrip from '@/components/SocialProofStrip';
 import JsonLd from '@/components/JsonLd';
+import CmsPageShell from '@/components/CmsPageShell';
+import { getPageSettings } from '@/lib/catalog';
 import { loadInitialCatalogListing } from '@/lib/catalog-listing';
+import { PROJECTS101_SLUG } from '@/lib/projects101-sections';
 import { breadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
 import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
@@ -18,7 +21,25 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({ ...seo, path: '/projects' });
 }
 
+/** Catalog Settings → Projects 101 → "Serve on /projects" swaps the listing for the Projects 101 page. */
+async function servesProjects101() {
+  try {
+    return (await getPageSettings('project'))?.listing_design === 'projects101';
+  } catch {
+    return false;
+  }
+}
+
 export default async function ProjectsPage({ searchParams }: Props) {
+  if (await servesProjects101()) {
+    return (
+      <>
+        <JsonLd data={breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects' }])} />
+        <CmsPageShell slug={PROJECTS101_SLUG} />
+      </>
+    );
+  }
+
   const [copy, initial] = await Promise.all([getSiteCopy(), loadInitialCatalogListing('project', await searchParams)]);
   const chrome = copy.catalog.projects;
 

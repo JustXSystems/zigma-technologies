@@ -17,6 +17,7 @@ import { renderTermsSection } from '@/components/sections/TermsSections';
 import { renderIndustriesSection } from '@/components/sections/IndustriesSections';
 import { renderIndustryPageSection } from '@/components/sections/IndustryPageSections';
 import { renderIndustries101Section } from '@/components/sections/Industries101Sections';
+import { renderProjects101Section } from '@/components/sections/Projects101Sections';
 import { renderQualitySafetySection } from '@/components/sections/QualitySafetySections';
 import { renderBlogSection } from '@/components/sections/BlogSections';
 import { renderHomeSection } from '@/components/sections/HomeSections';
@@ -2291,6 +2292,9 @@ export function renderCmsSection(section: CmsSection) {
     case 'ind101_category':
     case 'ind101_cta':
       return wrap(renderIndustries101Section(section.type, { key, content, sectionKey: section.section_key }));
+    case 'pj101_projects':
+    case 'pj101_ongoing':
+      return wrap(renderProjects101Section(section.type, { key, content, sectionKey: section.section_key }));
     case 'qs_hero':
     case 'qs_stats':
     case 'qs_quality':

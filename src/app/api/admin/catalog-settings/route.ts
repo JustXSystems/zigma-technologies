@@ -7,6 +7,7 @@ import {
   CATALOG_SHADOW_STYLE_VALUES,
   CATALOG_DETAIL_LAYOUT_VALUES,
   CATALOG_DETAIL_TEMPLATE_VALUES,
+  CATALOG_LISTING_DESIGN_VALUES,
   CATALOG_TOOLBAR_DISPLAY_VALUES,
 } from '@/lib/types';
 import { isHeroHeight, normalizeHeroHeight } from '@/lib/hero-height';
@@ -95,6 +96,7 @@ const putSchema = z.object({
   discovery_grouped_results_enabled: z.boolean().optional(),
   discovery_sticky_toolbar_enabled: z.boolean().optional(),
   discovery_group_preview_count: z.number().int().min(1).max(12).optional(),
+  listing_design: z.enum(CATALOG_LISTING_DESIGN_VALUES).optional(),
 });
 
 export async function PUT(request: Request) {

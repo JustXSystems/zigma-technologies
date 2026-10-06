@@ -109,6 +109,8 @@ export const SECTION_TYPES = [
   { type: 'ind101_stats', label: 'Industries 101 · Quick stat strip (numbers, icons, colors)' },
   { type: 'ind101_category', label: 'Industries 101 · Category block (collage media, sector cards)' },
   { type: 'ind101_cta', label: 'Industries 101 · CTA band (buttons, background media)' },
+  { type: 'pj101_projects', label: 'Projects 101 · Project cards (filter, detail popup, running strip)' },
+  { type: 'pj101_ongoing', label: 'Projects 101 · Ongoing projects (stage tracker cards)' },
   { type: 'qs_hero', label: 'Quality & Safety · Page hero (Ken Burns slideshow, breadcrumb, chips)' },
   { type: 'qs_stats', label: 'Quality & Safety · Stat bar (count-up numbers)' },
   { type: 'qs_quality', label: 'Quality & Safety · Quality approach (photo / video panel + process steps)' },

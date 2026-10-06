@@ -13,6 +13,7 @@ import "./certifications-sections.css";
 import "./privacy-sections.css";
 import "./industries-sections.css";
 import "./industries101-sections.css";
+import "./projects101-sections.css";
 import "./qualitysafety-sections.css";
 import "./blog-sections.css";
 

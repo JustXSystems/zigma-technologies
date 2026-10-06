@@ -111,6 +111,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Friendly aliases for the Projects 101 CMS page (slug projects101)
+  const PROJECTS101_ALIASES = new Set(['/projects101.html', '/projects-101']);
+  if (PROJECTS101_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/projects101';
+    return NextResponse.redirect(url, 308);
+  }
+
   // Friendly aliases for the Quality & Safety CMS page (slug qualitysafety)
   const QS_ALIASES = new Set(['/qualitysafety.html', '/quality-safety', '/quality-safety.html', '/quality-and-safety']);
   if (QS_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {

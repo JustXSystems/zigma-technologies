@@ -48,6 +48,8 @@ import { isIndustryPageSectionType, withIndustryPageDefaults } from '@/lib/indus
 import IndustryPageSectionEditor from '@/components/admin/industries/IndustryPageSectionEditor';
 import { isIndustries101SectionType, withIndustries101Defaults } from '@/lib/industries101-sections';
 import Industries101SectionEditor from '@/components/admin/industries101/Industries101SectionEditor';
+import { isProjects101SectionType, withProjects101Defaults } from '@/lib/projects101-sections';
+import Projects101SectionEditor from '@/components/admin/projects101/Projects101SectionEditor';
 import { isQsSectionType, withQsDefaults } from '@/lib/qualitysafety-sections';
 import QualitySafetySectionEditor from '@/components/admin/qualitysafety/QualitySafetySectionEditor';
 import { isBlogSectionType, withBlogDefaults } from '@/lib/blog-sections';
@@ -233,6 +235,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
     if (isIndustriesSectionType(section.type)) return withIndustriesDefaults<Record<string, unknown>>(section.type, raw);
     if (isIndustryPageSectionType(section.type)) return withIndustryPageDefaults<Record<string, unknown>>(section.type, raw);
     if (isIndustries101SectionType(section.type)) return withIndustries101Defaults<Record<string, unknown>>(section.type, raw);
+    if (isProjects101SectionType(section.type)) return withProjects101Defaults<Record<string, unknown>>(section.type, raw);
     if (isQsSectionType(section.type)) return withQsDefaults<Record<string, unknown>>(section.type, raw);
     if (isBlogSectionType(section.type)) return withBlogDefaults<Record<string, unknown>>(section.type, raw);
     if (isHomeSectionType(section.type)) return withHomeDefaults<Record<string, unknown>>(section.type, raw);
@@ -556,6 +559,9 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
             ) : null}
             {isIndustries101SectionType(section.type) ? (
               <Industries101SectionEditor type={section.type} content={content} onChange={setContent} />
+            ) : null}
+            {isProjects101SectionType(section.type) ? (
+              <Projects101SectionEditor type={section.type} content={content} onChange={setContent} />
             ) : null}
             {isQsSectionType(section.type) ? (
               <QualitySafetySectionEditor type={section.type} content={content} onChange={setContent} />

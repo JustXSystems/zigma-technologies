@@ -10,6 +10,13 @@ import { defaultTermsSectionContent } from '@/lib/terms-sections';
 import { defaultIndustriesSectionContent } from '@/lib/industries-sections';
 import { defaultIndustryPageSectionContent } from '@/lib/industry-page-sections';
 import { defaultIndustries101SectionContent } from '@/lib/industries101-sections';
+import {
+  PROJECTS101_SLUG,
+  defaultPj101CtaContent,
+  defaultPj101HeroContent,
+  defaultPj101StatsContent,
+  defaultProjects101SectionContent,
+} from '@/lib/projects101-sections';
 import { defaultQsSectionContent } from '@/lib/qualitysafety-sections';
 import { defaultHomeSectionContent } from '@/lib/home-sections';
 import { defaultBlogSectionContent } from '@/lib/blog-sections';
@@ -17,6 +24,11 @@ import { defaultBlogSectionContent } from '@/lib/blog-sections';
 /** Starter content for a newly added CMS section of `type` (empty object when the type has no seed). */
 export function defaultCmsSectionContent(type: string, pageSlug?: string): Record<string, unknown> {
   if (type === 'industry_category') return defaultIndustryCategoryContent();
+  if (pageSlug === PROJECTS101_SLUG) {
+    if (type === 'ind101_hero') return defaultPj101HeroContent();
+    if (type === 'ind101_stats') return defaultPj101StatsContent();
+    if (type === 'ind101_cta') return defaultPj101CtaContent();
+  }
   return (
     defaultAboutSectionContent(type) ||
     defaultLifeSectionContent(type) ||
@@ -29,6 +41,7 @@ export function defaultCmsSectionContent(type: string, pageSlug?: string): Recor
     defaultIndustriesSectionContent(type) ||
     defaultIndustryPageSectionContent(type, pageSlug) ||
     defaultIndustries101SectionContent(type) ||
+    defaultProjects101SectionContent(type) ||
     defaultQsSectionContent(type) ||
     defaultHomeSectionContent(type) ||
     defaultBlogSectionContent(type) ||

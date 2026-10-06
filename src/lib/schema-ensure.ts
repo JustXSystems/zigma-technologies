@@ -263,6 +263,10 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'detail_elements_json',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN detail_elements_json JSON NULL AFTER detail_template`,
   },
+  {
+    name: 'listing_design',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN listing_design VARCHAR(16) NOT NULL DEFAULT 'classic' AFTER detail_elements_json`,
+  },
 ];
 
 let mediaAssetColumnsReady: Promise<void> | null = null;

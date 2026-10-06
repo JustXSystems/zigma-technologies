@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS catalog_page_settings (
   detail_gallery_shadow VARCHAR(20) NOT NULL DEFAULT 'medium',
   detail_template VARCHAR(20) NOT NULL DEFAULT 'classic',
   detail_elements_json JSON NULL,
+  listing_design VARCHAR(16) NOT NULL DEFAULT 'classic',
   hero_variant ENUM('standard','spotlight') NOT NULL DEFAULT 'spotlight',
   hero_height VARCHAR(8) NOT NULL DEFAULT 'full',
   detail_hero_height VARCHAR(8) NOT NULL DEFAULT 'full',
