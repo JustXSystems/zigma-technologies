@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode, type TouchEvent } from 'react';
 import { appHref } from '@/lib/base-path';
 import { fitHeroViewportUnits } from '@/lib/hero-height';
+import type { BgVideoProps } from '@/components/BgVideo';
 import { useSiteShell } from '@/components/SiteProviders';
 import { useSiteCopy } from '@/lib/use-site-copy';
 import { headingTagForRole, logoAltText } from '@/lib/site-settings';
@@ -364,10 +365,17 @@ function HmCtas({
 }
 
 /** One image / video for a background layer (first hero image is fetched with high priority). */
-function HmLayerMedia({ item, priority, onFail }: { item: LifeMediaItem; priority?: boolean; onFail: (src: string) => void }) {
+function HmLayerMedia({
+  item,
+  priority,
+  onFail,
+  ...video
+}: { item: LifeMediaItem; priority?: boolean; onFail: (src: string) => void } & Pick<BgVideoProps, 'active' | 'warm' | 'scope'>) {
   const src = mediaSrc(item.src);
   if (!src) return null;
-  if (lifeMediaKind(item) === 'video') return <AzVideo className="lz-media lgy-bg-media" src={src} poster={mediaSrc(item.poster)} />;
+  if (lifeMediaKind(item) === 'video') {
+    return <AzVideo className="lz-media lgy-bg-media" src={src} poster={mediaSrc(item.poster)} {...video} />;
+  }
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -391,6 +399,8 @@ function HmMediaLayer({
   position,
   positionMobile,
   priority,
+  active = true,
+  warm = false,
 }: {
   items?: LifeMediaItem[];
   scope?: 'desk' | 'mob';
@@ -400,6 +410,10 @@ function HmMediaLayer({
   position?: string;
   positionMobile?: string;
   priority?: boolean;
+  /** Layer belongs to the visible hero slide. */
+  active?: boolean;
+  /** Layer belongs to the next hero slide. */
+  warm?: boolean;
 }) {
   const { items, markFailed } = useOkMedia(raw);
   const { index } = useSlides(items.length, intervalMs);
@@ -418,7 +432,14 @@ function HmMediaLayer({
       >
         {items.map((item, i) => (
           <div key={`${item.src}-${i}`} className={`lgy-bg-slide${i === index ? ' is-on' : ''}`}>
-            <HmLayerMedia item={item} priority={priority && i === 0} onFail={markFailed} />
+            <HmLayerMedia
+              item={item}
+              priority={priority && i === 0}
+              onFail={markFailed}
+              scope={scope}
+              active={active && i === index}
+              warm={(warm && i === index) || (active && items.length > 1 && i === (index + 1) % items.length)}
+            />
           </div>
         ))}
       </div>
@@ -570,6 +591,7 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
     >
       {slides.map((slide, i) => {
         const custom = !slide.theme;
+        const layerState = { active: i === idx, warm: count > 1 && i === (idx + 1) % count };
         return (
           <div
             key={i}
@@ -593,6 +615,7 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
                     position={slide.position}
                     positionMobile={slide.positionMobile}
                     priority={i === 0}
+                    {...layerState}
                   />
                   <HmMediaLayer
                     items={slide.mobileMedia}
@@ -603,6 +626,7 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
                     position={slide.position}
                     positionMobile={slide.positionMobile}
                     priority={i === 0}
+                    {...layerState}
                   />
                 </>
               ) : (
@@ -614,6 +638,7 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
                   position={slide.position}
                   positionMobile={slide.positionMobile}
                   priority={i === 0}
+                  {...layerState}
                 />
               )}
               <div className="slide-scrim" style={vars({ background: slide.scrim || ov.scrim })} />

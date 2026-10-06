@@ -66,4 +66,5 @@ next-env.d.ts
 
 # DB / media snapshots for UAT ↔ prod transfer (may contain PII)
 /storage/exports/
+/storage/video-originals/
 /storage/mail-attachments/

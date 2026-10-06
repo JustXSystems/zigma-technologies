@@ -32,6 +32,7 @@ import {
   formatMediaBytes,
   validateMediaUploadFile,
 } from '@/lib/media-upload-rules';
+import { faststartMp4 } from '@/lib/mp4-faststart';
 
 async function fileExists(diskPath: string) {
   return access(diskPath).then(
@@ -93,8 +94,9 @@ export async function POST(request: Request) {
     const uploadsDir = adminMediaDiskDir(category);
     await mkdir(uploadsDir, { recursive: true });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const contentHash = createHash('sha256').update(buffer).digest('hex');
+    const uploaded = Buffer.from(await file.arrayBuffer());
+    const contentHash = createHash('sha256').update(uploaded).digest('hex');
+    const buffer = (file.type === 'video/mp4' && faststartMp4(uploaded)) || uploaded;
     // Uploaders may send a folder-relative name ("ups/front.jpg"); keep only the file part.
     const originalName = baseName(String(form.get('original_name') || file.name)).slice(0, 255) || file.name;
 

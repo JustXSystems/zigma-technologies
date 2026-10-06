@@ -998,6 +998,9 @@
   .slide-bg picture{position:absolute;inset:0;display:block;width:100%;height:100%;}
   .slide-bg picture .slide-img{position:absolute;inset:0;}
   .slide-bg video.slide-img{pointer-events:none;background:var(--navy-950);}
+  video[data-hbm]{transition:opacity .7s ease;}
+  html video[data-hbm="loading"]{opacity:0;animation:hbm-reveal 0s 4s forwards;}
+  @keyframes hbm-reveal{to{opacity:1;}}
   .slide-scrim{
     position:absolute;inset:0;
     background:

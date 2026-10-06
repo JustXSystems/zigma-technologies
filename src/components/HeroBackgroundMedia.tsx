@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import BgVideo, { BG_MOBILE_MQ, useIsMobileViewport } from '@/components/BgVideo';
 import { isVideoMediaPath, publicMediaUrl } from '@/lib/media-url';
 
 type Props = {
@@ -11,23 +11,11 @@ type Props = {
   /** Class on the media element (e.g. `slide-img`). */
   className?: string;
   eager?: boolean;
+  /** Currently on screen. Inactive videos don't download or play (slideshows). */
+  active?: boolean;
+  /** Up next: fetch the video index and first frames so the switch is instant. */
+  warm?: boolean;
 };
-
-const MOBILE_MQ = '(max-width: 760px)';
-
-function useIsMobileViewport() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia(MOBILE_MQ);
-    const sync = () => setIsMobile(mq.matches);
-    sync();
-    mq.addEventListener?.('change', sync);
-    return () => mq.removeEventListener?.('change', sync);
-  }, []);
-
-  return isMobile;
-}
 
 /**
  * Full-bleed hero background from a media-library path.
@@ -40,14 +28,16 @@ export default function HeroBackgroundMedia({
   alt = '',
   className = 'slide-img',
   eager = false,
+  active = true,
+  warm = false,
 }: Props) {
   const isMobile = useIsMobileViewport();
   const desktop = publicMediaUrl(String(src || '').trim());
   const mobile = publicMediaUrl(String(mobileSrc || '').trim());
-  const active = (isMobile && mobile ? mobile : desktop) || mobile || desktop;
-  if (!active) return null;
+  const chosen = (isMobile && mobile ? mobile : desktop) || mobile || desktop;
+  if (!chosen) return null;
 
-  if (isVideoMediaPath(active)) {
+  if (isVideoMediaPath(chosen)) {
     const posterCandidate = isMobile
       ? mobile && !isVideoMediaPath(mobile)
         ? mobile
@@ -57,19 +47,19 @@ export default function HeroBackgroundMedia({
       : mobile && !isVideoMediaPath(mobile)
         ? mobile
         : undefined;
+    // With per-viewport sources, wait for hydration so phones never start the desktop file.
+    const viewportDependent = Boolean(mobile && desktop && mobile !== desktop);
+    const waiting = viewportDependent && isMobile === null;
 
     return (
-      <video
-        key={active}
-        className={className}
-        src={active}
+      <BgVideo
+        key={chosen}
+        src={chosen}
         poster={posterCandidate}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload={eager || isMobile ? 'auto' : 'metadata'}
-        aria-label={alt || undefined}
+        className={className}
+        alt={alt}
+        active={active && !waiting}
+        warm={warm && !waiting}
       />
     );
   }
@@ -77,7 +67,7 @@ export default function HeroBackgroundMedia({
   if (mobile && desktop && mobile !== desktop) {
     return (
       <picture>
-        <source media={MOBILE_MQ} srcSet={mobile} />
+        <source media={BG_MOBILE_MQ} srcSet={mobile} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className={className}
@@ -95,7 +85,7 @@ export default function HeroBackgroundMedia({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       className={className}
-      src={active}
+      src={chosen}
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       fetchPriority={eager ? 'high' : undefined}

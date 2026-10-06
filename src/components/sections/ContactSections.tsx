@@ -119,7 +119,14 @@ export function ContactSlides({
     <div className={`ctc-slides ${className}`}>
       {items.map((item, i) => (
         <div key={`${item.src}-${i}`} className={`ctc-slide${i === index ? ' is-on' : ''}`} aria-hidden={i === index ? undefined : true}>
-          <LzMedia item={item} className="ctc-slide-media" eager={eager && i === 0} onFail={markFailed} />
+          <LzMedia
+            item={item}
+            className="ctc-slide-media"
+            eager={eager && i === 0}
+            onFail={markFailed}
+            active={i === index}
+            warm={i === (index + 1) % items.length}
+          />
         </div>
       ))}
       {items.length > 1 ? (

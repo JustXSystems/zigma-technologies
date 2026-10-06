@@ -208,6 +208,8 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
                 mobileSrc={slide.imageMobile}
                 className="slide-img"
                 eager={i === 0}
+                active={i === current}
+                warm={i === (current + 1) % slides.length}
                 alt=""
               />
               <div className="slide-scrim"></div>

@@ -135,7 +135,15 @@ function I101HeroLayer({ bg, slider, dots, items: raw, scope }: HeroBgProps & { 
       >
         {items.map((item, i) => (
           <div key={`${item.src}-${i}`} className={`i101-hslide${slideState(i)}`}>
-            <LzMedia item={item} className="i101-hmedia" eager={i === 0} onFail={markFailed} />
+            <LzMedia
+              item={item}
+              className="i101-hmedia"
+              eager={i === 0}
+              onFail={markFailed}
+              active={i === view.cur || i === view.prev}
+              warm={i === (view.cur + 1) % items.length}
+              scope={scope}
+            />
           </div>
         ))}
         {bg.overlay?.trim() ? <span className="i101-hoverlay" style={{ background: bg.overlay }} /> : null}

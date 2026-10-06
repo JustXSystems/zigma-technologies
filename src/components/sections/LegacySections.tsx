@@ -174,7 +174,15 @@ function LgBgLayer({ bg, items: raw, scope }: { bg: LegacyBgMedia; items?: LifeM
       >
         {items.map((item, i) => (
           <div key={`${item.src}-${i}`} className={`lgy-bg-slide${i === index ? ' is-on' : ''}`}>
-            <LzMedia item={item} className="lgy-bg-media" eager={i === 0} onFail={markFailed} />
+            <LzMedia
+              item={item}
+              className="lgy-bg-media"
+              eager={i === 0}
+              onFail={markFailed}
+              active={i === index}
+              warm={i === (index + 1) % items.length}
+              scope={scope}
+            />
           </div>
         ))}
         {bg.overlay?.trim() ? <span className="lgy-bg-overlay" style={{ background: bg.overlay }} /> : null}

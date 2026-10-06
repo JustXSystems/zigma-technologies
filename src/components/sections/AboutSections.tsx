@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, type CSSProperties, type ReactNode } from 
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass, heroScrollBarOn } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
+import BgVideo, { type BgVideoProps } from '@/components/BgVideo';
 import HeroSlot from '@/components/HeroSlot';
 import { LgScrollBar, LgShell } from '@/components/sections/LegacySections';
 import { useSiteShell } from '@/components/SiteProviders';
@@ -120,6 +121,9 @@ export function AzVideo({
   controls,
   autoPlay = true,
   loop = true,
+  active,
+  warm,
+  scope,
 }: {
   src: string;
   poster?: string;
@@ -127,7 +131,10 @@ export function AzVideo({
   controls?: boolean;
   autoPlay?: boolean;
   loop?: boolean;
-}) {
+} & Pick<BgVideoProps, 'active' | 'warm' | 'scope'>) {
+  if (autoPlay && loop && !controls) {
+    return <BgVideo className={className} src={src} poster={poster} active={active} warm={warm} scope={scope} />;
+  }
   return (
     <video
       className={className}

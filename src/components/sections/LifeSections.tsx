@@ -14,6 +14,7 @@ import { createPortal } from 'react-dom';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass, heroScrollBarOn } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
+import type { BgVideoProps } from '@/components/BgVideo';
 import HeroSlot from '@/components/HeroSlot';
 import { LgScrollBar, LgShell } from '@/components/sections/LegacySections';
 import { useSiteShell } from '@/components/SiteProviders';
@@ -193,16 +194,21 @@ export function LzMedia({
   className = '',
   eager,
   onFail,
+  active,
+  warm,
+  scope,
 }: {
   item: LifeMediaItem;
   className?: string;
   eager?: boolean;
   onFail?: FailFn;
-}) {
+} & Pick<BgVideoProps, 'active' | 'warm' | 'scope'>) {
   const src = mediaSrc(item.src);
   if (!src) return null;
   const cls = `lz-media${className ? ` ${className}` : ''}`;
-  if (lifeMediaKind(item) === 'video') return <AzVideo className={cls} src={src} poster={mediaSrc(item.poster)} />;
+  if (lifeMediaKind(item) === 'video') {
+    return <AzVideo className={cls} src={src} poster={mediaSrc(item.poster)} active={active} warm={warm} scope={scope} />;
+  }
   return <LzImg className={cls} src={src} alt={item.title || ''} eager={eager} onFail={onFail} />;
 }
 
@@ -394,7 +400,15 @@ function LzHeroMedia({ c }: { c: LifeHeroContent }) {
     <div className="az-hero-visual">
       <div className="az-hero-image lz-fade" style={{ ...wrap, ...vars({ '--lz-fit': img.objectFit as string, '--lz-pos': img.objectPosition as string }) }}>
         {items.map((item, i) => (
-          <LzMedia key={`${item.src}-${i}`} item={item} eager={i === 0} onFail={m.markFailed} className={i === index ? 'is-on' : ''} />
+          <LzMedia
+            key={`${item.src}-${i}`}
+            item={item}
+            eager={i === 0}
+            onFail={m.markFailed}
+            className={i === index ? 'is-on' : ''}
+            active={i === index}
+            warm={i === (index + 1) % items.length}
+          />
         ))}
         {c.media?.frame?.overlay?.trim() ? (
           <span aria-hidden="true" className="az-img-overlay" style={{ background: c.media.frame.overlay }} />
