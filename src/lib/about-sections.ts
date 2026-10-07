@@ -3,6 +3,7 @@ import { publicMediaUrl } from '@/lib/media-url';
 import type { HeroHeight } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
 import type { LegacyBgMedia } from '@/lib/legacy-sections';
+import type { LifeHighlight } from '@/lib/life-sections';
 
 /**
  * Fully configurable "About" section family (About Zigma page):
@@ -236,6 +237,8 @@ export type AboutHeroContent = {
   };
   eyebrow: EyebrowEl;
   title: TextEl;
+  /** Gradient word / phrase inside the heading */
+  highlight?: LifeHighlight;
   lead: TextEl;
   pills: PillsEl;
   ctas: CtaButton[];

@@ -45,6 +45,7 @@ import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields from '@/components/admin/HeroMotionFields';
 import { BgMediaGroup } from '@/components/admin/legacy/LegacySectionEditor';
+import { HighlightEditor } from '@/components/admin/life/LifeControls';
 
 type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
@@ -181,6 +182,7 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
       <Group title="Text content" description="Eyebrow, heading, lead" open>
         <TextElementEditor label="Eyebrow" eyebrow siteScale="md" value={c.eyebrow} onChange={(v) => set('eyebrow', v)} />
         <TextElementEditor label="Heading" headingTag siteRole="pageHero" multiline value={c.title} onChange={(v) => set('title', v)} />
+        <HighlightEditor value={c.highlight} onChange={(v) => set('highlight', v)} />
         <TextElementEditor label="Lead" multiline value={c.lead} onChange={(v) => set('lead', v)} />
       </Group>
       <Group title="Pills" description="Value chips under the lead">

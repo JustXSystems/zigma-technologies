@@ -9,6 +9,7 @@ import { useSiteCopy } from '@/lib/use-site-copy';
 import { headingTagForRole, logoAltText } from '@/lib/site-settings';
 import { AzImage, AzText, AzVideo, hasText, vars, withLines } from '@/components/sections/AboutSections';
 import { LzMedia, clampCols } from '@/components/sections/LifeSections';
+import { highlightText } from '@/components/sections/highlight-text';
 import { LgBackground, StatNumber, useCountPhase, useOkMedia, useSlides } from '@/components/sections/LegacySections';
 import {
   EYEBROW_SCALE_VAR,
@@ -136,34 +137,6 @@ function HmShell({
       )}
     </section>
   );
-}
-
-function highlightText(text: string, hl?: LifeHighlight): ReactNode {
-  const word = hl?.text?.trim();
-  return text.split('\n').map((line, i) => {
-    let content: ReactNode = line;
-    const at = word ? line.indexOf(word) : -1;
-    if (word && at >= 0) {
-      content = (
-        <>
-          {line.slice(0, at)}
-          <em
-            className={`lz-hl${hl?.color?.trim() ? ' lz-hl--solid' : ''}${hl?.animate === false ? '' : ' lz-hl--anim'}`}
-            style={vars({ '--lz-hl-gradient': hl?.gradient, '--lz-hl-color': hl?.color })}
-          >
-            {word}
-          </em>
-          {line.slice(at + word.length)}
-        </>
-      );
-    }
-    return (
-      <Fragment key={i}>
-        {i > 0 ? <br /> : null}
-        {content}
-      </Fragment>
-    );
-  });
 }
 
 /**

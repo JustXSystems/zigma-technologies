@@ -52,6 +52,9 @@ import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
 import CatalogHeroBgEditor from '@/components/admin/CatalogHeroBgEditor';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import { normalizeLifeHighlight } from '@/lib/life-sections';
+import { HighlightEditor } from '@/components/admin/life/LifeControls';
+import { highlightText } from '@/components/sections/highlight-text';
 import { catalogSectionToCms, normalizeCatalogSections } from '@/lib/catalog-sections';
 import CatalogSectionsEditor, { CONFIGURABLE } from '@/components/admin/CatalogSectionsEditor';
 import SectionEditor from '@/components/admin/SectionEditor';
@@ -134,6 +137,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     ...raw!,
     hero_item_durations_json: raw?.hero_item_durations_json || null,
     hero_bg_json: normalizeCatalogHeroBg(raw?.hero_bg_json),
+    hero_highlight_json: normalizeLifeHighlight(raw?.hero_highlight_json),
     sections_json: normalizeCatalogSections(raw?.sections_json),
     hero_height: normalizeHeroHeight(raw?.hero_height),
     detail_hero_height: normalizeHeroHeight(raw?.detail_hero_height),
@@ -576,7 +580,7 @@ function CatalogAppearancePreview({
               ) : null}
               {heroEls.has('title') ? (
                 <h1 style={{ maxWidth: 480, marginBottom: '0.6rem' }}>
-                  {settings.hero_title?.trim() || heroDefaults?.title}
+                  {highlightText(settings.hero_title?.trim() || heroDefaults?.title || '', settings.hero_highlight_json || undefined)}
                 </h1>
               ) : null}
               {heroEls.has('lead') ? (
@@ -782,6 +786,7 @@ export default function CatalogSettingsPage() {
           detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
           hero_bg_json: normalizeCatalogHeroBg(settings.hero_bg_json),
+          hero_highlight_json: normalizeLifeHighlight(settings.hero_highlight_json),
           sections_json: normalizeCatalogSections(settings.sections_json),
           hero_height: normalizeHeroHeight(settings.hero_height),
           detail_hero_height: normalizeHeroHeight(settings.detail_hero_height),
@@ -1109,6 +1114,12 @@ export default function CatalogSettingsPage() {
                         placeholder={heroDefaults?.title}
                       />
 
+                    </div>
+                    <div className="full">
+                      <HighlightEditor
+                        value={settings.hero_highlight_json || undefined}
+                        onChange={(hero_highlight_json) => setSettings({ ...settings, hero_highlight_json })}
+                      />
                     </div>
                     <div className="admin-field full">
                       <LabelWithHelp

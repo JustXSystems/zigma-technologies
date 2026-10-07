@@ -21,6 +21,8 @@ import { renderProjects101Section } from '@/components/sections/Projects101Secti
 import { renderQualitySafetySection } from '@/components/sections/QualitySafetySections';
 import { renderBlogSection } from '@/components/sections/BlogSections';
 import { renderHomeSection } from '@/components/sections/HomeSections';
+import { highlightText } from '@/components/sections/highlight-text';
+import type { LifeHighlight } from '@/lib/life-sections';
 import InnerCtaBand from '@/components/InnerCtaBand';
 import InnerPageHero from '@/components/InnerPageHero';
 import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
@@ -161,6 +163,7 @@ type Slide = {
   iconHtml?: string;
   /** How long this slide stays visible before advancing (ms). */
   durationMs?: number;
+  highlight?: LifeHighlight;
 };
 
 function clampSlideDurationMs(value: unknown, fallback = 6000) {
@@ -231,7 +234,7 @@ function HeroSection({ content }: { content: Record<string, unknown> }) {
               <div className="slide-content">
                 <div className="eyebrow">{slide.eyebrow}</div>
                 <SiteHeading role="pageHero" secondary={i > 0}>
-                  {slide.title}
+                  {highlightText(String(slide.title || ''), slide.highlight)}
                 </SiteHeading>
                 <p className="lead">{slide.lead}</p>
                 <a href={hrefOf(slide.ctaHref)} className="slide-cta">
@@ -1006,7 +1009,7 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
         style={layout.style}
         overlay={layout.scrollBar}
         eyebrow={String(content.eyebrow || '')}
-        title={String(content.title || '')}
+        title={highlightText(String(content.title || ''), content.highlight as LifeHighlight | undefined)}
         lead={content.lead ? String(content.lead) : undefined}
         image={String(content.image || '/assets/images/city-skyline-with-solar-panels-and-indus.jpg')}
         imageMobile={imageMobile}
@@ -1065,7 +1068,9 @@ function PageHeroSection({ content }: { content: Record<string, unknown> }) {
           <span className="current">{crumb}</span>
         </div>
         {content.eyebrow ? <div className="eyebrow">{String(content.eyebrow)}</div> : null}
-        <SiteHeading role="pageHero">{String(content.title || '')}</SiteHeading>
+        <SiteHeading role="pageHero">
+          {highlightText(String(content.title || ''), content.highlight as LifeHighlight | undefined)}
+        </SiteHeading>
         {content.leadEmphasis ? <p className="lead lead-emphasis">{String(content.leadEmphasis)}</p> : null}
         {content.lead ? <p className="lead">{String(content.lead)}</p> : null}
         {content.leadAccent ? <p className="lead lead-accent">{String(content.leadAccent)}</p> : null}
@@ -1559,7 +1564,9 @@ function CertHeroSection({ content }: { content: Record<string, unknown> }) {
       <div className="container">
         <HeroSlot place={place} name="text">
         <div className="eyebrow">{String(content.eyebrow || 'CERTIFICATIONS')}</div>
-        <SiteHeading role="pageHero">{String(content.title || '')}</SiteHeading>
+        <SiteHeading role="pageHero">
+          {highlightText(String(content.title || ''), content.highlight as LifeHighlight | undefined)}
+        </SiteHeading>
         {content.sub ? <div className="sub">{String(content.sub)}</div> : null}
         <p>{String(content.lead || content.body || '')}</p>
         {content.tagline ? <div className="cert-tagline">{String(content.tagline)}</div> : null}

@@ -1,6 +1,7 @@
 import type { HeroHeight } from '@/lib/hero-height';
 import type { CatalogHeroBg } from '@/lib/catalog-hero-bg';
 import type { CatalogSectionEntry } from '@/lib/catalog-sections';
+import type { LifeHighlight } from '@/lib/life-sections';
 
 export type CatalogItemType = 'project' | 'product' | 'service';
 
@@ -505,6 +506,8 @@ export type CatalogPageSettings = {
   hero_variant: 'standard' | 'spotlight';
   /** Listing hero background media, size, framing, motion and grading. */
   hero_bg_json?: CatalogHeroBg | null;
+  /** Gradient word / phrase inside the listing hero title. */
+  hero_highlight_json?: LifeHighlight | null;
   /** Ordered page sections: built-in hero / listing / partners plus any CMS section types. */
   sections_json?: CatalogSectionEntry[] | null;
   /** Listing page hero: full viewport or fit content. */

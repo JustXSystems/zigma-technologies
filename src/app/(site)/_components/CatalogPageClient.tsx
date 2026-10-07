@@ -47,6 +47,7 @@ import { heroHeightClass } from '@/lib/hero-height';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
 import SiteHeading from '@/components/SiteHeading';
+import { highlightText } from '@/components/sections/highlight-text';
 import { catalogListingKey, type CatalogListingData } from '@/lib/catalog-listing-key';
 import { catalogSectionToCms, normalizeCatalogSections } from '@/lib/catalog-sections';
 import { cmsSectionsCss, renderCmsSection } from '@/components/sections/SectionRenderer';
@@ -262,7 +263,7 @@ function CatalogHero({
   }, [autoplayMs, heroEnabled, slides.length, current, timerTick]);
 
   const heroEyebrow = settings?.hero_eyebrow?.trim() || eyebrow;
-  const heroTitle = settings?.hero_title?.trim() || title;
+  const heroTitle = highlightText(settings?.hero_title?.trim() || title, settings?.hero_highlight_json || undefined);
   const heroLead = settings?.hero_lead?.trim() || lead;
 
   if (!heroEnabled) {

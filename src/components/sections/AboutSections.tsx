@@ -7,6 +7,8 @@ import { heroPlacement } from '@/lib/hero-placement';
 import BgVideo, { type BgVideoProps } from '@/components/BgVideo';
 import HeroSlot from '@/components/HeroSlot';
 import { LgScrollBar, LgShell } from '@/components/sections/LegacySections';
+import { highlightText } from '@/components/sections/highlight-text';
+import type { LifeHighlight } from '@/lib/life-sections';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -88,16 +90,25 @@ export function AzText({
 }
 
 /** Heading whose tag and size default to Theme Studio → Typography; element tag / style override. */
-function AzRoleHeading({ el, role, className }: { el?: TextEl; role: AboutHeadingRole; className: string }) {
+function AzRoleHeading({
+  el,
+  role,
+  className,
+  highlight,
+}: {
+  el?: TextEl;
+  role: AboutHeadingRole;
+  className: string;
+  highlight?: LifeHighlight;
+}) {
   const { settings } = useSiteShell();
   const level = headingTagForRole(settings, role);
+  if (!hasText(el)) return null;
+  const Tag = (el.tag || (role === 'pageHero' ? 'h1' : level)) as 'h2';
   return (
-    <AzText
-      el={el}
-      defaultTag={role === 'pageHero' ? 'h1' : level}
-      className={className}
-      style={{ fontSize: `var(--text-${level})` }}
-    />
+    <Tag className={className} style={elementCss(mergeStyle({ fontSize: `var(--text-${level})` }, el.style))}>
+      {highlightText(String(el.text), highlight)}
+    </Tag>
   );
 }
 
@@ -379,7 +390,7 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
         </nav>
       ) : null}
       <AzEyebrow el={c.eyebrow} scale="md" />
-      <AzRoleHeading el={c.title} role="pageHero" className="az-hero-title" />
+      <AzRoleHeading el={c.title} role="pageHero" className="az-hero-title" highlight={c.highlight} />
       <AzText el={c.lead} defaultTag="p" className="az-hero-lead" />
       <AzPills pills={c.pills} />
       <AzCtas ctas={c.ctas} />

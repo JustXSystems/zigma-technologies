@@ -34,6 +34,7 @@ import {
 import { toStorageMediaPath } from '@/lib/media-paths';
 import { normalizeHeroHeight } from '@/lib/hero-height';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import { normalizeLifeHighlight } from '@/lib/life-sections';
 import { normalizeCatalogSections } from '@/lib/catalog-sections';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
 
@@ -698,6 +699,7 @@ export async function getPageSettings(itemType: CatalogItemType) {
     detail_elements_json: parseJsonField<string[] | null>(row.detail_elements_json, null),
     hero_variant: row.hero_variant ?? 'spotlight',
     hero_bg_json: normalizeCatalogHeroBg(parseJsonField<unknown>(row.hero_bg_json, null)),
+    hero_highlight_json: normalizeLifeHighlight(parseJsonField<unknown>(row.hero_highlight_json, null)),
     sections_json: normalizeCatalogSections(parseJsonField<unknown>(row.sections_json, null)),
     hero_height: normalizeHeroHeight(row.hero_height),
     detail_hero_height: normalizeHeroHeight(row.detail_hero_height),
@@ -795,6 +797,8 @@ export async function updatePageSettings(
     hero_variant: input.hero_variant,
     hero_bg_json:
       input.hero_bg_json !== undefined ? JSON.stringify(normalizeCatalogHeroBg(input.hero_bg_json)) : undefined,
+    hero_highlight_json:
+      input.hero_highlight_json !== undefined ? JSON.stringify(normalizeLifeHighlight(input.hero_highlight_json)) : undefined,
     sections_json:
       input.sections_json !== undefined
         ? JSON.stringify(normalizeCatalogSections(input.sections_json))

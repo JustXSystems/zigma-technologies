@@ -80,6 +80,17 @@ export type LifeHighlight = {
 
 export type LifeSectionHeader = SectionHeader & { highlight?: LifeHighlight };
 
+/** Keep only known highlight fields; null when nothing is set. */
+export function normalizeLifeHighlight(raw: unknown): LifeHighlight | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.slice(0, 500) : undefined);
+  const out: LifeHighlight = { text: str(r.text), gradient: str(r.gradient), color: str(r.color) };
+  if (r.animate === false) out.animate = false;
+  for (const k of Object.keys(out) as Array<keyof LifeHighlight>) if (out[k] === undefined) delete out[k];
+  return Object.keys(out).length ? out : null;
+}
+
 export function lifeMediaKind(item: Pick<LifeMediaItem, 'src' | 'type'>): 'image' | 'video' {
   if (item.type === 'image' || item.type === 'video') return item.type;
   return isVideoMediaPath(item.src || '') ? 'video' : 'image';

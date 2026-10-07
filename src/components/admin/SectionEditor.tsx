@@ -28,8 +28,9 @@ import {
 } from '@/lib/eco-section';
 import { isAboutSectionType, withAboutDefaults } from '@/lib/about-sections';
 import AboutSectionEditor from '@/components/admin/about/AboutSectionEditor';
-import { isLifeSectionType, withLifeDefaults } from '@/lib/life-sections';
+import { isLifeSectionType, withLifeDefaults, type LifeHighlight } from '@/lib/life-sections';
 import LifeSectionEditor from '@/components/admin/life/LifeSectionEditor';
+import { HighlightEditor } from '@/components/admin/life/LifeControls';
 import { isLegacySectionType, withLegacyDefaults } from '@/lib/legacy-sections';
 import LegacySectionEditor from '@/components/admin/legacy/LegacySectionEditor';
 import { isContactSectionType, withContactDefaults } from '@/lib/contact-sections';
@@ -610,6 +611,14 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                       onChange={(e) => setField('title', e.target.value)}
                     />
                   </Field>
+                ) : null}
+                {section.type === 'page_hero' || section.type === 'cert_hero' ? (
+                  <div className="full">
+                    <HighlightEditor
+                      value={content.highlight as LifeHighlight | undefined}
+                      onChange={(highlight) => setField('highlight', highlight)}
+                    />
+                  </div>
                 ) : null}
                 {section.type !== 'logo_marquee' &&
                 section.type !== 'testimonials' &&
@@ -1666,6 +1675,16 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                           }}
                         />
                       </Field>
+                      <div className="full">
+                        <HighlightEditor
+                          value={slide.highlight as LifeHighlight | undefined}
+                          onChange={(highlight) => {
+                            const next = [...slides];
+                            next[idx] = { ...next[idx], highlight };
+                            setField('slides', next);
+                          }}
+                        />
+                      </div>
                       <Field label="CTA label">
                         <input
                           className="admin-input"

@@ -17,6 +17,7 @@ import { heroPlacement } from '@/lib/hero-placement';
 import type { BgVideoProps } from '@/components/BgVideo';
 import HeroSlot from '@/components/HeroSlot';
 import { LgScrollBar, LgShell } from '@/components/sections/LegacySections';
+import { highlightText } from '@/components/sections/highlight-text';
 import { useSiteShell } from '@/components/SiteProviders';
 import { headingTagForRole } from '@/lib/site-settings';
 import {
@@ -81,34 +82,6 @@ export function colVars(cols: LifeColumns | undefined, fb: Required<LifeColumns>
 
 export function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
-}
-
-function highlightText(text: string, hl?: LifeHighlight): ReactNode {
-  const word = hl?.text?.trim();
-  return text.split('\n').map((line, i) => {
-    let content: ReactNode = line;
-    const at = word ? line.indexOf(word) : -1;
-    if (word && at >= 0) {
-      content = (
-        <>
-          {line.slice(0, at)}
-          <em
-            className={`lz-hl${hl?.color?.trim() ? ' lz-hl--solid' : ''}${hl?.animate === false ? '' : ' lz-hl--anim'}`}
-            style={vars({ '--lz-hl-gradient': hl?.gradient, '--lz-hl-color': hl?.color })}
-          >
-            {word}
-          </em>
-          {line.slice(at + word.length)}
-        </>
-      );
-    }
-    return (
-      <Fragment key={i}>
-        {i > 0 ? <br /> : null}
-        {content}
-      </Fragment>
-    );
-  });
 }
 
 /** Heading whose tag / size default to Theme Studio → Typography; element tag / style override. */
