@@ -7,21 +7,20 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 Need to create this new page /projects101, this is the replacement for existing /projects.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup">
+      <change afterPath="$PROJECT_DIR$/src/components/sections/highlight-text.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/catalog-hero-bg.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-hero-bg.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/life-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/life-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
     </list>
@@ -81,23 +80,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.155275145225345" />
-      <entry key="MS500" value="3.201612350757309" />
-      <entry key="S2" value="7.713234342896836" />
-      <entry key="S5" value="13.209286354676772" />
-      <entry key="S10" value="19.57186796117295" />
-      <entry key="S30" value="39.07151688713597" />
-      <entry key="S60" value="62.87132814980293" />
-      <entry key="M2" value="91.8055564906466" />
-      <entry key="M5" value="122.92332460192522" />
-      <entry key="M10" value="137.14927867133073" />
-      <entry key="M15" value="142.44895036519054" />
-      <entry key="M30" value="148.0588852734494" />
-      <entry key="H1" value="150.98671136276002" />
-      <entry key="H2" value="152.61641771169693" />
-      <entry key="H4" value="164.04715158700063" />
-      <entry key="D1" value="1508.4548998532948" />
-      <entry key="W1" value="14315.341534613619" />
+      <entry key="MS100" value="1.1130052641898687" />
+      <entry key="MS500" value="2.7993335137861868" />
+      <entry key="S2" value="6.729536456228931" />
+      <entry key="S5" value="10.377624404084962" />
+      <entry key="S10" value="14.7207406750901" />
+      <entry key="S30" value="36.79861909804012" />
+      <entry key="S60" value="65.47691187588556" />
+      <entry key="M2" value="102.0518050894745" />
+      <entry key="M5" value="150.89337552973828" />
+      <entry key="M10" value="178.59250205649914" />
+      <entry key="M15" value="189.97562478852362" />
+      <entry key="M30" value="202.8533269331076" />
+      <entry key="H1" value="215.5068171767479" />
+      <entry key="H2" value="250.63679420450322" />
+      <entry key="H4" value="313.6858722890998" />
+      <entry key="D1" value="1581.7682706939513" />
+      <entry key="W1" value="14302.766371712649" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -111,31 +110,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="4.254E-321" />
-      <entry key="H1" value="6.470756498033486E-161" />
-      <entry key="H2" value="8.044101253733842E-81" />
-      <entry key="H4" value="8.968891377422796E-41" />
-      <entry key="D1" value="2.1496317755884452E-7" />
-      <entry key="W1" value="0.17296844551891466" />
+      <entry key="M30" value="4.9E-324" />
+      <entry key="H1" value="1.602120302191283E-162" />
+      <entry key="H2" value="1.2657489096147665E-81" />
+      <entry key="H4" value="3.55773651308915E-41" />
+      <entry key="D1" value="1.842623373901869E-7" />
+      <entry key="W1" value="0.16920212435576396" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1080992629384787" />
-      <entry key="MS500" value="3.1729422223112462" />
-      <entry key="S2" value="7.695462932739007" />
-      <entry key="S5" value="13.197059289305175" />
-      <entry key="S10" value="19.562786664646744" />
-      <entry key="S30" value="39.06529940910017" />
-      <entry key="S60" value="62.865962651211085" />
-      <entry key="M2" value="91.80134229661329" />
-      <entry key="M5" value="122.92093368604108" />
-      <entry key="M10" value="137.1479165212044" />
-      <entry key="M15" value="142.44800039276694" />
-      <entry key="M30" value="148.05838799788302" />
-      <entry key="H1" value="150.98645688375095" />
-      <entry key="H2" value="152.6162888107861" />
-      <entry key="H4" value="164.04707505285458" />
-      <entry key="D1" value="1508.454570129363" />
-      <entry key="W1" value="14315.514276560947" />
+      <entry key="MS100" value="1.0572339737843537" />
+      <entry key="MS500" value="2.7674703292138134" />
+      <entry key="S2" value="6.712202612459484" />
+      <entry key="S5" value="10.367437448968946" />
+      <entry key="S10" value="14.713549467209745" />
+      <entry key="S30" value="36.79234259595841" />
+      <entry key="S60" value="65.47104027989208" />
+      <entry key="M2" value="102.04694929749999" />
+      <entry key="M5" value="150.89028608839342" />
+      <entry key="M10" value="178.59060984474053" />
+      <entry key="M15" value="189.97426589837346" />
+      <entry key="M30" value="202.85259183316523" />
+      <entry key="H1" value="215.50642383251719" />
+      <entry key="H2" value="250.6365641785657" />
+      <entry key="H4" value="313.68572504686193" />
+      <entry key="D1" value="1581.7679649247968" />
+      <entry key="W1" value="14302.935348830411" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -290,7 +289,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 similar admin page design for industries-banking" />
     <MESSAGE value="#45 similar admin page design for industries-education" />
     <MESSAGE value="#45 similar admin page design for industries-airports" />
     <MESSAGE value="#45 similar admin page design for homepage" />
@@ -315,7 +313,8 @@
     <MESSAGE value="#51 Caalog products/services/project import / export for setup" />
     <MESSAGE value="#51 Caalog products/services/project video shrinking to loading issue" />
     <MESSAGE value="#52 Need to create this new page /projects101, this is the replacement for existing /projects." />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 Need to create this new page /projects101, this is the replacement for existing /projects." />
+    <MESSAGE value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

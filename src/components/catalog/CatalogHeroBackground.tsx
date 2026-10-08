@@ -144,6 +144,8 @@ export default function CatalogHeroBackground({
   }, [bg.motion]);
 
   const ambient = bg.fit === 'ambient' || bg.fitMobile === 'ambient';
+  const showMedia = bg.source !== 'none';
+  const grad = bg.gradType !== 'none';
 
   return (
     <div
@@ -152,19 +154,23 @@ export default function CatalogHeroBackground({
       style={catalogHeroBgStyle(bg)}
       aria-hidden="true"
     >
+      {grad && bg.gradLayer === 'under' ? <div className="chb-grad chb-grad--under"></div> : null}
       <div className="chb-stage">
-        <SlideStack
-          slides={slides}
-          current={shown.cur}
-          prev={shown.prev}
-          ambient={ambient}
-          className={phoneSlides.length ? 'chb-stack chb-stack--desk' : 'chb-stack'}
-        />
-        {phoneSlides.length ? (
+        {showMedia ? (
+          <SlideStack
+            slides={slides}
+            current={shown.cur}
+            prev={shown.prev}
+            ambient={ambient}
+            className={phoneSlides.length ? 'chb-stack chb-stack--desk' : 'chb-stack'}
+          />
+        ) : null}
+        {showMedia && phoneSlides.length ? (
           <SlideStack slides={phoneSlides} current={shown.cur} prev={shown.prev} ambient={ambient} className="chb-stack chb-stack--phone" />
         ) : null}
         {bg.tintOpacity > 0 ? <div className="chb-tint" /> : null}
       </div>
+      {grad && bg.gradLayer === 'over' ? <div className="chb-grad chb-grad--over"></div> : null}
       <div className="hero-overlay chb-ov"></div>
       {bg.texture === 'grid' ? <div className="grid-overlay"></div> : null}
       {bg.texture !== 'grid' && bg.texture !== 'none' ? <div className="chb-texture"></div> : null}

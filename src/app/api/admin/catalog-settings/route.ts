@@ -12,6 +12,7 @@ import {
 } from '@/lib/types';
 import { isHeroHeight, normalizeHeroHeight } from '@/lib/hero-height';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import { normalizeCatalogHeroCard } from '@/lib/catalog-hero-card';
 import { normalizeLifeHighlight } from '@/lib/life-sections';
 import { CATALOG_SECTIONS_MAX, normalizeCatalogSections } from '@/lib/catalog-sections';
 
@@ -76,6 +77,11 @@ const putSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v === undefined ? undefined : normalizeCatalogHeroBg(v))),
+  hero_card_json: z
+    .record(z.string(), z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : normalizeCatalogHeroCard(v))),
   hero_highlight_json: z
     .record(z.string(), z.unknown())
     .nullable()

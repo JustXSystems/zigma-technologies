@@ -3,16 +3,37 @@ import type { LifeMediaItem } from '@/lib/life-sections';
 
 /** Background layer of the /products, /projects, /services listing hero. */
 
-export type CatalogHeroBgSource = 'spotlight' | 'custom';
+export type CatalogHeroBgSource = 'spotlight' | 'custom' | 'none';
 export type CatalogHeroBgFit = 'cover' | 'contain' | 'ambient' | 'fill' | 'natural';
 export type CatalogHeroBgMotion = 'none' | 'zoom' | 'kenburns' | 'pan' | 'drift' | 'parallax' | 'cursor';
 export type CatalogHeroBgTransition = 'none' | 'fade' | 'zoom' | 'glide' | 'blur';
 export type CatalogHeroBgArea = 'full' | 'right' | 'left' | 'inset';
 export type CatalogHeroBgTexture = 'grid' | 'none' | 'dots' | 'noise' | 'scanlines';
 export type CatalogHeroBgBlend = 'normal' | 'multiply' | 'screen' | 'overlay' | 'soft-light' | 'color';
+export type CatalogHeroBgGradType = 'none' | 'linear' | 'radial' | 'aurora';
+export type CatalogHeroBgGradLayer = 'under' | 'over';
 
 export type CatalogHeroBg = {
+  /** spotlight / custom = media slides; none = base colour and gradient only */
   source: CatalogHeroBgSource;
+  /** Solid colour under everything */
+  baseColor: string;
+  gradType: CatalogHeroBgGradType;
+  gradAngle: number;
+  gradFrom: string;
+  gradVia: string;
+  gradTo: string;
+  gradUseVia: boolean;
+  /** Radial centre (%) */
+  gradX: number;
+  gradY: number;
+  gradOpacity: number;
+  /** under = behind the media (shows where media is absent), over = wash on top of it */
+  gradLayer: CatalogHeroBgGradLayer;
+  gradBlend: CatalogHeroBgBlend;
+  /** Slowly shifts the gradient */
+  gradAnimate: boolean;
+  gradSeconds: number;
   /** Custom slides (source = custom) */
   items: LifeMediaItem[];
   /** Phone-only custom slides; empty = reuse `items` */
@@ -65,6 +86,20 @@ export type CatalogHeroBg = {
 
 export const CATALOG_HERO_BG_DEFAULTS: CatalogHeroBg = {
   source: 'spotlight',
+  baseColor: '#0a1628',
+  gradType: 'none',
+  gradAngle: 135,
+  gradFrom: '#0a1628',
+  gradVia: '#163056',
+  gradTo: '#ff6b1a',
+  gradUseVia: true,
+  gradX: 70,
+  gradY: 40,
+  gradOpacity: 100,
+  gradLayer: 'under',
+  gradBlend: 'normal',
+  gradAnimate: false,
+  gradSeconds: 18,
   items: [],
   mobileItems: [],
   sync: true,
@@ -151,6 +186,18 @@ export const CATALOG_HERO_BG_BLEND_OPTIONS: Choice<CatalogHeroBgBlend> = [
   { value: 'color', label: 'Colourise', hint: 'Duotone-like single hue' },
 ];
 
+export const CATALOG_HERO_BG_GRAD_OPTIONS: Choice<CatalogHeroBgGradType> = [
+  { value: 'none', label: 'No gradient', hint: 'Base colour only' },
+  { value: 'linear', label: 'Linear', hint: 'Straight blend at any angle' },
+  { value: 'radial', label: 'Radial', hint: 'Glow spreading from a centre point' },
+  { value: 'aurora', label: 'Aurora mesh', hint: 'Soft colour clouds, one per colour' },
+];
+
+export const CATALOG_HERO_BG_GRAD_LAYER_OPTIONS: Choice<CatalogHeroBgGradLayer> = [
+  { value: 'under', label: 'Behind media', hint: 'Shows where there is no media (colour-only, panels, floating card, whole-image fit)' },
+  { value: 'over', label: 'Over media', hint: 'Colour wash on top of photos and videos' },
+];
+
 export const CATALOG_HERO_BG_PRESETS: ReadonlyArray<{ id: string; label: string; hint: string; patch: Partial<CatalogHeroBg> }> = [
   {
     id: 'classic',
@@ -159,6 +206,25 @@ export const CATALOG_HERO_BG_PRESETS: ReadonlyArray<{ id: string; label: string;
     patch: {
       fit: 'cover', scale: 100, posX: 50, posY: 35, area: 'full', motion: 'zoom', motionSeconds: 8, transition: 'none',
       brightness: 100, contrast: 100, saturate: 100, blur: 0, grayscale: 0, overlay: 100, tintOpacity: 0, texture: 'grid', vignette: 0,
+      gradType: 'none',
+    },
+  },
+  {
+    id: 'studio',
+    label: 'Gradient studio',
+    hint: 'No photos: navy-to-orange aurora behind the product card',
+    patch: {
+      source: 'none', baseColor: '#0a1628', gradType: 'aurora', gradFrom: '#163056', gradVia: '#00d4ff', gradTo: '#ff6b1a', gradUseVia: true,
+      gradOpacity: 70, gradLayer: 'under', gradBlend: 'normal', gradAnimate: true, gradSeconds: 18, overlay: 60, texture: 'grid', vignette: 25,
+    },
+  },
+  {
+    id: 'wash',
+    label: 'Brand wash',
+    hint: 'Photos with a diagonal navy-to-orange colour wash',
+    patch: {
+      gradType: 'linear', gradAngle: 120, gradFrom: '#0a1628', gradVia: '#163056', gradTo: '#ff6b1a', gradUseVia: false, gradOpacity: 55,
+      gradLayer: 'over', gradBlend: 'soft-light', gradAnimate: false, overlay: 85,
     },
   },
   {
@@ -227,8 +293,23 @@ export function normalizeCatalogHeroBg(raw: unknown): CatalogHeroBg {
   const d = CATALOG_HERO_BG_DEFAULTS;
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
   const nullablePct = (v: unknown) => (v === null || v === undefined || v === '' ? null : clamp(v, 0, 100, 50));
+  const hex = (v: unknown, fallback: string) => (typeof v === 'string' && HEX.test(v) ? v : fallback);
   return {
-    source: r.source === 'custom' ? 'custom' : 'spotlight',
+    source: r.source === 'custom' || r.source === 'none' ? r.source : 'spotlight',
+    baseColor: hex(r.baseColor, d.baseColor),
+    gradType: pick(r.gradType, CATALOG_HERO_BG_GRAD_OPTIONS, d.gradType),
+    gradAngle: clamp(r.gradAngle, 0, 360, d.gradAngle),
+    gradFrom: hex(r.gradFrom, d.gradFrom),
+    gradVia: hex(r.gradVia, d.gradVia),
+    gradTo: hex(r.gradTo, d.gradTo),
+    gradUseVia: r.gradUseVia === undefined ? d.gradUseVia : Boolean(r.gradUseVia),
+    gradX: clamp(r.gradX, 0, 100, d.gradX),
+    gradY: clamp(r.gradY, 0, 100, d.gradY),
+    gradOpacity: clamp(r.gradOpacity, 0, 100, d.gradOpacity),
+    gradLayer: r.gradLayer === 'over' ? 'over' : 'under',
+    gradBlend: pick(r.gradBlend, CATALOG_HERO_BG_BLEND_OPTIONS, d.gradBlend),
+    gradAnimate: Boolean(r.gradAnimate),
+    gradSeconds: clamp(r.gradSeconds, 4, 90, d.gradSeconds),
     items: normalizeItems(r.items),
     mobileItems: normalizeItems(r.mobileItems),
     sync: r.sync === undefined ? d.sync : Boolean(r.sync),
@@ -264,6 +345,23 @@ export function normalizeCatalogHeroBg(raw: unknown): CatalogHeroBg {
   };
 }
 
+/** CSS background value for the gradient layer, or '' when off. */
+export function catalogHeroBgGradient(bg: CatalogHeroBg): string {
+  const stops = bg.gradUseVia ? [bg.gradFrom, bg.gradVia, bg.gradTo] : [bg.gradFrom, bg.gradTo];
+  switch (bg.gradType) {
+    case 'linear':
+      return `linear-gradient(${bg.gradAngle}deg, ${stops.join(', ')})`;
+    case 'radial':
+      return `radial-gradient(circle at ${bg.gradX}% ${bg.gradY}%, ${stops.join(', ')})`;
+    case 'aurora': {
+      const spots = ['18% 22%', '82% 28%', '55% 92%'];
+      return stops.map((c, i) => `radial-gradient(ellipse at ${spots[i]}, ${c} 0%, transparent 58%)`).join(', ');
+    }
+    default:
+      return '';
+  }
+}
+
 const FIT_CSS: Record<CatalogHeroBgFit, string> = {
   cover: 'cover',
   contain: 'contain',
@@ -284,6 +382,11 @@ export function catalogHeroBgStyle(bg: CatalogHeroBg): CSSProperties {
   const mx = bg.posXMobile ?? bg.posX;
   const my = bg.posYMobile ?? bg.posY;
   return {
+    '--chb-base': bg.baseColor,
+    '--chb-grad': catalogHeroBgGradient(bg) || 'none',
+    '--chb-grad-o': String(bg.gradOpacity / 100),
+    '--chb-grad-blend': bg.gradLayer === 'over' ? bg.gradBlend : 'normal',
+    '--chb-grad-s': `${bg.gradSeconds}s`,
     '--chb-fit': FIT_CSS[bg.fit],
     '--chb-fit-m': FIT_CSS[bg.fitMobile || bg.fit],
     '--chb-pos': `${bg.posX}% ${bg.posY}%`,
@@ -312,6 +415,7 @@ export function catalogHeroBgClass(bg: CatalogHeroBg): string {
     `chb-trans-${bg.transition}`,
     `chb-area-${bg.area}`,
     `chb-tex-${bg.texture}`,
+    bg.gradAnimate && bg.gradType !== 'none' && 'chb-grad-animate',
     bg.stillOnMobile && 'chb-m-still',
   ]
     .filter(Boolean)

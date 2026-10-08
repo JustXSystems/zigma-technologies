@@ -9,6 +9,8 @@ import {
   CATALOG_HERO_BG_BLEND_OPTIONS,
   CATALOG_HERO_BG_DEFAULTS,
   CATALOG_HERO_BG_FIT_OPTIONS,
+  CATALOG_HERO_BG_GRAD_LAYER_OPTIONS,
+  CATALOG_HERO_BG_GRAD_OPTIONS,
   CATALOG_HERO_BG_MOTION_OPTIONS,
   CATALOG_HERO_BG_PRESETS,
   CATALOG_HERO_BG_TEXTURE_OPTIONS,
@@ -18,17 +20,18 @@ import {
 } from '@/lib/catalog-hero-bg';
 import { visibleMedia } from '@/lib/life-sections';
 
-type Tab = 'media' | 'size' | 'motion' | 'look' | 'phone';
+type Tab = 'media' | 'colour' | 'size' | 'motion' | 'look' | 'phone';
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'media', label: 'Media source' },
+  { id: 'colour', label: 'Base colour & gradient' },
   { id: 'size', label: 'Size & framing' },
   { id: 'motion', label: 'Motion' },
   { id: 'look', label: 'Colour & atmosphere' },
   { id: 'phone', label: 'Phones' },
 ];
 
-function Range({
+export function Range({
   label,
   value,
   min,
@@ -66,7 +69,7 @@ function Range({
   );
 }
 
-function Choices<T extends string>({
+export function Choices<T extends string>({
   name,
   value,
   options,
@@ -90,7 +93,7 @@ function Choices<T extends string>({
   );
 }
 
-function Select<T extends string>({
+export function Select<T extends string>({
   label,
   value,
   options,
@@ -117,11 +120,32 @@ function Select<T extends string>({
   );
 }
 
-function Sub({ title, children }: { title: string; children: ReactNode }) {
+export function Sub({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="chb-ed-sub">
       <div className="admin-chip-group-label">{title}</div>
       <div className="admin-form-grid">{children}</div>
+    </div>
+  );
+}
+
+export function Toggle({ label, title, checked, onChange }: { label: string; title?: string; checked: boolean; onChange: (next: boolean) => void }) {
+  return (
+    <div className="admin-field">
+      <label>{title ?? label}</label>
+      <label className={`admin-chip${checked ? ' is-on' : ''}`} style={{ alignSelf: 'start' }}>
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+        {label}
+      </label>
+    </div>
+  );
+}
+
+export function Swatch({ label, value, onChange }: { label: string; value: string; onChange: (next: string) => void }) {
+  return (
+    <div className="admin-field">
+      <label>{label}</label>
+      <ColorControl label={label} value={value} onChange={onChange} hexOnly />
     </div>
   );
 }
@@ -280,9 +304,15 @@ export default function CatalogHeroBgEditor({
             options={[
               { value: 'spotlight', label: 'Spotlight item images', hint: 'Each slide shows the primary image of its spotlight item (current behaviour)' },
               { value: 'custom', label: 'Custom images & videos', hint: 'Your own photos or muted looping videos behind the hero' },
+              { value: 'none', label: 'Colour / gradient only', hint: 'No photos — base colour plus the gradient from the next tab. Pairs well with the product card' },
             ]}
-            onChange={(source) => set({ source })}
+            onChange={(source) => set(source === 'none' && bg.gradType === 'none' ? { source, gradType: 'linear' } : { source })}
           />
+          {bg.source === 'none' ? (
+            <small className="chb-ed-hint">
+              Set the colours in <strong>Base colour &amp; gradient</strong>. Texture, vignette and the readability shade still apply.
+            </small>
+          ) : null}
           {bg.source === 'custom' ? (
             <>
               <MediaItemsEditor
@@ -313,6 +343,55 @@ export default function CatalogHeroBgEditor({
                   <Range label="Seconds per slide" value={bg.intervalSeconds} min={2} max={60} step={0.5} unit="s" onChange={(intervalSeconds) => set({ intervalSeconds })} />
                 ) : null}
               </div>
+            </>
+          ) : null}
+        </div>
+      ) : null}
+
+      {tab === 'colour' ? (
+        <div className="chb-ed-panel">
+          <Sub title="Base colour">
+            <Swatch label="Hero background colour" value={bg.baseColor} onChange={(baseColor) => set({ baseColor })} />
+          </Sub>
+          <div className="admin-chip-group-label">Gradient</div>
+          <Choices name="chb-grad" value={bg.gradType} options={CATALOG_HERO_BG_GRAD_OPTIONS} onChange={(gradType) => set({ gradType })} />
+          {bg.gradType !== 'none' ? (
+            <>
+              <Sub title="Colours">
+                <Swatch label={bg.gradType === 'radial' ? 'Centre colour' : 'Start colour'} value={bg.gradFrom} onChange={(gradFrom) => set({ gradFrom })} />
+                {bg.gradUseVia ? <Swatch label="Middle colour" value={bg.gradVia} onChange={(gradVia) => set({ gradVia })} /> : null}
+                <Swatch label={bg.gradType === 'radial' ? 'Outer colour' : 'End colour'} value={bg.gradTo} onChange={(gradTo) => set({ gradTo })} />
+                <Toggle title="Stops" label="Use a middle colour" checked={bg.gradUseVia} onChange={(gradUseVia) => set({ gradUseVia })} />
+              </Sub>
+              <Sub title="Shape">
+                {bg.gradType === 'linear' ? (
+                  <Range label="Angle" value={bg.gradAngle} min={0} max={360} unit="°" onChange={(gradAngle) => set({ gradAngle })} />
+                ) : null}
+                {bg.gradType === 'radial' ? (
+                  <>
+                    <Range label="Centre — horizontal" value={bg.gradX} min={0} max={100} unit="%" onChange={(gradX) => set({ gradX })} />
+                    <Range label="Centre — vertical" value={bg.gradY} min={0} max={100} unit="%" onChange={(gradY) => set({ gradY })} />
+                  </>
+                ) : null}
+                <Range label="Strength" value={bg.gradOpacity} min={0} max={100} unit="%" onChange={(gradOpacity) => set({ gradOpacity })} />
+                <Toggle title="Motion" label="Slowly shift the gradient" checked={bg.gradAnimate} onChange={(gradAnimate) => set({ gradAnimate })} />
+                {bg.gradAnimate ? (
+                  <Range label="Shift cycle" value={bg.gradSeconds} min={4} max={90} unit="s" onChange={(gradSeconds) => set({ gradSeconds })} />
+                ) : null}
+              </Sub>
+              <div className="admin-chip-group-label">Layer</div>
+              <Choices name="chb-grad-layer" value={bg.gradLayer} options={CATALOG_HERO_BG_GRAD_LAYER_OPTIONS} onChange={(gradLayer) => set({ gradLayer })} />
+              {bg.gradLayer === 'over' ? (
+                <Sub title="Wash">
+                  <Select label="Blend" value={bg.gradBlend} options={CATALOG_HERO_BG_BLEND_OPTIONS} onChange={(gradBlend) => set({ gradBlend })} />
+                </Sub>
+              ) : null}
+              {bg.gradLayer === 'under' && bg.source !== 'none' && bg.area === 'full' && bg.fit === 'cover' ? (
+                <small className="chb-ed-hint">
+                  Full-bleed photos cover a gradient that sits behind them. Switch Media source to Colour / gradient only, use a panel or floating
+                  card area, or put the gradient over the media.
+                </small>
+              ) : null}
             </>
           ) : null}
         </div>
@@ -382,11 +461,7 @@ export default function CatalogHeroBgEditor({
               hint="Strength of the dark gradient that keeps the hero text readable."
               onChange={(overlay) => set({ overlay })}
             />
-            <div className="admin-field">
-              <label>Tint colour</label>
-              <ColorControl label="Tint colour" value={bg.tintColor} onChange={(tintColor) => set({ tintColor })} hexOnly />
-
-            </div>
+            <Swatch label="Tint colour" value={bg.tintColor} onChange={(tintColor) => set({ tintColor })} />
             <Range label="Tint strength" value={bg.tintOpacity} min={0} max={100} unit="%" onChange={(tintOpacity) => set({ tintOpacity })} />
             <Select label="Tint blend" value={bg.tintBlend} options={CATALOG_HERO_BG_BLEND_OPTIONS} onChange={(tintBlend) => set({ tintBlend })} />
           </Sub>

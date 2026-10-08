@@ -144,12 +144,21 @@ export const CATALOG_SETTINGS_BLOCKS: Record<string, { title: string; guide: Set
       tip: 'Spotlight variant emphasises one featured card; Standard keeps copy more compact with an optional panel.',
     },
   },
-  hero_background: {
-    title: 'Background media',
+  hero_card: {
+    title: 'Product card',
     guide: {
-      purpose: 'Control what plays behind the hero and how it is sized, framed, animated and colour-graded.',
-      when: 'Use when product photos crop badly, when you want campaign imagery or video instead of item photos, or to give the hero a distinct mood.',
-      how: 'Start from a Quick look, then fine-tune per tab: Media source, Size & framing (display style, zoom, focal point, media area), Motion, Colour & atmosphere, and Phones. Click the preview to set the focal point.',
+      purpose: 'Show the spotlight item’s product image in an animated card beside the headline, like the About Zigma hero picture.',
+      when: 'Use when product photos look better framed whole than stretched across the background, or to give the listing hero a showroom feel.',
+      how: 'Switch the card on, pick a Quick look, then fine-tune per tab: Size & placement (custom width × height, radius, padding, side), Image & animation, Card style (fill, border, glow), Caption & extras, and Phones. The card follows the spotlight rotation.',
+      tip: 'Pair it with a “Colour / gradient only” background so the product is not shown twice. With the card on, the spotlight panel moves under the headline.',
+    },
+  },
+  hero_background: {
+    title: 'Background',
+    guide: {
+      purpose: 'Control the hero background: base colour, gradient, and the photos or videos behind the copy — how they are sized, framed, animated and colour-graded.',
+      when: 'Use when product photos crop badly, when you want campaign imagery or video instead of item photos, a clean brand gradient, or a distinct mood.',
+      how: 'Start from a Quick look, then fine-tune per tab: Media source (item photos, your own media, or colour only), Base colour & gradient, Size & framing, Motion, Colour & atmosphere, and Phones. Click the preview to set the focal point.',
       tip: '“Ambient fit” shows whole product photos without cropping. Keep the Readability shade high when using bright images so the headline stays legible.',
     },
   },

@@ -46,6 +46,8 @@ import { heroHas, toolbarHas, resolveDetailElements } from '@/lib/catalog-page-e
 import { heroHeightClass } from '@/lib/hero-height';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
+import CatalogHeroCard from '@/components/catalog/CatalogHeroCard';
+import { normalizeCatalogHeroCard } from '@/lib/catalog-hero-card';
 import SiteHeading from '@/components/SiteHeading';
 import { highlightText } from '@/components/sections/highlight-text';
 import { catalogListingKey, type CatalogListingData } from '@/lib/catalog-listing-key';
@@ -248,6 +250,7 @@ function CatalogHero({
   );
   const heroEnabled = settings?.hero_enabled !== 0 && slides.length > 0;
   const heroBg = useMemo(() => normalizeCatalogHeroBg(settings?.hero_bg_json), [settings?.hero_bg_json]);
+  const heroCard = useMemo(() => normalizeCatalogHeroCard(settings?.hero_card_json), [settings?.hero_card_json]);
 
   useEffect(() => {
     setCurrent(0);
@@ -358,10 +361,38 @@ function CatalogHero({
     );
   }
 
+  // With the product card on, the spotlight panel moves under the copy so the card owns the second column.
+  const withCard = heroCard.enabled;
+  const spotlightPanel =
+    variant === 'spotlight' && showFeaturedPanel ? (
+      <div className={cx('catalog-hero-spotlight', revealEnabled && 'reveal')}>
+        {renderFeaturedBody('spotlight')}
+        {renderDots('catalog-hero-dots')}
+      </div>
+    ) : variant === 'spotlight' ? (
+      renderDots('catalog-hero-dots')
+    ) : null;
+
   return (
-    <section className={cx('page-hero catalog-hero', `catalog-hero--${variant}`, heightClass)}>
+    <section
+      className={cx(
+        'page-hero catalog-hero',
+        `catalog-hero--${variant}`,
+        withCard && 'catalog-hero--card',
+        withCard && heroCard.side === 'left' && 'catalog-hero--card-left',
+        heightClass
+      )}
+    >
       <CatalogHeroBackground bg={heroBg} spotlight={slides.map((s) => s.primary_image)} activeIndex={current} />
-      <div className={cx('container catalog-hero-layout', variant === 'standard' && 'catalog-hero-layout--standard')}>
+      <div
+        className={cx(
+          'container catalog-hero-layout',
+          variant === 'standard' && !withCard && 'catalog-hero-layout--standard',
+          withCard && 'catalog-hero-layout--card',
+          withCard && heroCard.side === 'left' && 'catalog-hero-layout--card-left'
+        )}
+        style={withCard ? ({ '--chc-col': `${heroCard.width}px` } as CSSProperties) : undefined}
+      >
         <div className={cx('catalog-hero-copy', revealEnabled && 'reveal')}>
           {heroHas(settings, 'eyebrow') ? <div className="eyebrow">{heroEyebrow}</div> : null}
           {heroHas(settings, 'title') ? (
@@ -381,15 +412,21 @@ function CatalogHero({
             <div className="catalog-hero-standard-panel">{renderFeaturedBody('standard')}</div>
           ) : null}
           {variant === 'standard' ? renderDots('catalog-hero-standard-dots') : null}
+          {withCard ? spotlightPanel : null}
         </div>
 
-        {variant === 'spotlight' && showFeaturedPanel ? (
-          <div className={cx('catalog-hero-spotlight', revealEnabled && 'reveal')}>
-            {renderFeaturedBody('spotlight')}
-            {renderDots('catalog-hero-dots')}
-          </div>
-        ) : null}
-        {variant === 'spotlight' && !showFeaturedPanel ? renderDots('catalog-hero-dots') : null}
+        {withCard ? (
+          <CatalogHeroCard
+            card={heroCard}
+            items={slides}
+            activeIndex={current}
+            autoplayMs={autoplayMs}
+            onOpen={(index) => slides[index] && onOpenItem(slides[index])}
+            className={revealEnabled ? 'reveal' : undefined}
+          />
+        ) : (
+          spotlightPanel
+        )}
       </div>
     </section>
   );

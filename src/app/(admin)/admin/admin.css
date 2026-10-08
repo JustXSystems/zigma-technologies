@@ -1093,6 +1093,35 @@
   .chb-ed-readout { margin-left: 0; width: 100%; }
 }
 
+/* Catalog hero product card studio (CatalogHeroCardEditor): a 1280×720 hero scaled to fit */
+.chc-ed-box { width: 100%; }
+.chc-ed-viewport {
+  position: relative; margin: 0 auto; overflow: hidden; border-radius: 14px; background: #061121;
+  box-shadow: 0 18px 40px -22px rgba(6, 17, 33, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.chc-ed-viewport.is-phone { border-radius: 26px; box-shadow: 0 0 0 6px #0c1222, 0 18px 40px -18px rgba(6, 17, 33, 0.7); }
+.chc-ed-canvas { position: relative; transform-origin: 0 0; }
+.chc-ed-hero.page-hero { position: absolute; inset: 0; min-height: 0; height: 100%; margin: 0; padding: 3.5rem 0; }
+.chc-ed-hero .container { width: 100%; max-width: none; padding: 0 3.5rem; }
+.chc-ed-hero .chc-ed-title { font-size: 3.2rem; margin: 0; }
+.chc-ed-empty {
+  display: grid; place-items: center; min-height: 260px; padding: 1.5rem; border-radius: 18px; text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.25); color: #c9d4e5; font-size: 1rem;
+}
+.chc-ed-phone.page-hero { padding: 2.5rem 0; align-items: flex-start; }
+.chc-ed-phone .container { padding: 0 1.25rem; }
+.chc-ed-phone .chc-ed-title { font-size: 1.9rem; }
+.chc-ed-phone .catalog-hero-layout.catalog-hero-layout--card { grid-template-columns: 1fr; gap: 1.5rem; }
+.chc-ed-phone .catalog-hero-layout .chc { translate: none; }
+.chc-ed-phone .catalog-hero-layout .chc-m-above { order: -1; }
+.chc-ed-phone .catalog-hero-layout .chc-m-below { order: 2; }
+.chc-ed-phone .catalog-hero-layout .chc-m-hide { display: none; }
+.chc-ed-phone .chc-tilt { width: min(var(--chc-mobile-w), var(--chc-w)); }
+.chc-ed-note {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px;
+  background: var(--admin-bg-subtle); font-size: 0.8rem; color: var(--admin-text-secondary);
+}
+
 /* Catalog page sections (show / hide / add / remove / reorder) */
 .cse { display: grid; gap: 0.9rem; }
 .cse-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }

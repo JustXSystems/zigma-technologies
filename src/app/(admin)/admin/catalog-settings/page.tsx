@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, useCallback, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { CatalogCategory, CatalogItemType, CatalogListingDesign, CatalogPageSettings } from '@/lib/types';
 import {
@@ -51,7 +51,10 @@ import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import CatalogCardSizePicker from '@/components/admin/CatalogCardSizePicker';
 import CatalogHeroBgEditor from '@/components/admin/CatalogHeroBgEditor';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
+import CatalogHeroCardEditor from '@/components/admin/CatalogHeroCardEditor';
+import CatalogHeroCard from '@/components/catalog/CatalogHeroCard';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
+import { normalizeCatalogHeroCard } from '@/lib/catalog-hero-card';
 import { normalizeLifeHighlight } from '@/lib/life-sections';
 import { HighlightEditor } from '@/components/admin/life/LifeControls';
 import { highlightText } from '@/components/sections/highlight-text';
@@ -137,6 +140,7 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
     ...raw!,
     hero_item_durations_json: raw?.hero_item_durations_json || null,
     hero_bg_json: normalizeCatalogHeroBg(raw?.hero_bg_json),
+    hero_card_json: normalizeCatalogHeroCard(raw?.hero_card_json),
     hero_highlight_json: normalizeLifeHighlight(raw?.hero_highlight_json),
     sections_json: normalizeCatalogSections(raw?.sections_json),
     hero_height: normalizeHeroHeight(raw?.hero_height),
@@ -163,7 +167,16 @@ function hydratePageSettings(raw: CatalogPageSettings | null | undefined): Catal
   };
 }
 
-type HeroPreviewItem = { id: number; title: string; status: string; featured: number; primary_image?: string | null };
+type HeroPreviewItem = {
+  id: number;
+  title: string;
+  status: string;
+  featured: number;
+  primary_image?: string | null;
+  background_image_url?: string | null;
+  price_label?: string | null;
+  category_name?: string | null;
+};
 
 type CatalogAdminData = { categories: CatalogCategory[]; settings: CatalogPageSettings; items: HeroPreviewItem[] };
 
@@ -468,7 +481,7 @@ function CatalogAppearancePreview({
 }: {
   type: CatalogItemType;
   settings: CatalogPageSettings;
-  items: Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>;
+  items: HeroPreviewItem[];
   /** What the public hero shows when the eyebrow / title / lead fields are blank. */
   heroDefaults?: CatalogChrome;
 }) {
@@ -476,11 +489,12 @@ function CatalogAppearancePreview({
   const selectedIds = settings.hero_item_ids_json || [];
   const orderedSelected = selectedIds
     .map((id) => items.find((item) => item.id === id))
-    .filter(Boolean) as Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>;
+    .filter(Boolean) as HeroPreviewItem[];
   const previewItems = (orderedSelected.length ? orderedSelected : items).slice(0, 2);
   const active = previewItems[0];
   const heroEls = new Set(resolveHeroElements(settings));
   const variant = settings.hero_variant;
+  const heroCard = normalizeCatalogHeroCard(settings.hero_card_json);
   const showFeaturedPanel =
     variant === 'standard' ? heroEls.has('standard_panel') : heroEls.has('spotlight');
 
@@ -534,6 +548,19 @@ function CatalogAppearancePreview({
     </>
   );
 
+  const spotlightPanel =
+    variant === 'spotlight' && showFeaturedPanel ? (
+      <div className="catalog-hero-spotlight">
+        {featuredBody}
+        {heroEls.has('dots') ? (
+          <div className="catalog-hero-dots" aria-hidden="true">
+            <button type="button" className="active" />
+            <button type="button" />
+          </div>
+        ) : null}
+      </div>
+    ) : null;
+
   return (
     <div className="admin-field full">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
@@ -570,9 +597,13 @@ function CatalogAppearancePreview({
           />
           <div
             className={`container catalog-hero-layout ${
-              settings.hero_variant === 'standard' ? 'catalog-hero-layout--standard' : ''
+              heroCard.enabled
+                ? `catalog-hero-layout--card${heroCard.side === 'left' ? ' catalog-hero-layout--card-left' : ''}`
+                : settings.hero_variant === 'standard'
+                  ? 'catalog-hero-layout--standard'
+                  : ''
             }`}
-            style={{ padding: 0 }}
+            style={{ padding: 0, ...(heroCard.enabled ? ({ '--chc-col': `${heroCard.width}px` } as CSSProperties) : null) }}
           >
             <div className="catalog-hero-copy">
               {heroEls.has('eyebrow') ? (
@@ -604,18 +635,13 @@ function CatalogAppearancePreview({
                   <button type="button" />
                 </div>
               ) : null}
+              {heroCard.enabled ? spotlightPanel : null}
             </div>
-            {variant === 'spotlight' && showFeaturedPanel ? (
-              <div className="catalog-hero-spotlight">
-                {featuredBody}
-                {heroEls.has('dots') ? (
-                  <div className="catalog-hero-dots" aria-hidden="true">
-                    <button type="button" className="active" />
-                    <button type="button" />
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
+            {heroCard.enabled ? (
+              <CatalogHeroCard card={heroCard} items={previewItems} activeIndex={0} autoplayMs={settings.hero_autoplay_ms || 6000} />
+            ) : (
+              spotlightPanel
+            )}
           </div>
         </div>
 
@@ -650,9 +676,7 @@ export default function CatalogSettingsPage() {
   const [projects101, setProjects101] = useState(false);
   const [servedDesign, setServedDesign] = useState<CatalogListingDesign | null>(null);
   const [categories, setCategories] = useState<CatalogCategory[]>([]);
-  const [items, setItems] = useState<Array<{ id: number; title: string; status: string; featured: number; primary_image?: string | null }>>(
-    []
-  );
+  const [items, setItems] = useState<HeroPreviewItem[]>([]);
   const [settings, setSettings] = useState<CatalogPageSettings | null>(null);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -786,6 +810,7 @@ export default function CatalogSettingsPage() {
           detail_elements_json: normalizeDetailElements(settings.detail_elements_json),
           hero_variant: settings.hero_variant,
           hero_bg_json: normalizeCatalogHeroBg(settings.hero_bg_json),
+          hero_card_json: normalizeCatalogHeroCard(settings.hero_card_json),
           hero_highlight_json: normalizeLifeHighlight(settings.hero_highlight_json),
           sections_json: normalizeCatalogSections(settings.sections_json),
           hero_height: normalizeHeroHeight(settings.hero_height),
@@ -1139,6 +1164,22 @@ export default function CatalogSettingsPage() {
 
                     </div>
                   </div>
+                </SettingsBlock>
+
+                <SettingsBlock blockId="hero_card">
+                  <CatalogHeroCardEditor
+                    value={normalizeCatalogHeroCard(settings.hero_card_json)}
+                    onChange={(hero_card_json) => setSettings({ ...settings, hero_card_json })}
+                    bg={normalizeCatalogHeroBg(settings.hero_bg_json)}
+                    onBgChange={(hero_bg_json) => setSettings({ ...settings, hero_bg_json })}
+                    items={heroPreviewItems(settings, items)}
+                    autoplayMs={settings.hero_autoplay_ms || 6000}
+                    copy={{
+                      eyebrow: settings.hero_eyebrow?.trim() || heroDefaults?.eyebrow,
+                      title: settings.hero_title?.trim() || heroDefaults?.title,
+                      lead: settings.hero_lead?.trim() || heroDefaults?.lead,
+                    }}
+                  />
                 </SettingsBlock>
 
                 <SettingsBlock blockId="hero_background">

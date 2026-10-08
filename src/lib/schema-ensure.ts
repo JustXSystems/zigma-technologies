@@ -271,6 +271,10 @@ const DISCOVERY_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'hero_highlight_json',
     ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_highlight_json JSON NULL AFTER hero_bg_json`,
   },
+  {
+    name: 'hero_card_json',
+    ddl: `ALTER TABLE catalog_page_settings ADD COLUMN hero_card_json JSON NULL AFTER hero_bg_json`,
+  },
 ];
 
 let mediaAssetColumnsReady: Promise<void> | null = null;
