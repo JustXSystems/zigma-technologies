@@ -60,6 +60,9 @@ const ALIGN_ITEMS_OPTIONS = [
   { value: 'stretch', label: 'Stretch (equal height)' },
 ] as const;
 
+const JOB_DESCRIPTION_HINT =
+  'Plain text or HTML: <p>, <br>, <strong>, <em>, <ul>/<ol> + <li>, <a href="…">. Escape a literal < or & as &lt; / &amp;.';
+
 /** One entry per line; kept raw while typing, trimmed when rendered. */
 const linesOf = (v?: string[]) => (v || []).join('\n');
 const toLines = (v: string) => v.split('\n');
@@ -238,7 +241,13 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
                 <ColorInput label="Card background" value={j.background} onChange={(background) => patch({ ...j, background })} fallback="#FFFFFF" />
               </div>
               <TextArea label="Extra chips (one per line)" rows={2} value={linesOf(j.chips)} onChange={(v) => patch({ ...j, chips: toLines(v) })} placeholder="2–4 yrs experience" />
-              <TextArea label="Short description (optional)" rows={2} value={j.description} onChange={(description) => patch({ ...j, description })} />
+              <TextArea
+                label="Short description (optional, HTML)"
+                rows={4}
+                value={j.description}
+                onChange={(description) => patch({ ...j, description })}
+                hint={JOB_DESCRIPTION_HINT}
+              />
               <div className="admin-form-grid">
                 <TextInput label="Apply role" value={j.role} onChange={(role) => patch({ ...j, role })} placeholder="Empty = job title" />
                 <TextInput label="Apply button label" value={j.applyLabel} onChange={(applyLabel) => patch({ ...j, applyLabel })} placeholder="Empty = section default" />

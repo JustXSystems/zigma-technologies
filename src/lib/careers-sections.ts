@@ -134,6 +134,7 @@ export type CareersJob = {
   chips?: string[];
   /** Small highlighted label, e.g. "New" or "Urgent" */
   badge?: string;
+  /** HTML (plain text also works) */
   description?: string;
   background?: string;
   /** Apply-form role; empty = the job title */

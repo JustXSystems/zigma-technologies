@@ -165,9 +165,7 @@ function JobCard({ job, c }: { job: CareersJob; c: CareersJobsContent }) {
           </div>
         ) : null}
         {t(job.description) ? (
-          <p className="crs-job-desc" style={elementCss(c.descriptionStyle)}>
-            {job.description}
-          </p>
+          <div className="crs-job-desc" style={elementCss(c.descriptionStyle)} dangerouslySetInnerHTML={{ __html: t(job.description) }} />
         ) : null}
       </div>
       {(href && t(job.linkLabel)) || !c.hideApply ? (
