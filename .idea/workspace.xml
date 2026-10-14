@@ -7,22 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup">
-      <change afterPath="$PROJECT_DIR$/src/components/sections/highlight-text.tsx" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52  careers_jobs edit with html">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/_components/CatalogPageClient.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/catalog-settings/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-catalog-settings-guides.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog-hero-bg.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog-hero-bg.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/catalog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/catalog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/careers-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/careers-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/careers/CareersSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/careers/CareersSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/CareersSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/CareersSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/careers-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/careers-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,23 +70,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1130052641898687" />
-      <entry key="MS500" value="2.7993335137861868" />
-      <entry key="S2" value="6.729536456228931" />
-      <entry key="S5" value="10.377624404084962" />
-      <entry key="S10" value="14.7207406750901" />
-      <entry key="S30" value="36.79861909804012" />
-      <entry key="S60" value="65.47691187588556" />
-      <entry key="M2" value="102.0518050894745" />
-      <entry key="M5" value="150.89337552973828" />
-      <entry key="M10" value="178.59250205649914" />
-      <entry key="M15" value="189.97562478852362" />
-      <entry key="M30" value="202.8533269331076" />
-      <entry key="H1" value="215.5068171767479" />
-      <entry key="H2" value="250.63679420450322" />
-      <entry key="H4" value="313.6858722890998" />
-      <entry key="D1" value="1581.7682706939513" />
-      <entry key="W1" value="14302.766371712649" />
+      <entry key="MS100" value="1.503477775028361" />
+      <entry key="MS500" value="1.8745776526026048" />
+      <entry key="S2" value="2.953079152322201" />
+      <entry key="S5" value="7.550230893511374" />
+      <entry key="S10" value="16.959441936860188" />
+      <entry key="S30" value="52.22070404694184" />
+      <entry key="S60" value="92.57833094320071" />
+      <entry key="M2" value="155.6855717638228" />
+      <entry key="M5" value="265.63196097765024" />
+      <entry key="M10" value="342.466707282013" />
+      <entry key="M15" value="377.8949108044799" />
+      <entry key="M30" value="420.64222072215756" />
+      <entry key="H1" value="445.44486661147766" />
+      <entry key="H2" value="458.8597908663009" />
+      <entry key="H4" value="467.4475147549798" />
+      <entry key="D1" value="1129.192818528617" />
+      <entry key="W1" value="13089.558393911682" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -110,31 +100,31 @@
       <entry key="M5" value="0.0" />
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
-      <entry key="M30" value="4.9E-324" />
-      <entry key="H1" value="1.602120302191283E-162" />
-      <entry key="H2" value="1.2657489096147665E-81" />
-      <entry key="H4" value="3.55773651308915E-41" />
-      <entry key="D1" value="1.842623373901869E-7" />
-      <entry key="W1" value="0.16920212435576396" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="1.130314919691231E-171" />
+      <entry key="H2" value="3.362015644953205E-86" />
+      <entry key="H4" value="1.833580007816595E-43" />
+      <entry key="D1" value="7.658156841954229E-8" />
+      <entry key="W1" value="0.14925628331329516" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0572339737843537" />
-      <entry key="MS500" value="2.7674703292138134" />
-      <entry key="S2" value="6.712202612459484" />
-      <entry key="S5" value="10.367437448968946" />
-      <entry key="S10" value="14.713549467209745" />
-      <entry key="S30" value="36.79234259595841" />
-      <entry key="S60" value="65.47104027989208" />
-      <entry key="M2" value="102.04694929749999" />
-      <entry key="M5" value="150.89028608839342" />
-      <entry key="M10" value="178.59060984474053" />
-      <entry key="M15" value="189.97426589837346" />
-      <entry key="M30" value="202.85259183316523" />
-      <entry key="H1" value="215.50642383251719" />
-      <entry key="H2" value="250.6365641785657" />
-      <entry key="H4" value="313.68572504686193" />
-      <entry key="D1" value="1581.7679649247968" />
-      <entry key="W1" value="14302.935348830411" />
+      <entry key="MS100" value="1.4489044933872697" />
+      <entry key="MS500" value="1.860429636870807" />
+      <entry key="S2" value="2.947484616279518" />
+      <entry key="S5" value="7.544180473611358" />
+      <entry key="S10" value="16.95236097626002" />
+      <entry key="S30" value="52.2133080506669" />
+      <entry key="S60" value="92.57166678670121" />
+      <entry key="M2" value="155.67970356491284" />
+      <entry key="M5" value="265.62736925436496" />
+      <entry key="M10" value="342.4633828708217" />
+      <entry key="M15" value="377.8923336967338" />
+      <entry key="M30" value="420.6406977147772" />
+      <entry key="H1" value="445.4440332786868" />
+      <entry key="H2" value="458.8593542421277" />
+      <entry key="H4" value="467.44729042466855" />
+      <entry key="D1" value="1129.1926534300228" />
+      <entry key="W1" value="13089.707446262697" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -215,11 +205,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="zigma-technologies" />
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="Next.js: server-side" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
@@ -289,8 +274,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 similar admin page design for industries-education" />
-    <MESSAGE value="#45 similar admin page design for industries-airports" />
     <MESSAGE value="#45 similar admin page design for homepage" />
     <MESSAGE value="#45 seend consolidation" />
     <MESSAGE value="#45 hero section render issue fixed" />
@@ -314,7 +297,9 @@
     <MESSAGE value="#51 Caalog products/services/project video shrinking to loading issue" />
     <MESSAGE value="#52 Need to create this new page /projects101, this is the replacement for existing /projects." />
     <MESSAGE value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
+    <MESSAGE value="#52 Products page, hero section, need to enhance to display Product Image on a card style" />
+    <MESSAGE value="#52  careers_jobs edit with html" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52  careers_jobs edit with html" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

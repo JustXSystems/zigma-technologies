@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
+import AdminCollapsible from '@/components/admin/AdminCollapsible';
+import { hasStructuredDetails, parseJobText, type ParsedJobText } from '@/lib/careers-job-text';
 import {
   AboutSiteSettingsContext,
   AlignButtons,
@@ -24,6 +26,7 @@ import { ActionFields, ContactHelpEditor, ContactHeroEditor, IconStyleFields } f
 import type { ContactSideItem } from '@/lib/contact-sections';
 import {
   CAREERS_ALL_ICON_PRESETS,
+  CAREERS_JOB_LABELS,
   CAREERS_WHY_TINTS,
   withCareersDefaults,
   type CareersApplicationContent,
@@ -32,6 +35,7 @@ import {
   type CareersHeroContent,
   type CareersInternshipContent,
   type CareersJob,
+  type CareersJobLabels,
   type CareersJobsContent,
   type CareersProgramPoint,
   type CareersSectionType,
@@ -62,6 +66,21 @@ const ALIGN_ITEMS_OPTIONS = [
 
 const JOB_DESCRIPTION_HINT =
   'Plain text or HTML: <p>, <br>, <strong>, <em>, <ul>/<ol> + <li>, <a href="…">. Escape a literal < or & as &lt; / &amp;.';
+
+const JOB_LABEL_NAMES: Record<keyof CareersJobLabels, string> = {
+  view: '“View details” button',
+  hide: '“Hide details” button',
+  about: 'About heading',
+  responsibilities: 'Responsibilities heading',
+  requirements: 'Requirements heading',
+  benefits: 'What we offer heading',
+  facts: 'At a glance heading',
+  department: 'Department label',
+  location: 'Location label',
+  type: 'Job type label',
+  experience: 'Experience label',
+  panelApply: 'Apply button inside details',
+};
 
 /** One entry per line; kept raw while typing, trimmed when rendered. */
 const linesOf = (v?: string[]) => (v || []).join('\n');
@@ -205,6 +224,109 @@ function CareersWhyEditor({ content: c, onChange }: EditorProps<CareersWhyConten
 /* Current openings                                                    */
 /* ------------------------------------------------------------------ */
 
+const JOB_TYPE_OPTIONS = ['Full-Time', 'Part-Time', 'Contract', 'Internship', 'Trainee', 'Third-Party Payroll'];
+const EXPERIENCE_CHIP = /\b(exp|experience|years?|yrs?|fresher)/i;
+
+/** Text input with suggestions; keeps department names consistent so the filter tabs group correctly. */
+function SuggestInput({ label, value, onChange, options, placeholder, hint }: {
+  label: string;
+  value?: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+  hint?: string;
+}) {
+  const listId = `crs-suggest-${label.toLowerCase().replace(/[^a-z]+/g, '-')}`;
+  return (
+    <Field label={label} hint={hint}>
+      <input className="admin-input" list={listId} value={value || ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+      <datalist id={listId}>
+        {options.map((o) => (
+          <option key={o} value={o} />
+        ))}
+      </datalist>
+    </Field>
+  );
+}
+
+function applyParsed(job: CareersJob, p: ParsedJobText, fromOldDescription: boolean): CareersJob {
+  const chips = job.chips || [];
+  const expChip = fromOldDescription && !job.experience ? chips.find((ch) => EXPERIENCE_CHIP.test(ch)) : undefined;
+  const pick = (list: string[] | undefined, current: string[] | undefined) => (list?.length ? list : current || []);
+  return {
+    ...job,
+    department: job.department || p.department,
+    location: job.location || p.location,
+    type: job.type || p.type,
+    experience: job.experience || expChip || p.experience,
+    chips: expChip ? chips.filter((ch) => ch !== expChip) : chips,
+    summary: p.summary || job.summary,
+    responsibilities: pick(p.responsibilities, job.responsibilities),
+    requirements: pick(p.requirements, job.requirements),
+    benefits: pick(p.benefits, job.benefits),
+    facts: pick(p.facts, job.facts),
+    description: fromOldDescription ? '' : job.description,
+  };
+}
+
+/** Paste a whole job description; headings like "Key Responsibilities" / "Requirements" sort it into the boxes below. */
+function JobAutoFill({ job, onFill }: { job: CareersJob; onFill: (next: CareersJob) => void }) {
+  const [text, setText] = useState('');
+  const [done, setDone] = useState(false);
+  const legacy = Boolean(String(job.description || '').trim()) && !hasStructuredDetails(job);
+  return (
+    <>
+      {legacy ? (
+        <div className="admin-guide-callout admin-guide-callout--warn">
+          <strong>This job still uses the old single text box.</strong> It shows on the site inside &ldquo;View details&rdquo;, but
+          splitting it into Summary / Responsibilities / Requirements looks much cleaner.
+          <div style={{ marginTop: '0.6rem' }}>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary az-admin-mini"
+              onClick={() => onFill(applyParsed(job, parseJobText(job.description || ''), true))}
+            >
+              Split it into sections automatically
+            </button>
+          </div>
+        </div>
+      ) : null}
+      <AdminCollapsible
+        title="Paste a full job description (auto-fill)"
+        description="Copy the job ad from Word, PDF, email or WhatsApp — the boxes below are filled in for you"
+        className="az-admin-group"
+      >
+        <TextArea
+          label="Job description text"
+          rows={8}
+          value={text}
+          onChange={(v) => {
+            setText(v);
+            setDone(false);
+          }}
+          placeholder={'About the role…\n\nKey Responsibilities\n- …\n\nRequirements\n- …'}
+          hint="Headings such as Key Responsibilities, Requirements, Eligibility, Qualifications, Benefits and lines like “Vacancies: 2” are recognised. Bullets, numbers and emojis are removed. “How to apply” text is skipped — the Apply button handles that."
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary az-admin-mini"
+            disabled={!text.trim()}
+            onClick={() => {
+              onFill(applyParsed(job, parseJobText(text), false));
+              setText('');
+              setDone(true);
+            }}
+          >
+            Fill in the boxes below
+          </button>
+          {done ? <span className="az-admin-hint" style={{ margin: 0 }}>Done — check the boxes below, then save. Cancel undoes it.</span> : null}
+        </div>
+      </AdminCollapsible>
+    </>
+  );
+}
+
 function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsContent>) {
   const set = (patch: Partial<CareersJobsContent>) => onChange({ ...c, ...patch });
   const cs = c.cardStyle || {};
@@ -213,50 +335,115 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
   const setF = (patch: Partial<CareersJobsContent['filter']>) => set({ filter: { ...f, ...patch } });
   const ci = c.chipIcons;
   const setCi = (patch: Partial<CareersJobsContent['chipIcons']>) => set({ chipIcons: { ...ci, ...patch } });
+  const dl = c.detailLabels || CAREERS_JOB_LABELS;
+  const setDl = (patch: Partial<CareersJobLabels>) => set({ detailLabels: { ...dl, ...patch } });
+  const departments = Array.from(new Set((c.jobs || []).map((j) => String(j.department || '').trim()).filter(Boolean)));
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
         <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
-      <Group title="Job openings" open description="Apply buttons scroll to the application form and preselect the role">
+      <Group title="Job openings" open description="Add, hide or reorder jobs. Apply buttons scroll to the application form and preselect the role">
         <ListEditor<CareersJob>
           label="Jobs"
           items={c.jobs || []}
           onChange={(jobs) => set({ jobs })}
           addLabel="Job"
-          create={() => ({ title: 'New role', department: 'Engineering', location: 'Bengaluru', type: 'Full-Time', chips: [] })}
+          create={() => ({
+            title: 'New role',
+            department: departments[0] || '',
+            location: 'Bengaluru',
+            type: 'Full-Time',
+            badge: 'New',
+            chips: [],
+            responsibilities: [],
+            requirements: [],
+            benefits: [],
+            facts: [],
+          })}
           itemTitle={(j) => `${j.hidden ? '(hidden) ' : ''}${j.title || 'Job'}${j.location ? ` · ${j.location}` : ''}`}
           renderItem={(j, patch) => (
             <>
+              <JobAutoFill job={j} onFill={patch} />
               <div className="admin-form-grid">
+                <TextInput label="Job title" value={j.title} onChange={(title) => patch({ ...j, title })} placeholder="Solar Design Engineer" />
+                <SuggestInput
+                  label="Department"
+                  value={j.department}
+                  onChange={(department) => patch({ ...j, department })}
+                  options={departments}
+                  placeholder="Solar, UPS, Sales…"
+                  hint="Pick an existing one so the filter tabs stay tidy"
+                />
+                <TextInput label="Location" value={j.location} onChange={(location) => patch({ ...j, location })} placeholder="Bengaluru" />
+                <SuggestInput label="Job type" value={j.type} onChange={(type) => patch({ ...j, type })} options={JOB_TYPE_OPTIONS} placeholder="Full-Time" />
+                <TextInput label="Experience" value={j.experience} onChange={(experience) => patch({ ...j, experience })} placeholder="1–2 years / Freshers" />
+                <TextInput label="Badge (optional)" value={j.badge} onChange={(badge) => patch({ ...j, badge })} placeholder="New, Urgent, Hiring fast…" />
                 <Field label="Visibility">
-                  <Toggle label="Show this job" checked={!j.hidden} onChange={(on) => patch({ ...j, hidden: !on })} />
+                  <Toggle label="Show this job on the website" checked={!j.hidden} onChange={(on) => patch({ ...j, hidden: !on })} />
                 </Field>
-                <TextInput label="Job title" value={j.title} onChange={(title) => patch({ ...j, title })} />
-                <TextInput label="Department" value={j.department} onChange={(department) => patch({ ...j, department })} />
-                <TextInput label="Location" value={j.location} onChange={(location) => patch({ ...j, location })} />
-                <TextInput label="Type" value={j.type} onChange={(type) => patch({ ...j, type })} placeholder="Full-Time" />
-                <TextInput label="Badge (optional)" value={j.badge} onChange={(badge) => patch({ ...j, badge })} placeholder="New, Urgent…" />
-                <ColorInput label="Card background" value={j.background} onChange={(background) => patch({ ...j, background })} fallback="#FFFFFF" />
               </div>
-              <TextArea label="Extra chips (one per line)" rows={2} value={linesOf(j.chips)} onChange={(v) => patch({ ...j, chips: toLines(v) })} placeholder="2–4 yrs experience" />
               <TextArea
-                label="Short description (optional, HTML)"
-                rows={4}
-                value={j.description}
-                onChange={(description) => patch({ ...j, description })}
-                hint={JOB_DESCRIPTION_HINT}
+                label="Short summary"
+                rows={2}
+                value={j.summary}
+                onChange={(summary) => patch({ ...j, summary })}
+                placeholder="We're looking for a Sales Executive to grow our UPS business across Bengaluru."
+                hint="One or two sentences shown on the card before visitors open it."
               />
-              <div className="admin-form-grid">
-                <TextInput label="Apply role" value={j.role} onChange={(role) => patch({ ...j, role })} placeholder="Empty = job title" />
-                <TextInput label="Apply button label" value={j.applyLabel} onChange={(applyLabel) => patch({ ...j, applyLabel })} placeholder="Empty = section default" />
-                <TextInput label="Details link (optional)" value={j.href} onChange={(href) => patch({ ...j, href })} placeholder="/careers/solar-design-engineer or PDF" />
-                <TextInput label="Details link label" value={j.linkLabel} onChange={(linkLabel) => patch({ ...j, linkLabel })} placeholder="View details →" />
-                <Field label="Details link">
-                  <Toggle label="Open in a new tab" checked={Boolean(j.newTab)} onChange={(newTab) => patch({ ...j, newTab })} />
-                </Field>
-              </div>
+              <TextArea
+                label="Key responsibilities"
+                rows={6}
+                value={linesOf(j.responsibilities)}
+                onChange={(v) => patch({ ...j, responsibilities: toLines(v) })}
+                placeholder={'Generate leads and develop new business\nVisit customers and conduct site surveys\nPrepare quotations and follow up for closure'}
+                hint="One point per line — no bullets or numbers needed."
+              />
+              <TextArea
+                label="Requirements"
+                rows={6}
+                value={linesOf(j.requirements)}
+                onChange={(v) => patch({ ...j, requirements: toLines(v) })}
+                placeholder={'Diploma / Degree in Electrical or Electronics\n1–2 years of sales experience\nWillingness to travel'}
+                hint="One point per line."
+              />
+              <TextArea
+                label="What we offer (optional)"
+                rows={3}
+                value={linesOf(j.benefits)}
+                onChange={(v) => patch({ ...j, benefits: toLines(v) })}
+                placeholder={'1 month paid training\nTravel allowance'}
+                hint="One point per line. Leave empty to hide."
+              />
+              <TextArea
+                label="Extra details for “At a glance” (optional)"
+                rows={3}
+                value={linesOf(j.facts)}
+                onChange={(v) => patch({ ...j, facts: toLines(v) })}
+                placeholder={'Vacancies: 2\nTraining: Erode – 1 month\nSalary: As per industry standards'}
+                hint="One per line as Label: value. Department, location, job type and experience are added automatically."
+              />
+              <AdminCollapsible title="More options" description="Extra tags, apply button, external link, card colour, old HTML description" className="az-admin-group">
+                <TextArea label="Extra tags (one per line)" rows={2} value={linesOf(j.chips)} onChange={(v) => patch({ ...j, chips: toLines(v) })} placeholder="Hybrid" />
+                <div className="admin-form-grid">
+                  <TextInput label="Role in the apply form" value={j.role} onChange={(role) => patch({ ...j, role })} placeholder="Empty = job title" />
+                  <TextInput label="Apply button label" value={j.applyLabel} onChange={(applyLabel) => patch({ ...j, applyLabel })} placeholder="Empty = section default" />
+                  <TextInput label="External link (optional)" value={j.href} onChange={(href) => patch({ ...j, href })} placeholder="/files/job-description.pdf" />
+                  <TextInput label="External link label" value={j.linkLabel} onChange={(linkLabel) => patch({ ...j, linkLabel })} placeholder="Download JD →" />
+                  <Field label="External link">
+                    <Toggle label="Open in a new tab" checked={Boolean(j.newTab)} onChange={(newTab) => patch({ ...j, newTab })} />
+                  </Field>
+                  <ColorInput label="Card background" value={j.background} onChange={(background) => patch({ ...j, background })} fallback="#FFFFFF" />
+                </div>
+                <TextArea
+                  label="About the role (HTML, optional)"
+                  rows={4}
+                  value={j.description}
+                  onChange={(description) => patch({ ...j, description })}
+                  hint={`Shown at the top of the details panel. ${JOB_DESCRIPTION_HINT}`}
+                />
+              </AdminCollapsible>
             </>
           )}
         />
@@ -283,7 +470,7 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
       <Group title="Layout & filter">
         <div className="admin-form-grid">
           <ColumnsEditor value={c.columns} onChange={(columns) => set({ columns })} defaults={{ desktop: 1, tablet: 1, mobile: 1 }} />
-          <TextInput label="Gap" value={c.gap} onChange={(gap) => set({ gap })} placeholder="1.1rem" />
+          <TextInput label="Gap" value={c.gap} onChange={(gap) => set({ gap })} placeholder="1rem" />
           <Field label="Motion">
             <Toggle label="Staggered reveal on scroll" checked={c.reveal !== false} onChange={(reveal) => set({ reveal })} />
             <Toggle label="Lift on hover" checked={cs.hoverLift !== false} onChange={(hoverLift) => setCs({ hoverLift })} />
@@ -297,24 +484,33 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
         </div>
         <StyleEditor title="Filter tab style" value={f.style} onChange={(style) => setF({ style })} allowHide={false} fontSizePlaceholder="0.72rem" />
       </Group>
-      <Group title="Chips & chip icons">
-        <Toggle label="Show icons in department / location / type chips" checked={Boolean(ci?.enabled)} onChange={(enabled) => setCi({ enabled })} />
+      <Group title="Card wording" description="Button and heading text used inside every job card">
+        <div className="admin-form-grid">
+          <TextInput label="Open-roles counter label" value={c.countLabel} onChange={(countLabel) => set({ countLabel })} placeholder="Empty = counter hidden" />
+          {(Object.keys(CAREERS_JOB_LABELS) as Array<keyof CareersJobLabels>).map((key) => (
+            <TextInput key={key} label={JOB_LABEL_NAMES[key]} value={dl[key]} onChange={(v) => setDl({ [key]: v })} placeholder={CAREERS_JOB_LABELS[key]} />
+          ))}
+        </div>
+      </Group>
+      <Group title="Icons, tags & badge">
+        <Toggle label="Show icons beside department / location / type / experience" checked={!ci?.hidden} onChange={(on) => setCi({ hidden: !on })} />
         <IconEditor label="Department icon" value={ci?.department || {}} onChange={(department) => setCi({ department })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
         <IconEditor label="Location icon" value={ci?.location || {}} onChange={(location) => setCi({ location })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
-        <IconEditor label="Type icon" value={ci?.type || {}} onChange={(type) => setCi({ type })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
-        <StyleEditor title="Chip style" value={c.chipStyle} onChange={(chipStyle) => set({ chipStyle })} allowHide={false} fontSizePlaceholder="0.68rem" />
+        <IconEditor label="Job type icon" value={ci?.type || {}} onChange={(type) => setCi({ type })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
+        <IconEditor label="Experience icon" value={ci?.experience || {}} onChange={(experience) => setCi({ experience })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
+        <StyleEditor title="Location / type / tag text style" value={c.chipStyle} onChange={(chipStyle) => set({ chipStyle })} allowHide={false} fontSizePlaceholder="0.9rem" />
         <StyleEditor title="Badge style" value={c.badgeStyle} onChange={(badgeStyle) => set({ badgeStyle })} allowHide={false} fontSizePlaceholder="0.62rem" />
       </Group>
       <Group title="Job card style">
         <CardStyleFields
           value={cs}
           onChange={setCs}
-          placeholders={{ background: '#FFFFFF', border: '1px solid var(--gray-200)', radius: '10px', padding: '1.6rem 1.8rem', shadow: '0 6px 18px -8px rgba(10,22,40,0.1)' }}
+          placeholders={{ background: '#FFFFFF', border: '1px solid #E3E8EF', radius: '14px', padding: '1.6rem 1.9rem', shadow: '0 1px 2px rgba(10,22,40,0.04)' }}
         />
       </Group>
       <Group title="Job card text">
-        <StyleEditor title="Job title style" value={c.titleStyle} onChange={(titleStyle) => set({ titleStyle })} allowHide={false} fontSizePlaceholder="1.05rem" />
-        <StyleEditor title="Description style" value={c.descriptionStyle} onChange={(descriptionStyle) => set({ descriptionStyle })} allowHide={false} fontSizePlaceholder="0.92rem" />
+        <StyleEditor title="Job title style" value={c.titleStyle} onChange={(titleStyle) => set({ titleStyle })} allowHide={false} fontSizePlaceholder="1.3rem" />
+        <StyleEditor title="Summary / about text style" value={c.descriptionStyle} onChange={(descriptionStyle) => set({ descriptionStyle })} allowHide={false} fontSizePlaceholder="0.96rem" />
         <StyleEditor title="Details link style" value={c.linkStyle} onChange={(linkStyle) => set({ linkStyle })} allowHide={false} fontSizePlaceholder="0.85rem" />
       </Group>
       <Group title="No openings message">

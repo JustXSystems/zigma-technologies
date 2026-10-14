@@ -130,11 +130,21 @@ export type CareersJob = {
   department?: string;
   location?: string;
   type?: string;
-  /** Extra chips (e.g. "2–4 yrs", "Hybrid") */
+  /** e.g. "1–2 years" or "Freshers" */
+  experience?: string;
+  /** Extra chips (e.g. "Hybrid") */
   chips?: string[];
   /** Small highlighted label, e.g. "New" or "Urgent" */
   badge?: string;
-  /** HTML (plain text also works) */
+  /** One or two sentences shown on the collapsed card */
+  summary?: string;
+  /** One entry per item; blank lines are ignored */
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
+  /** "Label: value" per entry, shown in the "At a glance" panel (e.g. "Vacancies: 2") */
+  facts?: string[];
+  /** Older free-form description: HTML (plain text also works), shown as "About the role" */
   description?: string;
   background?: string;
   /** Apply-form role; empty = the job title */
@@ -162,13 +172,47 @@ export type CareersJobsContent = {
   buttonStyle?: ElementStyle;
   hideApply?: boolean;
   cardStyle: LegacyCardStyle;
-  chipIcons: { enabled?: boolean; department: IconEl; location: IconEl; type: IconEl };
+  /** Label beside the open-roles counter; empty = counter hidden */
+  countLabel?: string;
+  /** Headings and button labels used inside each job card */
+  detailLabels: CareersJobLabels;
+  chipIcons: { hidden?: boolean; department: IconEl; location: IconEl; type: IconEl; experience: IconEl };
   titleStyle?: ElementStyle;
   descriptionStyle?: ElementStyle;
   chipStyle?: ElementStyle;
   badgeStyle?: ElementStyle;
   linkStyle?: ElementStyle;
   emptyText: TextEl;
+};
+
+export type CareersJobLabels = {
+  view: string;
+  hide: string;
+  about: string;
+  responsibilities: string;
+  requirements: string;
+  benefits: string;
+  facts: string;
+  department: string;
+  location: string;
+  type: string;
+  experience: string;
+  panelApply: string;
+};
+
+export const CAREERS_JOB_LABELS: CareersJobLabels = {
+  view: 'View details',
+  hide: 'Hide details',
+  about: 'About the role',
+  responsibilities: 'Key responsibilities',
+  requirements: 'Requirements',
+  benefits: 'What we offer',
+  facts: 'At a glance',
+  department: 'Department',
+  location: 'Location',
+  type: 'Job type',
+  experience: 'Experience',
+  panelApply: 'Apply for this role →',
 };
 
 export type CareersProgramPoint = { hidden?: boolean; label: string; value: string; icon?: IconEl };
@@ -302,6 +346,7 @@ export const CAREERS_ICON_PRESETS: Array<{ key: string; label: string; svg: stri
     svg: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>',
   },
   { key: 'careers-clock', label: 'Clock (duration / type)', svg: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>' },
+  { key: 'careers-award', label: 'Award (experience)', svg: '<circle cx="12" cy="8" r="6"/><path d="M15.48 12.89L17 22l-5-3-5 3 1.52-9.11"/>' },
   { key: 'careers-mail', label: 'Email', svg: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/>' },
   {
     key: 'careers-rupee',
@@ -534,11 +579,13 @@ export function defaultCareersJobsContent(): CareersJobsContent {
     buttonVariant: 'primary',
     buttonSize: 'sm',
     cardStyle: { hoverLift: true },
+    countLabel: 'Open positions',
+    detailLabels: { ...CAREERS_JOB_LABELS },
     chipIcons: {
-      enabled: false,
       department: icon('careers-briefcase'),
       location: icon('careers-pin'),
       type: icon('careers-clock'),
+      experience: icon('careers-award'),
     },
     emptyText: { text: 'No open roles right now — send a general application below and we will keep you in mind.' },
   };
@@ -703,9 +750,22 @@ export function withCareersDefaults<T extends object>(type: CareersSectionType, 
     out.iconStyle = out.iconStyle || {};
   }
   if (type === 'careers_jobs') {
-    out.jobs = arr<CareersJob>(out.jobs).map((j) => ({ ...j, chips: strs(j.chips) }));
+    out.jobs = arr<CareersJob>(out.jobs).map((j) => ({
+      ...j,
+      chips: strs(j.chips),
+      responsibilities: strs(j.responsibilities),
+      requirements: strs(j.requirements),
+      benefits: strs(j.benefits),
+      facts: strs(j.facts),
+    }));
     const ci = out.chipIcons as CareersJobsContent['chipIcons'];
-    out.chipIcons = { ...ci, department: iconOf(ci?.department), location: iconOf(ci?.location), type: iconOf(ci?.type) };
+    out.chipIcons = {
+      ...ci,
+      department: iconOf(ci?.department),
+      location: iconOf(ci?.location),
+      type: iconOf(ci?.type),
+      experience: iconOf(ci?.experience),
+    };
   }
   if (type === 'careers_internship') {
     out.media = arr<LifeMediaItem>(out.media);

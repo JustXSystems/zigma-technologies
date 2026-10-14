@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
@@ -16,11 +16,13 @@ import { visibleMedia } from '@/lib/life-sections';
 import {
   CAREERS_APPLY_ANCHOR,
   CAREERS_DEFAULT_ROLES,
+  CAREERS_JOB_LABELS,
   withCareersDefaults,
   type CareersApplicationContent,
   type CareersFieldText,
   type CareersInternshipContent,
   type CareersJob,
+  type CareersJobLabels,
   type CareersJobsContent,
   type CareersWhyCard,
   type CareersWhyContent,
@@ -130,45 +132,103 @@ export function CareersWhySection({ content, sectionKey }: SectionProps) {
 /* Current openings                                                    */
 /* ------------------------------------------------------------------ */
 
-function JobCard({ job, c }: { job: CareersJob; c: CareersJobsContent }) {
+const lines = (v?: string[]) => (v || []).map(t).filter(Boolean);
+const jobSlug = (title: string) =>
+  'job-' +
+  title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+
+function JobPoints({ title, items, tone }: { title: string; items: string[]; tone: 'orange' | 'green' | 'blue' }) {
+  if (!items.length) return null;
+  return (
+    <div className={`crs-job-block crs-job-block--${tone}`}>
+      <h6 className="crs-job-h">{title}</h6>
+      <ul className="crs-job-points">
+        {items.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; c: CareersJobsContent; open: boolean; onToggle: () => void }) {
   const ci = c.chipIcons;
-  const chips: Array<{ text: string; icon?: typeof ci.department }> = [
-    { text: t(job.department), icon: ci?.department },
+  const showIcons = !ci?.hidden;
+  const lbl = (key: keyof CareersJobLabels) => t(c.detailLabels?.[key]) || CAREERS_JOB_LABELS[key];
+  const meta = [
     { text: t(job.location), icon: ci?.location },
     { text: t(job.type), icon: ci?.type },
-    ...(job.chips || []).map((text) => ({ text: t(text) })),
-  ].filter((chip) => chip.text);
+    { text: t(job.experience), icon: ci?.experience },
+    ...(job.chips || []).map((text) => ({ text: t(text), icon: undefined })),
+  ].filter((m) => m.text);
+  const responsibilities = lines(job.responsibilities);
+  const requirements = lines(job.requirements);
+  const benefits = lines(job.benefits);
+  const extraFacts = lines(job.facts).map((f) => {
+    const at = f.indexOf(':');
+    return at > 0 ? [f.slice(0, at).trim(), f.slice(at + 1).trim()] : ['', f];
+  });
+  const facts = [
+    [lbl('department'), t(job.department)],
+    [lbl('location'), t(job.location)],
+    [lbl('type'), t(job.type)],
+    [lbl('experience'), t(job.experience)],
+    ...extraFacts,
+  ].filter(([, value]) => value);
+  const description = t(job.description);
+  const hasBody = Boolean(description || responsibilities.length || requirements.length || benefits.length);
+  const hasDetails = hasBody || extraFacts.length > 0;
   const role = t(job.role) || t(job.title);
   const label = t(job.applyLabel) || t(c.applyLabel) || 'Apply Now →';
   const href = t(job.href);
+  const panelId = `${id}-details`;
+  const btnClass = `btn btn-${c.buttonVariant || 'primary'}${c.buttonSize === 'md' ? '' : ' btn-sm'}`;
+
+  const onRowClick = (e: MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a,button') || window.getSelection()?.toString()) return;
+    onToggle();
+  };
+
   return (
-    <article className="crs-job" style={vars({ '--crs-own-bg': job.background })}>
-      <div className="crs-job-main">
-        <div className="crs-job-head">
-          <h5 className="crs-job-title" style={elementCss(c.titleStyle)}>
-            {job.title}
-          </h5>
-          {t(job.badge) ? (
-            <span className="crs-job-badge" style={elementCss(c.badgeStyle)}>
-              {job.badge}
-            </span>
+    <article id={id} className={`crs-job${open ? ' is-open' : ''}`} style={vars({ '--crs-own-bg': job.background })}>
+      <div className={`crs-job-row${hasDetails ? ' is-toggle' : ''}`} onClick={hasDetails ? onRowClick : undefined}>
+        <div className="crs-job-main">
+          {t(job.department) ? (
+            <div className="crs-job-dept">
+              {showIcons && ci?.department ? <AzIcon icon={ci.department} className="crs-chip-ico" /> : null}
+              {job.department}
+            </div>
+          ) : null}
+          <div className="crs-job-head">
+            <h5 className="crs-job-title" style={elementCss(c.titleStyle)}>
+              {job.title}
+            </h5>
+            {t(job.badge) ? (
+              <span className="crs-job-badge" style={elementCss(c.badgeStyle)}>
+                {job.badge}
+              </span>
+            ) : null}
+          </div>
+          {meta.length ? (
+            <div className="crs-job-meta">
+              {meta.map((m, i) => (
+                <span className="crs-job-chip" key={`${m.text}-${i}`} style={elementCss(c.chipStyle)}>
+                  {showIcons && m.icon ? <AzIcon icon={m.icon} className="crs-chip-ico" /> : null}
+                  {m.text}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {t(job.summary) ? (
+            <p className="crs-job-summary" style={elementCss(c.descriptionStyle)}>
+              {job.summary}
+            </p>
           ) : null}
         </div>
-        {chips.length ? (
-          <div className="crs-job-meta">
-            {chips.map((chip, i) => (
-              <span className="crs-job-chip" key={`${chip.text}-${i}`} style={elementCss(c.chipStyle)}>
-                {ci?.enabled && chip.icon ? <AzIcon icon={chip.icon} className="crs-chip-ico" /> : null}
-                {chip.text}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        {t(job.description) ? (
-          <div className="crs-job-desc" style={elementCss(c.descriptionStyle)} dangerouslySetInnerHTML={{ __html: t(job.description) }} />
-        ) : null}
-      </div>
-      {(href && t(job.linkLabel)) || !c.hideApply ? (
         <div className="crs-job-actions">
           {href && t(job.linkLabel) ? (
             <a
@@ -181,17 +241,65 @@ function JobCard({ job, c }: { job: CareersJob; c: CareersJobsContent }) {
               {job.linkLabel}
             </a>
           ) : null}
+          {hasDetails ? (
+            <button type="button" className="crs-job-toggle" aria-expanded={open} aria-controls={panelId} onClick={onToggle}>
+              <span>{open ? lbl('hide') : lbl('view')}</span>
+              <svg className="crs-job-chev" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          ) : null}
           {!c.hideApply ? (
-            <button
-              type="button"
-              className={`btn btn-${c.buttonVariant || 'primary'}${c.buttonSize === 'md' ? '' : ' btn-sm'} crs-job-apply`}
-              style={elementCss(c.buttonStyle)}
-              data-role={role}
-              onClick={() => focusApplyRole(role)}
-            >
+            <button type="button" className={`${btnClass} crs-job-apply`} style={elementCss(c.buttonStyle)} data-role={role} onClick={() => focusApplyRole(role)}>
               {label}
             </button>
           ) : null}
+        </div>
+      </div>
+      {hasDetails ? (
+        <div className="crs-job-details" id={panelId} role="region" aria-label={`${job.title} — ${lbl('view')}`} inert={!open}>
+          <div className="crs-job-clip">
+            <div className={`crs-job-panel${hasBody ? '' : ' crs-job-panel--facts'}`}>
+              {hasBody ? (
+                <div className="crs-job-body">
+                  {description ? (
+                    <div className="crs-job-block">
+                      <h6 className="crs-job-h">{lbl('about')}</h6>
+                      <div className="crs-job-desc" style={elementCss(c.descriptionStyle)} dangerouslySetInnerHTML={{ __html: description }} />
+                    </div>
+                  ) : null}
+                  {responsibilities.length || requirements.length ? (
+                    <div className="crs-job-cols">
+                      <JobPoints title={lbl('responsibilities')} items={responsibilities} tone="orange" />
+                      <JobPoints title={lbl('requirements')} items={requirements} tone="green" />
+                    </div>
+                  ) : null}
+                  <JobPoints title={lbl('benefits')} items={benefits} tone="blue" />
+                </div>
+              ) : null}
+              <aside className="crs-job-facts">
+                <h6 className="crs-job-h">{lbl('facts')}</h6>
+                <dl>
+                  {facts.map(([k, v], i) => (
+                    <div key={`${k}-${i}`}>
+                      {k ? <dt>{k}</dt> : null}
+                      <dd>{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {!c.hideApply ? (
+                  <button
+                    type="button"
+                    className={`btn btn-${c.buttonVariant === 'ghost' ? 'primary' : c.buttonVariant || 'primary'} btn-sm crs-job-panel-apply`}
+                    style={elementCss(c.buttonStyle)}
+                    onClick={() => focusApplyRole(role)}
+                  >
+                    {lbl('panelApply')}
+                  </button>
+                ) : null}
+              </aside>
+            </div>
+          </div>
         </div>
       ) : null}
     </article>
@@ -201,37 +309,69 @@ function JobCard({ job, c }: { job: CareersJob; c: CareersJobsContent }) {
 export function CareersJobsSection({ content, sectionKey }: SectionProps) {
   const c = withCareersDefaults<CareersJobsContent>('careers_jobs', content);
   const jobs = (c.jobs || []).filter((j) => !j.hidden && t(j.title));
+  const ids = jobs.map((j, i) => {
+    const base = jobSlug(t(j.title));
+    return jobs.slice(0, i).some((p) => jobSlug(t(p.title)) === base) ? `${base}-${i + 1}` : base;
+  });
   const [dept, setDept] = useState('');
+  const [openId, setOpenId] = useState<string | null>(null);
   const departments = Array.from(new Set(jobs.map((j) => t(j.department)).filter(Boolean)));
   const filterOn = Boolean(c.filter?.enabled) && departments.length > 1;
   const active = filterOn && departments.includes(dept) ? dept : '';
-  const shown = active ? jobs.filter((j) => t(j.department) === active) : jobs;
+  const shown = jobs.map((job, i) => ({ job, id: ids[i] })).filter(({ job }) => !active || t(job.department) === active);
   const listRef = useRef<HTMLDivElement>(null);
   useStaggerReveal(listRef, '.crs-job', c.reveal !== false, `${active}|${shown.length}`);
   const cs = c.cardStyle || {};
   const f = c.filter || { allLabel: 'All roles' };
+  const countLabel = t(c.countLabel);
+  const idKey = ids.join('|');
+
+  useEffect(() => {
+    const fromHash = window.setTimeout(() => {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      if (hash && idKey.split('|').includes(hash)) setOpenId(hash);
+    }, 0);
+    return () => window.clearTimeout(fromHash);
+  }, [idKey]);
+
+  const toggle = (id: string) => {
+    const next = openId === id ? null : id;
+    setOpenId(next);
+    if (next) window.history.replaceState(null, '', `#${next}`);
+  };
+
   return (
     <LgShell box={c.section} className="lgy-section crs-jobs" id={sectionKey || 'current-openings'}>
       <LgHeader header={c.header} />
-      {filterOn ? (
-        <div
-          className="crs-filter"
-          role="group"
-          aria-label="Filter roles by department"
-          style={vars({ '--crs-filter-bg': f.activeBackground, '--crs-filter-color': f.activeColor })}
-        >
-          {['', ...departments].map((d) => (
-            <button
-              key={d || 'all'}
-              type="button"
-              className={`crs-filter-btn${active === d ? ' is-on' : ''}`}
-              aria-pressed={active === d}
-              style={elementCss(f.style)}
-              onClick={() => setDept(d)}
+      {filterOn || (countLabel && jobs.length) ? (
+        <div className="crs-jobs-bar">
+          {filterOn ? (
+            <div
+              className="crs-filter"
+              role="group"
+              aria-label="Filter roles by department"
+              style={vars({ '--crs-filter-bg': f.activeBackground, '--crs-filter-color': f.activeColor })}
             >
-              {d || t(f.allLabel) || 'All roles'}
-            </button>
-          ))}
+              {['', ...departments].map((d) => (
+                <button
+                  key={d || 'all'}
+                  type="button"
+                  className={`crs-filter-btn${active === d ? ' is-on' : ''}`}
+                  aria-pressed={active === d}
+                  style={elementCss(f.style)}
+                  onClick={() => setDept(d)}
+                >
+                  {d || t(f.allLabel) || 'All roles'}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {countLabel && jobs.length ? (
+            <div className="crs-jobs-count" aria-live="polite">
+              {countLabel}
+              <strong>{shown.length}</strong>
+            </div>
+          ) : null}
         </div>
       ) : null}
       {shown.length ? (
@@ -240,8 +380,8 @@ export function CareersJobsSection({ content, sectionKey }: SectionProps) {
           className={`crs-job-list${cs.hoverLift === false ? ' lgy-no-lift' : ''}`}
           style={vars({ ...colVars(c.columns, { desktop: 1, tablet: 1, mobile: 1 }), '--lz-gap': c.gap, ...cardVars(cs) })}
         >
-          {shown.map((job, i) => (
-            <JobCard key={`${job.title}-${i}`} job={job} c={c} />
+          {shown.map(({ job, id }) => (
+            <JobCard key={id} job={job} id={id} c={c} open={openId === id} onToggle={() => toggle(id)} />
           ))}
         </div>
       ) : (
