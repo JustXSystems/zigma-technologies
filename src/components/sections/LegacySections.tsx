@@ -38,6 +38,8 @@ import {
 } from '@/lib/about-sections';
 import { visibleMedia, type LifeMediaItem } from '@/lib/life-sections';
 import {
+  badgePinVars,
+  isBadgePinned,
   withLegacyDefaults,
   type LegacyBgMedia,
   type LegacyCapsContent,
@@ -368,7 +370,7 @@ export function LgScrollBar({ gradient }: { gradient?: string }) {
 /* Page hero (slideshow background + animated 20-years ring)           */
 /* ------------------------------------------------------------------ */
 
-function LgRing({ badge: b }: { badge: LegacyRingBadge }) {
+function LgRing({ badge: b, className }: { badge: LegacyRingBadge; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const gradId = `lgy-ring-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const value = String(b.value || '').trim();
@@ -376,7 +378,7 @@ function LgRing({ badge: b }: { badge: LegacyRingBadge }) {
   return (
     <div
       ref={ref}
-      className={`lgy-badge${b.blur === false ? ' lgy-no-blur' : ''}`}
+      className={`lgy-badge${b.blur === false ? ' lgy-no-blur' : ''}${className ? ` ${className}` : ''}`}
       style={vars({
         background: b.background,
         border: b.border,
@@ -464,11 +466,33 @@ export function LegacyHeroSection({ content, sectionKey }: SectionProps) {
     </div>
     </HeroSlot>
   );
-  const badge = showBadge ? (
-    <HeroSlot place={place} name="media">
-      <LgRing badge={b} />
-    </HeroSlot>
-  ) : null;
+  const pin = b?.pin || {};
+  const pinD = showBadge && isBadgePinned(pin.desktop);
+  const pinM = showBadge && isBadgePinned(pin.mobile);
+  const flowScope = pinD ? 'lgy-badge--phone-only' : pinM ? 'lgy-badge--desk-only' : undefined;
+  const badge =
+    showBadge && !(pinD && pinM) ? (
+      <HeroSlot place={place} name="media">
+        <LgRing badge={b} className={flowScope} />
+      </HeroSlot>
+    ) : null;
+  const pinFrame = pin.frame === 'content';
+  const pinned =
+    pinD || pinM ? (
+      <div
+        className={`lgy-pin-frame${pinFrame ? ' lgy-pin-frame--content container' : ''}${
+          !pinD ? ' lgy-pin-frame--phone' : !pinM ? ' lgy-pin-frame--desk' : ''
+        }`}
+        style={pinFrame && c.section?.containerMaxWidth ? { maxWidth: c.section.containerMaxWidth } : undefined}
+      >
+        <div className="lgy-pin-box">
+          <div className="lgy-pin" style={vars({ ...badgePinVars(pin.desktop, 'd'), ...badgePinVars(pin.mobile, 'm') })}>
+            <LgRing badge={b} />
+          </div>
+        </div>
+      </div>
+    ) : null;
+  const twoCols = Boolean(badge) && !pinD;
 
   return (
     <LgShell
@@ -476,11 +500,12 @@ export function LegacyHeroSection({ content, sectionKey }: SectionProps) {
       bg={c.background}
       className={`az-hero lgy-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
+      layers={pinned}
     >
       {!scroll.hidden ? <LgScrollBar gradient={scroll.gradient} /> : null}
       <div
-        className={`lgy-hero-grid${badge ? '' : ' lgy-hero-grid--single'}${c.layout?.mobileBadgeFirst ? ' lgy-badge-first' : ''}`}
-        style={vars({ '--lgy-cols': badge ? cols : undefined, gap: c.layout?.gap, alignItems: c.layout?.alignItems })}
+        className={`lgy-hero-grid${twoCols ? '' : ' lgy-hero-grid--single'}${c.layout?.mobileBadgeFirst ? ' lgy-badge-first' : ''}`}
+        style={vars({ '--lgy-cols': twoCols ? cols : undefined, gap: c.layout?.gap, alignItems: c.layout?.alignItems })}
       >
         {badgeLeft ? (
           <>

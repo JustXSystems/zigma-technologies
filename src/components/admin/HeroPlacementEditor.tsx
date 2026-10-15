@@ -52,7 +52,7 @@ function prune(value: HeroPlacement): HeroPlacement | undefined {
   return { ...(value.frame === 'edge' ? { frame: 'edge' as const } : {}), slots };
 }
 
-function AnchorPad({
+export function AnchorPad({
   value,
   onChange,
   label,

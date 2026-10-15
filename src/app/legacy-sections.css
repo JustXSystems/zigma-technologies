@@ -112,6 +112,17 @@
 .lgy-ring-num{font-family:var(--font-display);font-weight:700;font-size:calc(var(--lgy-ring,184px) * 0.3);line-height:1;color:#FFFFFF;font-variant-numeric:tabular-nums;}
 .lgy-ring-label{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.16em;color:#C7D3E6;margin-top:0.3rem;}
 .lgy-badge-span{margin-top:0.8rem;font-family:var(--font-mono);font-size:0.85rem;color:var(--yellow,#FFC93C);letter-spacing:0.08em;}
+/* Pinned badge: floats over the hero at an anchor + X / Y (--lgy-pin-* from badgePinVars; phones read --lgy-pin-m-*).
+   It takes no space in the layout, so the hero height / padding must leave room for it. */
+.lgy-pin-frame{position:absolute;inset:0;z-index:2;pointer-events:none;}
+.lgy-pin-frame--content{top:max(var(--header-h, 82px), calc(var(--site-nav-h, 0px) + 2 * var(--header-pad, 1.2rem)));}
+.lgy-pin-box{position:relative;height:100%;}
+.lgy-pin{
+  position:absolute;pointer-events:auto;max-width:100%;
+  left:var(--lgy-pin-l,auto);right:var(--lgy-pin-r,auto);top:var(--lgy-pin-t,auto);bottom:var(--lgy-pin-b,auto);
+  translate:var(--lgy-pin-tx,0) var(--lgy-pin-ty,0);
+}
+.lgy-pin-frame--phone,.lgy-badge--phone-only{display:none;}
 
 /* ---------- Stat bar ---------- */
 .lgy-stats{background-color:var(--navy-900,#0F1F3D);padding:var(--az-pt,1.95rem) 0 var(--az-pb,1.95rem);}
@@ -451,6 +462,12 @@
   .lgy-ring{width:var(--lgy-ring-m,130px);height:var(--lgy-ring-m,130px);}
   .lgy-ring-num{font-size:calc(var(--lgy-ring-m,130px) * 0.3);}
   .lgy-badge{padding:1rem 1.4rem 0.9rem;}
+  .lgy-pin{
+    left:var(--lgy-pin-m-l,auto);right:var(--lgy-pin-m-r,auto);top:var(--lgy-pin-m-t,auto);bottom:var(--lgy-pin-m-b,auto);
+    translate:var(--lgy-pin-m-tx,0) var(--lgy-pin-m-ty,0);
+  }
+  .lgy-pin-frame--desk,.lgy-badge--desk-only{display:none;}
+  .lgy-pin-frame--phone,.lgy-badge--phone-only{display:block;}
   .lgy-hero .az-hero-lead{font-size:1rem;}
   .lgy-bg-ui{bottom:0.8rem;}
   .lgy-bg-scope--desk{display:none;}

@@ -35,7 +35,10 @@ import { normalizeLinkItems, type FloatCardPosition, type ImageEl, type SplitLay
 import {
   LEGACY_ALL_ICON_PRESETS,
   defaultLegacyMilestone,
+  isBadgePinned,
   withLegacyDefaults,
+  type LegacyBadgePin,
+  type LegacyBadgePinPos,
   type LegacyCapCard,
   type LegacyCapsContent,
   type LegacyCollageFrame,
@@ -56,9 +59,85 @@ import {
   type LegacyValuesContent,
 } from '@/lib/legacy-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
-import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
+import HeroPlacementEditor, { AnchorPad } from '@/components/admin/HeroPlacementEditor';
+import type { HeroAnchor } from '@/lib/hero-placement';
 
 const ICON_PREVIEW = 'lz-icon-preview';
+
+function pinHint(anchor: HeroAnchor | undefined, axis: 'x' | 'y') {
+  if (!anchor) return '';
+  const [v, h] = anchor === 'center' ? ['center', 'center'] : anchor.split('-');
+  const side = axis === 'x' ? h : v;
+  if (side === 'center') return axis === 'x' ? '+ right / − left' : '+ down / − up';
+  return `from ${side} (− = past edge)`;
+}
+
+function BadgePinFields({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: LegacyBadgePinPos | undefined;
+  onChange: (next: LegacyBadgePinPos | undefined) => void;
+}) {
+  const anchor = isBadgePinned(value) ? value.anchor : undefined;
+  const set = (patch: Partial<LegacyBadgePinPos>) => onChange({ ...value, ...patch });
+  return (
+    <div className="hp-row">
+      <AnchorPad label={label} value={anchor} onChange={(next) => (next ? set({ anchor: next }) : onChange(undefined))} />
+      <div className="hp-inputs">
+        <label>
+          X <small>{pinHint(anchor, 'x')}</small>
+        </label>
+        <input className="admin-input" value={value?.x || ''} placeholder="0px" disabled={!anchor} onChange={(e) => set({ x: e.target.value })} />
+        <label>
+          Y <small>{pinHint(anchor, 'y')}</small>
+        </label>
+        <input className="admin-input" value={value?.y || ''} placeholder="0px" disabled={!anchor} onChange={(e) => set({ y: e.target.value })} />
+      </div>
+    </div>
+  );
+}
+
+/** Pins the hero badge to an exact anchor + X / Y over the hero, separately for desktop / tablet and phones. */
+function BadgePinEditor({ value, onChange }: { value: LegacyBadgePin | undefined; onChange: (next: LegacyBadgePin | undefined) => void }) {
+  const pin = value || {};
+  const commit = (next: LegacyBadgePin) => {
+    const desktop = isBadgePinned(next.desktop) ? next.desktop : undefined;
+    const mobile = isBadgePinned(next.mobile) ? next.mobile : undefined;
+    onChange(desktop || mobile ? { ...(next.frame === 'content' ? { frame: 'content' } : {}), desktop, mobile } : undefined);
+  };
+  return (
+    <div className="admin-field full hp-editor">
+      <label>Badge position (pin)</label>
+      <select
+        className="admin-select"
+        value={pin.frame === 'content' ? 'content' : 'hero'}
+        onChange={(e) => commit({ ...pin, frame: e.target.value as LegacyBadgePin['frame'] })}
+      >
+        <option value="hero">Measure from the hero edges</option>
+        <option value="content">Measure from the content area (page margins, below the header)</option>
+      </select>
+      <fieldset className="hp-slot">
+        <legend>Desktop &amp; tablet (above 760px)</legend>
+        <BadgePinFields label="Badge anchor on desktop and tablet" value={pin.desktop} onChange={(desktop) => commit({ ...pin, desktop })} />
+      </fieldset>
+      <fieldset className="hp-slot">
+        <legend>Phones (760px and below)</legend>
+        <BadgePinFields label="Badge anchor on phones" value={pin.mobile} onChange={(mobile) => commit({ ...pin, mobile })} />
+      </fieldset>
+      <p className="az-admin-hint">
+        Pick an anchor, then set exact X / Y (px, rem, %, vw; a plain number means px). On an edge the offset is the distance
+        from that edge, so <strong>bottom left, X 40px, Y 24px</strong> puts the badge&apos;s bottom-left corner 40px from the
+        left and 24px from the bottom; a negative value pushes it past the edge. On a centre line the badge is centred and
+        nudged: + moves right / down, − moves left / up. A pinned badge floats over the hero and takes no space, so give the
+        hero enough height / padding. No anchor (click the active dot again) keeps the badge in its layout column for that
+        screen size.
+      </p>
+    </div>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Page hero                                                           */
@@ -88,7 +167,7 @@ function LegacyHeroEditor({ content: c, onChange }: EditorProps<LegacyHeroConten
             ]}
           />
           <AlignButtons
-            label="Badge position"
+            label="Badge column (when not pinned)"
             value={layout.badgeSide}
             options={['left', 'right']}
             onChange={(v) => setLayout({ badgeSide: (v || 'right') as 'left' | 'right' })}
@@ -160,6 +239,7 @@ function LegacyHeroEditor({ content: c, onChange }: EditorProps<LegacyHeroConten
       </Group>
       <Group title="20 years badge (animated ring)">
         <Toggle label="Show badge" checked={!b.hidden} onChange={(v) => setBadge({ hidden: !v })} />
+        <BadgePinEditor value={b.pin} onChange={(pin) => setBadge({ pin })} />
         <div className="admin-form-grid">
           <TextInput label="Number" value={b.value} onChange={(value) => setBadge({ value })} hint="Digits count up; other text shows as typed." />
           <TextInput label="Prefix" value={b.prefix} onChange={(prefix) => setBadge({ prefix })} />

@@ -1,5 +1,5 @@
 import type { HeroHeight } from '@/lib/hero-height';
-import type { HeroPlacement } from '@/lib/hero-placement';
+import { isHeroAnchor, type HeroAnchor, type HeroPlacement } from '@/lib/hero-placement';
 import {
   ABOUT_ICON_PRESETS,
   ABOUT_TYPOGRAPHY_VERSION,
@@ -92,8 +92,26 @@ export type LegacyCardStyle = {
 /* Section content shapes                                              */
 /* ------------------------------------------------------------------ */
 
+export type LegacyBadgePinPos = {
+  anchor?: HeroAnchor;
+  /** CSS length; a bare number means px. Signed: on an edge + moves inward, − past the edge; on a centre line + right / down. */
+  x?: string;
+  y?: string;
+};
+
+/** Floats the badge over the hero at an exact anchor + offset instead of the layout column. */
+export type LegacyBadgePin = {
+  /** `hero` = the hero's own edges; `content` = page content margins, below the fixed header */
+  frame?: 'hero' | 'content';
+  /** Above 760px. No anchor = badge stays in its layout column. */
+  desktop?: LegacyBadgePinPos;
+  /** 760px and below. No anchor = badge stays in the stacked flow. */
+  mobile?: LegacyBadgePinPos;
+};
+
 export type LegacyRingBadge = {
   hidden?: boolean;
+  pin?: LegacyBadgePin;
   value: string;
   prefix?: string;
   suffix?: string;
@@ -436,6 +454,42 @@ export const LEGACY_IMAGES = {
   installersSmall: US('1624397640148-949b1732bb0a', 1000),
   next: US('1660330589693-99889d60181e', 1600),
 };
+
+export function isBadgePinned(p: LegacyBadgePinPos | undefined): p is LegacyBadgePinPos & { anchor: HeroAnchor } {
+  return isHeroAnchor(p?.anchor);
+}
+
+function pinLength(value: unknown): string {
+  const v = typeof value === 'string' ? value.trim() : '';
+  if (!v) return '0px';
+  return /^-?\d*\.?\d+$/.test(v) ? `${v}px` : v;
+}
+
+/**
+ * `--lgy-pin{-m}-{l,r,t,b,tx,ty}` for one breakpoint: edge anchors set that side's inset to the offset, centre lines
+ * sit at 50% and shift by the offset via translate (so the badge's own centre lands on the line).
+ */
+export function badgePinVars(p: LegacyBadgePinPos | undefined, scope: 'd' | 'm'): Record<string, string> {
+  if (!isBadgePinned(p)) return {};
+  const [v, h] = p.anchor === 'center' ? ['center', 'center'] : p.anchor.split('-');
+  const x = pinLength(p.x);
+  const y = pinLength(p.y);
+  const k = (side: string) => `--lgy-pin${scope === 'm' ? '-m' : ''}-${side}`;
+  const out: Record<string, string> = {};
+  if (h === 'left') out[k('l')] = x;
+  else if (h === 'right') out[k('r')] = x;
+  else {
+    out[k('l')] = '50%';
+    out[k('tx')] = `calc(-50% + ${x})`;
+  }
+  if (v === 'top') out[k('t')] = y;
+  else if (v === 'bottom') out[k('b')] = y;
+  else {
+    out[k('t')] = '50%';
+    out[k('ty')] = `calc(-50% + ${y})`;
+  }
+  return out;
+}
 
 const header = (eyebrow: string, color: string, title: string, subtitle: string): LegacySectionHeader => ({
   align: 'center',
