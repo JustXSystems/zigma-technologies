@@ -88,8 +88,8 @@
   .crs-job:not(.is-open):hover{transform:translateY(-2px);}
   .lgy-no-lift .crs-job:hover{transform:none;}
   .crs-job:hover .crs-job-title{color:var(--navy-850,#122647);}
-  .crs-job:hover .crs-job-chip{background:#FFFFFF;border-color:#DCE2EA;}
-  .crs-job-toggle:hover{border-color:var(--navy-950,#0A1628);background:rgba(10,22,40,0.03);}
+  .crs-job:hover .crs-job-chip{border-color:#D3DAE4;}
+  .crs-job-toggle:hover{border-color:var(--navy-950,#0A1628);background:#F6F8FB;}
 }
 .crs-job[data-reveal="pre"]{opacity:0;transform:translateY(24px);}
 .crs-job[data-reveal="in"]{opacity:1;}
@@ -114,10 +114,10 @@
   display:inline-flex;align-items:center;gap:0.45rem;max-width:min(100%,26rem);min-width:0;
   padding:0.36rem 0.8rem 0.36rem 0.7rem;border-radius:100px;
   font-size:0.82rem;font-weight:500;line-height:1.3;color:#2B3442;
-  background:#F3F5F8;border:1px solid #E5E9EF;
+  background:#FFFFFF;border:1px solid #E1E6ED;
   transition:background .25s ease,border-color .25s ease;
 }
-.crs-job.is-open .crs-job-chip{background:#FFFFFF;border-color:#DCE2EA;}
+.crs-job.is-open .crs-job-chip{border-color:#D3DAE4;}
 .crs-chip-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .crs-job-chip .crs-chip-ico{--az-icon-box:14px;--az-icon-size:14px;color:var(--az-icon-color,var(--orange-dim,#c9540f));}
 .crs-chip-ico{display:inline-flex;flex-shrink:0;width:var(--az-icon-box,12px);height:var(--az-icon-box,12px);color:var(--az-icon-color,currentColor);}
@@ -130,7 +130,7 @@
 .crs-job.is-open .crs-job-summary{-webkit-line-clamp:unset;line-clamp:unset;}
 .crs-job-toggle{
   display:inline-flex;align-items:center;gap:0.45rem;padding:0.68rem 1.05rem;border:1px solid #D8DFE8;border-radius:2px;
-  font-size:0.88rem;font-weight:600;color:var(--navy-950,#0A1628);background:transparent;white-space:nowrap;
+  font-size:0.88rem;font-weight:600;color:var(--navy-950,#0A1628);background:#FFFFFF;white-space:nowrap;
   transition:border-color .2s,background .2s;
 }
 .crs-job-toggle:focus-visible,.crs-job-apply:focus-visible{outline:2px solid var(--orange,#FF6B1A);outline-offset:2px;}
