@@ -1,36 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
   AlignButtons,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   IconEditor,
   ImageEditor,
   LinkListEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
   PillsEditor,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import {
-  ColumnsEditor,
-  HighlightEditor,
-  LifeGroup as Group,
-  LifeGroupProvider,
-  MediaItemsEditor,
-  NapHint,
-  NumberInput,
-} from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import { normalizeLinkItems } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
@@ -56,7 +54,6 @@ import {
   type ContactSideItem,
 } from '@/lib/contact-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
@@ -324,7 +321,7 @@ export function ContactHelpEditor({
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title={cardsTitle} open>
         <NapHint />
@@ -478,7 +475,7 @@ function ContactLocationsEditor({ content: c, onChange }: EditorProps<ContactLoc
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro above the office cards">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Offices" open>
         <NapHint />
@@ -681,7 +678,7 @@ function ContactFormEditor({ content: c, onChange }: EditorProps<ContactFormCont
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro above the form">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Form panel" open description="Form fields and Subject options are managed in Admin → Forms → enquiry">
         <TextElementEditor label="Form title" headingTag value={f.title} onChange={(title) => setForm({ title })} />
@@ -900,49 +897,13 @@ function ContactFormEditor({ content: c, onChange }: EditorProps<ContactFormCont
 
 /* ------------------------------------------------------------------ */
 
-export default function ContactSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: ContactSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin ctc-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'contact_hero' ? (
-            <ContactHeroEditor content={withContactDefaults<ContactHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'contact_quick' ? (
-            <ContactQuickEditor content={withContactDefaults<ContactQuickContent>(type, content)} onChange={emit} />
-          ) : type === 'contact_help' ? (
-            <ContactHelpEditor content={withContactDefaults<ContactHelpContent>(type, content)} onChange={emit} />
-          ) : type === 'contact_locations' ? (
-            <ContactLocationsEditor content={withContactDefaults<ContactLocationsContent>(type, content)} onChange={emit} />
-          ) : type === 'contact_form' ? (
-            <ContactFormEditor content={withContactDefaults<ContactFormContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<ContactSectionType>({
+  withDefaults: withContactDefaults,
+  editors: {
+    contact_hero: ContactHeroEditor,
+    contact_quick: ContactQuickEditor,
+    contact_help: ContactHelpEditor,
+    contact_locations: ContactLocationsEditor,
+    contact_form: ContactFormEditor,
+  },
+});

@@ -348,6 +348,23 @@ export function siteSettingsHashHome(hash: string): string | null {
   return group && group !== 'general' ? `${SITE_SETTINGS_GROUP_HOME[group]}${hash}` : null;
 }
 
+/** Every section with its home screen link and field labels, for the admin quick-find. */
+export function siteSettingsSearchIndex() {
+  return SECTIONS.flatMap((s) => {
+    const group = groupOfSection(s.id);
+    if (!group) return [];
+    return [
+      {
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        fields: s.fields.map((f) => f.label),
+        href: `${SITE_SETTINGS_GROUP_HOME[group]}#site-settings-${s.id}`,
+      },
+    ];
+  });
+}
+
 type Props = {
   group: SiteSettingsGroup;
   /** Intro card; omit when the host screen has its own. */
@@ -403,6 +420,15 @@ export default function SiteSettingsEditor({ group, intro }: Props) {
         const sectionId = sectionFromHash(window.location.hash);
         if (sectionId && groupOfSection(sectionId) === group) expandSection(sectionId, true);
       });
+  }, [expandSection, group]);
+
+  useEffect(() => {
+    const onHash = () => {
+      const sectionId = sectionFromHash(window.location.hash);
+      if (sectionId && groupOfSection(sectionId) === group) expandSection(sectionId, true);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, [expandSection, group]);
 
   function onJumpClick(e: MouseEvent<HTMLAnchorElement>, sectionId: string) {

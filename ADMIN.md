@@ -173,6 +173,13 @@ Custom roles (Roles screen) pick any mix of non-admin screens (Users, Roles, Ema
 
 ---
 
+## Finding things
+
+- **Ctrl + K** (⌘ + K on Mac), or the *Find a setting…* box in the top bar, searches every screen, hub tab, Site Settings section (including field names such as "GA4" or "Copyright") and CMS page the signed-in user may open. Enter opens it; unsaved edits are confirmed first.
+- **Dashboard → Where to edit what** lists the same screens with one-line summaries, filtered by role.
+- Sidebar groups: **Content** (Pages, Inventory, Catalog Settings, Media, Resources, Press, Testimonials), **Leads**, **Site setup** (Site Settings, Header & Footer, Theme Studio, Site Copy, SEO, Email), **Platform**.
+- Every tabbed screen (Header & Footer, Forms & CRM, SEO, Theme Studio, Site Copy) keeps the open tab in `?tab=` so links and bookmarks land on it.
+
 ## Module reference
 
 Each module: **Why** (business purpose), **When** (trigger), **How** (steps), **Public impact**, **Database**.
@@ -194,10 +201,12 @@ Each module: **Why** (business purpose), **When** (trigger), **How** (steps), **
 |---|---|
 | **Why** | Marketing/legal content without code deploys |
 | **When** | Homepage edits; contact/careers/legal; custom landings; preview drafts |
-| **How** | Edit SEO/slug/status → add/reorder sections → media picker → Preview → Publish |
+| **How** | Edit sections → click a section to edit it → ↑↓ to reorder, Shown/Hidden, Duplicate, Delete → Add a section (grouped by page) → Preview → Publish page. Title, slug and meta: *Page details & SEO* below the list |
 | **Public** | `/`, `/contact`, `/careers`, `/certifications`, `/privacy`, `/terms`, `/{slug}` |
 | **DB** | `pages`, `page_sections` |
 | **Seed** | Seed homepage; Seed inner pages; Seed industries |
+
+**Section editor:** the header names the page group and section (type code beside it). Fields are grouped and collapsible (*Expand all / Collapse all*); every field is optional and blank shows the design default. *Advanced* at the bottom holds the internal name, `#anchor`, extra CSS class and scoped CSS; *Edit as JSON* is in the footer. Esc, the backdrop and *Discard* ask before throwing away edits. The same list and editor run on Catalog Settings → Projects 101.
 
 **Preview:** Signed link 12h. Draft/disabled sections visible with orange banner.
 
@@ -276,7 +285,7 @@ Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls 
 |---|---|
 | **Why** | White-label marketing strings without code changes |
 | **When** | New client; toggle tools/locales/partners; edit wizard/calculator copy |
-| **How** | Tabs: Hub pages, Features, Hero height, Tools, Locales, Industries / Locations JSON. Header/footer labels: Header & Footer → Labels. Page titles: SEO. Enquiry pop-up and thank-you: Forms & CRM. Catalog page headings and partner strip: Catalog Settings. Cookie banner and `/cookies` text: Site Settings → Analytics & cookies |
+| **How** | Tabs (`?tab=`): Hub pages, Features, Hero height, Tools, Locales, Industries data / Locations data (JSON). Switching tabs keeps unsaved edits; one Save covers all tabs. Header/footer labels: Header & Footer → Labels. Page titles: SEO. Enquiry pop-up and thank-you: Forms & CRM. Catalog page headings and partner strip: Catalog Settings. Cookie banner and `/cookies` text: Site Settings → Analytics & cookies |
 | **Public** | All chrome; `GET /api/public/site-copy` |
 | **DB** | `site_copy`, `industries`, `locations` |
 
@@ -526,6 +535,12 @@ CRM webhook, partner portal, video case studies, availability/lead time, press/n
 |---------|------|
 | Auth proxy | `src/proxy.ts` |
 | Admin shell | `src/app/(admin)/admin/layout.tsx` |
+| Screens, sidebar groups, RBAC | `src/lib/admin-screens.ts` |
+| Hub tabs (`?tab=`) | `src/lib/admin-hub-tabs.ts`, `src/components/admin/AdminHub.tsx` |
+| Quick-find | `src/components/admin/AdminQuickFind.tsx` |
+| Page section list | `src/components/admin/PageSectionsManager.tsx` |
+| Section editor | `src/components/admin/SectionEditor.tsx`; page-family editors resolved by `src/components/admin/section-families.ts` |
+| Section editor kit | `src/components/admin/section-kit` — fields (`controls`), groups, media, shared blocks (header, background media, split layout, card style, paragraphs) and `createSectionFamilyEditor` |
 | In-app guide | `src/app/(admin)/admin/guide/page.tsx` |
 | KVM 2 production guide | `src/app/(admin)/admin/guide/hostinger-prod/page.tsx` |
 | justxsystems PreProd guide | `src/app/(admin)/admin/guide/justxsystems/page.tsx` |

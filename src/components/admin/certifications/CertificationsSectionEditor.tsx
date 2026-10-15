@@ -1,36 +1,40 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
   AlignButtons,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   IconEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import { ContactHeroEditor } from '@/components/admin/contact/ContactSectionEditor';
 import {
   CERTS_ALL_ICON_PRESETS,
   withCertsDefaults,
   type CertsCtaContent,
   type CertsGalleryContent,
-  type CertsHeroContent,
   type CertsItem,
   type CertsSectionType,
 } from '@/lib/certifications-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
@@ -77,7 +81,7 @@ function CertsGalleryEditor({ content: c, onChange }: EditorProps<CertsGalleryCo
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
       <Group title="Section heading" description="Optional eyebrow, heading (H2 by default) and intro above the certificates">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Certificates" open description="Each certificate can hold several images / videos — the first is the card picture, all of them open in the lightbox">
         <ListEditor<CertsItem>
@@ -254,45 +258,11 @@ export function CertsCtaEditor({ content: c, onChange }: EditorProps<CertsCtaCon
 
 /* ------------------------------------------------------------------ */
 
-export default function CertificationsSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: CertsSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin ctc-admin cer-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'certs_hero' ? (
-            <ContactHeroEditor content={withCertsDefaults<CertsHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'certs_gallery' ? (
-            <CertsGalleryEditor content={withCertsDefaults<CertsGalleryContent>(type, content)} onChange={emit} />
-          ) : type === 'certs_cta' ? (
-            <CertsCtaEditor content={withCertsDefaults<CertsCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<CertsSectionType>({
+  withDefaults: withCertsDefaults,
+  editors: {
+    certs_hero: ContactHeroEditor,
+    certs_gallery: CertsGalleryEditor,
+    certs_cta: CertsCtaEditor,
+  },
+});

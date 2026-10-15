@@ -1,27 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
   AlignButtons,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   IconEditor,
   LinkListEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
   PillsEditor,
+  SectionBoxGroup,
   SelectInput,
+  StringListEditor,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup, VALIGN_OPTIONS } from '@/components/admin/legacy/LegacySectionEditor';
+  VALIGN_OPTIONS,
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
@@ -51,7 +59,6 @@ import {
   type QsVerifyBox,
 } from '@/lib/qualitysafety-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
@@ -76,17 +83,6 @@ const CAPTION_POSITION_OPTIONS = [
 ] as const;
 
 /** Edit a string list with the link-list control (add, reorder, bulk paste). */
-function StringListEditor({ label, items, onChange }: { label: string; items: string[]; onChange: (next: string[]) => void }) {
-  return (
-    <LinkListEditor
-      label={label}
-      items={(items || []).map((label) => ({ label }))}
-      onChange={(next) => onChange(next.map((it) => it.label))}
-      withHref={false}
-    />
-  );
-}
-
 /* ------------------------------------------------------------------ */
 /* Page hero                                                           */
 /* ------------------------------------------------------------------ */
@@ -246,7 +242,7 @@ function QsQualityEditor({ content: c, onChange }: EditorProps<QsQualityContent>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
       <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Layout (photo + steps)">
         <div className="admin-form-grid">
@@ -393,7 +389,7 @@ function QsSafetyEditor({ content: c, onChange }: EditorProps<QsSafetyContent>) 
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
       <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Photo gallery (images / videos)" description="Add as many as you like; each tile shows its caption and a small second line">
         <div className="admin-form-grid">
@@ -516,7 +512,7 @@ function QsCertsEditor({ content: c, onChange }: EditorProps<QsCertsContent>) {
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
       <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle, accent bar">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Certificates" open description="Seal icon, title, scope, detail rows and optional certificate scans / download link">
         <ListEditor<QsCert>
@@ -804,53 +800,15 @@ function QsCtaEditor({ content: c, onChange }: EditorProps<QsCtaContent>) {
 
 /* ------------------------------------------------------------------ */
 
-export default function QualitySafetySectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: QsSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin qs-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'qs_hero' ? (
-            <QsHeroEditor content={withQsDefaults<QsHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'qs_stats' ? (
-            <QsStatsEditor content={withQsDefaults<QsStatsContent>(type, content)} onChange={emit} />
-          ) : type === 'qs_quality' ? (
-            <QsQualityEditor content={withQsDefaults<QsQualityContent>(type, content)} onChange={emit} />
-          ) : type === 'qs_safety' ? (
-            <QsSafetyEditor content={withQsDefaults<QsSafetyContent>(type, content)} onChange={emit} />
-          ) : type === 'qs_certs' ? (
-            <QsCertsEditor content={withQsDefaults<QsCertsContent>(type, content)} onChange={emit} />
-          ) : type === 'qs_commit' ? (
-            <QsCommitEditor content={withQsDefaults<QsCommitContent>(type, content)} onChange={emit} />
-          ) : type === 'qs_cta' ? (
-            <QsCtaEditor content={withQsDefaults<QsCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<QsSectionType>({
+  withDefaults: withQsDefaults,
+  editors: {
+    qs_hero: QsHeroEditor,
+    qs_stats: QsStatsEditor,
+    qs_quality: QsQualityEditor,
+    qs_safety: QsSafetyEditor,
+    qs_certs: QsCertsEditor,
+    qs_commit: QsCommitEditor,
+    qs_cta: QsCtaEditor,
+  },
+});

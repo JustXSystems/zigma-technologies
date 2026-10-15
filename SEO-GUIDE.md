@@ -1545,7 +1545,7 @@ Visitors can still open and use every hidden page; they are only kept out of Goo
 
 ### 6.2 Make the six city pages stronger [You]
 
-The city pages get their text from **Admin → Site Copy → Locations JSON**. Each city has:
+The city pages get their text from **Admin → Site Copy → Locations data**. Each city has:
 - `eyebrow`: the small line above the heading
 - `lead`: the introduction under the heading (also used as the Google description, so keep it 120–160 characters)
 - `highlights`: 3–6 bullet points under "Why teams in [city] work with Zigma"
@@ -1557,7 +1557,7 @@ The city pages get their text from **Admin → Site Copy → Locations JSON**. E
 3. In Step B, put the city name first in that city's `serviceTags`, so local projects show first.
 
 **Step B — edit the city text:**
-1. Admin → left menu **Site Copy** → tab **Locations JSON**.
+1. Admin → left menu **Site Copy** → tab **Locations data** (or open `/admin/site-copy?tab=locations`).
 2. **First make a backup:** click in the big text box → **Ctrl + A** → **Ctrl + C** → paste into a Notepad file and save it as `locations-backup-<date>.txt`.
 3. Edit the text of one city. Only change the text between quotes. Example for Bengaluru:
 
@@ -1963,8 +1963,8 @@ This is how the website behaves **in production** (built with `NEXT_PUBLIC_SEO_I
 | `/resources?tag=…` | **No** (noindex, follow) | No | — | automatic |
 | `/resources/<slug>` | Yes | Yes | Article, Breadcrumbs | Admin → Resources |
 | `/press`, `/press/<slug>` | Yes | Yes | NewsArticle on posts | Admin → Press |
-| `/industries`, `/industries/<key>` | Yes (if feature on) | Yes (if feature on) | Breadcrumbs, FAQ | Site Copy → Features / Industries JSON |
-| `/locations`, `/locations/<city>` | Yes | Yes | Breadcrumbs | Site Copy → Locations JSON |
+| `/industries`, `/industries/<key>` | Yes (if feature on) | Yes (if feature on) | Breadcrumbs, FAQ | Site Copy → Features / Industries data |
+| `/locations`, `/locations/<city>` | Yes | Yes | Breadcrumbs | Site Copy → Locations data |
 | `/locations/<city>/<service>` | **No**, unless allowlisted by a developer (6.4) | Only if allowlisted | Breadcrumbs | `src/lib/location-services.ts` |
 | `/hi`, `/kn` | Only when **Enable hi/kn locale landings** is on (otherwise they redirect to `/`) | Only when on | — | Site Copy → Features |
 | `/hi/locations/<city>`, `/kn/locations/<city>` | Only when locales are on **and** the city is translated (today: Bengaluru) | Same | Breadcrumbs | `src/lib/locale-locations.ts` |

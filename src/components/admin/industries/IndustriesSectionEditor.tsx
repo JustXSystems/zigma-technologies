@@ -1,22 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   Field,
+  Group,
   IconEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, LegacyStatsEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
+import { LegacyStatsEditor } from '@/components/admin/legacy/LegacySectionEditor';
 import { ActionFields, ContactHeroEditor, IconStyleFields } from '@/components/admin/contact/ContactSectionEditor';
 import { CertsCtaEditor } from '@/components/admin/certifications/CertificationsSectionEditor';
 import {
@@ -25,15 +31,11 @@ import {
   withIndustriesDefaults,
   type IndustriesCategoryCard,
   type IndustriesCategoryContent,
-  type IndustriesCtaContent,
-  type IndustriesHeroContent,
   type IndustriesHubCard,
   type IndustriesHubContent,
   type IndustriesSectionType,
-  type IndustriesStatsContent,
 } from '@/lib/industries-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
@@ -61,7 +63,7 @@ function IndustriesHubEditor({ content: c, onChange }: EditorProps<IndustriesHub
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default) and intro above the cards">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title={'"I\'m looking for…" picker'} description="Industry / city selector that sends visitors to the best matching page">
         <div className="admin-form-grid">
@@ -217,7 +219,7 @@ function IndustriesCategoryEditor({ content: c, onChange }: EditorProps<Industri
         </div>
       </Group>
       <Group title="Section heading" description="Eyebrow, heading (H2 by default) and intro">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Industry cards" open description="Icon, title and text per card; optional images / videos, link and own colour">
         <NapHint />
@@ -320,49 +322,13 @@ function IndustriesCategoryEditor({ content: c, onChange }: EditorProps<Industri
 
 /* ------------------------------------------------------------------ */
 
-export default function IndustriesSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: IndustriesSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin ctc-admin ind-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'industries_hero' ? (
-            <ContactHeroEditor content={withIndustriesDefaults<IndustriesHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'industries_stats' ? (
-            <LegacyStatsEditor content={withIndustriesDefaults<IndustriesStatsContent>(type, content)} onChange={emit} />
-          ) : type === 'industries_hub' ? (
-            <IndustriesHubEditor content={withIndustriesDefaults<IndustriesHubContent>(type, content)} onChange={emit} />
-          ) : type === 'industries_category' ? (
-            <IndustriesCategoryEditor content={withIndustriesDefaults<IndustriesCategoryContent>(type, content)} onChange={emit} />
-          ) : type === 'industries_cta' ? (
-            <CertsCtaEditor content={withIndustriesDefaults<IndustriesCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<IndustriesSectionType>({
+  withDefaults: withIndustriesDefaults,
+  editors: {
+    industries_hero: ContactHeroEditor,
+    industries_stats: LegacyStatsEditor,
+    industries_hub: IndustriesHubEditor,
+    industries_category: IndustriesCategoryEditor,
+    industries_cta: CertsCtaEditor,
+  },
+});

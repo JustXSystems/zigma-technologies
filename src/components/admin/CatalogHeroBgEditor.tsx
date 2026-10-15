@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import CatalogHeroBackground from '@/components/catalog/CatalogHeroBackground';
-import { MediaItemsEditor } from '@/components/admin/life/LifeControls';
+import { MediaItemsEditor } from '@/components/admin/section-kit';
 import { ColorControl } from '@/components/admin/form/controls';
 import {
   CATALOG_HERO_BG_AREA_OPTIONS,

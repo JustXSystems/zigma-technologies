@@ -1,39 +1,39 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
   AlignButtons,
+  BG_MOTION_OPTIONS,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  createSectionFamilyEditor,
   Field,
+  Group,
+  HighlightEditor,
   IconEditor,
   ImageEditor,
   LinkListEditor,
   ListEditor,
-  Panel,
-  SelectInput,
-  StyleEditor,
-  TextArea,
-  TextElementEditor,
-  TextInput,
-  ThemeColorDatalist,
-  Toggle,
-} from '@/components/admin/about/AboutControls';
-import {
-  HighlightEditor,
-  LifeGroup as Group,
-  LifeGroupProvider,
   MediaBulkAdd,
   MediaItemsEditor,
   NapHint,
   NumberInput,
+  Panel,
+  SectionBoxGroup,
+  SectionHeaderEditor,
+  SelectInput,
+  SplitLayoutEditor,
+  StyleEditor,
+  TextArea,
+  TextElementEditor,
+  TextInput,
   titleFromPath,
-} from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, SectionBoxGroup, VALIGN_OPTIONS } from '@/components/admin/legacy/LegacySectionEditor';
-import { normalizeLinkItems, type EyebrowScale, type ImageEl, type SplitLayout } from '@/lib/about-sections';
-import type { LegacyBgMotion } from '@/lib/legacy-sections';
+  Toggle,
+  type EditorProps,
+} from '@/components/admin/section-kit';
+import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import { publicMediaUrl } from '@/lib/media-url';
 import {
   HOME_ECO_GLYPHS,
@@ -50,7 +50,6 @@ import {
   type HomeEcoContent,
   type HomeEcoGroup,
   type HomeEcoNode,
-  type HomeHeader,
   type HomeHeroContent,
   type HomeHeroSlide,
   type HomeIndustriesContent,
@@ -73,17 +72,8 @@ import {
   type HomeWhyContent,
 } from '@/lib/home-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
-
-const MOTION_OPTIONS: Array<{ value: LegacyBgMotion; label: string }> = [
-  { value: 'none', label: 'None (still)' },
-  { value: 'kenburns', label: 'Ken Burns (slow zoom per slide)' },
-  { value: 'zoom', label: 'Zoom (slow zoom in / out loop)' },
-  { value: 'pan', label: 'Pan (slow zoom + pan loop)' },
-  { value: 'drift', label: 'Drift (side-to-side loop)' },
-];
 
 const CTA_VARIANTS: Array<{ value: HomeCtaVariant; label: string }> = [
   { value: 'primary', label: 'Primary (orange)' },
@@ -182,76 +172,6 @@ function HomeColumnsEditor({
       <NumberInput label={`${label} · tablet (≤1080px)`} value={v.tablet} min={1} max={8} placeholder={String(defaults.tablet)} onChange={(tablet) => set({ tablet })} />
       <NumberInput label={`${label} · phone (≤760px)`} value={v.mobile} min={1} max={4} placeholder={String(defaults.mobile)} onChange={(mobile) => set({ mobile })} />
     </>
-  );
-}
-
-function HomeHeaderEditor({ value, onChange, scale }: { value: HomeHeader; onChange: (next: HomeHeader) => void; scale: EyebrowScale }) {
-  const h = value || { eyebrow: { text: '' }, title: { text: '' }, subtitle: { text: '' } };
-  const set = (patch: Partial<HomeHeader>) => onChange({ ...h, ...patch });
-  return (
-    <div>
-      <div style={{ marginBottom: '0.6rem' }}>
-        <Toggle label="Show section header" checked={!h.hidden} onChange={(v) => set({ hidden: !v })} />
-      </div>
-      <div className="admin-form-grid">
-        <AlignButtons label="Header position" value={h.align} onChange={(align) => set({ align: (align || undefined) as HomeHeader['align'] })} />
-        <TextInput label="Header max width" value={h.maxWidth} onChange={(maxWidth) => set({ maxWidth })} placeholder="Design default" />
-        <TextInput label="Space below header" value={h.marginBottom} onChange={(marginBottom) => set({ marginBottom })} placeholder="Design default" />
-      </div>
-      <TextElementEditor label="Eyebrow" eyebrow siteScale={scale} value={h.eyebrow} onChange={(eyebrow) => set({ eyebrow })} hint="Empty = hidden" />
-      <TextElementEditor label="Heading" multiline headingTag siteRole="section" value={h.title} onChange={(title) => set({ title })} />
-      <HighlightEditor value={h.highlight} onChange={(highlight) => set({ highlight })} />
-      <TextElementEditor label="Subtitle" multiline value={h.subtitle} onChange={(subtitle) => set({ subtitle })} hint="Empty = hidden" />
-    </div>
-  );
-}
-
-function SplitLayoutFields({
-  value,
-  onChange,
-  columnsPlaceholder,
-  gapPlaceholder,
-  children,
-}: {
-  value: SplitLayout;
-  onChange: (next: SplitLayout) => void;
-  columnsPlaceholder: string;
-  gapPlaceholder: string;
-  children?: ReactNode;
-}) {
-  const l = value || { imageSide: 'left' };
-  const set = (patch: Partial<SplitLayout>) => onChange({ ...l, ...patch });
-  return (
-    <div className="admin-form-grid">
-      <AlignButtons
-        label="Image / visual side"
-        value={l.imageSide}
-        options={['left', 'right']}
-        onChange={(v) => set({ imageSide: (v || 'left') as SplitLayout['imageSide'] })}
-      />
-      <SelectInput
-        label="Vertical alignment"
-        value={l.alignItems || ''}
-        options={[...VALIGN_OPTIONS, { value: 'stretch', label: 'Stretch' }]}
-        onChange={(v) => set({ alignItems: (v || undefined) as SplitLayout['alignItems'] })}
-      />
-      <TextInput
-        label="Column widths (desktop)"
-        value={l.columns}
-        onChange={(columns) => set({ columns })}
-        placeholder={columnsPlaceholder}
-        hint="CSS grid columns in on-screen order. Columns stack on tablet / phone."
-      />
-      <TextInput label="Column gap" value={l.gap} onChange={(gap) => set({ gap })} placeholder={gapPlaceholder} />
-      <Field label="Tablet / phone">
-        <Toggle
-          label="Show the image above the text when stacked"
-          checked={l.mobileImageFirst !== false}
-          onChange={(mobileImageFirst) => set({ mobileImageFirst })}
-        />
-      </Field>
-      {children}
-    </div>
   );
 }
 
@@ -546,7 +466,7 @@ function HomeHeroEditor({ content: c, onChange }: EditorProps<HomeHeroContent>) 
             hint="When a slide has several background images / videos."
             onChange={(intervalSeconds) => set({ media: { ...media, intervalSeconds } })}
           />
-          <SelectInput label="Background motion" value={media.motion || 'none'} options={MOTION_OPTIONS} onChange={(motion) => set({ media: { ...media, motion } })} />
+          <SelectInput label="Background motion" value={media.motion || 'none'} options={BG_MOTION_OPTIONS} onChange={(motion) => set({ media: { ...media, motion } })} />
           <NumberInput
             label="Motion cycle (seconds)"
             value={media.motionSeconds}
@@ -649,7 +569,7 @@ function HomeEcoEditor({ content: c, onChange }: EditorProps<HomeEcoContent>) {
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Layout">
-        <SplitLayoutFields value={c.layout} onChange={(layout) => set({ layout })} columnsPlaceholder="1fr 1.05fr" gapPlaceholder="4rem" />
+        <SplitLayoutEditor sideLabel="Image / visual side" defaultSide="left" mediaFirstByDefault value={c.layout} onChange={(layout) => set({ layout })} columnsPlaceholder="1fr 1.05fr" gapPlaceholder="4rem" />
       </Group>
       <Group title="Visual (diagram or images / videos)" description="Animated ecosystem diagram, or your own images / videos">
         <div className="admin-form-grid">
@@ -932,7 +852,7 @@ function HomeWhyEditor({ content: c, onChange }: EditorProps<HomeWhyContent>) {
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Section header" open>
-        <HomeHeaderEditor value={c.header} onChange={(header) => set({ header })} scale="lg" />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight multilineTitle emptyHidden eyebrowScale="lg" defaultsPlaceholder="Design default" />
       </Group>
       <Group title="Cards" open>
         <ListEditor<HomeWhyCard>
@@ -1019,11 +939,11 @@ function HomeSplitEditor({ content: c, onChange }: EditorProps<HomeSplitContent>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Layout">
-        <SplitLayoutFields value={c.layout} onChange={(layout) => set({ layout })} columnsPlaceholder="9fr 11fr" gapPlaceholder="2.25rem">
+        <SplitLayoutEditor sideLabel="Image / visual side" defaultSide="left" mediaFirstByDefault value={c.layout} onChange={(layout) => set({ layout })} columnsPlaceholder="9fr 11fr" gapPlaceholder="2.25rem">
           <Field label="Motion">
             <Toggle label="Fade in on scroll" checked={c.reveal !== false} onChange={(reveal) => set({ reveal })} />
           </Field>
-        </SplitLayoutFields>
+        </SplitLayoutEditor>
       </Group>
       <Group title="Images / videos" description="Add as many as you like; several cross-fade">
         <Toggle label="Show media" checked={!m.hidden} onChange={(on) => setMedia({ hidden: !on })} />
@@ -1132,7 +1052,7 @@ function HomeTimelineEditor({ content: c, onChange }: EditorProps<HomeTimelineCo
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Section header" open>
-        <HomeHeaderEditor value={c.header} onChange={(header) => set({ header })} scale="base" />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight multilineTitle emptyHidden eyebrowScale="base" defaultsPlaceholder="Design default" />
       </Group>
       <Group title="Milestones" open>
         <ListEditor<HomeTimelineItem>
@@ -1200,7 +1120,7 @@ function HomeProjectsEditor({ content: c, onChange }: EditorProps<HomeProjectsCo
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Section header" open>
-        <HomeHeaderEditor value={c.header} onChange={(header) => set({ header })} scale="base" />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight multilineTitle emptyHidden eyebrowScale="base" defaultsPlaceholder="Design default" />
       </Group>
       <Group title="Project cards" description="Pull from case studies / catalog, or write your own cards" open>
         <div className="admin-form-grid">
@@ -1314,7 +1234,7 @@ function HomeIndustriesEditor({ content: c, onChange }: EditorProps<HomeIndustri
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Section header" open>
-        <HomeHeaderEditor value={c.header} onChange={(header) => set({ header })} scale="base" />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight multilineTitle emptyHidden eyebrowScale="base" defaultsPlaceholder="Design default" />
       </Group>
       <Group title="Header link">
         <Toggle label="Show link next to the header" checked={!link.hidden} onChange={(on) => setLink({ hidden: !on })} />
@@ -1417,7 +1337,7 @@ function HomeTestimonialsEditor({ content: c, onChange }: EditorProps<HomeTestim
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Section header" open>
-        <HomeHeaderEditor value={c.header} onChange={(header) => set({ header })} scale="base" />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight multilineTitle emptyHidden eyebrowScale="base" defaultsPlaceholder="Design default" />
       </Group>
       <Group title="Testimonials" open>
         <ListEditor<HomeTestimonial>
@@ -1489,7 +1409,7 @@ function HomePartnersEditor({ content: c, onChange }: EditorProps<HomePartnersCo
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} />
       <Group title="Section header" open>
-        <HomeHeaderEditor value={c.header} onChange={(header) => set({ header })} scale="md" />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight multilineTitle emptyHidden eyebrowScale="md" defaultsPlaceholder="Design default" />
       </Group>
       <Group title="Logos" description="Upload or pick many at once; drag order with the arrows" open>
         <LogosEditor items={c.logos || []} onChange={(logos) => set({ logos })} />
@@ -1616,63 +1536,20 @@ function HomeCtaEditor({ content: c, onChange }: EditorProps<HomeCtaContent>) {
 
 /* ------------------------------------------------------------------ */
 
-export default function HomeSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: HomeSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin hm-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'home_hero' ? (
-            <HomeHeroEditor content={withHomeDefaults<HomeHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'home_eco' ? (
-            <HomeEcoEditor content={withHomeDefaults<HomeEcoContent>(type, content)} onChange={emit} />
-          ) : type === 'home_stats' ? (
-            <HomeStatsEditor content={withHomeDefaults<HomeStatsContent>(type, content)} onChange={emit} />
-          ) : type === 'home_why' ? (
-            <HomeWhyEditor content={withHomeDefaults<HomeWhyContent>(type, content)} onChange={emit} />
-          ) : type === 'home_split' ? (
-            <HomeSplitEditor content={withHomeDefaults<HomeSplitContent>(type, content)} onChange={emit} />
-          ) : type === 'home_timeline' ? (
-            <HomeTimelineEditor content={withHomeDefaults<HomeTimelineContent>(type, content)} onChange={emit} />
-          ) : type === 'home_projects' ? (
-            <HomeProjectsEditor content={withHomeDefaults<HomeProjectsContent>(type, content)} onChange={emit} />
-          ) : type === 'home_industries' ? (
-            <HomeIndustriesEditor content={withHomeDefaults<HomeIndustriesContent>(type, content)} onChange={emit} />
-          ) : type === 'home_testimonials' ? (
-            <HomeTestimonialsEditor content={withHomeDefaults<HomeTestimonialsContent>(type, content)} onChange={emit} />
-          ) : type === 'home_partners' ? (
-            <HomePartnersEditor content={withHomeDefaults<HomePartnersContent>(type, content)} onChange={emit} />
-          ) : type === 'home_cert' ? (
-            <HomeCertEditor content={withHomeDefaults<HomeCertContent>(type, content)} onChange={emit} />
-          ) : type === 'home_cta' ? (
-            <HomeCtaEditor content={withHomeDefaults<HomeCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<HomeSectionType>({
+  withDefaults: withHomeDefaults,
+  editors: {
+    home_hero: HomeHeroEditor,
+    home_eco: HomeEcoEditor,
+    home_stats: HomeStatsEditor,
+    home_why: HomeWhyEditor,
+    home_split: HomeSplitEditor,
+    home_timeline: HomeTimelineEditor,
+    home_projects: HomeProjectsEditor,
+    home_industries: HomeIndustriesEditor,
+    home_testimonials: HomeTestimonialsEditor,
+    home_partners: HomePartnersEditor,
+    home_cert: HomeCertEditor,
+    home_cta: HomeCtaEditor,
+  },
+});

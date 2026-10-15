@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { adminHomeHref, canOpenScreen, navGroupsFromScreens, screenKeyFromPath } from '@/lib/admin-screens';
 import { AdminUserContext, type AdminUser } from '@/components/admin/admin-session';
 import { AdminLink, UnsavedChangesProvider, useUnsavedChangesState } from '@/components/admin/unsaved-changes';
+import AdminQuickFind from '@/components/admin/AdminQuickFind';
 import './admin.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -149,6 +150,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="admin-topbar-actions">
+              {user ? <AdminQuickFind screens={user.screens} /> : null}
               {user ? (
                 <span className={`admin-role-badge${user.role === 'editor' ? ' admin-role-badge--editor' : ''}`}>
                   {roleLabel}

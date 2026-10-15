@@ -1,24 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
   AlignButtons,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   ListEditor,
+  NapHint,
+  NumberInput,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import MediaPicker from '@/components/admin/MediaPicker';
 import {
   PJ101_DEFAULT_STEPS,
@@ -40,7 +42,6 @@ import {
   type Projects101SectionType,
 } from '@/lib/projects101-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const SOURCE_OPTIONS: Array<{ value: Pj101Source; label: string }> = [
   { value: 'manual', label: 'Projects typed below (design)' },
@@ -518,43 +519,10 @@ function Pj101OngoingEditor({ content: c, onChange }: EditorProps<Pj101OngoingCo
 
 /* ------------------------------------------------------------------ */
 
-export default function Projects101SectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: Projects101SectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin pj101-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'pj101_projects' ? (
-            <Pj101ProjectsEditor content={withProjects101Defaults<Pj101ProjectsContent>(type, content)} onChange={emit} />
-          ) : type === 'pj101_ongoing' ? (
-            <Pj101OngoingEditor content={withProjects101Defaults<Pj101OngoingContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<Projects101SectionType>({
+  withDefaults: withProjects101Defaults,
+  editors: {
+    pj101_projects: Pj101ProjectsEditor,
+    pj101_ongoing: Pj101OngoingEditor,
+  },
+});

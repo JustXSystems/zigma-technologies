@@ -1,23 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  createSectionFamilyEditor,
   Field,
+  Group,
   IconEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import { ContactHeroEditor, IconStyleFields } from '@/components/admin/contact/ContactSectionEditor';
 import { CertsCtaEditor } from '@/components/admin/certifications/CertificationsSectionEditor';
 import {
@@ -25,13 +29,10 @@ import {
   privacyAnchor,
   withPrivacyDefaults,
   type PrivacyBlock,
-  type PrivacyCtaContent,
-  type PrivacyHeroContent,
   type PrivacyPolicyContent,
   type PrivacySectionType,
 } from '@/lib/privacy-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
@@ -60,7 +61,7 @@ export function PrivacyPolicyEditor({ content: c, onChange }: EditorProps<Privac
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Section background images / videos" />
       <Group title="Section heading" description="Optional eyebrow, heading (H2 by default) and intro above the policy">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Last updated & intro" description="Both optional; empty = hidden">
         <TextElementEditor label="Last updated line" value={c.updated} onChange={(updated) => set({ updated })} hint="e.g. Last updated: 1 October 2026" />
@@ -185,45 +186,11 @@ export function PrivacyPolicyEditor({ content: c, onChange }: EditorProps<Privac
 
 /* ------------------------------------------------------------------ */
 
-export default function PrivacySectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: PrivacySectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin ctc-admin pvc-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'privacy_hero' ? (
-            <ContactHeroEditor content={withPrivacyDefaults<PrivacyHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'privacy_policy' ? (
-            <PrivacyPolicyEditor content={withPrivacyDefaults<PrivacyPolicyContent>(type, content)} onChange={emit} />
-          ) : type === 'privacy_cta' ? (
-            <CertsCtaEditor content={withPrivacyDefaults<PrivacyCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<PrivacySectionType>({
+  withDefaults: withPrivacyDefaults,
+  editors: {
+    privacy_hero: ContactHeroEditor,
+    privacy_policy: PrivacyPolicyEditor,
+    privacy_cta: CertsCtaEditor,
+  },
+});

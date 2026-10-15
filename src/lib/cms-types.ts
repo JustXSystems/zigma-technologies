@@ -136,3 +136,35 @@ export const SECTION_TYPES = [
   { type: 'home_cert', label: 'Home · Certifications teaser (badges, button)' },
   { type: 'home_cta', label: 'Home · CTA band' },
 ] as const;
+
+/** Group for section types whose label has no "Page · " prefix (the original all-purpose blocks). */
+export const CLASSIC_SECTION_GROUP = 'Classic blocks';
+
+/** `name` is the label without its page prefix; `title` drops the trailing "(…)" hint as well. */
+export type SectionTypeMeta = { type: string; label: string; group: string; name: string; title: string; hint: string };
+
+function parseSectionLabel(type: string, label: string): SectionTypeMeta {
+  const at = label.indexOf(' · ');
+  const group = at < 0 ? CLASSIC_SECTION_GROUP : label.slice(0, at);
+  const name = at < 0 ? label : label.slice(at + 3);
+  const hint = /^(.*?)\s*\((.*)\)$/.exec(name);
+  return { type, label, group, name, title: hint ? hint[1] : name, hint: hint ? hint[2] : '' };
+}
+
+const SECTION_TYPE_META = new Map<string, SectionTypeMeta>(
+  SECTION_TYPES.map(({ type, label }) => [type, parseSectionLabel(type, label)])
+);
+
+/** Page group ("Home", "Contact"…), short name and hint of a section type. */
+export function sectionTypeMeta(type: string): SectionTypeMeta {
+  return SECTION_TYPE_META.get(type) ?? parseSectionLabel(type, type);
+}
+
+/** Section types grouped by page, in catalog order. */
+export function sectionTypeGroups(): Array<{ group: string; types: SectionTypeMeta[] }> {
+  const groups = new Map<string, SectionTypeMeta[]>();
+  for (const meta of SECTION_TYPE_META.values()) {
+    groups.set(meta.group, [...(groups.get(meta.group) || []), meta]);
+  }
+  return Array.from(groups, ([group, types]) => ({ group, types }));
+}

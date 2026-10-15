@@ -1,209 +1,154 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import type { CmsPage, CmsSection } from '@/lib/cms-types';
-import { SECTION_TYPES } from '@/lib/cms-types';
-import { defaultCmsSectionContent } from '@/lib/cms-section-defaults';
-import SectionEditor from '@/components/admin/SectionEditor';
+import type { CmsPage } from '@/lib/cms-types';
+import PageSectionsManager from '@/components/admin/PageSectionsManager';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import AdminFloatingActions from '@/components/admin/AdminFloatingActions';
 import SeoFieldsEditor from '@/components/admin/SeoFieldsEditor';
 import { AdminLink, useDirtyTracker } from '@/components/admin/unsaved-changes';
 import { movedAddressNote } from '@/lib/moved-address';
+import { appHref } from '@/lib/base-path';
+
+const pagePath = (slug: string) => (slug === 'home' ? '/' : `/${slug}`);
 
 export default function AdminPageSectionsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const pageId = Number(params.id);
   const [page, setPage] = useState<CmsPage | null>(null);
-  const [sections, setSections] = useState<CmsSection[]>([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [addType, setAddType] = useState('why');
-  const [editing, setEditing] = useState<CmsSection | null>(null);
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [pageTitle, setPageTitle] = useState('');
   const [pageSlug, setPageSlug] = useState('');
-  const [savingMeta, setSavingMeta] = useState(false);
-  const { markClean } = useDirtyTracker({ pageTitle, pageSlug, metaTitle, metaDescription });
+  const [busy, setBusy] = useState('');
+  const { dirty, markClean } = useDirtyTracker({ pageTitle, pageSlug, metaTitle, metaDescription });
 
-  async function load() {
+  const apply = useCallback(
+    (next: CmsPage, withDetails: boolean) => {
+      setPage(next);
+      if (!withDetails) return;
+      setPageTitle(next.title || '');
+      setPageSlug(next.slug || '');
+      setMetaTitle(next.meta_title || '');
+      setMetaDescription(next.meta_description || '');
+      markClean();
+    },
+    [markClean]
+  );
+
+  const fetchPage = useCallback(async () => {
     const res = await fetch(`/api/admin/pages/${pageId}`, { credentials: 'same-origin' });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to load');
-    setPage(data.page);
-    setSections(data.page.sections || []);
-    setPageTitle(data.page.title || '');
-    setPageSlug(data.page.slug || '');
-    setMetaTitle(data.page.meta_title || '');
-    setMetaDescription(data.page.meta_description || '');
-    markClean();
-  }
+    return data.page as CmsPage;
+  }, [pageId]);
+
+  /** Refresh sections and status without touching unsaved page-detail edits. */
+  const reloadSections = useCallback(async () => apply(await fetchPage(), false), [apply, fetchPage]);
 
   useEffect(() => {
     if (!pageId) return;
-    load().catch((e) => setError(e.message));
-  }, [pageId]);
+    let current = true;
+    fetchPage()
+      .then((next) => current && apply(next, true))
+      .catch((e: Error) => current && setError(e.message));
+    return () => {
+      current = false;
+    };
+  }, [pageId, fetchPage, apply]);
 
-  const typeLabel = useMemo(() => {
-    const map = Object.fromEntries(SECTION_TYPES.map((t) => [t.type, t.label]));
-    return (type: string) => map[type] || type;
-  }, []);
-
-  async function saveMeta(e?: FormEvent) {
-    e?.preventDefault();
+  async function run(key: string, task: () => Promise<string | void>) {
+    setBusy(key);
     setError('');
     setMessage('');
-    setSavingMeta(true);
     try {
-      const res = await fetch(`/api/admin/pages/${pageId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: pageTitle,
-          slug: pageSlug,
-          meta_title: metaTitle || null,
-          meta_description: metaDescription || null,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Save failed');
-        return;
-      }
-      setMessage(`Page details saved.${movedAddressNote(data.redirect)}`);
-      await load();
+      const note = await task();
+      if (note) setMessage(note);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong');
     } finally {
-      setSavingMeta(false);
+      setBusy('');
     }
   }
 
-  async function deletePage() {
-    if (!page) return;
-    if (!confirm(`Delete page "${page.title}" and all its sections?`)) return;
-    const res = await fetch(`/api/admin/pages/${page.id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || 'Delete failed');
-      return;
-    }
-    router.push('/admin/pages');
-  }
-
-  async function addSection(e: FormEvent) {
-    e.preventDefault();
-    const content_json = defaultCmsSectionContent(addType, page?.slug);
-    const res = await fetch('/api/admin/sections', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        page_id: pageId,
-        type: addType,
-        title: typeLabel(addType),
-        section_key: addType === 'industry_category' ? 'cat-infra' : undefined,
-        content_json,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Add failed');
-      return;
-    }
-    await load();
-  }
-
-  async function duplicate(section: CmsSection) {
-    const res = await fetch('/api/admin/sections', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        page_id: pageId,
-        type: section.type,
-        title: `${section.title || section.type} (copy)`,
-        section_key: section.section_key ? `${section.section_key}-copy` : null,
-        content_json: section.content_json || {},
-        style_json: section.style_json || {},
-        enabled: false,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || 'Duplicate failed');
-      return;
-    }
-    await load();
-  }
-
-  async function toggle(section: CmsSection) {
-    setError('');
-    const res = await fetch(`/api/admin/sections/${section.id}`, {
+  async function patchPage(body: Record<string, unknown>) {
+    const res = await fetch(`/api/admin/pages/${pageId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ enabled: !section.enabled }),
+      body: JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      if (res.status === 401) {
-        setError('Session expired — sign in again, then retry Enable/Disable.');
-        router.replace('/admin/login');
-        return;
-      }
-      setError((data as { error?: string }).error || 'Failed to update section');
-      return;
-    }
-    await load();
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    return data;
   }
 
-  async function remove(section: CmsSection) {
-    if (!confirm(`Delete section "${section.title || section.type}"?`)) return;
-    await fetch(`/api/admin/sections/${section.id}`, { method: 'DELETE' });
-    await load();
-  }
+  const saveDetails = (e?: FormEvent) => {
+    e?.preventDefault();
+    return run('details', async () => {
+      const data = await patchPage({
+        title: pageTitle,
+        slug: pageSlug,
+        meta_title: metaTitle || null,
+        meta_description: metaDescription || null,
+      });
+      apply(await fetchPage(), true);
+      return `Page details saved.${movedAddressNote(data.redirect)}`;
+    });
+  };
 
-  async function move(section: CmsSection, dir: -1 | 1) {
-    const idx = sections.findIndex((s) => s.id === section.id);
-    const swap = idx + dir;
-    if (swap < 0 || swap >= sections.length) return;
-    const next = [...sections];
-    [next[idx], next[swap]] = [next[swap], next[idx]];
-    setSections(next);
-    await fetch('/api/admin/sections/reorder', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ page_id: pageId, ordered_ids: next.map((s) => s.id) }),
+  const setPublished = (published: boolean) =>
+    run('status', async () => {
+      await patchPage({ status: published ? 'published' : 'draft' });
+      await reloadSections();
+      return published ? 'Page published.' : 'Page moved back to draft. Visitors no longer see it.';
+    });
+
+  const preview = () =>
+    run('preview', async () => {
+      const res = await fetch(`/api/admin/pages/${pageId}/preview`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Preview failed');
+      window.open(data.url, '_blank', 'noopener,noreferrer');
+    });
+
+  function deletePage() {
+    if (!page || !window.confirm(`Delete page "${page.title}" and all its sections?`)) return;
+    void run('delete', async () => {
+      const res = await fetch(`/api/admin/pages/${page.id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+      router.push('/admin/pages');
     });
   }
+
+  function clearSections() {
+    if (!window.confirm('Delete ALL sections on this page? You can re-seed built-in pages afterwards from Pages.')) return;
+    void run('clear', async () => {
+      const res = await fetch(`/api/admin/pages/${pageId}/sections`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Clear failed');
+      await reloadSections();
+      return data.message || 'Sections cleared.';
+    });
+  }
+
+  const published = page?.status === 'published';
+  const sections = page?.sections || [];
 
   return (
     <div className="admin-page-stack">
-      <AdminFloatingActions status={message || (savingMeta ? 'Saving…' : undefined)}>
+      <AdminFloatingActions status={message || (busy === 'details' ? 'Saving…' : undefined)}>
         {page ? (
-          <button
-            type="button"
-            className="admin-btn admin-btn-secondary"
-            onClick={async () => {
-              const res = await fetch(`/api/admin/pages/${page.id}/preview`, { method: 'POST' });
-              const data = await res.json();
-              if (!res.ok) {
-                setError(data.error || 'Preview failed');
-                return;
-              }
-              window.open(data.url, '_blank', 'noopener,noreferrer');
-            }}
-          >
+          <button type="button" className="admin-btn admin-btn-secondary" disabled={busy === 'preview'} onClick={() => void preview()}>
             Preview
           </button>
         ) : null}
-        <button
-          type="button"
-          className="admin-btn admin-btn-primary"
-          disabled={savingMeta}
-          onClick={() => void saveMeta()}
-        >
-          {savingMeta ? 'Saving…' : 'Save page details'}
+        <button type="button" className="admin-btn admin-btn-primary" disabled={busy === 'details' || !dirty} onClick={() => void saveDetails()}>
+          {busy === 'details' ? 'Saving…' : 'Save page details'}
         </button>
       </AdminFloatingActions>
 
@@ -218,43 +163,54 @@ export default function AdminPageSectionsPage() {
       <div className="admin-card admin-page-intro">
         <div className="admin-toolbar" style={{ marginBottom: 0 }}>
           <div>
-            <h2>{page?.title || 'Page'} sections</h2>
+            <h2>{page?.title || 'Page'}</h2>
             <p>
-              Slug: <code>/{page?.slug === 'home' ? '' : page?.slug}</code>
+              {page ? (
+                <>
+                  <span className={`admin-badge ${page.status}`}>{page.status}</span>{' '}
+                  {page.enabled ? null : <span className="admin-badge closed">disabled</span>}{' '}
+                  <a href={appHref(pagePath(page.slug))} target="_blank" rel="noreferrer">
+                    <code>{pagePath(page.slug)}</code> ↗
+                  </a>{' '}
+                  · {sections.length} section{sections.length === 1 ? '' : 's'}
+                  {sections.some((s) => !s.enabled) ? `, ${sections.filter((s) => !s.enabled).length} hidden` : ''}
+                </>
+              ) : (
+                'Loading…'
+              )}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
-            <button type="button" className="admin-btn admin-btn-danger" onClick={deletePage}>
-              Delete page
-            </button>
+          {page ? (
             <button
               type="button"
-              className="admin-btn admin-btn-danger"
-              onClick={async () => {
-                if (!confirm('Delete ALL sections on this page? You can re-seed afterwards.')) return;
-                const res = await fetch(`/api/admin/pages/${pageId}/sections`, { method: 'DELETE' });
-                const data = await res.json();
-                if (!res.ok) {
-                  setError(data.error || 'Clear failed');
-                  return;
-                }
-                setMessage(data.message || 'Sections cleared.');
-                await load();
-              }}
+              className={`admin-btn ${published ? 'admin-btn-secondary' : 'admin-btn-primary'}`}
+              disabled={busy === 'status'}
+              onClick={() => void setPublished(!published)}
             >
-              Clear sections
+              {published ? 'Unpublish' : 'Publish page'}
             </button>
-          </div>
+          ) : null}
         </div>
       </div>
 
-      <AdminCollapsible title="Page details / SEO" description="Title, slug, and meta fields for this page." defaultOpen>
-        <form
-          onSubmit={(e) => {
-            void saveMeta(e);
-          }}
-          className="admin-form-grid"
-        >
+      {page ? (
+        <section className="admin-card">
+          <div className="admin-page-intro" style={{ marginBottom: '0.85rem' }}>
+            <h2>Sections</h2>
+            <p>Top to bottom, as on the page. Click a section to edit its content, look and media.</p>
+          </div>
+          <PageSectionsManager
+            pageId={page.id}
+            pageSlug={page.slug}
+            sections={sections}
+            reload={reloadSections}
+            emptyText="No sections yet. Add one below, or seed a built-in page from Pages."
+          />
+        </section>
+      ) : null}
+
+      <AdminCollapsible title="Page details & SEO" description="Title, address (slug), and the search / share preview." defaultOpen={false}>
+        <form onSubmit={(e) => void saveDetails(e)} className="admin-form-grid">
           <div className="admin-field">
             <label>Title</label>
             <input className="admin-input" value={pageTitle} onChange={(e) => setPageTitle(e.target.value)} required />
@@ -271,94 +227,22 @@ export default function AdminPageSectionsPage() {
                 setMetaDescription(next.description);
               }}
               fallbackTitle={pageSlug === 'home' ? undefined : pageTitle}
-              path={pageSlug === 'home' ? '/' : `/${pageSlug}`}
+              path={pagePath(pageSlug)}
             />
           </div>
         </form>
       </AdminCollapsible>
 
-      <AdminCollapsible title="Add section" description="Append a new CMS section type to this page." defaultOpen={false}>
-        <form onSubmit={addSection} style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <select className="admin-select" value={addType} onChange={(e) => setAddType(e.target.value)}>
-            {SECTION_TYPES.map((t) => (
-              <option key={t.type} value={t.type}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="admin-btn admin-btn-primary">
-            Add section
+      <AdminCollapsible title="Danger zone" description="Remove every section, or delete the whole page." defaultOpen={false}>
+        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+          <button type="button" className="admin-btn admin-btn-danger" disabled={Boolean(busy)} onClick={clearSections}>
+            Clear all sections
           </button>
-        </form>
+          <button type="button" className="admin-btn admin-btn-danger" disabled={Boolean(busy)} onClick={deletePage}>
+            Delete page
+          </button>
+        </div>
       </AdminCollapsible>
-
-      <div className="admin-table-wrap admin-card" style={{ padding: 0 }}>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Type</th>
-              <th>Title / key</th>
-              <th>Enabled</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sections.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="admin-empty">
-                  No sections. Add one or seed from Pages.
-                </td>
-              </tr>
-            ) : (
-              sections.map((section) => (
-                <tr key={section.id}>
-                  <td>
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => move(section, -1)}>
-                      ↑
-                    </button>{' '}
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => move(section, 1)}>
-                      ↓
-                    </button>
-                  </td>
-                  <td>{typeLabel(section.type)}</td>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{section.title || '—'}</div>
-                    <div style={{ color: 'var(--admin-muted)', fontSize: '0.8rem' }}>#{section.section_key || '—'}</div>
-                  </td>
-                  <td>{section.enabled ? 'Yes' : 'No'}</td>
-                  <td>
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setEditing(section)}>
-                      Edit
-                    </button>{' '}
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => duplicate(section)}>
-                      Duplicate
-                    </button>{' '}
-                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => toggle(section)}>
-                      {section.enabled ? 'Disable' : 'Enable'}
-                    </button>{' '}
-                    <button type="button" className="admin-btn admin-btn-danger" onClick={() => remove(section)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {editing ? (
-        <SectionEditor
-          key={editing.id}
-          section={editing}
-          onClose={() => setEditing(null)}
-          onSaved={async () => {
-            setEditing(null);
-            await load();
-          }}
-        />
-      ) : null}
     </div>
   );
 }

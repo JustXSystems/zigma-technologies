@@ -1,27 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
   AlignButtons,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   IconEditor,
   LinkListEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
   PillsEditor,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, SectionBoxGroup, VALIGN_OPTIONS } from '@/components/admin/legacy/LegacySectionEditor';
+  VALIGN_OPTIONS,
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
@@ -47,7 +53,6 @@ import {
   type Industries101SectionType,
 } from '@/lib/industries101-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 
@@ -646,49 +651,13 @@ function Ind101CtaEditor({ content: c, onChange }: EditorProps<Ind101CtaContent>
 
 /* ------------------------------------------------------------------ */
 
-export default function Industries101SectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: Industries101SectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin i101-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'ind101_hero' ? (
-            <Ind101HeroEditor content={withIndustries101Defaults<Ind101HeroContent>(type, content)} onChange={emit} />
-          ) : type === 'ind101_subnav' ? (
-            <Ind101SubnavEditor content={withIndustries101Defaults<Ind101SubnavContent>(type, content)} onChange={emit} />
-          ) : type === 'ind101_stats' ? (
-            <Ind101StatsEditor content={withIndustries101Defaults<Ind101StatsContent>(type, content)} onChange={emit} />
-          ) : type === 'ind101_category' ? (
-            <Ind101CategoryEditor content={withIndustries101Defaults<Ind101CategoryContent>(type, content)} onChange={emit} />
-          ) : type === 'ind101_cta' ? (
-            <Ind101CtaEditor content={withIndustries101Defaults<Ind101CtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<Industries101SectionType>({
+  withDefaults: withIndustries101Defaults,
+  editors: {
+    ind101_hero: Ind101HeroEditor,
+    ind101_subnav: Ind101SubnavEditor,
+    ind101_stats: Ind101StatsEditor,
+    ind101_category: Ind101CategoryEditor,
+    ind101_cta: Ind101CtaEditor,
+  },
+});

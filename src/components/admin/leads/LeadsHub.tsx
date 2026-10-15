@@ -1,34 +1,11 @@
 'use client';
 
-import AdminHub, { type AdminHubTab } from '@/components/admin/AdminHub';
+import AdminHub from '@/components/admin/AdminHub';
+import { LEADS_TABS } from '@/lib/admin-hub-tabs';
 import SiteSettingsEditor from '@/components/admin/site-settings/SiteSettingsEditor';
 import { AdminLink } from '@/components/admin/unsaved-changes';
 import FormFieldsEditor from './FormFieldsEditor';
 import LeadMessagesEditor from './LeadMessagesEditor';
-
-type Tab = 'fields' | 'messages' | 'crm';
-
-const TABS: readonly AdminHubTab<Tab>[] = [
-  {
-    id: 'fields',
-    label: 'Form fields',
-    screen: 'forms',
-    description:
-      'The enquiry form behind the Send an Enquiry pop-up, the contact page, product / project enquiry drawers and case-study blocks. Changes apply on the public site immediately.',
-  },
-  {
-    id: 'messages',
-    label: 'Pop-up & thank-you',
-    screen: 'siteCopy',
-    description: 'What visitors read while sending an enquiry and on the page they land on afterwards.',
-  },
-  {
-    id: 'crm',
-    label: 'CRM',
-    screen: 'siteSettings',
-    description: 'Forward new leads to HubSpot, Zoho, Zapier, Make or any webhook as they arrive.',
-  },
-];
 
 export default function LeadsHub({ initialTab }: { initialTab?: string }) {
   return (
@@ -41,7 +18,7 @@ export default function LeadsHub({ initialTab }: { initialTab?: string }) {
           <AdminLink href="/admin/email">Email</AdminLink>.
         </>
       }
-      tabs={TABS}
+      tabs={LEADS_TABS}
       initialTab={initialTab}
     >
       {(active) =>

@@ -1,38 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
   AlignButtons,
+  BgMediaGroup,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   IconEditor,
   ImageEditor,
   LinkListEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
   PillsEditor,
-  SectionBoxEditor,
+  SectionBoxGroup,
+  SectionHeaderEditor,
   SelectInput,
+  SplitLayoutEditor,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import {
-  ColumnsEditor,
-  HighlightEditor,
-  LifeGroup as Group,
-  LifeGroupProvider,
-  LifeHeaderEditor,
-  MediaItemsEditor,
-  NapHint,
-  NumberInput,
-} from '@/components/admin/life/LifeControls';
-import { normalizeLinkItems, type ImageEl, type SplitLayout } from '@/lib/about-sections';
+  type EditorProps,
+} from '@/components/admin/section-kit';
+import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import {
   LIFE_ALL_ICON_PRESETS,
   defaultLifeEventGroup,
@@ -55,60 +52,8 @@ import {
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields from '@/components/admin/HeroMotionFields';
-import { BgMediaGroup } from '@/components/admin/legacy/LegacySectionEditor';
-
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview lz-icons-anim';
-
-function SectionBoxGroup({ value, onChange }: { value: LifeHeroContent['section']; onChange: (v: LifeHeroContent['section']) => void }) {
-  return (
-    <Group title="Section background & spacing" description="Colors, gradient, image or video background, pattern, glow orbs, padding">
-      <SectionBoxEditor value={value} onChange={onChange} />
-    </Group>
-  );
-}
-
-function SplitLayoutEditor({ value, onChange }: { value: SplitLayout; onChange: (next: SplitLayout) => void }) {
-  const l = value || { imageSide: 'right' };
-  return (
-    <div className="admin-form-grid">
-      <AlignButtons
-        label="Media position"
-        value={l.imageSide}
-        options={['left', 'right']}
-        onChange={(v) => onChange({ ...l, imageSide: (v || 'right') as SplitLayout['imageSide'] })}
-      />
-      <SelectInput
-        label="Vertical alignment"
-        value={l.alignItems || ''}
-        options={[
-          { value: '', label: 'Default (center)' },
-          { value: 'start', label: 'Top' },
-          { value: 'center', label: 'Center' },
-          { value: 'end', label: 'Bottom' },
-          { value: 'stretch', label: 'Stretch' },
-        ]}
-        onChange={(v) => onChange({ ...l, alignItems: (v || undefined) as SplitLayout['alignItems'] })}
-      />
-      <TextInput
-        label="Column widths"
-        value={l.columns}
-        onChange={(columns) => onChange({ ...l, columns })}
-        placeholder="1.15fr 0.98fr"
-        hint="CSS grid columns in on-screen order. Empty = design default."
-      />
-      <TextInput label="Column gap" value={l.gap} onChange={(gap) => onChange({ ...l, gap })} placeholder="3.2rem" />
-      <div className="full">
-        <Toggle
-          label="On tablet / phone (stacked), show the media above the text"
-          checked={Boolean(l.mobileImageFirst)}
-          onChange={(mobileImageFirst) => onChange({ ...l, mobileImageFirst })}
-        />
-      </div>
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /* Page hero                                                           */
@@ -143,7 +88,7 @@ function LifeHeroEditor({ content: c, onChange }: EditorProps<LifeHeroContent>) 
             ]}
           />
         </div>
-        <SplitLayoutEditor value={c.layout} onChange={(layout) => set({ layout })} />
+        <SplitLayoutEditor value={c.layout} onChange={(layout) => set({ layout })} sideLabel="Media position" media="media" columnsPlaceholder="1.15fr 0.98fr" />
         <HeroMotionFields
           entrance={Boolean(c.entrance)}
           onEntrance={(entrance) => set({ entrance })}
@@ -332,7 +277,7 @@ function LifeCardsEditor({ content: c, onChange }: EditorProps<LifeCardsContent>
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle">
-        <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight />
       </Group>
       <Group title="Cards" open>
         <ListEditor<LifeCard>
@@ -435,7 +380,7 @@ function LifeRolesEditor({ content: c, onChange }: EditorProps<LifeRolesContent>
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle">
-        <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight />
       </Group>
       <Group title="Roles" open>
         <ListEditor<LifeRole>
@@ -649,7 +594,7 @@ function LifeEventsEditor({ content: c, onChange }: EditorProps<LifeEventsConten
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header" description="Eyebrow, heading with gradient word, subtitle">
-        <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight />
       </Group>
       <Group title="Event groups" description="Each group is a scrolling row, album cards or a photo grid" open>
         <ListEditor<LifeEventGroup>
@@ -706,7 +651,7 @@ function LifeGalleryEditor({ content: c, onChange }: EditorProps<LifeGalleryCont
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header" description="Eyebrow, heading (site heading level), subtitle">
-        <LifeHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <SectionHeaderEditor value={c.header} onChange={(header) => set({ header })} highlight />
       </Group>
       <Group title="Photos & videos" open>
         <MediaItemsEditor
@@ -811,53 +756,15 @@ function LifeCtaEditor({ content: c, onChange }: EditorProps<LifeCtaContent>) {
 
 /* ------------------------------------------------------------------ */
 
-export default function LifeSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: LifeSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'life_hero' ? (
-            <LifeHeroEditor content={withLifeDefaults<LifeHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'life_stats' ? (
-            <LifeStatsEditor content={withLifeDefaults<LifeStatsContent>(type, content)} onChange={emit} />
-          ) : type === 'life_cards' ? (
-            <LifeCardsEditor content={withLifeDefaults<LifeCardsContent>(type, content)} onChange={emit} />
-          ) : type === 'life_roles' ? (
-            <LifeRolesEditor content={withLifeDefaults<LifeRolesContent>(type, content)} onChange={emit} />
-          ) : type === 'life_events' ? (
-            <LifeEventsEditor content={withLifeDefaults<LifeEventsContent>(type, content)} onChange={emit} />
-          ) : type === 'life_gallery' ? (
-            <LifeGalleryEditor content={withLifeDefaults<LifeGalleryContent>(type, content)} onChange={emit} />
-          ) : type === 'life_cta' ? (
-            <LifeCtaEditor content={withLifeDefaults<LifeCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<LifeSectionType>({
+  withDefaults: withLifeDefaults,
+  editors: {
+    life_hero: LifeHeroEditor,
+    life_stats: LifeStatsEditor,
+    life_cards: LifeCardsEditor,
+    life_roles: LifeRolesEditor,
+    life_events: LifeEventsEditor,
+    life_gallery: LifeGalleryEditor,
+    life_cta: LifeCtaEditor,
+  },
+});

@@ -56,7 +56,7 @@ import CatalogHeroCard from '@/components/catalog/CatalogHeroCard';
 import { normalizeCatalogHeroBg } from '@/lib/catalog-hero-bg';
 import { normalizeCatalogHeroCard } from '@/lib/catalog-hero-card';
 import { normalizeLifeHighlight } from '@/lib/life-sections';
-import { HighlightEditor } from '@/components/admin/life/LifeControls';
+import { HighlightEditor } from '@/components/admin/section-kit';
 import { highlightText } from '@/components/sections/highlight-text';
 import { catalogSectionToCms, normalizeCatalogSections } from '@/lib/catalog-sections';
 import CatalogSectionsEditor, { CONFIGURABLE } from '@/components/admin/CatalogSectionsEditor';

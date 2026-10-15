@@ -1,27 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
+import { useState } from 'react';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import { extractEducation, hasStructuredDetails, parseJobText, type ParsedJobText } from '@/lib/careers-job-text';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
   AlignButtons,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
   IconEditor,
   ListEditor,
+  MediaItemsEditor,
+  NapHint,
+  NumberInput,
+  SectionBoxGroup,
   SelectInput,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, LifeGroup as Group, LifeGroupProvider, MediaItemsEditor, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { CardStyleFields, LegacyHeaderEditor, LegacyStatsEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
+import { LegacyStatsEditor } from '@/components/admin/legacy/LegacySectionEditor';
 import { ActionFields, ContactHelpEditor, ContactHeroEditor, IconStyleFields } from '@/components/admin/contact/ContactSectionEditor';
 import type { ContactSideItem } from '@/lib/contact-sections';
 import {
@@ -32,20 +38,17 @@ import {
   type CareersApplicationContent,
   type CareersCardsContent,
   type CareersFieldText,
-  type CareersHeroContent,
   type CareersInternshipContent,
   type CareersJob,
   type CareersJobLabels,
   type CareersJobsContent,
   type CareersProgramPoint,
   type CareersSectionType,
-  type CareersStatsContent,
   type CareersStep,
   type CareersWhyCard,
   type CareersWhyContent,
 } from '@/lib/careers-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 const ICON_PREVIEW = 'lz-icon-preview';
 const presetSvg = (key: string) => CAREERS_ALL_ICON_PRESETS.find((p) => p.key === key)?.svg || '';
@@ -101,7 +104,7 @@ function CareersWhyEditor({ content: c, onChange }: EditorProps<CareersWhyConten
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Reason cards" open>
         <ListEditor<CareersWhyCard>
@@ -370,7 +373,7 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Job openings" open description="Add, hide or reorder jobs. Apply buttons scroll to the application form and preselect the role">
         <ListEditor<CareersJob>
@@ -565,7 +568,7 @@ function CareersInternshipEditor({ content: c, onChange }: EditorProps<CareersIn
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Text column heading" description="Eyebrow, heading (H2 by default), highlight and description">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Text column images / videos">
         <MediaItemsEditor
@@ -737,7 +740,7 @@ function CareersApplicationEditor({ content: c, onChange }: EditorProps<CareersA
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro above the form">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Form panel" open description="Applications arrive in Admin → Enquiries with the résumé attached">
         <TextElementEditor label="Form title" headingTag value={f.title} onChange={(title) => setForm({ title })} />
@@ -917,59 +920,19 @@ function CareersApplicationEditor({ content: c, onChange }: EditorProps<CareersA
 
 /* ------------------------------------------------------------------ */
 
-export default function CareersSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: CareersSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin ctc-admin crs-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'careers_hero' ? (
-            <ContactHeroEditor content={withCareersDefaults<CareersHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'careers_stats' ? (
-            <LegacyStatsEditor content={withCareersDefaults<CareersStatsContent>(type, content)} onChange={emit} />
-          ) : type === 'careers_cards' ? (
-            <ContactHelpEditor
-              content={withCareersDefaults<CareersCardsContent>(type, content)}
-              onChange={emit}
-              presets={CAREERS_ALL_ICON_PRESETS}
-              actionMode="role"
-              cardsTitle="Cards"
-            />
-          ) : type === 'careers_why' ? (
-            <CareersWhyEditor content={withCareersDefaults<CareersWhyContent>(type, content)} onChange={emit} />
-          ) : type === 'careers_jobs' ? (
-            <CareersJobsEditor content={withCareersDefaults<CareersJobsContent>(type, content)} onChange={emit} />
-          ) : type === 'careers_internship' ? (
-            <CareersInternshipEditor content={withCareersDefaults<CareersInternshipContent>(type, content)} onChange={emit} />
-          ) : type === 'careers_application' ? (
-            <CareersApplicationEditor content={withCareersDefaults<CareersApplicationContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
+function CareersCardsEditor(props: EditorProps<CareersCardsContent>) {
+  return <ContactHelpEditor {...props} presets={CAREERS_ALL_ICON_PRESETS} actionMode="role" cardsTitle="Cards" />;
 }
+
+export default createSectionFamilyEditor<CareersSectionType>({
+  withDefaults: withCareersDefaults,
+  editors: {
+    careers_hero: ContactHeroEditor,
+    careers_stats: LegacyStatsEditor,
+    careers_cards: CareersCardsEditor,
+    careers_why: CareersWhyEditor,
+    careers_jobs: CareersJobsEditor,
+    careers_internship: CareersInternshipEditor,
+    careers_application: CareersApplicationEditor,
+  },
+});

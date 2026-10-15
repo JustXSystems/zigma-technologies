@@ -1,6 +1,6 @@
 'use client';
 
-import { Field, TextInput, Toggle } from '@/components/admin/about/AboutControls';
+import { Field, TextInput, Toggle } from '@/components/admin/form/controls';
 import { heroScrollBarOn } from '@/lib/hero-height';
 
 export type HeroScrollBar = { hidden?: boolean; gradient?: string };

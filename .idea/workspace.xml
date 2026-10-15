@@ -7,13 +7,56 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52  careers_jobs edit with html">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52  careers_jobs edit with Education and add show pills">
+      <change afterPath="$PROJECT_DIR$/src/components/admin/AdminQuickFind.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/PageSectionsManager.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/section-families.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/section-kit/blocks.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/section-kit/frame.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/section-kit/groups.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/section-kit/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/admin/site-copy/SiteCopyHub.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/lib/admin-hub-tabs.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/careers-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/careers-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ADMIN.md" beforeDir="false" afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/catalog-settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/pages/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/site-copy/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/AdminHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/AdminHub.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/CatalogHeroBgEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/HeroMotionFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/HeroMotionFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutControls.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/section-kit/controls.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/careers/CareersSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/careers/CareersSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/CareersSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/CareersSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/careers-job-text.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/careers-job-text.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/careers-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/careers-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/catalog/Projects101Settings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/catalog/Projects101Settings.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/certifications/CertificationsSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/header-footer/HeaderFooterHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/header-footer/HeaderFooterHub.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/industries/IndustriesSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries/IndustriesSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/industries/IndustryPageSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries/IndustryPageSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/leads/LeadsHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/leads/LeadsHub.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeControls.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/section-kit/media.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/privacy/PrivacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/privacy/PrivacySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/projects101/Projects101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/projects101/Projects101SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/SeoHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/SeoHub.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/site-settings/SiteSettingsEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/site-settings/SiteSettingsEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/terms/TermsSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/terms/TermsSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/theme/ThemeHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/theme/ThemeHub.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-screens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-screens.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,23 +114,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4706304153817968" />
-      <entry key="MS500" value="3.2516069481102425" />
-      <entry key="S2" value="8.380456862829504" />
-      <entry key="S5" value="15.46808267215402" />
-      <entry key="S10" value="22.44607305158429" />
-      <entry key="S30" value="31.2663175268222" />
-      <entry key="S60" value="34.53769554718102" />
-      <entry key="M2" value="40.41400725565283" />
-      <entry key="M5" value="72.39164969116636" />
-      <entry key="M10" value="109.88996129529873" />
-      <entry key="M15" value="129.8375497629214" />
-      <entry key="M30" value="155.34389978673573" />
-      <entry key="H1" value="170.66212462006857" />
-      <entry key="H2" value="179.15015894095183" />
-      <entry key="H4" value="189.92641756016414" />
-      <entry key="D1" value="740.4591082323014" />
-      <entry key="W1" value="12009.004414289213" />
+      <entry key="MS100" value="1.337852080816599" />
+      <entry key="MS500" value="3.0878524815388855" />
+      <entry key="S2" value="5.300798297245818" />
+      <entry key="S5" value="7.581391201649105" />
+      <entry key="S10" value="8.997783102691352" />
+      <entry key="S30" value="10.253286536714334" />
+      <entry key="S60" value="10.61623709805757" />
+      <entry key="M2" value="11.191022910380696" />
+      <entry key="M5" value="33.58249352066402" />
+      <entry key="M10" value="108.53058150848922" />
+      <entry key="M15" value="174.46627082408693" />
+      <entry key="M30" value="290.9193353487028" />
+      <entry key="H1" value="380.79526437181744" />
+      <entry key="H2" value="437.2277297821154" />
+      <entry key="H4" value="474.7939703005996" />
+      <entry key="D1" value="1043.6080941332907" />
+      <entry key="W1" value="12302.62732763487" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -102,30 +145,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="4.1344060776962386E-179" />
-      <entry key="H2" value="6.429934741267153E-90" />
-      <entry key="H4" value="2.535731598864584E-45" />
-      <entry key="D1" value="3.751959653295882E-8" />
-      <entry key="W1" value="0.13479259600861498" />
+      <entry key="H1" value="3.082519659846639E-179" />
+      <entry key="H2" value="5.5520443620760395E-90" />
+      <entry key="H4" value="2.356277649654229E-45" />
+      <entry key="D1" value="3.706340851061009E-8" />
+      <entry key="W1" value="0.13455723854280402" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4072392622492331" />
-      <entry key="MS500" value="3.2163005270683325" />
-      <entry key="S2" value="8.355806816718767" />
-      <entry key="S5" value="15.450668520867215" />
-      <entry key="S10" value="22.433863515851748" />
-      <entry key="S30" value="31.260802810324165" />
-      <entry key="S60" value="34.53467267727132" />
-      <entry key="M2" value="40.41226329699013" />
-      <entry key="M5" value="72.3904431583282" />
-      <entry key="M10" value="109.88905614076029" />
-      <entry key="M15" value="129.83683866483418" />
-      <entry key="M30" value="155.3434751823585" />
-      <entry key="H1" value="170.6618915308765" />
-      <entry key="H2" value="179.15003660602738" />
-      <entry key="H4" value="189.92635183671865" />
-      <entry key="D1" value="740.4590166949595" />
-      <entry key="W1" value="12009.139021188148" />
+      <entry key="MS100" value="1.2964620408815866" />
+      <entry key="MS500" value="3.0612187886672384" />
+      <entry key="S2" value="5.2876938308785055" />
+      <entry key="S5" value="7.573532083145338" />
+      <entry key="S10" value="8.993041104039156" />
+      <entry key="S30" value="10.251465616556953" />
+      <entry key="S60" value="10.615291905955841" />
+      <entry key="M2" value="11.19052795795924" />
+      <entry key="M5" value="33.581974569644395" />
+      <entry key="M10" value="108.5297695688285" />
+      <entry key="M15" value="174.4653997494793" />
+      <entry key="M30" value="290.9186050629467" />
+      <entry key="H1" value="380.7947844713252" />
+      <entry key="H2" value="437.22745361406334" />
+      <entry key="H4" value="474.79381920116987" />
+      <entry key="D1" value="1043.607988007768" />
+      <entry key="W1" value="12302.761697240021" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -275,7 +318,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 similar admin page design for homepage" />
     <MESSAGE value="#45 seend consolidation" />
     <MESSAGE value="#45 hero section render issue fixed" />
     <MESSAGE value="#45 hero section compact render enhanced" />
@@ -300,7 +342,8 @@
     <MESSAGE value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
     <MESSAGE value="#52 Products page, hero section, need to enhance to display Product Image on a card style" />
     <MESSAGE value="#52  careers_jobs edit with html" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52  careers_jobs edit with html" />
+    <MESSAGE value="#52  careers_jobs edit with Education and add show pills" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52  careers_jobs edit with Education and add show pills" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

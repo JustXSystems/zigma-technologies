@@ -28,12 +28,12 @@ import {
   type Orb,
   type PillsEl,
   type SectionBox,
-  type SectionHeader,
   type TextEl,
 } from '@/lib/about-sections';
+import type { LifeColumns, LifeHighlight, LifeSectionHeader } from '@/lib/life-sections';
 
-/** Theme Studio → Typography values shown as the inherited defaults in About editors. */
-export const AboutSiteSettingsContext = createContext<SiteSettings>(DEFAULT_SITE_SETTINGS);
+/** Theme Studio → Typography values shown as the inherited defaults in every section editor. */
+export const SectionSiteSettingsContext = createContext<SiteSettings>(DEFAULT_SITE_SETTINGS);
 
 const ROLE_LABEL: Record<AboutHeadingRole, string> = { pageHero: 'Page hero', section: 'Section' };
 
@@ -244,7 +244,7 @@ export function TextElementEditor({
   /** Eyebrow placement default scale (Theme Studio → Typography eyebrow sizes). */
   siteScale?: EyebrowScale;
 }) {
-  const site = useContext(AboutSiteSettingsContext);
+  const site = useContext(SectionSiteSettingsContext);
   const v = (value || { text: '' }) as EyebrowEl;
   const level = siteRole ? headingTagForRole(site, siteRole) : null;
   const tagOptions =
@@ -513,6 +513,18 @@ export function LinkListEditor({
       )}
       {bulk ? <p className="az-admin-hint">One per line. Optional link: Label | /path</p> : null}
     </div>
+  );
+}
+
+/** Plain list of short strings (chips, checklist lines…) with row editor and bulk paste. */
+export function StringListEditor({ label, items, onChange }: { label: string; items: string[]; onChange: (next: string[]) => void }) {
+  return (
+    <LinkListEditor
+      label={label}
+      items={(items || []).map((text) => ({ label: text }))}
+      onChange={(next) => onChange(next.map((it) => it.label))}
+      withHref={false}
+    />
   );
 }
 
@@ -831,22 +843,191 @@ export function SectionBoxEditor({ value, onChange }: { value: SectionBox; onCha
   );
 }
 
-export function SectionHeaderEditor({ value, onChange }: { value: SectionHeader; onChange: (next: SectionHeader) => void }) {
-  const h = value || { eyebrow: { text: '' }, title: { text: '' }, subtitle: { text: '' } };
-  const set = (patch: Partial<SectionHeader>) => onChange({ ...h, ...patch });
+/** Eyebrow + heading + subtitle block shared by every section; `highlight` adds the gradient-word editor. */
+export function SectionHeaderEditor<H extends LifeSectionHeader>({
+  value,
+  onChange,
+  highlight,
+  eyebrowScale = 'lg',
+  multilineTitle,
+  emptyHidden,
+  defaultsPlaceholder,
+}: {
+  value: H;
+  onChange: (next: H) => void;
+  highlight?: boolean;
+  eyebrowScale?: EyebrowScale;
+  multilineTitle?: boolean;
+  /** Note that an empty eyebrow / subtitle is hidden on the page. */
+  emptyHidden?: boolean;
+  /** Placeholders for max width / space below; omit for the classic section defaults. */
+  defaultsPlaceholder?: string;
+}) {
+  const h = value || ({ eyebrow: { text: '' }, title: { text: '' }, subtitle: { text: '' } } as H);
+  const set = (patch: Partial<LifeSectionHeader>) => onChange({ ...h, ...patch });
+  const emptyHint = emptyHidden ? 'Empty = hidden' : undefined;
   return (
     <div>
       <div style={{ marginBottom: '0.6rem' }}>
         <Toggle label="Show section header" checked={!h.hidden} onChange={(v) => set({ hidden: !v })} />
       </div>
       <div className="admin-form-grid">
-        <AlignButtons label="Header position" value={h.align} onChange={(align) => set({ align: (align || undefined) as SectionHeader['align'] })} />
-        <TextInput label="Header max width" value={h.maxWidth} onChange={(maxWidth) => set({ maxWidth })} placeholder="680px" />
-        <TextInput label="Space below header" value={h.marginBottom} onChange={(marginBottom) => set({ marginBottom })} placeholder="4rem" />
+        <AlignButtons label="Header position" value={h.align} onChange={(align) => set({ align: (align || undefined) as H['align'] })} />
+        <TextInput label="Header max width" value={h.maxWidth} onChange={(maxWidth) => set({ maxWidth })} placeholder={defaultsPlaceholder ?? '680px'} />
+        <TextInput
+          label="Space below header"
+          value={h.marginBottom}
+          onChange={(marginBottom) => set({ marginBottom })}
+          placeholder={defaultsPlaceholder ?? '4rem'}
+        />
       </div>
-      <TextElementEditor label="Eyebrow" eyebrow siteScale="lg" value={h.eyebrow} onChange={(eyebrow) => set({ eyebrow })} />
-      <TextElementEditor label="Heading" headingTag siteRole="section" value={h.title} onChange={(title) => set({ title })} />
-      <TextElementEditor label="Subtitle" multiline value={h.subtitle} onChange={(subtitle) => set({ subtitle })} />
+      <TextElementEditor label="Eyebrow" eyebrow siteScale={eyebrowScale} value={h.eyebrow} onChange={(eyebrow) => set({ eyebrow })} hint={emptyHint} />
+      <TextElementEditor
+        label="Heading"
+        multiline={multilineTitle}
+        headingTag
+        siteRole="section"
+        value={h.title}
+        onChange={(title) => set({ title })}
+      />
+      {highlight ? <HighlightEditor value={h.highlight} onChange={(next) => set({ highlight: next })} /> : null}
+      <TextElementEditor label="Subtitle" multiline value={h.subtitle} onChange={(subtitle) => set({ subtitle })} hint={emptyHint} />
     </div>
+  );
+}
+
+export function NumberInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  min,
+  max,
+  step,
+  hint,
+}: {
+  label: string;
+  value?: number;
+  onChange: (v: number | undefined) => void;
+  placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  hint?: string;
+}) {
+  return (
+    <Field label={label} hint={hint}>
+      <input
+        className="admin-input"
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value ?? ''}
+        placeholder={placeholder}
+        onChange={(e) => {
+          const raw = e.target.value;
+          const n = Number(raw);
+          onChange(raw === '' || !Number.isFinite(n) ? undefined : n);
+        }}
+      />
+    </Field>
+  );
+}
+
+/** Desktop / tablet / phone column counts; empty uses `defaults`. */
+export function ColumnsEditor({
+  label = 'Columns',
+  value,
+  onChange,
+  defaults,
+}: {
+  label?: string;
+  value?: LifeColumns;
+  onChange: (next: LifeColumns) => void;
+  defaults: Required<LifeColumns>;
+}) {
+  const v = value || {};
+  const set = (patch: Partial<LifeColumns>) => onChange({ ...v, ...patch });
+  return (
+    <>
+      <NumberInput
+        label={`${label} · desktop`}
+        value={v.desktop}
+        min={1}
+        max={8}
+        placeholder={String(defaults.desktop)}
+        onChange={(desktop) => set({ desktop })}
+      />
+      <NumberInput
+        label={`${label} · tablet (≤1000px)`}
+        value={v.tablet}
+        min={1}
+        max={8}
+        placeholder={String(defaults.tablet)}
+        onChange={(tablet) => set({ tablet })}
+      />
+      <NumberInput
+        label={`${label} · phone (≤640px)`}
+        value={v.mobile}
+        min={1}
+        max={4}
+        placeholder={String(defaults.mobile)}
+        onChange={(mobile) => set({ mobile })}
+      />
+    </>
+  );
+}
+
+export function HighlightEditor({
+  value,
+  onChange,
+  title = 'Heading highlight (gradient word)',
+}: {
+  value?: LifeHighlight;
+  onChange: (next: LifeHighlight) => void;
+  title?: string;
+}) {
+  const h = value || {};
+  const set = (patch: Partial<LifeHighlight>) => onChange({ ...h, ...patch });
+  return (
+    <Panel title={`${title}${h.text?.trim() ? ` · “${h.text.trim()}”` : ''}`}>
+      <div className="admin-form-grid">
+        <TextInput
+          label="Word / phrase to highlight"
+          value={h.text}
+          onChange={(text) => set({ text })}
+          placeholder="e.g. beyond"
+          hint="Must appear in the heading text exactly (case-sensitive). Empty = no highlight."
+        />
+        <Field label="Animation">
+          <Toggle label="Animate gradient" checked={h.animate !== false} onChange={(animate) => set({ animate })} />
+        </Field>
+        <TextInput
+          label="Gradient"
+          value={h.gradient}
+          onChange={(gradient) => set({ gradient })}
+          placeholder="linear-gradient(90deg, var(--orange), var(--yellow), var(--cyan), var(--orange))"
+          full
+        />
+        <ColorInput
+          label="…or solid color"
+          value={h.color}
+          onChange={(color) => set({ color })}
+          fallback=""
+          hint="A solid color replaces the gradient."
+        />
+      </div>
+    </Panel>
+  );
+}
+
+export function NapHint() {
+  return (
+    <p className="az-admin-hint">
+      Company details come from Site Settings: use <code>{'{{emergencyPhone}}'}</code>, <code>{'{{phone}}'}</code>,{' '}
+      <code>{'{{email}}'}</code> or <code>{'{{companyName}}'}</code> in labels, and <code>{'tel:{{emergencyPhone}}'}</code> /{' '}
+      <code>{'mailto:{{email}}'}</code> in links. Typing a literal value overrides the site setting.
+    </p>
   );
 }

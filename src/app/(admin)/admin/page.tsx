@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { navGroupsFromScreens } from '@/lib/admin-screens';
+import { useAdminUser } from '@/components/admin/admin-session';
 
 type Counts = {
   items: number;
@@ -20,6 +22,7 @@ type CheckItem = {
 };
 
 export default function AdminDashboardPage() {
+  const user = useAdminUser();
   const [counts, setCounts] = useState<Counts | null>(null);
   const [checklist, setChecklist] = useState<CheckItem[]>([]);
   const [complete, setComplete] = useState(false);
@@ -150,41 +153,29 @@ export default function AdminDashboardPage() {
         </ul>
       </div>
 
-      <div className="admin-card">
-        <h2 style={{ marginTop: 0, marginBottom: '0.8rem', fontSize: '1.05rem' }}>Quick actions</h2>
-        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <Link className="admin-btn admin-btn-primary" href="/admin/pages">
-            Manage pages
-          </Link>
-          <Link className="admin-btn admin-btn-primary" href="/admin/inventory?type=product">
-            Manage products
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/inventory?type=project">
-            Manage projects
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/inventory?type=service">
-            Manage services
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/enquiries">
-            Review enquiries
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/site-settings">
-            Site settings
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/header-footer">
-            Header &amp; Footer
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/guide">
-            Admin guide
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/theme">
-            Theme & CSS
-          </Link>
-          <Link className="admin-btn admin-btn-secondary" href="/admin/account">
-            Account
-          </Link>
+      {user ? (
+        <div className="admin-card">
+          <h2 style={{ marginTop: 0, marginBottom: '0.25rem', fontSize: '1.05rem' }}>Where to edit what</h2>
+          <p style={{ margin: '0 0 0.9rem', color: 'var(--admin-muted)', fontSize: '0.88rem' }}>
+            Or press <kbd>Ctrl</kbd> + <kbd>K</kbd> anywhere in the admin and type what you are looking for.
+          </p>
+          {navGroupsFromScreens(user.screens)
+            .filter((g) => g.label !== 'Overview')
+            .map((group) => (
+              <section key={group.label} className="admin-shortcut-group">
+                <h3>{group.label}</h3>
+                <div className="admin-shortcuts">
+                  {group.items.map((screen) => (
+                    <Link key={screen.key} className="admin-shortcut" href={screen.href}>
+                      <strong>{screen.label}</strong>
+                      <span>{screen.summary}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ))}
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

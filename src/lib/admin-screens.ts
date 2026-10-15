@@ -32,6 +32,8 @@ export type AdminScreenDef = {
   href: string;
   exact?: boolean;
   group: string;
+  /** What is edited here, in the admin's words (dashboard cards and quick-find). */
+  summary: string;
   /** Shown only to super-admins in the role editor (always granted to role=admin users). */
   superAdminOnly?: boolean;
   /** Hub screens: holders of these screens may open it too and see only their tabs. */
@@ -42,59 +44,108 @@ export type AdminScreenDef = {
   alwaysOpen?: boolean;
 };
 
+/** Sidebar order: what admins edit most comes first; the site frame and look next; platform last. */
 export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
-  { key: 'dashboard', label: 'Dashboard', href: '/admin', exact: true, group: 'Overview' },
-  { key: 'guide', label: 'Guide', href: '/admin/guide', group: 'Overview' },
-  { key: 'pages', label: 'Pages', href: '/admin/pages', group: 'Content' },
-  { key: 'inventory', label: 'Inventory', href: '/admin/inventory', group: 'Content' },
-  { key: 'catalogSettings', label: 'Catalog Settings', href: '/admin/catalog-settings', group: 'Content' },
-  { key: 'resources', label: 'Resources', href: '/admin/resources', group: 'Content' },
-  { key: 'press', label: 'Press', href: '/admin/press', group: 'Content' },
-  { key: 'testimonials', label: 'Testimonials', href: '/admin/testimonials', group: 'Content' },
-  { key: 'enquiries', label: 'Enquiries', href: '/admin/enquiries', group: 'Leads' },
+  { key: 'dashboard', label: 'Dashboard', href: '/admin', exact: true, group: 'Overview', summary: 'Counts, setup checklist and shortcuts' },
+  { key: 'guide', label: 'Guide', href: '/admin/guide', group: 'Overview', summary: 'How-to articles for every admin screen' },
+  {
+    key: 'pages',
+    label: 'Pages',
+    href: '/admin/pages',
+    group: 'Content',
+    summary: 'Home, About, Contact and every other page: sections, text, images, order and SEO',
+  },
+  {
+    key: 'inventory',
+    label: 'Inventory',
+    href: '/admin/inventory',
+    group: 'Content',
+    summary: 'Products, projects and services: details, media, case studies and SEO',
+  },
+  {
+    key: 'catalogSettings',
+    label: 'Catalog Settings',
+    href: '/admin/catalog-settings',
+    group: 'Content',
+    summary: 'Design of the product, project and service listing and detail pages',
+  },
+  { key: 'media', label: 'Media', href: '/admin/media', group: 'Content', summary: 'Upload and reuse images, videos and files' },
+  { key: 'resources', label: 'Resources', href: '/admin/resources', group: 'Content', summary: 'Brochures, guides and articles in /resources' },
+  { key: 'press', label: 'Press', href: '/admin/press', group: 'Content', summary: 'Press releases and coverage' },
+  { key: 'testimonials', label: 'Testimonials', href: '/admin/testimonials', group: 'Content', summary: 'Client quotes shown across the site' },
+  { key: 'enquiries', label: 'Enquiries', href: '/admin/enquiries', group: 'Leads', summary: 'Leads from the enquiry, contact and quote forms' },
   {
     key: 'forms',
     label: 'Forms & CRM',
     href: '/admin/forms',
     group: 'Leads',
+    summary: 'Enquiry form fields, pop-up and thank-you text, CRM forwarding',
     openWith: ['siteCopy', 'siteSettings'],
     accessLabel: 'Enquiry form fields',
   },
-  { key: 'newsletter', label: 'Newsletter', href: '/admin/newsletter', group: 'Leads' },
+  { key: 'newsletter', label: 'Newsletter', href: '/admin/newsletter', group: 'Leads', summary: 'Newsletter subscribers' },
+  {
+    key: 'siteSettings',
+    label: 'Site Settings',
+    href: '/admin/site-settings',
+    group: 'Site setup',
+    summary: 'Brand, contact details, social links, address, analytics and cookies',
+  },
   {
     key: 'nav',
     label: 'Header & Footer',
     href: '/admin/header-footer',
-    group: 'Configuration',
+    group: 'Site setup',
+    summary: 'Menus, logo, header buttons, footer columns and their labels',
     openWith: ['siteSettings', 'siteCopy'],
     accessLabel: 'Header & Footer menus',
   },
-  { key: 'siteSettings', label: 'Site Settings', href: '/admin/site-settings', group: 'Configuration' },
-  { key: 'email', label: 'Email', href: '/admin/email', group: 'Configuration', superAdminOnly: true },
-  { key: 'siteCopy', label: 'Site Copy', href: '/admin/site-copy', group: 'Configuration' },
-  { key: 'media', label: 'Media', href: '/admin/media', group: 'Configuration' },
   {
     key: 'theme',
     label: 'Theme Studio',
     href: '/admin/theme',
-    group: 'Configuration',
+    group: 'Site setup',
+    summary: 'Colours, spacing, typography and the site stylesheet',
     openWith: ['siteSettings'],
     accessLabel: 'Theme Studio colours, type scale & CSS',
+  },
+  {
+    key: 'siteCopy',
+    label: 'Site Copy',
+    href: '/admin/site-copy',
+    group: 'Site setup',
+    summary: 'Text of built-in hubs, tools and language pages; feature switches',
   },
   {
     key: 'redirects',
     label: 'SEO',
     href: '/admin/seo',
-    group: 'Configuration',
+    group: 'Site setup',
+    summary: 'Default meta and share image, built-in page titles, redirects',
     openWith: ['siteSettings', 'siteCopy'],
     accessLabel: 'SEO redirects',
   },
-  { key: 'newClient', label: 'New Client', href: '/admin/new-client', group: 'Platform', superAdminOnly: true },
-  { key: 'partners', label: 'Partners', href: '/admin/partners', group: 'Platform' },
-  { key: 'ztools', label: 'ZTools', href: '/admin/ztools', group: 'Platform' },
-  { key: 'users', label: 'Users', href: '/admin/users', group: 'Platform', superAdminOnly: true },
-  { key: 'roles', label: 'Roles', href: '/admin/roles', group: 'Platform', superAdminOnly: true },
-  { key: 'account', label: 'Account', href: '/admin/account', group: 'Platform', alwaysOpen: true },
+  {
+    key: 'email',
+    label: 'Email',
+    href: '/admin/email',
+    group: 'Site setup',
+    summary: 'Mail delivery, notification flows and auto-replies',
+    superAdminOnly: true,
+  },
+  {
+    key: 'newClient',
+    label: 'New Client',
+    href: '/admin/new-client',
+    group: 'Platform',
+    summary: 'Brand this deployment for another client',
+    superAdminOnly: true,
+  },
+  { key: 'partners', label: 'Partners', href: '/admin/partners', group: 'Platform', summary: 'Partner portal users and documents' },
+  { key: 'ztools', label: 'ZTools', href: '/admin/ztools', group: 'Platform', summary: 'ZTools inventory, registrations and users' },
+  { key: 'users', label: 'Users', href: '/admin/users', group: 'Platform', summary: 'Admin users and their roles', superAdminOnly: true },
+  { key: 'roles', label: 'Roles', href: '/admin/roles', group: 'Platform', summary: 'Which screens each role can open', superAdminOnly: true },
+  { key: 'account', label: 'Account', href: '/admin/account', group: 'Platform', summary: 'Your name, email and password', alwaysOpen: true },
 ];
 
 export const ADMIN_SCREEN_KEYS = ADMIN_SCREEN_DEFS.map((s) => s.key);

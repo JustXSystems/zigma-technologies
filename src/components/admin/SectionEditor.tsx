@@ -1,9 +1,12 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { CmsSection } from '@/lib/cms-types';
+import { sectionTypeMeta, type CmsSection } from '@/lib/cms-types';
 import MediaPicker from '@/components/admin/MediaPicker';
+import AdminCollapsible from '@/components/admin/AdminCollapsible';
+import { useUnsavedChanges } from '@/components/admin/unsaved-changes';
+import { sectionFamilyOf } from '@/components/admin/section-families';
 import { ColorInput, Field } from '@/components/admin/form/controls';
 import {
   createIndustryCategoryCard,
@@ -26,37 +29,8 @@ import {
   type EcoCapabilityGroup,
   type EcoGroupColorKey,
 } from '@/lib/eco-section';
-import { isAboutSectionType, withAboutDefaults } from '@/lib/about-sections';
-import AboutSectionEditor from '@/components/admin/about/AboutSectionEditor';
-import { isLifeSectionType, withLifeDefaults, type LifeHighlight } from '@/lib/life-sections';
-import LifeSectionEditor from '@/components/admin/life/LifeSectionEditor';
-import { HighlightEditor } from '@/components/admin/life/LifeControls';
-import { isLegacySectionType, withLegacyDefaults } from '@/lib/legacy-sections';
-import LegacySectionEditor from '@/components/admin/legacy/LegacySectionEditor';
-import { isContactSectionType, withContactDefaults } from '@/lib/contact-sections';
-import ContactSectionEditor from '@/components/admin/contact/ContactSectionEditor';
-import { isCareersSectionType, withCareersDefaults } from '@/lib/careers-sections';
-import CareersSectionEditor from '@/components/admin/careers/CareersSectionEditor';
-import { isCertsSectionType, withCertsDefaults } from '@/lib/certifications-sections';
-import CertificationsSectionEditor from '@/components/admin/certifications/CertificationsSectionEditor';
-import { isPrivacySectionType, withPrivacyDefaults } from '@/lib/privacy-sections';
-import PrivacySectionEditor from '@/components/admin/privacy/PrivacySectionEditor';
-import { isTermsSectionType, withTermsDefaults } from '@/lib/terms-sections';
-import TermsSectionEditor from '@/components/admin/terms/TermsSectionEditor';
-import { isIndustriesSectionType, withIndustriesDefaults } from '@/lib/industries-sections';
-import IndustriesSectionEditor from '@/components/admin/industries/IndustriesSectionEditor';
-import { isIndustryPageSectionType, withIndustryPageDefaults } from '@/lib/industry-page-sections';
-import IndustryPageSectionEditor from '@/components/admin/industries/IndustryPageSectionEditor';
-import { isIndustries101SectionType, withIndustries101Defaults } from '@/lib/industries101-sections';
-import Industries101SectionEditor from '@/components/admin/industries101/Industries101SectionEditor';
-import { isProjects101SectionType, withProjects101Defaults } from '@/lib/projects101-sections';
-import Projects101SectionEditor from '@/components/admin/projects101/Projects101SectionEditor';
-import { isQsSectionType, withQsDefaults } from '@/lib/qualitysafety-sections';
-import QualitySafetySectionEditor from '@/components/admin/qualitysafety/QualitySafetySectionEditor';
-import { isBlogSectionType, withBlogDefaults } from '@/lib/blog-sections';
-import BlogSectionEditor from '@/components/admin/blog/BlogSectionEditor';
-import { isHomeSectionType, withHomeDefaults } from '@/lib/home-sections';
-import HomeSectionEditor from '@/components/admin/home/HomeSectionEditor';
+import type { LifeHighlight } from '@/lib/life-sections';
+import { HighlightEditor } from '@/components/admin/section-kit';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields, { type HeroScrollBar } from '@/components/admin/HeroMotionFields';
@@ -218,45 +192,77 @@ function migrateSplitContent(raw: Record<string, unknown>): Record<string, unkno
   return { ...rest, ctas: [] };
 }
 
+function initialContent(section: CmsSection): Record<string, unknown> {
+  const raw = { ...(section.content_json || {}) };
+  if (section.type === 'timeline') return migrateTimelineContent(raw);
+  if (section.type === 'split') return migrateSplitContent(raw);
+  return sectionFamilyOf(section.type)?.withDefaults(section.type, raw) ?? raw;
+}
+
+/** Comparable form of everything the editor can change (JSON text that does not parse counts as changed). */
+function editorSnapshot(fields: { title: string; sectionKey: string; extraClass: string; customCss: string }, content: unknown, jsonText: string | null) {
+  let body: unknown = content;
+  if (jsonText !== null) {
+    try {
+      body = JSON.parse(jsonText || '{}');
+    } catch {
+      body = { invalidJson: jsonText };
+    }
+  }
+  return JSON.stringify([fields, body]);
+}
+
+const DISCARD_PROMPT = 'Discard your changes to this section?';
+
+/** Another dialog (media library, picker…) is open on top of this one. */
+function nestedDialogOpen() {
+  return document.querySelectorAll('.admin-modal-backdrop').length > 1;
+}
+
 export default function SectionEditor({ section, onClose, onSaved, onApply }: Props) {
+  const meta = sectionTypeMeta(section.type);
+  const family = sectionFamilyOf(section.type);
   const [title, setTitle] = useState(section.title || '');
   const [sectionKey, setSectionKey] = useState(section.section_key || '');
-  const [content, setContent] = useState<Record<string, unknown>>(() => {
-    const raw = { ...(section.content_json || {}) };
-    if (section.type === 'timeline') return migrateTimelineContent(raw);
-    if (section.type === 'split') return migrateSplitContent(raw);
-    if (isAboutSectionType(section.type)) return withAboutDefaults<Record<string, unknown>>(section.type, raw);
-    if (isLifeSectionType(section.type)) return withLifeDefaults<Record<string, unknown>>(section.type, raw);
-    if (isLegacySectionType(section.type)) return withLegacyDefaults<Record<string, unknown>>(section.type, raw);
-    if (isContactSectionType(section.type)) return withContactDefaults<Record<string, unknown>>(section.type, raw);
-    if (isCareersSectionType(section.type)) return withCareersDefaults<Record<string, unknown>>(section.type, raw);
-    if (isCertsSectionType(section.type)) return withCertsDefaults<Record<string, unknown>>(section.type, raw);
-    if (isPrivacySectionType(section.type)) return withPrivacyDefaults<Record<string, unknown>>(section.type, raw);
-    if (isTermsSectionType(section.type)) return withTermsDefaults<Record<string, unknown>>(section.type, raw);
-    if (isIndustriesSectionType(section.type)) return withIndustriesDefaults<Record<string, unknown>>(section.type, raw);
-    if (isIndustryPageSectionType(section.type)) return withIndustryPageDefaults<Record<string, unknown>>(section.type, raw);
-    if (isIndustries101SectionType(section.type)) return withIndustries101Defaults<Record<string, unknown>>(section.type, raw);
-    if (isProjects101SectionType(section.type)) return withProjects101Defaults<Record<string, unknown>>(section.type, raw);
-    if (isQsSectionType(section.type)) return withQsDefaults<Record<string, unknown>>(section.type, raw);
-    if (isBlogSectionType(section.type)) return withBlogDefaults<Record<string, unknown>>(section.type, raw);
-    if (isHomeSectionType(section.type)) return withHomeDefaults<Record<string, unknown>>(section.type, raw);
-    return raw;
-  });
+  const [content, setContent] = useState<Record<string, unknown>>(() => initialContent(section));
   const [extraClass, setExtraClass] = useState(String((section.style_json as { className?: string })?.className || ''));
   const [customCss, setCustomCss] = useState(String((section.style_json as { css?: string })?.css || ''));
   const [jsonMode, setJsonMode] = useState(false);
-  const [jsonText, setJsonText] = useState(() => {
-    const raw = { ...(section.content_json || {}) };
-    const migrated =
-      section.type === 'timeline'
-        ? migrateTimelineContent(raw)
-        : section.type === 'split'
-          ? migrateSplitContent(raw)
-          : raw;
-    return JSON.stringify(migrated, null, 2);
-  });
+  const [jsonText, setJsonText] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const fields = { title, sectionKey, extraClass, customCss };
+  const [savedSnapshot] = useState(() => editorSnapshot(fields, content, null));
+  const dirty = editorSnapshot(fields, content, jsonMode ? jsonText : null) !== savedSnapshot;
+  useUnsavedChanges(dirty);
+
+  function requestClose() {
+    if (!dirty || window.confirm(DISCARD_PROMPT)) onClose();
+  }
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented || nestedDialogOpen()) return;
+      if (!dirty || window.confirm(DISCARD_PROMPT)) onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [dirty, onClose]);
+
+  function toggleJsonMode() {
+    if (jsonMode) {
+      try {
+        setContent(JSON.parse(jsonText || '{}'));
+      } catch {
+        setError('Invalid JSON — fix it before going back to the form.');
+        return;
+      }
+    } else {
+      setJsonText(JSON.stringify(content, null, 2));
+    }
+    setError('');
+    setJsonMode(!jsonMode);
+  }
 
   function setField(key: string, value: unknown) {
     setContent((prev) => ({ ...prev, [key]: value }));
@@ -383,19 +389,16 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
     setJobCards(next);
   }
 
-  function setTimelineCtas(next: TimelineCta[]) {
+  /** Replaces the legacy single-CTA keys with the `ctas` list. */
+  function setCtas(next: TimelineCta[] | SplitCta[], legacyKeys: string[]) {
     setContent((prev) => {
-      const { cta: _cta, ctaHref: _ctaHref, ctaAlign: _ctaAlign, ...rest } = prev;
+      const rest = Object.fromEntries(Object.entries(prev).filter(([key]) => !legacyKeys.includes(key)));
       return { ...rest, ctas: next };
     });
   }
 
-  function setSplitCtas(next: SplitCta[]) {
-    setContent((prev) => {
-      const { cta: _cta, ctaHref: _ctaHref, ...rest } = prev;
-      return { ...rest, ctas: next };
-    });
-  }
+  const setTimelineCtas = (next: TimelineCta[]) => setCtas(next, ['cta', 'ctaHref', 'ctaAlign']);
+  const setSplitCtas = (next: SplitCta[]) => setCtas(next, ['cta', 'ctaHref']);
 
   function setIndustryCards(next: IndustryCategoryCard[]) {
     setField('cards', next);
@@ -468,1949 +471,326 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
   }
 
   return createPortal(
-    <div className="admin-modal-backdrop" onClick={onClose}>
-      <form className="admin-modal" style={{ width: 'min(920px, 100%)' }} onClick={(e) => e.stopPropagation()} onSubmit={save}>
-        <div className="admin-toolbar" style={{ marginBottom: '0.75rem' }}>
-          <h2 style={{ margin: 0 }}>Edit · {section.type}</h2>
-          <button
-            type="button"
-            className="admin-btn admin-btn-secondary"
-            onClick={() => {
-              if (!jsonMode) setJsonText(JSON.stringify(content, null, 2));
-              else {
-                try {
-                  setContent(JSON.parse(jsonText || '{}'));
-                } catch {
-                  setError('Invalid JSON');
-                  return;
-                }
-              }
-              setJsonMode(!jsonMode);
-            }}
-          >
-            {jsonMode ? 'Form mode' : 'JSON mode'}
-          </button>
-        </div>
-        <div className="admin-modal-actions">
-          <button type="button" className="admin-btn admin-btn-secondary" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
-            {saving ? 'Saving…' : onApply ? 'Apply changes' : 'Save section'}
-          </button>
-        </div>
-        {error ? <div className="admin-error">{error}</div> : null}
-
-        <div className="admin-form-grid">
-          <Field label="Title">
-            <input className="admin-input" value={title} onChange={(e) => setTitle(e.target.value)} />
-          </Field>
-          <Field label="Section key (anchor id)">
-            <input className="admin-input" value={sectionKey} onChange={(e) => setSectionKey(e.target.value)} />
-          </Field>
-          <Field label="Extra CSS class (style_json)">
-            <input className="admin-input" value={extraClass} onChange={(e) => setExtraClass(e.target.value)} placeholder="e.g. my-section" />
-          </Field>
-          <Field label="Scoped CSS override">
-            <input className="admin-input" value={customCss} onChange={(e) => setCustomCss(e.target.value)} placeholder=".my-section h2{color:red}" />
-          </Field>
-        </div>
-
-        {jsonMode ? (
-          <div className="admin-field" style={{ marginTop: '1rem' }}>
-            <label>content_json</label>
-            <textarea
-              className="admin-textarea"
-              style={{ minHeight: 320, fontFamily: 'var(--admin-mono)' }}
-              value={jsonText}
-              onChange={(e) => setJsonText(e.target.value)}
-            />
+    <div className="admin-modal-backdrop" onClick={requestClose}>
+      <form
+        className="admin-modal section-editor"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="section-editor-title"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={save}
+      >
+        <div className="admin-modal-header">
+          <div className="admin-modal-header-text">
+            <p className="section-editor-kicker">
+              {meta.group} · <code>{section.type}</code>
+            </p>
+            <h2 id="section-editor-title">{title.trim() || meta.title}</h2>
+            {meta.hint ? <p>{meta.hint}</p> : null}
           </div>
-        ) : (
-          <div style={{ marginTop: '1rem' }}>
-            {isAboutSectionType(section.type) ? (
-              <AboutSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isLifeSectionType(section.type) ? (
-              <LifeSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isLegacySectionType(section.type) ? (
-              <LegacySectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isContactSectionType(section.type) ? (
-              <ContactSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isCareersSectionType(section.type) ? (
-              <CareersSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isCertsSectionType(section.type) ? (
-              <CertificationsSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isPrivacySectionType(section.type) ? (
-              <PrivacySectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isTermsSectionType(section.type) ? (
-              <TermsSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isIndustriesSectionType(section.type) ? (
-              <IndustriesSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isIndustryPageSectionType(section.type) ? (
-              <IndustryPageSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isIndustries101SectionType(section.type) ? (
-              <Industries101SectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isProjects101SectionType(section.type) ? (
-              <Projects101SectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isQsSectionType(section.type) ? (
-              <QualitySafetySectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isBlogSectionType(section.type) ? (
-              <BlogSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {isHomeSectionType(section.type) ? (
-              <HomeSectionEditor type={section.type} content={content} onChange={setContent} />
-            ) : null}
-            {(section.type === 'cta' ||
-              section.type === 'eco' ||
-              section.type === 'why' ||
-              section.type === 'timeline' ||
-              section.type === 'projects_teaser' ||
-              section.type === 'industries' ||
-              section.type === 'industry_hub' ||
-              section.type === 'industry_category' ||
-              section.type === 'split' ||
-              section.type === 'rich_text' ||
-              section.type === 'enquiry_form' ||
-              section.type === 'page_hero' ||
-              section.type === 'cert_hero' ||
-              section.type === 'cert_teaser' ||
-              section.type === 'cert_cta' ||
-              section.type === 'testimonials' ||
-              section.type === 'partners' ||
-              section.type === 'feature_grid' ||
-              section.type === 'logo_marquee' ||
-              section.type === 'locations' ||
-              section.type === 'job_list' ||
-              section.type === 'internship' ||
-              section.type === 'careers_apply' ||
-              section.type === 'comparison_table') && (
-              <div className="admin-form-grid">
-                {section.type !== 'cta' && section.type !== 'logo_marquee' && section.type !== 'cert_cta' ? (
-                  <Field label="Eyebrow">
-                    <input className="admin-input" value={String(content.eyebrow || '')} onChange={(e) => setField('eyebrow', e.target.value)} />
+          <button type="button" className="admin-modal-close" onClick={requestClose} aria-label="Close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="admin-modal-body">
+          {error ? <div className="admin-error">{error}</div> : null}
+
+          {jsonMode ? (
+            <div className="admin-field">
+              <label>content_json</label>
+              <textarea
+                className="admin-textarea"
+                style={{ minHeight: 320, fontFamily: 'var(--admin-mono)' }}
+                value={jsonText}
+                onChange={(e) => setJsonText(e.target.value)}
+              />
+            </div>
+          ) : (
+            <div>
+              {family ? <family.Editor type={section.type} content={content} onChange={setContent} /> : null}
+              {(section.type === 'cta' ||
+                section.type === 'eco' ||
+                section.type === 'why' ||
+                section.type === 'timeline' ||
+                section.type === 'projects_teaser' ||
+                section.type === 'industries' ||
+                section.type === 'industry_hub' ||
+                section.type === 'industry_category' ||
+                section.type === 'split' ||
+                section.type === 'rich_text' ||
+                section.type === 'enquiry_form' ||
+                section.type === 'page_hero' ||
+                section.type === 'cert_hero' ||
+                section.type === 'cert_teaser' ||
+                section.type === 'cert_cta' ||
+                section.type === 'testimonials' ||
+                section.type === 'partners' ||
+                section.type === 'feature_grid' ||
+                section.type === 'logo_marquee' ||
+                section.type === 'locations' ||
+                section.type === 'job_list' ||
+                section.type === 'internship' ||
+                section.type === 'careers_apply' ||
+                section.type === 'comparison_table') && (
+                <div className="admin-form-grid">
+                  {section.type !== 'cta' && section.type !== 'logo_marquee' && section.type !== 'cert_cta' ? (
+                    <Field label="Eyebrow">
+                      <input className="admin-input" value={String(content.eyebrow || '')} onChange={(e) => setField('eyebrow', e.target.value)} />
+                    </Field>
+                  ) : null}
+                  {section.type !== 'logo_marquee' && section.type !== 'cert_cta' ? (
+                    <Field label={section.type === 'cta' ? 'Headline' : 'Heading'}>
+                      <input
+                        className="admin-input"
+                        value={String(content.title || '')}
+                        onChange={(e) => setField('title', e.target.value)}
+                      />
+                    </Field>
+                  ) : null}
+                  {section.type === 'page_hero' || section.type === 'cert_hero' ? (
+                    <div className="full">
+                      <HighlightEditor
+                        value={content.highlight as LifeHighlight | undefined}
+                        onChange={(highlight) => setField('highlight', highlight)}
+                      />
+                    </div>
+                  ) : null}
+                  {section.type !== 'logo_marquee' &&
+                  section.type !== 'testimonials' &&
+                  section.type !== 'cert_cta' &&
+                  section.type !== 'timeline' ? (
+                    <div className="admin-field full">
+                      <label>
+                        {section.type === 'page_hero' || section.type === 'cert_hero' ? 'Lead' : 'Body'}
+                      </label>
+                      <textarea
+                        className="admin-textarea"
+                        value={String(
+                          section.type === 'page_hero' || section.type === 'cert_hero'
+                            ? content.lead || content.body || ''
+                            : content.body || ''
+                        )}
+                        onChange={(e) =>
+                          setField(
+                            section.type === 'page_hero' || section.type === 'cert_hero' ? 'lead' : 'body',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              {section.type === 'page_hero' ? (
+                <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                  <Field label="Breadcrumb label">
+                    <input className="admin-input" value={String(content.breadcrumb || '')} onChange={(e) => setField('breadcrumb', e.target.value)} />
                   </Field>
-                ) : null}
-                {section.type !== 'logo_marquee' && section.type !== 'cert_cta' ? (
-                  <Field label={section.type === 'cta' ? 'Headline' : 'Heading'}>
-                    <input
-                      className="admin-input"
-                      value={String(content.title || '')}
-                      onChange={(e) => setField('title', e.target.value)}
-                    />
-                  </Field>
-                ) : null}
-                {section.type === 'page_hero' || section.type === 'cert_hero' ? (
+                  <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                  <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
+                  <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="left" />
                   <div className="full">
-                    <HighlightEditor
-                      value={content.highlight as LifeHighlight | undefined}
-                      onChange={(highlight) => setField('highlight', highlight)}
+                    <MediaPicker
+                      value={String(content.image || '')}
+                      onChange={(path) => setField('image', path)}
+                      label="Background media (desktop)"
+                      kinds="visual"
+                      allowUpload
+                      hint="Pick any successful media-library upload (image, SVG, or video). Used full-bleed on desktop and as the mobile fallback."
                     />
                   </div>
-                ) : null}
-                {section.type !== 'logo_marquee' &&
-                section.type !== 'testimonials' &&
-                section.type !== 'cert_cta' &&
-                section.type !== 'timeline' ? (
+                  <div className="full">
+                    <MediaPicker
+                      value={String(content.imageMobile || '')}
+                      onChange={(path) => setField('imageMobile', path)}
+                      label="Background media (mobile, optional)"
+                      kinds="visual"
+                      allowUpload
+                      hint="Optional ≤760px override. Leave blank to reuse the desktop media."
+                    />
+                  </div>
+                  <Field label="Body class">
+                    <input className="admin-input" value={String(content.bodyClass || '')} onChange={(e) => setField('bodyClass', e.target.value)} placeholder="contact-page" />
+                  </Field>
+                  <Field label="Primary CTA label">
+                    <input className="admin-input" value={String(content.primaryCta || '')} onChange={(e) => setField('primaryCta', e.target.value)} />
+                  </Field>
+                  <Field label="Primary CTA href">
+                    <input className="admin-input" value={String(content.primaryHref || '')} onChange={(e) => setField('primaryHref', e.target.value)} />
+                  </Field>
+                  <Field label="Secondary CTA label">
+                    <input className="admin-input" value={String(content.secondaryCta || '')} onChange={(e) => setField('secondaryCta', e.target.value)} />
+                  </Field>
+                  <Field label="Secondary CTA href">
+                    <input className="admin-input" value={String(content.secondaryHref || '')} onChange={(e) => setField('secondaryHref', e.target.value)} />
+                  </Field>
                   <div className="admin-field full">
-                    <label>
-                      {section.type === 'page_hero' || section.type === 'cert_hero' ? 'Lead' : 'Body'}
-                    </label>
+                    <label>Proof rail (one per line)</label>
                     <textarea
                       className="admin-textarea"
-                      value={String(
-                        section.type === 'page_hero' || section.type === 'cert_hero'
-                          ? content.lead || content.body || ''
-                          : content.body || ''
-                      )}
+                      style={{ minHeight: 100 }}
+                      value={((content.proofRail as string[]) || []).join('\n')}
                       onChange={(e) =>
                         setField(
-                          section.type === 'page_hero' || section.type === 'cert_hero' ? 'lead' : 'body',
+                          'proofRail',
                           e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
                         )
                       }
                     />
                   </div>
-                ) : null}
-              </div>
-            )}
+                </div>
+              ) : null}
 
-            {section.type === 'page_hero' ? (
-              <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                <Field label="Breadcrumb label">
-                  <input className="admin-input" value={String(content.breadcrumb || '')} onChange={(e) => setField('breadcrumb', e.target.value)} />
-                </Field>
-                <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
-                <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
-                <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="left" />
-                <div className="full">
-                  <MediaPicker
-                    value={String(content.image || '')}
-                    onChange={(path) => setField('image', path)}
-                    label="Background media (desktop)"
-                    kinds="visual"
-                    allowUpload
-                    hint="Pick any successful media-library upload (image, SVG, or video). Used full-bleed on desktop and as the mobile fallback."
-                  />
-                </div>
-                <div className="full">
-                  <MediaPicker
-                    value={String(content.imageMobile || '')}
-                    onChange={(path) => setField('imageMobile', path)}
-                    label="Background media (mobile, optional)"
-                    kinds="visual"
-                    allowUpload
-                    hint="Optional ≤760px override. Leave blank to reuse the desktop media."
-                  />
-                </div>
-                <Field label="Body class">
-                  <input className="admin-input" value={String(content.bodyClass || '')} onChange={(e) => setField('bodyClass', e.target.value)} placeholder="contact-page" />
-                </Field>
-                <Field label="Primary CTA label">
-                  <input className="admin-input" value={String(content.primaryCta || '')} onChange={(e) => setField('primaryCta', e.target.value)} />
-                </Field>
-                <Field label="Primary CTA href">
-                  <input className="admin-input" value={String(content.primaryHref || '')} onChange={(e) => setField('primaryHref', e.target.value)} />
-                </Field>
-                <Field label="Secondary CTA label">
-                  <input className="admin-input" value={String(content.secondaryCta || '')} onChange={(e) => setField('secondaryCta', e.target.value)} />
-                </Field>
-                <Field label="Secondary CTA href">
-                  <input className="admin-input" value={String(content.secondaryHref || '')} onChange={(e) => setField('secondaryHref', e.target.value)} />
-                </Field>
-                <div className="admin-field full">
-                  <label>Proof rail (one per line)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 100 }}
-                    value={((content.proofRail as string[]) || []).join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'proofRail',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'cert_hero' ? (
-              <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                <Field label="Tagline">
-                  <input className="admin-input" value={String(content.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} />
-                </Field>
-                <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
-                <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
-                <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="center" />
-                <div className="full">
-                  <MediaPicker
-                    value={String(content.image || '')}
-                    onChange={(path) => setField('image', path)}
-                    label="Background media"
-                    kinds="visual"
-                    allowUpload
-                    hint="Optional full-bleed background from the media library (image, SVG, or video)."
-                  />
-                </div>
-                <div className="full">
-                  <MediaPicker
-                    value={String(content.imageMobile || '')}
-                    onChange={(path) => setField('imageMobile', path)}
-                    label="Background media (mobile, optional)"
-                    kinds="visual"
-                    allowUpload
-                  />
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'cert_teaser' || section.type === 'cert_cta' ? (
-              <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                <Field label="CTA label">
-                  <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
-                </Field>
-                <Field label="CTA href">
-                  <input className="admin-input" value={String(content.ctaHref || '')} onChange={(e) => setField('ctaHref', e.target.value)} />
-                </Field>
-              </div>
-            ) : null}
-
-            {section.type === 'cta' ? (
-              <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                <Field label="Layout variant">
-                  <select
-                    className="admin-input"
-                    value={String(content.variant || '') === 'inner' ? 'inner' : 'band'}
-                    onChange={(e) => setField('variant', e.target.value === 'inner' ? 'inner' : '')}
-                  >
-                    <option value="band">Classic CTA band</option>
-                    <option value="inner">Inner page CTA</option>
-                  </select>
-                </Field>
-                <Field label="Eyebrow (inner)">
-                  <input className="admin-input" value={String(content.eyebrow || '')} onChange={(e) => setField('eyebrow', e.target.value)} placeholder="Next step" />
-                </Field>
-                <Field label="Primary CTA label">
-                  <input className="admin-input" value={ctaFields.primaryCta || ''} onChange={(e) => setField('primaryCta', e.target.value)} />
-                </Field>
-                <Field label="Primary CTA href">
-                  <input className="admin-input" value={ctaFields.primaryHref || ''} onChange={(e) => setField('primaryHref', e.target.value)} />
-                </Field>
-                <Field label="Secondary CTA label">
-                  <input className="admin-input" value={ctaFields.secondaryCta || ''} onChange={(e) => setField('secondaryCta', e.target.value)} />
-                </Field>
-                <Field label="Secondary CTA href">
-                  <input className="admin-input" value={ctaFields.secondaryHref || ''} onChange={(e) => setField('secondaryHref', e.target.value)} />
-                </Field>
-              </div>
-            ) : null}
-
-            {section.type === 'split' ? (
-              <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                <div className="full">
-                  <MediaPicker value={String(content.image || '')} onChange={(path) => setField('image', path)} />
-                </div>
-                <Field label="Image position">
-                  <select className="admin-select" value={String(content.imagePosition || 'left')} onChange={(e) => setField('imagePosition', e.target.value)}>
-                    <option value="left">left</option>
-                    <option value="right">right</option>
-                  </select>
-                </Field>
-                <Field label="Tone">
-                  <select className="admin-select" value={String(content.tone || 'light')} onChange={(e) => setField('tone', e.target.value)}>
-                    <option value="light">light</option>
-                    <option value="gray">gray</option>
-                    <option value="ice">ice</option>
-                  </select>
-                </Field>
-                <ColorInput
-                  label="Section background"
-                  value={String(content.sectionBg || '')}
-                  fallback={
-                    content.tone === 'gray' ? '#F4F6F9' : content.tone === 'ice' ? '#F0F8FC' : '#FFFFFF'
-                  }
-                  onChange={(next) => setField('sectionBg', next)}
-                  hint="Overrides Tone when set. Clear to use the Tone preset."
-                />
-                <ColorInput
-                  label="Feature card background"
-                  value={String(content.featCardBg || '')}
-                  fallback="#FFFFFF"
-                  onChange={(next) => setField('featCardBg', next)}
-                  hint="Applies to all feature cards in this split block."
-                />
-                <Field label="Eyebrow class">
-                  <input className="admin-input" value={String(content.eyebrowClass || 'eyebrow-orange')} onChange={(e) => setField('eyebrowClass', e.target.value)} />
-                </Field>
-                <div
-                  className="full"
-                  style={{
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                  }}
-                >
-                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                    <div>
-                      <strong>CTA buttons</strong>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                        One line with left / center / right slots. Each button&apos;s Position places it in that slot.
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary"
-                      onClick={() =>
-                        setSplitCtas([
-                          ...splitCtas,
-                          { label: 'Learn more →', href: '/contact', position: 'left', type: 'primary' },
-                        ])
-                      }
-                    >
-                      Add CTA
-                    </button>
+              {section.type === 'cert_hero' ? (
+                <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                  <Field label="Tagline">
+                    <input className="admin-input" value={String(content.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} />
+                  </Field>
+                  <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                  <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
+                  <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="center" />
+                  <div className="full">
+                    <MediaPicker
+                      value={String(content.image || '')}
+                      onChange={(path) => setField('image', path)}
+                      label="Background media"
+                      kinds="visual"
+                      allowUpload
+                      hint="Optional full-bleed background from the media library (image, SVG, or video)."
+                    />
                   </div>
-                  {splitCtas.length === 0 ? (
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                      No CTA buttons yet. Add one to show a call-to-action under the feature cards.
-                    </p>
-                  ) : null}
-                  {splitCtas.map((cta, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        border: '1px solid var(--admin-border, #e5e7eb)',
-                        borderRadius: 8,
-                        padding: '0.8rem',
-                        marginBottom: '0.7rem',
-                        background: '#fff',
-                      }}
-                    >
-                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                        <strong>CTA {idx + 1}</strong>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-danger"
-                          onClick={() => setSplitCtas(splitCtas.filter((_, i) => i !== idx))}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="admin-form-grid">
-                        <Field label="Label">
-                          <input
-                            className="admin-input"
-                            value={cta.label || ''}
-                            onChange={(e) => {
-                              const next = [...splitCtas];
-                              next[idx] = { ...next[idx], label: e.target.value };
-                              setSplitCtas(next);
-                            }}
-                          />
-                        </Field>
-                        <Field label="Href">
-                          <input
-                            className="admin-input"
-                            value={cta.href || ''}
-                            onChange={(e) => {
-                              const next = [...splitCtas];
-                              next[idx] = { ...next[idx], href: e.target.value };
-                              setSplitCtas(next);
-                            }}
-                            placeholder="/contact"
-                          />
-                        </Field>
-                        <Field label="Position">
-                          <select
-                            className="admin-select"
-                            value={cta.position === 'center' || cta.position === 'right' ? cta.position : 'left'}
-                            onChange={(e) => {
-                              const next = [...splitCtas];
-                              next[idx] = { ...next[idx], position: e.target.value };
-                              setSplitCtas(next);
-                            }}
-                          >
-                            <option value="left">Left</option>
-                            <option value="center">Center</option>
-                            <option value="right">Right</option>
-                          </select>
-                        </Field>
-                        <Field label="Type">
-                          <select
-                            className="admin-select"
-                            value={cta.type === 'secondary' ? 'secondary' : 'primary'}
-                            onChange={(e) => {
-                              const next = [...splitCtas];
-                              next[idx] = {
-                                ...next[idx],
-                                type: e.target.value === 'secondary' ? 'secondary' : 'primary',
-                              };
-                              setSplitCtas(next);
-                            }}
-                          >
-                            <option value="primary">Primary</option>
-                            <option value="secondary">Secondary</option>
-                          </select>
-                        </Field>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="admin-field full">
-                  <label>Features (one per line: Title | Body)</label>
-                  <textarea
-                    className="admin-textarea"
-                    value={features.map((f) => `${f.title} | ${f.body}`).join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'features',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line, idx) => {
-                            const [t, ...rest] = line.split('|');
-                            const title = t.trim();
-                            const body = rest.join('|').trim();
-                            const prev =
-                              features.find((f) => f.title === title) || features[idx];
-                            return { title, body, icon: prev?.icon };
-                          })
-                      )
-                    }
-                  />
-                  <small style={{ color: 'var(--admin-muted)' }}>
-                    Card icons come from seed/CMS JSON; editing titles preserves matching icons when possible.
-                  </small>
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'industry_category' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Tone (background preset)">
-                    <select
-                      className="admin-select"
-                      value={String(content.tone || 'light')}
-                      onChange={(e) => setField('tone', e.target.value)}
-                    >
-                      <option value="light">Light (white) — cat-infra / industrial</option>
-                      <option value="gray">Gray — cat-commercial / energy</option>
-                    </select>
-                  </Field>
-                  <ColorInput
-                    label="Section background override"
-                    value={String(content.sectionBg || '')}
-                    fallback={content.tone === 'gray' ? '#F4F6F9' : '#FFFFFF'}
-                    onChange={(next) => setField('sectionBg', next)}
-                    hint="Overrides Tone when set. Clear to use the Tone preset."
-                  />
-                  <ColorInput
-                    label="Category accent (--cat-color)"
-                    value={String(content.catColor || '')}
-                    fallback="#00D4FF"
-                    onChange={(next) => setField('catColor', next)}
-                    hint="Icon tint, card hover bar, and title hover. Infra=cyan, commercial=orange, industrial=green, energy=purple."
-                  />
-                  <Field label="Accent presets">
-                    <select
-                      className="admin-select"
-                      value=""
-                      onChange={(e) => {
-                        if (e.target.value) setField('catColor', e.target.value);
-                      }}
-                    >
-                      <option value="">Apply preset…</option>
-                      {INDUSTRY_CATEGORY_COLOR_PRESETS.map((p) => (
-                        <option key={p.value} value={p.value}>
-                          {p.label}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Eyebrow class">
-                    <input
-                      className="admin-input"
-                      value={String(content.eyebrowClass || 'eyebrow-orange')}
-                      onChange={(e) => setField('eyebrowClass', e.target.value)}
-                      placeholder="eyebrow-orange"
+                  <div className="full">
+                    <MediaPicker
+                      value={String(content.imageMobile || '')}
+                      onChange={(path) => setField('imageMobile', path)}
+                      label="Background media (mobile, optional)"
+                      kinds="visual"
+                      allowUpload
                     />
-                  </Field>
-                  <Field label="Section padding (block)">
-                    <input
-                      className="admin-input"
-                      value={String(content.sectionPadding || '')}
-                      onChange={(e) => setField('sectionPadding', e.target.value)}
-                      placeholder="4rem"
-                    />
-                  </Field>
-                  <Field label="Head margin bottom">
-                    <input
-                      className="admin-input"
-                      value={String(content.headMarginBottom || '')}
-                      onChange={(e) => setField('headMarginBottom', e.target.value)}
-                      placeholder="2.2rem"
-                    />
-                  </Field>
-                  <Field label="Grid columns">
-                    <input
-                      className="admin-input"
-                      type="number"
-                      min={1}
-                      max={6}
-                      value={Number(content.gridColumns) || 3}
-                      onChange={(e) => setField('gridColumns', Number(e.target.value) || 3)}
-                    />
-                  </Field>
-                  <Field label="Grid gap">
-                    <input
-                      className="admin-input"
-                      value={String(content.gridGap || '')}
-                      onChange={(e) => setField('gridGap', e.target.value)}
-                      placeholder="1.5rem"
-                    />
-                  </Field>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: '1rem',
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                  }}
-                >
-                  <strong>Typography &amp; colors</strong>
-                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <ColorInput
-                      label="Eyebrow color"
-                      value={String(content.eyebrowColor || '')}
-                      fallback="#FF6B1A"
-                      onChange={(next) => setField('eyebrowColor', next)}
-                    />
-                    <Field label="Eyebrow font">
-                      <select
-                        className="admin-select"
-                        value={String(content.eyebrowFont || '')}
-                        onChange={(e) => setField('eyebrowFont', e.target.value)}
-                      >
-                        <option value="">Default (mono)</option>
-                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Eyebrow size">
-                      <input
-                        className="admin-input"
-                        value={String(content.eyebrowSize || '')}
-                        onChange={(e) => setField('eyebrowSize', e.target.value)}
-                        placeholder="0.72rem"
-                      />
-                    </Field>
-                    <Field label="Eyebrow weight">
-                      <input
-                        className="admin-input"
-                        value={String(content.eyebrowWeight || '')}
-                        onChange={(e) => setField('eyebrowWeight', e.target.value)}
-                        placeholder="600"
-                      />
-                    </Field>
-                    <Field label="Eyebrow letter-spacing">
-                      <input
-                        className="admin-input"
-                        value={String(content.eyebrowLetterSpacing || '')}
-                        onChange={(e) => setField('eyebrowLetterSpacing', e.target.value)}
-                        placeholder="0.14em"
-                      />
-                    </Field>
-                    <Field label="Eyebrow text-transform">
-                      <select
-                        className="admin-select"
-                        value={String(content.eyebrowTransform || '')}
-                        onChange={(e) => setField('eyebrowTransform', e.target.value)}
-                      >
-                        <option value="">Default (uppercase)</option>
-                        <option value="uppercase">uppercase</option>
-                        <option value="none">none</option>
-                        <option value="capitalize">capitalize</option>
-                      </select>
-                    </Field>
-                    <ColorInput
-                      label="Title color"
-                      value={String(content.titleColor || '')}
-                      fallback="#1E2530"
-                      onChange={(next) => setField('titleColor', next)}
-                    />
-                    <Field label="Title font">
-                      <select
-                        className="admin-select"
-                        value={String(content.titleFont || '')}
-                        onChange={(e) => setField('titleFont', e.target.value)}
-                      >
-                        <option value="">Default (display)</option>
-                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Title size">
-                      <input
-                        className="admin-input"
-                        value={String(content.titleSize || '')}
-                        onChange={(e) => setField('titleSize', e.target.value)}
-                        placeholder="clamp(1.7rem,2.8vw,2.2rem)"
-                      />
-                    </Field>
-                    <Field label="Title weight">
-                      <input
-                        className="admin-input"
-                        value={String(content.titleWeight || '')}
-                        onChange={(e) => setField('titleWeight', e.target.value)}
-                        placeholder="700"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Body color"
-                      value={String(content.bodyColor || '')}
-                      fallback="#5B6472"
-                      onChange={(next) => setField('bodyColor', next)}
-                    />
-                    <Field label="Body font">
-                      <select
-                        className="admin-select"
-                        value={String(content.bodyFont || '')}
-                        onChange={(e) => setField('bodyFont', e.target.value)}
-                      >
-                        <option value="">Default (body)</option>
-                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Body size">
-                      <input
-                        className="admin-input"
-                        value={String(content.bodySize || '')}
-                        onChange={(e) => setField('bodySize', e.target.value)}
-                        placeholder="0.96rem"
-                      />
-                    </Field>
                   </div>
                 </div>
+              ) : null}
 
-                <div
-                  style={{
-                    marginTop: '1rem',
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                  }}
-                >
-                  <strong>Accent bar &amp; cards chrome</strong>
-                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <Field label="Show accent bar">
-                      <select
-                        className="admin-select"
-                        value={content.showAccentBar === false ? '0' : '1'}
-                        onChange={(e) => setField('showAccentBar', e.target.value === '1')}
-                      >
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </select>
-                    </Field>
-                    <ColorInput
-                      label="Accent bar color"
-                      value={String(content.accentBarColor || '')}
-                      fallback={String(content.catColor || '#00D4FF')}
-                      onChange={(next) => setField('accentBarColor', next)}
-                      hint="Defaults to category accent when cleared."
-                    />
-                    <Field label="Accent bar width">
-                      <input
-                        className="admin-input"
-                        value={String(content.accentBarWidth || '')}
-                        onChange={(e) => setField('accentBarWidth', e.target.value)}
-                        placeholder="56px"
-                      />
-                    </Field>
-                    <Field label="Accent bar height">
-                      <input
-                        className="admin-input"
-                        value={String(content.accentBarHeight || '')}
-                        onChange={(e) => setField('accentBarHeight', e.target.value)}
-                        placeholder="4px"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Card background"
-                      value={String(content.cardBg || '')}
-                      fallback="#FFFFFF"
-                      onChange={(next) => setField('cardBg', next)}
-                    />
-                    <ColorInput
-                      label="Card border color"
-                      value={String(content.cardBorderColor || '')}
-                      fallback="#E7EBF1"
-                      onChange={(next) => setField('cardBorderColor', next)}
-                    />
-                    <Field label="Card border radius">
-                      <input
-                        className="admin-input"
-                        value={String(content.cardBorderRadius || '')}
-                        onChange={(e) => setField('cardBorderRadius', e.target.value)}
-                        placeholder="12px"
-                      />
-                    </Field>
-                    <Field label="Card padding">
-                      <input
-                        className="admin-input"
-                        value={String(content.cardPadding || '')}
-                        onChange={(e) => setField('cardPadding', e.target.value)}
-                        placeholder="1.9rem"
-                      />
-                    </Field>
-                    <Field label="Icon circle size">
-                      <input
-                        className="admin-input"
-                        value={String(content.iconSize || '')}
-                        onChange={(e) => setField('iconSize', e.target.value)}
-                        placeholder="48px"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Card title color"
-                      value={String(content.cardTitleColor || '')}
-                      fallback="#1E2530"
-                      onChange={(next) => setField('cardTitleColor', next)}
-                    />
-                    <Field label="Card title font">
-                      <select
-                        className="admin-select"
-                        value={String(content.cardTitleFont || '')}
-                        onChange={(e) => setField('cardTitleFont', e.target.value)}
-                      >
-                        <option value="">Default (display)</option>
-                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Card title size">
-                      <input
-                        className="admin-input"
-                        value={String(content.cardTitleSize || '')}
-                        onChange={(e) => setField('cardTitleSize', e.target.value)}
-                        placeholder="1.04rem"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Card body color"
-                      value={String(content.cardBodyColor || '')}
-                      fallback="#5B6472"
-                      onChange={(next) => setField('cardBodyColor', next)}
-                    />
-                    <Field label="Card body font">
-                      <select
-                        className="admin-select"
-                        value={String(content.cardBodyFont || '')}
-                        onChange={(e) => setField('cardBodyFont', e.target.value)}
-                      >
-                        <option value="">Default (body)</option>
-                        {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Card body size">
-                      <input
-                        className="admin-input"
-                        value={String(content.cardBodySize || '')}
-                        onChange={(e) => setField('cardBodySize', e.target.value)}
-                        placeholder="0.86rem"
-                      />
-                    </Field>
-                  </div>
+              {section.type === 'cert_teaser' || section.type === 'cert_cta' ? (
+                <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                  <Field label="CTA label">
+                    <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
+                  </Field>
+                  <Field label="CTA href">
+                    <input className="admin-input" value={String(content.ctaHref || '')} onChange={(e) => setField('ctaHref', e.target.value)} />
+                  </Field>
                 </div>
+              ) : null}
 
-                <div
-                  className="full"
-                  style={{
-                    marginTop: '1rem',
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                  }}
-                >
-                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                    <div>
-                      <strong>Industry detail cards</strong>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                        Add, edit, delete, reorder (↑↓), and show/hide any number of idetail-cards.
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary"
-                      onClick={() => setIndustryCards([...industryCards, createIndustryCategoryCard()])}
-                    >
-                      Add card
-                    </button>
-                  </div>
-                  {industryCards.length === 0 ? (
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                      No cards yet. Add one to populate the idetail-grid.
-                    </p>
-                  ) : null}
-                  {industryCards.map((card, idx) => (
-                    <div
-                      key={card.id}
-                      style={{
-                        border: '1px solid var(--admin-border, #e5e7eb)',
-                        borderRadius: 8,
-                        padding: '0.8rem',
-                        marginBottom: '0.7rem',
-                        background: card.enabled === false ? '#f1f5f9' : '#fff',
-                        opacity: card.enabled === false ? 0.72 : 1,
-                      }}
-                    >
-                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                        <strong>
-                          #{idx + 1} · {card.title || 'Untitled'}
-                          {card.enabled === false ? ' (hidden)' : ''}
-                        </strong>
-                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => moveIndustryCard(card.id, -1)}
-                            disabled={idx === 0}
-                          >
-                            ↑
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => moveIndustryCard(card.id, 1)}
-                            disabled={idx === industryCards.length - 1}
-                          >
-                            ↓
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() =>
-                              patchIndustryCard(card.id, { enabled: card.enabled === false })
-                            }
-                          >
-                            {card.enabled === false ? 'Show' : 'Hide'}
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-danger"
-                            onClick={() =>
-                              setIndustryCards(industryCards.filter((c) => c.id !== card.id))
-                            }
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                      <div className="admin-form-grid">
-                        <Field label="Title">
-                          <input
-                            className="admin-input"
-                            value={card.title}
-                            onChange={(e) => patchIndustryCard(card.id, { title: e.target.value })}
-                          />
-                        </Field>
-                        <div className="admin-field full">
-                          <label>Body</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 72 }}
-                            value={card.body}
-                            onChange={(e) => patchIndustryCard(card.id, { body: e.target.value })}
-                          />
-                        </div>
-                        <div className="admin-field full">
-                          <label>Icon SVG (inner markup for 24×24 viewBox)</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
-                            value={card.icon || ''}
-                            onChange={(e) => patchIndustryCard(card.id, { icon: e.target.value })}
-                            placeholder='<path d="M3 21h18…" />'
-                          />
-                          <small style={{ color: 'var(--admin-muted)' }}>
-                            Paths/circles only — the renderer wraps them in an SVG. Leave blank to use a title-matched fallback.
-                          </small>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'why' ? (
-              <div
-                style={{
-                  marginTop: '0.8rem',
-                  border: '1px solid var(--admin-border, #e5e7eb)',
-                  borderRadius: 10,
-                  padding: '0.9rem',
-                  background: 'var(--admin-muted-bg, #f8fafc)',
-                }}
-              >
-                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                  <div>
-                    <strong>Why cards</strong>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                      Edit each card and set its background color. Clear uses the tint preset.
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-secondary"
-                    onClick={() => {
-                      const i = whyCards.length;
-                      setWhyCards([
-                        ...whyCards,
-                        {
-                          index: String(i + 1).padStart(2, '0'),
-                          title: 'New reason',
-                          desc: 'Describe this differentiator.',
-                          tint: `tint-${(i % 6) + 1}`,
-                        },
-                      ]);
-                    }}
-                  >
-                    Add card
-                  </button>
-                </div>
-                {whyCards.length === 0 ? (
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                    No cards yet. Add one to populate the why-grid.
-                  </p>
-                ) : null}
-                {whyCards.map((card, idx) => (
-                  <div
-                    key={`why-${idx}-${card.index}`}
-                    style={{
-                      border: '1px solid var(--admin-border, #e5e7eb)',
-                      borderRadius: 8,
-                      padding: '0.8rem',
-                      marginBottom: '0.7rem',
-                      background: '#fff',
-                    }}
-                  >
-                    <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                      <strong>
-                        #{idx + 1} · {card.title || 'Untitled'}
-                      </strong>
-                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-secondary"
-                          onClick={() => moveWhyCard(idx, -1)}
-                          disabled={idx === 0}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-secondary"
-                          onClick={() => moveWhyCard(idx, 1)}
-                          disabled={idx === whyCards.length - 1}
-                        >
-                          ↓
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-danger"
-                          onClick={() => setWhyCards(whyCards.filter((_, i) => i !== idx))}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                    <div className="admin-form-grid">
-                      <Field label="Index">
-                        <input
-                          className="admin-input"
-                          value={card.index}
-                          onChange={(e) => patchWhyCard(idx, { index: e.target.value })}
-                        />
-                      </Field>
-                      <Field label="Title">
-                        <input
-                          className="admin-input"
-                          value={card.title}
-                          onChange={(e) => patchWhyCard(idx, { title: e.target.value })}
-                        />
-                      </Field>
-                      <Field label="Tint preset">
-                        <select
-                          className="admin-select"
-                          value={card.tint || 'tint-1'}
-                          onChange={(e) => patchWhyCard(idx, { tint: e.target.value })}
-                        >
-                          <option value="tint-1">tint-1</option>
-                          <option value="tint-2">tint-2</option>
-                          <option value="tint-3">tint-3</option>
-                          <option value="tint-4">tint-4</option>
-                          <option value="tint-5">tint-5</option>
-                          <option value="tint-6">tint-6</option>
-                        </select>
-                      </Field>
-                      <ColorInput
-                        label="Card background"
-                        value={String(card.bg || '')}
-                        fallback={whyCardBgFallback(card)}
-                        onChange={(next) => patchWhyCard(idx, { bg: next || undefined })}
-                        hint="Overrides tint preset when set."
-                      />
-                      <div className="admin-field full">
-                        <label>Description</label>
-                        <textarea
-                          className="admin-textarea"
-                          style={{ minHeight: 72 }}
-                          value={card.desc}
-                          onChange={(e) => patchWhyCard(idx, { desc: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {section.type === 'hero' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                  <strong>Hero slides</strong>
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-secondary"
-                    onClick={() =>
-                      setField('slides', [
-                        ...slides,
-                        {
-                          theme: 'theme-legacy',
-                          eyebrow: '',
-                          title: 'New slide',
-                          lead: '',
-                          cta: 'Learn more →',
-                          ctaHref: '#',
-                          tags: [],
-                          image: '/assets/images/zigma-technologies-engineers-monitoring-.jpg',
-                          imageMobile: '',
-                          durationMs: 6000,
-                        },
-                      ])
-                    }
-                  >
-                    Add slide
-                  </button>
-                </div>
-                <div className="admin-field" style={{ marginBottom: '0.7rem' }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(content.tagsSingleLine)}
-                      onChange={(e) => setField('tagsSingleLine', e.target.checked)}
-                    />{' '}
-                    Show tag pills in one single line (scrolls sideways if they don&apos;t fit)
-                  </label>
-                </div>
-                {slides.map((slide, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      border: '1px solid var(--admin-border, #e5e7eb)',
-                      borderRadius: 8,
-                      padding: '0.8rem',
-                      marginBottom: '0.7rem',
-                    }}
-                  >
-                    <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                      <strong>Slide {idx + 1}</strong>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-danger"
-                        onClick={() => setField('slides', slides.filter((_, i) => i !== idx))}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    <div className="admin-form-grid">
-                      <Field label="Theme">
-                        <select
-                          className="admin-select"
-                          value={String(slide.theme || 'theme-legacy')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], theme: e.target.value };
-                            setField('slides', next);
-                          }}
-                        >
-                          {['theme-legacy', 'theme-ups', 'theme-solar', 'theme-eng', 'theme-future'].map((t) => (
-                            <option key={t} value={t}>
-                              {t}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                      <Field label="Eyebrow">
-                        <input
-                          className="admin-input"
-                          value={String(slide.eyebrow || '')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], eyebrow: e.target.value };
-                            setField('slides', next);
-                          }}
-                        />
-                      </Field>
-                      <Field label="Title">
-                        <input
-                          className="admin-input"
-                          value={String(slide.title || '')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], title: e.target.value };
-                            setField('slides', next);
-                          }}
-                        />
-                      </Field>
-                      <div className="full">
-                        <HighlightEditor
-                          value={slide.highlight as LifeHighlight | undefined}
-                          onChange={(highlight) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], highlight };
-                            setField('slides', next);
-                          }}
-                        />
-                      </div>
-                      <Field label="CTA label">
-                        <input
-                          className="admin-input"
-                          value={String(slide.cta || '')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], cta: e.target.value };
-                            setField('slides', next);
-                          }}
-                        />
-                      </Field>
-                      <Field label="CTA href">
-                        <input
-                          className="admin-input"
-                          value={String(slide.ctaHref || '')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], ctaHref: e.target.value };
-                            setField('slides', next);
-                          }}
-                        />
-                      </Field>
-                      <Field label="Numeral">
-                        <input
-                          className="admin-input"
-                          value={String(slide.numeral || '')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], numeral: e.target.value };
-                            setField('slides', next);
-                          }}
-                        />
-                      </Field>
-                      <Field label="Duration (ms)">
-                        <input
-                          className="admin-input"
-                          type="number"
-                          min={2500}
-                          max={30000}
-                          step={500}
-                          value={Number(slide.durationMs ?? 6000)}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            const raw = Number(e.target.value);
-                            const durationMs = Number.isFinite(raw)
-                              ? Math.min(30000, Math.max(2500, Math.round(raw)))
-                              : 6000;
-                            next[idx] = { ...next[idx], durationMs };
-                            setField('slides', next);
-                          }}
-                        />
-                      </Field>
-                      <div className="admin-field full">
-                        <label>Lead</label>
-                        <textarea
-                          className="admin-textarea"
-                          value={String(slide.lead || '')}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], lead: e.target.value };
-                            setField('slides', next);
-                          }}
-                        />
-                      </div>
-                      <div className="full">
-                        <MediaPicker
-                          value={String(slide.image || '')}
-                          onChange={(path) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], image: path };
-                            setField('slides', next);
-                          }}
-                          label="Slide media (desktop)"
-                          kinds="visual"
-                          allowUpload
-                          hint="Any successful media-library upload (image, SVG, or video). Renders full-bleed on desktop and mobile."
-                        />
-                      </div>
-                      <div className="full">
-                        <MediaPicker
-                          value={String(slide.imageMobile || '')}
-                          onChange={(path) => {
-                            const next = [...slides];
-                            next[idx] = { ...next[idx], imageMobile: path };
-                            setField('slides', next);
-                          }}
-                          label="Slide media (mobile, optional)"
-                          kinds="visual"
-                          allowUpload
-                          hint="Optional ≤760px override for tighter crops on phones."
-                        />
-                      </div>
-                      <div className="admin-field full">
-                        <label>Tags (comma separated)</label>
-                        <input
-                          className="admin-input"
-                          value={Array.isArray(slide.tags) ? (slide.tags as string[]).join(', ') : ''}
-                          onChange={(e) => {
-                            const next = [...slides];
-                            next[idx] = {
-                              ...next[idx],
-                              tags: e.target.value
-                                .split(',')
-                                .map((t) => t.trim())
-                                .filter(Boolean),
-                            };
-                            setField('slides', next);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {section.type === 'industries' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Display layout">
+              {section.type === 'cta' ? (
+                <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                  <Field label="Layout variant">
                     <select
                       className="admin-input"
-                      value={String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee'}
-                      onChange={(e) => setField('layout', e.target.value)}
+                      value={String(content.variant || '') === 'inner' ? 'inner' : 'band'}
+                      onChange={(e) => setField('variant', e.target.value === 'inner' ? 'inner' : '')}
                     >
-                      <option value="marquee">Rotating marquee</option>
-                      <option value="grid">Tabular grid</option>
+                      <option value="band">Classic CTA band</option>
+                      <option value="inner">Inner page CTA</option>
                     </select>
                   </Field>
-                  <Field label="Hub link label">
-                    <input
-                      className="admin-input"
-                      value={String(content.linkLabel || '')}
-                      onChange={(e) => setField('linkLabel', e.target.value)}
-                      placeholder="See All Industries We Serve →"
-                    />
+                  <Field label="Eyebrow (inner)">
+                    <input className="admin-input" value={String(content.eyebrow || '')} onChange={(e) => setField('eyebrow', e.target.value)} placeholder="Next step" />
                   </Field>
-                  <Field label="Hub link URL">
-                    <input
-                      className="admin-input"
-                      value={String(content.linkHref || '')}
-                      onChange={(e) => setField('linkHref', e.target.value)}
-                      placeholder="/industries"
-                    />
+                  <Field label="Primary CTA label">
+                    <input className="admin-input" value={ctaFields.primaryCta || ''} onChange={(e) => setField('primaryCta', e.target.value)} />
                   </Field>
-                  <ColorInput
-                    label="Industry item background"
-                    value={String(content.itemBg || '')}
-                    fallback="#FFFFFF"
-                    onChange={(next) => setField('itemBg', next || undefined)}
-                    hint="Background of each industry tile. Clear to use the default white."
-                  />
-                  <ColorInput
-                    label="Industry item border color"
-                    value={String(content.itemBorderColor || '')}
-                    fallback="#E7EBF1"
-                    onChange={(next) => setField('itemBorderColor', next || undefined)}
-                    hint="Clear to use the default light gray."
-                  />
-                  <Field label="Industry item border width">
-                    <input
-                      className="admin-input"
-                      value={String(content.itemBorderWidth || '')}
-                      onChange={(e) => setField('itemBorderWidth', e.target.value || undefined)}
-                      placeholder="1px"
-                    />
+                  <Field label="Primary CTA href">
+                    <input className="admin-input" value={ctaFields.primaryHref || ''} onChange={(e) => setField('primaryHref', e.target.value)} />
+                  </Field>
+                  <Field label="Secondary CTA label">
+                    <input className="admin-input" value={ctaFields.secondaryCta || ''} onChange={(e) => setField('secondaryCta', e.target.value)} />
+                  </Field>
+                  <Field label="Secondary CTA href">
+                    <input className="admin-input" value={ctaFields.secondaryHref || ''} onChange={(e) => setField('secondaryHref', e.target.value)} />
                   </Field>
                 </div>
-                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                  <label>Industry labels (one per line)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 200 }}
-                    value={((content.items as string[]) || []).join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'items',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                      )
-                    }
-                  />
-                  <small style={{ color: 'var(--admin-muted)' }}>
-                    Single-line marquee pauses on hover/keyboard focus and respects reduced-motion.
-                  </small>
-                </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            {section.type === 'industry_hub' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Eyebrow class">
-                    <input
-                      className="admin-input"
-                      value={String(content.eyebrowClass || 'eyebrow-cyan')}
-                      onChange={(e) => setField('eyebrowClass', e.target.value)}
-                    />
-                  </Field>
-                  <Field label="Show visit tailor bar">
-                    <select
-                      className="admin-input"
-                      value={content.showVisitTailor === false ? 'no' : 'yes'}
-                      onChange={(e) => setField('showVisitTailor', e.target.value === 'yes')}
-                    >
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
+              {section.type === 'split' ? (
+                <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                  <div className="full">
+                    <MediaPicker value={String(content.image || '')} onChange={(path) => setField('image', path)} />
+                  </div>
+                  <Field label="Image position">
+                    <select className="admin-select" value={String(content.imagePosition || 'left')} onChange={(e) => setField('imagePosition', e.target.value)}>
+                      <option value="left">left</option>
+                      <option value="right">right</option>
                     </select>
                   </Field>
-                </div>
-                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                  <label>Industry cards (one per line: key | eyebrow | name | lead | image | href)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 220, fontFamily: 'var(--admin-mono)' }}
-                    value={((content.cards as Array<Record<string, string>>) || [])
-                      .map((c) =>
-                        [c.key, c.eyebrow, c.name, c.lead, c.image, c.href]
-                          .map((p) => String(p || ''))
-                          .join(' | ')
-                      )
-                      .join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'cards',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const [key, eyebrow, name, lead, image, href] = line
-                              .split('|')
-                              .map((p) => p.trim());
-                            return {
-                              key: key || '',
-                              eyebrow: eyebrow || '',
-                              name: name || key || '',
-                              lead: lead || '',
-                              image: image || '',
-                              href: href || (key ? `/industries/${key}` : '/industries'),
-                            };
-                          })
-                      )
-                    }
-                  />
-                  <small style={{ color: 'var(--admin-muted)' }}>
-                    Leave cards empty to fall back to live industry definitions from Site Copy.
-                  </small>
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'logo_marquee' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <Field label="Start position">
-                  <select
-                    className="admin-select"
-                    value={content.startFrom === 'right' ? 'right' : 'left'}
-                    onChange={(e) => setField('startFrom', e.target.value)}
-                  >
-                    <option value="left">Left edge (default — may leave a gap on the right)</option>
-                    <option value="right">Right-most edge, fill the strip (no gap)</option>
-                  </select>
-                </Field>
-                <small style={{ color: 'var(--admin-muted)', marginBottom: '0.8rem', display: 'block' }}>
-                  Right-most repeats the certificates as needed so the strip is full from the first frame, with the
-                  first certificate starting at the right edge.
-                </small>
-                <label>Certificates / brands (one per line: Name | Image URL)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 220 }}
-                  value={((content.items as Array<string | { name: string; image?: string }>) || [])
-                    .map((item) =>
-                      typeof item === 'string'
-                        ? item
-                        : item.image
-                          ? `${item.name} | ${item.image}`
-                          : item.name
-                    )
-                    .join('\n')}
-                  onChange={(e) =>
-                    setField(
-                      'items',
-                      e.target.value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean)
-                        .map((line) => {
-                          const [name, ...rest] = line.split('|').map((p) => p.trim());
-                          const image = rest.join('|').trim();
-                          return image ? { name, image } : { name };
-                        })
-                    )
-                  }
-                />
-                <small style={{ color: 'var(--admin-muted)' }}>
-                  Image URL enables click-to-enlarge lightbox on the public page.
-                </small>
-              </div>
-            ) : null}
-
-            {section.type === 'testimonials' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>Testimonials (one per line: Quote | Name | Role)</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 200 }}
-                  value={((content.items as Array<{ quote: string; name: string; role?: string }>) || [])
-                    .map((t) => `${t.quote} | ${t.name} | ${t.role || ''}`)
-                    .join('\n')}
-                  onChange={(e) =>
-                    setField(
-                      'items',
-                      e.target.value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean)
-                        .map((line) => {
-                          const parts = line.split('|').map((p) => p.trim());
-                          return { quote: parts[0] || '', name: parts[1] || '', role: parts[2] || '' };
-                        })
-                    )
-                  }
-                />
-              </div>
-            ) : null}
-
-            {section.type === 'partners' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-field full">
-                  <label>Partner note</label>
-                  <textarea
-                    className="admin-textarea"
-                    value={String(content.note || '')}
-                    onChange={(e) => setField('note', e.target.value)}
-                  />
-                </div>
-                <div className="admin-field full">
-                  <label>Logos (one per line: /path | Alt text)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 180 }}
-                    value={((content.logos as Array<{ src: string; alt?: string }>) || [])
-                      .map((l) => `${l.src} | ${l.alt || ''}`)
-                      .join('\n')}
-                    onChange={(e) =>
-                      setField(
-                        'logos',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const [src, ...rest] = line.split('|');
-                            return { src: src.trim(), alt: rest.join('|').trim() };
-                          })
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'feature_grid' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
                   <Field label="Tone">
                     <select className="admin-select" value={String(content.tone || 'light')} onChange={(e) => setField('tone', e.target.value)}>
                       <option value="light">light</option>
                       <option value="gray">gray</option>
-                      <option value="dark">dark</option>
+                      <option value="ice">ice</option>
                     </select>
                   </Field>
-                  <Field label="Dark cards">
-                    <select
-                      className="admin-select"
-                      value={content.darkCards ? '1' : '0'}
-                      onChange={(e) => setField('darkCards', e.target.value === '1')}
-                    >
-                      <option value="0">No</option>
-                      <option value="1">Yes</option>
-                    </select>
+                  <ColorInput
+                    label="Section background"
+                    value={String(content.sectionBg || '')}
+                    fallback={
+                      content.tone === 'gray' ? '#F4F6F9' : content.tone === 'ice' ? '#F0F8FC' : '#FFFFFF'
+                    }
+                    onChange={(next) => setField('sectionBg', next)}
+                    hint="Overrides Tone when set. Clear to use the Tone preset."
+                  />
+                  <ColorInput
+                    label="Feature card background"
+                    value={String(content.featCardBg || '')}
+                    fallback="#FFFFFF"
+                    onChange={(next) => setField('featCardBg', next)}
+                    hint="Applies to all feature cards in this split block."
+                  />
+                  <Field label="Eyebrow class">
+                    <input className="admin-input" value={String(content.eyebrowClass || 'eyebrow-orange')} onChange={(e) => setField('eyebrowClass', e.target.value)} />
                   </Field>
-                </div>
-                <div
-                  className="full"
-                  style={{
-                    marginTop: '0.9rem',
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                  }}
-                >
-                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                    <div>
-                      <strong>Feature cards</strong>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                        Edit each card and set its background color. Clear uses the variant / CSS default.
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary"
-                      onClick={() =>
-                        setFeatureCards([
-                          ...featureCards,
-                          { title: 'New card', body: 'Describe this feature or request type.' },
-                        ])
-                      }
-                    >
-                      Add card
-                    </button>
-                  </div>
-                  {featureCards.length === 0 ? (
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                      No cards yet. Add one to populate the feature grid.
-                    </p>
-                  ) : null}
-                  {featureCards.map((card, idx) => (
-                    <div
-                      key={`feat-${idx}-${card.title}`}
-                      style={{
-                        border: '1px solid var(--admin-border, #e5e7eb)',
-                        borderRadius: 8,
-                        padding: '0.8rem',
-                        marginBottom: '0.7rem',
-                        background: '#fff',
-                      }}
-                    >
-                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                        <strong>
-                          #{idx + 1} · {card.title || 'Untitled'}
-                        </strong>
-                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => moveFeatureCard(idx, -1)}
-                            disabled={idx === 0}
-                          >
-                            ↑
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => moveFeatureCard(idx, 1)}
-                            disabled={idx === featureCards.length - 1}
-                          >
-                            ↓
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-danger"
-                            onClick={() =>
-                              setFeatureCards(featureCards.filter((_, i) => i !== idx))
-                            }
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                      <div className="admin-form-grid">
-                        <Field label="Title">
-                          <input
-                            className="admin-input"
-                            value={card.title}
-                            onChange={(e) => patchFeatureCard(idx, { title: e.target.value })}
-                          />
-                        </Field>
-                        <ColorInput
-                          label="Card background"
-                          value={String(card.bg || '')}
-                          fallback={featureCardBgFallback(card)}
-                          onChange={(next) => patchFeatureCard(idx, { bg: next || undefined })}
-                          hint="Overrides variant tint when set."
-                        />
-                        <div className="admin-field full">
-                          <label>Body</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 72 }}
-                            value={card.body}
-                            onChange={(e) => patchFeatureCard(idx, { body: e.target.value })}
-                          />
-                        </div>
-                        <Field label="Badge (optional)">
-                          <input
-                            className="admin-input"
-                            value={card.badge || ''}
-                            onChange={(e) =>
-                              patchFeatureCard(idx, { badge: e.target.value || undefined })
-                            }
-                          />
-                        </Field>
-                        <Field label="Variant">
-                          <select
-                            className="admin-select"
-                            value={card.variant || ''}
-                            onChange={(e) =>
-                              patchFeatureCard(idx, { variant: e.target.value || undefined })
-                            }
-                          >
-                            <option value="">default</option>
-                            <option value="pastel-green">pastel-green</option>
-                            <option value="emergency">emergency</option>
-                          </select>
-                        </Field>
-                        <Field label="Link label">
-                          <input
-                            className="admin-input"
-                            value={card.linkLabel || ''}
-                            onChange={(e) =>
-                              patchFeatureCard(idx, { linkLabel: e.target.value || undefined })
-                            }
-                            placeholder="Ask About Solar →"
-                          />
-                        </Field>
-                        <Field label="Link href (or leave blank for subject)">
-                          <input
-                            className="admin-input"
-                            value={card.linkHref || ''}
-                            onChange={(e) =>
-                              patchFeatureCard(idx, { linkHref: e.target.value || undefined })
-                            }
-                            placeholder="tel:+91… or /contact"
-                          />
-                        </Field>
-                        <Field label="Contact subject">
-                          <input
-                            className="admin-input"
-                            value={card.subject || ''}
-                            onChange={(e) =>
-                              patchFeatureCard(idx, { subject: e.target.value || undefined })
-                            }
-                          />
-                        </Field>
-                        <div className="admin-field full">
-                          <label>Icon SVG (inner markup for 24×24 viewBox)</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
-                            value={card.icon || ''}
-                            onChange={(e) =>
-                              patchFeatureCard(idx, { icon: e.target.value || undefined })
-                            }
-                            placeholder='<path d="M3 21h18…" />'
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'rich_text' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>HTML</label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 220, fontFamily: 'var(--admin-mono)' }}
-                  value={String(content.html || '')}
-                  onChange={(e) => setField('html', e.target.value)}
-                />
-              </div>
-            ) : null}
-
-            {section.type === 'comparison_table' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Feature column label">
-                    <input
-                      className="admin-input"
-                      value={String(content.featureLabel || 'Capability')}
-                      onChange={(e) => setField('featureLabel', e.target.value)}
-                    />
-                  </Field>
-                  <Field label="Tone">
-                    <select
-                      className="admin-select"
-                      value={String(content.tone || 'light')}
-                      onChange={(e) => setField('tone', e.target.value)}
-                    >
-                      <option value="light">Light</option>
-                      <option value="gray">Gray</option>
-                      <option value="dark">Dark</option>
-                    </select>
-                  </Field>
-                  <Field label="CTA label">
-                    <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
-                  </Field>
-                  <Field label="CTA link">
-                    <input className="admin-input" value={String(content.ctaHref || '')} onChange={(e) => setField('ctaHref', e.target.value)} />
-                  </Field>
-                  <div className="admin-field full">
-                    <label>CTA note (below button)</label>
-                    <input className="admin-input" value={String(content.ctaNote || '')} onChange={(e) => setField('ctaNote', e.target.value)} />
-                  </div>
-                </div>
-                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                  <label>Columns (one per line: Label | Sub-label | highlight?)</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 120 }}
-                    value={((content.columns as Array<{ label: string; sub?: string; highlight?: boolean }>) || [])
-                      .map((c) => `${c.label} | ${c.sub || ''} | ${c.highlight ? 'highlight' : ''}`)
-                      .join('\n')}
-                    onChange={(e) => {
-                      setField(
-                        'columns',
-                        e.target.value
-                          .split('\n')
-                          .filter((l) => l.trim())
-                          .map((l) => {
-                            const [label, sub, hl] = l.split('|').map((s) => s.trim());
-                            return { label: label || '', sub: sub || undefined, highlight: hl?.toLowerCase().includes('highlight') };
-                          })
-                      );
+                  <div
+                    className="full"
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
                     }}
-                  />
-                  <small style={{ color: 'var(--admin-muted)' }}>e.g. "UPS / Power | Protect | highlight"</small>
-                </div>
-                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                  <label>Rows (one per line: Group | Feature | val1 | val2 | …) — use "true" / "false" for ✓/✗, or text</label>
-                  <textarea
-                    className="admin-textarea"
-                    style={{ minHeight: 240 }}
-                    value={((content.rows as Array<{ group?: string; feature: string; values: unknown[] }>) || [])
-                      .map((r) => `${r.group || ''} | ${r.feature} | ${(r.values || []).join(' | ')}`)
-                      .join('\n')}
-                    onChange={(e) => {
-                      setField(
-                        'rows',
-                        e.target.value
-                          .split('\n')
-                          .filter((l) => l.trim())
-                          .map((l) => {
-                            const parts = l.split('|').map((s) => s.trim());
-                            const group = parts[0] || undefined;
-                            const feature = parts[1] || '';
-                            const values = parts.slice(2).map((v) => {
-                              if (v.toLowerCase() === 'true') return true;
-                              if (v.toLowerCase() === 'false') return false;
-                              return v || null;
-                            });
-                            return { group, feature, values };
-                          })
-                      );
-                    }}
-                  />
-                  <small style={{ color: 'var(--admin-muted)' }}>e.g. "Delivery | Annual Maintenance | true | true | false | true | true"</small>
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'projects_teaser' ? (
-              <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                <Field label="Limit">
-                  <input
-                    className="admin-input"
-                    type="number"
-                    value={Number(content.limit || 3)}
-                    onChange={(e) => setField('limit', Number(e.target.value))}
-                  />
-                </Field>
-                <Field label="Featured only">
-                  <select
-                    className="admin-select"
-                    value={content.featuredOnly === false ? '0' : '1'}
-                    onChange={(e) => setField('featuredOnly', e.target.value === '1')}
                   >
-                    <option value="1">Yes (fallback to latest)</option>
-                    <option value="0">No — latest items</option>
-                  </select>
-                </Field>
-                <Field label="CTA label">
-                  <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
-                </Field>
-                <Field label="CTA href">
-                  <input className="admin-input" value={String(content.ctaHref || '/projects')} onChange={(e) => setField('ctaHref', e.target.value)} />
-                </Field>
-              </div>
-            ) : null}
-
-            {section.type === 'timeline' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div
-                  style={{
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    marginBottom: '1rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                  }}
-                >
-                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                    <div>
-                      <strong>CTA buttons</strong>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                        One line with left / center / right slots. Each button’s Position places it in that slot.
+                    <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                      <div>
+                        <strong>CTA buttons</strong>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                          One line with left / center / right slots. Each button&apos;s Position places it in that slot.
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={() =>
+                          setSplitCtas([
+                            ...splitCtas,
+                            { label: 'Learn more →', href: '/contact', position: 'left', type: 'primary' },
+                          ])
+                        }
+                      >
+                        Add CTA
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary"
-                      onClick={() =>
-                        setTimelineCtas([
-                          ...timelineCtas,
-                          { label: 'Learn more →', href: '#', position: 'left', color: '' },
-                        ])
-                      }
-                    >
-                      Add CTA
-                    </button>
-                  </div>
-                  {timelineCtas.length === 0 ? (
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                      No CTA buttons yet. Add one to show a call-to-action under the timeline.
-                    </p>
-                  ) : null}
-                  {timelineCtas.map((cta, idx) => {
-                    return (
+                    {splitCtas.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                        No CTA buttons yet. Add one to show a call-to-action under the feature cards.
+                      </p>
+                    ) : null}
+                    {splitCtas.map((cta, idx) => (
                       <div
                         key={idx}
                         style={{
@@ -2426,7 +806,7 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                           <button
                             type="button"
                             className="admin-btn admin-btn-danger"
-                            onClick={() => setTimelineCtas(timelineCtas.filter((_, i) => i !== idx))}
+                            onClick={() => setSplitCtas(splitCtas.filter((_, i) => i !== idx))}
                           >
                             Remove
                           </button>
@@ -2437,9 +817,9 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                               className="admin-input"
                               value={cta.label || ''}
                               onChange={(e) => {
-                                const next = [...timelineCtas];
+                                const next = [...splitCtas];
                                 next[idx] = { ...next[idx], label: e.target.value };
-                                setTimelineCtas(next);
+                                setSplitCtas(next);
                               }}
                             />
                           </Field>
@@ -2448,9 +828,9 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                               className="admin-input"
                               value={cta.href || ''}
                               onChange={(e) => {
-                                const next = [...timelineCtas];
+                                const next = [...splitCtas];
                                 next[idx] = { ...next[idx], href: e.target.value };
-                                setTimelineCtas(next);
+                                setSplitCtas(next);
                               }}
                               placeholder="/contact"
                             />
@@ -2460,9 +840,9 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                               className="admin-select"
                               value={cta.position === 'center' || cta.position === 'right' ? cta.position : 'left'}
                               onChange={(e) => {
-                                const next = [...timelineCtas];
+                                const next = [...splitCtas];
                                 next[idx] = { ...next[idx], position: e.target.value };
-                                setTimelineCtas(next);
+                                setSplitCtas(next);
                               }}
                             >
                               <option value="left">Left</option>
@@ -2470,30 +850,1091 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                               <option value="right">Right</option>
                             </select>
                           </Field>
-                          <ColorInput
-                            label="Button color"
-                            value={cta.color || ''}
-                            fallback="#ea580c"
-                            placeholder="Theme default (empty)"
-                            onChange={(color) => {
-                              const next = [...timelineCtas];
-                              next[idx] = { ...next[idx], color };
-                              setTimelineCtas(next);
+                          <Field label="Type">
+                            <select
+                              className="admin-select"
+                              value={cta.type === 'secondary' ? 'secondary' : 'primary'}
+                              onChange={(e) => {
+                                const next = [...splitCtas];
+                                next[idx] = {
+                                  ...next[idx],
+                                  type: e.target.value === 'secondary' ? 'secondary' : 'primary',
+                                };
+                                setSplitCtas(next);
+                              }}
+                            >
+                              <option value="primary">Primary</option>
+                              <option value="secondary">Secondary</option>
+                            </select>
+                          </Field>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="admin-field full">
+                    <label>Features (one per line: Title | Body)</label>
+                    <textarea
+                      className="admin-textarea"
+                      value={features.map((f) => `${f.title} | ${f.body}`).join('\n')}
+                      onChange={(e) =>
+                        setField(
+                          'features',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line, idx) => {
+                              const [t, ...rest] = line.split('|');
+                              const title = t.trim();
+                              const body = rest.join('|').trim();
+                              const prev =
+                                features.find((f) => f.title === title) || features[idx];
+                              return { title, body, icon: prev?.icon };
+                            })
+                        )
+                      }
+                    />
+                    <small style={{ color: 'var(--admin-muted)' }}>
+                      Card icons come from seed/CMS JSON; editing titles preserves matching icons when possible.
+                    </small>
+                  </div>
+                </div>
+              ) : null}
+
+              {section.type === 'industry_category' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Tone (background preset)">
+                      <select
+                        className="admin-select"
+                        value={String(content.tone || 'light')}
+                        onChange={(e) => setField('tone', e.target.value)}
+                      >
+                        <option value="light">Light (white) — cat-infra / industrial</option>
+                        <option value="gray">Gray — cat-commercial / energy</option>
+                      </select>
+                    </Field>
+                    <ColorInput
+                      label="Section background override"
+                      value={String(content.sectionBg || '')}
+                      fallback={content.tone === 'gray' ? '#F4F6F9' : '#FFFFFF'}
+                      onChange={(next) => setField('sectionBg', next)}
+                      hint="Overrides Tone when set. Clear to use the Tone preset."
+                    />
+                    <ColorInput
+                      label="Category accent (--cat-color)"
+                      value={String(content.catColor || '')}
+                      fallback="#00D4FF"
+                      onChange={(next) => setField('catColor', next)}
+                      hint="Icon tint, card hover bar, and title hover. Infra=cyan, commercial=orange, industrial=green, energy=purple."
+                    />
+                    <Field label="Accent presets">
+                      <select
+                        className="admin-select"
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) setField('catColor', e.target.value);
+                        }}
+                      >
+                        <option value="">Apply preset…</option>
+                        {INDUSTRY_CATEGORY_COLOR_PRESETS.map((p) => (
+                          <option key={p.value} value={p.value}>
+                            {p.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Eyebrow class">
+                      <input
+                        className="admin-input"
+                        value={String(content.eyebrowClass || 'eyebrow-orange')}
+                        onChange={(e) => setField('eyebrowClass', e.target.value)}
+                        placeholder="eyebrow-orange"
+                      />
+                    </Field>
+                    <Field label="Section padding (block)">
+                      <input
+                        className="admin-input"
+                        value={String(content.sectionPadding || '')}
+                        onChange={(e) => setField('sectionPadding', e.target.value)}
+                        placeholder="4rem"
+                      />
+                    </Field>
+                    <Field label="Head margin bottom">
+                      <input
+                        className="admin-input"
+                        value={String(content.headMarginBottom || '')}
+                        onChange={(e) => setField('headMarginBottom', e.target.value)}
+                        placeholder="2.2rem"
+                      />
+                    </Field>
+                    <Field label="Grid columns">
+                      <input
+                        className="admin-input"
+                        type="number"
+                        min={1}
+                        max={6}
+                        value={Number(content.gridColumns) || 3}
+                        onChange={(e) => setField('gridColumns', Number(e.target.value) || 3)}
+                      />
+                    </Field>
+                    <Field label="Grid gap">
+                      <input
+                        className="admin-input"
+                        value={String(content.gridGap || '')}
+                        onChange={(e) => setField('gridGap', e.target.value)}
+                        placeholder="1.5rem"
+                      />
+                    </Field>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: '1rem',
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                    }}
+                  >
+                    <strong>Typography &amp; colors</strong>
+                    <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                      <ColorInput
+                        label="Eyebrow color"
+                        value={String(content.eyebrowColor || '')}
+                        fallback="#FF6B1A"
+                        onChange={(next) => setField('eyebrowColor', next)}
+                      />
+                      <Field label="Eyebrow font">
+                        <select
+                          className="admin-select"
+                          value={String(content.eyebrowFont || '')}
+                          onChange={(e) => setField('eyebrowFont', e.target.value)}
+                        >
+                          <option value="">Default (mono)</option>
+                          {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Eyebrow size">
+                        <input
+                          className="admin-input"
+                          value={String(content.eyebrowSize || '')}
+                          onChange={(e) => setField('eyebrowSize', e.target.value)}
+                          placeholder="0.72rem"
+                        />
+                      </Field>
+                      <Field label="Eyebrow weight">
+                        <input
+                          className="admin-input"
+                          value={String(content.eyebrowWeight || '')}
+                          onChange={(e) => setField('eyebrowWeight', e.target.value)}
+                          placeholder="600"
+                        />
+                      </Field>
+                      <Field label="Eyebrow letter-spacing">
+                        <input
+                          className="admin-input"
+                          value={String(content.eyebrowLetterSpacing || '')}
+                          onChange={(e) => setField('eyebrowLetterSpacing', e.target.value)}
+                          placeholder="0.14em"
+                        />
+                      </Field>
+                      <Field label="Eyebrow text-transform">
+                        <select
+                          className="admin-select"
+                          value={String(content.eyebrowTransform || '')}
+                          onChange={(e) => setField('eyebrowTransform', e.target.value)}
+                        >
+                          <option value="">Default (uppercase)</option>
+                          <option value="uppercase">uppercase</option>
+                          <option value="none">none</option>
+                          <option value="capitalize">capitalize</option>
+                        </select>
+                      </Field>
+                      <ColorInput
+                        label="Title color"
+                        value={String(content.titleColor || '')}
+                        fallback="#1E2530"
+                        onChange={(next) => setField('titleColor', next)}
+                      />
+                      <Field label="Title font">
+                        <select
+                          className="admin-select"
+                          value={String(content.titleFont || '')}
+                          onChange={(e) => setField('titleFont', e.target.value)}
+                        >
+                          <option value="">Default (display)</option>
+                          {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Title size">
+                        <input
+                          className="admin-input"
+                          value={String(content.titleSize || '')}
+                          onChange={(e) => setField('titleSize', e.target.value)}
+                          placeholder="clamp(1.7rem,2.8vw,2.2rem)"
+                        />
+                      </Field>
+                      <Field label="Title weight">
+                        <input
+                          className="admin-input"
+                          value={String(content.titleWeight || '')}
+                          onChange={(e) => setField('titleWeight', e.target.value)}
+                          placeholder="700"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Body color"
+                        value={String(content.bodyColor || '')}
+                        fallback="#5B6472"
+                        onChange={(next) => setField('bodyColor', next)}
+                      />
+                      <Field label="Body font">
+                        <select
+                          className="admin-select"
+                          value={String(content.bodyFont || '')}
+                          onChange={(e) => setField('bodyFont', e.target.value)}
+                        >
+                          <option value="">Default (body)</option>
+                          {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Body size">
+                        <input
+                          className="admin-input"
+                          value={String(content.bodySize || '')}
+                          onChange={(e) => setField('bodySize', e.target.value)}
+                          placeholder="0.96rem"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: '1rem',
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                    }}
+                  >
+                    <strong>Accent bar &amp; cards chrome</strong>
+                    <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                      <Field label="Show accent bar">
+                        <select
+                          className="admin-select"
+                          value={content.showAccentBar === false ? '0' : '1'}
+                          onChange={(e) => setField('showAccentBar', e.target.value === '1')}
+                        >
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
+                        </select>
+                      </Field>
+                      <ColorInput
+                        label="Accent bar color"
+                        value={String(content.accentBarColor || '')}
+                        fallback={String(content.catColor || '#00D4FF')}
+                        onChange={(next) => setField('accentBarColor', next)}
+                        hint="Defaults to category accent when cleared."
+                      />
+                      <Field label="Accent bar width">
+                        <input
+                          className="admin-input"
+                          value={String(content.accentBarWidth || '')}
+                          onChange={(e) => setField('accentBarWidth', e.target.value)}
+                          placeholder="56px"
+                        />
+                      </Field>
+                      <Field label="Accent bar height">
+                        <input
+                          className="admin-input"
+                          value={String(content.accentBarHeight || '')}
+                          onChange={(e) => setField('accentBarHeight', e.target.value)}
+                          placeholder="4px"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Card background"
+                        value={String(content.cardBg || '')}
+                        fallback="#FFFFFF"
+                        onChange={(next) => setField('cardBg', next)}
+                      />
+                      <ColorInput
+                        label="Card border color"
+                        value={String(content.cardBorderColor || '')}
+                        fallback="#E7EBF1"
+                        onChange={(next) => setField('cardBorderColor', next)}
+                      />
+                      <Field label="Card border radius">
+                        <input
+                          className="admin-input"
+                          value={String(content.cardBorderRadius || '')}
+                          onChange={(e) => setField('cardBorderRadius', e.target.value)}
+                          placeholder="12px"
+                        />
+                      </Field>
+                      <Field label="Card padding">
+                        <input
+                          className="admin-input"
+                          value={String(content.cardPadding || '')}
+                          onChange={(e) => setField('cardPadding', e.target.value)}
+                          placeholder="1.9rem"
+                        />
+                      </Field>
+                      <Field label="Icon circle size">
+                        <input
+                          className="admin-input"
+                          value={String(content.iconSize || '')}
+                          onChange={(e) => setField('iconSize', e.target.value)}
+                          placeholder="48px"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Card title color"
+                        value={String(content.cardTitleColor || '')}
+                        fallback="#1E2530"
+                        onChange={(next) => setField('cardTitleColor', next)}
+                      />
+                      <Field label="Card title font">
+                        <select
+                          className="admin-select"
+                          value={String(content.cardTitleFont || '')}
+                          onChange={(e) => setField('cardTitleFont', e.target.value)}
+                        >
+                          <option value="">Default (display)</option>
+                          {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Card title size">
+                        <input
+                          className="admin-input"
+                          value={String(content.cardTitleSize || '')}
+                          onChange={(e) => setField('cardTitleSize', e.target.value)}
+                          placeholder="1.04rem"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Card body color"
+                        value={String(content.cardBodyColor || '')}
+                        fallback="#5B6472"
+                        onChange={(next) => setField('cardBodyColor', next)}
+                      />
+                      <Field label="Card body font">
+                        <select
+                          className="admin-select"
+                          value={String(content.cardBodyFont || '')}
+                          onChange={(e) => setField('cardBodyFont', e.target.value)}
+                        >
+                          <option value="">Default (body)</option>
+                          {INDUSTRY_CATEGORY_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Card body size">
+                        <input
+                          className="admin-input"
+                          value={String(content.cardBodySize || '')}
+                          onChange={(e) => setField('cardBodySize', e.target.value)}
+                          placeholder="0.86rem"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div
+                    className="full"
+                    style={{
+                      marginTop: '1rem',
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                    }}
+                  >
+                    <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                      <div>
+                        <strong>Industry detail cards</strong>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                          Add, edit, delete, reorder (↑↓), and show/hide any number of idetail-cards.
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={() => setIndustryCards([...industryCards, createIndustryCategoryCard()])}
+                      >
+                        Add card
+                      </button>
+                    </div>
+                    {industryCards.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                        No cards yet. Add one to populate the idetail-grid.
+                      </p>
+                    ) : null}
+                    {industryCards.map((card, idx) => (
+                      <div
+                        key={card.id}
+                        style={{
+                          border: '1px solid var(--admin-border, #e5e7eb)',
+                          borderRadius: 8,
+                          padding: '0.8rem',
+                          marginBottom: '0.7rem',
+                          background: card.enabled === false ? '#f1f5f9' : '#fff',
+                          opacity: card.enabled === false ? 0.72 : 1,
+                        }}
+                      >
+                        <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                          <strong>
+                            #{idx + 1} · {card.title || 'Untitled'}
+                            {card.enabled === false ? ' (hidden)' : ''}
+                          </strong>
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveIndustryCard(card.id, -1)}
+                              disabled={idx === 0}
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveIndustryCard(card.id, 1)}
+                              disabled={idx === industryCards.length - 1}
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() =>
+                                patchIndustryCard(card.id, { enabled: card.enabled === false })
+                              }
+                            >
+                              {card.enabled === false ? 'Show' : 'Hide'}
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-danger"
+                              onClick={() =>
+                                setIndustryCards(industryCards.filter((c) => c.id !== card.id))
+                              }
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        <div className="admin-form-grid">
+                          <Field label="Title">
+                            <input
+                              className="admin-input"
+                              value={card.title}
+                              onChange={(e) => patchIndustryCard(card.id, { title: e.target.value })}
+                            />
+                          </Field>
+                          <div className="admin-field full">
+                            <label>Body</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 72 }}
+                              value={card.body}
+                              onChange={(e) => patchIndustryCard(card.id, { body: e.target.value })}
+                            />
+                          </div>
+                          <div className="admin-field full">
+                            <label>Icon SVG (inner markup for 24×24 viewBox)</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
+                              value={card.icon || ''}
+                              onChange={(e) => patchIndustryCard(card.id, { icon: e.target.value })}
+                              placeholder='<path d="M3 21h18…" />'
+                            />
+                            <small style={{ color: 'var(--admin-muted)' }}>
+                              Paths/circles only — the renderer wraps them in an SVG. Leave blank to use a title-matched fallback.
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {section.type === 'why' ? (
+                <div
+                  style={{
+                    marginTop: '0.8rem',
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <div>
+                      <strong>Why cards</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        Edit each card and set its background color. Clear uses the tint preset.
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() => {
+                        const i = whyCards.length;
+                        setWhyCards([
+                          ...whyCards,
+                          {
+                            index: String(i + 1).padStart(2, '0'),
+                            title: 'New reason',
+                            desc: 'Describe this differentiator.',
+                            tint: `tint-${(i % 6) + 1}`,
+                          },
+                        ]);
+                      }}
+                    >
+                      Add card
+                    </button>
+                  </div>
+                  {whyCards.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No cards yet. Add one to populate the why-grid.
+                    </p>
+                  ) : null}
+                  {whyCards.map((card, idx) => (
+                    <div
+                      key={`why-${idx}-${card.index}`}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                        background: '#fff',
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong>
+                          #{idx + 1} · {card.title || 'Untitled'}
+                        </strong>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveWhyCard(idx, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary"
+                            onClick={() => moveWhyCard(idx, 1)}
+                            disabled={idx === whyCards.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() => setWhyCards(whyCards.filter((_, i) => i !== idx))}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Index">
+                          <input
+                            className="admin-input"
+                            value={card.index}
+                            onChange={(e) => patchWhyCard(idx, { index: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Title">
+                          <input
+                            className="admin-input"
+                            value={card.title}
+                            onChange={(e) => patchWhyCard(idx, { title: e.target.value })}
+                          />
+                        </Field>
+                        <Field label="Tint preset">
+                          <select
+                            className="admin-select"
+                            value={card.tint || 'tint-1'}
+                            onChange={(e) => patchWhyCard(idx, { tint: e.target.value })}
+                          >
+                            <option value="tint-1">tint-1</option>
+                            <option value="tint-2">tint-2</option>
+                            <option value="tint-3">tint-3</option>
+                            <option value="tint-4">tint-4</option>
+                            <option value="tint-5">tint-5</option>
+                            <option value="tint-6">tint-6</option>
+                          </select>
+                        </Field>
+                        <ColorInput
+                          label="Card background"
+                          value={String(card.bg || '')}
+                          fallback={whyCardBgFallback(card)}
+                          onChange={(next) => patchWhyCard(idx, { bg: next || undefined })}
+                          hint="Overrides tint preset when set."
+                        />
+                        <div className="admin-field full">
+                          <label>Description</label>
+                          <textarea
+                            className="admin-textarea"
+                            style={{ minHeight: 72 }}
+                            value={card.desc}
+                            onChange={(e) => patchWhyCard(idx, { desc: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {section.type === 'hero' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <strong>Hero slides</strong>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() =>
+                        setField('slides', [
+                          ...slides,
+                          {
+                            theme: 'theme-legacy',
+                            eyebrow: '',
+                            title: 'New slide',
+                            lead: '',
+                            cta: 'Learn more →',
+                            ctaHref: '#',
+                            tags: [],
+                            image: '/assets/images/zigma-technologies-engineers-monitoring-.jpg',
+                            imageMobile: '',
+                            durationMs: 6000,
+                          },
+                        ])
+                      }
+                    >
+                      Add slide
+                    </button>
+                  </div>
+                  <div className="admin-field" style={{ marginBottom: '0.7rem' }}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(content.tagsSingleLine)}
+                        onChange={(e) => setField('tagsSingleLine', e.target.checked)}
+                      />{' '}
+                      Show tag pills in one single line (scrolls sideways if they don&apos;t fit)
+                    </label>
+                  </div>
+                  {slides.map((slide, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        border: '1px solid var(--admin-border, #e5e7eb)',
+                        borderRadius: 8,
+                        padding: '0.8rem',
+                        marginBottom: '0.7rem',
+                      }}
+                    >
+                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                        <strong>Slide {idx + 1}</strong>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-danger"
+                          onClick={() => setField('slides', slides.filter((_, i) => i !== idx))}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="admin-form-grid">
+                        <Field label="Theme">
+                          <select
+                            className="admin-select"
+                            value={String(slide.theme || 'theme-legacy')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], theme: e.target.value };
+                              setField('slides', next);
+                            }}
+                          >
+                            {['theme-legacy', 'theme-ups', 'theme-solar', 'theme-eng', 'theme-future'].map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                        <Field label="Eyebrow">
+                          <input
+                            className="admin-input"
+                            value={String(slide.eyebrow || '')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], eyebrow: e.target.value };
+                              setField('slides', next);
+                            }}
+                          />
+                        </Field>
+                        <Field label="Title">
+                          <input
+                            className="admin-input"
+                            value={String(slide.title || '')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], title: e.target.value };
+                              setField('slides', next);
+                            }}
+                          />
+                        </Field>
+                        <div className="full">
+                          <HighlightEditor
+                            value={slide.highlight as LifeHighlight | undefined}
+                            onChange={(highlight) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], highlight };
+                              setField('slides', next);
+                            }}
+                          />
+                        </div>
+                        <Field label="CTA label">
+                          <input
+                            className="admin-input"
+                            value={String(slide.cta || '')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], cta: e.target.value };
+                              setField('slides', next);
+                            }}
+                          />
+                        </Field>
+                        <Field label="CTA href">
+                          <input
+                            className="admin-input"
+                            value={String(slide.ctaHref || '')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], ctaHref: e.target.value };
+                              setField('slides', next);
+                            }}
+                          />
+                        </Field>
+                        <Field label="Numeral">
+                          <input
+                            className="admin-input"
+                            value={String(slide.numeral || '')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], numeral: e.target.value };
+                              setField('slides', next);
+                            }}
+                          />
+                        </Field>
+                        <Field label="Duration (ms)">
+                          <input
+                            className="admin-input"
+                            type="number"
+                            min={2500}
+                            max={30000}
+                            step={500}
+                            value={Number(slide.durationMs ?? 6000)}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              const raw = Number(e.target.value);
+                              const durationMs = Number.isFinite(raw)
+                                ? Math.min(30000, Math.max(2500, Math.round(raw)))
+                                : 6000;
+                              next[idx] = { ...next[idx], durationMs };
+                              setField('slides', next);
+                            }}
+                          />
+                        </Field>
+                        <div className="admin-field full">
+                          <label>Lead</label>
+                          <textarea
+                            className="admin-textarea"
+                            value={String(slide.lead || '')}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], lead: e.target.value };
+                              setField('slides', next);
+                            }}
+                          />
+                        </div>
+                        <div className="full">
+                          <MediaPicker
+                            value={String(slide.image || '')}
+                            onChange={(path) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], image: path };
+                              setField('slides', next);
+                            }}
+                            label="Slide media (desktop)"
+                            kinds="visual"
+                            allowUpload
+                            hint="Any successful media-library upload (image, SVG, or video). Renders full-bleed on desktop and mobile."
+                          />
+                        </div>
+                        <div className="full">
+                          <MediaPicker
+                            value={String(slide.imageMobile || '')}
+                            onChange={(path) => {
+                              const next = [...slides];
+                              next[idx] = { ...next[idx], imageMobile: path };
+                              setField('slides', next);
+                            }}
+                            label="Slide media (mobile, optional)"
+                            kinds="visual"
+                            allowUpload
+                            hint="Optional ≤760px override for tighter crops on phones."
+                          />
+                        </div>
+                        <div className="admin-field full">
+                          <label>Tags (comma separated)</label>
+                          <input
+                            className="admin-input"
+                            value={Array.isArray(slide.tags) ? (slide.tags as string[]).join(', ') : ''}
+                            onChange={(e) => {
+                              const next = [...slides];
+                              next[idx] = {
+                                ...next[idx],
+                                tags: e.target.value
+                                  .split(',')
+                                  .map((t) => t.trim())
+                                  .filter(Boolean),
+                              };
+                              setField('slides', next);
                             }}
                           />
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
+              ) : null}
 
-                <div className="admin-field full">
-                  <label>Timeline items (one per line: Year | Title | Body | now?)</label>
+              {section.type === 'industries' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Display layout">
+                      <select
+                        className="admin-input"
+                        value={String(content.layout || 'marquee') === 'grid' ? 'grid' : 'marquee'}
+                        onChange={(e) => setField('layout', e.target.value)}
+                      >
+                        <option value="marquee">Rotating marquee</option>
+                        <option value="grid">Tabular grid</option>
+                      </select>
+                    </Field>
+                    <Field label="Hub link label">
+                      <input
+                        className="admin-input"
+                        value={String(content.linkLabel || '')}
+                        onChange={(e) => setField('linkLabel', e.target.value)}
+                        placeholder="See All Industries We Serve →"
+                      />
+                    </Field>
+                    <Field label="Hub link URL">
+                      <input
+                        className="admin-input"
+                        value={String(content.linkHref || '')}
+                        onChange={(e) => setField('linkHref', e.target.value)}
+                        placeholder="/industries"
+                      />
+                    </Field>
+                    <ColorInput
+                      label="Industry item background"
+                      value={String(content.itemBg || '')}
+                      fallback="#FFFFFF"
+                      onChange={(next) => setField('itemBg', next || undefined)}
+                      hint="Background of each industry tile. Clear to use the default white."
+                    />
+                    <ColorInput
+                      label="Industry item border color"
+                      value={String(content.itemBorderColor || '')}
+                      fallback="#E7EBF1"
+                      onChange={(next) => setField('itemBorderColor', next || undefined)}
+                      hint="Clear to use the default light gray."
+                    />
+                    <Field label="Industry item border width">
+                      <input
+                        className="admin-input"
+                        value={String(content.itemBorderWidth || '')}
+                        onChange={(e) => setField('itemBorderWidth', e.target.value || undefined)}
+                        placeholder="1px"
+                      />
+                    </Field>
+                  </div>
+                  <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                    <label>Industry labels (one per line)</label>
+                    <textarea
+                      className="admin-textarea"
+                      style={{ minHeight: 200 }}
+                      value={((content.items as string[]) || []).join('\n')}
+                      onChange={(e) =>
+                        setField(
+                          'items',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                        )
+                      }
+                    />
+                    <small style={{ color: 'var(--admin-muted)' }}>
+                      Single-line marquee pauses on hover/keyboard focus and respects reduced-motion.
+                    </small>
+                  </div>
+                </div>
+              ) : null}
+
+              {section.type === 'industry_hub' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Eyebrow class">
+                      <input
+                        className="admin-input"
+                        value={String(content.eyebrowClass || 'eyebrow-cyan')}
+                        onChange={(e) => setField('eyebrowClass', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Show visit tailor bar">
+                      <select
+                        className="admin-input"
+                        value={content.showVisitTailor === false ? 'no' : 'yes'}
+                        onChange={(e) => setField('showVisitTailor', e.target.value === 'yes')}
+                      >
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                    <label>Industry cards (one per line: key | eyebrow | name | lead | image | href)</label>
+                    <textarea
+                      className="admin-textarea"
+                      style={{ minHeight: 220, fontFamily: 'var(--admin-mono)' }}
+                      value={((content.cards as Array<Record<string, string>>) || [])
+                        .map((c) =>
+                          [c.key, c.eyebrow, c.name, c.lead, c.image, c.href]
+                            .map((p) => String(p || ''))
+                            .join(' | ')
+                        )
+                        .join('\n')}
+                      onChange={(e) =>
+                        setField(
+                          'cards',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line) => {
+                              const [key, eyebrow, name, lead, image, href] = line
+                                .split('|')
+                                .map((p) => p.trim());
+                              return {
+                                key: key || '',
+                                eyebrow: eyebrow || '',
+                                name: name || key || '',
+                                lead: lead || '',
+                                image: image || '',
+                                href: href || (key ? `/industries/${key}` : '/industries'),
+                              };
+                            })
+                        )
+                      }
+                    />
+                    <small style={{ color: 'var(--admin-muted)' }}>
+                      Leave cards empty to fall back to live industry definitions from Site Copy.
+                    </small>
+                  </div>
+                </div>
+              ) : null}
+
+              {section.type === 'logo_marquee' ? (
+                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                  <Field label="Start position">
+                    <select
+                      className="admin-select"
+                      value={content.startFrom === 'right' ? 'right' : 'left'}
+                      onChange={(e) => setField('startFrom', e.target.value)}
+                    >
+                      <option value="left">Left edge (default — may leave a gap on the right)</option>
+                      <option value="right">Right-most edge, fill the strip (no gap)</option>
+                    </select>
+                  </Field>
+                  <small style={{ color: 'var(--admin-muted)', marginBottom: '0.8rem', display: 'block' }}>
+                    Right-most repeats the certificates as needed so the strip is full from the first frame, with the
+                    first certificate starting at the right edge.
+                  </small>
+                  <label>Certificates / brands (one per line: Name | Image URL)</label>
                   <textarea
                     className="admin-textarea"
-                    style={{ minHeight: 140 }}
-                    value={((content.items as Array<{ year: string; title: string; body: string; now?: boolean; next?: boolean }>) || [])
-                      .map((i) => `${i.year} | ${i.title} | ${i.body}${i.now ? ' | now' : i.next ? ' | next' : ''}`)
+                    style={{ minHeight: 220 }}
+                    value={((content.items as Array<string | { name: string; image?: string }>) || [])
+                      .map((item) =>
+                        typeof item === 'string'
+                          ? item
+                          : item.image
+                            ? `${item.name} | ${item.image}`
+                            : item.name
+                      )
+                      .join('\n')}
+                    onChange={(e) =>
+                      setField(
+                        'items',
+                        e.target.value
+                          .split('\n')
+                          .map((l) => l.trim())
+                          .filter(Boolean)
+                          .map((line) => {
+                            const [name, ...rest] = line.split('|').map((p) => p.trim());
+                            const image = rest.join('|').trim();
+                            return image ? { name, image } : { name };
+                          })
+                      )
+                    }
+                  />
+                  <small style={{ color: 'var(--admin-muted)' }}>
+                    Image URL enables click-to-enlarge lightbox on the public page.
+                  </small>
+                </div>
+              ) : null}
+
+              {section.type === 'testimonials' ? (
+                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                  <label>Testimonials (one per line: Quote | Name | Role)</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 200 }}
+                    value={((content.items as Array<{ quote: string; name: string; role?: string }>) || [])
+                      .map((t) => `${t.quote} | ${t.name} | ${t.role || ''}`)
                       .join('\n')}
                     onChange={(e) =>
                       setField(
@@ -2504,502 +1945,523 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                           .filter(Boolean)
                           .map((line) => {
                             const parts = line.split('|').map((p) => p.trim());
-                            const flag = (parts[3] || '').toLowerCase();
-                            return {
-                              year: parts[0] || '',
-                              title: parts[1] || '',
-                              body: parts[2] || '',
-                              now: flag === 'now',
-                              next: flag === 'next',
-                            };
+                            return { quote: parts[0] || '', name: parts[1] || '', role: parts[2] || '' };
                           })
                       )
                     }
                   />
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            {section.type === 'eco' ? (
-              <div
-                style={{
-                  marginTop: '0.8rem',
-                  border: '1px solid var(--admin-border, #e5e7eb)',
-                  borderRadius: 10,
-                  padding: '0.9rem',
-                  background: 'var(--admin-muted-bg, #f8fafc)',
-                }}
-              >
-                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                  <div>
-                    <strong>Capability groups</strong>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                      Each group gets a dot and hover color. Orange, Green, Blue and Purple keep their fixed 2×2 spots;
-                      the other colors fill the next free cells in order.
-                    </div>
+              {section.type === 'partners' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-field full">
+                    <label>Partner note</label>
+                    <textarea
+                      className="admin-textarea"
+                      value={String(content.note || '')}
+                      onChange={(e) => setField('note', e.target.value)}
+                    />
                   </div>
-                  <button type="button" className="admin-btn admin-btn-secondary" onClick={addEcoGroup}>
-                    Add group
-                  </button>
+                  <div className="admin-field full">
+                    <label>Logos (one per line: /path | Alt text)</label>
+                    <textarea
+                      className="admin-textarea"
+                      style={{ minHeight: 180 }}
+                      value={((content.logos as Array<{ src: string; alt?: string }>) || [])
+                        .map((l) => `${l.src} | ${l.alt || ''}`)
+                        .join('\n')}
+                      onChange={(e) =>
+                        setField(
+                          'logos',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line) => {
+                              const [src, ...rest] = line.split('|');
+                              return { src: src.trim(), alt: rest.join('|').trim() };
+                            })
+                        )
+                      }
+                    />
+                  </div>
                 </div>
-                {ecoGroups.length === 0 ? (
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                    No groups yet. Add one to populate the checklist.
-                  </p>
-                ) : null}
-                {ecoGroups.map((group, idx) => {
-                  const colorKey = ecoGroupColorKey(group);
-                  const preset = ECO_GROUP_COLOR_PRESETS.find((p) => p.key === colorKey)!;
-                  return (
-                    <div
-                      key={idx}
-                      style={{
-                        border: '1px solid var(--admin-border, #e5e7eb)',
-                        borderLeft: `4px solid ${preset.hex}`,
-                        borderRadius: 8,
-                        padding: '0.8rem',
-                        marginBottom: '0.7rem',
-                        background: '#fff',
-                      }}
-                    >
-                      <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                        <strong style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                          <span
-                            style={{ width: 10, height: 10, borderRadius: '50%', background: preset.hex, display: 'inline-block' }}
-                          />
-                          #{idx + 1} · {preset.label}
-                        </strong>
-                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => moveEcoGroup(idx, -1)}
-                            disabled={idx === 0}
-                          >
-                            ↑
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => moveEcoGroup(idx, 1)}
-                            disabled={idx === ecoGroups.length - 1}
-                          >
-                            ↓
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-danger"
-                            onClick={() => setEcoGroups(ecoGroups.filter((_, i) => i !== idx))}
-                          >
-                            Delete
-                          </button>
+              ) : null}
+
+              {section.type === 'feature_grid' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Tone">
+                      <select className="admin-select" value={String(content.tone || 'light')} onChange={(e) => setField('tone', e.target.value)}>
+                        <option value="light">light</option>
+                        <option value="gray">gray</option>
+                        <option value="dark">dark</option>
+                      </select>
+                    </Field>
+                    <Field label="Dark cards">
+                      <select
+                        className="admin-select"
+                        value={content.darkCards ? '1' : '0'}
+                        onChange={(e) => setField('darkCards', e.target.value === '1')}
+                      >
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <div
+                    className="full"
+                    style={{
+                      marginTop: '0.9rem',
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                    }}
+                  >
+                    <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                      <div>
+                        <strong>Feature cards</strong>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                          Edit each card and set its background color. Clear uses the variant / CSS default.
                         </div>
                       </div>
-                      <div className="admin-form-grid">
-                        <Field label="Color">
-                          <select
-                            className="admin-select"
-                            value={colorKey}
-                            onChange={(e) =>
-                              patchEcoGroup(idx, ecoGroupForColor(e.target.value as EcoGroupColorKey, group.items))
-                            }
-                          >
-                            {ECO_GROUP_COLOR_PRESETS.map((p) => (
-                              <option key={p.key} value={p.key}>
-                                {p.label} ({p.hex})
-                              </option>
-                            ))}
-                          </select>
-                        </Field>
-                        <div className="admin-field full">
-                          <label>Items (one per line)</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 90 }}
-                            value={(group.items || []).join('\n')}
-                            onChange={(e) => patchEcoGroup(idx, { items: e.target.value.split('\n') })}
-                          />
-                        </div>
-                      </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={() =>
+                          setFeatureCards([
+                            ...featureCards,
+                            { title: 'New card', body: 'Describe this feature or request type.' },
+                          ])
+                        }
+                      >
+                        Add card
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
-            ) : null}
+                    {featureCards.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                        No cards yet. Add one to populate the feature grid.
+                      </p>
+                    ) : null}
+                    {featureCards.map((card, idx) => (
+                      <div
+                        key={`feat-${idx}-${card.title}`}
+                        style={{
+                          border: '1px solid var(--admin-border, #e5e7eb)',
+                          borderRadius: 8,
+                          padding: '0.8rem',
+                          marginBottom: '0.7rem',
+                          background: '#fff',
+                        }}
+                      >
+                        <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                          <strong>
+                            #{idx + 1} · {card.title || 'Untitled'}
+                          </strong>
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveFeatureCard(idx, -1)}
+                              disabled={idx === 0}
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveFeatureCard(idx, 1)}
+                              disabled={idx === featureCards.length - 1}
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-danger"
+                              onClick={() =>
+                                setFeatureCards(featureCards.filter((_, i) => i !== idx))
+                              }
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        <div className="admin-form-grid">
+                          <Field label="Title">
+                            <input
+                              className="admin-input"
+                              value={card.title}
+                              onChange={(e) => patchFeatureCard(idx, { title: e.target.value })}
+                            />
+                          </Field>
+                          <ColorInput
+                            label="Card background"
+                            value={String(card.bg || '')}
+                            fallback={featureCardBgFallback(card)}
+                            onChange={(next) => patchFeatureCard(idx, { bg: next || undefined })}
+                            hint="Overrides variant tint when set."
+                          />
+                          <div className="admin-field full">
+                            <label>Body</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 72 }}
+                              value={card.body}
+                              onChange={(e) => patchFeatureCard(idx, { body: e.target.value })}
+                            />
+                          </div>
+                          <Field label="Badge (optional)">
+                            <input
+                              className="admin-input"
+                              value={card.badge || ''}
+                              onChange={(e) =>
+                                patchFeatureCard(idx, { badge: e.target.value || undefined })
+                              }
+                            />
+                          </Field>
+                          <Field label="Variant">
+                            <select
+                              className="admin-select"
+                              value={card.variant || ''}
+                              onChange={(e) =>
+                                patchFeatureCard(idx, { variant: e.target.value || undefined })
+                              }
+                            >
+                              <option value="">default</option>
+                              <option value="pastel-green">pastel-green</option>
+                              <option value="emergency">emergency</option>
+                            </select>
+                          </Field>
+                          <Field label="Link label">
+                            <input
+                              className="admin-input"
+                              value={card.linkLabel || ''}
+                              onChange={(e) =>
+                                patchFeatureCard(idx, { linkLabel: e.target.value || undefined })
+                              }
+                              placeholder="Ask About Solar →"
+                            />
+                          </Field>
+                          <Field label="Link href (or leave blank for subject)">
+                            <input
+                              className="admin-input"
+                              value={card.linkHref || ''}
+                              onChange={(e) =>
+                                patchFeatureCard(idx, { linkHref: e.target.value || undefined })
+                              }
+                              placeholder="tel:+91… or /contact"
+                            />
+                          </Field>
+                          <Field label="Contact subject">
+                            <input
+                              className="admin-input"
+                              value={card.subject || ''}
+                              onChange={(e) =>
+                                patchFeatureCard(idx, { subject: e.target.value || undefined })
+                              }
+                            />
+                          </Field>
+                          <div className="admin-field full">
+                            <label>Icon SVG (inner markup for 24×24 viewBox)</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
+                              value={card.icon || ''}
+                              onChange={(e) =>
+                                patchFeatureCard(idx, { icon: e.target.value || undefined })
+                              }
+                              placeholder='<path d="M3 21h18…" />'
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
-            {section.type === 'quick_contact' || section.type === 'culture_stats' || section.type === 'stats' ? (
-              <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
-                <label>
-                  {section.type === 'quick_contact'
-                    ? 'Items (one per line: Label | Value | href | emergency?)'
-                    : section.type === 'stats'
-                      ? 'Stats (one per line: Value | Label | optionalSuffix)'
-                      : 'Items (one per line: Value | Label)'}
-                </label>
-                <textarea
-                  className="admin-textarea"
-                  style={{ minHeight: 160 }}
-                  value={
-                    section.type === 'quick_contact'
-                      ? ((content.items as Array<{ label: string; value: string; href?: string | null; emergency?: boolean }>) || [])
-                          .map((i) => `${i.label} | ${i.value} | ${i.href || ''} | ${i.emergency ? 'emergency' : ''}`)
-                          .join('\n')
-                      : section.type === 'stats'
-                        ? ((content.stats as Array<{ value: number | string; label: string; suffix?: string }>) || [])
-                            .map((s) => `${s.value} | ${s.label} | ${s.suffix || ''}`)
-                            .join('\n')
-                        : ((content.items as Array<{ value?: string; label: string }>) || [])
-                            .map((i) => `${i.value || ''} | ${i.label || ''}`)
-                            .join('\n')
-                  }
-                  onChange={(e) => {
-                    if (section.type === 'quick_contact') {
-                      setField(
-                        'items',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const parts = line.split('|').map((p) => p.trim());
-                            return {
-                              label: parts[0] || '',
-                              value: parts[1] || '',
-                              href: parts[2] || null,
-                              emergency: (parts[3] || '').toLowerCase().includes('emergency'),
-                            };
-                          })
-                      );
-                    } else if (section.type === 'stats') {
-                      setField(
-                        'stats',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const parts = line.split('|').map((p) => p.trim());
-                            const num = Number(parts[0]);
-                            return {
-                              value: Number.isFinite(num) ? num : parts[0] || 0,
-                              label: parts[1] || '',
-                              suffix: parts[2] || undefined,
-                            };
-                          })
-                      );
-                    } else {
-                      setField(
-                        'items',
-                        e.target.value
-                          .split('\n')
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((line) => {
-                            const parts = line.split('|').map((p) => p.trim());
-                            return { value: parts[0] || '', label: parts[1] || '' };
-                          })
-                      );
-                    }
-                  }}
-                />
-              </div>
-            ) : null}
+              {section.type === 'rich_text' ? (
+                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                  <label>HTML</label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 220, fontFamily: 'var(--admin-mono)' }}
+                    value={String(content.html || '')}
+                    onChange={(e) => setField('html', e.target.value)}
+                  />
+                </div>
+              ) : null}
 
-            {section.type === 'locations' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div
-                  style={{
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                    marginBottom: '0.9rem',
-                  }}
-                >
-                  <strong>Section &amp; map layout</strong>
-                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+              {section.type === 'comparison_table' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Feature column label">
+                      <input
+                        className="admin-input"
+                        value={String(content.featureLabel || 'Capability')}
+                        onChange={(e) => setField('featureLabel', e.target.value)}
+                      />
+                    </Field>
                     <Field label="Tone">
                       <select
                         className="admin-select"
-                        value={String(content.tone || 'gray')}
+                        value={String(content.tone || 'light')}
                         onChange={(e) => setField('tone', e.target.value)}
                       >
-                        <option value="gray">Gray</option>
                         <option value="light">Light</option>
+                        <option value="gray">Gray</option>
+                        <option value="dark">Dark</option>
                       </select>
                     </Field>
-                    <ColorInput
-                      label="Section background"
-                      value={String(content.sectionBg || '')}
-                      fallback={content.tone === 'light' ? '#FFFFFF' : '#F4F6F9'}
-                      onChange={(next) => setField('sectionBg', next)}
-                      hint="Overrides Tone when set."
+                    <Field label="CTA label">
+                      <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
+                    </Field>
+                    <Field label="CTA link">
+                      <input className="admin-input" value={String(content.ctaHref || '')} onChange={(e) => setField('ctaHref', e.target.value)} />
+                    </Field>
+                    <div className="admin-field full">
+                      <label>CTA note (below button)</label>
+                      <input className="admin-input" value={String(content.ctaNote || '')} onChange={(e) => setField('ctaNote', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                    <label>Columns (one per line: Label | Sub-label | highlight?)</label>
+                    <textarea
+                      className="admin-textarea"
+                      style={{ minHeight: 120 }}
+                      value={((content.columns as Array<{ label: string; sub?: string; highlight?: boolean }>) || [])
+                        .map((c) => `${c.label} | ${c.sub || ''} | ${c.highlight ? 'highlight' : ''}`)
+                        .join('\n')}
+                      onChange={(e) => {
+                        setField(
+                          'columns',
+                          e.target.value
+                            .split('\n')
+                            .filter((l) => l.trim())
+                            .map((l) => {
+                              const [label, sub, hl] = l.split('|').map((s) => s.trim());
+                              return { label: label || '', sub: sub || undefined, highlight: hl?.toLowerCase().includes('highlight') };
+                            })
+                        );
+                      }}
                     />
-                    <Field label="Layout">
-                      <select
-                        className="admin-select"
-                        value={String(content.layout || 'img-right')}
-                        onChange={(e) => setField('layout', e.target.value)}
-                      >
-                        <option value="img-right">Cards left · Map right</option>
-                        <option value="img-left">Map left · Cards right</option>
-                      </select>
-                    </Field>
-                    <Field label="Show map">
-                      <select
-                        className="admin-select"
-                        value={content.showMap === false ? '0' : '1'}
-                        onChange={(e) => setField('showMap', e.target.value === '1')}
-                      >
-                        <option value="1">Show</option>
-                        <option value="0">Hide</option>
-                      </select>
-                    </Field>
-                    <Field label="Eyebrow class">
-                      <select
-                        className="admin-select"
-                        value={String(content.eyebrowClass || 'eyebrow-orange')}
-                        onChange={(e) => setField('eyebrowClass', e.target.value)}
-                      >
-                        {LOCATIONS_SECTION_EYEBROW_PRESETS.map((p) => (
-                          <option key={p.value} value={p.value}>
-                            {p.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Section padding (block)">
-                      <input
-                        className="admin-input"
-                        value={String(content.sectionPadding || '')}
-                        onChange={(e) => setField('sectionPadding', e.target.value)}
-                        placeholder="9rem"
-                      />
-                    </Field>
-                    <Field label="Default map embed URL">
-                      <input
-                        className="admin-input"
-                        value={String(content.mapEmbedUrl || '')}
-                        onChange={(e) => setField('mapEmbedUrl', e.target.value)}
-                        placeholder="https://www.google.com/maps?q=…&output=embed"
-                      />
-                    </Field>
-                    <Field label="Default map title">
-                      <input
-                        className="admin-input"
-                        value={String(content.mapTitle || '')}
-                        onChange={(e) => setField('mapTitle', e.target.value)}
-                      />
-                    </Field>
-                    <Field label="Map min height">
-                      <input
-                        className="admin-input"
-                        value={String(content.mapMinHeight || '')}
-                        onChange={(e) => setField('mapMinHeight', e.target.value)}
-                        placeholder="460px"
-                      />
-                    </Field>
-                    <Field label="Card list gap">
-                      <input
-                        className="admin-input"
-                        value={String(content.locGridGap || '')}
-                        onChange={(e) => setField('locGridGap', e.target.value)}
-                        placeholder="1.25rem"
-                      />
-                    </Field>
-                    <Field label="Default directions label">
-                      <input
-                        className="admin-input"
-                        value={String(content.directionsLabel || '')}
-                        onChange={(e) => setField('directionsLabel', e.target.value)}
-                        placeholder="Get Directions →"
-                      />
-                    </Field>
+                    <small style={{ color: 'var(--admin-muted)' }}>e.g. <code>UPS / Power | Protect | highlight</code></small>
+                  </div>
+                  <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                    <label>Rows (one per line: Group | Feature | val1 | val2 | …) — use <code>true</code> / <code>false</code> for ✓/✗, or text</label>
+                    <textarea
+                      className="admin-textarea"
+                      style={{ minHeight: 240 }}
+                      value={((content.rows as Array<{ group?: string; feature: string; values: unknown[] }>) || [])
+                        .map((r) => `${r.group || ''} | ${r.feature} | ${(r.values || []).join(' | ')}`)
+                        .join('\n')}
+                      onChange={(e) => {
+                        setField(
+                          'rows',
+                          e.target.value
+                            .split('\n')
+                            .filter((l) => l.trim())
+                            .map((l) => {
+                              const parts = l.split('|').map((s) => s.trim());
+                              const group = parts[0] || undefined;
+                              const feature = parts[1] || '';
+                              const values = parts.slice(2).map((v) => {
+                                if (v.toLowerCase() === 'true') return true;
+                                if (v.toLowerCase() === 'false') return false;
+                                return v || null;
+                              });
+                              return { group, feature, values };
+                            })
+                        );
+                      }}
+                    />
+                    <small style={{ color: 'var(--admin-muted)' }}>e.g. <code>Delivery | Annual Maintenance | true | true | false | true | true</code></small>
                   </div>
                 </div>
+              ) : null}
 
-                <div
-                  style={{
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                    marginBottom: '0.9rem',
-                  }}
-                >
-                  <strong>Typography &amp; colors</strong>
-                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <ColorInput
-                      label="Eyebrow color"
-                      value={String(content.eyebrowColor || '')}
-                      fallback="#FF6B1A"
-                      onChange={(next) => setField('eyebrowColor', next)}
+              {section.type === 'projects_teaser' ? (
+                <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                  <Field label="Limit">
+                    <input
+                      className="admin-input"
+                      type="number"
+                      value={Number(content.limit || 3)}
+                      onChange={(e) => setField('limit', Number(e.target.value))}
                     />
-                    <Field label="Eyebrow font">
-                      <select
-                        className="admin-select"
-                        value={String(content.eyebrowFont || '')}
-                        onChange={(e) => setField('eyebrowFont', e.target.value)}
-                      >
-                        <option value="">Default (mono)</option>
-                        {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Eyebrow size">
-                      <input
-                        className="admin-input"
-                        value={String(content.eyebrowSize || '')}
-                        onChange={(e) => setField('eyebrowSize', e.target.value)}
-                        placeholder="0.72rem"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Title color"
-                      value={String(content.titleColor || '')}
-                      fallback="#1E2530"
-                      onChange={(next) => setField('titleColor', next)}
-                    />
-                    <Field label="Title font">
-                      <select
-                        className="admin-select"
-                        value={String(content.titleFont || '')}
-                        onChange={(e) => setField('titleFont', e.target.value)}
-                      >
-                        <option value="">Default (display)</option>
-                        {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Title size">
-                      <input
-                        className="admin-input"
-                        value={String(content.titleSize || '')}
-                        onChange={(e) => setField('titleSize', e.target.value)}
-                        placeholder="clamp(2.6rem,5vw,4.2rem)"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Body color"
-                      value={String(content.bodyColor || '')}
-                      fallback="#5B6472"
-                      onChange={(next) => setField('bodyColor', next)}
-                    />
-                    <Field label="Body font">
-                      <select
-                        className="admin-select"
-                        value={String(content.bodyFont || '')}
-                        onChange={(e) => setField('bodyFont', e.target.value)}
-                      >
-                        <option value="">Default (body)</option>
-                        {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
-                          <option key={f.value} value={f.value}>
-                            {f.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Body size">
-                      <input
-                        className="admin-input"
-                        value={String(content.bodySize || '')}
-                        onChange={(e) => setField('bodySize', e.target.value)}
-                        placeholder="1.02rem"
-                      />
-                    </Field>
-                  </div>
+                  </Field>
+                  <Field label="Featured only">
+                    <select
+                      className="admin-select"
+                      value={content.featuredOnly === false ? '0' : '1'}
+                      onChange={(e) => setField('featuredOnly', e.target.value === '1')}
+                    >
+                      <option value="1">Yes (fallback to latest)</option>
+                      <option value="0">No — latest items</option>
+                    </select>
+                  </Field>
+                  <Field label="CTA label">
+                    <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
+                  </Field>
+                  <Field label="CTA href">
+                    <input className="admin-input" value={String(content.ctaHref || '/projects')} onChange={(e) => setField('ctaHref', e.target.value)} />
+                  </Field>
                 </div>
+              ) : null}
 
-                <div
-                  style={{
-                    border: '1px solid var(--admin-border, #e5e7eb)',
-                    borderRadius: 10,
-                    padding: '0.9rem',
-                    background: 'var(--admin-muted-bg, #f8fafc)',
-                    marginBottom: '0.9rem',
-                  }}
-                >
-                  <strong>Loc-card style</strong>
-                  <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
-                    <ColorInput
-                      label="Card background"
-                      value={String(content.cardBg || '')}
-                      fallback="#FFFFFF"
-                      onChange={(next) => setField('cardBg', next)}
-                    />
-                    <ColorInput
-                      label="Card border"
-                      value={String(content.cardBorderColor || '')}
-                      fallback="#E7EBF1"
-                      onChange={(next) => setField('cardBorderColor', next)}
-                    />
-                    <ColorInput
-                      label="Active / hover border"
-                      value={String(content.cardActiveBorderColor || '')}
-                      fallback="#FF6B1A"
-                      onChange={(next) => setField('cardActiveBorderColor', next)}
-                      hint="Matches HTML .loc-card:hover / .map-active orange border."
-                    />
-                    <Field label="Card radius">
-                      <input
-                        className="admin-input"
-                        value={String(content.cardBorderRadius || '')}
-                        onChange={(e) => setField('cardBorderRadius', e.target.value)}
-                        placeholder="10px"
-                      />
-                    </Field>
-                    <Field label="Card padding">
-                      <input
-                        className="admin-input"
-                        value={String(content.cardPadding || '')}
-                        onChange={(e) => setField('cardPadding', e.target.value)}
-                        placeholder="1.6rem 1.7rem"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Icon background"
-                      value={String(content.iconBg || '')}
-                      fallback="#0A1628"
-                      onChange={(next) => setField('iconBg', next)}
-                    />
-                    <ColorInput
-                      label="Icon color"
-                      value={String(content.iconColor || '')}
-                      fallback="#00D4FF"
-                      onChange={(next) => setField('iconColor', next)}
-                    />
-                    <Field label="Icon size">
-                      <input
-                        className="admin-input"
-                        value={String(content.iconSize || '')}
-                        onChange={(e) => setField('iconSize', e.target.value)}
-                        placeholder="40px"
-                      />
-                    </Field>
-                    <ColorInput
-                      label="Tag color"
-                      value={String(content.tagColor || '')}
-                      fallback="#FF6B1A"
-                      onChange={(next) => setField('tagColor', next)}
-                    />
-                    <ColorInput
-                      label="Tag border"
-                      value={String(content.tagBorderColor || '')}
-                      fallback="#FFB48A"
-                      onChange={(next) => setField('tagBorderColor', next)}
+              {section.type === 'timeline' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      marginBottom: '1rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                    }}
+                  >
+                    <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                      <div>
+                        <strong>CTA buttons</strong>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                          One line with left / center / right slots. Each button’s Position places it in that slot.
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={() =>
+                          setTimelineCtas([
+                            ...timelineCtas,
+                            { label: 'Learn more →', href: '#', position: 'left', color: '' },
+                          ])
+                        }
+                      >
+                        Add CTA
+                      </button>
+                    </div>
+                    {timelineCtas.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                        No CTA buttons yet. Add one to show a call-to-action under the timeline.
+                      </p>
+                    ) : null}
+                    {timelineCtas.map((cta, idx) => {
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            border: '1px solid var(--admin-border, #e5e7eb)',
+                            borderRadius: 8,
+                            padding: '0.8rem',
+                            marginBottom: '0.7rem',
+                            background: '#fff',
+                          }}
+                        >
+                          <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                            <strong>CTA {idx + 1}</strong>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-danger"
+                              onClick={() => setTimelineCtas(timelineCtas.filter((_, i) => i !== idx))}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <div className="admin-form-grid">
+                            <Field label="Label">
+                              <input
+                                className="admin-input"
+                                value={cta.label || ''}
+                                onChange={(e) => {
+                                  const next = [...timelineCtas];
+                                  next[idx] = { ...next[idx], label: e.target.value };
+                                  setTimelineCtas(next);
+                                }}
+                              />
+                            </Field>
+                            <Field label="Href">
+                              <input
+                                className="admin-input"
+                                value={cta.href || ''}
+                                onChange={(e) => {
+                                  const next = [...timelineCtas];
+                                  next[idx] = { ...next[idx], href: e.target.value };
+                                  setTimelineCtas(next);
+                                }}
+                                placeholder="/contact"
+                              />
+                            </Field>
+                            <Field label="Position">
+                              <select
+                                className="admin-select"
+                                value={cta.position === 'center' || cta.position === 'right' ? cta.position : 'left'}
+                                onChange={(e) => {
+                                  const next = [...timelineCtas];
+                                  next[idx] = { ...next[idx], position: e.target.value };
+                                  setTimelineCtas(next);
+                                }}
+                              >
+                                <option value="left">Left</option>
+                                <option value="center">Center</option>
+                                <option value="right">Right</option>
+                              </select>
+                            </Field>
+                            <ColorInput
+                              label="Button color"
+                              value={cta.color || ''}
+                              fallback="#ea580c"
+                              placeholder="Theme default (empty)"
+                              onChange={(color) => {
+                                const next = [...timelineCtas];
+                                next[idx] = { ...next[idx], color };
+                                setTimelineCtas(next);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="admin-field full">
+                    <label>Timeline items (one per line: Year | Title | Body | now?)</label>
+                    <textarea
+                      className="admin-textarea"
+                      style={{ minHeight: 140 }}
+                      value={((content.items as Array<{ year: string; title: string; body: string; now?: boolean; next?: boolean }>) || [])
+                        .map((i) => `${i.year} | ${i.title} | ${i.body}${i.now ? ' | now' : i.next ? ' | next' : ''}`)
+                        .join('\n')}
+                      onChange={(e) =>
+                        setField(
+                          'items',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line) => {
+                              const parts = line.split('|').map((p) => p.trim());
+                              const flag = (parts[3] || '').toLowerCase();
+                              return {
+                                year: parts[0] || '',
+                                title: parts[1] || '',
+                                body: parts[2] || '',
+                                now: flag === 'now',
+                                next: flag === 'next',
+                              };
+                            })
+                        )
+                      }
                     />
                   </div>
                 </div>
+              ) : null}
 
+              {section.type === 'eco' ? (
                 <div
-                  className="full"
                   style={{
+                    marginTop: '0.8rem',
                     border: '1px solid var(--admin-border, #e5e7eb)',
                     borderRadius: 10,
                     padding: '0.9rem',
@@ -3008,48 +2470,716 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                 >
                   <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
                     <div>
-                      <strong>Office location cards</strong>
+                      <strong>Capability groups</strong>
                       <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                        Add, edit, delete, reorder (↑↓), and show/hide. Hovering a card with a map URL
-                        previews that pin on the map (HTML parity).
+                        Each group gets a dot and hover color. Orange, Green, Blue and Purple keep their fixed 2×2 spots;
+                        the other colors fill the next free cells in order.
+                      </div>
+                    </div>
+                    <button type="button" className="admin-btn admin-btn-secondary" onClick={addEcoGroup}>
+                      Add group
+                    </button>
+                  </div>
+                  {ecoGroups.length === 0 ? (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                      No groups yet. Add one to populate the checklist.
+                    </p>
+                  ) : null}
+                  {ecoGroups.map((group, idx) => {
+                    const colorKey = ecoGroupColorKey(group);
+                    const preset = ECO_GROUP_COLOR_PRESETS.find((p) => p.key === colorKey)!;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          border: '1px solid var(--admin-border, #e5e7eb)',
+                          borderLeft: `4px solid ${preset.hex}`,
+                          borderRadius: 8,
+                          padding: '0.8rem',
+                          marginBottom: '0.7rem',
+                          background: '#fff',
+                        }}
+                      >
+                        <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                          <strong style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                            <span
+                              style={{ width: 10, height: 10, borderRadius: '50%', background: preset.hex, display: 'inline-block' }}
+                            />
+                            #{idx + 1} · {preset.label}
+                          </strong>
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveEcoGroup(idx, -1)}
+                              disabled={idx === 0}
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveEcoGroup(idx, 1)}
+                              disabled={idx === ecoGroups.length - 1}
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-danger"
+                              onClick={() => setEcoGroups(ecoGroups.filter((_, i) => i !== idx))}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        <div className="admin-form-grid">
+                          <Field label="Color">
+                            <select
+                              className="admin-select"
+                              value={colorKey}
+                              onChange={(e) =>
+                                patchEcoGroup(idx, ecoGroupForColor(e.target.value as EcoGroupColorKey, group.items))
+                              }
+                            >
+                              {ECO_GROUP_COLOR_PRESETS.map((p) => (
+                                <option key={p.key} value={p.key}>
+                                  {p.label} ({p.hex})
+                                </option>
+                              ))}
+                            </select>
+                          </Field>
+                          <div className="admin-field full">
+                            <label>Items (one per line)</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 90 }}
+                              value={(group.items || []).join('\n')}
+                              onChange={(e) => patchEcoGroup(idx, { items: e.target.value.split('\n') })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {section.type === 'quick_contact' || section.type === 'culture_stats' || section.type === 'stats' ? (
+                <div className="admin-field full" style={{ marginTop: '0.8rem' }}>
+                  <label>
+                    {section.type === 'quick_contact'
+                      ? 'Items (one per line: Label | Value | href | emergency?)'
+                      : section.type === 'stats'
+                        ? 'Stats (one per line: Value | Label | optionalSuffix)'
+                        : 'Items (one per line: Value | Label)'}
+                  </label>
+                  <textarea
+                    className="admin-textarea"
+                    style={{ minHeight: 160 }}
+                    value={
+                      section.type === 'quick_contact'
+                        ? ((content.items as Array<{ label: string; value: string; href?: string | null; emergency?: boolean }>) || [])
+                            .map((i) => `${i.label} | ${i.value} | ${i.href || ''} | ${i.emergency ? 'emergency' : ''}`)
+                            .join('\n')
+                        : section.type === 'stats'
+                          ? ((content.stats as Array<{ value: number | string; label: string; suffix?: string }>) || [])
+                              .map((s) => `${s.value} | ${s.label} | ${s.suffix || ''}`)
+                              .join('\n')
+                          : ((content.items as Array<{ value?: string; label: string }>) || [])
+                              .map((i) => `${i.value || ''} | ${i.label || ''}`)
+                              .join('\n')
+                    }
+                    onChange={(e) => {
+                      if (section.type === 'quick_contact') {
+                        setField(
+                          'items',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line) => {
+                              const parts = line.split('|').map((p) => p.trim());
+                              return {
+                                label: parts[0] || '',
+                                value: parts[1] || '',
+                                href: parts[2] || null,
+                                emergency: (parts[3] || '').toLowerCase().includes('emergency'),
+                              };
+                            })
+                        );
+                      } else if (section.type === 'stats') {
+                        setField(
+                          'stats',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line) => {
+                              const parts = line.split('|').map((p) => p.trim());
+                              const num = Number(parts[0]);
+                              return {
+                                value: Number.isFinite(num) ? num : parts[0] || 0,
+                                label: parts[1] || '',
+                                suffix: parts[2] || undefined,
+                              };
+                            })
+                        );
+                      } else {
+                        setField(
+                          'items',
+                          e.target.value
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean)
+                            .map((line) => {
+                              const parts = line.split('|').map((p) => p.trim());
+                              return { value: parts[0] || '', label: parts[1] || '' };
+                            })
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              {section.type === 'locations' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                      marginBottom: '0.9rem',
+                    }}
+                  >
+                    <strong>Section &amp; map layout</strong>
+                    <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                      <Field label="Tone">
+                        <select
+                          className="admin-select"
+                          value={String(content.tone || 'gray')}
+                          onChange={(e) => setField('tone', e.target.value)}
+                        >
+                          <option value="gray">Gray</option>
+                          <option value="light">Light</option>
+                        </select>
+                      </Field>
+                      <ColorInput
+                        label="Section background"
+                        value={String(content.sectionBg || '')}
+                        fallback={content.tone === 'light' ? '#FFFFFF' : '#F4F6F9'}
+                        onChange={(next) => setField('sectionBg', next)}
+                        hint="Overrides Tone when set."
+                      />
+                      <Field label="Layout">
+                        <select
+                          className="admin-select"
+                          value={String(content.layout || 'img-right')}
+                          onChange={(e) => setField('layout', e.target.value)}
+                        >
+                          <option value="img-right">Cards left · Map right</option>
+                          <option value="img-left">Map left · Cards right</option>
+                        </select>
+                      </Field>
+                      <Field label="Show map">
+                        <select
+                          className="admin-select"
+                          value={content.showMap === false ? '0' : '1'}
+                          onChange={(e) => setField('showMap', e.target.value === '1')}
+                        >
+                          <option value="1">Show</option>
+                          <option value="0">Hide</option>
+                        </select>
+                      </Field>
+                      <Field label="Eyebrow class">
+                        <select
+                          className="admin-select"
+                          value={String(content.eyebrowClass || 'eyebrow-orange')}
+                          onChange={(e) => setField('eyebrowClass', e.target.value)}
+                        >
+                          {LOCATIONS_SECTION_EYEBROW_PRESETS.map((p) => (
+                            <option key={p.value} value={p.value}>
+                              {p.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Section padding (block)">
+                        <input
+                          className="admin-input"
+                          value={String(content.sectionPadding || '')}
+                          onChange={(e) => setField('sectionPadding', e.target.value)}
+                          placeholder="9rem"
+                        />
+                      </Field>
+                      <Field label="Default map embed URL">
+                        <input
+                          className="admin-input"
+                          value={String(content.mapEmbedUrl || '')}
+                          onChange={(e) => setField('mapEmbedUrl', e.target.value)}
+                          placeholder="https://www.google.com/maps?q=…&output=embed"
+                        />
+                      </Field>
+                      <Field label="Default map title">
+                        <input
+                          className="admin-input"
+                          value={String(content.mapTitle || '')}
+                          onChange={(e) => setField('mapTitle', e.target.value)}
+                        />
+                      </Field>
+                      <Field label="Map min height">
+                        <input
+                          className="admin-input"
+                          value={String(content.mapMinHeight || '')}
+                          onChange={(e) => setField('mapMinHeight', e.target.value)}
+                          placeholder="460px"
+                        />
+                      </Field>
+                      <Field label="Card list gap">
+                        <input
+                          className="admin-input"
+                          value={String(content.locGridGap || '')}
+                          onChange={(e) => setField('locGridGap', e.target.value)}
+                          placeholder="1.25rem"
+                        />
+                      </Field>
+                      <Field label="Default directions label">
+                        <input
+                          className="admin-input"
+                          value={String(content.directionsLabel || '')}
+                          onChange={(e) => setField('directionsLabel', e.target.value)}
+                          placeholder="Get Directions →"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                      marginBottom: '0.9rem',
+                    }}
+                  >
+                    <strong>Typography &amp; colors</strong>
+                    <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                      <ColorInput
+                        label="Eyebrow color"
+                        value={String(content.eyebrowColor || '')}
+                        fallback="#FF6B1A"
+                        onChange={(next) => setField('eyebrowColor', next)}
+                      />
+                      <Field label="Eyebrow font">
+                        <select
+                          className="admin-select"
+                          value={String(content.eyebrowFont || '')}
+                          onChange={(e) => setField('eyebrowFont', e.target.value)}
+                        >
+                          <option value="">Default (mono)</option>
+                          {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Eyebrow size">
+                        <input
+                          className="admin-input"
+                          value={String(content.eyebrowSize || '')}
+                          onChange={(e) => setField('eyebrowSize', e.target.value)}
+                          placeholder="0.72rem"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Title color"
+                        value={String(content.titleColor || '')}
+                        fallback="#1E2530"
+                        onChange={(next) => setField('titleColor', next)}
+                      />
+                      <Field label="Title font">
+                        <select
+                          className="admin-select"
+                          value={String(content.titleFont || '')}
+                          onChange={(e) => setField('titleFont', e.target.value)}
+                        >
+                          <option value="">Default (display)</option>
+                          {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Title size">
+                        <input
+                          className="admin-input"
+                          value={String(content.titleSize || '')}
+                          onChange={(e) => setField('titleSize', e.target.value)}
+                          placeholder="clamp(2.6rem,5vw,4.2rem)"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Body color"
+                        value={String(content.bodyColor || '')}
+                        fallback="#5B6472"
+                        onChange={(next) => setField('bodyColor', next)}
+                      />
+                      <Field label="Body font">
+                        <select
+                          className="admin-select"
+                          value={String(content.bodyFont || '')}
+                          onChange={(e) => setField('bodyFont', e.target.value)}
+                        >
+                          <option value="">Default (body)</option>
+                          {LOCATIONS_SECTION_FONT_OPTIONS.map((f) => (
+                            <option key={f.value} value={f.value}>
+                              {f.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label="Body size">
+                        <input
+                          className="admin-input"
+                          value={String(content.bodySize || '')}
+                          onChange={(e) => setField('bodySize', e.target.value)}
+                          placeholder="1.02rem"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                      marginBottom: '0.9rem',
+                    }}
+                  >
+                    <strong>Loc-card style</strong>
+                    <div className="admin-form-grid" style={{ marginTop: '0.7rem' }}>
+                      <ColorInput
+                        label="Card background"
+                        value={String(content.cardBg || '')}
+                        fallback="#FFFFFF"
+                        onChange={(next) => setField('cardBg', next)}
+                      />
+                      <ColorInput
+                        label="Card border"
+                        value={String(content.cardBorderColor || '')}
+                        fallback="#E7EBF1"
+                        onChange={(next) => setField('cardBorderColor', next)}
+                      />
+                      <ColorInput
+                        label="Active / hover border"
+                        value={String(content.cardActiveBorderColor || '')}
+                        fallback="#FF6B1A"
+                        onChange={(next) => setField('cardActiveBorderColor', next)}
+                        hint="Matches HTML .loc-card:hover / .map-active orange border."
+                      />
+                      <Field label="Card radius">
+                        <input
+                          className="admin-input"
+                          value={String(content.cardBorderRadius || '')}
+                          onChange={(e) => setField('cardBorderRadius', e.target.value)}
+                          placeholder="10px"
+                        />
+                      </Field>
+                      <Field label="Card padding">
+                        <input
+                          className="admin-input"
+                          value={String(content.cardPadding || '')}
+                          onChange={(e) => setField('cardPadding', e.target.value)}
+                          placeholder="1.6rem 1.7rem"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Icon background"
+                        value={String(content.iconBg || '')}
+                        fallback="#0A1628"
+                        onChange={(next) => setField('iconBg', next)}
+                      />
+                      <ColorInput
+                        label="Icon color"
+                        value={String(content.iconColor || '')}
+                        fallback="#00D4FF"
+                        onChange={(next) => setField('iconColor', next)}
+                      />
+                      <Field label="Icon size">
+                        <input
+                          className="admin-input"
+                          value={String(content.iconSize || '')}
+                          onChange={(e) => setField('iconSize', e.target.value)}
+                          placeholder="40px"
+                        />
+                      </Field>
+                      <ColorInput
+                        label="Tag color"
+                        value={String(content.tagColor || '')}
+                        fallback="#FF6B1A"
+                        onChange={(next) => setField('tagColor', next)}
+                      />
+                      <ColorInput
+                        label="Tag border"
+                        value={String(content.tagBorderColor || '')}
+                        fallback="#FFB48A"
+                        onChange={(next) => setField('tagBorderColor', next)}
+                      />
+                    </div>
+                  </div>
+
+                  <div
+                    className="full"
+                    style={{
+                      border: '1px solid var(--admin-border, #e5e7eb)',
+                      borderRadius: 10,
+                      padding: '0.9rem',
+                      background: 'var(--admin-muted-bg, #f8fafc)',
+                    }}
+                  >
+                    <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                      <div>
+                        <strong>Office location cards</strong>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                          Add, edit, delete, reorder (↑↓), and show/hide. Hovering a card with a map URL
+                          previews that pin on the map (HTML parity).
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={() => setLocationCards([...locationCards, createLocationOfficeCard()])}
+                      >
+                        Add location
+                      </button>
+                    </div>
+                    {locationCards.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
+                        No locations yet. Add one to populate the loc-grid.
+                      </p>
+                    ) : null}
+                    {locationCards.map((card, idx) => (
+                      <div
+                        key={card.id}
+                        style={{
+                          border: '1px solid var(--admin-border, #e5e7eb)',
+                          borderRadius: 8,
+                          padding: '0.8rem',
+                          marginBottom: '0.7rem',
+                          background: card.enabled === false ? '#f1f5f9' : '#fff',
+                          opacity: card.enabled === false ? 0.72 : 1,
+                        }}
+                      >
+                        <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
+                          <strong>
+                            #{idx + 1} · {card.title || 'Untitled'}
+                            {card.enabled === false ? ' (hidden)' : ''}
+                            {card.isDefault ? ' · default map' : ''}
+                          </strong>
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveLocationCard(card.id, -1)}
+                              disabled={idx === 0}
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => moveLocationCard(card.id, 1)}
+                              disabled={idx === locationCards.length - 1}
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() =>
+                                patchLocationCard(card.id, { enabled: card.enabled === false })
+                              }
+                            >
+                              {card.enabled === false ? 'Show' : 'Hide'}
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-secondary"
+                              onClick={() => patchLocationCard(card.id, { isDefault: !card.isDefault })}
+                            >
+                              {card.isDefault ? 'Unset default' : 'Set default map'}
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-danger"
+                              onClick={() =>
+                                setLocationCards(locationCards.filter((c) => c.id !== card.id))
+                              }
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                        <div className="admin-form-grid">
+                          <Field label="Tag">
+                            <input
+                              className="admin-input"
+                              value={card.tag || ''}
+                              onChange={(e) => patchLocationCard(card.id, { tag: e.target.value })}
+                              placeholder="Head Office"
+                            />
+                          </Field>
+                          <Field label="Title">
+                            <input
+                              className="admin-input"
+                              value={card.title}
+                              onChange={(e) => patchLocationCard(card.id, { title: e.target.value })}
+                            />
+                          </Field>
+                          <div className="admin-field full">
+                            <label>Address</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 64 }}
+                              value={card.address}
+                              onChange={(e) => patchLocationCard(card.id, { address: e.target.value })}
+                            />
+                          </div>
+                          <Field label="Phone label">
+                            <input
+                              className="admin-input"
+                              value={card.phone || ''}
+                              onChange={(e) => patchLocationCard(card.id, { phone: e.target.value })}
+                            />
+                          </Field>
+                          <Field label="Phone href">
+                            <input
+                              className="admin-input"
+                              value={card.phoneHref || ''}
+                              onChange={(e) => patchLocationCard(card.id, { phoneHref: e.target.value })}
+                              placeholder="tel:+919590137666"
+                            />
+                          </Field>
+                          <Field label="Directions URL">
+                            <input
+                              className="admin-input"
+                              value={card.directionsUrl || ''}
+                              onChange={(e) =>
+                                patchLocationCard(card.id, { directionsUrl: e.target.value })
+                              }
+                            />
+                          </Field>
+                          <Field label="Directions label">
+                            <input
+                              className="admin-input"
+                              value={card.directionsLabel || ''}
+                              onChange={(e) =>
+                                patchLocationCard(card.id, { directionsLabel: e.target.value })
+                              }
+                              placeholder="Get Directions →"
+                            />
+                          </Field>
+                          <Field label="Map embed URL (hover preview)">
+                            <input
+                              className="admin-input"
+                              value={card.mapEmbedUrl || ''}
+                              onChange={(e) =>
+                                patchLocationCard(card.id, { mapEmbedUrl: e.target.value })
+                              }
+                              placeholder="https://www.google.com/maps?q=lat,lng&z=16&output=embed"
+                            />
+                          </Field>
+                          <Field label="Map title">
+                            <input
+                              className="admin-input"
+                              value={card.mapTitle || ''}
+                              onChange={(e) => patchLocationCard(card.id, { mapTitle: e.target.value })}
+                            />
+                          </Field>
+                          <div className="admin-field full">
+                            <label>Icon SVG (inner markup for 24×24 viewBox)</label>
+                            <textarea
+                              className="admin-textarea"
+                              style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
+                              value={card.icon || ''}
+                              onChange={(e) => patchLocationCard(card.id, { icon: e.target.value })}
+                              placeholder='<path d="M21 10c0 7-9 13…" />'
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {section.type === 'job_list' ? (
+                <div
+                  style={{
+                    marginTop: '0.8rem',
+                    border: '1px solid var(--admin-border, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '0.9rem',
+                    background: 'var(--admin-muted-bg, #f8fafc)',
+                  }}
+                >
+                  <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
+                    <div>
+                      <strong>Job cards</strong>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
+                        Edit each opening and set its background color. Clear uses the default white card.
                       </div>
                     </div>
                     <button
                       type="button"
                       className="admin-btn admin-btn-secondary"
-                      onClick={() => setLocationCards([...locationCards, createLocationOfficeCard()])}
+                      onClick={() =>
+                        setJobCards([
+                          ...jobCards,
+                          {
+                            title: 'New role',
+                            department: 'Engineering',
+                            location: 'Bengaluru',
+                            type: 'Full-Time',
+                          },
+                        ])
+                      }
                     >
-                      Add location
+                      Add job
                     </button>
                   </div>
-                  {locationCards.length === 0 ? (
+                  {jobCards.length === 0 ? (
                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                      No locations yet. Add one to populate the loc-grid.
+                      No jobs yet. Add one to populate the openings list.
                     </p>
                   ) : null}
-                  {locationCards.map((card, idx) => (
+                  {jobCards.map((job, idx) => (
                     <div
-                      key={card.id}
+                      key={`job-${idx}-${job.title}`}
                       style={{
                         border: '1px solid var(--admin-border, #e5e7eb)',
                         borderRadius: 8,
                         padding: '0.8rem',
                         marginBottom: '0.7rem',
-                        background: card.enabled === false ? '#f1f5f9' : '#fff',
-                        opacity: card.enabled === false ? 0.72 : 1,
+                        background: '#fff',
                       }}
                     >
                       <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
                         <strong>
-                          #{idx + 1} · {card.title || 'Untitled'}
-                          {card.enabled === false ? ' (hidden)' : ''}
-                          {card.isDefault ? ' · default map' : ''}
+                          #{idx + 1} · {job.title || 'Untitled'}
                         </strong>
                         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                           <button
                             type="button"
                             className="admin-btn admin-btn-secondary"
-                            onClick={() => moveLocationCard(card.id, -1)}
+                            onClick={() => moveJobCard(idx, -1)}
                             disabled={idx === 0}
                           >
                             ↑
@@ -3057,459 +3187,105 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                           <button
                             type="button"
                             className="admin-btn admin-btn-secondary"
-                            onClick={() => moveLocationCard(card.id, 1)}
-                            disabled={idx === locationCards.length - 1}
+                            onClick={() => moveJobCard(idx, 1)}
+                            disabled={idx === jobCards.length - 1}
                           >
                             ↓
                           </button>
                           <button
                             type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() =>
-                              patchLocationCard(card.id, { enabled: card.enabled === false })
-                            }
-                          >
-                            {card.enabled === false ? 'Show' : 'Hide'}
-                          </button>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            onClick={() => patchLocationCard(card.id, { isDefault: !card.isDefault })}
-                          >
-                            {card.isDefault ? 'Unset default' : 'Set default map'}
-                          </button>
-                          <button
-                            type="button"
                             className="admin-btn admin-btn-danger"
-                            onClick={() =>
-                              setLocationCards(locationCards.filter((c) => c.id !== card.id))
-                            }
+                            onClick={() => setJobCards(jobCards.filter((_, i) => i !== idx))}
                           >
                             Delete
                           </button>
                         </div>
                       </div>
                       <div className="admin-form-grid">
-                        <Field label="Tag">
-                          <input
-                            className="admin-input"
-                            value={card.tag || ''}
-                            onChange={(e) => patchLocationCard(card.id, { tag: e.target.value })}
-                            placeholder="Head Office"
-                          />
-                        </Field>
                         <Field label="Title">
                           <input
                             className="admin-input"
-                            value={card.title}
-                            onChange={(e) => patchLocationCard(card.id, { title: e.target.value })}
+                            value={job.title}
+                            onChange={(e) => patchJobCard(idx, { title: e.target.value })}
                           />
                         </Field>
-                        <div className="admin-field full">
-                          <label>Address</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 64 }}
-                            value={card.address}
-                            onChange={(e) => patchLocationCard(card.id, { address: e.target.value })}
-                          />
-                        </div>
-                        <Field label="Phone label">
+                        <ColorInput
+                          label="Card background"
+                          value={String(job.bg || '')}
+                          fallback="#FFFFFF"
+                          onChange={(next) => patchJobCard(idx, { bg: next || undefined })}
+                          hint="Overrides the default white job card when set."
+                        />
+                        <Field label="Department">
                           <input
                             className="admin-input"
-                            value={card.phone || ''}
-                            onChange={(e) => patchLocationCard(card.id, { phone: e.target.value })}
-                          />
-                        </Field>
-                        <Field label="Phone href">
-                          <input
-                            className="admin-input"
-                            value={card.phoneHref || ''}
-                            onChange={(e) => patchLocationCard(card.id, { phoneHref: e.target.value })}
-                            placeholder="tel:+919590137666"
-                          />
-                        </Field>
-                        <Field label="Directions URL">
-                          <input
-                            className="admin-input"
-                            value={card.directionsUrl || ''}
+                            value={job.department || ''}
                             onChange={(e) =>
-                              patchLocationCard(card.id, { directionsUrl: e.target.value })
+                              patchJobCard(idx, { department: e.target.value || undefined })
                             }
                           />
                         </Field>
-                        <Field label="Directions label">
+                        <Field label="Location">
                           <input
                             className="admin-input"
-                            value={card.directionsLabel || ''}
+                            value={job.location || ''}
                             onChange={(e) =>
-                              patchLocationCard(card.id, { directionsLabel: e.target.value })
+                              patchJobCard(idx, { location: e.target.value || undefined })
                             }
-                            placeholder="Get Directions →"
                           />
                         </Field>
-                        <Field label="Map embed URL (hover preview)">
+                        <Field label="Type">
                           <input
                             className="admin-input"
-                            value={card.mapEmbedUrl || ''}
-                            onChange={(e) =>
-                              patchLocationCard(card.id, { mapEmbedUrl: e.target.value })
-                            }
-                            placeholder="https://www.google.com/maps?q=lat,lng&z=16&output=embed"
+                            value={job.type || ''}
+                            onChange={(e) => patchJobCard(idx, { type: e.target.value || undefined })}
+                            placeholder="Full-Time"
                           />
                         </Field>
-                        <Field label="Map title">
-                          <input
-                            className="admin-input"
-                            value={card.mapTitle || ''}
-                            onChange={(e) => patchLocationCard(card.id, { mapTitle: e.target.value })}
-                          />
-                        </Field>
-                        <div className="admin-field full">
-                          <label>Icon SVG (inner markup for 24×24 viewBox)</label>
-                          <textarea
-                            className="admin-textarea"
-                            style={{ minHeight: 64, fontFamily: 'var(--admin-mono)' }}
-                            value={card.icon || ''}
-                            onChange={(e) => patchLocationCard(card.id, { icon: e.target.value })}
-                            placeholder='<path d="M21 10c0 7-9 13…" />'
-                          />
-                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            {section.type === 'job_list' ? (
-              <div
-                style={{
-                  marginTop: '0.8rem',
-                  border: '1px solid var(--admin-border, #e5e7eb)',
-                  borderRadius: 10,
-                  padding: '0.9rem',
-                  background: 'var(--admin-muted-bg, #f8fafc)',
-                }}
-              >
-                <div className="admin-toolbar" style={{ marginBottom: '0.6rem' }}>
-                  <div>
-                    <strong>Job cards</strong>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: 2 }}>
-                      Edit each opening and set its background color. Clear uses the default white card.
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-secondary"
-                    onClick={() =>
-                      setJobCards([
-                        ...jobCards,
-                        {
-                          title: 'New role',
-                          department: 'Engineering',
-                          location: 'Bengaluru',
-                          type: 'Full-Time',
-                        },
-                      ])
-                    }
-                  >
-                    Add job
-                  </button>
-                </div>
-                {jobCards.length === 0 ? (
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                    No jobs yet. Add one to populate the openings list.
-                  </p>
-                ) : null}
-                {jobCards.map((job, idx) => (
-                  <div
-                    key={`job-${idx}-${job.title}`}
-                    style={{
-                      border: '1px solid var(--admin-border, #e5e7eb)',
-                      borderRadius: 8,
-                      padding: '0.8rem',
-                      marginBottom: '0.7rem',
-                      background: '#fff',
-                    }}
-                  >
-                    <div className="admin-toolbar" style={{ marginBottom: '0.5rem' }}>
-                      <strong>
-                        #{idx + 1} · {job.title || 'Untitled'}
-                      </strong>
-                      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-secondary"
-                          onClick={() => moveJobCard(idx, -1)}
-                          disabled={idx === 0}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-secondary"
-                          onClick={() => moveJobCard(idx, 1)}
-                          disabled={idx === jobCards.length - 1}
-                        >
-                          ↓
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn-danger"
-                          onClick={() => setJobCards(jobCards.filter((_, i) => i !== idx))}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                    <div className="admin-form-grid">
-                      <Field label="Title">
-                        <input
-                          className="admin-input"
-                          value={job.title}
-                          onChange={(e) => patchJobCard(idx, { title: e.target.value })}
-                        />
-                      </Field>
-                      <ColorInput
-                        label="Card background"
-                        value={String(job.bg || '')}
-                        fallback="#FFFFFF"
-                        onChange={(next) => patchJobCard(idx, { bg: next || undefined })}
-                        hint="Overrides the default white job card when set."
-                      />
-                      <Field label="Department">
-                        <input
-                          className="admin-input"
-                          value={job.department || ''}
-                          onChange={(e) =>
-                            patchJobCard(idx, { department: e.target.value || undefined })
-                          }
-                        />
-                      </Field>
-                      <Field label="Location">
-                        <input
-                          className="admin-input"
-                          value={job.location || ''}
-                          onChange={(e) =>
-                            patchJobCard(idx, { location: e.target.value || undefined })
-                          }
-                        />
-                      </Field>
-                      <Field label="Type">
-                        <input
-                          className="admin-input"
-                          value={job.type || ''}
-                          onChange={(e) => patchJobCard(idx, { type: e.target.value || undefined })}
-                          placeholder="Full-Time"
-                        />
-                      </Field>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {section.type === 'internship' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Card title">
-                    <input
-                      className="admin-input"
-                      value={String(content.cardTitle || '')}
-                      onChange={(e) => setField('cardTitle', e.target.value)}
-                    />
-                  </Field>
-                  <Field label="CTA label">
-                    <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
-                  </Field>
-                  <Field label="Apply role (prefill)">
-                    <input
-                      className="admin-input"
-                      value={String(content.applyRole || '')}
-                      onChange={(e) => setField('applyRole', e.target.value)}
-                    />
-                  </Field>
-                  <div className="admin-field full">
-                    <label>Card body</label>
-                    <textarea
-                      className="admin-textarea"
-                      value={String(content.cardBody || '')}
-                      onChange={(e) => setField('cardBody', e.target.value)}
-                    />
-                  </div>
-                  <div className="admin-field full">
-                    <label>Points (one per line: Label | Value)</label>
-                    <textarea
-                      className="admin-textarea"
-                      value={((content.points as Array<{ label: string; value: string }>) || [])
-                        .map((p) => `${p.label} | ${p.value}`)
-                        .join('\n')}
-                      onChange={(e) =>
-                        setField(
-                          'points',
-                          e.target.value
-                            .split('\n')
-                            .map((l) => l.trim())
-                            .filter(Boolean)
-                            .map((line) => {
-                              const parts = line.split('|').map((p) => p.trim());
-                              return { label: parts[0] || '', value: parts[1] || '' };
-                            })
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : null}
-
-            {section.type === 'careers_apply' || section.type === 'enquiry_form' ? (
-              <div style={{ marginTop: '0.8rem' }}>
-                <div className="admin-form-grid">
-                  <Field label="Form title">
-                    <input
-                      className="admin-input"
-                      value={String(content.formTitle || '')}
-                      onChange={(e) => setField('formTitle', e.target.value)}
-                    />
-                  </Field>
-                  <Field label="Submit label">
-                    <input
-                      className="admin-input"
-                      value={String(content.submitLabel || '')}
-                      onChange={(e) => setField('submitLabel', e.target.value)}
-                    />
-                  </Field>
-                  <div className="admin-field full">
-                    <label>Form intro</label>
-                    <textarea
-                      className="admin-textarea"
-                      value={String(content.formIntro || '')}
-                      onChange={(e) => setField('formIntro', e.target.value)}
-                    />
-                  </div>
-                  <div className="admin-field full">
-                    <label>Privacy note</label>
-                    <textarea
-                      className="admin-textarea"
-                      value={String(content.privacyNote || '')}
-                      onChange={(e) => setField('privacyNote', e.target.value)}
-                    />
-                  </div>
-                  <Field label="Success title">
-                    <input
-                      className="admin-input"
-                      value={String(content.successTitle || '')}
-                      onChange={(e) => setField('successTitle', e.target.value)}
-                    />
-                  </Field>
-                  <div className="admin-field full">
-                    <label>Success body</label>
-                    <textarea
-                      className="admin-textarea"
-                      value={String(content.successBody || '')}
-                      onChange={(e) => setField('successBody', e.target.value)}
-                    />
-                  </div>
-                  <Field label="Side title">
-                    <input
-                      className="admin-input"
-                      value={String(content.sideTitle || '')}
-                      onChange={(e) => setField('sideTitle', e.target.value)}
-                    />
-                  </Field>
-                  <div className="admin-field full">
-                    <label>Side items (one per line: Label | Value | href)</label>
-                    <textarea
-                      className="admin-textarea"
-                      value={((content.sideItems as Array<{ label: string; value: string; href?: string }>) || [])
-                        .map((i) => `${i.label} | ${i.value} | ${i.href || ''}`)
-                        .join('\n')}
-                      onChange={(e) => {
-                        const prev = (content.sideItems as Array<{ icon?: string }>) || [];
-                        setField(
-                          'sideItems',
-                          e.target.value
-                            .split('\n')
-                            .map((l) => l.trim())
-                            .filter(Boolean)
-                            .map((line, idx) => {
-                              const parts = line.split('|').map((p) => p.trim());
-                              return {
-                                label: parts[0] || '',
-                                value: parts[1] || '',
-                                href: parts[2] || undefined,
-                                icon: prev[idx]?.icon,
-                              };
-                            })
-                        );
-                      }}
-                    />
-                  </div>
-                </div>
-                {section.type === 'careers_apply' ? (
-                  <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                    <Field label="Next steps title">
+              {section.type === 'internship' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Card title">
                       <input
                         className="admin-input"
-                        value={String(content.nextTitle || '')}
-                        onChange={(e) => setField('nextTitle', e.target.value)}
+                        value={String(content.cardTitle || '')}
+                        onChange={(e) => setField('cardTitle', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="CTA label">
+                      <input className="admin-input" value={String(content.cta || '')} onChange={(e) => setField('cta', e.target.value)} />
+                    </Field>
+                    <Field label="Apply role (prefill)">
+                      <input
+                        className="admin-input"
+                        value={String(content.applyRole || '')}
+                        onChange={(e) => setField('applyRole', e.target.value)}
                       />
                     </Field>
                     <div className="admin-field full">
-                      <label>Next steps (one per line)</label>
+                      <label>Card body</label>
                       <textarea
                         className="admin-textarea"
-                        value={((content.nextSteps as Array<{ text: string }>) || []).map((s) => s.text).join('\n')}
-                        onChange={(e) =>
-                          setField(
-                            'nextSteps',
-                            e.target.value
-                              .split('\n')
-                              .map((l) => l.trim())
-                              .filter(Boolean)
-                              .map((text) => ({ text }))
-                          )
-                        }
+                        value={String(content.cardBody || '')}
+                        onChange={(e) => setField('cardBody', e.target.value)}
                       />
                     </div>
                     <div className="admin-field full">
-                      <label>Role options (one per line)</label>
+                      <label>Points (one per line: Label | Value)</label>
                       <textarea
                         className="admin-textarea"
-                        value={((content.roles as string[]) || []).join('\n')}
-                        onChange={(e) =>
-                          setField(
-                            'roles',
-                            e.target.value
-                              .split('\n')
-                              .map((l) => l.trim())
-                              .filter(Boolean)
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
-                    <Field label="Hours title">
-                      <input
-                        className="admin-input"
-                        value={String(content.hoursTitle || '')}
-                        onChange={(e) => setField('hoursTitle', e.target.value)}
-                      />
-                    </Field>
-                    <div className="admin-field full">
-                      <label>Hours (one per line: Label | Value)</label>
-                      <textarea
-                        className="admin-textarea"
-                        value={((content.hours as Array<{ label: string; value: string }>) || [])
-                          .map((h) => `${h.label} | ${h.value}`)
+                        value={((content.points as Array<{ label: string; value: string }>) || [])
+                          .map((p) => `${p.label} | ${p.value}`)
                           .join('\n')}
                         onChange={(e) =>
                           setField(
-                            'hours',
+                            'points',
                             e.target.value
                               .split('\n')
                               .map((l) => l.trim())
@@ -3523,11 +3299,214 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                       />
                     </div>
                   </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-        )}
+                </div>
+              ) : null}
+
+              {section.type === 'careers_apply' || section.type === 'enquiry_form' ? (
+                <div style={{ marginTop: '0.8rem' }}>
+                  <div className="admin-form-grid">
+                    <Field label="Form title">
+                      <input
+                        className="admin-input"
+                        value={String(content.formTitle || '')}
+                        onChange={(e) => setField('formTitle', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Submit label">
+                      <input
+                        className="admin-input"
+                        value={String(content.submitLabel || '')}
+                        onChange={(e) => setField('submitLabel', e.target.value)}
+                      />
+                    </Field>
+                    <div className="admin-field full">
+                      <label>Form intro</label>
+                      <textarea
+                        className="admin-textarea"
+                        value={String(content.formIntro || '')}
+                        onChange={(e) => setField('formIntro', e.target.value)}
+                      />
+                    </div>
+                    <div className="admin-field full">
+                      <label>Privacy note</label>
+                      <textarea
+                        className="admin-textarea"
+                        value={String(content.privacyNote || '')}
+                        onChange={(e) => setField('privacyNote', e.target.value)}
+                      />
+                    </div>
+                    <Field label="Success title">
+                      <input
+                        className="admin-input"
+                        value={String(content.successTitle || '')}
+                        onChange={(e) => setField('successTitle', e.target.value)}
+                      />
+                    </Field>
+                    <div className="admin-field full">
+                      <label>Success body</label>
+                      <textarea
+                        className="admin-textarea"
+                        value={String(content.successBody || '')}
+                        onChange={(e) => setField('successBody', e.target.value)}
+                      />
+                    </div>
+                    <Field label="Side title">
+                      <input
+                        className="admin-input"
+                        value={String(content.sideTitle || '')}
+                        onChange={(e) => setField('sideTitle', e.target.value)}
+                      />
+                    </Field>
+                    <div className="admin-field full">
+                      <label>Side items (one per line: Label | Value | href)</label>
+                      <textarea
+                        className="admin-textarea"
+                        value={((content.sideItems as Array<{ label: string; value: string; href?: string }>) || [])
+                          .map((i) => `${i.label} | ${i.value} | ${i.href || ''}`)
+                          .join('\n')}
+                        onChange={(e) => {
+                          const prev = (content.sideItems as Array<{ icon?: string }>) || [];
+                          setField(
+                            'sideItems',
+                            e.target.value
+                              .split('\n')
+                              .map((l) => l.trim())
+                              .filter(Boolean)
+                              .map((line, idx) => {
+                                const parts = line.split('|').map((p) => p.trim());
+                                return {
+                                  label: parts[0] || '',
+                                  value: parts[1] || '',
+                                  href: parts[2] || undefined,
+                                  icon: prev[idx]?.icon,
+                                };
+                              })
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {section.type === 'careers_apply' ? (
+                    <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                      <Field label="Next steps title">
+                        <input
+                          className="admin-input"
+                          value={String(content.nextTitle || '')}
+                          onChange={(e) => setField('nextTitle', e.target.value)}
+                        />
+                      </Field>
+                      <div className="admin-field full">
+                        <label>Next steps (one per line)</label>
+                        <textarea
+                          className="admin-textarea"
+                          value={((content.nextSteps as Array<{ text: string }>) || []).map((s) => s.text).join('\n')}
+                          onChange={(e) =>
+                            setField(
+                              'nextSteps',
+                              e.target.value
+                                .split('\n')
+                                .map((l) => l.trim())
+                                .filter(Boolean)
+                                .map((text) => ({ text }))
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="admin-field full">
+                        <label>Role options (one per line)</label>
+                        <textarea
+                          className="admin-textarea"
+                          value={((content.roles as string[]) || []).join('\n')}
+                          onChange={(e) =>
+                            setField(
+                              'roles',
+                              e.target.value
+                                .split('\n')
+                                .map((l) => l.trim())
+                                .filter(Boolean)
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+                      <Field label="Hours title">
+                        <input
+                          className="admin-input"
+                          value={String(content.hoursTitle || '')}
+                          onChange={(e) => setField('hoursTitle', e.target.value)}
+                        />
+                      </Field>
+                      <div className="admin-field full">
+                        <label>Hours (one per line: Label | Value)</label>
+                        <textarea
+                          className="admin-textarea"
+                          value={((content.hours as Array<{ label: string; value: string }>) || [])
+                            .map((h) => `${h.label} | ${h.value}`)
+                            .join('\n')}
+                          onChange={(e) =>
+                            setField(
+                              'hours',
+                              e.target.value
+                                .split('\n')
+                                .map((l) => l.trim())
+                                .filter(Boolean)
+                                .map((line) => {
+                                  const parts = line.split('|').map((p) => p.trim());
+                                  return { label: parts[0] || '', value: parts[1] || '' };
+                                })
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          <AdminCollapsible
+            className="section-editor-advanced"
+            title="Advanced: name, anchor & custom CSS"
+            description="Internal name in the section list, #anchor for in-page links, and per-section style overrides."
+            defaultOpen={Boolean(sectionKey || extraClass || customCss)}
+          >
+            <div className="admin-form-grid">
+              <Field label="Internal name">
+                <input className="admin-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={meta.title} />
+              </Field>
+              <Field label="Anchor id (section key)">
+                <input className="admin-input" value={sectionKey} onChange={(e) => setSectionKey(e.target.value)} placeholder="e.g. services → /page#services" />
+              </Field>
+              <Field label="Extra CSS class">
+                <input className="admin-input" value={extraClass} onChange={(e) => setExtraClass(e.target.value)} placeholder="e.g. my-section" />
+              </Field>
+              <Field label="Scoped CSS override">
+                <input className="admin-input" value={customCss} onChange={(e) => setCustomCss(e.target.value)} placeholder=".my-section h2{color:red}" />
+              </Field>
+            </div>
+          </AdminCollapsible>
+        </div>
+
+        <div className="admin-modal-footer">
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary section-editor-json"
+            title="Edit the raw content JSON"
+            onClick={toggleJsonMode}
+          >
+            {jsonMode ? 'Back to form' : 'Edit as JSON'}
+          </button>
+          {dirty ? <span className="section-editor-dirty">Unsaved changes</span> : null}
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={requestClose}>
+            {dirty ? 'Discard' : 'Close'}
+          </button>
+          <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
+            {saving ? 'Saving…' : onApply ? 'Apply changes' : 'Save section'}
+          </button>
+        </div>
       </form>
     </div>,
     document.body

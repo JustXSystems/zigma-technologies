@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { CmsPage } from '@/lib/cms-types';
 import type { PageSeedResult, PageSeedStatus } from '@/lib/page-seeds';
 
@@ -59,6 +60,7 @@ const groupRowStyle = {
 };
 
 export default function AdminPagesPage() {
+  const router = useRouter();
   const [pages, setPages] = useState<CmsPage[]>([]);
   const [seeds, setSeeds] = useState<PageSeedStatus[]>([]);
   const [error, setError] = useState('');
@@ -157,9 +159,7 @@ export default function AdminPagesPage() {
       setError(data.error || 'Create failed');
       return;
     }
-    setTitle('');
-    setSlug('');
-    await load();
+    router.push(`/admin/pages/${data.page.id}`);
   }
 
   async function openPreview(page: CmsPage) {
@@ -195,8 +195,8 @@ export default function AdminPagesPage() {
   function pageActions(page: CmsPage) {
     return (
       <>
-        <Link className="admin-btn admin-btn-secondary" href={`/admin/pages/${page.id}`}>
-          Sections
+        <Link className="admin-btn admin-btn-primary" href={`/admin/pages/${page.id}`}>
+          Edit sections
         </Link>
         <button type="button" className="admin-btn admin-btn-secondary" onClick={() => openPreview(page)}>
           Preview

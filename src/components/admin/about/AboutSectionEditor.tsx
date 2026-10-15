@@ -1,27 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import AdminCollapsible from '@/components/admin/AdminCollapsible';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
   AlignButtons,
+  BgMediaGroup,
   ColorInput,
+  createSectionFamilyEditor,
   CtaListEditor,
+  Group,
+  HighlightEditor,
   IconEditor,
   ImageEditor,
   LinkListEditor,
   ListEditor,
+  ParagraphsEditor,
   PillsEditor,
   SectionBoxEditor,
   SectionHeaderEditor,
   SelectInput,
+  SplitLayoutEditor,
   StyleEditor,
   TextArea,
   TextElementEditor,
   TextInput,
   Toggle,
-} from '@/components/admin/about/AboutControls';
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import {
   ABOUT_ICON_PRESETS,
   normalizeLinkItems,
@@ -37,96 +40,11 @@ import {
   type PurposeCard,
   type PurposeContent,
   type ServicesMarqueeContent,
-  type SplitLayout,
   type StoryContent,
-  type TextEl,
 } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields from '@/components/admin/HeroMotionFields';
-import { BgMediaGroup } from '@/components/admin/legacy/LegacySectionEditor';
-import { HighlightEditor } from '@/components/admin/life/LifeControls';
-
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
-
-function Group({ title, description, children, open }: { title: string; description?: string; children: React.ReactNode; open?: boolean }) {
-  return (
-    <AdminCollapsible title={title} description={description} defaultOpen={open} className="az-admin-group">
-      {children}
-    </AdminCollapsible>
-  );
-}
-
-function SplitLayoutEditor({
-  value,
-  onChange,
-  sideLabel = 'Image position',
-  columnsPlaceholder,
-}: {
-  value: SplitLayout;
-  onChange: (next: SplitLayout) => void;
-  sideLabel?: string;
-  columnsPlaceholder: string;
-}) {
-  const l = value || { imageSide: 'right' };
-  return (
-    <div className="admin-form-grid">
-      <AlignButtons
-        label={sideLabel}
-        value={l.imageSide}
-        options={['left', 'right']}
-        onChange={(v) => onChange({ ...l, imageSide: (v || 'right') as SplitLayout['imageSide'] })}
-      />
-      <SelectInput
-        label="Vertical alignment"
-        value={l.alignItems || ''}
-        options={[
-          { value: '', label: 'Default (center)' },
-          { value: 'start', label: 'Top' },
-          { value: 'center', label: 'Center' },
-          { value: 'end', label: 'Bottom' },
-          { value: 'stretch', label: 'Stretch' },
-        ]}
-        onChange={(v) => onChange({ ...l, alignItems: (v || undefined) as SplitLayout['alignItems'] })}
-      />
-      <TextInput
-        label="Column widths"
-        value={l.columns}
-        onChange={(columns) => onChange({ ...l, columns })}
-        placeholder={columnsPlaceholder}
-        hint="CSS grid columns in on-screen order. Empty = design default."
-      />
-      <TextInput label="Column gap" value={l.gap} onChange={(gap) => onChange({ ...l, gap })} placeholder="3.2rem" />
-      <div className="full">
-        <Toggle
-          label="On tablet / phone (stacked), show the image above the text"
-          checked={Boolean(l.mobileImageFirst)}
-          onChange={(mobileImageFirst) => onChange({ ...l, mobileImageFirst })}
-        />
-      </div>
-    </div>
-  );
-}
-
-function ParagraphsEditor({
-  items,
-  onChange,
-}: {
-  items: TextEl[];
-  onChange: (next: TextEl[]) => void;
-}) {
-  return (
-    <ListEditor<TextEl>
-      label="Paragraphs"
-      items={items || []}
-      onChange={onChange}
-      addLabel="Paragraph"
-      create={() => ({ text: 'New paragraph.' })}
-      itemTitle={(p) => p.text.slice(0, 60)}
-      renderItem={(p, patch) => <TextElementEditor label="Paragraph text" multiline value={p} onChange={patch} />}
-    />
-  );
-}
 
 /* ------------------------------------------------------------------ */
 
@@ -298,7 +216,7 @@ function StoryEditor({ content: c, onChange }: EditorProps<StoryContent>) {
       <Group title="Text content" description="Eyebrow, heading, paragraphs" open>
         <TextElementEditor label="Eyebrow" eyebrow siteScale="lg" value={c.eyebrow} onChange={(v) => set('eyebrow', v)} />
         <TextElementEditor label="Heading" headingTag siteRole="section" multiline value={c.title} onChange={(v) => set('title', v)} />
-        <ParagraphsEditor items={c.paragraphs} onChange={(v) => set('paragraphs', v)} />
+        <ParagraphsEditor value={c.paragraphs} onChange={(v) => set('paragraphs', v)} />
         <StyleEditor title="Style for all paragraphs" value={c.paragraphStyle} onChange={(v) => set('paragraphStyle', v)} allowHide={false} />
       </Group>
       <Group title="Image">
@@ -430,7 +348,7 @@ function FounderNoteEditor({ content: c, onChange }: EditorProps<FounderNoteCont
           <TextInput label="Quote bar width" value={q.borderWidth} onChange={(borderWidth) => set('quote', { ...q, borderWidth })} placeholder="4px" />
         </div>
         <TextElementEditor label="Quote" multiline value={q} onChange={(v) => set('quote', { ...q, ...v })} />
-        <ParagraphsEditor items={c.paragraphs} onChange={(v) => set('paragraphs', v)} />
+        <ParagraphsEditor value={c.paragraphs} onChange={(v) => set('paragraphs', v)} />
         <StyleEditor title="Style for all paragraphs" value={c.paragraphStyle} onChange={(v) => set('paragraphStyle', v)} allowHide={false} />
       </Group>
       <Group title="Signature">
@@ -598,48 +516,14 @@ function FacilitiesEditor({ content: c, onChange }: EditorProps<FacilitiesConten
   );
 }
 
-export default function AboutSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: AboutSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin">
-        {type === 'about_hero' ? (
-          <AboutHeroEditor content={withAboutDefaults<AboutHeroContent>(type, content)} onChange={emit} />
-        ) : type === 'services_marquee' ? (
-          <ServicesMarqueeEditor content={withAboutDefaults<ServicesMarqueeContent>(type, content)} onChange={emit} />
-        ) : type === 'story' ? (
-          <StoryEditor content={withAboutDefaults<StoryContent>(type, content)} onChange={emit} />
-        ) : type === 'purpose' ? (
-          <PurposeEditor content={withAboutDefaults<PurposeContent>(type, content)} onChange={emit} />
-        ) : type === 'founder_note' ? (
-          <FounderNoteEditor content={withAboutDefaults<FounderNoteContent>(type, content)} onChange={emit} />
-        ) : type === 'facilities' ? (
-          <FacilitiesEditor content={withAboutDefaults<FacilitiesContent>(type, content)} onChange={emit} />
-        ) : null}
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<AboutSectionType>({
+  withDefaults: withAboutDefaults,
+  editors: {
+    about_hero: AboutHeroEditor,
+    services_marquee: ServicesMarqueeEditor,
+    story: StoryEditor,
+    purpose: PurposeEditor,
+    founder_note: FounderNoteEditor,
+    facilities: FacilitiesEditor,
+  },
+});

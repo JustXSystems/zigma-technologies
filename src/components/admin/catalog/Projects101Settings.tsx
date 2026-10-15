@@ -1,17 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
-import type { CmsPage, CmsSection } from '@/lib/cms-types';
-import { SECTION_TYPES } from '@/lib/cms-types';
-import { defaultCmsSectionContent } from '@/lib/cms-section-defaults';
+import { useCallback, useEffect, useState } from 'react';
+import type { CmsPage } from '@/lib/cms-types';
 import { PROJECTS101_SLUG } from '@/lib/projects101-sections';
 import type { CatalogListingDesign } from '@/lib/types';
-import SectionEditor from '@/components/admin/SectionEditor';
+import PageSectionsManager from '@/components/admin/PageSectionsManager';
 import { appHref } from '@/lib/base-path';
 
 /** Section types built for this page, offered first in "Add section". */
-const DESIGN_TYPES = ['ind101_hero', 'ind101_stats', 'pj101_projects', 'pj101_ongoing', 'ind101_cta'];
+const PREFERRED_TYPES = {
+  label: 'Projects 101 design',
+  types: ['ind101_hero', 'ind101_stats', 'pj101_projects', 'pj101_ongoing', 'ind101_cta'],
+};
 
 type Snapshot = { page: CmsPage | null; listing_design: CatalogListingDesign };
 
@@ -28,8 +28,6 @@ export default function Projects101Settings({ onDesignChange }: { onDesignChange
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [addType, setAddType] = useState('pj101_projects');
-  const [editing, setEditing] = useState<CmsSection | null>(null);
 
   const sections = page?.sections || [];
 
@@ -60,11 +58,6 @@ export default function Projects101Settings({ onDesignChange }: { onDesignChange
       current = false;
     };
   }, [apply]);
-
-  const typeLabel = useMemo(() => {
-    const map = Object.fromEntries(SECTION_TYPES.map((t) => [t.type, t.label]));
-    return (type: string) => map[type] || type;
-  }, []);
 
   async function run(label: string, task: () => Promise<string | void>) {
     setBusy(label);
@@ -109,69 +102,6 @@ export default function Projects101Settings({ onDesignChange }: { onDesignChange
         ? '/projects now shows the Projects 101 page.'
         : '/projects now shows the classic catalog listing again.';
     });
-
-  const patchSection = (section: CmsSection, body: Record<string, unknown>) =>
-    run(`s-${section.id}`, async () => {
-      const res = await fetch(`/api/admin/sections/${section.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Update failed');
-      await load();
-    });
-
-  const removeSection = (section: CmsSection) => {
-    if (!confirm(`Delete section "${section.title || typeLabel(section.type)}"?`)) return;
-    void run(`s-${section.id}`, async () => {
-      const res = await fetch(`/api/admin/sections/${section.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      await load();
-      return 'Section deleted.';
-    });
-  };
-
-  const moveSection = (index: number, dir: -1 | 1) => {
-    if (!page) return;
-    const swap = index + dir;
-    if (swap < 0 || swap >= sections.length) return;
-    const next = [...sections];
-    [next[index], next[swap]] = [next[swap], next[index]];
-    setPage({ ...page, sections: next });
-    void run('order', async () => {
-      const res = await fetch('/api/admin/sections/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page_id: page.id, ordered_ids: next.map((s) => s.id) }),
-      });
-      if (!res.ok) throw new Error('Reorder failed');
-    });
-  };
-
-  const addSection = () =>
-    run('add', async () => {
-      if (!page) return;
-      const res = await fetch('/api/admin/sections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          page_id: page.id,
-          type: addType,
-          title: typeLabel(addType),
-          content_json: defaultCmsSectionContent(addType, PROJECTS101_SLUG),
-          sort_order: sections.length,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Add failed');
-      await load();
-      return 'Section added at the bottom of the page. Use ↑ / ↓ to move it.';
-    });
-
-  const designOptions = SECTION_TYPES.filter((t) => DESIGN_TYPES.includes(t.type));
-  const otherOptions = SECTION_TYPES.filter((t) => !DESIGN_TYPES.includes(t.type));
 
   return (
     <div className="admin-settings-panel">
@@ -250,126 +180,24 @@ export default function Projects101Settings({ onDesignChange }: { onDesignChange
             </button>
           </div>
         ) : (
-          <>
-            <div className="admin-table-wrap admin-card" style={{ padding: 0 }}>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Order</th>
-                    <th>Section</th>
-                    <th>Visible</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sections.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="admin-empty">
-                        No sections. Add one below or restore the design sections.
-                      </td>
-                    </tr>
-                  ) : (
-                    sections.map((section, i) => (
-                      <tr key={section.id} style={section.enabled ? undefined : { opacity: 0.6 }}>
-                        <td style={{ whiteSpace: 'nowrap' }}>
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            aria-label="Move up"
-                            disabled={i === 0 || Boolean(busy)}
-                            onClick={() => moveSection(i, -1)}
-                          >
-                            ↑
-                          </button>{' '}
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn-secondary"
-                            aria-label="Move down"
-                            disabled={i === sections.length - 1 || Boolean(busy)}
-                            onClick={() => moveSection(i, 1)}
-                          >
-                            ↓
-                          </button>
-                        </td>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>{section.title || typeLabel(section.type)}</div>
-                          <div style={{ color: 'var(--admin-muted)', fontSize: '0.8rem' }}>
-                            {typeLabel(section.type)} · #{section.section_key || '—'}
-                          </div>
-                        </td>
-                        <td>
-                          <label className="az-admin-toggle">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(section.enabled)}
-                              disabled={Boolean(busy)}
-                              onChange={(e) => void patchSection(section, { enabled: e.target.checked })}
-                            />
-                            <span>{section.enabled ? 'Shown' : 'Hidden'}</span>
-                          </label>
-                        </td>
-                        <td style={{ whiteSpace: 'nowrap' }}>
-                          <button type="button" className="admin-btn admin-btn-primary" onClick={() => setEditing(section)}>
-                            Edit
-                          </button>{' '}
-                          <button type="button" className="admin-btn admin-btn-danger" disabled={Boolean(busy)} onClick={() => removeSection(section)}>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="admin-card" style={{ marginTop: '1rem' }}>
-              <h3 style={{ marginTop: 0 }}>Add a section</h3>
-              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <select className="admin-select" value={addType} onChange={(e) => setAddType(e.target.value)} style={{ maxWidth: 520 }}>
-                  <optgroup label="Projects 101 design">
-                    {designOptions.map((t) => (
-                      <option key={t.type} value={t.type}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Other section types">
-                    {otherOptions.map((t) => (
-                      <option key={t.type} value={t.type}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-                <button type="button" className="admin-btn admin-btn-primary" disabled={Boolean(busy)} onClick={() => void addSection()}>
-                  {busy === 'add' ? 'Adding…' : 'Add section'}
-                </button>
+          <div className="admin-card">
+            <PageSectionsManager
+              pageId={page.id}
+              pageSlug={PROJECTS101_SLUG}
+              sections={sections}
+              reload={load}
+              preferred={PREFERRED_TYPES}
+              emptyText="No sections. Add one below or restore the design sections."
+              actions={
                 <button type="button" className="admin-btn admin-btn-secondary" disabled={Boolean(busy)} onClick={() => void seed()}>
                   {busy === 'seed' ? 'Checking…' : 'Restore missing design sections'}
                 </button>
-              </div>
-              <p className="admin-hint">Restore only adds design sections the page does not have yet; it never changes or removes your edits.</p>
-            </div>
-          </>
+              }
+            />
+            <p className="admin-hint">Restore only adds design sections the page does not have yet; it never changes or removes your edits.</p>
+          </div>
         )}
       </div>
-
-      {editing
-        ? createPortal(
-            <SectionEditor
-              key={editing.id}
-              section={editing}
-              onClose={() => setEditing(null)}
-              onSaved={() => {
-                setEditing(null);
-                setMessage('Section saved. The public page updates on next load.');
-                void load().catch((e: Error) => setError(e.message));
-              }}
-            />,
-            document.body
-          )
-        : null}
     </div>
   );
 }

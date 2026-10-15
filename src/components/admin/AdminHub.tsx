@@ -1,25 +1,11 @@
 'use client';
 
 import { useMemo, useState, type ReactNode } from 'react';
-import { hasScreenAccess, type AdminScreenKey } from '@/lib/admin-screens';
+import { canOpenHubTab, type AdminHubTab } from '@/lib/admin-hub-tabs';
 import { useAdminUser } from '@/components/admin/admin-session';
 import { useUnsavedChangesState } from '@/components/admin/unsaved-changes';
 
-/** Each tab keeps the permission of the screen whose data it edits. */
-export type AdminHubTab<Id extends string> = {
-  id: Id;
-  label: string;
-  /** Any one of several screens opens a tab that edits data from each of them. */
-  screen: AdminScreenKey | readonly AdminScreenKey[];
-  description: ReactNode;
-  /** Tabs naming the same editor share its state, so switching between them keeps edits without asking. */
-  editor?: string;
-};
-
-function canOpenTab(screens: AdminScreenKey[] | '*', tab: AdminHubTab<string>) {
-  const keys = typeof tab.screen === 'string' ? [tab.screen] : tab.screen;
-  return keys.some((key) => hasScreenAccess(screens, key));
-}
+export type { AdminHubTab };
 
 type HubControls<Id extends string> = {
   /** Whether the signed-in user can open a tab. */
@@ -45,7 +31,7 @@ export default function AdminHub<Id extends string>({
   const user = useAdminUser();
   const { confirmDiscard } = useUnsavedChangesState();
   const tabs = useMemo(
-    () => (user ? allTabs.filter((t) => canOpenTab(user.screens, t)) : []),
+    () => (user ? allTabs.filter((t) => canOpenHubTab(user.screens, t)) : []),
     [allTabs, user]
   );
 

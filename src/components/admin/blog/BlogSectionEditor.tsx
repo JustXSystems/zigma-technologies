@@ -1,25 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import {
-  AboutSiteSettingsContext,
+  AccentHeaderEditor,
   AlignButtons,
+  BgMediaGroup,
+  CardStyleFields,
   ColorInput,
+  ColumnsEditor,
+  createSectionFamilyEditor,
   CtaListEditor,
   Field,
+  Group,
+  HighlightEditor,
   LinkListEditor,
+  NapHint,
+  NumberInput,
   PillsEditor,
+  SectionBoxGroup,
   SelectInput,
+  StringListEditor,
   StyleEditor,
   TextElementEditor,
   TextInput,
-  ThemeColorDatalist,
   Toggle,
-} from '@/components/admin/about/AboutControls';
-import { ColumnsEditor, HighlightEditor, LifeGroup as Group, LifeGroupProvider, NapHint, NumberInput } from '@/components/admin/life/LifeControls';
-import { BgMediaGroup, CardStyleFields, LegacyHeaderEditor, SectionBoxGroup } from '@/components/admin/legacy/LegacySectionEditor';
+  type EditorProps,
+} from '@/components/admin/section-kit';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import { normalizeLinkItems } from '@/lib/about-sections';
@@ -35,20 +41,8 @@ import {
   type BlogTopicsContent,
 } from '@/lib/blog-sections';
 
-type EditorProps<T> = { content: T; onChange: (next: T) => void };
 
 /** Edit a string list with the link-list control (add, reorder, bulk paste). */
-function StringListEditor({ label, items, onChange }: { label: string; items: string[]; onChange: (next: string[]) => void }) {
-  return (
-    <LinkListEditor
-      label={label}
-      items={(items || []).map((label) => ({ label }))}
-      onChange={(next) => onChange(next.map((it) => it.label.trim()).filter(Boolean))}
-      withHref={false}
-    />
-  );
-}
-
 function PostsHint() {
   return (
     <p className="az-admin-hint">
@@ -163,7 +157,7 @@ function BlogFeaturedEditor({ content: c, onChange }: EditorProps<BlogFeaturedCo
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Which articles" open>
         <PostsHint />
@@ -216,7 +210,7 @@ function BlogTopicsEditor({ content: c, onChange }: EditorProps<BlogTopicsConten
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header" description="Hidden by default; the bar works well on its own">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Topics" open>
         <StringListEditor label="Topics, in order (must match post tags exactly)" items={c.topics} onChange={(topics) => set({ topics })} />
@@ -244,7 +238,7 @@ function BlogFeedEditor({ content: c, onChange }: EditorProps<BlogFeedContent>) 
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header">
-        <LegacyHeaderEditor value={c.header} onChange={(header) => set({ header })} />
+        <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
       <Group title="Listing" open>
         <PostsHint />
@@ -307,49 +301,13 @@ function BlogCtaEditor({ content: c, onChange }: EditorProps<BlogCtaContent>) {
 
 /* ------------------------------------------------------------------ */
 
-export default function BlogSectionEditor({
-  type,
-  content,
-  onChange,
-}: {
-  type: BlogSectionType;
-  content: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
-}) {
-  const emit = (next: object) => onChange(next as Record<string, unknown>);
-  const [site, setSite] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/admin/site-settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.settings) setSite(mergeSiteSettings(data.settings));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <AboutSiteSettingsContext.Provider value={site}>
-      <div className="az-admin lz-admin lgy-admin blg-admin">
-        <ThemeColorDatalist />
-        <LifeGroupProvider key={type}>
-          {type === 'blog_hero' ? (
-            <BlogHeroEditor content={withBlogDefaults<BlogHeroContent>(type, content)} onChange={emit} />
-          ) : type === 'blog_featured' ? (
-            <BlogFeaturedEditor content={withBlogDefaults<BlogFeaturedContent>(type, content)} onChange={emit} />
-          ) : type === 'blog_topics' ? (
-            <BlogTopicsEditor content={withBlogDefaults<BlogTopicsContent>(type, content)} onChange={emit} />
-          ) : type === 'blog_feed' ? (
-            <BlogFeedEditor content={withBlogDefaults<BlogFeedContent>(type, content)} onChange={emit} />
-          ) : type === 'blog_cta' ? (
-            <BlogCtaEditor content={withBlogDefaults<BlogCtaContent>(type, content)} onChange={emit} />
-          ) : null}
-        </LifeGroupProvider>
-      </div>
-    </AboutSiteSettingsContext.Provider>
-  );
-}
+export default createSectionFamilyEditor<BlogSectionType>({
+  withDefaults: withBlogDefaults,
+  editors: {
+    blog_hero: BlogHeroEditor,
+    blog_featured: BlogFeaturedEditor,
+    blog_topics: BlogTopicsEditor,
+    blog_feed: BlogFeedEditor,
+    blog_cta: BlogCtaEditor,
+  },
+});
