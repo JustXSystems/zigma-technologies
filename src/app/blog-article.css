@@ -429,7 +429,8 @@ body:has(.blg-hero.az-tone-light) header{background:rgba(10,22,40,0.96);}
   .blg-afe-head{min-height:88svh;padding-bottom:4.5rem;}
   .blg-article--feature .blg-prose blockquote{margin:2.2rem 0;}
   .blg-prose{font-size:calc(1.02rem * var(--blg-scale,1));}
-  .blg-prose table{display:block;overflow-x:auto;}
+  .blg-prose table{display:block;overflow-x:auto;overscroll-behavior-x:contain;}
+  .blg-prose :is(th,td){min-width:7.5rem;}
   .blg-prose figure[data-size="inset"]{width:100%;}
   .blg-callout{padding-left:2.8rem;}
   .blg-callout::before{left:0.8rem;}

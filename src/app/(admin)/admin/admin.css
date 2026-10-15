@@ -6275,7 +6275,7 @@
 .abl-editor{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:1rem;align-items:start;}
 .abl-main{display:flex;flex-direction:column;gap:1rem;min-width:0;}
 .abl-main > .admin-card + .admin-card,.abl-main > .admin-card + .admin-collapse{margin-top:0;}
-.abl-side{position:sticky;top:1rem;display:flex;flex-direction:column;gap:1rem;max-height:calc(100vh - 2rem);overflow:auto;padding-bottom:4.5rem;}
+.abl-side{position:sticky;top:5.3rem;display:flex;flex-direction:column;gap:1rem;max-height:calc(100vh - 6.3rem);overflow:auto;padding-bottom:4.5rem;}
 .abl-side > .admin-card + .admin-card{margin-top:0;}
 .abl-side-card{display:flex;flex-direction:column;gap:0.75rem;}
 .abl-card-title{margin:0;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--admin-muted);}
@@ -6322,7 +6322,11 @@
 /* Visual editor */
 .abl-rich{display:flex;flex-direction:column;gap:0.55rem;}
 .abl-rich-loading{min-height:420px;display:grid;place-items:center;border:1px solid var(--admin-border);border-radius:12px;color:var(--admin-muted);background:var(--admin-panel-2);}
-.abl-rich-bar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.4rem 0.75rem;margin:0 -0.25rem;padding:0.4rem 0.25rem;border-bottom:1px solid var(--admin-border);background:rgba(255,255,255,0.96);backdrop-filter:blur(6px);}
+/* Sticks just under .admin-topbar; no backdrop-filter, which would trap the fixed popover and its backdrop inside the bar */
+.abl-rich-bar{position:sticky;top:4.55rem;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.4rem 0.75rem;margin:0 -0.25rem;padding:0.4rem 0.25rem;border-bottom:1px solid var(--admin-border);background:#fff;}
+.abl-write.is-focus .abl-rich-bar{top:0;}
+/* Sticky makes the bar its own stacking context; lift it while the block list is open so the list clears the floating actions */
+.abl-rich-bar:has(.abl-pop){z-index:1300;}
 .abl-rich-modes{display:flex;align-items:center;gap:0.4rem;}
 .abl-tb{display:flex;flex-wrap:wrap;align-items:center;gap:2px;}
 .abl-tb button,.abl-ctx button,.abl-bubble button{min-width:2rem;height:2rem;padding:0 0.5rem;border:1px solid transparent;border-radius:7px;background:none;font:inherit;font-size:0.8rem;font-weight:600;color:var(--admin-text-secondary);cursor:pointer;white-space:nowrap;}
@@ -6353,6 +6357,7 @@
 .abl-blocks-text strong{font-size:0.84rem;color:var(--admin-text);}
 .abl-blocks-text small{font-size:0.72rem;color:var(--admin-muted);}
 .abl-slash{position:fixed;z-index:1300;}
+.abl-slash .abl-blocks{width:auto;max-height:var(--abl-slash-max,420px);}
 .abl-slash-foot{margin:0.3rem 0 0;padding:0.3rem 0.6rem;border-radius:8px;font-size:0.68rem;color:var(--admin-muted);background:#fff;box-shadow:0 8px 20px -12px rgba(15,23,42,0.3);}
 .abl-bubble{display:flex;align-items:center;gap:2px;padding:0.25rem;border-radius:10px;background:#0f172a;box-shadow:0 18px 40px -14px rgba(15,23,42,0.6);}
 .abl-bubble button{color:#cbd5e1;}
@@ -6370,6 +6375,7 @@
 .abl-rich-canvas .ProseMirror-selectednode{outline:none;}
 .abl-rich-canvas .ProseMirror a{cursor:text;}
 .abl-rich-canvas .ProseMirror table{table-layout:fixed;}
+.abl-rich-canvas .ProseMirror .tableWrapper{overflow-x:auto;}
 .abl-rich-canvas .ProseMirror :is(td,th){position:relative;}
 .abl-rich-canvas .ProseMirror .selectedCell::after{content:'';position:absolute;inset:0;pointer-events:none;background:rgba(2,132,168,0.12);}
 .abl-rich-canvas .ProseMirror div[data-youtube-video]{position:relative;}
@@ -6407,6 +6413,10 @@
 .abl-fig-alt input{flex:1;min-width:0;border:0;outline:0;font:inherit;background:none;color:var(--admin-text);}
 .abl-fig-alt.is-missing{border-color:#fcd34d;background:#fffbeb;}
 .abl-fig-alt.is-missing span{color:#b45309;}
+/* Selecting an image block selects its inputs too; the site's white ::selection text would vanish on these light fields */
+.abl-fig input::selection{color:var(--admin-text);background:transparent;}
+.abl-fig input:focus::selection{background:rgba(2,132,168,0.22);}
+.abl-btnblock-form input::selection{color:#fff;background:rgba(255,255,255,0.25);}
 .abl-fig-error{margin:0.3rem 0 0;font-size:0.76rem;color:#b91c1c;}
 .abl-btnblock{display:flex;flex-wrap:wrap;align-items:center;gap:0.6rem 0.9rem;margin:2rem 0;font-family:var(--admin-font);}
 .abl-btnblock .blg-btn{display:inline-flex;align-items:center;padding:0.85rem 1.4rem;border-radius:999px;font-family:var(--font-display);font-size:0.95rem;font-weight:600;color:#fff;background:var(--blg-accent);cursor:pointer;}
@@ -6433,6 +6443,7 @@
 
 /* Focus mode: the writing card fills the screen */
 .abl-write.is-focus{position:fixed;inset:0;z-index:1200;margin:0;max-width:none;overflow:auto;padding:1.5rem max(1.5rem,calc((100vw - 900px) / 2)) 4rem;border:0;border-radius:0;background:#fff;}
+.abl-write.is-focus > *{flex-shrink:0;}
 .abl-write.is-focus .abl-summary,.abl-write.is-focus .abl-starters,.abl-write.is-focus .abl-outline{display:none;}
 .abl-write.is-focus .abl-title-input{font-size:2.2rem;}
 .abl-write.is-focus .abl-rich-canvas{border-color:transparent;padding-left:0;padding-right:0;}
@@ -6580,12 +6591,42 @@
   .abl-tpl-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
   .abl-style-grid{grid-template-columns:minmax(0,1fr);}
 }
+@media (max-width:960px){
+  .abl-rich-bar{top:4.35rem;}
+}
 @media (max-width:760px){
   .abl-row{grid-template-columns:minmax(0,1fr);gap:0.5rem;}
   .abl-row-status{justify-items:start;grid-auto-flow:column;align-items:center;justify-content:start;gap:0.6rem;}
   .abl-tpl-grid,.abl-tpl-grid--3{grid-template-columns:minmax(0,1fr);}
   .abl-title-input{font-size:1.4rem;}
+  .abl-starters-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  /* One swipeable row of tools instead of three wrapped rows */
+  .abl-rich-bar{flex-wrap:nowrap;justify-content:flex-start;gap:0.5rem;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;}
+  .abl-rich-bar::-webkit-scrollbar{display:none;}
+  .abl-tb,.abl-rich-modes{flex-wrap:nowrap;flex-shrink:0;}
+  .abl-tb button,.abl-bubble button{min-width:2.5rem;height:2.5rem;}
+  .abl-tb-select{height:2.5rem;}
+  .abl-focus-btn{height:2.5rem;}
+  .abl-ctx{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}
+  /* The block list opens as a bottom sheet */
+  .abl-pop-backdrop{z-index:1290;background:rgba(15,23,42,0.35);}
+  .abl-pop{position:fixed;top:auto;left:0.6rem;right:0.6rem;bottom:max(0.6rem,env(safe-area-inset-bottom,0px));z-index:1300;}
+  .abl-pop .abl-blocks{width:auto;max-height:min(70vh,560px);border-radius:16px;}
+  .abl-blocks button{padding:0.55rem 0.5rem;}
+  .abl-bubble{max-width:calc(100vw - 16px);overflow-x:auto;scrollbar-width:none;}
+  .abl-bubble-link input{width:min(240px,52vw);}
   .abl-rich-canvas{padding:1rem 0.85rem 1.5rem;}
+  .abl-rich-canvas .ProseMirror table{table-layout:auto;}
+  .abl-rich-canvas .ProseMirror :is(td,th){min-width:7.5rem;}
   .abl-fig[data-size]{margin-left:0;margin-right:0;width:auto;}
-  .abl-foot-tip{display:none;}
+  .abl-fig-tools{left:0.5rem;right:0.5rem;flex-wrap:wrap;justify-content:flex-end;}
+  .abl-fig-sizes{flex-wrap:wrap;}
+  .abl-write.is-focus{padding:0.75rem 1rem 3rem;}
+  .abl-write.is-focus .abl-title-input{font-size:1.6rem;}
+  .abl-outline{padding-left:1.6rem;}
+}
+@media (pointer:coarse){
+  .abl-slash-foot{display:none;}
+  .abl-fig-tools{opacity:1;}
+  .abl-fig:not(.is-selected) .abl-fig-tools{display:none;}
 }

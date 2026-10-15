@@ -7,64 +7,14 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#50 blog admin consolidation">
-      <change afterPath="$PROJECT_DIR$/scripts/migrate-blog-design.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/blog-settings/apply-hub/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/blog-settings/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/resources/[id]/preview/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/blog-article.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogArticles.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogDesign.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogHub.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogPageSections.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogPostEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogRichEditor.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogTemplateThumb.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/editor/blocks.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/editor/extensions.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/editor/node-views.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/admin/blog/editor/upload.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/blog/ArticleReader.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/blog/BlogArticleView.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/blog-design.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/blog-hub-presets.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/blog-preview.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/blog-settings.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/blog-writing.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/resource-post-schema.ts" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#50 blog redesign">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ADMIN.md" beforeDir="false" afterPath="$PROJECT_DIR$/ADMIN.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/resources/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/resources/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/blog/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/blog/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/blog/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/blog/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/resources/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/resources/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/resources/[id]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/resources/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/resources/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/search/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/search/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/blog-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/blog-sections.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/RedirectsEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/RedirectsEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/SeoHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/SeoHub.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/site-copy/SiteCopyHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/site-copy/SiteCopyHub.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/blog/BlogPostsContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/blog/BlogPostsContext.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/resources/ResourceDetailView.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-api-access.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-api-access.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-hub-tabs.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-hub-tabs.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-screens.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-screens.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/blog-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/blog-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/blog.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/blog.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/nav-features.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-features.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/blog-article.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/blog-article.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/blog/BlogDesign.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogDesign.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/blog/BlogRichEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogRichEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/blog/BlogArticleView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/blog/BlogArticleView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/resources.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/resources.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/schema-ensure.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/schema-ensure.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-copy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-copy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,23 +72,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0008527790994164" />
-      <entry key="S2" value="1.4272227893646703" />
-      <entry key="S5" value="2.846195290987092" />
-      <entry key="S10" value="4.6640811332711385" />
-      <entry key="S30" value="14.183465636579015" />
-      <entry key="S60" value="34.78394911659811" />
-      <entry key="M2" value="70.18874721898311" />
-      <entry key="M5" value="126.31341260247075" />
-      <entry key="M10" value="192.9109327863982" />
-      <entry key="M15" value="253.80442033998494" />
-      <entry key="M30" value="405.61910509133327" />
-      <entry key="H1" value="581.7349000476848" />
-      <entry key="H2" value="725.5750402273316" />
-      <entry key="H4" value="824.1886312867707" />
-      <entry key="D1" value="1445.274317140281" />
-      <entry key="W1" value="12690.917184473345" />
+      <entry key="MS100" value="1.0000035592384016" />
+      <entry key="MS500" value="1.0816288682448543" />
+      <entry key="S2" value="1.6972956787823315" />
+      <entry key="S5" value="2.6061181392335984" />
+      <entry key="S10" value="3.5176109056932017" />
+      <entry key="S30" value="5.083212709475415" />
+      <entry key="S60" value="5.867612468345713" />
+      <entry key="M2" value="6.381806507234632" />
+      <entry key="M5" value="8.672643034249718" />
+      <entry key="M10" value="30.744941023431817" />
+      <entry key="M15" value="69.94835723314205" />
+      <entry key="M30" value="209.10342648923452" />
+      <entry key="H1" value="417.6552316697782" />
+      <entry key="H2" value="616.6244243167675" />
+      <entry key="H4" value="762.4703262048766" />
+      <entry key="D1" value="1431.455892661131" />
+      <entry key="W1" value="12671.640432264781" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -153,30 +103,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="1.8021869875585917E-179" />
-      <entry key="H2" value="4.2452172942715665E-90" />
-      <entry key="H4" value="2.0603925097932776E-45" />
-      <entry key="D1" value="3.624370661101162E-8" />
-      <entry key="W1" value="0.13412802506389945" />
+      <entry key="H1" value="1.2722606451997363E-179" />
+      <entry key="H2" value="3.566876287733412E-90" />
+      <entry key="H4" value="1.8886175599765055E-45" />
+      <entry key="D1" value="3.5721658668343906E-8" />
+      <entry key="W1" value="0.1338503122203822" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9460576467255959" />
-      <entry key="MS500" value="0.9898140479261203" />
-      <entry key="S2" value="1.4221608856538592" />
-      <entry key="S5" value="2.839823504917402" />
-      <entry key="S10" value="4.656710392034045" />
-      <entry key="S30" value="14.174245331718577" />
-      <entry key="S60" value="34.77339451733864" />
-      <entry key="M2" value="70.17885945484396" />
-      <entry key="M5" value="126.30704428871752" />
-      <entry key="M10" value="192.90690048626638" />
-      <entry key="M15" value="253.80134891312105" />
-      <entry key="M30" value="405.61715014910885" />
-      <entry key="H1" value="581.7336911276707" />
-      <entry key="H2" value="725.574342394164" />
-      <entry key="H4" value="824.1882496735003" />
-      <entry key="D1" value="1445.2741708764659" />
-      <entry key="W1" value="12691.051119371394" />
+      <entry key="MS100" value="4.597557856414486E-5" />
+      <entry key="MS500" value="0.18680483263162195" />
+      <entry key="S2" value="1.155668650167042" />
+      <entry key="S5" value="2.1943553297611698" />
+      <entry key="S10" value="3.2204278759028853" />
+      <entry key="S30" value="4.949364670434149" />
+      <entry key="S60" value="5.794915999449342" />
+      <entry key="M2" value="6.3438784373498756" />
+      <entry key="M5" value="8.656976200416242" />
+      <entry key="M10" value="30.736589249861407" />
+      <entry key="M15" value="69.9423440334563" />
+      <entry key="M30" value="209.09981938164722" />
+      <entry key="H1" value="417.6530598983258" />
+      <entry key="H2" value="616.6231783445685" />
+      <entry key="H4" value="762.4696464637806" />
+      <entry key="D1" value="1431.4556934968807" />
+      <entry key="W1" value="12671.774081991281" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -326,7 +276,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 hero section render issue fixed" />
     <MESSAGE value="#45 hero section compact render enhanced" />
     <MESSAGE value="#45 hero section full screen with multiple section" />
     <MESSAGE value="#45 In hero section, for any text or image/vedio container must be configurable for its position/alignment with precision like Example (bottom left, -10px, -20px) means leaving 10px from bottom left and leaving 20px from bottom, this might helps me to put the container to the desired position in hero section of any page" />
@@ -351,7 +300,8 @@
     <MESSAGE value="#52  careers_jobs edit with html" />
     <MESSAGE value="#52  careers_jobs edit with Education and add show pills" />
     <MESSAGE value="#50 blog admin consolidation" />
-    <option name="LAST_COMMIT_MESSAGE" value="#50 blog admin consolidation" />
+    <MESSAGE value="#50 blog redesign" />
+    <option name="LAST_COMMIT_MESSAGE" value="#50 blog redesign" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

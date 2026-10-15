@@ -22,7 +22,24 @@ type Props = {
   onFocusChange: (on: boolean) => void;
 };
 
-type Slash = { from: number; query: string; left: number; top: number };
+type Slash = { from: number; query: string; left: number; top: number; caretTop: number };
+
+/** Keeps the block menu inside the visible area, including above an on-screen keyboard. */
+function slashPlacement(slash: Slash): CSSProperties {
+  const vv = window.visualViewport;
+  const viewTop = vv?.offsetTop ?? 0;
+  const viewBottom = viewTop + (vv?.height ?? window.innerHeight);
+  const viewWidth = vv?.width ?? window.innerWidth;
+  const width = Math.min(310, viewWidth - 16);
+  const left = Math.max(8, Math.min(slash.left, viewWidth - width - 8));
+  const below = viewBottom - slash.top - 12;
+  const above = slash.caretTop - viewTop - 12;
+  const reserve = 44;
+  if (below >= 240 || below >= above) {
+    return { left, width, top: slash.top + 6, '--abl-slash-max': `${Math.max(140, Math.min(420, below - reserve))}px` } as CSSProperties;
+  }
+  return { left, width, bottom: window.innerHeight - slash.caretTop + 6, '--abl-slash-max': `${Math.min(420, above - reserve)}px` } as CSSProperties;
+}
 
 const serialize = (editor: Editor) => (editor.isEmpty ? '' : editor.getHTML());
 
@@ -30,7 +47,7 @@ const prettyHtml = (html: string) =>
   html.replace(/>\s*(<\/?(?:p|h[1-6]|ul|ol|li|blockquote|figure|table|tbody|thead|tr|details|summary|div|pre|hr)\b)/g, '>\n$1').trim();
 
 /** `/query` typed at the cursor inside a paragraph, or null. */
-function findSlash(editor: Editor): Omit<Slash, 'left' | 'top'> | null {
+function findSlash(editor: Editor): Pick<Slash, 'from' | 'query'> | null {
   const { selection } = editor.state;
   const { $from } = selection;
   if (!selection.empty || $from.parent.type.name !== 'paragraph') return null;
@@ -125,6 +142,8 @@ export default function BlogRichEditor({ value, onChange, canvasClass, canvasSty
   const [slash, setSlash] = useState<Slash | null>(null);
   const [slashIndex, setSlashIndex] = useState(0);
   const slashDismissed = useRef<number | null>(null);
+  /** Phones show their own copy / paste bar above a selection, so ours goes below. */
+  const [touch] = useState(() => window.matchMedia('(pointer: coarse)').matches);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -144,9 +163,11 @@ export default function BlogRichEditor({ value, onChange, canvasClass, canvasSty
     },
   });
 
+  // Reads the hook's `editor`, not the snapshot's: the snapshot keeps `null` until the first transaction.
   const snap = useEditorState({
     editor,
-    selector: ({ editor: e }) => {
+    selector: () => {
+      const e = editor;
       if (!e) return null;
       const { doc } = e.state;
       const headings: Array<{ level: number; text: string; pos: number }> = [];
@@ -317,7 +338,7 @@ export default function BlogRichEditor({ value, onChange, canvasClass, canvasSty
       if (found.query !== lastQuery) setSlashIndex(0);
       lastQuery = found.query;
       const c = editor.view.coordsAtPos(found.from);
-      setSlash({ ...found, left: c.left, top: c.bottom });
+      setSlash({ ...found, left: c.left, top: c.bottom, caretTop: c.top });
     };
     editor.on('selectionUpdate', update);
     editor.on('update', update);
@@ -562,7 +583,7 @@ export default function BlogRichEditor({ value, onChange, canvasClass, canvasSty
       {editor ? (
         <BubbleMenu
           editor={editor}
-          options={{ placement: 'top' }}
+          options={{ placement: touch ? 'bottom' : 'top', shift: { padding: 8 }, flip: true }}
           shouldShow={({ editor: e, from, to }) =>
             e.isEditable && !e.isActive('figure') && !e.isActive('buttonBlock') && !e.isActive('codeBlock') && (from !== to || e.isActive('link'))
           }
@@ -629,7 +650,7 @@ export default function BlogRichEditor({ value, onChange, canvasClass, canvasSty
 
       {slash && slashItems.length && typeof document !== 'undefined'
         ? createPortal(
-            <div className="abl-slash" style={{ left: Math.min(slash.left, window.innerWidth - 330), top: Math.min(slash.top + 6, window.innerHeight - 340) }}>
+            <div className="abl-slash" style={slashPlacement(slash)}>
               <BlockList items={slashItems} active={Math.min(slashIndex, slashItems.length - 1)} onPick={pickBlock} onHover={setSlashIndex} />
               <p className="abl-slash-foot">↑↓ to move · Enter to insert · Esc to close</p>
             </div>,
@@ -649,7 +670,7 @@ export default function BlogRichEditor({ value, onChange, canvasClass, canvasSty
         </span>
         {uploading ? <span className="abl-foot-busy">Uploading {uploading} image{uploading === 1 ? '' : 's'}…</span> : null}
         {notice ? <span className="abl-foot-note">{notice}</span> : null}
-        <span className="abl-foot-tip">Type / for blocks · paste or drop images · Ctrl+K links</span>
+        <span className="abl-foot-tip">{touch ? 'Tap + Insert for images, boxes and FAQs · select words to format them' : 'Type / for blocks · paste or drop images · Ctrl+K links'}</span>
       </div>
       {s?.headings.length ? (
         <ol className="abl-outline" aria-label="Contents — click to jump">

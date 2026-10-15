@@ -296,8 +296,8 @@ const RESOURCE_SEEDS: Array<
   },
   {
     slug: 'solar-om-checklist',
-    title: 'Solar O&amp;M checklist for commercial rooftops',
-    excerpt: 'A practical operations checklist to keep C&amp;I solar plants performing year-round.',
+    title: 'Solar O&M checklist for commercial rooftops',
+    excerpt: 'A practical operations checklist to keep C&I solar plants performing year-round.',
     cover_url: '/assets/images/seed-solar-modules.jpg',
     tags_json: ['Solar', 'O&M', 'Checklist'],
     format: 'checklist',

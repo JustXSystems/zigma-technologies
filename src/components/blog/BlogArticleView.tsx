@@ -299,7 +299,7 @@ export default function BlogArticleView({ post, template, settings: blogSettings
       <main id="main-content" className={shell('focus')} style={look.style}>
         {banner}
         {a.progressBar ? <ReadingProgress /> : null}
-        <header className="blg-af-head">
+        <div className="blg-af-head">
           <div className="blg-af-col">
             <p className="blg-af-kicker">
               <Link href={BLOG_BASE_PATH}>Blog</Link>
@@ -310,7 +310,7 @@ export default function BlogArticleView({ post, template, settings: blogSettings
             {post.excerpt ? <p className="blg-lead">{post.excerpt}</p> : null}
             <Byline author={author} published={post.published_at} minutes={minutes} showAuthor={a.author} />
           </div>
-        </header>
+        </div>
         <figure className="blg-af-cover">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={appHref(cover)} alt="" fetchPriority="high" />
@@ -331,7 +331,7 @@ export default function BlogArticleView({ post, template, settings: blogSettings
       <main id="main-content" className={shell('feature')} style={look.style}>
         {banner}
         {a.progressBar ? <ReadingProgress /> : null}
-        <header className="blg-afe-head">
+        <div className="blg-afe-head">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="blg-afe-cover" src={appHref(cover)} alt="" fetchPriority="high" />
           <div className="container blg-afe-copy">
@@ -344,7 +344,7 @@ export default function BlogArticleView({ post, template, settings: blogSettings
           <a href="#article-start" className="blg-afe-cue">
             Scroll to read <span aria-hidden="true">↓</span>
           </a>
-        </header>
+        </div>
         <div id="article-start" className="blg-afe-col">
           {prose}
           <KeyPoints points={points} label={settings.labels.keyPoints} />
@@ -360,7 +360,7 @@ export default function BlogArticleView({ post, template, settings: blogSettings
     <main id="main-content" className={shell('technical')} style={look.style}>
       {banner}
       {a.progressBar ? <ReadingProgress /> : null}
-      <header className="blg-at-head">
+      <div className="blg-at-head">
         <div className="container blg-at-head-inner">
           {crumbs}
           <div className="blg-at-badges">
@@ -405,7 +405,7 @@ export default function BlogArticleView({ post, template, settings: blogSettings
             </div>
           </dl>
         </div>
-      </header>
+      </div>
 
       <div className={`container blg-at-grid${a.share ? '' : ' no-share'}`}>
         {a.share ? (

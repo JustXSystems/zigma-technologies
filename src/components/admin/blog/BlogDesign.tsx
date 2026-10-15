@@ -145,12 +145,12 @@ export default function BlogDesign() {
       {message ? <div className="admin-success">{message}</div> : null}
 
       <section className="admin-card abl-design-block">
-        <header className="abl-design-head">
+        <div className="abl-design-head">
           <div>
             <h3>Blog page design</h3>
             <p>The look of /blog. Every page section follows it unless that section picks its own design.</p>
           </div>
-        </header>
+        </div>
         <div className="abl-tpl-grid" role="radiogroup" aria-label="Blog page design">
           {BLOG_HUB_TEMPLATES.map((t) => (
             <label key={t.id} className={`abl-tpl-card${settings.hubTemplate === t.id ? ' is-on' : ''}`}>
@@ -181,12 +181,12 @@ export default function BlogDesign() {
       </section>
 
       <section className="admin-card abl-design-block">
-        <header className="abl-design-head">
+        <div className="abl-design-head">
           <div>
             <h3>Article layout</h3>
             <p>How each post at /blog/&lt;slug&gt; reads. A post can pick a different layout in its own editor.</p>
           </div>
-        </header>
+        </div>
         <div className="abl-tpl-grid abl-tpl-grid--3" role="radiogroup" aria-label="Article layout">
           {BLOG_ARTICLE_TEMPLATES.map((t) => (
             <label key={t.id} className={`abl-tpl-card${settings.articleTemplate === t.id ? ' is-on' : ''}`}>
@@ -206,12 +206,12 @@ export default function BlogDesign() {
       </section>
 
       <section className="admin-card abl-design-block">
-        <header className="abl-design-head">
+        <div className="abl-design-head">
           <div>
             <h3>Article style</h3>
             <p>Colour and typography of every article body. A post can change its accent and width under “This article&rsquo;s look”.</p>
           </div>
-        </header>
+        </div>
         <div className="abl-style-grid">
           <div className="abl-style-controls">
             <div className="admin-field">
