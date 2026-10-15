@@ -17,7 +17,6 @@ import { COPY_PATHS_EDITED_ELSEWHERE } from '@/components/admin/site-copy/paths-
 const HUBS = [
   { key: 'industries', label: 'Industries hub' },
   { key: 'locations', label: 'Locations hub' },
-  { key: 'resources', label: 'Resources hub' },
   { key: 'press', label: 'Press hub' },
   { key: 'sla', label: 'SLA page' },
   { key: 'search', label: 'Search page' },
@@ -27,7 +26,6 @@ const FEATURES = [
   { key: 'toolsEnabled', label: 'Calculators', hint: '/tools/ups-calculator and /tools/solar-roi' },
   { key: 'solutionFinderEnabled', label: 'Solution finder', hint: '/tools/solution-finder' },
   { key: 'searchEnabled', label: 'Site search', hint: 'Header search icon and /search' },
-  { key: 'resourcesEnabled', label: 'Resources hub', hint: '/resources' },
   { key: 'industriesEnabled', label: 'Industries hub', hint: '/industries' },
   { key: 'partnersEnabled', label: 'Partner portal', hint: 'Partner sign-in and portal pages' },
   { key: 'localesEnabled', label: 'Language landings', hint: 'Hindi (/hi) and Kannada (/kn) pages' },

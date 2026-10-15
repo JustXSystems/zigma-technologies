@@ -1,6 +1,7 @@
 import { jsonError, jsonOk } from '@/lib/api';
 import { listCatalogItems } from '@/lib/catalog';
 import { listPages } from '@/lib/cms';
+import { blogPostPath } from '@/lib/blog-sections';
 import { listResourcePosts } from '@/lib/resources';
 import { INDUSTRY_DEFS } from '@/lib/industries';
 import { isReservedSiteSlug } from '@/lib/reserved-slugs';
@@ -14,12 +15,11 @@ export async function GET(request: Request) {
     if (q.length < 2) return jsonOk({ results: [], q });
 
     const copy = await getSiteCopy();
-    const resourcesEnabled = copy.features.resourcesEnabled;
     const industriesEnabled = copy.features.industriesEnabled;
 
-    const [pages, resources, projects, products, services] = await Promise.all([
+    const [pages, articles, projects, products, services] = await Promise.all([
       listPages(false),
-      resourcesEnabled ? listResourcePosts({ q, limit: 12 }) : Promise.resolve([]),
+      listResourcePosts({ q, limit: 12 }),
       listCatalogItems({ itemType: 'project', q, limit: 12 }),
       listCatalogItems({ itemType: 'product', q, limit: 12 }),
       listCatalogItems({ itemType: 'service', q, limit: 12 }),
@@ -52,11 +52,11 @@ export async function GET(request: Request) {
       }
     }
 
-    for (const post of resources) {
+    for (const post of articles) {
       results.push({
-        type: 'Resource',
+        type: 'Article',
         title: post.title,
-        href: `/blog/${post.slug}`,
+        href: blogPostPath(post.slug),
         excerpt: post.excerpt || undefined,
       });
     }

@@ -16,6 +16,7 @@ import "./industries101-sections.css";
 import "./projects101-sections.css";
 import "./qualitysafety-sections.css";
 import "./blog-sections.css";
+import "./blog-article.css";
 
 const TITLE = 'Zigma Technologies | Solar EPC, UPS, BESS & EV Charging in India';
 const DESCRIPTION =

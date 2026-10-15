@@ -8,6 +8,7 @@ import {
   type SectionBox,
   type TextEl,
 } from '@/lib/about-sections';
+import type { BlogHubVariant } from '@/lib/blog-design';
 import type { HeroHeight, HeroVAlign } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
 import type { LegacyBgMedia, LegacyCardStyle, LegacySectionHeader } from '@/lib/legacy-sections';
@@ -17,9 +18,10 @@ import type { LifeColumns, LifeHighlight } from '@/lib/life-sections';
  * Blog hub section family (page /blog):
  * blog_hero, blog_featured, blog_topics, blog_feed, blog_cta.
  *
- * Articles are the Resources / Blog posts (resource_posts table, Admin → Resources / Blog) and publish at
- * /blog/[slug]; /resources and /resources/[slug] redirect here. The hub layout itself is a CMS page
- * (Admin → Pages → Blog). Empty style fields fall back to the scoped `.blg-*` CSS defaults.
+ * Articles live in resource_posts (Admin → Blog → Articles) and publish at /blog/[slug]; /resources and
+ * /resources/[slug] redirect here. The hub itself is the CMS page `blog` (Admin → Blog → Page sections).
+ * Each section renders in the blog template (Admin → Blog → Design) unless its own `variant` picks another.
+ * Empty style fields fall back to the scoped `.blg-*` CSS defaults.
  */
 
 export const BLOG_SECTION_TYPES = ['blog_hero', 'blog_featured', 'blog_topics', 'blog_feed', 'blog_cta'] as const;
@@ -48,6 +50,10 @@ export type BlogCardPost = {
   excerpt: string;
   cover: string;
   tags: string[];
+  /** Format label: Guide, Checklist, Technical brief… */
+  format: string;
+  featured: boolean;
+  author: string;
   publishedAt: string | null;
   readMinutes: number;
 };
@@ -56,11 +62,16 @@ export const BLOG_FALLBACK_COVER = '/assets/images/engineers-reviewing-electrica
 
 /** Posts shown by a Featured section; the feed uses the same pick to avoid repeating them. */
 export function pickFeaturedPosts(posts: BlogCardPost[], c: Pick<BlogFeaturedContent, 'mode' | 'slugs' | 'limit'>): BlogCardPost[] {
+  const limit = Math.max(1, Number(c.limit) || 3);
   if (c.mode === 'manual') {
     const bySlug = new Map(posts.map((p) => [p.slug, p]));
     return (c.slugs || []).map((s) => bySlug.get(s.trim())).filter((p): p is BlogCardPost => Boolean(p));
   }
-  return posts.slice(0, Math.max(1, Number(c.limit) || 3));
+  if (c.mode === 'flagged') {
+    const picks = posts.filter((p) => p.featured);
+    if (picks.length) return picks.slice(0, limit);
+  }
+  return posts.slice(0, limit);
 }
 
 /* ------------------------------------------------------------------ */
@@ -68,6 +79,8 @@ export function pickFeaturedPosts(posts: BlogCardPost[], c: Pick<BlogFeaturedCon
 /* ------------------------------------------------------------------ */
 
 export type BlogHeroContent = {
+  /** Design of this section; empty = the blog template (Admin → Blog → Design) */
+  variant?: BlogHubVariant;
   section: SectionBox;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
@@ -107,19 +120,21 @@ export type BlogCardOptions = {
 };
 
 export type BlogFeaturedContent = BlogCardOptions & {
+  variant?: BlogHubVariant;
   section: SectionBox;
   header: LegacySectionHeader;
-  /** latest = newest published posts; manual = the slugs below, in order */
-  mode: 'latest' | 'manual';
+  /** flagged = posts marked Featured (newest when none); latest = newest posts; manual = the slugs below, in order */
+  mode: 'flagged' | 'latest' | 'manual';
   slugs: string[];
   limit: number;
-  /** spotlight = one large lead card + stacked side cards; grid = equal cards */
+  /** Classic design only: spotlight = one large lead card + stacked side cards; grid = equal cards */
   layout: 'spotlight' | 'grid';
   columns: LifeColumns;
   gap?: string;
 };
 
 export type BlogTopicsContent = {
+  variant?: BlogHubVariant;
   section: SectionBox;
   header: LegacySectionHeader;
   /** Topics in this order; empty = every tag used by published posts */
@@ -131,6 +146,7 @@ export type BlogTopicsContent = {
 };
 
 export type BlogFeedContent = BlogCardOptions & {
+  variant?: BlogHubVariant;
   section: SectionBox;
   header: LegacySectionHeader;
   columns: LifeColumns;
@@ -147,6 +163,7 @@ export type BlogFeedContent = BlogCardOptions & {
 };
 
 export type BlogCtaContent = {
+  variant?: BlogHubVariant;
   section: SectionBox;
   background: LegacyBgMedia;
   align?: 'left' | 'center';
@@ -206,7 +223,7 @@ export function defaultBlogFeaturedContent(): BlogFeaturedContent {
       align: 'left',
       maxWidth: '680px',
     },
-    mode: 'latest',
+    mode: 'flagged',
     slugs: [],
     limit: 3,
     layout: 'spotlight',

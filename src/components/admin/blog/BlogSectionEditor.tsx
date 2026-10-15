@@ -29,6 +29,7 @@ import {
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import { normalizeLinkItems } from '@/lib/about-sections';
+import { BLOG_HUB_TEMPLATES, type BlogHubVariant } from '@/lib/blog-design';
 import { HERO_VALIGN_CHOICES } from '@/lib/hero-height';
 import {
   withBlogDefaults,
@@ -41,13 +42,29 @@ import {
   type BlogTopicsContent,
 } from '@/lib/blog-sections';
 
+const VARIANT_OPTIONS: ReadonlyArray<{ value: BlogHubVariant; label: string }> = [
+  { value: '', label: 'Follow the blog design' },
+  ...BLOG_HUB_TEMPLATES.map((t) => ({ value: t.id, label: `${t.label} — ${t.summary}` })),
+];
 
-/** Edit a string list with the link-list control (add, reorder, bulk paste). */
+/** Per-section design override; empty keeps the section in step with Admin → Blog → Design. */
+function DesignGroup({ value, onChange }: { value?: BlogHubVariant; onChange: (variant: BlogHubVariant) => void }) {
+  return (
+    <Group title="Design" description="Classic, Editorial, Bento or Signal" open>
+      <SelectInput label="This section's design" value={value || ''} options={VARIANT_OPTIONS} onChange={onChange} full />
+      <p className="az-admin-hint">
+        Leave on &ldquo;Follow the blog design&rdquo; so the whole page switches together from{' '}
+        <Link href="/admin/resources?tab=design">Blog → Design</Link>, where you can also apply each design&rsquo;s colours to every section.
+      </p>
+    </Group>
+  );
+}
+
 function PostsHint() {
   return (
     <p className="az-admin-hint">
-      Articles come from <Link href="/admin/resources">Resources / Blog</Link>: write, tag, add a cover image and publish there. Only published,
-      visible posts appear on /blog.
+      Articles come from <Link href="/admin/resources?tab=articles">Blog → Articles</Link>: write, tag, add a cover image and publish there.
+      Only published, visible posts appear on /blog.
     </p>
   );
 }
@@ -86,6 +103,7 @@ function BlogHeroEditor({ content: c, onChange }: EditorProps<BlogHeroContent>) 
   const setRo = (patch: Partial<BlogHeroContent['readout']>) => set({ readout: { ...ro, ...patch } });
   return (
     <>
+      <DesignGroup value={c.variant} onChange={(variant) => set({ variant })} />
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Background slideshow (images / videos)" withIndicators />
       <Group title="Layout, height & motion">
@@ -155,6 +173,7 @@ function BlogFeaturedEditor({ content: c, onChange }: EditorProps<BlogFeaturedCo
   const set = (patch: Partial<BlogFeaturedContent>) => onChange({ ...c, ...patch });
   return (
     <>
+      <DesignGroup value={c.variant} onChange={(variant) => set({ variant })} />
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header">
         <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
@@ -166,21 +185,22 @@ function BlogFeaturedEditor({ content: c, onChange }: EditorProps<BlogFeaturedCo
             label="Pick"
             value={c.mode}
             options={[
+              { value: 'flagged', label: 'Posts marked Featured (newest when none)' },
               { value: 'latest', label: 'Newest published posts' },
               { value: 'manual', label: 'Hand-picked (slugs below)' },
             ]}
-            onChange={(mode) => set({ mode: mode || 'latest' })}
+            onChange={(mode) => set({ mode: mode || 'flagged' })}
           />
           {c.mode === 'manual' ? null : (
             <NumberInput label="How many" value={c.limit} min={1} max={6} placeholder="3" onChange={(limit) => set({ limit: limit || 3 })} />
           )}
         </div>
         {c.mode === 'manual' ? (
-          <StringListEditor label="Post slugs, in order (as shown in Resources / Blog)" items={c.slugs} onChange={(slugs) => set({ slugs })} />
+          <StringListEditor label="Post slugs, in order (as shown in Blog → Articles)" items={c.slugs} onChange={(slugs) => set({ slugs })} />
         ) : null}
         <p className="az-admin-hint">The featured strip hides itself while a visitor filters by topic or searches.</p>
       </Group>
-      <Group title="Layout">
+      <Group title="Layout" description="Classic design only; the other designs have their own layout">
         <div className="admin-form-grid">
           <SelectInput
             label="Layout"
@@ -208,6 +228,7 @@ function BlogTopicsEditor({ content: c, onChange }: EditorProps<BlogTopicsConten
   const set = (patch: Partial<BlogTopicsContent>) => onChange({ ...c, ...patch });
   return (
     <>
+      <DesignGroup value={c.variant} onChange={(variant) => set({ variant })} />
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header" description="Hidden by default; the bar works well on its own">
         <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
@@ -236,6 +257,7 @@ function BlogFeedEditor({ content: c, onChange }: EditorProps<BlogFeedContent>) 
   const set = (patch: Partial<BlogFeedContent>) => onChange({ ...c, ...patch });
   return (
     <>
+      <DesignGroup value={c.variant} onChange={(variant) => set({ variant })} />
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section header">
         <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
@@ -273,6 +295,7 @@ function BlogCtaEditor({ content: c, onChange }: EditorProps<BlogCtaContent>) {
   const set = (patch: Partial<BlogCtaContent>) => onChange({ ...c, ...patch });
   return (
     <>
+      <DesignGroup value={c.variant} onChange={(variant) => set({ variant })} />
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <BgMediaGroup value={c.background} onChange={(background) => set({ background })} title="Background images / videos" />
       <Group title="Layout">

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useMemo, useState, type PointerEvent } from 'react';
 import { AzCtas, AzEyebrow, AzPills, AzText, vars } from '@/components/sections/AboutSections';
 import { LzHeading, colVars } from '@/components/sections/LifeSections';
 import { LgHeader, LgScrollBar, LgShell, cardVars } from '@/components/sections/LegacySections';
@@ -9,6 +9,7 @@ import HeroSlot from '@/components/HeroSlot';
 import { useBlogHub } from '@/components/blog/BlogPostsContext';
 import { appHref } from '@/lib/base-path';
 import { elementCss, normalizeLinkItems } from '@/lib/about-sections';
+import { resolveHubVariant, type BlogHubTemplate } from '@/lib/blog-design';
 import { heroHeightClass, heroScrollBarOn, heroVAlignClass } from '@/lib/hero-height';
 import { heroPlacement } from '@/lib/hero-placement';
 import {
@@ -34,22 +35,52 @@ function formatDate(iso: string | null) {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function BlogCard({ post, opts, variant = 'grid' }: { post: BlogCardPost; opts: BlogCardOptions; variant?: 'grid' | 'lead' | 'side' }) {
+const pad = (n: number, width = 2) => String(n).padStart(width, '0');
+
+/** The design a section renders in: its own variant, else the blog template. */
+function useVariant(variant: unknown): BlogHubTemplate {
+  const { template } = useBlogHub();
+  return resolveHubVariant(variant, { hubTemplate: template });
+}
+
+/** Cursor-following glow on bento tiles (sets --mx / --my on the hovered [data-glow] element). */
+function trackGlow(e: PointerEvent<HTMLElement>) {
+  const card = (e.target as HTMLElement).closest<HTMLElement>('[data-glow]');
+  if (!card) return;
+  const r = card.getBoundingClientRect();
+  card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+  card.style.setProperty('--my', `${e.clientY - r.top}px`);
+}
+
+function Cover({ post, eager }: { post: BlogCardPost; eager?: boolean }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={appHref(post.cover)} alt="" loading={eager ? 'eager' : 'lazy'} decoding="async" />;
+}
+
+function CardMeta({ post, opts, className = 'blg-card-meta' }: { post: BlogCardPost; opts: BlogCardOptions; className?: string }) {
+  if (opts.showMeta === false) return null;
   const date = formatDate(post.publishedAt);
+  return (
+    <div className={className}>
+      {date ? <time dateTime={post.publishedAt || undefined}>{date}</time> : null}
+      <span>{post.readMinutes} min read</span>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Classic                                                             */
+/* ------------------------------------------------------------------ */
+
+function BlogCard({ post, opts, variant = 'grid' }: { post: BlogCardPost; opts: BlogCardOptions; variant?: 'grid' | 'lead' | 'side' }) {
   return (
     <Link href={blogPostPath(post.slug)} className={`blg-card blg-card--${variant}`}>
       <div className="blg-card-media" style={vars({ height: variant === 'grid' ? opts.mediaHeight : undefined })}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={appHref(post.cover)} alt="" loading="lazy" />
+        <Cover post={post} eager={variant === 'lead'} />
         {opts.showTag !== false && post.tags[0] ? <span className="blg-card-tag">{post.tags[0]}</span> : null}
       </div>
       <div className="blg-card-body">
-        {opts.showMeta !== false ? (
-          <div className="blg-card-meta">
-            {date ? <time dateTime={post.publishedAt || undefined}>{date}</time> : null}
-            <span>{post.readMinutes} min read</span>
-          </div>
-        ) : null}
+        <CardMeta post={post} opts={opts} />
         <h3 className="blg-card-title">{post.title}</h3>
         {opts.showExcerpt !== false && post.excerpt && variant !== 'side' ? <p className="blg-card-excerpt">{post.excerpt}</p> : null}
         {opts.ctaLabel?.trim() ? <span className="blg-card-cta">{opts.ctaLabel}</span> : null}
@@ -59,11 +90,166 @@ function BlogCard({ post, opts, variant = 'grid' }: { post: BlogCardPost; opts: 
 }
 
 /* ------------------------------------------------------------------ */
+/* Editorial                                                           */
+/* ------------------------------------------------------------------ */
+
+function EditorialLead({ post, opts }: { post: BlogCardPost; opts: BlogCardOptions }) {
+  const { defaultAuthor } = useBlogHub();
+  return (
+    <Link href={blogPostPath(post.slug)} className="blg-ed-lead">
+      <div className="blg-ed-lead-media">
+        <Cover post={post} eager />
+      </div>
+      <div className="blg-ed-lead-body">
+        {opts.showTag !== false ? <span className="blg-ed-kicker">{post.format}</span> : null}
+        <h3 className="blg-ed-lead-title">{post.title}</h3>
+        {opts.showExcerpt !== false && post.excerpt ? <p className="blg-ed-lead-excerpt">{post.excerpt}</p> : null}
+        {opts.showMeta !== false ? (
+          <p className="blg-ed-byline">
+            By <strong>{post.author || defaultAuthor}</strong>
+            <span aria-hidden="true"> · </span>
+            {post.readMinutes} min read
+          </p>
+        ) : null}
+        {opts.ctaLabel?.trim() ? <span className="blg-ed-cta">{opts.ctaLabel}</span> : null}
+      </div>
+    </Link>
+  );
+}
+
+function EditorialRow({ post, opts, index }: { post: BlogCardPost; opts: BlogCardOptions; index: number }) {
+  const { defaultAuthor } = useBlogHub();
+  const date = formatDate(post.publishedAt);
+  return (
+    <Link href={blogPostPath(post.slug)} className="blg-ed-row">
+      <div className="blg-ed-row-meta">
+        <span className="blg-ed-row-num">{pad(index)}</span>
+        {opts.showTag !== false ? <span className="blg-ed-kicker">{post.format}</span> : null}
+        {opts.showMeta !== false && date ? <time dateTime={post.publishedAt || undefined}>{date}</time> : null}
+      </div>
+      <div className="blg-ed-row-body">
+        <h3 className="blg-ed-row-title">{post.title}</h3>
+        {opts.showExcerpt !== false && post.excerpt ? <p className="blg-ed-row-excerpt">{post.excerpt}</p> : null}
+        {opts.showMeta !== false ? (
+          <p className="blg-ed-byline">
+            By <strong>{post.author || defaultAuthor}</strong>
+            <span aria-hidden="true"> · </span>
+            {post.readMinutes} min read
+          </p>
+        ) : null}
+      </div>
+      <div className="blg-ed-row-media">
+        <Cover post={post} />
+      </div>
+    </Link>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Bento                                                               */
+/* ------------------------------------------------------------------ */
+
+function BentoTile({ post, opts, eager }: { post: BlogCardPost; opts: BlogCardOptions; eager?: boolean }) {
+  return (
+    <Link href={blogPostPath(post.slug)} className="blg-tile" data-glow="">
+      <div className="blg-tile-media">
+        <Cover post={post} eager={eager} />
+      </div>
+      <div className="blg-tile-body">
+        {opts.showTag !== false ? <span className="blg-chip">{post.format}</span> : null}
+        <h3 className="blg-tile-title">{post.title}</h3>
+        {opts.showExcerpt !== false && post.excerpt ? <p className="blg-tile-excerpt">{post.excerpt}</p> : null}
+        <CardMeta post={post} opts={opts} className="blg-tile-meta" />
+      </div>
+    </Link>
+  );
+}
+
+function BentoCard({ post, opts }: { post: BlogCardPost; opts: BlogCardOptions }) {
+  return (
+    <Link href={blogPostPath(post.slug)} className="blg-bcard" data-glow="">
+      <div className="blg-bcard-media" style={vars({ height: opts.mediaHeight })}>
+        <Cover post={post} />
+        {opts.showTag !== false ? <span className="blg-chip">{post.format}</span> : null}
+      </div>
+      <div className="blg-bcard-body">
+        <h3 className="blg-bcard-title">{post.title}</h3>
+        {opts.showExcerpt !== false && post.excerpt ? <p className="blg-bcard-excerpt">{post.excerpt}</p> : null}
+        <div className="blg-bcard-foot">
+          <CardMeta post={post} opts={opts} className="blg-tile-meta" />
+          <span className="blg-bcard-arrow" aria-hidden="true">
+            ↗
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Signal                                                              */
+/* ------------------------------------------------------------------ */
+
+function SignalBrief({ post, opts, index }: { post: BlogCardPost; opts: BlogCardOptions; index: number }) {
+  return (
+    <Link href={blogPostPath(post.slug)} className="blg-sig-brief">
+      <span className="blg-sig-idx">{pad(index)}</span>
+      {opts.showTag !== false ? <span className="blg-sig-format">{post.format}</span> : null}
+      <h3 className="blg-sig-brief-title">{post.title}</h3>
+      {opts.showExcerpt !== false && post.excerpt ? <p className="blg-sig-brief-excerpt">{post.excerpt}</p> : null}
+      <span className="blg-sig-brief-foot">
+        <CardMeta post={post} opts={opts} className="blg-sig-meta" />
+        <span aria-hidden="true">→</span>
+      </span>
+    </Link>
+  );
+}
+
+function SignalIndex({ posts, opts, start }: { posts: BlogCardPost[]; opts: BlogCardOptions; start: number }) {
+  return (
+    <div className={`blg-sig-index${opts.showTag === false ? ' no-format' : ''}${opts.showMeta === false ? ' no-meta' : ''}`}>
+      <div className="blg-sig-index-head" aria-hidden="true">
+        <span>#</span>
+        <span>Title</span>
+        <span className="blg-sig-col-format">Format</span>
+        <span className="blg-sig-col-meta">Read</span>
+        <span className="blg-sig-col-meta">Published</span>
+        <span />
+      </div>
+      <ol>
+        {posts.map((post, i) => (
+          <li key={post.id}>
+            <Link href={blogPostPath(post.slug)} className="blg-sig-row">
+              <span className="blg-sig-row-idx">{pad(start + i, 3)}</span>
+              <span className="blg-sig-row-main">
+                <span className="blg-sig-row-title">{post.title}</span>
+                {opts.showExcerpt !== false && post.excerpt ? <span className="blg-sig-row-excerpt">{post.excerpt}</span> : null}
+              </span>
+              <span className="blg-sig-col-format">
+                <span className="blg-sig-format">{post.format}</span>
+              </span>
+              <span className="blg-sig-col-meta blg-sig-row-read">{post.readMinutes} min</span>
+              <time className="blg-sig-col-meta" dateTime={post.publishedAt || undefined}>
+                {formatDate(post.publishedAt)}
+              </time>
+              <span className="blg-sig-row-arrow" aria-hidden="true">
+                →
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
 
 export function BlogHeroSection({ content, sectionKey }: SectionProps) {
   const c = withBlogDefaults<BlogHeroContent>('blog_hero', content);
+  const v = useVariant(c.variant);
   const { posts, tags } = useBlogHub();
   const crumbs = normalizeLinkItems(c.breadcrumb?.items);
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
@@ -74,10 +260,11 @@ export function BlogHeroSection({ content, sectionKey }: SectionProps) {
     <LgShell
       box={c.section}
       bg={c.background}
-      className={`az-hero ctc-hero blg-hero ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(c.heroHeight)} ${heroVAlignClass(
-        c.vAlign
-      )} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
+      className={`az-hero ctc-hero blg-hero blg-hero--${v} ctc-hero--${c.align === 'center' ? 'center' : 'left'} ${heroHeightClass(
+        c.heroHeight
+      )} ${heroVAlignClass(c.vAlign)} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
+      layers={v === 'bento' ? <div aria-hidden="true" className="blg-aurora" /> : null}
     >
       {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <HeroSlot place={place} name="text">
@@ -117,7 +304,10 @@ export function BlogHeroSection({ content, sectionKey }: SectionProps) {
           {!ro?.hidden && posts.length ? (
             <dl className="blg-readout">
               <div>
-                <dt>{ro.articlesLabel}</dt>
+                <dt>
+                  {v === 'signal' ? <span className="blg-readout-live" aria-hidden="true" /> : null}
+                  {ro.articlesLabel}
+                </dt>
                 <dd>{posts.length}</dd>
               </div>
               {tags.length ? (
@@ -144,33 +334,84 @@ export function BlogHeroSection({ content, sectionKey }: SectionProps) {
 /* Featured                                                            */
 /* ------------------------------------------------------------------ */
 
+function FeaturedBody({ v, items, c }: { v: BlogHubTemplate; items: BlogCardPost[]; c: BlogFeaturedContent }) {
+  const style = vars({ ...colVars(c.columns, { desktop: 3, tablet: 2, mobile: 1 }), '--lz-gap': c.gap, ...cardVars(c.cardStyle || {}) });
+  if (v === 'editorial') {
+    const [lead, ...rest] = items;
+    return (
+      <div className={`blg-ed-feature${rest.length ? '' : ' blg-ed-feature--solo'}`} style={style}>
+        <EditorialLead post={lead} opts={c} />
+        {rest.length ? (
+          <ol className="blg-ed-list">
+            {rest.map((post, i) => (
+              <li key={post.id}>
+                <Link href={blogPostPath(post.slug)} className="blg-ed-list-item">
+                  <span className="blg-ed-list-num">{pad(i + 2)}</span>
+                  <span className="blg-ed-list-body">
+                    {c.showTag !== false ? <span className="blg-ed-kicker">{post.format}</span> : null}
+                    <span className="blg-ed-list-title">{post.title}</span>
+                    {c.showMeta !== false ? <span className="blg-ed-list-meta">{post.readMinutes} min read</span> : null}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        ) : null}
+      </div>
+    );
+  }
+  if (v === 'bento') {
+    return (
+      <div className={`blg-bento blg-bento--n${Math.min(items.length, 6)}`} style={style} onPointerMove={trackGlow}>
+        {items.slice(0, 6).map((post, i) => (
+          <BentoTile key={post.id} post={post} opts={c} eager={i === 0} />
+        ))}
+      </div>
+    );
+  }
+  if (v === 'signal') {
+    return (
+      <ol className="blg-sig-top" style={style}>
+        {items.map((post, i) => (
+          <li key={post.id}>
+            <SignalBrief post={post} opts={c} index={i + 1} />
+          </li>
+        ))}
+      </ol>
+    );
+  }
+  if (c.layout !== 'grid' && items.length > 1) {
+    return (
+      <div className="blg-spotlight" style={style}>
+        <BlogCard post={items[0]} opts={c} variant="lead" />
+        <div className="blg-spotlight-side">
+          {items.slice(1).map((post) => (
+            <BlogCard key={post.id} post={post} opts={c} variant="side" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="blg-grid" style={style}>
+      {items.map((post) => (
+        <BlogCard key={post.id} post={post} opts={c} />
+      ))}
+    </div>
+  );
+}
+
 export function BlogFeaturedSection({ content, sectionKey }: SectionProps) {
   const c = withBlogDefaults<BlogFeaturedContent>('blog_featured', content);
+  const v = useVariant(c.variant);
   const { posts, activeTag, query } = useBlogHub();
   const items = useMemo(() => pickFeaturedPosts(posts, c), [posts, c]);
   // A topic or search view is about the archive; the featured strip would only repeat it.
   if (!items.length || activeTag || query) return null;
-  const spotlight = c.layout !== 'grid' && items.length > 1;
-  const style = vars({ ...colVars(c.columns, { desktop: 3, tablet: 2, mobile: 1 }), '--lz-gap': c.gap, ...cardVars(c.cardStyle || {}) });
   return (
-    <LgShell box={c.section} className="blg-featured" id={sectionKey || 'featured'}>
+    <LgShell box={c.section} className={`blg-featured blg-featured--${v}`} id={sectionKey || 'featured'}>
       <LgHeader header={c.header} />
-      {spotlight ? (
-        <div className="blg-spotlight" style={style}>
-          <BlogCard post={items[0]} opts={c} variant="lead" />
-          <div className="blg-spotlight-side">
-            {items.slice(1).map((post) => (
-              <BlogCard key={post.id} post={post} opts={c} variant="side" />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="blg-grid" style={style}>
-          {items.map((post) => (
-            <BlogCard key={post.id} post={post} opts={c} />
-          ))}
-        </div>
-      )}
+      <FeaturedBody v={v} items={items} c={c} />
     </LgShell>
   );
 }
@@ -181,12 +422,17 @@ export function BlogFeaturedSection({ content, sectionKey }: SectionProps) {
 
 export function BlogTopicsSection({ content, sectionKey }: SectionProps) {
   const c = withBlogDefaults<BlogTopicsContent>('blog_topics', content);
+  const v = useVariant(c.variant);
   const { posts, tags, activeTag } = useBlogHub();
   const counts = new Map(tags.map((t) => [t.tag, t.count]));
   const topics = c.topics.length ? c.topics : tags.map((t) => t.tag);
   if (!topics.length) return null;
   return (
-    <LgShell box={c.section} className={`blg-topics blg-topics--${c.align || 'left'}${c.sticky === false ? '' : ' blg-topics--sticky'}`} id={sectionKey || 'topics'}>
+    <LgShell
+      box={c.section}
+      className={`blg-topics blg-topics--${v} blg-topics--${c.align || 'left'}${c.sticky === false ? '' : ' blg-topics--sticky'}`}
+      id={sectionKey || 'topics'}
+    >
       <LgHeader header={c.header} />
       <nav className="blg-topic-rail" aria-label="Blog topics">
         <Link href={`${BLOG_BASE_PATH}#blog-feed`} scroll={false} className={`blg-topic${!activeTag ? ' is-active' : ''}`}>
@@ -214,8 +460,39 @@ export function BlogTopicsSection({ content, sectionKey }: SectionProps) {
 /* Feed                                                                */
 /* ------------------------------------------------------------------ */
 
+function FeedList({ v, posts, c }: { v: BlogHubTemplate; posts: BlogCardPost[]; c: BlogFeedContent }) {
+  const style = vars({ ...colVars(c.columns, { desktop: 3, tablet: 2, mobile: 1 }), '--lz-gap': c.gap, ...cardVars(c.cardStyle || {}) });
+  if (v === 'editorial') {
+    return (
+      <div className="blg-ed-rows" style={style}>
+        {posts.map((post, i) => (
+          <EditorialRow key={post.id} post={post} opts={c} index={i + 1} />
+        ))}
+      </div>
+    );
+  }
+  if (v === 'signal') return <SignalIndex posts={posts} opts={c} start={1} />;
+  if (v === 'bento') {
+    return (
+      <div className="blg-grid blg-grid--bento" style={style} onPointerMove={trackGlow}>
+        {posts.map((post) => (
+          <BentoCard key={post.id} post={post} opts={c} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="blg-grid" style={style}>
+      {posts.map((post) => (
+        <BlogCard key={post.id} post={post} opts={c} />
+      ))}
+    </div>
+  );
+}
+
 export function BlogFeedSection({ content, sectionKey }: SectionProps) {
   const c = withBlogDefaults<BlogFeedContent>('blog_feed', content);
+  const v = useVariant(c.variant);
   const { posts, activeTag, query, featuredIds } = useBlogHubWithFeatured();
   const [q, setQ] = useState(query);
   const pageSize = Math.max(1, Number(c.pageSize) || 9);
@@ -225,7 +502,7 @@ export function BlogFeedSection({ content, sectionKey }: SectionProps) {
   const filtered = useMemo(() => {
     let list = posts;
     if (activeTag) list = list.filter((p) => p.tags.includes(activeTag));
-    if (needle) list = list.filter((p) => `${p.title} ${p.excerpt} ${p.tags.join(' ')}`.toLowerCase().includes(needle));
+    if (needle) list = list.filter((p) => `${p.title} ${p.excerpt} ${p.format} ${p.tags.join(' ')}`.toLowerCase().includes(needle));
     if (c.excludeFeatured !== false && !activeTag && !needle) {
       const rest = list.filter((p) => !featuredIds.has(p.id));
       if (rest.length) list = rest;
@@ -237,7 +514,7 @@ export function BlogFeedSection({ content, sectionKey }: SectionProps) {
   const filteredView = Boolean(activeTag || needle);
 
   return (
-    <LgShell box={c.section} className="blg-feed" id={sectionKey || 'blog-feed'}>
+    <LgShell box={c.section} className={`blg-feed blg-feed--${v}`} id={sectionKey || 'blog-feed'}>
       <div className="blg-feed-head">
         <LgHeader header={c.header} />
         {c.showSearch !== false ? (
@@ -286,11 +563,7 @@ export function BlogFeedSection({ content, sectionKey }: SectionProps) {
       ) : null}
 
       {visible.length ? (
-        <div className="blg-grid" style={vars({ ...colVars(c.columns, { desktop: 3, tablet: 2, mobile: 1 }), '--lz-gap': c.gap, ...cardVars(c.cardStyle || {}) })}>
-          {visible.map((post) => (
-            <BlogCard key={post.id} post={post} opts={c} />
-          ))}
-        </div>
+        <FeedList v={v} posts={visible} c={c} />
       ) : (
         <div className="blg-empty">
           <h3>{c.emptyTitle}</h3>
@@ -305,7 +578,7 @@ export function BlogFeedSection({ content, sectionKey }: SectionProps) {
 
       {filtered.length > shown ? (
         <div className="blg-more">
-          <button type="button" className="btn btn-ghost-dark" onClick={() => setShown((n) => n + pageSize)}>
+          <button type="button" className="btn btn-ghost-dark blg-more-btn" onClick={() => setShown((n) => n + pageSize)}>
             {c.loadMoreLabel || 'Load more'} <span className="blg-more-count">{filtered.length - shown}</span>
           </button>
         </div>
@@ -325,9 +598,10 @@ function useBlogHubWithFeatured() {
 
 export function BlogCtaSection({ content, sectionKey }: SectionProps) {
   const c = withBlogDefaults<BlogCtaContent>('blog_cta', content);
+  const v = useVariant(c.variant);
   const align = c.align === 'left' ? 'left' : 'center';
   return (
-    <LgShell box={c.section} bg={c.background} className={`lz-cta lz-cta--${align} blg-cta`} id={sectionKey || 'contact'}>
+    <LgShell box={c.section} bg={c.background} className={`lz-cta lz-cta--${align} blg-cta blg-cta--${v}`} id={sectionKey || 'contact'}>
       <div className="lz-cta-inner" style={vars({ maxWidth: c.maxWidth })}>
         <AzEyebrow el={c.eyebrow} scale="lg" />
         <LzHeading el={c.title} role="section" className="lz-cta-title" highlight={c.highlight} />

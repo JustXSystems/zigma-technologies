@@ -1,18 +1,10 @@
 import type { SiteCopy } from '@/lib/site-copy';
 import type { NavItem } from '@/lib/nav-types';
 
-export type PublicNavFeatures = Pick<
-  SiteCopy['features'],
-  'resourcesEnabled' | 'industriesEnabled'
->;
+export type PublicNavFeatures = Pick<SiteCopy['features'], 'industriesEnabled'>;
 
 function pathOnly(href?: string) {
   return href?.split('#')[0].split('?')[0] || '';
-}
-
-function isResourcesHref(href?: string) {
-  const path = pathOnly(href);
-  return path === '/resources' || path.startsWith('/resources/');
 }
 
 function isIndustriesHref(href?: string) {
@@ -22,7 +14,6 @@ function isIndustriesHref(href?: string) {
 
 function shouldHideHref(href: string | undefined, features: PublicNavFeatures) {
   if (!href) return false;
-  if (!features.resourcesEnabled && isResourcesHref(href)) return true;
   if (!features.industriesEnabled && isIndustriesHref(href)) return true;
   return false;
 }

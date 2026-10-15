@@ -1,5 +1,7 @@
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { cleanPostDisplay, type PostDisplay } from '@/lib/blog-design';
 import pool from '@/lib/db';
+import { ensureResourcePostColumns } from '@/lib/schema-ensure';
 
 export type ResourcePost = {
   id: number;
@@ -9,6 +11,19 @@ export type ResourcePost = {
   body_html: string | null;
   cover_url: string | null;
   tags_json: string[] | null;
+  /** Article, guide, checklist… (empty = derived from the tags) */
+  format: string;
+  /** Article template for this post (empty = the blog default) */
+  template: string;
+  /** Editor's pick for the Featured section */
+  featured: number;
+  author_name: string | null;
+  author_role: string | null;
+  author_avatar_url: string | null;
+  /** Key takeaways shown as a summary card */
+  key_points_json: string[] | null;
+  /** This post's departures from the blog-wide design */
+  display_json: PostDisplay;
   status: 'draft' | 'published';
   meta_title: string | null;
   meta_description: string | null;
@@ -17,6 +32,29 @@ export type ResourcePost = {
   sort_order: number;
   created_at?: string;
   updated_at?: string;
+};
+
+export type ResourcePostInput = {
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  body_html?: string | null;
+  cover_url?: string | null;
+  tags_json?: string[];
+  format?: string;
+  template?: string;
+  featured?: boolean;
+  author_name?: string | null;
+  author_role?: string | null;
+  author_avatar_url?: string | null;
+  key_points_json?: string[];
+  display_json?: PostDisplay | null;
+  status?: 'draft' | 'published';
+  meta_title?: string | null;
+  meta_description?: string | null;
+  published_at?: string | Date | null;
+  enabled?: boolean;
+  sort_order?: number;
 };
 
 function parseJsonArray(raw: unknown): string[] | null {
@@ -32,6 +70,21 @@ function parseJsonArray(raw: unknown): string[] | null {
   return null;
 }
 
+function parseJsonObject(raw: unknown): unknown {
+  if (typeof raw !== 'string') return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function isoOrNull(raw: unknown): string | null {
+  if (!raw) return null;
+  const date = raw instanceof Date ? raw : new Date(String(raw));
+  return Number.isNaN(date.getTime()) ? String(raw) : date.toISOString();
+}
+
 function mapRow(row: RowDataPacket): ResourcePost {
   return {
     id: Number(row.id),
@@ -41,14 +94,22 @@ function mapRow(row: RowDataPacket): ResourcePost {
     body_html: row.body_html ?? null,
     cover_url: row.cover_url ?? null,
     tags_json: parseJsonArray(row.tags_json),
+    format: row.format ? String(row.format) : '',
+    template: row.template ? String(row.template) : '',
+    featured: Number(row.featured) ? 1 : 0,
+    author_name: row.author_name ?? null,
+    author_role: row.author_role ?? null,
+    author_avatar_url: row.author_avatar_url ?? null,
+    key_points_json: parseJsonArray(row.key_points_json),
+    display_json: cleanPostDisplay(parseJsonObject(row.display_json)),
     status: row.status === 'published' ? 'published' : 'draft',
     meta_title: row.meta_title ?? null,
     meta_description: row.meta_description ?? null,
-    published_at: row.published_at ? String(row.published_at) : null,
+    published_at: isoOrNull(row.published_at),
     enabled: Number(row.enabled) ? 1 : 0,
     sort_order: Number(row.sort_order) || 0,
-    created_at: row.created_at ? String(row.created_at) : undefined,
-    updated_at: row.updated_at ? String(row.updated_at) : undefined,
+    created_at: isoOrNull(row.created_at) ?? undefined,
+    updated_at: isoOrNull(row.updated_at) ?? undefined,
   };
 }
 
@@ -58,6 +119,7 @@ export async function listResourcePosts(opts?: {
   tag?: string;
   limit?: number;
 }) {
+  await ensureResourcePostColumns();
   const where: string[] = [];
   const params: unknown[] = [];
   if (!opts?.admin) {
@@ -81,6 +143,7 @@ export async function listResourcePosts(opts?: {
 }
 
 export async function getResourcePostBySlug(slug: string, opts?: { admin?: boolean }) {
+  await ensureResourcePostColumns();
   const where = ['slug = ?'];
   const params: unknown[] = [slug];
   if (!opts?.admin) {
@@ -95,38 +158,41 @@ export async function getResourcePostBySlug(slug: string, opts?: { admin?: boole
 }
 
 export async function getResourcePostById(id: number) {
+  await ensureResourcePostColumns();
   const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM resource_posts WHERE id = ? LIMIT 1', [id]);
   return rows[0] ? mapRow(rows[0]) : null;
 }
 
-export async function createResourcePost(input: {
-  slug: string;
-  title: string;
-  excerpt?: string | null;
-  body_html?: string | null;
-  cover_url?: string | null;
-  tags_json?: string[];
-  status?: 'draft' | 'published';
-  meta_title?: string | null;
-  meta_description?: string | null;
-  published_at?: string | null;
-  enabled?: boolean;
-  sort_order?: number;
-}) {
+const cleanList = (list: string[] | undefined) => JSON.stringify((list || []).map((s) => s.trim()).filter(Boolean));
+const displayJson = (display: PostDisplay | null | undefined) => {
+  const clean = cleanPostDisplay(display);
+  return Object.keys(clean).length ? JSON.stringify(clean) : null;
+};
+
+export async function createResourcePost(input: ResourcePostInput) {
+  await ensureResourcePostColumns();
   const status = input.status || 'draft';
-  const publishedAt =
-    input.published_at || (status === 'published' ? new Date().toISOString().slice(0, 19).replace('T', ' ') : null);
+  const publishedAt = input.published_at || (status === 'published' ? new Date() : null);
   const [result] = await pool.query<ResultSetHeader>(
     `INSERT INTO resource_posts
-      (slug, title, excerpt, body_html, cover_url, tags_json, status, meta_title, meta_description, published_at, enabled, sort_order)
-     VALUES (?, ?, ?, ?, ?, CAST(? AS JSON), ?, ?, ?, ?, ?, ?)`,
+      (slug, title, excerpt, body_html, cover_url, tags_json, format, template, featured, author_name, author_role,
+       author_avatar_url, key_points_json, display_json, status, meta_title, meta_description, published_at, enabled, sort_order)
+     VALUES (?, ?, ?, ?, ?, CAST(? AS JSON), ?, ?, ?, ?, ?, ?, CAST(? AS JSON), CAST(? AS JSON), ?, ?, ?, ?, ?, ?)`,
     [
       input.slug,
       input.title,
       input.excerpt ?? null,
       input.body_html ?? null,
       input.cover_url ?? null,
-      JSON.stringify(input.tags_json || []),
+      cleanList(input.tags_json),
+      input.format || '',
+      input.template || '',
+      input.featured ? 1 : 0,
+      input.author_name || null,
+      input.author_role || null,
+      input.author_avatar_url || null,
+      cleanList(input.key_points_json),
+      displayJson(input.display_json),
       status,
       input.meta_title ?? null,
       input.meta_description ?? null,
@@ -138,23 +204,8 @@ export async function createResourcePost(input: {
   return result.insertId;
 }
 
-export async function updateResourcePost(
-  id: number,
-  input: Partial<{
-    slug: string;
-    title: string;
-    excerpt: string | null;
-    body_html: string | null;
-    cover_url: string | null;
-    tags_json: string[];
-    status: 'draft' | 'published';
-    meta_title: string | null;
-    meta_description: string | null;
-    published_at: string | null;
-    enabled: boolean;
-    sort_order: number;
-  }>
-) {
+export async function updateResourcePost(id: number, input: Partial<ResourcePostInput>) {
+  await ensureResourcePostColumns();
   const fields: string[] = [];
   const params: unknown[] = [];
   const map: Record<string, unknown> = {
@@ -163,6 +214,11 @@ export async function updateResourcePost(
     excerpt: input.excerpt,
     body_html: input.body_html,
     cover_url: input.cover_url,
+    format: input.format,
+    template: input.template,
+    author_name: input.author_name,
+    author_role: input.author_role,
+    author_avatar_url: input.author_avatar_url,
     status: input.status,
     meta_title: input.meta_title,
     meta_description: input.meta_description,
@@ -177,7 +233,19 @@ export async function updateResourcePost(
   }
   if (input.tags_json !== undefined) {
     fields.push('tags_json = CAST(? AS JSON)');
-    params.push(JSON.stringify(input.tags_json));
+    params.push(cleanList(input.tags_json));
+  }
+  if (input.key_points_json !== undefined) {
+    fields.push('key_points_json = CAST(? AS JSON)');
+    params.push(cleanList(input.key_points_json));
+  }
+  if (input.display_json !== undefined) {
+    fields.push('display_json = CAST(? AS JSON)');
+    params.push(displayJson(input.display_json));
+  }
+  if (input.featured !== undefined) {
+    fields.push('featured = ?');
+    params.push(input.featured ? 1 : 0);
   }
   if (input.enabled !== undefined) {
     fields.push('enabled = ?');
@@ -195,26 +263,28 @@ export async function deleteResourcePost(id: number) {
   await pool.query('DELETE FROM resource_posts WHERE id = ?', [id]);
 }
 
-const RESOURCE_SEEDS: Array<{
-  slug: string;
-  title: string;
-  excerpt: string;
-  body_html: string;
-  cover_url: string;
-  tags_json: string[];
-  meta_title: string;
-  meta_description: string;
-}> = [
+const RESOURCE_SEEDS: Array<
+  Required<Pick<ResourcePostInput, 'slug' | 'title' | 'excerpt' | 'body_html' | 'cover_url' | 'tags_json' | 'format' | 'key_points_json'>> & {
+    meta_title: string;
+    meta_description: string;
+  }
+> = [
   {
     slug: 'ups-sizing-guide',
     title: 'UPS sizing guide for industrial and IT loads',
     excerpt: 'How to estimate kVA, autonomy, and redundancy before you buy a UPS.',
     cover_url: '/assets/images/seed-abb-ups.jpg',
     tags_json: ['UPS', 'Guide', 'Sizing'],
+    format: 'guide',
+    key_points_json: [
+      'Size from measured kW, then convert to kVA with the real power factor',
+      'Add 20–25% headroom for growth and inrush',
+      'Pick N+1 redundancy for mission-critical loads',
+    ],
     meta_title: 'UPS Sizing Guide | Zigma Technologies',
     meta_description: 'Practical UPS sizing checklist for industrial plants, server rooms, and commercial facilities in India.',
     body_html: `<p>Correct UPS sizing protects critical loads without overspending on oversized hardware. Start with measured load (kW), apply a power-factor conversion to kVA, then add headroom for growth and inrush.</p>
-<h3>Sizing checklist</h3>
+<h2>Sizing checklist</h2>
 <ul>
 <li>List critical vs non-critical loads with measured kW</li>
 <li>Note single-phase vs three-phase distribution</li>
@@ -230,17 +300,23 @@ const RESOURCE_SEEDS: Array<{
     excerpt: 'A practical operations checklist to keep C&amp;I solar plants performing year-round.',
     cover_url: '/assets/images/seed-solar-modules.jpg',
     tags_json: ['Solar', 'O&M', 'Checklist'],
+    format: 'checklist',
+    key_points_json: [
+      'Monthly visual, string and inverter-log checks catch silent losses',
+      'Quarterly thermal imaging finds hotspots before they fail',
+      'Documented O&M protects yield and warranty claims',
+    ],
     meta_title: 'Solar O&M Checklist | Zigma Technologies',
     meta_description: 'Monthly and quarterly solar O&M checklist covering cleaning, IV curves, string health, and inverter alarms.',
     body_html: `<p>Commercial solar underperforms quietly when soiling, loose terminations, or inverter faults go unnoticed. A disciplined O&amp;M rhythm protects yield and warranty compliance.</p>
-<h3>Monthly inspection rhythm</h3>
+<h2>Monthly inspection rhythm</h2>
 <ul>
 <li>Visual inspection of modules, mounting, and cable routing</li>
 <li>String current spot-checks against baseline</li>
 <li>Inverter alarm and event log review</li>
 <li>Vegetation, soiling, and drainage notes</li>
 </ul>
-<h3>Quarterly engineering checks</h3>
+<h2>Quarterly engineering checks</h2>
 <ul>
 <li>Torque verification on critical joints</li>
 <li>Thermal imaging for hotspot detection</li>
@@ -255,10 +331,16 @@ const RESOURCE_SEEDS: Array<{
     excerpt: 'How battery energy storage cuts demand charges and firms solar generation.',
     cover_url: '/assets/images/city-skyline-with-solar-panels-and-indus.jpg',
     tags_json: ['BESS', 'EMS', 'Peak Shaving'],
+    format: 'brief',
+    key_points_json: [
+      'Storage pays back fastest where short peaks drive demand charges',
+      'An EMS automates charge and discharge against the load profile',
+      'BESS can defer a transformer upgrade when adding EV charging',
+    ],
     meta_title: 'BESS Peak Shaving Guide | Zigma Technologies',
     meta_description: 'Learn when battery energy storage systems reduce demand charges and improve solar self-consumption.',
     body_html: `<p>Peak shaving uses stored energy during short high-demand windows that drive tariff spikes. Pairing BESS with an energy management system (EMS) automates charge/discharge against your load profile.</p>
-<h3>When BESS pays back</h3>
+<h2>When BESS pays back</h2>
 <ul>
 <li>Factories with sharp process peaks and high demand charges</li>
 <li>Campuses adding EV charging without upgrading transformer capacity</li>

@@ -107,6 +107,7 @@ mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-appearance.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-case-study.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-categories.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-resource-posts.sql
+mysql -u zigmatech -p zigmatech < scripts/migrate-blog-design.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-testimonials.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-wave3.sql
 mysql -u zigmatech -p zigmatech < scripts/migrate-catalog-background.sql
@@ -166,7 +167,7 @@ Change admin passwords after import from shared environments.
 
 | Role | Scope |
 |------|-------|
-| **Editor** | Pages, inventory, catalog settings, resources, press, testimonials, enquiries, forms, nav, site settings, media, account |
+| **Editor** | Pages, inventory, catalog settings, blog, press, testimonials, enquiries, forms, nav, site settings, media, account |
 | **Admin** | Everything + Site Copy (write), Theme Studio (publish), New Client, newsletter, redirects, partners, users, dashboard bootstrap |
 
 Custom roles (Roles screen) pick any mix of non-admin screens (Users, Roles, Email and New Client are never grantable); Account is always available. Access, name/email, password and deletion take effect on the user's next request — no sign-out needed. The last full admin cannot be deleted or demoted, and nobody can change their own access. Users opening a screen they lack are redirected to their first allowed screen.
@@ -177,8 +178,8 @@ Custom roles (Roles screen) pick any mix of non-admin screens (Users, Roles, Ema
 
 - **Ctrl + K** (⌘ + K on Mac), or the *Find a setting…* box in the top bar, searches every screen, hub tab, Site Settings section (including field names such as "GA4" or "Copyright") and CMS page the signed-in user may open. Enter opens it; unsaved edits are confirmed first.
 - **Dashboard → Where to edit what** lists the same screens with one-line summaries, filtered by role.
-- Sidebar groups: **Content** (Pages, Inventory, Catalog Settings, Media, Resources, Press, Testimonials), **Leads**, **Site setup** (Site Settings, Header & Footer, Theme Studio, Site Copy, SEO, Email), **Platform**.
-- Every tabbed screen (Header & Footer, Forms & CRM, SEO, Theme Studio, Site Copy) keeps the open tab in `?tab=` so links and bookmarks land on it.
+- Sidebar groups: **Content** (Pages, Inventory, Catalog Settings, Media, Blog, Press, Testimonials), **Leads**, **Site setup** (Site Settings, Header & Footer, Theme Studio, Site Copy, SEO, Email), **Platform**.
+- Every tabbed screen (Blog, Header & Footer, Forms & CRM, SEO, Theme Studio, Site Copy) keeps the open tab in `?tab=` so links and bookmarks land on it.
 
 ## Module reference
 
@@ -237,15 +238,16 @@ Each module: **Why** (business purpose), **When** (trigger), **How** (steps), **
 
 Presets: `classic`, `premium`, `glass`, `minimal`, `bold-corporate`. Hero falls back to featured items if none selected.
 
-### Resources — `/admin/resources`
+### Blog — `/admin/resources`
 
 | | |
 |---|---|
 | **Why** | SEO guides and engineering credibility |
-| **When** | Publish technical checklists; tag-filtered hub |
-| **How** | Create/seed → HTML body (h2, lists) → cover, tags, meta → Publish |
-| **Public** | `/resources`, `/resources/{slug}` + Article JSON-LD |
-| **DB** | `resource_posts` |
+| **When** | Publish technical checklists and articles; change how the blog looks |
+| **How** | **Articles**: search and filter (Live / Drafts / Hidden / Featured), ★ to feature, Duplicate, + New article → title (slug follows it) → optional starter outline (How-to, Checklist, Case study, News, Comparison) → write in the **visual editor**, which looks like the published article: `/` opens the block menu (headings, lists, steps timeline, pull quote, note / tip / warning / verdict boxes, FAQ, image, YouTube, table, button, divider, code); selecting text shows bold / italic / link / heading; paste from Google Docs, Word or Markdown keeps the formatting; pasted or dropped images upload to Media; click an image to size it (inset / column / wide / full), caption it and write its alt text; Focus mode; HTML source view; clickable outline, word count and reading time. Side panel: **Readiness** score with one-click fixes (summary from the intro, takeaways from the sections, tags found in the text, format from the title, alt text from captions / file names, cover from the first image), status and date, visible, featured, format, layout override, cover (empty = first body image), tags, author, and *This article's look* (accent, width, drop cap, each reader tool on / off / blog default). Drafts autosave; a browser copy is offered back after a closed tab; Ctrl+S saves → Preview ↗ (12-hour private link, works for drafts) → Publish. **Design**: blog page design (Classic, Editorial, Bento, Signal) and article layout (Technical brief, Focus, Immersive feature) with live wireframes; **article style** (accent colour, text width, text size, heading font, drop cap) with a live sample; what every article shows (progress bar, contents, takeaways, author, share, previous / next, related count, side CTA, CTA band); labels; default author; CTA copy. *Save & apply colours* recolours the /blog sections for the chosen design. **Page sections**: the /blog CMS page (hero, featured, topics, feed, CTA); each section follows the blog design unless its own *Design* picks another |
+| **Public** | `/blog`, `/blog/{slug}` (+ `?preview=1&token=…` for drafts) + BlogPosting JSON-LD, FAQPage JSON-LD when the article has FAQ blocks; external links open in a new tab; `/resources/*` redirects to `/blog/*` |
+| **DB** | `resource_posts` incl. `display_json` per-article overrides (columns self-heal; `scripts/migrate-blog-design.sql` for manual setups), `theme_settings` key `blog` (incl. `style`), CMS page `blog` |
+| **Access** | Articles and Design need *Blog*; Page sections and *apply colours* need *Pages* |
 
 ### Press — `/admin/press`
 
@@ -502,7 +504,8 @@ CRM webhook, partner portal, video case studies, availability/lead time, press/n
 | `/api/admin/theme` | Tokens + CSS |
 | `/api/admin/enquiries` | Lead inbox |
 | `/api/admin/media` | Asset library |
-| `/api/admin/resources`, `/press`, `/testimonials` | Editorial |
+| `/api/admin/resources`, `/press`, `/testimonials` | Editorial (`/resources/{id}/preview` signs a draft link) |
+| `/api/admin/blog-settings`, `/blog-settings/apply-hub` | Blog designs; recolour the /blog sections |
 | `/api/admin/redirects`, `/newsletter`, `/partners`, `/users` | Platform (admin) |
 
 ### Public (no auth)

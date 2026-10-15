@@ -3,7 +3,8 @@ import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import { blogPostPath } from '@/lib/blog-sections';
 import { keepOldAddress } from '@/lib/redirects';
-import { deleteResourcePost, getResourcePostById, updateResourcePost } from '@/lib/resources';
+import { resourcePostSchema, schemaMessage } from '@/lib/resource-post-schema';
+import { deleteResourcePost, getResourcePostById, getResourcePostBySlug, updateResourcePost } from '@/lib/resources';
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -20,33 +21,25 @@ export async function GET(_request: Request, ctx: Ctx) {
   }
 }
 
-const patchSchema = z.object({
-  slug: z.string().min(1).optional(),
-  title: z.string().min(1).optional(),
-  excerpt: z.string().nullable().optional(),
-  body_html: z.string().nullable().optional(),
-  cover_url: z.string().nullable().optional(),
-  tags_json: z.array(z.string()).optional(),
-  status: z.enum(['draft', 'published']).optional(),
-  meta_title: z.string().nullable().optional(),
-  meta_description: z.string().nullable().optional(),
-  published_at: z.string().nullable().optional(),
-  enabled: z.boolean().optional(),
-  sort_order: z.number().optional(),
-});
+const patchSchema = resourcePostSchema.partial();
 
 export async function PATCH(request: Request, ctx: Ctx) {
   try {
     await requireSession();
     const { id } = await ctx.params;
     const body = patchSchema.parse(await readJson(request));
-    const before = body.slug ? await getResourcePostById(Number(id)) : null;
+    const before = await getResourcePostById(Number(id));
+    if (!before) return jsonError('Not found', 404);
+    if (body.slug && body.slug !== before.slug) {
+      const clash = await getResourcePostBySlug(body.slug, { admin: true });
+      if (clash && clash.id !== before.id) return jsonError(`Another post already uses /blog/${body.slug}`, 409);
+    }
     await updateResourcePost(Number(id), body);
     const post = await getResourcePostById(Number(id));
     const redirect = await keepOldAddress(before, post, (p) => blogPostPath(p.slug));
     return jsonOk({ post, redirect });
   } catch (error) {
-    if (error instanceof z.ZodError) return jsonError('Invalid payload', 400);
+    if (error instanceof z.ZodError) return jsonError(schemaMessage(error), 400);
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
     console.error(error);
     return jsonError(error instanceof Error ? error.message : 'Update failed', 500);

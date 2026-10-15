@@ -7,8 +7,6 @@ export const HERO_HEIGHT_PAGES = [
   { key: 'industryDetail', label: 'Industry detail (/industries/[slug])' },
   { key: 'locations', label: 'Locations hub (/locations)' },
   { key: 'locationDetail', label: 'City + city-service pages (/locations/…)' },
-  { key: 'resources', label: 'Resources hub (/resources)' },
-  { key: 'resourceDetail', label: 'Resource article (/resources/[slug])' },
   { key: 'press', label: 'Press hub (/press)' },
   { key: 'pressDetail', label: 'Press article (/press/[slug])' },
   { key: 'sla', label: 'SLA (/sla)' },
@@ -163,7 +161,6 @@ export type SiteCopy = {
   hubs: {
     industries: HubCopy;
     locations: HubCopy;
-    resources: HubCopy;
     press: HubCopy;
     sla: HubCopy;
     search: HubCopy;
@@ -277,7 +274,6 @@ export type SiteCopy = {
     toolsEnabled: boolean;
     solutionFinderEnabled: boolean;
     searchEnabled: boolean;
-    resourcesEnabled: boolean;
     industriesEnabled: boolean;
     partnersEnabled: boolean;
     localesEnabled: boolean;
@@ -381,19 +377,6 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
       ctaBandEyebrow: 'Site visit',
       ctaBandTitle: 'Need a city-specific review?',
       ctaBandLead: 'Share your city and load priority — we route it to the right desk.',
-    }),
-    resources: hub({
-      eyebrow: 'Resources',
-      title: 'Resources & guides',
-      lead: 'Practical notes for UPS sizing, solar ROI, and service planning.',
-      ctaPrimary: 'Solution finder →',
-      ctaPrimaryHref: '/tools/solution-finder',
-      ctaSecondary: 'Contact us',
-      ctaSecondaryHref: '/contact',
-      proofRail: ['Guides', 'Checklists', 'Calculators'],
-      ctaBandEyebrow: 'Prefer a guided path?',
-      ctaBandTitle: 'Use the solution finder',
-      ctaBandLead: 'Answer a few questions and get a recommended capability stack.',
     }),
     press: hub({
       eyebrow: 'Press',
@@ -776,7 +759,6 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
     toolsEnabled: true,
     solutionFinderEnabled: false,
     searchEnabled: false,
-    resourcesEnabled: false,
     industriesEnabled: true,
     partnersEnabled: true,
     localesEnabled: true,

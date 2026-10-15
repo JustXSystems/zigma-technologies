@@ -13,10 +13,10 @@ export default function SeoHub({ initialTab }: { initialTab?: string }) {
       title="SEO"
       intro={
         <>
-          How the site appears in search and when shared. CMS pages, catalog items and resources have their own SEO
+          How the site appears in search and when shared. CMS pages, catalog items and blog articles have their own SEO
           fields in <AdminLink href="/admin/pages">Pages</AdminLink>,{' '}
           <AdminLink href="/admin/inventory">Inventory → SEO</AdminLink> and{' '}
-          <AdminLink href="/admin/resources">Resources</AdminLink>.
+          <AdminLink href="/admin/resources">Blog → Articles</AdminLink>.
         </>
       }
       tabs={SEO_TABS}

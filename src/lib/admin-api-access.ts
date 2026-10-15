@@ -62,6 +62,8 @@ export const ADMIN_API_RULES: readonly ApiRule[] = [
   { prefix: '/catalog-transfer', read: ['inventory'] },
 
   { prefix: '/resources', read: ['resources'] },
+  { prefix: '/blog-settings', read: ['resources'] },
+  { prefix: '/blog-settings/apply-hub', read: ['pages'] },
   { prefix: '/press', read: ['press'] },
   { prefix: '/testimonials', read: ['testimonials'] },
 

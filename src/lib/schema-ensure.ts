@@ -327,6 +327,67 @@ export function ensureMediaAssetColumns(): Promise<void> {
   return mediaAssetColumnsReady;
 }
 
+let resourcePostColumnsReady: Promise<void> | null = null;
+
+const RESOURCE_POSTS_TABLE = `CREATE TABLE IF NOT EXISTS resource_posts (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug VARCHAR(160) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  excerpt TEXT NULL,
+  body_html MEDIUMTEXT NULL,
+  cover_url VARCHAR(500) NULL,
+  tags_json JSON NULL,
+  status ENUM('draft','published') NOT NULL DEFAULT 'draft',
+  meta_title VARCHAR(255) NULL,
+  meta_description VARCHAR(500) NULL,
+  published_at DATETIME NULL,
+  enabled TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_resource_slug (slug),
+  INDEX idx_resource_pub (status, enabled, published_at)
+) ENGINE=InnoDB`;
+
+const RESOURCE_POST_COLUMNS: Array<{ name: string; ddl: string }> = [
+  { name: 'format', ddl: `ALTER TABLE resource_posts ADD COLUMN format VARCHAR(24) NOT NULL DEFAULT '' AFTER cover_url` },
+  { name: 'template', ddl: `ALTER TABLE resource_posts ADD COLUMN template VARCHAR(24) NOT NULL DEFAULT '' AFTER format` },
+  { name: 'featured', ddl: `ALTER TABLE resource_posts ADD COLUMN featured TINYINT(1) NOT NULL DEFAULT 0 AFTER template` },
+  { name: 'author_name', ddl: `ALTER TABLE resource_posts ADD COLUMN author_name VARCHAR(120) NULL AFTER featured` },
+  { name: 'author_role', ddl: `ALTER TABLE resource_posts ADD COLUMN author_role VARCHAR(160) NULL AFTER author_name` },
+  { name: 'author_avatar_url', ddl: `ALTER TABLE resource_posts ADD COLUMN author_avatar_url VARCHAR(500) NULL AFTER author_role` },
+  { name: 'key_points_json', ddl: `ALTER TABLE resource_posts ADD COLUMN key_points_json JSON NULL AFTER author_avatar_url` },
+  { name: 'display_json', ddl: `ALTER TABLE resource_posts ADD COLUMN display_json JSON NULL AFTER key_points_json` },
+];
+
+/** Idempotent: the blog posts table and its design columns (format, template, featured, author, key points, display overrides). */
+export function ensureResourcePostColumns(): Promise<void> {
+  if (!resourcePostColumnsReady) {
+    resourcePostColumnsReady = (async () => {
+      try {
+        await pool.query(RESOURCE_POSTS_TABLE);
+        const [rows] = await pool.query<RowDataPacket[]>(
+          `SELECT COLUMN_NAME AS name FROM information_schema.COLUMNS
+           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'resource_posts'`
+        );
+        const have = new Set(rows.map((r) => String(r.name)));
+        for (const col of RESOURCE_POST_COLUMNS) {
+          if (have.has(col.name)) continue;
+          await pool.query(col.ddl);
+          console.info(`[schema] added resource_posts.${col.name}`);
+        }
+      } catch (err) {
+        if (isDbUnavailableError(err)) throw err;
+        console.error('[schema] could not ensure resource_posts columns — run scripts/migrate-blog-design.sql', err);
+      }
+    })().catch((err) => {
+      resourcePostColumnsReady = null;
+      throw err;
+    });
+  }
+  return resourcePostColumnsReady;
+}
+
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */
 export function ensureCatalogDiscoveryColumns(): Promise<void> {
   if (!discoveryColumnsReady) {

@@ -30,6 +30,16 @@
     "ztools:expo": "npm run expo:android --prefix apps/ztools-mobile"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.8.0",
+    "@tiptap/core": "^3.32.0",
+    "@tiptap/extension-heading": "^3.32.0",
+    "@tiptap/extension-table": "^3.32.0",
+    "@tiptap/extension-typography": "^3.32.0",
+    "@tiptap/extension-youtube": "^3.32.0",
+    "@tiptap/extensions": "^3.32.0",
+    "@tiptap/pm": "^3.32.0",
+    "@tiptap/react": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.8",
     "mysql2": "^3.23.3",

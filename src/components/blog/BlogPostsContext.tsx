@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, type ReactNode } from 'react';
+import { DEFAULT_BLOG_SETTINGS, type BlogHubTemplate } from '@/lib/blog-design';
 import type { BlogCardPost } from '@/lib/blog-sections';
 
 export type BlogHubData = {
@@ -11,9 +12,21 @@ export type BlogHubData = {
   query: string;
   /** Posts the page's Featured section shows, so the feed can skip them */
   featuredIds: number[];
+  /** Blog template from Admin → Blog → Design; sections without their own variant follow it */
+  template: BlogHubTemplate;
+  /** Byline for posts without an author */
+  defaultAuthor: string;
 };
 
-const EMPTY: BlogHubData = { posts: [], tags: [], activeTag: null, query: '', featuredIds: [] };
+const EMPTY: BlogHubData = {
+  posts: [],
+  tags: [],
+  activeTag: null,
+  query: '',
+  featuredIds: [],
+  template: DEFAULT_BLOG_SETTINGS.hubTemplate,
+  defaultAuthor: DEFAULT_BLOG_SETTINGS.author.name,
+};
 
 const BlogHubContext = createContext<BlogHubData>(EMPTY);
 

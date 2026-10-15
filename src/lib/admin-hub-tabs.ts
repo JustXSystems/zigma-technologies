@@ -113,14 +113,14 @@ export const SITE_COPY_TABS = [
     label: 'Hub pages',
     screen: 'siteCopy',
     editor: 'siteCopy',
-    description: 'Eyebrow, title, lead, buttons, proof rail and CTA band of the industries, locations, resources, press, SLA and search hubs.',
+    description: 'Eyebrow, title, lead, buttons, proof rail and CTA band of the industries, locations, press, SLA and search hubs.',
   },
   {
     id: 'features',
     label: 'Features',
     screen: 'siteCopy',
     editor: 'siteCopy',
-    description: 'Switch whole site features on or off: tools, solution finder, search, resources, industries, partner portal, language landings.',
+    description: 'Switch whole site features on or off: tools, solution finder, search, industries, partner portal, language landings.',
   },
   {
     id: 'heroHeights',
@@ -159,8 +159,31 @@ export const SITE_COPY_TABS = [
   },
 ] as const satisfies readonly AdminHubTab<string>[];
 
+export const BLOG_TABS = [
+  {
+    id: 'articles',
+    label: 'Articles',
+    screen: 'resources',
+    description: 'Write, preview and publish posts at /blog/<slug>: cover, author, format, key takeaways, tags and SEO.',
+  },
+  {
+    id: 'design',
+    label: 'Design',
+    screen: 'resources',
+    description:
+      'Pick the /blog hub design and the article layout, choose what every article shows (contents, progress, share, author, related) and the default author and CTA.',
+  },
+  {
+    id: 'sections',
+    label: 'Page sections',
+    screen: 'pages',
+    description: 'The sections of the /blog page — hero, featured, topics, feed and CTA band. Each one follows the blog design unless it picks its own.',
+  },
+] as const satisfies readonly AdminHubTab<string>[];
+
 /** Tabbed hub screens: the screen that hosts them and their tabs (for search and deep links). */
 export const ADMIN_HUBS: readonly { screen: AdminScreenKey; href: string; tabs: readonly AdminHubTab<string>[] }[] = [
+  { screen: 'resources', href: '/admin/resources', tabs: BLOG_TABS },
   { screen: 'nav', href: '/admin/header-footer', tabs: HEADER_FOOTER_TABS },
   { screen: 'forms', href: '/admin/forms', tabs: LEADS_TABS },
   { screen: 'redirects', href: '/admin/seo', tabs: SEO_TABS },

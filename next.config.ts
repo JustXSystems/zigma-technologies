@@ -8,7 +8,7 @@ const csp = [
   "font-src 'self' data: https://fonts.gstatic.com",
   // GA4 hosts per Google's CSP guidance (collection endpoints vary by region / Google signals).
   "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://plausible.io https://challenges.cloudflare.com",
-  "frame-src 'self' https://www.google.com https://maps.google.com https://challenges.cloudflare.com https://www.youtube.com https://player.vimeo.com",
+  "frame-src 'self' https://www.google.com https://maps.google.com https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
   "media-src 'self' blob: https:",
   "frame-ancestors 'self'",
   "base-uri 'self'",

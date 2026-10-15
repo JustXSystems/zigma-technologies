@@ -78,7 +78,7 @@ export default function RedirectsEditor() {
       <div className="admin-card">
         <h3 style={{ marginTop: 0 }}>Add a redirect</h3>
         <p className="theme-help" style={{ marginTop: 0 }}>
-          Applied before the page renders. Renaming the address of a published page, resource, press post or catalog
+          Applied before the page renders. Renaming the address of a published page, blog article, press post or catalog
           item adds its redirect automatically — use this for legacy paths and external moves. Run{' '}
           <code>scripts/migrate-redirects.sql</code> if the table is missing.
         </p>
