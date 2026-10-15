@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
-import { hasStructuredDetails, parseJobText, type ParsedJobText } from '@/lib/careers-job-text';
+import { extractEducation, hasStructuredDetails, parseJobText, type ParsedJobText } from '@/lib/careers-job-text';
 import {
   AboutSiteSettingsContext,
   AlignButtons,
@@ -79,6 +79,7 @@ const JOB_LABEL_NAMES: Record<keyof CareersJobLabels, string> = {
   location: 'Location label',
   type: 'Job type label',
   experience: 'Experience label',
+  education: 'Education label',
   panelApply: 'Apply button inside details',
 };
 
@@ -259,6 +260,7 @@ function applyParsed(job: CareersJob, p: ParsedJobText, fromOldDescription: bool
     location: job.location || p.location,
     type: job.type || p.type,
     experience: job.experience || expChip || p.experience,
+    education: job.education || p.education,
     chips: expChip ? chips.filter((ch) => ch !== expChip) : chips,
     summary: p.summary || job.summary,
     responsibilities: pick(p.responsibilities, job.responsibilities),
@@ -267,6 +269,32 @@ function applyParsed(job: CareersJob, p: ParsedJobText, fromOldDescription: bool
     facts: pick(p.facts, job.facts),
     description: fromOldDescription ? '' : job.description,
   };
+}
+
+/** Education field; offers to pull degree / diploma lines out of Requirements when it is empty. */
+function EducationInput({ job, onChange }: { job: CareersJob; onChange: (next: CareersJob) => void }) {
+  const found = String(job.education || '').trim() ? null : extractEducation(job.requirements || []);
+  return (
+    <Field label="Education" hint={found?.education ? undefined : 'Shown as a tag and in “At a glance”'}>
+      <input
+        className="admin-input"
+        value={job.education || ''}
+        placeholder="Diploma / BE – EEE / ECE"
+        onChange={(e) => onChange({ ...job, education: e.target.value })}
+      />
+      {found?.education ? (
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary az-admin-mini"
+          style={{ alignSelf: 'start', marginTop: '0.35rem' }}
+          title={found.education}
+          onClick={() => onChange({ ...job, education: found.education, requirements: found.rest })}
+        >
+          Take it from Requirements
+        </button>
+      ) : null}
+    </Field>
+  );
 }
 
 /** Paste a whole job description; headings like "Key Responsibilities" / "Requirements" sort it into the boxes below. */
@@ -305,7 +333,7 @@ function JobAutoFill({ job, onFill }: { job: CareersJob; onFill: (next: CareersJ
             setDone(false);
           }}
           placeholder={'About the role…\n\nKey Responsibilities\n- …\n\nRequirements\n- …'}
-          hint="Headings such as Key Responsibilities, Requirements, Eligibility, Qualifications, Benefits and lines like “Vacancies: 2” are recognised. Bullets, numbers and emojis are removed. “How to apply” text is skipped — the Apply button handles that."
+          hint="Headings such as Key Responsibilities, Requirements, Eligibility, Education / Qualifications, Benefits and lines like “Vacancies: 2” are recognised. Degree / diploma lines go into Education. Bullets, numbers and emojis are removed. “How to apply” text is skipped — the Apply button handles that."
         />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
           <button
@@ -379,6 +407,7 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
                 <TextInput label="Location" value={j.location} onChange={(location) => patch({ ...j, location })} placeholder="Bengaluru" />
                 <SuggestInput label="Job type" value={j.type} onChange={(type) => patch({ ...j, type })} options={JOB_TYPE_OPTIONS} placeholder="Full-Time" />
                 <TextInput label="Experience" value={j.experience} onChange={(experience) => patch({ ...j, experience })} placeholder="1–2 years / Freshers" />
+                <EducationInput job={j} onChange={patch} />
                 <TextInput label="Badge (optional)" value={j.badge} onChange={(badge) => patch({ ...j, badge })} placeholder="New, Urgent, Hiring fast…" />
                 <Field label="Visibility">
                   <Toggle label="Show this job on the website" checked={!j.hidden} onChange={(on) => patch({ ...j, hidden: !on })} />
@@ -493,12 +522,13 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
         </div>
       </Group>
       <Group title="Icons, tags & badge">
-        <Toggle label="Show icons beside department / location / type / experience" checked={!ci?.hidden} onChange={(on) => setCi({ hidden: !on })} />
+        <Toggle label="Show icons beside department / location / type / experience / education" checked={!ci?.hidden} onChange={(on) => setCi({ hidden: !on })} />
         <IconEditor label="Department icon" value={ci?.department || {}} onChange={(department) => setCi({ department })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
         <IconEditor label="Location icon" value={ci?.location || {}} onChange={(location) => setCi({ location })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
         <IconEditor label="Job type icon" value={ci?.type || {}} onChange={(type) => setCi({ type })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
         <IconEditor label="Experience icon" value={ci?.experience || {}} onChange={(experience) => setCi({ experience })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
-        <StyleEditor title="Location / type / tag text style" value={c.chipStyle} onChange={(chipStyle) => set({ chipStyle })} allowHide={false} fontSizePlaceholder="0.9rem" />
+        <IconEditor label="Education icon" value={ci?.education || {}} onChange={(education) => setCi({ education })} presets={CAREERS_ALL_ICON_PRESETS} previewClassName={ICON_PREVIEW} />
+        <StyleEditor title="Tag pill style" value={c.chipStyle} onChange={(chipStyle) => set({ chipStyle })} allowHide={false} fontSizePlaceholder="0.82rem" />
         <StyleEditor title="Badge style" value={c.badgeStyle} onChange={(badgeStyle) => set({ badgeStyle })} allowHide={false} fontSizePlaceholder="0.62rem" />
       </Group>
       <Group title="Job card style">

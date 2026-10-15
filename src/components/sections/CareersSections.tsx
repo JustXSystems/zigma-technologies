@@ -163,6 +163,7 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
     { text: t(job.location), icon: ci?.location },
     { text: t(job.type), icon: ci?.type },
     { text: t(job.experience), icon: ci?.experience },
+    { text: t(job.education), icon: ci?.education },
     ...(job.chips || []).map((text) => ({ text: t(text), icon: undefined })),
   ].filter((m) => m.text);
   const responsibilities = lines(job.responsibilities);
@@ -177,6 +178,7 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
     [lbl('location'), t(job.location)],
     [lbl('type'), t(job.type)],
     [lbl('experience'), t(job.experience)],
+    [lbl('education'), t(job.education)],
     ...extraFacts,
   ].filter(([, value]) => value);
   const description = t(job.description);
@@ -216,9 +218,9 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
           {meta.length ? (
             <div className="crs-job-meta">
               {meta.map((m, i) => (
-                <span className="crs-job-chip" key={`${m.text}-${i}`} style={elementCss(c.chipStyle)}>
+                <span className="crs-job-chip" key={`${m.text}-${i}`} style={elementCss(c.chipStyle)} title={m.text.length > 40 ? m.text : undefined}>
                   {showIcons && m.icon ? <AzIcon icon={m.icon} className="crs-chip-ico" /> : null}
-                  {m.text}
+                  <span className="crs-chip-text">{m.text}</span>
                 </span>
               ))}
             </div>
@@ -281,7 +283,7 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
                 <h6 className="crs-job-h">{lbl('facts')}</h6>
                 <dl>
                   {facts.map(([k, v], i) => (
-                    <div key={`${k}-${i}`}>
+                    <div key={`${k}-${i}`} className={v.length > 36 ? 'is-long' : undefined}>
                       {k ? <dt>{k}</dt> : null}
                       <dd>{v}</dd>
                     </div>
@@ -337,7 +339,18 @@ export function CareersJobsSection({ content, sectionKey }: SectionProps) {
   const toggle = (id: string) => {
     const next = openId === id ? null : id;
     setOpenId(next);
-    if (next) window.history.replaceState(null, '', `#${next}`);
+    if (!next) return;
+    window.history.replaceState(null, '', `#${next}`);
+    if (!openId) return;
+    /* Collapsing a card above shifts this one up — often off-screen on phones. Wait for the 0.4s collapse. */
+    window.setTimeout(() => {
+      const el = document.getElementById(next);
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 82;
+      if (el && el.getBoundingClientRect().top < headerH) {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      }
+    }, 420);
   };
 
   return (

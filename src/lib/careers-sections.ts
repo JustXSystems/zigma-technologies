@@ -132,6 +132,8 @@ export type CareersJob = {
   type?: string;
   /** e.g. "1–2 years" or "Freshers" */
   experience?: string;
+  /** e.g. "Diploma / BE – EEE / ECE" */
+  education?: string;
   /** Extra chips (e.g. "Hybrid") */
   chips?: string[];
   /** Small highlighted label, e.g. "New" or "Urgent" */
@@ -176,7 +178,7 @@ export type CareersJobsContent = {
   countLabel?: string;
   /** Headings and button labels used inside each job card */
   detailLabels: CareersJobLabels;
-  chipIcons: { hidden?: boolean; department: IconEl; location: IconEl; type: IconEl; experience: IconEl };
+  chipIcons: { hidden?: boolean; department: IconEl; location: IconEl; type: IconEl; experience: IconEl; education: IconEl };
   titleStyle?: ElementStyle;
   descriptionStyle?: ElementStyle;
   chipStyle?: ElementStyle;
@@ -197,6 +199,7 @@ export type CareersJobLabels = {
   location: string;
   type: string;
   experience: string;
+  education: string;
   panelApply: string;
 };
 
@@ -212,6 +215,7 @@ export const CAREERS_JOB_LABELS: CareersJobLabels = {
   location: 'Location',
   type: 'Job type',
   experience: 'Experience',
+  education: 'Education',
   panelApply: 'Apply for this role →',
 };
 
@@ -586,6 +590,7 @@ export function defaultCareersJobsContent(): CareersJobsContent {
       location: icon('careers-pin'),
       type: icon('careers-clock'),
       experience: icon('careers-award'),
+      education: icon('careers-cap'),
     },
     emptyText: { text: 'No open roles right now — send a general application below and we will keep you in mind.' },
   };
@@ -765,6 +770,7 @@ export function withCareersDefaults<T extends object>(type: CareersSectionType, 
       location: iconOf(ci?.location),
       type: iconOf(ci?.type),
       experience: iconOf(ci?.experience),
+      education: iconOf(ci?.education),
     };
   }
   if (type === 'careers_internship') {

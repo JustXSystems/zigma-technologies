@@ -5,16 +5,17 @@ import type { CareersJob } from '@/lib/careers-sections';
  * job fields, so HR never has to format lists by hand.
  */
 
-type Bucket = 'about' | 'facts' | 'responsibilities' | 'requirements' | 'benefits' | 'skip';
+type Bucket = 'about' | 'facts' | 'responsibilities' | 'education' | 'requirements' | 'benefits' | 'skip';
 
 export type ParsedJobText = Pick<
   CareersJob,
-  'summary' | 'responsibilities' | 'requirements' | 'benefits' | 'facts' | 'department' | 'location' | 'type' | 'experience'
+  'summary' | 'responsibilities' | 'requirements' | 'benefits' | 'facts' | 'department' | 'location' | 'type' | 'experience' | 'education'
 >;
 
 const HEADINGS: Array<[Bucket, RegExp]> = [
   ['skip', /how to apply|apply now/i],
   ['responsibilities', /responsibilit|\bduties\b|what you('|’)?ll (do|be doing)|\byour role\b|\bjob role\b/i],
+  ['education', /\beducation|qualification/i],
   ['requirements', /requirement|qualification|eligibility|\bskills?\b|what we('|’)?re looking for|who you are|\bcriteria\b|must[- ]have|nice[- ]to[- ]have/i],
   ['benefits', /benefit|\bperks\b|what we offer|we offer|why join/i],
   ['facts', /\b(job|position|role|key) (details|information|info)\b|at a glance/i],
@@ -31,8 +32,45 @@ const FIELD_FACTS: Array<[keyof ParsedJobText | 'drop', RegExp]> = [
   ['location', /^((work|job) )?location$/i],
   ['type', /^((employment|job) )?type$/i],
   ['department', /^department$/i],
+  ['education', /^(educational?|qualifications?|educational qualifications?)$/i],
   ['drop', /^(designation|position|job title|role|company)$/i],
 ];
+
+/* Abbreviations are case-sensitive so words like "be" or "me" in a sentence don't match. */
+const EDUCATION_WORDS = /\b(diploma|degree|graduate|graduation|post[- ]?graduat\w*|bachelor'?s?|master'?s? degree|polytechnic|12th|10th)\b/i;
+const EDUCATION_ABBR = /\b(B\.?\s?E|M\.?\s?E|B\.?\s?Tech|M\.?\s?Tech|ITI|BBA|MBA|BCA|MCA|B\.?\s?Sc|M\.?\s?Sc|B\.?\s?Com|M\.?\s?Com|Ph\.?\s?D|SSLC|PUC|HSC)\b/;
+
+export const isEducationLine = (line: string) => EDUCATION_WORDS.test(line) || EDUCATION_ABBR.test(line);
+
+/** "ITI / Diploma – EEE / ECE: 1 Position." → "ITI / Diploma – EEE / ECE"; several lines join with " · ". */
+export function educationText(lines: string[]): string {
+  const seen = new Set<string>();
+  const tokens = (l: string) =>
+    [...(l.match(new RegExp(EDUCATION_WORDS.source, 'gi')) || []), ...(l.match(new RegExp(EDUCATION_ABBR.source, 'g')) || [])].map((x) =>
+      x.toLowerCase().replace(/[.\s]/g, '')
+    );
+  return lines
+    .map((l) =>
+      l
+        .replace(/[:：\-–]\s*\d+\s*(positions?|posts?|vacanc(y|ies)|openings?)\.?$/i, '')
+        .replace(/[.;,]+$/, '')
+        .trim()
+    )
+    .filter((l) => {
+      if (!l) return false;
+      const own = tokens(l);
+      const repeat = own.length > 0 && own.every((x) => seen.has(x));
+      own.forEach((x) => seen.add(x));
+      return !repeat;
+    })
+    .join(' · ');
+}
+
+/** Moves education lines out of a requirements list. */
+export function extractEducation(requirements: string[]): { education: string; rest: string[] } {
+  const edu = requirements.filter((r) => r.trim() && isEducationLine(r));
+  return { education: educationText(edu), rest: requirements.filter((r) => !edu.includes(r)) };
+}
 
 const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'", nbsp: ' ' };
 
@@ -104,6 +142,7 @@ export function parseJobText(raw: string): ParsedJobText {
     facts: [],
   };
   const about: string[] = [];
+  const education: string[] = [];
   let bucket: Bucket = 'about';
 
   const addFact = (label: string, value: string) => {
@@ -124,6 +163,10 @@ export function parseJobText(raw: string): ParsedJobText {
       else about.push(line);
       return;
     }
+    if (bucket === 'education') {
+      (isEducationLine(line) ? education : out.requirements).push(line);
+      return;
+    }
     out[bucket].push(...splitSentences(line).map(clean).filter(Boolean));
   };
 
@@ -137,6 +180,10 @@ export function parseJobText(raw: string): ParsedJobText {
     }
   }
   out.summary = about.join(' ');
+  const fromReqs = extractEducation(out.requirements);
+  out.requirements = fromReqs.rest;
+  const allEducation = educationText([out.education || '', ...education, ...fromReqs.education.split(' · ')]);
+  if (allEducation) out.education = allEducation;
   return out;
 }
 
