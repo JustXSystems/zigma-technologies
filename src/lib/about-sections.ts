@@ -3,7 +3,7 @@ import { publicMediaUrl } from '@/lib/media-url';
 import type { HeroHeight } from '@/lib/hero-height';
 import type { HeroPlacement } from '@/lib/hero-placement';
 import type { LegacyBgMedia } from '@/lib/legacy-sections';
-import type { LifeHighlight } from '@/lib/life-sections';
+import type { LifeColumns, LifeHighlight } from '@/lib/life-sections';
 
 /**
  * Fully configurable "About" section family (About Zigma page):
@@ -326,31 +326,98 @@ export type PurposeContent = {
 
 export type FounderStat = { label: string; text: string };
 
+export type FounderQuote = TextEl & { hidden?: boolean; borderColor?: string; borderWidth?: string };
+
+export type FounderSignature = {
+  hidden?: boolean;
+  divider?: boolean;
+  name: TextEl;
+  role: TextEl;
+};
+
+/** One column of the first row (founder / co-founder): photo + personal note. */
+export type FounderLeader = {
+  hidden?: boolean;
+  photo: ImageEl;
+  heading: TextEl;
+  quote: FounderQuote;
+  paragraphs: TextEl[];
+  signature: FounderSignature;
+};
+
+export type FounderTeamMember = {
+  hidden?: boolean;
+  photo: ImageEl;
+  name: string;
+  designation: string;
+  /** Optional profile link (e.g. LinkedIn) */
+  href?: string;
+};
+
+/** Second row: photo + name + designation cards. */
+export type FounderTeam = {
+  hidden?: boolean;
+  divider?: boolean;
+  eyebrow: EyebrowEl;
+  title: TextEl;
+  align?: 'left' | 'center' | 'right';
+  columns: LifeColumns;
+  /** Where an incomplete last row sits */
+  justify?: 'start' | 'center';
+  gap?: string;
+  marginTop?: string;
+  maxWidth?: string;
+  members: FounderTeamMember[];
+  /** Shared photo defaults; each member's own image settings win */
+  photo: {
+    aspectRatio?: string;
+    radius?: string;
+    fit?: ImageEl['fit'];
+    position?: string;
+  };
+  cardStyle: {
+    background?: string;
+    border?: string;
+    radius?: string;
+    padding?: string;
+    shadow?: string;
+    textAlign?: 'left' | 'center' | 'right';
+    hoverLift?: boolean;
+  };
+  nameStyle?: ElementStyle;
+  roleStyle?: ElementStyle;
+};
+
 export type FounderNoteContent = {
   section: SectionBox;
   header: SectionHeader;
   layout: {
+    /** Leader columns per row (desktop / tablet / phone) */
+    columns?: LifeColumns;
+    /** top = photo above the note; side = photo beside the note */
+    photoPlacement?: 'top' | 'side';
     photoSide: 'left' | 'right';
+    /** Side: photo column width. Top: photo max width. */
     photoWidth?: string;
     gap?: string;
     maxWidth?: string;
+    /** Side placement: vertical alignment of photo vs note */
     alignItems?: 'start' | 'center' | 'end';
-    /** When stacked on phones, show the photo above the note */
+    /** Side placement, once stacked: show the photo above the note */
     mobilePhotoFirst?: boolean;
-    /** Photo width once stacked on phones */
+    /** Photo width once stacked */
     photoWidthMobile?: string;
   };
-  photo: ImageEl;
-  heading: TextEl;
-  quote: TextEl & { hidden?: boolean; borderColor?: string; borderWidth?: string };
-  paragraphs: TextEl[];
-  paragraphStyle?: ElementStyle;
-  signature: {
-    hidden?: boolean;
-    divider?: boolean;
-    name: TextEl;
-    role: TextEl;
+  leaders: FounderLeader[];
+  leaderCard: {
+    background?: string;
+    border?: string;
+    radius?: string;
+    padding?: string;
+    paddingMobile?: string;
+    shadow?: string;
   };
+  paragraphStyle?: ElementStyle;
   stats: {
     hidden?: boolean;
     divider?: boolean;
@@ -360,6 +427,7 @@ export type FounderNoteContent = {
     labelStyle?: ElementStyle;
     textStyle?: ElementStyle;
   };
+  team: FounderTeam;
 };
 
 export type FacilityStep = {
@@ -741,24 +809,8 @@ export function defaultPurposeContent(): PurposeContent {
   };
 }
 
-export function defaultFounderNoteContent(): FounderNoteContent {
+function defaultFounderLeader(): FounderLeader {
   return {
-    section: { tone: 'light' },
-    header: {
-      align: 'center',
-      eyebrow: { text: 'A NOTE FROM OUR FOUNDER', line: true, style: { color: ORANGE } },
-      title: { text: '' },
-      subtitle: { text: '' },
-    },
-    layout: {
-      photoSide: 'left',
-      photoWidth: '',
-      gap: '',
-      maxWidth: '',
-      alignItems: 'start',
-      mobilePhotoFirst: true,
-      photoWidthMobile: '',
-    },
     photo: {
       src: ABOUT_FOUNDER_IMAGE,
       alt: 'Raghavendra Y, Founder and CEO of Zigma Technologies',
@@ -785,6 +837,59 @@ export function defaultFounderNoteContent(): FounderNoteContent {
       name: { text: 'Raghavendra Y' },
       role: { text: 'Founder & CEO, Zigma Technologies' },
     },
+  };
+}
+
+export function defaultCoFounderLeader(): FounderLeader {
+  return {
+    photo: { src: '', alt: 'Co-Founder of Zigma Technologies', fit: 'cover', position: 'center top' },
+    heading: { text: 'Building the team that keeps every promise.', tag: 'h3' },
+    quote: {
+      text: 'Our clients trust us with the power that keeps their operations running — that trust is earned on every site, every day.',
+    },
+    paragraphs: [
+      {
+        text: "Add the co-founder's note here from Admin → Pages → About Zigma → Founder's note.",
+      },
+    ],
+    signature: {
+      divider: true,
+      name: { text: 'Co-Founder Name' },
+      role: { text: 'Co-Founder, Zigma Technologies' },
+    },
+  };
+}
+
+export function defaultFounderTeamMember(n = 1): FounderTeamMember {
+  return {
+    photo: { src: '', alt: '' },
+    name: `Team Member ${n}`,
+    designation: 'Designation',
+  };
+}
+
+export function defaultFounderNoteContent(): FounderNoteContent {
+  return {
+    section: { tone: 'light' },
+    header: {
+      align: 'center',
+      eyebrow: { text: 'A NOTE FROM OUR FOUNDERS', line: true, style: { color: ORANGE } },
+      title: { text: '' },
+      subtitle: { text: '' },
+    },
+    layout: {
+      columns: { desktop: 2, tablet: 1, mobile: 1 },
+      photoPlacement: 'top',
+      photoSide: 'left',
+      photoWidth: '',
+      gap: '',
+      maxWidth: '',
+      alignItems: 'start',
+      mobilePhotoFirst: true,
+      photoWidthMobile: '',
+    },
+    leaders: [defaultFounderLeader(), defaultCoFounderLeader()],
+    leaderCard: {},
     stats: {
       divider: true,
       hideTextOnMobile: true,
@@ -794,6 +899,17 @@ export function defaultFounderNoteContent(): FounderNoteContent {
         { label: '6 Capabilities', text: 'Solar, UPS, BESS, EV Charging, Design, and AMC.' },
         { label: 'The Promise', text: 'Accountability starts where commissioning ends.' },
       ],
+    },
+    team: {
+      divider: true,
+      eyebrow: { text: 'LEADERSHIP TEAM', line: true, style: { color: ORANGE } },
+      title: { text: 'The people behind every project', tag: 'h3' },
+      align: 'center',
+      columns: { desktop: 5, tablet: 3, mobile: 2 },
+      justify: 'center',
+      members: [1, 2, 3, 4, 5].map(defaultFounderTeamMember),
+      photo: { aspectRatio: '1/1', fit: 'cover', position: 'center top' },
+      cardStyle: { textAlign: 'center', hoverLift: true },
     },
   };
 }
@@ -897,7 +1013,22 @@ export function withAboutDefaults<T extends object>(type: AboutSectionType, raw:
       out[k] = v;
     }
   }
+  if (type === 'founder_note') upgradeFounderNote(src, out);
   return upgradeAboutTypography(type, out) as T;
+}
+
+/** Single-founder fields stored before the section held a list of leaders. */
+const LEGACY_FOUNDER_KEYS = ['photo', 'heading', 'quote', 'paragraphs', 'signature'] as const;
+
+function upgradeFounderNote(src: Record<string, unknown>, out: Record<string, unknown>) {
+  if (!Array.isArray(src.leaders) && LEGACY_FOUNDER_KEYS.some((k) => src[k] != null)) {
+    const first: Record<string, unknown> = { ...defaultFounderLeader() };
+    for (const k of LEGACY_FOUNDER_KEYS) {
+      if (src[k] != null) first[k] = src[k];
+    }
+    out.leaders = [first as FounderLeader, defaultCoFounderLeader()];
+  }
+  for (const k of LEGACY_FOUNDER_KEYS) delete out[k];
 }
 
 /** Tags the original seed wrote on role headings; stored copies of these follow Site Settings instead. */

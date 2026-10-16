@@ -4,6 +4,7 @@ import {
   AlignButtons,
   BgMediaGroup,
   ColorInput,
+  ColumnsEditor,
   createSectionFamilyEditor,
   CtaListEditor,
   Group,
@@ -27,6 +28,8 @@ import {
 } from '@/components/admin/section-kit';
 import {
   ABOUT_ICON_PRESETS,
+  defaultCoFounderLeader,
+  defaultFounderTeamMember,
   normalizeLinkItems,
   withAboutDefaults,
   type AboutHeroContent,
@@ -34,8 +37,11 @@ import {
   type FacilitiesContent,
   type FacilityStep,
   type FloatCardPosition,
+  type FounderLeader,
   type FounderNoteContent,
   type FounderStat,
+  type FounderTeam,
+  type FounderTeamMember,
   type MarqueeSeparator,
   type PurposeCard,
   type PurposeContent,
@@ -327,39 +333,241 @@ function PurposeEditor({ content: c, onChange }: EditorProps<PurposeContent>) {
   );
 }
 
+function FounderLeaderEditor({ value: ld, onChange }: { value: FounderLeader; onChange: (next: FounderLeader) => void }) {
+  const set = <K extends keyof FounderLeader>(k: K, v: FounderLeader[K]) => onChange({ ...ld, [k]: v });
+  const q = ld.quote || { text: '' };
+  const sig = ld.signature || { name: { text: '' }, role: { text: '' } };
+  return (
+    <>
+      <div style={{ marginBottom: '0.6rem' }}>
+        <Toggle label="Show this person" checked={!ld.hidden} onChange={(v) => set('hidden', !v)} />
+      </div>
+      <ImageEditor label="Photo" value={ld.photo} onChange={(v) => set('photo', v)} />
+      <TextElementEditor label="Heading" headingTag multiline value={ld.heading} onChange={(v) => set('heading', v)} />
+      <div style={{ margin: '0.6rem 0' }}>
+        <Toggle label="Show quote" checked={!q.hidden} onChange={(v) => set('quote', { ...q, hidden: !v })} />
+      </div>
+      <div className="admin-form-grid">
+        <ColorInput label="Quote bar color" value={q.borderColor} onChange={(borderColor) => set('quote', { ...q, borderColor })} fallback="#FF6B1A" />
+        <TextInput label="Quote bar width" value={q.borderWidth} onChange={(borderWidth) => set('quote', { ...q, borderWidth })} placeholder="4px" />
+      </div>
+      <TextElementEditor label="Quote" multiline value={q} onChange={(v) => set('quote', { ...q, ...v })} />
+      <ParagraphsEditor value={ld.paragraphs || []} onChange={(v) => set('paragraphs', v)} />
+      <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap', margin: '0.8rem 0 0.6rem' }}>
+        <Toggle label="Show signature" checked={!sig.hidden} onChange={(v) => set('signature', { ...sig, hidden: !v })} />
+        <Toggle label="Divider line above signature" checked={sig.divider !== false} onChange={(v) => set('signature', { ...sig, divider: v })} />
+      </div>
+      <TextElementEditor label="Name" value={sig.name} onChange={(name) => set('signature', { ...sig, name })} />
+      <TextElementEditor label="Role / designation" value={sig.role} onChange={(role) => set('signature', { ...sig, role })} />
+    </>
+  );
+}
+
+function FounderTeamEditor({ value: t, onChange }: { value: FounderTeam; onChange: (next: FounderTeam) => void }) {
+  const set = <K extends keyof FounderTeam>(k: K, v: FounderTeam[K]) => onChange({ ...t, [k]: v });
+  const cs = t.cardStyle || {};
+  const ph = t.photo || {};
+  return (
+    <>
+      <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+        <Toggle label="Show team row" checked={!t.hidden} onChange={(v) => set('hidden', !v)} />
+        <Toggle label="Divider line above" checked={t.divider !== false} onChange={(v) => set('divider', v)} />
+      </div>
+      <TextElementEditor label="Eyebrow" eyebrow siteScale="base" value={t.eyebrow} onChange={(v) => set('eyebrow', v)} />
+      <TextElementEditor label="Heading" headingTag value={t.title} onChange={(v) => set('title', v)} />
+      <div className="admin-form-grid" style={{ marginBottom: '0.8rem' }}>
+        <AlignButtons label="Heading align" value={t.align} onChange={(v) => set('align', (v || undefined) as FounderTeam['align'])} />
+      </div>
+      <ListEditor<FounderTeamMember>
+        label="People"
+        items={t.members || []}
+        onChange={(members) => set('members', members)}
+        addLabel="Person"
+        create={() => defaultFounderTeamMember((t.members?.length || 0) + 1)}
+        itemTitle={(m) => [m.name, m.designation].filter(Boolean).join(' — ')}
+        renderItem={(m, patch) => (
+          <>
+            <div style={{ marginBottom: '0.6rem' }}>
+              <Toggle label="Show this person" checked={!m.hidden} onChange={(v) => patch({ ...m, hidden: !v })} />
+            </div>
+            <div className="admin-form-grid" style={{ marginBottom: '0.6rem' }}>
+              <TextInput label="Name" value={m.name} onChange={(name) => patch({ ...m, name })} />
+              <TextInput label="Designation" value={m.designation} onChange={(designation) => patch({ ...m, designation })} />
+              <TextInput
+                label="Profile link (optional)"
+                value={m.href}
+                onChange={(href) => patch({ ...m, href: href || undefined })}
+                placeholder="https://www.linkedin.com/in/…"
+                full
+              />
+            </div>
+            <ImageEditor label="Photo" value={m.photo} onChange={(photo) => patch({ ...m, photo })} />
+          </>
+        )}
+      />
+      <div className="admin-form-grid" style={{ marginTop: '0.8rem' }}>
+        <ColumnsEditor label="Columns" value={t.columns} onChange={(columns) => set('columns', columns)} defaults={{ desktop: 5, tablet: 3, mobile: 2 }} />
+        <SelectInput
+          label="Incomplete last row"
+          value={t.justify || 'center'}
+          options={[
+            { value: 'center', label: 'Centered' },
+            { value: 'start', label: 'Left aligned' },
+          ]}
+          onChange={(v) => set('justify', (v || 'center') as FounderTeam['justify'])}
+        />
+        <TextInput label="Gap between cards" value={t.gap} onChange={(gap) => set('gap', gap)} placeholder="1.6rem" />
+        <TextInput label="Space above row" value={t.marginTop} onChange={(marginTop) => set('marginTop', marginTop)} placeholder="4.5rem" />
+        <TextInput label="Row max width" value={t.maxWidth} onChange={(maxWidth) => set('maxWidth', maxWidth)} placeholder="100%" />
+      </div>
+      <p className="az-admin-hint" style={{ marginTop: '0.8rem' }}>
+        Photo defaults for every person (a person&apos;s own photo settings win):
+      </p>
+      <div className="admin-form-grid">
+        <TextInput label="Photo aspect ratio" value={ph.aspectRatio} onChange={(aspectRatio) => set('photo', { ...ph, aspectRatio })} placeholder="1/1, 4/5, 3/4" />
+        <TextInput label="Photo corner radius" value={ph.radius} onChange={(radius) => set('photo', { ...ph, radius })} placeholder="12px, 50% (circle)" />
+        <SelectInput
+          label="Photo fit"
+          value={ph.fit || ''}
+          options={[
+            { value: '', label: 'Default (cover)' },
+            { value: 'cover', label: 'Cover (crop to fill)' },
+            { value: 'contain', label: 'Contain (show whole)' },
+          ]}
+          onChange={(fit) => set('photo', { ...ph, fit: (fit || undefined) as FounderTeam['photo']['fit'] })}
+        />
+        <TextInput label="Photo focus position" value={ph.position} onChange={(position) => set('photo', { ...ph, position })} placeholder="center top" />
+      </div>
+      <p className="az-admin-hint" style={{ marginTop: '0.8rem' }}>
+        Card style (all people):
+      </p>
+      <div className="admin-form-grid">
+        <ColorInput label="Card background" value={cs.background} onChange={(background) => set('cardStyle', { ...cs, background })} fallback="#FFFFFF" />
+        <TextInput label="Card border" value={cs.border} onChange={(border) => set('cardStyle', { ...cs, border })} placeholder="1px solid rgba(10,22,40,0.06)" />
+        <TextInput label="Card radius" value={cs.radius} onChange={(radius) => set('cardStyle', { ...cs, radius })} placeholder="16px" />
+        <TextInput label="Card padding" value={cs.padding} onChange={(padding) => set('cardStyle', { ...cs, padding })} placeholder="1rem 1rem 1.3rem" />
+        <TextInput label="Card shadow" value={cs.shadow} onChange={(shadow) => set('cardStyle', { ...cs, shadow })} placeholder="0 18px 40px -28px rgba(10,22,40,0.28)" />
+        <AlignButtons
+          label="Text align"
+          value={cs.textAlign}
+          onChange={(v) => set('cardStyle', { ...cs, textAlign: (v || undefined) as FounderTeam['cardStyle']['textAlign'] })}
+        />
+        <div className="full">
+          <Toggle label="Lift card on hover" checked={cs.hoverLift !== false} onChange={(hoverLift) => set('cardStyle', { ...cs, hoverLift })} />
+        </div>
+      </div>
+      <StyleEditor title="Name style" value={t.nameStyle} onChange={(nameStyle) => set('nameStyle', nameStyle)} allowHide={false} />
+      <StyleEditor title="Designation style" value={t.roleStyle} onChange={(roleStyle) => set('roleStyle', roleStyle)} allowHide={false} />
+    </>
+  );
+}
+
 function FounderNoteEditor({ content: c, onChange }: EditorProps<FounderNoteContent>) {
   const set = <K extends keyof FounderNoteContent>(k: K, v: FounderNoteContent[K]) => onChange({ ...c, [k]: v });
   const l = c.layout || { photoSide: 'left' };
-  const q = c.quote;
-  const sig = c.signature;
+  const side = l.photoPlacement === 'side';
+  const lc = c.leaderCard || {};
   const st = c.stats;
   return (
     <>
-      <Group title="Section header" description="Eyebrow above the note">
+      <Group title="Section header" description="Eyebrow / heading above both rows">
         <SectionHeaderEditor value={c.header} onChange={(v) => set('header', v)} />
       </Group>
-      <Group title="Note content" description="Heading, quote, paragraphs" open>
-        <TextElementEditor label="Heading" headingTag multiline value={c.heading} onChange={(v) => set('heading', v)} />
-        <div style={{ margin: '0.6rem 0' }}>
-          <Toggle label="Show quote" checked={!q.hidden} onChange={(v) => set('quote', { ...q, hidden: !v })} />
-        </div>
-        <div className="admin-form-grid">
-          <ColorInput label="Quote bar color" value={q.borderColor} onChange={(borderColor) => set('quote', { ...q, borderColor })} fallback="#FF6B1A" />
-          <TextInput label="Quote bar width" value={q.borderWidth} onChange={(borderWidth) => set('quote', { ...q, borderWidth })} placeholder="4px" />
-        </div>
-        <TextElementEditor label="Quote" multiline value={q} onChange={(v) => set('quote', { ...q, ...v })} />
-        <ParagraphsEditor value={c.paragraphs} onChange={(v) => set('paragraphs', v)} />
+      <Group title="First row · Founders" description="Founder, co-founder (or more) — photo with their note" open>
+        <ListEditor<FounderLeader>
+          label="People"
+          items={c.leaders || []}
+          onChange={(v) => set('leaders', v)}
+          addLabel="Person"
+          create={defaultCoFounderLeader}
+          itemTitle={(ld) => [ld.signature?.name?.text, ld.signature?.role?.text].filter(Boolean).join(' — ')}
+          renderItem={(ld, patch) => <FounderLeaderEditor value={ld} onChange={patch} />}
+        />
         <StyleEditor title="Style for all paragraphs" value={c.paragraphStyle} onChange={(v) => set('paragraphStyle', v)} allowHide={false} />
       </Group>
-      <Group title="Signature">
-        <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
-          <Toggle label="Show signature" checked={!sig.hidden} onChange={(v) => set('signature', { ...sig, hidden: !v })} />
-          <Toggle label="Divider line above" checked={sig.divider !== false} onChange={(v) => set('signature', { ...sig, divider: v })} />
+      <Group title="First row · Layout & card style">
+        <div className="admin-form-grid">
+          <ColumnsEditor
+            label="Columns"
+            value={l.columns}
+            onChange={(columns) => set('layout', { ...l, columns })}
+            defaults={{ desktop: 2, tablet: 1, mobile: 1 }}
+          />
+          <SelectInput
+            label="Photo placement"
+            value={l.photoPlacement || 'top'}
+            options={[
+              { value: 'top', label: 'Above the note' },
+              { value: 'side', label: 'Beside the note' },
+            ]}
+            onChange={(v) => set('layout', { ...l, photoPlacement: (v || 'top') as FounderNoteContent['layout']['photoPlacement'] })}
+          />
+          {side ? (
+            <AlignButtons
+              label="Photo position"
+              value={l.photoSide}
+              options={['left', 'right']}
+              onChange={(v) => set('layout', { ...l, photoSide: (v || 'left') as FounderNoteContent['layout']['photoSide'] })}
+            />
+          ) : null}
+          {side ? (
+            <SelectInput
+              label="Vertical alignment"
+              value={l.alignItems || ''}
+              options={[
+                { value: '', label: 'Default (top)' },
+                { value: 'start', label: 'Top' },
+                { value: 'center', label: 'Center' },
+                { value: 'end', label: 'Bottom' },
+              ]}
+              onChange={(v) => set('layout', { ...l, alignItems: (v || undefined) as FounderNoteContent['layout']['alignItems'] })}
+            />
+          ) : null}
+          <TextInput
+            label={side ? 'Photo column width' : 'Photo max width'}
+            value={l.photoWidth}
+            onChange={(photoWidth) => set('layout', { ...l, photoWidth })}
+            placeholder={side ? '200px' : '100%'}
+          />
+          <TextInput
+            label="Photo width (phone)"
+            value={l.photoWidthMobile}
+            onChange={(photoWidthMobile) => set('layout', { ...l, photoWidthMobile })}
+            placeholder={side ? '260px' : '100%'}
+          />
+          <TextInput label="Gap between columns" value={l.gap} onChange={(gap) => set('layout', { ...l, gap })} placeholder="2rem" />
+          <TextInput label="Max width (both rows)" value={l.maxWidth} onChange={(maxWidth) => set('layout', { ...l, maxWidth })} placeholder="1180px" />
+          {side ? (
+            <div className="full">
+              <Toggle
+                label="When a card gets narrow (stacked), show the photo above the note"
+                checked={l.mobilePhotoFirst !== false}
+                onChange={(mobilePhotoFirst) => set('layout', { ...l, mobilePhotoFirst })}
+              />
+            </div>
+          ) : null}
         </div>
-        <TextElementEditor label="Name" value={sig.name} onChange={(name) => set('signature', { ...sig, name })} />
-        <TextElementEditor label="Role" value={sig.role} onChange={(role) => set('signature', { ...sig, role })} />
+        <p className="az-admin-hint" style={{ marginTop: '0.8rem' }}>
+          Card style (each person):
+        </p>
+        <div className="admin-form-grid">
+          <ColorInput label="Card background" value={lc.background} onChange={(background) => set('leaderCard', { ...lc, background })} fallback="#FFFFFF" />
+          <TextInput label="Card border" value={lc.border} onChange={(border) => set('leaderCard', { ...lc, border })} placeholder="1px solid rgba(10,22,40,0.06)" />
+          <TextInput label="Card radius" value={lc.radius} onChange={(radius) => set('leaderCard', { ...lc, radius })} placeholder="18px" />
+          <TextInput label="Card shadow" value={lc.shadow} onChange={(shadow) => set('leaderCard', { ...lc, shadow })} placeholder="0 24px 55px -30px rgba(10,22,40,0.25)" />
+          <TextInput label="Card padding" value={lc.padding} onChange={(padding) => set('leaderCard', { ...lc, padding })} placeholder="2.2rem (0 = no card)" />
+          <TextInput
+            label="Card padding (phone)"
+            value={lc.paddingMobile}
+            onChange={(paddingMobile) => set('leaderCard', { ...lc, paddingMobile })}
+            placeholder="1.5rem"
+          />
+        </div>
       </Group>
-      <Group title="Stats row">
+      <Group title="Second row · Team" description="Photo, name and designation cards (3–5 per row)" open>
+        <FounderTeamEditor value={c.team} onChange={(v) => set('team', v)} />
+      </Group>
+      <Group title="Stats row" description="Optional strip between the founders and the team">
         <div style={{ display: 'flex', gap: '1.2rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
           <Toggle label="Show stats" checked={!st.hidden} onChange={(v) => set('stats', { ...st, hidden: !v })} />
           <Toggle label="Divider line above" checked={st.divider !== false} onChange={(v) => set('stats', { ...st, divider: v })} />
@@ -385,46 +593,6 @@ function FounderNoteEditor({ content: c, onChange }: EditorProps<FounderNoteCont
         />
         <StyleEditor title="Stat label style" value={st.labelStyle} onChange={(labelStyle) => set('stats', { ...st, labelStyle })} allowHide={false} />
         <StyleEditor title="Stat text style" value={st.textStyle} onChange={(textStyle) => set('stats', { ...st, textStyle })} allowHide={false} />
-      </Group>
-      <Group title="Photo">
-        <ImageEditor label="Photo" value={c.photo} onChange={(v) => set('photo', v)} />
-      </Group>
-      <Group title="Layout">
-        <div className="admin-form-grid">
-          <AlignButtons
-            label="Photo position"
-            value={l.photoSide}
-            options={['left', 'right']}
-            onChange={(v) => set('layout', { ...l, photoSide: (v || 'left') as FounderNoteContent['layout']['photoSide'] })}
-          />
-          <SelectInput
-            label="Vertical alignment"
-            value={l.alignItems || ''}
-            options={[
-              { value: '', label: 'Default (top)' },
-              { value: 'start', label: 'Top' },
-              { value: 'center', label: 'Center' },
-              { value: 'end', label: 'Bottom' },
-            ]}
-            onChange={(v) => set('layout', { ...l, alignItems: (v || undefined) as FounderNoteContent['layout']['alignItems'] })}
-          />
-          <TextInput label="Photo column width" value={l.photoWidth} onChange={(photoWidth) => set('layout', { ...l, photoWidth })} placeholder="260px" />
-          <TextInput label="Gap" value={l.gap} onChange={(gap) => set('layout', { ...l, gap })} placeholder="3.2rem" />
-          <TextInput label="Max width" value={l.maxWidth} onChange={(maxWidth) => set('layout', { ...l, maxWidth })} placeholder="1180px" />
-          <TextInput
-            label="Photo width (phone)"
-            value={l.photoWidthMobile}
-            onChange={(photoWidthMobile) => set('layout', { ...l, photoWidthMobile })}
-            placeholder="260px"
-          />
-          <div className="full">
-            <Toggle
-              label="On phones (stacked), show the photo above the note"
-              checked={l.mobilePhotoFirst !== false}
-              onChange={(mobilePhotoFirst) => set('layout', { ...l, mobilePhotoFirst })}
-            />
-          </div>
-        </div>
       </Group>
       <Group title="Background & spacing">
         <SectionBoxEditor value={c.section} onChange={(v) => set('section', v)} />

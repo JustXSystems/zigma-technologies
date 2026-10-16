@@ -29,7 +29,9 @@ import {
   type EyebrowEl,
   type EyebrowScale,
   type FacilitiesContent,
+  type FounderLeader,
   type FounderNoteContent,
+  type FounderTeam,
   type HeadingTag,
   type IconEl,
   type ImageEl,
@@ -632,19 +634,38 @@ export function PurposeSection({ content, sectionKey }: SectionProps) {
 /* Founder note                                                        */
 /* ------------------------------------------------------------------ */
 
-export function FounderNoteSection({ content, sectionKey }: SectionProps) {
-  const c = withAboutDefaults<FounderNoteContent>('founder_note', content);
-  const photoLeft = c.layout?.photoSide !== 'right';
-  const w = c.layout?.photoWidth?.trim() || '260px';
-  const photo = c.photo?.hidden ? null : <AzImage image={c.photo} className="az-founder-photo" />;
-  const q = c.quote;
-  const sig = c.signature;
-  const stats = c.stats;
-  const statItems = (stats?.items || []).filter((s) => s.label || s.text);
+function clampCols(n: number | undefined, fallback: number, max = 8): number {
+  const v = Math.round(Number(n));
+  return Number.isFinite(v) && v >= 1 ? Math.min(v, max) : fallback;
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('');
+}
+
+function FounderLeaderCard({
+  leader,
+  layout,
+  paragraphStyle,
+}: {
+  leader: FounderLeader;
+  layout: FounderNoteContent['layout'];
+  paragraphStyle?: ElementStyle;
+}) {
+  const side = layout?.photoPlacement === 'side';
+  const photoLeft = layout?.photoSide !== 'right';
+  const q = leader.quote;
+  const sig = leader.signature;
+  const photo = leader.photo?.hidden ? null : <AzImage image={leader.photo} className="az-founder-photo" />;
 
   const body = (
     <div className="az-founder-content">
-      <AzText el={c.heading} defaultTag="h3" className="az-founder-heading" />
+      <AzText el={leader.heading} defaultTag="h3" className="az-founder-heading" />
       {q && !q.hidden && hasText(q) ? (
         <div
           className="az-founder-quote"
@@ -656,10 +677,10 @@ export function FounderNoteSection({ content, sectionKey }: SectionProps) {
           <p style={elementCss(q.style)}>{withLines(q.text)}</p>
         </div>
       ) : null}
-      {(c.paragraphs || []).length ? (
+      {(leader.paragraphs || []).length ? (
         <div className="az-founder-body">
-          {c.paragraphs.map((p, i) => (
-            <AzText key={i} el={p} defaultTag="p" style={c.paragraphStyle} />
+          {leader.paragraphs.map((p, i) => (
+            <AzText key={i} el={p} defaultTag="p" style={paragraphStyle} />
           ))}
         </div>
       ) : null}
@@ -669,39 +690,20 @@ export function FounderNoteSection({ content, sectionKey }: SectionProps) {
           <AzText el={sig.role} defaultTag="span" className="az-founder-sign-role" />
         </div>
       ) : null}
-      {stats && !stats.hidden && statItems.length ? (
-        <div
-          className={`az-founder-stats${stats.divider === false ? ' az-no-divider' : ''}${
-            stats.hideTextOnMobile === false ? '' : ' az-stats-hide-text-m'
-          }`}
-        >
-          {statItems.map((s, i) => (
-            <div className="az-founder-stat" key={`${s.label}-${i}`}>
-              {s.label ? <strong style={elementCss(stats.labelStyle)}>{s.label}</strong> : null}
-              {s.text ? <p style={elementCss(stats.textStyle)}>{withLines(s.text)}</p> : null}
-            </div>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 
   return (
-    <AzShell box={c.section} className="az-section az-founder" id={sectionKey || 'founder-note'}>
-      <AzHeader header={c.header} />
+    <article className="az-founder-leader">
       <div
-        className={`az-founder-wrap${photo ? '' : ' az-founder-wrap--single'} ${
-          c.layout?.mobilePhotoFirst === false ? 'az-mobile-img-last' : 'az-mobile-img-first'
+        className={`az-founder-leader-inner az-founder-leader-inner--${side ? 'side' : 'top'}${
+          side && !photoLeft ? ' az-founder-leader-inner--right' : ''
+        }${photo ? '' : ' az-founder-leader-inner--single'}${
+          layout?.mobilePhotoFirst === false ? ' az-photo-last' : ' az-photo-first'
         }`}
-        style={vars({
-          '--az-founder-cols': photoLeft ? `${w} 1fr` : `1fr ${w}`,
-          '--az-founder-photo-w': c.layout?.photoWidthMobile?.trim() || w,
-          gap: c.layout?.gap,
-          maxWidth: c.layout?.maxWidth,
-          alignItems: c.layout?.alignItems,
-        })}
+        style={side ? vars({ alignItems: layout?.alignItems }) : undefined}
       >
-        {photoLeft ? (
+        {photoLeft || !side ? (
           <>
             {photo}
             {body}
@@ -712,6 +714,143 @@ export function FounderNoteSection({ content, sectionKey }: SectionProps) {
             {photo}
           </>
         )}
+      </div>
+    </article>
+  );
+}
+
+function FounderTeamRow({ team }: { team: FounderTeam }) {
+  const members = (team.members || []).filter((m) => !m.hidden && (m.name?.trim() || m.designation?.trim() || m.photo?.src));
+  if (team.hidden || !members.length) return null;
+  const cs = team.cardStyle || {};
+  const shared = team.photo || {};
+  const align = team.align || 'center';
+  return (
+    <div
+      className={`az-founder-team${team.divider === false ? ' az-no-divider' : ''}`}
+      style={vars({ marginTop: team.marginTop, maxWidth: team.maxWidth })}
+    >
+      {hasText(team.eyebrow) || hasText(team.title) ? (
+        <div className={`az-founder-team-head az-head--${align}`}>
+          <AzEyebrow el={team.eyebrow} scale="base" />
+          <AzText el={team.title} defaultTag="h3" className="az-founder-team-title" />
+        </div>
+      ) : null}
+      <div
+        className={`az-team-grid${team.justify === 'start' ? ' az-team-grid--start' : ''}`}
+        style={vars({
+          '--az-team-cols': String(clampCols(team.columns?.desktop, 5)),
+          '--az-team-cols-t': String(clampCols(team.columns?.tablet, 3)),
+          '--az-team-cols-m': String(clampCols(team.columns?.mobile, 2, 4)),
+          '--az-team-gap': team.gap,
+          '--az-team-card-bg': cs.background,
+          '--az-team-card-border': cs.border,
+          '--az-team-card-radius': cs.radius,
+          '--az-team-card-pad': cs.padding,
+          '--az-team-card-shadow': cs.shadow,
+          textAlign: cs.textAlign,
+        })}
+      >
+        {members.map((m, i) => {
+          const image: ImageEl = {
+            ...m.photo,
+            aspectRatio: m.photo?.aspectRatio || shared.aspectRatio,
+            radius: m.photo?.radius || shared.radius,
+            fit: m.photo?.fit || shared.fit,
+            position: m.photo?.position || shared.position,
+            alt: m.photo?.alt || m.name,
+          };
+          const hasPhoto = !m.photo?.hidden && Boolean(mediaSrc(m.photo?.src));
+          const inner = (
+            <>
+              {m.photo?.hidden ? null : hasPhoto ? (
+                <AzImage image={image} className="az-team-photo" />
+              ) : (
+                <div className="az-team-photo az-team-photo--empty" style={imageCss(image).wrap} aria-hidden="true">
+                  <span>{initials(m.name || '')}</span>
+                </div>
+              )}
+              {m.name?.trim() ? (
+                <span className="az-team-name" style={elementCss(team.nameStyle)}>
+                  {m.name}
+                </span>
+              ) : null}
+              {m.designation?.trim() ? (
+                <span className="az-team-role" style={elementCss(team.roleStyle)}>
+                  {withLines(m.designation)}
+                </span>
+              ) : null}
+            </>
+          );
+          const cls = `az-team-card${cs.hoverLift === false ? ' az-no-lift' : ''}`;
+          return m.href?.trim() ? (
+            <a key={i} className={cls} href={appHref(m.href)} target={/^https?:/i.test(m.href) ? '_blank' : undefined} rel="noopener noreferrer">
+              {inner}
+            </a>
+          ) : (
+            <div key={i} className={cls}>
+              {inner}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function FounderNoteSection({ content, sectionKey }: SectionProps) {
+  const c = withAboutDefaults<FounderNoteContent>('founder_note', content);
+  const l = c.layout;
+  const leaders = (c.leaders || []).filter((ld) => ld && !ld.hidden);
+  const side = l?.photoPlacement === 'side';
+  const w = l?.photoWidth?.trim();
+  const lc = c.leaderCard || {};
+  const stats = c.stats;
+  const statItems = (stats?.items || []).filter((s) => s.label || s.text);
+
+  return (
+    <AzShell box={c.section} className="az-section az-founder" id={sectionKey || 'founder-note'}>
+      <AzHeader header={c.header} />
+      <div className="az-founder-wrap" style={vars({ maxWidth: l?.maxWidth })}>
+        {leaders.length ? (
+          <div
+            className="az-founder-leaders"
+            style={vars({
+              '--az-lead-cols': String(clampCols(l?.columns?.desktop, 2)),
+              '--az-lead-cols-t': String(clampCols(l?.columns?.tablet, 1)),
+              '--az-lead-cols-m': String(clampCols(l?.columns?.mobile, 1, 4)),
+              '--az-founder-photo-col': side ? w || '200px' : undefined,
+              '--az-founder-photo-max': side ? undefined : w,
+              '--az-founder-photo-w': l?.photoWidthMobile,
+              '--az-lead-card-bg': lc.background,
+              '--az-lead-card-border': lc.border,
+              '--az-lead-card-radius': lc.radius,
+              '--az-lead-card-pad': lc.padding,
+              '--az-lead-card-pad-m': lc.paddingMobile,
+              '--az-lead-card-shadow': lc.shadow,
+              gap: l?.gap,
+            })}
+          >
+            {leaders.map((leader, i) => (
+              <FounderLeaderCard key={i} leader={leader} layout={l} paragraphStyle={c.paragraphStyle} />
+            ))}
+          </div>
+        ) : null}
+        {stats && !stats.hidden && statItems.length ? (
+          <div
+            className={`az-founder-stats${stats.divider === false ? ' az-no-divider' : ''}${
+              stats.hideTextOnMobile === false ? '' : ' az-stats-hide-text-m'
+            }`}
+          >
+            {statItems.map((s, i) => (
+              <div className="az-founder-stat" key={`${s.label}-${i}`}>
+                {s.label ? <strong style={elementCss(stats.labelStyle)}>{s.label}</strong> : null}
+                {s.text ? <p style={elementCss(stats.textStyle)}>{withLines(s.text)}</p> : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {c.team ? <FounderTeamRow team={c.team} /> : null}
       </div>
     </AzShell>
   );
