@@ -61,11 +61,43 @@
 }
 .hr-timeline time{display:block;font-size:0.7rem;color:var(--admin-muted);margin-bottom:0.1rem;}
 .hr-empty{padding:2rem 1rem;text-align:center;color:var(--admin-muted);font-size:0.92rem;}
+.hr-empty--cta{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2.25rem 1.25rem;border:1px dashed var(--admin-border);border-radius:12px;background:var(--admin-panel);}
+.hr-empty--cta p{max-width:36rem;margin:0;line-height:1.55;}
+.hr-empty--cta strong{color:var(--admin-text);}
+.hr-resume{
+  display:flex;flex-direction:column;gap:0.45rem;margin:0 0 0.95rem;padding:0.75rem 0.85rem;
+  border:1px solid var(--admin-border);border-radius:10px;background:var(--admin-panel-2);
+}
+.hr-resume-label{font-size:0.78rem;font-weight:650;color:var(--admin-text);word-break:break-all;}
+.hr-resume-actions{display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;}
+.hr-resume-enquiry{font-size:0.75rem;color:var(--admin-muted);text-decoration:underline;margin-left:0.15rem;}
+.hr-resume-enquiry:hover{color:var(--admin-text);}
 .hr-callout{
   padding:0.9rem 1.05rem;border-radius:10px;border:1px solid rgba(56,189,248,0.25);background:rgba(56,189,248,0.08);
   font-size:0.88rem;line-height:1.55;margin-bottom:1rem;color:var(--admin-text-secondary);
 }
 .hr-callout strong{color:var(--admin-text);}
+.hr-stage-row{display:flex;flex-wrap:wrap;gap:0.35rem;margin:0.35rem 0 0.85rem;}
+.hr-stage-btn{
+  padding:0.35rem 0.65rem;border-radius:999px;border:1px solid var(--admin-border);
+  font-size:0.72rem;font-weight:650;background:var(--admin-panel);color:var(--admin-text-secondary);cursor:pointer;
+}
+.hr-stage-btn.is-on{background:rgba(255,107,26,0.12);border-color:rgba(255,107,26,0.45);color:var(--admin-text);}
+.hr-stage-btn:disabled{opacity:0.55;cursor:default;}
+.crs-hire-panel{display:flex;flex-direction:column;gap:1rem;}
+.crs-hire-stats{display:flex;flex-wrap:wrap;gap:0.85rem 1.25rem;align-items:center;font-size:0.85rem;color:var(--admin-muted);}
+.crs-hire-stats strong{color:var(--admin-text);margin-right:0.25rem;}
+.crs-hire-link{margin-left:auto;font-weight:650;color:var(--orange,#FF6B1A);text-decoration:none;}
+.crs-hire-empty{padding:1rem;border:1px dashed var(--admin-border);border-radius:10px;display:flex;flex-direction:column;gap:0.75rem;align-items:flex-start;}
+.crs-hire-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.55rem;}
+.crs-hire-list li{
+  display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:space-between;align-items:center;
+  padding:0.85rem 1rem;border:1px solid var(--admin-border);border-radius:10px;background:var(--admin-panel);
+}
+.crs-hire-meta{display:flex;flex-wrap:wrap;gap:0.45rem;margin-top:0.35rem;font-size:0.78rem;color:var(--admin-muted);align-items:center;}
+.crs-hire-actions{display:flex;flex-wrap:wrap;gap:0.35rem;}
+.crs-hire-publish{padding:1rem;border-radius:12px;border:1px solid rgba(18,183,106,0.25);background:rgba(18,183,106,0.06);}
+.crs-hire-publish h4{margin:0 0 0.25rem;font-size:0.95rem;}
 @media (max-width:980px){
   .hr-split{grid-template-columns:1fr;}
   .hr-panel{position:static;max-height:none;}

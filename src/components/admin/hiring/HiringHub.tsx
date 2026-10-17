@@ -12,12 +12,11 @@ export default function HiringHub({ initialTab, initialJob }: { initialTab?: str
       title="Hiring"
       intro={
         <>
-          Manage time-bound job openings for{' '}
+          Publish roles here (or from Pages → Careers → Current openings) — they go live on{' '}
           <AdminLink href="/careers" target="_blank">
             /careers
           </AdminLink>
-          , move applicants through the pipeline, and keep a closed-job archive for audit. Website applications appear in Pipeline
-          automatically. Section chrome (headings, colours) stays on the Careers page under Pages.
+          . Website applications enter Pipeline automatically; move each person through stages, then archive the role when filled.
         </>
       }
       tabs={HIRING_TABS}

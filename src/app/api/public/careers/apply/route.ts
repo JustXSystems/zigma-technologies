@@ -34,6 +34,10 @@ export async function POST(request: Request) {
     const experience = String(form.get('experience') || '').trim();
     const role = String(form.get('role') || '').trim();
     const message = String(form.get('message') || '').trim();
+    const jobPublicId = String(form.get('job_public_id') || '').trim();
+    const jobSlug = String(form.get('job_slug') || '').trim();
+    const jobIdRaw = String(form.get('job_id') || '').trim();
+    const jobId = jobIdRaw && /^\d+$/.test(jobIdRaw) ? Number(jobIdRaw) : null;
     const resume = form.get('resume');
 
     if (!name) return jsonError('Full Name is required');
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
     await saveResumeFile(storedName, buffer);
 
     const defaultForm = await getDefaultForm();
-    const payload = {
+    const payload: Record<string, unknown> = {
       source: 'careers_apply',
       name,
       email,
@@ -71,6 +75,9 @@ export async function POST(request: Request) {
       resume_name: resume.name,
       resume_mime: mime || guessMime(resume.name),
     };
+    if (jobId) payload.job_id = jobId;
+    if (jobPublicId) payload.job_public_id = jobPublicId;
+    if (jobSlug) payload.job_slug = jobSlug;
 
     const id = await createEnquiry({
       form_id: defaultForm?.id ?? null,
@@ -80,8 +87,9 @@ export async function POST(request: Request) {
     });
 
     after(async () => {
+      let notifyPayload = { ...payload };
       try {
-        await ingestWebsiteApplication({
+        const ingest = await ingestWebsiteApplication({
           enquiryId: id,
           role,
           name,
@@ -91,22 +99,56 @@ export async function POST(request: Request) {
           resumeFile: storedName,
           resumeName: resume.name,
           message: message || undefined,
+          jobId,
+          publicId: jobPublicId || undefined,
+          slug: jobSlug || undefined,
         });
+        if (ingest.job) {
+          notifyPayload = {
+            ...notifyPayload,
+            job_title: ingest.job.title,
+            job_id: ingest.job.id,
+            job_public_id: ingest.job.publicId,
+            job_slug: ingest.job.slug,
+            pipeline_matched: 'yes',
+            candidate_id: ingest.candidateId,
+            hiring_url: `/admin/hiring?tab=pipeline&job=${ingest.job.id}`,
+          };
+          if (ingest.duplicate) notifyPayload.pipeline_duplicate = 'yes';
+        } else {
+          notifyPayload = {
+            ...notifyPayload,
+            hiring_url: '/admin/hiring?tab=pipeline',
+          };
+        }
       } catch (err) {
         console.error('[careers] pipeline ingest failed', err);
+        notifyPayload = {
+          ...notifyPayload,
+          pipeline_matched: 'error',
+          hiring_url: '/admin/hiring?tab=pipeline',
+        };
+      }
+
+      try {
+        await notifySubmission({
+          kind: 'careers',
+          id,
+          itemType: 'careers',
+          itemTitle: typeof notifyPayload.job_title === 'string' ? notifyPayload.job_title : role,
+          payload: notifyPayload,
+          resume: { stored: storedName, name: resume.name, mime: String(payload.resume_mime || '') },
+        });
+      } catch (err) {
+        console.error('[careers] notify failed', err);
+      }
+
+      try {
+        await sendLeadToCrm('careers', { id, source: 'careers_apply', item_type: 'careers', payload: notifyPayload });
+      } catch (err) {
+        console.error('[careers] CRM failed', err);
       }
     });
-
-    after(() =>
-      notifySubmission({
-        kind: 'careers',
-        id,
-        itemType: 'careers',
-        payload,
-        resume: { stored: storedName, name: resume.name, mime: payload.resume_mime },
-      })
-    );
-    after(() => sendLeadToCrm('careers', { id, source: 'careers_apply', item_type: 'careers', payload }));
 
     return jsonOk({ id, message: 'Application submitted successfully' }, { status: 201 });
   } catch (error) {

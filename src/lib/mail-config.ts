@@ -159,6 +159,13 @@ export const SYSTEM_VARIABLES: SystemVariable[] = [
   { key: 'fields_table', label: 'All fields (table)', group: 'Submission', description: 'Every submitted field as a formatted table.', html: true },
   { key: 'admin_url', label: 'Admin inbox link', group: 'Links', description: 'Admin → Enquiries.' },
   { key: 'enquiry_url', label: 'Enquiry link', group: 'Links', description: 'Opens this exact submission in admin.' },
+  {
+    key: 'hiring_url',
+    label: 'Hiring pipeline link',
+    group: 'Links',
+    description: 'Admin → Hiring (pipeline), deep-linked to the matched job when available.',
+  },
+  { key: 'job_title', label: 'Matched job title', group: 'Submission', description: 'Hiring ATS job title when the application was matched.' },
   { key: 'site_url', label: 'Website URL', group: 'Links', description: 'NEXT_PUBLIC_SITE_URL.' },
   { key: 'company_name', label: 'Company name', group: 'Company', description: 'Site Settings → company name.' },
   { key: 'company_phone', label: 'Company phone', group: 'Company', description: 'Site Settings → phone.' },
@@ -176,6 +183,7 @@ export const KNOWN_FORM_FIELDS: Array<{ key: string; label: string; forms: strin
   { key: 'preferred_time', label: 'Preferred call time', forms: ['Callback'], kind: 'enquiry' },
   { key: 'brochure_url', label: 'Brochure link', forms: ['Brochure'], kind: 'enquiry' },
   { key: 'role', label: 'Applied role', forms: ['Careers'], kind: 'careers' },
+  { key: 'job_title', label: 'Matched job title', forms: ['Careers'], kind: 'careers' },
   { key: 'experience', label: 'Experience', forms: ['Careers'], kind: 'careers' },
   { key: 'resume_name', label: 'CV file name', forms: ['Careers'], kind: 'careers' },
 ];
@@ -192,9 +200,15 @@ const VISITOR_BODY_ENQUIRY = `<p>Hi {{name}},</p>
 {{#if company_phone}}<p>For urgent support, call <strong>{{company_phone}}</strong>.</p>{{/if}}
 <p>Regards,<br>{{company_name}}</p>`;
 
-const TEAM_BODY_CAREERS = `<p>New application for <strong>{{role}}</strong> from {{name}}.</p>
+const TEAM_BODY_CAREERS = `<p>New application for <strong>{{job_title}}</strong> from {{name}}.</p>
 {{fields_table}}
-<p><a class="btn" href="{{admin_url}}">Review in admin</a></p>`;
+<p>
+  <a class="btn" href="{{hiring_url}}">Open in Hiring pipeline</a>
+  &nbsp;&nbsp;
+  <a href="{{enquiry_url}}">View enquiry #{{submission_id}}</a>
+</p>
+{{#if pipeline_matched}}<p class="muted">Pipeline match: {{pipeline_matched}}</p>{{/if}}
+{{#if pipeline_duplicate == "yes"}}<p class="muted">Re-application linked to an existing pipeline candidate.</p>{{/if}}`;
 
 const VISITOR_BODY_CAREERS = `<p>Hi {{name}},</p>
 <p>Thank you for applying{{#if role}} for the <strong>{{role}}</strong> role{{/if}} at {{company_name}}. Our recruitment team will review your application within 3–5 business days.</p>

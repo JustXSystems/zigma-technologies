@@ -361,7 +361,10 @@ export async function createCareerJob(input: JobWriteInput, actor: string): Prom
       closesAt = mysqlDt(end.toISOString());
     }
   }
-  const content = input.content || {};
+  const content: CareerJobContent = {
+    ...(input.content || {}),
+    role: t(input.content?.role) || title,
+  };
   const [res] = await pool.query<ResultSetHeader>(
     `INSERT INTO career_jobs (
        public_id, slug, title, department, location, job_type, experience, education, badge, summary,
@@ -432,7 +435,10 @@ export async function updateCareerJob(id: number, input: Partial<JobWriteInput>,
     }
   }
 
-  const content = input.content !== undefined ? input.content || {} : current.content;
+  const content: CareerJobContent =
+    input.content !== undefined
+      ? { ...(input.content || {}), role: t(input.content?.role) || title }
+      : { ...current.content, role: t(current.content.role) || title };
 
   await pool.query(
     `UPDATE career_jobs SET
@@ -764,6 +770,14 @@ export async function listJobEvents(jobId: number, limit = 80): Promise<CareerEv
 /* Public apply → candidate                                            */
 /* ------------------------------------------------------------------ */
 
+export async function getCareerJobByPublicId(publicId: string): Promise<CareerJob | null> {
+  const pid = t(publicId);
+  if (!pid) return null;
+  await ensureCareerHiringTables();
+  const [rows] = await pool.query<RowDataPacket[]>(`SELECT * FROM career_jobs WHERE public_id = ? LIMIT 1`, [pid]);
+  return rows[0] ? mapJob(rows[0]) : null;
+}
+
 export async function findOpenJobByRole(role: string): Promise<CareerJob | null> {
   const r = t(role);
   if (!r) return null;
@@ -771,8 +785,72 @@ export async function findOpenJobByRole(role: string): Promise<CareerJob | null>
   const exact = open.find((j) => j.title === r || t(j.content.role) === r);
   if (exact) return exact;
   const lower = r.toLowerCase();
-  return open.find((j) => j.title.toLowerCase() === lower || t(j.content.role).toLowerCase() === lower) || null;
+  return (
+    open.find(
+      (j) =>
+        j.title.toLowerCase() === lower ||
+        t(j.content.role).toLowerCase() === lower ||
+        j.slug.toLowerCase() === lower
+    ) || null
+  );
 }
+
+/** Resolve an open posting by stable ATS ids first, then role/title fallback. */
+export async function resolveOpenJob(ref: {
+  jobId?: number | null;
+  publicId?: string | null;
+  slug?: string | null;
+  role?: string | null;
+}): Promise<CareerJob | null> {
+  const open = await listOpenCareerJobs();
+  if (!open.length) return null;
+
+  if (ref.jobId && Number.isFinite(ref.jobId) && ref.jobId > 0) {
+    const byId = open.find((j) => j.id === Number(ref.jobId));
+    if (byId) return byId;
+  }
+  const publicId = t(ref.publicId);
+  if (publicId) {
+    const byPid = open.find((j) => j.publicId === publicId);
+    if (byPid) return byPid;
+  }
+  const slug = t(ref.slug).toLowerCase();
+  if (slug) {
+    const bySlug = open.find((j) => j.slug.toLowerCase() === slug);
+    if (bySlug) return bySlug;
+  }
+  return findOpenJobByRole(t(ref.role));
+}
+
+const ACTIVE_DUP_STAGES = CANDIDATE_STAGES.filter((s) => s !== 'rejected' && s !== 'withdrawn');
+const DUP_WINDOW_DAYS = 90;
+
+/** Active pipeline row for same email + job within the duplicate window. */
+export async function findActiveDuplicateCandidate(jobId: number, email: string): Promise<CareerCandidate | null> {
+  const em = t(email).toLowerCase();
+  if (!jobId || !em) return null;
+  await ensureCareerHiringTables();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT c.*, j.title AS job_title
+     FROM career_candidates c
+     LEFT JOIN career_jobs j ON j.id = c.job_id
+     WHERE c.job_id = ?
+       AND LOWER(c.email) = ?
+       AND c.stage IN (?)
+       AND c.created_at >= (UTC_TIMESTAMP() - INTERVAL ? DAY)
+     ORDER BY c.id DESC
+     LIMIT 1`,
+    [jobId, em, ACTIVE_DUP_STAGES, DUP_WINDOW_DAYS]
+  );
+  return rows[0] ? mapCandidate(rows[0]) : null;
+}
+
+export type IngestWebsiteResult = {
+  candidateId: number | null;
+  job: CareerJob | null;
+  matched: boolean;
+  duplicate: boolean;
+};
 
 export async function ingestWebsiteApplication(input: {
   enquiryId: number;
@@ -784,15 +862,69 @@ export async function ingestWebsiteApplication(input: {
   resumeFile?: string;
   resumeName?: string;
   message?: string;
-}): Promise<number | null> {
-  const job = await findOpenJobByRole(input.role);
-  if (!job) return null;
-  const [dup] = await pool.query<RowDataPacket[]>(
+  jobId?: number | null;
+  publicId?: string | null;
+  slug?: string | null;
+}): Promise<IngestWebsiteResult> {
+  const job = await resolveOpenJob({
+    jobId: input.jobId,
+    publicId: input.publicId,
+    slug: input.slug,
+    role: input.role,
+  });
+  if (!job) return { candidateId: null, job: null, matched: false, duplicate: false };
+
+  const [byEnquiry] = await pool.query<RowDataPacket[]>(
     `SELECT id FROM career_candidates WHERE enquiry_id = ? LIMIT 1`,
     [input.enquiryId]
   );
-  if (dup[0]) return Number(dup[0].id);
-  return createCandidate(
+  if (byEnquiry[0]) {
+    return { candidateId: Number(byEnquiry[0].id), job, matched: true, duplicate: true };
+  }
+
+  const existing = await findActiveDuplicateCandidate(job.id, input.email || '');
+  if (existing) {
+    const noteLine = [
+      '',
+      `--- Re-applied via website (${new Date().toISOString().slice(0, 10)}) · enquiry #${input.enquiryId} ---`,
+      t(input.message) || '(no message)',
+      input.resumeName ? `Resume: ${input.resumeName}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+    await pool.query(
+      `UPDATE career_candidates
+       SET enquiry_id = COALESCE(enquiry_id, ?),
+           resume_file = COALESCE(NULLIF(?, ''), resume_file),
+           resume_name = COALESCE(NULLIF(?, ''), resume_name),
+           phone = COALESCE(NULLIF(?, ''), phone),
+           experience = COALESCE(NULLIF(?, ''), experience),
+           notes = TRIM(CONCAT(IFNULL(notes, ''), ?)),
+           updated_by = 'website',
+           updated_at = UTC_TIMESTAMP()
+       WHERE id = ?`,
+      [
+        input.enquiryId,
+        t(input.resumeFile),
+        t(input.resumeName),
+        t(input.phone),
+        t(input.experience),
+        noteLine,
+        existing.id,
+      ]
+    );
+    await recordEvent({
+      jobId: job.id,
+      candidateId: existing.id,
+      actor: 'website',
+      eventType: 'candidate.reapplied',
+      message: `${existing.name} re-applied (enquiry #${input.enquiryId}).`,
+      meta: { enquiryId: input.enquiryId },
+    });
+    return { candidateId: existing.id, job, matched: true, duplicate: true };
+  }
+
+  const candidateId = await createCandidate(
     {
       jobId: job.id,
       enquiryId: input.enquiryId,
@@ -808,6 +940,7 @@ export async function ingestWebsiteApplication(input: {
     },
     'website'
   );
+  return { candidateId, job, matched: true, duplicate: false };
 }
 
 /* ------------------------------------------------------------------ */
@@ -850,16 +983,35 @@ export function careerJobToPublicCard(job: CareerJob): CareersJob & { id: number
 export async function importLegacyJobs(
   jobs: CareersJob[],
   actor: string,
-  opts: { durationDays?: number; asOpen?: boolean } = {}
-): Promise<{ imported: number; skipped: number }> {
+  opts: { durationDays?: number; asOpen?: boolean; mode?: 'empty-only' | 'missing' } = {}
+): Promise<{ imported: number; skipped: number; mode: 'empty-only' | 'missing' }> {
   await ensureCareerHiringTables();
-  const [countRows] = await pool.query<RowDataPacket[]>(`SELECT COUNT(*) AS c FROM career_jobs`);
-  if (Number(countRows[0]?.c || 0) > 0) {
-    return { imported: 0, skipped: jobs.length };
+  const mode = opts.mode || 'missing';
+  const [existingRows] = await pool.query<RowDataPacket[]>(`SELECT id, title, slug FROM career_jobs`);
+  if (mode === 'empty-only' && existingRows.length > 0) {
+    return { imported: 0, skipped: jobs.length, mode };
   }
+
+  const known = new Set<string>();
+  for (const row of existingRows) {
+    known.add(t(row.title).toLowerCase());
+    known.add(t(row.slug).toLowerCase());
+  }
+
   let imported = 0;
+  let skipped = 0;
   for (const j of jobs) {
-    if (!t(j.title) || j.hidden) continue;
+    const title = t(j.title);
+    if (!title || j.hidden) {
+      skipped++;
+      continue;
+    }
+    const key = title.toLowerCase();
+    const slugKey = slugify(title);
+    if (known.has(key) || known.has(slugKey)) {
+      skipped++;
+      continue;
+    }
     await createCareerJob(
       {
         title: j.title,
@@ -889,9 +1041,40 @@ export async function importLegacyJobs(
       },
       actor
     );
+    known.add(key);
+    known.add(slugKey);
     imported++;
   }
-  return { imported, skipped: jobs.length - imported };
+  return { imported, skipped, mode };
+}
+
+/**
+ * When Hiring is empty, pull roles from the Careers page CMS section once.
+ * Safe to call on public hydrate and admin list — no-ops if ATS already has rows.
+ */
+export async function bootstrapHiringFromCareersCms(actor = 'system'): Promise<{ imported: number; skipped: number }> {
+  await ensureCareerHiringTables();
+  const [countRows] = await pool.query<RowDataPacket[]>(`SELECT COUNT(*) AS c FROM career_jobs`);
+  if (Number(countRows[0]?.c || 0) > 0) {
+    return { imported: 0, skipped: 0 };
+  }
+
+  const { getPageBySlug } = await import('@/lib/cms');
+  const { withCareersDefaults } = await import('@/lib/careers-sections');
+  type JobsContent = import('@/lib/careers-sections').CareersJobsContent;
+  type Job = import('@/lib/careers-sections').CareersJob;
+
+  const page = await getPageBySlug('careers', true);
+  const section = page?.sections?.find((s) => s.type === 'careers_jobs');
+  const content = withCareersDefaults<JobsContent>('careers_jobs', section?.content_json || {});
+  const jobs = (content.jobs || []) as Job[];
+  if (!jobs.length) return { imported: 0, skipped: 0 };
+
+  const result = await importLegacyJobs(jobs, actor, { asOpen: true, durationDays: 45, mode: 'empty-only' });
+  if (result.imported) {
+    console.info(`[hiring] bootstrapped ${result.imported} job(s) from Careers CMS into ATS`);
+  }
+  return { imported: result.imported, skipped: result.skipped };
 }
 
 export async function hiringStats() {

@@ -6,7 +6,7 @@ import HoneypotField from '@/components/HoneypotField';
 import { HONEYPOT_FIELD } from '@/lib/form-guard';
 import { trackEvent } from '@/lib/analytics';
 import { appHref } from '@/lib/base-path';
-import { focusApplyRole } from '@/lib/careers-apply';
+import { focusApplyRole, type CareersApplyPrefill } from '@/lib/careers-apply';
 import { AzCtas, AzIcon, AzText, vars } from '@/components/sections/AboutSections';
 import { colVars, useStaggerReveal } from '@/components/sections/LifeSections';
 import { LegacyStatsSection, LgHeader, LgShell, cardVars } from '@/components/sections/LegacySections';
@@ -24,6 +24,7 @@ import {
   type CareersJob,
   type CareersJobLabels,
   type CareersJobsContent,
+  type CareersRoleOption,
   type CareersWhyCard,
   type CareersWhyContent,
 } from '@/lib/careers-sections';
@@ -32,6 +33,15 @@ type SectionProps = { content: Record<string, unknown>; sectionKey?: string | nu
 
 const t = (v: unknown) => String(v ?? '').trim();
 const ROLE_EVENT = 'careers:prefill-role';
+
+function jobApplyPrefill(job: CareersJob): CareersApplyPrefill {
+  return {
+    role: t(job.role) || t(job.title),
+    jobId: typeof job.id === 'number' ? job.id : null,
+    publicId: t(job.publicId) || null,
+    slug: t(job.slug) || null,
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /* Hero, stat bar, icon cards (shared renderers, careers defaults)     */
@@ -185,6 +195,7 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
   const hasBody = Boolean(description || responsibilities.length || requirements.length || benefits.length);
   const hasDetails = hasBody || extraFacts.length > 0;
   const role = t(job.role) || t(job.title);
+  const prefill = jobApplyPrefill(job);
   const label = t(job.applyLabel) || t(c.applyLabel) || 'Apply Now →';
   const href = t(job.href);
   const panelId = `${id}-details`;
@@ -252,7 +263,14 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
             </button>
           ) : null}
           {!c.hideApply ? (
-            <button type="button" className={`${btnClass} crs-job-apply`} style={elementCss(c.buttonStyle)} data-role={role} onClick={() => focusApplyRole(role)}>
+            <button
+              type="button"
+              className={`${btnClass} crs-job-apply`}
+              style={elementCss(c.buttonStyle)}
+              data-role={role}
+              data-job-public-id={prefill.publicId || undefined}
+              onClick={() => focusApplyRole(prefill)}
+            >
               {label}
             </button>
           ) : null}
@@ -294,7 +312,7 @@ function JobCard({ job, id, c, open, onToggle }: { job: CareersJob; id: string; 
                     type="button"
                     className={`btn btn-${c.buttonVariant === 'ghost' ? 'primary' : c.buttonVariant || 'primary'} btn-sm crs-job-panel-apply`}
                     style={elementCss(c.buttonStyle)}
-                    onClick={() => focusApplyRole(role)}
+                    onClick={() => focusApplyRole(prefill)}
                   >
                     {lbl('panelApply')}
                   </button>
@@ -500,16 +518,31 @@ export function CareersInternshipSection({ content, sectionKey }: SectionProps) 
 
 type ApplyValues = { name: string; email: string; phone: string; experience: string; role: string; message: string };
 const EMPTY_VALUES: ApplyValues = { name: '', email: '', phone: '', experience: '', role: '', message: '' };
+const EMPTY_JOB_REF = { jobId: '', publicId: '', slug: '' };
 const RESUME_ACCEPT =
   '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+function optionValue(opt: CareersRoleOption) {
+  return t(opt.publicId) || t(opt.label);
+}
 
 export function CareersApplicationSection({ content, sectionKey }: SectionProps) {
   const c = withCareersDefaults<CareersApplicationContent>('careers_application', content);
   const baseRoles = Array.from(new Set((c.roles || []).map(t).filter(Boolean)));
   const roleList = baseRoles.length ? baseRoles : CAREERS_DEFAULT_ROLES;
-  const [extraRole, setExtraRole] = useState('');
-  const roles = extraRole && !roleList.includes(extraRole) ? [...roleList, extraRole] : roleList;
+  const baseOptions: CareersRoleOption[] = (c.roleOptions || []).filter((o) => t(o.label));
+  const optionPool: CareersRoleOption[] =
+    baseOptions.length > 0 ? baseOptions : roleList.map((label): CareersRoleOption => ({ label }));
+  const [extraOption, setExtraOption] = useState<CareersRoleOption | null>(null);
+  const roleOptions =
+    extraOption && !optionPool.some((o) => optionValue(o) === optionValue(extraOption) || o.label === extraOption.label)
+      ? [...optionPool, extraOption]
+      : optionPool;
+  const roleOptionsRef = useRef(roleOptions);
+  roleOptionsRef.current = roleOptions;
   const [values, setValues] = useState<ApplyValues>(EMPTY_VALUES);
+  const [jobRef, setJobRef] = useState(EMPTY_JOB_REF);
+  const [selectValue, setSelectValue] = useState('');
   const [resume, setResume] = useState<File | null>(null);
   const [fileKey, setFileKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -517,15 +550,44 @@ export function CareersApplicationSection({ content, sectionKey }: SectionProps)
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const pick = (raw: unknown) => {
-      const role = t(raw).slice(0, 120);
-      if (!role) return;
-      setExtraRole(role);
-      setValues((v) => ({ ...v, role }));
+  const applyPrefill = (detail: CareersApplyPrefill) => {
+    const publicId = t(detail.publicId);
+    const slug = t(detail.slug);
+    const jobIdNum = detail.jobId && Number(detail.jobId) > 0 ? Number(detail.jobId) : 0;
+    const known = roleOptionsRef.current.find(
+      (o) =>
+        (publicId && t(o.publicId) === publicId) ||
+        (jobIdNum && o.jobId === jobIdNum) ||
+        (slug && t(o.slug) === slug) ||
+        (t(detail.role) && o.label === t(detail.role))
+    );
+    const role = (known?.label || t(detail.role)).slice(0, 120);
+    const jobId = String(known?.jobId || jobIdNum || '');
+    const resolvedPid = t(known?.publicId) || publicId;
+    const resolvedSlug = t(known?.slug) || slug;
+    if (!role && !resolvedPid && !resolvedSlug && !jobId) return;
+    const opt: CareersRoleOption = {
+      label: role || resolvedPid || resolvedSlug || 'Selected role',
+      jobId: jobId ? Number(jobId) : undefined,
+      publicId: resolvedPid || undefined,
+      slug: resolvedSlug || undefined,
     };
-    const fromUrl = window.setTimeout(() => pick(new URLSearchParams(window.location.search).get('role')), 0);
-    const onPrefill = (e: Event) => pick((e as CustomEvent<{ role?: string }>).detail?.role);
+    setExtraOption(opt);
+    setSelectValue(optionValue(opt));
+    setValues((v) => ({ ...v, role: opt.label }));
+    setJobRef({ jobId, publicId: resolvedPid, slug: resolvedSlug });
+  };
+
+  useEffect(() => {
+    const fromUrl = window.setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      applyPrefill({
+        role: params.get('role'),
+        publicId: params.get('job') || params.get('jobId'),
+        slug: params.get('slug'),
+      });
+    }, 0);
+    const onPrefill = (e: Event) => applyPrefill((e as CustomEvent<CareersApplyPrefill>).detail || {});
     window.addEventListener(ROLE_EVENT, onPrefill);
     return () => {
       window.clearTimeout(fromUrl);
@@ -534,6 +596,22 @@ export function CareersApplicationSection({ content, sectionKey }: SectionProps)
   }, []);
 
   const set = (key: keyof ApplyValues, value: string) => setValues((v) => ({ ...v, [key]: value }));
+
+  const onRoleChange = (value: string) => {
+    setSelectValue(value);
+    const opt = roleOptions.find((o) => optionValue(o) === value);
+    if (!opt) {
+      setValues((v) => ({ ...v, role: value }));
+      setJobRef(EMPTY_JOB_REF);
+      return;
+    }
+    setValues((v) => ({ ...v, role: opt.label }));
+    setJobRef({
+      jobId: opt.jobId ? String(opt.jobId) : '',
+      publicId: t(opt.publicId),
+      slug: t(opt.slug),
+    });
+  };
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -544,13 +622,19 @@ export function CareersApplicationSection({ content, sectionKey }: SectionProps)
       const hp = new FormData(e.currentTarget).get(HONEYPOT_FIELD);
       const body = new FormData();
       (Object.keys(values) as Array<keyof ApplyValues>).forEach((k) => body.set(k, values[k]));
+      if (jobRef.jobId) body.set('job_id', jobRef.jobId);
+      if (jobRef.publicId) body.set('job_public_id', jobRef.publicId);
+      if (jobRef.slug) body.set('job_slug', jobRef.slug);
       body.set('resume', resume);
       body.set(HONEYPOT_FIELD, typeof hp === 'string' ? hp : '');
       const res = await fetch('/api/public/careers/apply', { method: 'POST', body });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Submit failed');
-      trackEvent('careers_apply', { role: values.role });
+      trackEvent('careers_apply', { role: values.role, job_public_id: jobRef.publicId || undefined });
       setValues(EMPTY_VALUES);
+      setJobRef(EMPTY_JOB_REF);
+      setSelectValue('');
+      setExtraOption(null);
       setResume(null);
       setFileKey((k) => k + 1);
       const redirect = t(c.form?.redirectUrl);
@@ -717,14 +801,23 @@ export function CareersApplicationSection({ content, sectionKey }: SectionProps)
           <div className="ctc-row ctc-row--single">
             <div className="ctc-field">
               {label(L.role, 'crs-f-role', true)}
-              <select id="crs-f-role" name="role" required value={values.role} onChange={(e) => set('role', e.target.value)}>
+              <select id="crs-f-role" name="role" required value={selectValue || values.role} onChange={(e) => onRoleChange(e.target.value)}>
                 <option value="">{L.role.placeholder || 'Select a role'}</option>
-                {roles.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
+                {roleOptions.map((opt) => (
+                  <option
+                    key={optionValue(opt)}
+                    value={optionValue(opt)}
+                    data-public-id={opt.publicId || undefined}
+                    data-job-id={opt.jobId || undefined}
+                    data-slug={opt.slug || undefined}
+                  >
+                    {opt.label}
                   </option>
                 ))}
               </select>
+              {jobRef.publicId ? <input type="hidden" name="job_public_id" value={jobRef.publicId} /> : null}
+              {jobRef.jobId ? <input type="hidden" name="job_id" value={jobRef.jobId} /> : null}
+              {jobRef.slug ? <input type="hidden" name="job_slug" value={jobRef.slug} /> : null}
             </div>
           </div>
           <div className="ctc-row ctc-row--single">

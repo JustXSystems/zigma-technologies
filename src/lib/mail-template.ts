@@ -13,6 +13,13 @@ export const HIDDEN_FIELDS: ReadonlySet<string> = new Set([
   'source',
   'form_id',
   'item_id',
+  'job_id',
+  'job_public_id',
+  'job_slug',
+  'candidate_id',
+  'hiring_url',
+  'pipeline_matched',
+  'pipeline_duplicate',
 ]);
 
 export function escapeHtml(value: string): string {
@@ -95,6 +102,10 @@ export function buildMailVars(input: {
   const site = input.site.siteUrl.replace(/\/$/, '');
   const at = input.submittedAt || new Date();
   const admin = `${site}/admin/enquiries`;
+  const hiringPath =
+    typeof input.payload.hiring_url === 'string' && input.payload.hiring_url.startsWith('/')
+      ? input.payload.hiring_url
+      : '/admin/hiring?tab=pipeline';
   return {
     ...vars,
     name: vars.name || vars.full_name || '',
@@ -105,6 +116,7 @@ export function buildMailVars(input: {
     source_label: sourceLabel(input.payload.source, input.kind),
     item_type: input.itemType,
     item_title: input.itemTitle || '',
+    job_title: vars.job_title || input.itemTitle || vars.role || '',
     submission_id: String(input.id),
     submitted_at: at.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: IST }),
     submitted_date: at.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: IST }),
@@ -112,6 +124,7 @@ export function buildMailVars(input: {
     fields_table: fieldsTableHtml(input.payload),
     admin_url: admin,
     enquiry_url: `${admin}?id=${input.id}`,
+    hiring_url: `${site}${hiringPath}`,
     company_name: input.site.companyName,
     company_phone: input.site.phone,
     support_email: input.site.supportEmail,

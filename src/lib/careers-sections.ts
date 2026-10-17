@@ -157,6 +157,18 @@ export type CareersJob = {
   href?: string;
   linkLabel?: string;
   newTab?: boolean;
+  /** Set when hydrated from Hiring ATS — used to lock apply → pipeline. */
+  id?: number;
+  publicId?: string;
+  slug?: string;
+};
+
+/** Structured open-role option for the apply form (ATS-backed when present). */
+export type CareersRoleOption = {
+  label: string;
+  jobId?: number;
+  publicId?: string;
+  slug?: string;
 };
 
 export type CareersJobsContent = {
@@ -280,6 +292,8 @@ export type CareersApplicationContent = {
     message: CareersFieldText & { rows?: number };
   };
   roles: string[];
+  /** Prefer these when present (hydrated from Hiring ATS). Select value = publicId || label. */
+  roleOptions?: CareersRoleOption[];
   side: {
     hidden?: boolean;
     background?: string;

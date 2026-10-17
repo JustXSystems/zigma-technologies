@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk, readJson } from '@/lib/api';
 import {
+  bootstrapHiringFromCareersCms,
   createCareerJob,
   hiringStats,
   listCareerJobs,
@@ -31,16 +32,24 @@ const writeSchema = z.object({
 export async function GET(request: Request) {
   try {
     await requireSession();
+    const boot = await bootstrapHiringFromCareersCms('system');
     const { searchParams } = new URL(request.url);
     const status = (searchParams.get('status') || 'active') as JobStatus | 'active' | 'archive' | 'all';
     const q = searchParams.get('q') || undefined;
     const department = searchParams.get('department') || undefined;
     const [jobs, stats] = await Promise.all([listCareerJobs({ status, q, department }), hiringStats()]);
-    return jsonOk({ jobs, stats });
+    return jsonOk({
+      jobs,
+      stats,
+      bootstrapped: boot.imported,
+      message: boot.imported
+        ? `Loaded ${boot.imported} role(s) from the Careers page into Hiring automatically.`
+        : undefined,
+    });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') return jsonError('Unauthorized', 401);
     console.error(error);
-    return jsonError('Failed to list jobs', 500);
+    return jsonError(error instanceof Error ? error.message : 'Failed to list jobs', 500);
   }
 }
 

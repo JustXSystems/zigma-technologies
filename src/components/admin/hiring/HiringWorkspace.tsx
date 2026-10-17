@@ -50,6 +50,45 @@ const emptyContent = (): CareerJobContent => ({
   facts: [],
 });
 
+const blankDraft = () => ({
+  title: '',
+  department: '',
+  location: 'Bengaluru',
+  jobType: 'Full-Time',
+  experience: '',
+  education: '',
+  badge: 'New',
+  summary: '',
+  durationDays: 30,
+  vacancies: 1,
+  responsibilities: '',
+  requirements: '',
+  benefits: '',
+  facts: '',
+});
+
+function draftFromJob(job: CareerJob) {
+  const left = daysLeft(job.closesAt);
+  return {
+    title: job.title,
+    department: job.department,
+    location: job.location || 'Bengaluru',
+    jobType: job.jobType || 'Full-Time',
+    experience: job.experience,
+    education: job.education,
+    badge: job.badge,
+    summary: job.summary,
+    durationDays: left && left > 0 ? left : 30,
+    vacancies: job.vacancies || 1,
+    responsibilities: (job.content.responsibilities || []).join('\n'),
+    requirements: (job.content.requirements || []).join('\n'),
+    benefits: (job.content.benefits || []).join('\n'),
+    facts: (job.content.facts || []).join('\n'),
+  };
+}
+
+const STAGE_FLOW: CandidateStage[] = ['applied', 'screening', 'interview', 'offer', 'hired'];
+
 export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initialJobId?: string }) {
   const [jobs, setJobs] = useState<CareerJob[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -61,23 +100,9 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
   const [candId, setCandId] = useState<number | null>(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [editingNew, setEditingNew] = useState(!initialJobId);
 
-  const [draft, setDraft] = useState({
-    title: '',
-    department: '',
-    location: 'Bengaluru',
-    jobType: 'Full-Time',
-    experience: '',
-    education: '',
-    badge: 'New',
-    summary: '',
-    durationDays: 30,
-    vacancies: 1,
-    responsibilities: '',
-    requirements: '',
-    benefits: '',
-    facts: '',
-  });
+  const [draft, setDraft] = useState(blankDraft);
 
   const [closeForm, setCloseForm] = useState({ reason: 'filled' as CloseReason, notes: '', hiredIds: [] as number[], joinedAt: '' });
   const [note, setNote] = useState('');
@@ -89,6 +114,7 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     if (!res.ok) throw new Error(data.error || 'Load failed');
     setJobs(data.jobs || []);
     setStats(data.stats || null);
+    if (data.message) setMsg(data.message);
     return data.jobs as CareerJob[];
   }, [tab, q]);
 
@@ -139,7 +165,8 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
         setStats(data.stats || null);
         setLoading(false);
         if (tab === 'pipeline') {
-          const cres = await fetch('/api/admin/hiring/candidates');
+          const jobQ = selectedId ? `?jobId=${selectedId}` : '';
+          const cres = await fetch(`/api/admin/hiring/candidates${jobQ}`);
           const cdata = await cres.json();
           if (!current || !cres.ok) return;
           setCandidates(cdata.candidates || []);
@@ -174,6 +201,25 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
   const selected = useMemo(() => jobs.find((j) => j.id === selectedId) || null, [jobs, selectedId]);
   const selectedCand = useMemo(() => candidates.find((c) => c.id === candId) || null, [candidates, candId]);
 
+  useEffect(() => {
+    if (tab !== 'openings') return;
+    if (editingNew || !selected) return;
+    setDraft(draftFromJob(selected));
+  }, [selected, editingNew, tab]);
+
+  function startNewJob() {
+    setSelectedId(null);
+    setEditingNew(true);
+    setDraft(blankDraft());
+    setMsg('');
+  }
+
+  function selectJob(id: number) {
+    setSelectedId(id);
+    setEditingNew(false);
+    setCloseForm({ reason: 'filled', notes: '', hiredIds: [], joinedAt: '' });
+  }
+
   async function importLegacy() {
     setBusy(true);
     setMsg('');
@@ -190,6 +236,17 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     }
   }
 
+  function buildContent(): CareerJobContent {
+    return {
+      ...emptyContent(),
+      role: draft.title.trim(),
+      responsibilities: draft.responsibilities.split('\n').map((s) => s.trim()).filter(Boolean),
+      requirements: draft.requirements.split('\n').map((s) => s.trim()).filter(Boolean),
+      benefits: draft.benefits.split('\n').map((s) => s.trim()).filter(Boolean),
+      facts: draft.facts.split('\n').map((s) => s.trim()).filter(Boolean),
+    };
+  }
+
   async function createJob(publish: boolean) {
     if (!draft.title.trim()) {
       setMsg('Job title is required');
@@ -198,13 +255,6 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     setBusy(true);
     setMsg('');
     try {
-      const content: CareerJobContent = {
-        ...emptyContent(),
-        responsibilities: draft.responsibilities.split('\n').map((s) => s.trim()).filter(Boolean),
-        requirements: draft.requirements.split('\n').map((s) => s.trim()).filter(Boolean),
-        benefits: draft.benefits.split('\n').map((s) => s.trim()).filter(Boolean),
-        facts: draft.facts.split('\n').map((s) => s.trim()).filter(Boolean),
-      };
       const res = await fetch('/api/admin/hiring/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -220,17 +270,57 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
           vacancies: draft.vacancies,
           durationDays: draft.durationDays,
           status: publish ? 'open' : 'draft',
-          content,
+          content: buildContent(),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Create failed');
-      setMsg(publish ? 'Published on /careers' : 'Draft saved');
-      setDraft((d) => ({ ...d, title: '', summary: '', responsibilities: '', requirements: '', benefits: '', facts: '', badge: '' }));
+      setMsg(publish ? 'Published on /careers — applicants will land in Pipeline.' : 'Draft saved');
+      setDraft(blankDraft());
+      setEditingNew(false);
       await refresh();
       if (data.id) setSelectedId(data.id);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Create failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveSelected(publish?: boolean) {
+    if (!selectedId) return;
+    if (!draft.title.trim()) {
+      setMsg('Job title is required');
+      return;
+    }
+    setBusy(true);
+    setMsg('');
+    try {
+      const body: Record<string, unknown> = {
+        title: draft.title,
+        department: draft.department,
+        location: draft.location,
+        jobType: draft.jobType,
+        experience: draft.experience,
+        education: draft.education,
+        badge: draft.badge,
+        summary: draft.summary,
+        vacancies: draft.vacancies,
+        durationDays: draft.durationDays,
+        content: buildContent(),
+      };
+      if (publish) body.status = 'open';
+      const res = await fetch(`/api/admin/hiring/jobs/${selectedId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      setMsg(publish ? 'Saved and live on /careers' : 'Job updated');
+      await refresh();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setBusy(false);
     }
@@ -302,6 +392,7 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
 
   async function moveStage(id: number, stage: CandidateStage) {
     setBusy(true);
+    setMsg('');
     try {
       const res = await fetch(`/api/admin/hiring/candidates/${id}`, {
         method: 'PATCH',
@@ -310,8 +401,10 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
+      setMsg(`Moved to ${STAGE_LABELS[stage]}`);
+      setCandId(id);
       await loadPipeline(selectedId);
-      if (selectedId) await loadJobDetail(selectedId);
+      if (tab !== 'pipeline' && selectedId) await loadJobDetail(selectedId);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Update failed');
     } finally {
@@ -366,7 +459,7 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
 
       <div className="hr-callout">
         <strong>How it works.</strong> Publish a role with an end date — it appears on /careers until that date, then auto-archives.
-        When you fill a role, close it with the hired people and notes. Everything stays here for audit; nothing closed is shown publicly.
+        Website applications land in Pipeline (matched by job id). When you fill a role, close it with hired people and notes for audit.
       </div>
 
       <div className="hr-toolbar">
@@ -375,8 +468,8 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
           Refresh
         </button>
         {tab === 'openings' ? (
-          <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void importLegacy()} disabled={busy}>
-            Import from Careers page
+          <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void importLegacy()} disabled={busy} title="Adds Careers-page roles that are not already in Hiring">
+            Sync from Careers page
           </button>
         ) : null}
         {tab === 'pipeline' ? (
@@ -410,8 +503,14 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
           <div>
             <div className="hr-job-list">
               {jobs.length === 0 ? (
-                <div className="hr-empty">
-                  No active jobs yet. Create one on the right, or import existing Careers page roles.
+                <div className="hr-empty hr-empty--cta">
+                  <p>
+                    <strong>No active openings yet.</strong> Create a role on the right, or sync roles still stored on the Careers page
+                    (Pages → Careers → Current openings). Sync is safe to re-run — existing titles are skipped.
+                  </p>
+                  <button type="button" className="admin-btn admin-btn-primary" disabled={busy} onClick={() => void importLegacy()}>
+                    Sync from Careers page
+                  </button>
                 </div>
               ) : (
                 jobs.map((j) => {
@@ -419,8 +518,8 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                   return (
                     <article
                       key={j.id}
-                      className={`hr-job-row${selectedId === j.id ? ' is-on' : ''}`}
-                      onClick={() => setSelectedId(j.id)}
+                      className={`hr-job-row${selectedId === j.id && !editingNew ? ' is-on' : ''}`}
+                      onClick={() => selectJob(j.id)}
                     >
                       <div>
                         <h4 className="hr-job-title">{j.title}</h4>
@@ -527,7 +626,21 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
           </div>
 
           <aside className="hr-panel">
-            <h3>New job posting</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0 }}>{editingNew || !selected ? 'New job posting' : 'Edit job'}</h3>
+              {!editingNew ? (
+                <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={startNewJob}>
+                  + New
+                </button>
+              ) : null}
+            </div>
+            {!editingNew && selected ? (
+              <div className="hr-job-meta" style={{ marginBottom: '0.85rem' }}>
+                <StatusPill status={selected.status} />
+                <span className="hr-pill">{selected.candidateCount ?? 0} applicants</span>
+                {selected.closesAt ? <span className="hr-pill">Ends {fmtDate(selected.closesAt)}</span> : null}
+              </div>
+            ) : null}
             <div className="hr-field-grid">
               <label className="admin-field full">
                 <span>Job title</span>
@@ -582,12 +695,30 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
               </label>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-              <button type="button" className="admin-btn admin-btn-primary" disabled={busy} onClick={() => void createJob(true)}>
-                Publish live
-              </button>
-              <button type="button" className="admin-btn admin-btn-secondary" disabled={busy} onClick={() => void createJob(false)}>
-                Save draft
-              </button>
+              {editingNew || !selected ? (
+                <>
+                  <button type="button" className="admin-btn admin-btn-primary" disabled={busy} onClick={() => void createJob(true)}>
+                    Publish live
+                  </button>
+                  <button type="button" className="admin-btn admin-btn-secondary" disabled={busy} onClick={() => void createJob(false)}>
+                    Save draft
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" className="admin-btn admin-btn-primary" disabled={busy} onClick={() => void saveSelected(false)}>
+                    Save changes
+                  </button>
+                  {selected.status !== 'open' ? (
+                    <button type="button" className="admin-btn admin-btn-secondary" disabled={busy} onClick={() => void saveSelected(true)}>
+                      Go live
+                    </button>
+                  ) : null}
+                  <a className="admin-btn admin-btn-secondary az-admin-mini" href={`/admin/hiring?tab=pipeline&job=${selected.id}`}>
+                    Pipeline
+                  </a>
+                </>
+              )}
             </div>
           </aside>
         </div>
@@ -634,23 +765,61 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                   {selectedCand.phone ? ` · ${selectedCand.phone}` : ''}
                   {selectedCand.experience ? ` · ${selectedCand.experience}` : ''}
                 </p>
-                {selectedCand.resumeFile ? (
-                  <p>
-                    <a href={`/api/admin/enquiries/${selectedCand.enquiryId}/resume`} target="_blank" rel="noopener noreferrer">
-                      Open resume
-                    </a>
-                  </p>
+                {selectedCand.resumeFile || selectedCand.enquiryId ? (
+                  <div className="hr-resume">
+                    <span className="hr-resume-label">
+                      {selectedCand.resumeName || 'Resume / CV'}
+                    </span>
+                    <div className="hr-resume-actions">
+                      <a
+                        className="admin-btn admin-btn-secondary az-admin-mini"
+                        href={`/api/admin/hiring/candidates/${selectedCand.id}/resume`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open
+                      </a>
+                      <a
+                        className="admin-btn admin-btn-secondary az-admin-mini"
+                        href={`/api/admin/hiring/candidates/${selectedCand.id}/resume?download=1`}
+                      >
+                        Download
+                      </a>
+                      {selectedCand.enquiryId ? (
+                        <a
+                          className="hr-resume-enquiry"
+                          href={`/admin/enquiries?id=${selectedCand.enquiryId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Enquiry #{selectedCand.enquiryId}
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
                 ) : null}
-                <label className="admin-field">
-                  <span>Move to stage</span>
-                  <select className="admin-select" value={selectedCand.stage} onChange={(e) => void moveStage(selectedCand.id, e.target.value as CandidateStage)} disabled={busy}>
-                    {CANDIDATE_STAGES.map((s) => (
-                      <option key={s} value={s}>
+                <div className="admin-field">
+                  <span>Pipeline stage</span>
+                  <div className="hr-stage-row" role="group" aria-label="Candidate stage">
+                    {[...STAGE_FLOW, 'on_hold' as CandidateStage, 'rejected' as CandidateStage, 'withdrawn' as CandidateStage].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className={`hr-stage-btn${selectedCand.stage === s ? ' is-on' : ''}`}
+                        disabled={busy || selectedCand.stage === s}
+                        onClick={() => void moveStage(selectedCand.id, s)}
+                      >
                         {STAGE_LABELS[s]}
-                      </option>
+                      </button>
                     ))}
-                  </select>
-                </label>
+                  </div>
+                  {selectedCand.stage === 'hired' ? (
+                    <p className="az-admin-hint" style={{ margin: '0 0 0.75rem' }}>
+                      Hired — close the role under{' '}
+                      <a href={`/admin/hiring?tab=openings&job=${selectedCand.jobId}`}>Openings → Archive</a> when the vacancy is filled.
+                    </p>
+                  ) : null}
+                </div>
                 <label className="admin-field">
                   <span>Interviewer</span>
                   <input

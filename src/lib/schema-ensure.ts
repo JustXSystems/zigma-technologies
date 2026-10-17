@@ -474,16 +474,12 @@ const CAREER_EVENTS_TABLE = `CREATE TABLE IF NOT EXISTS career_events (
 export function ensureCareerHiringTables(): Promise<void> {
   if (!careerHiringReady) {
     careerHiringReady = (async () => {
-      try {
-        await pool.query(CAREER_JOBS_TABLE);
-        await pool.query(CAREER_CANDIDATES_TABLE);
-        await pool.query(CAREER_EVENTS_TABLE);
-      } catch (err) {
-        if (isDbUnavailableError(err)) throw err;
-        console.error('[schema] could not ensure career hiring tables — run scripts/migrate-career-hiring.sql', err);
-      }
+      await pool.query(CAREER_JOBS_TABLE);
+      await pool.query(CAREER_CANDIDATES_TABLE);
+      await pool.query(CAREER_EVENTS_TABLE);
     })().catch((err) => {
       careerHiringReady = null;
+      console.error('[schema] could not ensure career hiring tables — run scripts/migrate-career-hiring.sql', err);
       throw err;
     });
   }

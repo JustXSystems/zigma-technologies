@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   AccentHeaderEditor,
   AlignButtons,
@@ -25,6 +24,8 @@ import {
   Toggle,
   type EditorProps,
 } from '@/components/admin/section-kit';
+import CareersHiringJobsPanel from '@/components/admin/careers/CareersHiringJobsPanel';
+import '@/components/admin/hiring/Hiring.css';
 import { LegacyStatsEditor } from '@/components/admin/legacy/LegacySectionEditor';
 import { ActionFields, ContactHelpEditor, ContactHeroEditor, IconStyleFields } from '@/components/admin/contact/ContactSectionEditor';
 import type { ContactSideItem } from '@/lib/contact-sections';
@@ -232,22 +233,18 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
   const setCi = (patch: Partial<CareersJobsContent['chipIcons']>) => set({ chipIcons: { ...ci, ...patch } });
   const dl = c.detailLabels || CAREERS_JOB_LABELS;
   const setDl = (patch: Partial<CareersJobLabels>) => set({ detailLabels: { ...dl, ...patch } });
-  const departments = Array.from(new Set((c.jobs || []).map((j) => String(j.department || '').trim()).filter(Boolean)));
   return (
     <>
       <SectionBoxGroup value={c.section} onChange={(section) => set({ section })} />
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
         <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
-      <Group title="Job openings" open description="Live roles come from Hiring ATS — time-bound, auto-archive, candidate pipeline">
-        <div className="admin-guide-callout admin-guide-callout--info">
-          <strong>Jobs are managed in Hiring.</strong> Create, publish, close and archive roles under{' '}
-          <Link href="/admin/hiring">Admin → Hiring</Link>. This section only styles the public cards (filters, buttons, wording).
-          Open jobs on /careers are loaded automatically; archived jobs never appear on the website.
-          {departments.length ? (
-            <p style={{ margin: '0.5rem 0 0' }}>Legacy list still in this section: {departments.join(', ')} — use Hiring → Import if the Hiring table is empty.</p>
-          ) : null}
-        </div>
+      <Group
+        title="Job openings"
+        open
+        description="Publish here → live on /careers + Hiring pipeline. Archived roles never appear on the website."
+      >
+        <CareersHiringJobsPanel />
       </Group>
       <Group title="Apply button">
         <div className="admin-form-grid">
