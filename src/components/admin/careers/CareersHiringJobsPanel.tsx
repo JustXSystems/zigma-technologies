@@ -1,6 +1,9 @@
 'use client';
 
-import Link from 'next/link';import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import JobTextAutofill from '@/components/admin/hiring/JobTextAutofill';
+import type { JobAutofillDraft } from '@/lib/careers-job-text';
 import { STATUS_LABELS, type CareerJob, type JobStatus } from '@/lib/career-hiring-types';
 
 type Stats = { open: number; draft: number; paused: number; archive: number; pipeline: number };
@@ -10,9 +13,26 @@ function daysLeft(closesAt: string | null) {
   return Math.ceil((new Date(closesAt).getTime() - Date.now()) / 86400000);
 }
 
+const blankDraft = (): JobAutofillDraft & { durationDays: number } => ({
+  title: '',
+  department: '',
+  location: 'Bengaluru',
+  jobType: 'Full-Time',
+  experience: '',
+  education: '',
+  badge: '',
+  summary: '',
+  responsibilities: '',
+  requirements: '',
+  benefits: '',
+  facts: '',
+  vacancies: 1,
+  durationDays: 30,
+});
+
 /**
  * Live bridge: Careers page editor ↔ Hiring ATS.
- * Publish here and the role appears on /careers + Pipeline automatically.
+ * Publish here (including WhatsApp/email paste autofill) → /careers + Pipeline.
  */
 export default function CareersHiringJobsPanel() {
   const [jobs, setJobs] = useState<CareerJob[]>([]);
@@ -20,10 +40,7 @@ export default function CareersHiringJobsPanel() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const [title, setTitle] = useState('');
-  const [department, setDepartment] = useState('');
-  const [location, setLocation] = useState('Bengaluru');
-  const [durationDays, setDurationDays] = useState(30);
+  const [draft, setDraft] = useState(blankDraft);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -46,30 +63,45 @@ export default function CareersHiringJobsPanel() {
   }, [refresh]);
 
   async function publish() {
-    if (!title.trim()) {
-      setMsg('Job title is required');
+    if (!draft.title.trim()) {
+      setMsg('Job title is required — paste a description or type a title');
       return;
     }
     setBusy(true);
     setMsg('');
     try {
+      const lines = (s: string) => s.split('\n').map((x) => x.trim()).filter(Boolean);
       const res = await fetch('/api/admin/hiring/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: title.trim(),
-          department,
-          location,
-          jobType: 'Full-Time',
-          durationDays,
+          title: draft.title.trim(),
+          department: draft.department,
+          location: draft.location,
+          jobType: draft.jobType || 'Full-Time',
+          experience: draft.experience,
+          education: draft.education,
+          badge: draft.badge,
+          summary: draft.summary,
+          vacancies: draft.vacancies,
+          durationDays: draft.durationDays,
           status: 'open',
-          content: { role: title.trim() },
+          content: {
+            role: draft.title.trim(),
+            responsibilities: lines(draft.responsibilities),
+            requirements: lines(draft.requirements),
+            benefits: lines(draft.benefits),
+            facts: lines(draft.facts),
+            chips: lines(draft.facts)
+              .filter((f) => /^work mode:/i.test(f))
+              .map((f) => f.replace(/^work mode:\s*/i, '')),
+          },
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Publish failed');
-      setTitle('');
-      setMsg(`Published — live on /careers and ready in Hiring → Pipeline.`);
+      setDraft(blankDraft());
+      setMsg(`Published “${draft.title.trim()}” — live on /careers and ready in Hiring → Pipeline.`);
       await refresh();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Publish failed');
@@ -85,7 +117,7 @@ export default function CareersHiringJobsPanel() {
       const res = await fetch(`/api/admin/hiring/jobs/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, durationDays: status === 'open' ? durationDays : undefined }),
+        body: JSON.stringify({ status, durationDays: status === 'open' ? draft.durationDays : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
@@ -136,7 +168,8 @@ export default function CareersHiringJobsPanel() {
       {!loading && jobs.length === 0 ? (
         <div className="crs-hire-empty">
           <p>
-            No roles in Hiring yet. Publish one below, or sync any legacy jobs still stored in this section&apos;s JSON.
+            No roles in Hiring yet. Paste a WhatsApp/email job ad below and publish, or sync any legacy jobs still in this
+            section&apos;s JSON.
           </p>
           <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" disabled={busy} onClick={() => void syncLegacy()}>
             Sync legacy Careers jobs
@@ -184,19 +217,49 @@ export default function CareersHiringJobsPanel() {
 
       <div className="crs-hire-publish">
         <h4>Publish a new role</h4>
-        <p className="az-admin-hint">Goes live on /careers immediately and opens a pipeline for applicants.</p>
-        <div className="admin-form-grid">
+        <p className="az-admin-hint">
+          Paste the full ad from WhatsApp or email first — fields fill automatically — then publish live on /careers.
+        </p>
+        <JobTextAutofill defaultOpen value={draft} onFill={(next) => setDraft((d) => ({ ...d, ...next }))} />
+        <div className="admin-form-grid" style={{ marginTop: '0.75rem' }}>
           <label className="admin-field">
             <span>Job title</span>
-            <input className="admin-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="UPS Service Engineer" />
+            <input className="admin-input" value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} placeholder="UPS Service Engineer" />
           </label>
           <label className="admin-field">
             <span>Department</span>
-            <input className="admin-input" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Field Service" />
+            <input className="admin-input" value={draft.department} onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))} placeholder="Field Service" />
           </label>
           <label className="admin-field">
             <span>Location</span>
-            <input className="admin-input" value={location} onChange={(e) => setLocation(e.target.value)} />
+            <input className="admin-input" value={draft.location} onChange={(e) => setDraft((d) => ({ ...d, location: e.target.value }))} />
+          </label>
+          <label className="admin-field">
+            <span>Job type</span>
+            <input className="admin-input" value={draft.jobType} onChange={(e) => setDraft((d) => ({ ...d, jobType: e.target.value }))} />
+          </label>
+          <label className="admin-field">
+            <span>Experience</span>
+            <input className="admin-input" value={draft.experience} onChange={(e) => setDraft((d) => ({ ...d, experience: e.target.value }))} />
+          </label>
+          <label className="admin-field">
+            <span>Education</span>
+            <input className="admin-input" value={draft.education} onChange={(e) => setDraft((d) => ({ ...d, education: e.target.value }))} />
+          </label>
+          <label className="admin-field">
+            <span>Badge</span>
+            <input className="admin-input" value={draft.badge} onChange={(e) => setDraft((d) => ({ ...d, badge: e.target.value }))} placeholder="Urgent" />
+          </label>
+          <label className="admin-field">
+            <span>Vacancies</span>
+            <input
+              className="admin-input"
+              type="number"
+              min={1}
+              max={99}
+              value={draft.vacancies}
+              onChange={(e) => setDraft((d) => ({ ...d, vacancies: Math.max(1, Number(e.target.value) || 1) }))}
+            />
           </label>
           <label className="admin-field">
             <span>Live for (days)</span>
@@ -205,9 +268,13 @@ export default function CareersHiringJobsPanel() {
               type="number"
               min={1}
               max={365}
-              value={durationDays}
-              onChange={(e) => setDurationDays(Number(e.target.value) || 30)}
+              value={draft.durationDays}
+              onChange={(e) => setDraft((d) => ({ ...d, durationDays: Number(e.target.value) || 30 }))}
             />
+          </label>
+          <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
+            <span>Short summary</span>
+            <textarea className="admin-textarea" rows={2} value={draft.summary} onChange={(e) => setDraft((d) => ({ ...d, summary: e.target.value }))} />
           </label>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
@@ -217,10 +284,17 @@ export default function CareersHiringJobsPanel() {
           <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" disabled={busy} onClick={() => void syncLegacy()}>
             Sync legacy JSON
           </button>
+          <Link href="/admin/hiring?tab=openings" className="admin-btn admin-btn-secondary az-admin-mini">
+            Full editor in Hiring
+          </Link>
         </div>
       </div>
 
-      {msg ? <p className="az-admin-hint" style={{ marginTop: '0.75rem' }}>{msg}</p> : null}
+      {msg ? (
+        <p className="az-admin-hint" style={{ marginTop: '0.75rem' }}>
+          {msg}
+        </p>
+      ) : null}
     </div>
   );
 }

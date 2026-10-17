@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  CANDIDATE_STAGES,
   CLOSE_REASON_LABELS,
   STAGE_LABELS,
   STATUS_LABELS,
@@ -14,6 +13,8 @@ import {
   type CloseReason,
   type JobStatus,
 } from '@/lib/career-hiring-types';
+import JobTextAutofill from '@/components/admin/hiring/JobTextAutofill';
+import type { JobAutofillDraft } from '@/lib/careers-job-text';
 
 type Stats = { open: number; draft: number; paused: number; archive: number; pipeline: number; hired: number };
 type Tab = 'openings' | 'pipeline' | 'archive';
@@ -50,14 +51,14 @@ const emptyContent = (): CareerJobContent => ({
   facts: [],
 });
 
-const blankDraft = () => ({
+const blankDraft = (): JobAutofillDraft & { durationDays: number } => ({
   title: '',
   department: '',
   location: 'Bengaluru',
   jobType: 'Full-Time',
   experience: '',
   education: '',
-  badge: 'New',
+  badge: '',
   summary: '',
   durationDays: 30,
   vacancies: 1,
@@ -67,7 +68,7 @@ const blankDraft = () => ({
   facts: '',
 });
 
-function draftFromJob(job: CareerJob) {
+function draftFromJob(job: CareerJob): JobAutofillDraft & { durationDays: number } {
   const left = daysLeft(job.closesAt);
   return {
     title: job.title,
@@ -641,6 +642,11 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                 {selected.closesAt ? <span className="hr-pill">Ends {fmtDate(selected.closesAt)}</span> : null}
               </div>
             ) : null}
+            <JobTextAutofill
+              defaultOpen={editingNew || !selected}
+              value={draft}
+              onFill={(next) => setDraft((d) => ({ ...d, ...next }))}
+            />
             <div className="hr-field-grid">
               <label className="admin-field full">
                 <span>Job title</span>
@@ -668,7 +674,18 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
               </label>
               <label className="admin-field">
                 <span>Badge</span>
-                <input className="admin-input" value={draft.badge} onChange={(e) => setDraft((d) => ({ ...d, badge: e.target.value }))} />
+                <input className="admin-input" value={draft.badge} onChange={(e) => setDraft((d) => ({ ...d, badge: e.target.value }))} placeholder="New / Urgent" />
+              </label>
+              <label className="admin-field">
+                <span>Vacancies</span>
+                <input
+                  className="admin-input"
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={draft.vacancies}
+                  onChange={(e) => setDraft((d) => ({ ...d, vacancies: Math.max(1, Number(e.target.value) || 1) }))}
+                />
               </label>
               <label className="admin-field">
                 <span>Posting days</span>
@@ -692,6 +709,14 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
               <label className="admin-field full">
                 <span>Requirements (one per line)</span>
                 <textarea className="admin-textarea" rows={4} value={draft.requirements} onChange={(e) => setDraft((d) => ({ ...d, requirements: e.target.value }))} />
+              </label>
+              <label className="admin-field full">
+                <span>Benefits (one per line)</span>
+                <textarea className="admin-textarea" rows={3} value={draft.benefits} onChange={(e) => setDraft((d) => ({ ...d, benefits: e.target.value }))} />
+              </label>
+              <label className="admin-field full">
+                <span>Facts — Label: value (one per line)</span>
+                <textarea className="admin-textarea" rows={2} value={draft.facts} onChange={(e) => setDraft((d) => ({ ...d, facts: e.target.value }))} />
               </label>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
