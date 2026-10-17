@@ -5,6 +5,11 @@ import { useCallback, useEffect, useState } from 'react';
 import JobTextAutofill from '@/components/admin/hiring/JobTextAutofill';
 import type { JobAutofillDraft } from '@/lib/careers-job-text';
 import { STATUS_LABELS, type CareerJob, type JobStatus } from '@/lib/career-hiring-types';
+import {
+  buildCareersApplyUrl,
+  buildWhatsAppShareUrl,
+  validateJobForPublish,
+} from '@/lib/career-job-publish';
 
 type Stats = { open: number; draft: number; paused: number; archive: number; pipeline: number };
 
@@ -41,6 +46,7 @@ export default function CareersHiringJobsPanel() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [draft, setDraft] = useState(blankDraft);
+  const [allowDupTitle, setAllowDupTitle] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -62,9 +68,35 @@ export default function CareersHiringJobsPanel() {
     void refresh();
   }, [refresh]);
 
+  async function copyApplyLink(job: CareerJob) {
+    const url = buildCareersApplyUrl({ publicId: job.publicId, slug: job.slug });
+    try {
+      await navigator.clipboard.writeText(url);
+      setMsg('Apply link copied');
+    } catch {
+      setMsg(url);
+    }
+  }
+
+  function shareWhatsApp(job: CareerJob) {
+    const applyUrl = buildCareersApplyUrl({ publicId: job.publicId, slug: job.slug });
+    window.open(buildWhatsAppShareUrl({ title: job.title, location: job.location, applyUrl }), '_blank', 'noopener,noreferrer');
+  }
+
   async function publish() {
     if (!draft.title.trim()) {
       setMsg('Job title is required — paste a description or type a title');
+      return;
+    }
+    const gates = validateJobForPublish({
+      title: draft.title,
+      location: draft.location,
+      summary: draft.summary,
+      responsibilitiesText: draft.responsibilities,
+      requirementsText: draft.requirements,
+    });
+    if (gates.length) {
+      setMsg(gates.join(' · '));
       return;
     }
     setBusy(true);
@@ -86,6 +118,7 @@ export default function CareersHiringJobsPanel() {
           vacancies: draft.vacancies,
           durationDays: draft.durationDays,
           status: 'open',
+          allowDuplicateTitle: allowDupTitle,
           content: {
             role: draft.title.trim(),
             responsibilities: lines(draft.responsibilities),
@@ -101,10 +134,17 @@ export default function CareersHiringJobsPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Publish failed');
       setDraft(blankDraft());
+      setAllowDupTitle(false);
       setMsg(`Published “${draft.title.trim()}” — live on /careers and ready in Hiring → Pipeline.`);
       await refresh();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : 'Publish failed');
+      const raw = e instanceof Error ? e.message : 'Publish failed';
+      if (raw.startsWith('DUPLICATE_TITLE:')) {
+        setAllowDupTitle(true);
+        setMsg(raw.replace(/^DUPLICATE_TITLE:\s*/, '') + ' Click publish again to confirm.');
+      } else {
+        setMsg(raw);
+      }
     } finally {
       setBusy(false);
     }
@@ -203,6 +243,16 @@ export default function CareersHiringJobsPanel() {
                     Pause
                   </button>
                 ) : null}
+                {j.status === 'open' || j.status === 'paused' ? (
+                  <>
+                    <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void copyApplyLink(j)}>
+                      Copy link
+                    </button>
+                    <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => shareWhatsApp(j)}>
+                      WhatsApp
+                    </button>
+                  </>
+                ) : null}
                 <Link href={`/admin/hiring?tab=pipeline&job=${j.id}`} className="admin-btn admin-btn-secondary az-admin-mini">
                   Pipeline
                 </Link>
@@ -276,10 +326,23 @@ export default function CareersHiringJobsPanel() {
             <span>Short summary</span>
             <textarea className="admin-textarea" rows={2} value={draft.summary} onChange={(e) => setDraft((d) => ({ ...d, summary: e.target.value }))} />
           </label>
+          <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
+            <span>Key responsibilities (one per line)</span>
+            <textarea className="admin-textarea" rows={3} value={draft.responsibilities} onChange={(e) => setDraft((d) => ({ ...d, responsibilities: e.target.value }))} />
+          </label>
+          <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
+            <span>Requirements (one per line)</span>
+            <textarea className="admin-textarea" rows={3} value={draft.requirements} onChange={(e) => setDraft((d) => ({ ...d, requirements: e.target.value }))} />
+          </label>
         </div>
+        {allowDupTitle ? (
+          <p className="az-admin-hint" style={{ marginTop: '0.5rem', color: 'var(--orange, #FF6B1A)' }}>
+            Duplicate title acknowledged — next click publishes another open role with this title.
+          </p>
+        ) : null}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
           <button type="button" className="admin-btn admin-btn-primary" disabled={busy} onClick={() => void publish()}>
-            Publish live on /careers
+            {allowDupTitle ? 'Publish anyway' : 'Publish live on /careers'}
           </button>
           <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" disabled={busy} onClick={() => void syncLegacy()}>
             Sync legacy JSON

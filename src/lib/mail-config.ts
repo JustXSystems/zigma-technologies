@@ -2,7 +2,12 @@
 
 export type MailProvider = 'graph' | 'smtp' | 'off';
 
-export type MailEventKey = 'enquiry_team' | 'enquiry_visitor' | 'careers_team' | 'careers_applicant';
+export type MailEventKey =
+  | 'enquiry_team'
+  | 'enquiry_visitor'
+  | 'careers_team'
+  | 'careers_applicant'
+  | 'careers_stage';
 
 export type MailRouteRule = {
   /** Submitted field to test, e.g. role, source, item_type, subject */
@@ -97,6 +102,8 @@ export const MAIL_EVENTS: Array<{
   audience: 'team' | 'visitor';
   label: string;
   description: string;
+  /** When true, only Hiring stage changes send this — never on form submit. */
+  manualOnly?: boolean;
 }> = [
   {
     key: 'enquiry_team',
@@ -125,6 +132,15 @@ export const MAIL_EVENTS: Array<{
     audience: 'visitor',
     label: 'Application auto-reply → applicant',
     description: 'Confirmation sent to the applicant.',
+  },
+  {
+    key: 'careers_stage',
+    kind: 'careers',
+    audience: 'visitor',
+    label: 'Pipeline stage update → applicant',
+    description:
+      'Sent when HR moves a candidate (screening, interview, offer, hired, rejected, etc.). Disable per template or use conditions like stage == interview.',
+    manualOnly: true,
   },
 ];
 
@@ -166,6 +182,12 @@ export const SYSTEM_VARIABLES: SystemVariable[] = [
     description: 'Admin → Hiring (pipeline), deep-linked to the matched job when available.',
   },
   { key: 'job_title', label: 'Matched job title', group: 'Submission', description: 'Hiring ATS job title when the application was matched.' },
+  { key: 'stage', label: 'Pipeline stage code', group: 'Submission', description: 'applied, screening, interview, offer, hired, rejected, …' },
+  { key: 'stage_label', label: 'Pipeline stage label', group: 'Submission', description: 'Readable stage, e.g. Interview.' },
+  { key: 'stage_from', label: 'Previous stage code', group: 'Submission', description: 'Stage before the update.' },
+  { key: 'stage_from_label', label: 'Previous stage label', group: 'Submission', description: 'Readable previous stage.' },
+  { key: 'interview_at', label: 'Interview date/time', group: 'Submission', description: 'Scheduled interview (local-friendly string) when set.' },
+  { key: 'interviewer', label: 'Interviewer', group: 'Submission', description: 'Named interviewer from the Hiring pipeline.' },
   { key: 'site_url', label: 'Website URL', group: 'Links', description: 'NEXT_PUBLIC_SITE_URL.' },
   { key: 'company_name', label: 'Company name', group: 'Company', description: 'Site Settings → company name.' },
   { key: 'company_phone', label: 'Company phone', group: 'Company', description: 'Site Settings → phone.' },
@@ -215,6 +237,27 @@ const VISITOR_BODY_CAREERS = `<p>Hi {{name}},</p>
 <p>If you have questions, email {{support_email}}{{#if company_phone}} or call {{company_phone}}{{/if}}.</p>
 <p>Regards,<br>Talent team, {{company_name}}</p>`;
 
+const VISITOR_BODY_CAREERS_STAGE = `<p>Hi {{name}},</p>
+<p>An update on your application{{#if job_title}} for <strong>{{job_title}}</strong>{{/if}} at {{company_name}}:</p>
+<p>Your status is now <strong>{{stage_label}}</strong>{{#if stage_from_label}} (was {{stage_from_label}}){{/if}}.</p>
+{{#if stage == "interview"}}
+<p>{{#if interview_at}}We would like to schedule / confirm your interview for <strong>{{interview_at}}</strong>.{{else}}Our team will contact you shortly with interview details.{{/if}}{{#if interviewer}} Interviewer: <strong>{{interviewer}}</strong>.{{/if}}</p>
+{{/if}}
+{{#if stage == "offer"}}
+<p>Congratulations — we would like to proceed with an offer. Our team will reach out with next steps.</p>
+{{/if}}
+{{#if stage == "hired"}}
+<p>Welcome aboard! We look forward to working with you.</p>
+{{/if}}
+{{#if stage == "rejected"}}
+<p>Thank you for your interest. We have decided not to move forward at this time. We wish you the best in your search.</p>
+{{/if}}
+{{#if stage == "screening"}}
+<p>Your application is under review by our recruitment team.</p>
+{{/if}}
+<p>If you have questions, email {{support_email}}{{#if company_phone}} or call {{company_phone}}{{/if}}.</p>
+<p>Regards,<br>Talent team, {{company_name}}</p>`;
+
 function template(partial: Partial<MailTemplate>): MailTemplate {
   return {
     enabled: true,
@@ -258,6 +301,11 @@ export function defaultMailTemplates(): Record<MailEventKey, MailTemplate> {
       to: '{{email}}',
       subject: 'Application received — {{company_name}}',
       body: VISITOR_BODY_CAREERS,
+    }),
+    careers_stage: template({
+      to: '{{email}}',
+      subject: 'Application update: {{stage_label}} — {{job_title}} · {{company_name}}',
+      body: VISITOR_BODY_CAREERS_STAGE,
     }),
   };
 }

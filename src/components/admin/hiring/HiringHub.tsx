@@ -6,7 +6,15 @@ import { HIRING_TABS } from '@/lib/admin-hub-tabs';
 import HiringWorkspace from './HiringWorkspace';
 import './Hiring.css';
 
-export default function HiringHub({ initialTab, initialJob }: { initialTab?: string; initialJob?: string }) {
+export default function HiringHub({
+  initialTab,
+  initialJob,
+  initialCandidate,
+}: {
+  initialTab?: string;
+  initialJob?: string;
+  initialCandidate?: string;
+}) {
   return (
     <AdminHub
       title="Hiring"
@@ -16,13 +24,15 @@ export default function HiringHub({ initialTab, initialJob }: { initialTab?: str
           <AdminLink href="/careers" target="_blank">
             /careers
           </AdminLink>
-          . Website applications enter Pipeline automatically; move each person through stages, then archive the role when filled.
+          . Website applications sync into Pipeline automatically (matched role or General Applications queue). Stage moves update Enquiries status.
         </>
       }
       tabs={HIRING_TABS}
       initialTab={initialTab}
     >
-      {(active) => <HiringWorkspace tab={active} initialJobId={initialJob} />}
+      {(active) => (
+        <HiringWorkspace tab={active} initialJobId={initialJob} initialCandidateId={initialCandidate} />
+      )}
     </AdminHub>
   );
 }

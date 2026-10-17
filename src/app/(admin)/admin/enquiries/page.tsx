@@ -2,9 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import EnquiryExportCentre, { type ExportScope } from '@/components/admin/EnquiryExportCentre';
+import type { EnquiryPipelineLink } from '@/lib/career-enquiry-bridge';
+import type { CareerJob } from '@/lib/career-hiring-types';
 import type { Enquiry } from '@/lib/types';
 
 type EnquiryKind = 'enquiry' | 'careers' | 'callback' | 'brochure';
+
+type EnquiryRow = Enquiry & { pipeline?: EnquiryPipelineLink | null };
 
 const KIND_LABEL: Record<EnquiryKind, string> = {
   enquiry: 'Enquiry',
@@ -27,14 +31,25 @@ function enquiryKind(e: Enquiry): EnquiryKind {
 }
 
 function hasAttachment(e: Enquiry) {
-  return Object.entries(e.payload_json || {}).some(([k, v]) => (/_file$/.test(k) || k === 'resume_url') && typeof v === 'string' && v !== '');
+  return Object.entries(e.payload_json || {}).some(
+    ([k, v]) => (/_file$/.test(k) || k === 'resume_url') && typeof v === 'string' && v !== ''
+  );
+}
+
+function pipeClass(link: EnquiryPipelineLink | null | undefined) {
+  if (!link) return 'is-unmatched';
+  if (link.holding) return 'is-holding';
+  if (link.stage === 'hired') return 'is-hired';
+  if (link.stage === 'rejected' || link.stage === 'withdrawn') return 'is-closed';
+  if (link.stage === 'interview' || link.stage === 'offer') return 'is-hot';
+  return 'is-linked';
 }
 
 export default function EnquiriesPage() {
-  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+  const [enquiries, setEnquiries] = useState<EnquiryRow[]>([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [selected, setSelected] = useState<Enquiry | null>(null);
+  const [selected, setSelected] = useState<EnquiryRow | null>(null);
   const [notes, setNotes] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | Enquiry['status']>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | EnquiryKind>('all');
@@ -42,6 +57,9 @@ export default function EnquiriesPage() {
   const [picked, setPicked] = useState<Set<number>>(new Set());
   const [exportScope, setExportScope] = useState<ExportScope | null>(null);
   const [exportIds, setExportIds] = useState<number[]>([]);
+  const [jobs, setJobs] = useState<CareerJob[]>([]);
+  const [assignJobId, setAssignJobId] = useState('');
+  const [pipeBusy, setPipeBusy] = useState(false);
   const deepLinked = useRef(false);
 
   async function load(status = statusFilter) {
@@ -49,20 +67,35 @@ export default function EnquiriesPage() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to load');
     setEnquiries(data.enquiries);
+    if (data.pipelineSync) setMessage(data.pipelineSync);
     if (!deepLinked.current) {
       deepLinked.current = true;
       const id = Number(new URLSearchParams(window.location.search).get('id'));
-      const hit = id ? (data.enquiries as Enquiry[]).find((e) => e.id === id) : undefined;
+      const hit = id ? (data.enquiries as EnquiryRow[]).find((e) => e.id === id) : undefined;
       if (hit) {
         setSelected(hit);
         setNotes(hit.admin_notes || '');
       }
+    } else if (selected) {
+      const next = (data.enquiries as EnquiryRow[]).find((e) => e.id === selected.id);
+      if (next) setSelected(next);
     }
   }
 
   useEffect(() => {
     load().catch((e) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
+
+  useEffect(() => {
+    if (!selected || enquiryKind(selected) !== 'careers') return;
+    void fetch('/api/admin/hiring/jobs?status=active')
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.jobs)) setJobs(d.jobs);
+      })
+      .catch(() => undefined);
+  }, [selected?.id]);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -70,8 +103,10 @@ export default function EnquiriesPage() {
       if (typeFilter !== 'all' && enquiryKind(e) !== typeFilter) return false;
       if (!term) return true;
       const blob = JSON.stringify(e.payload_json).toLowerCase();
+      const pipe = e.pipeline ? `${e.pipeline.stageLabel} ${e.pipeline.jobTitle}`.toLowerCase() : '';
       return (
         blob.includes(term) ||
+        pipe.includes(term) ||
         String(e.item_title || '').toLowerCase().includes(term) ||
         String(e.admin_notes || '').toLowerCase().includes(term)
       );
@@ -80,6 +115,10 @@ export default function EnquiriesPage() {
 
   const pickedIds = useMemo(() => filtered.filter((e) => picked.has(e.id)).map((e) => e.id), [filtered, picked]);
   const allPicked = filtered.length > 0 && pickedIds.length === filtered.length;
+  const careersUnmapped = useMemo(
+    () => enquiries.filter((e) => enquiryKind(e) === 'careers' && !e.pipeline).length,
+    [enquiries]
+  );
 
   function togglePick(id: number) {
     setPicked((prev) => {
@@ -149,6 +188,48 @@ export default function EnquiriesPage() {
     await load();
   }
 
+  async function syncAllCareers() {
+    setPipeBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/admin/hiring/sync-enquiries', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Sync failed');
+      setMessage(data.message || 'Pipeline sync complete');
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Sync failed');
+    } finally {
+      setPipeBusy(false);
+    }
+  }
+
+  async function addToPipeline(enquiryId: number, jobId?: number) {
+    setPipeBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetch('/api/admin/hiring/from-enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enquiryId, jobId: jobId || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not add to pipeline');
+      setMessage(jobId ? 'Assigned to role in Hiring pipeline' : 'Added to Hiring pipeline');
+      setAssignJobId('');
+      await load();
+      if (data.hiringUrl) {
+        /* keep modal open with refreshed pipeline link */
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Pipeline update failed');
+    } finally {
+      setPipeBusy(false);
+    }
+  }
+
   return (
     <div>
       {error ? <div className="admin-error">{error}</div> : null}
@@ -180,10 +261,21 @@ export default function EnquiriesPage() {
           </select>
           <input
             className="admin-input"
-            placeholder="Search payload…"
+            placeholder="Search payload or pipeline…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+          {careersUnmapped > 0 || typeFilter === 'careers' ? (
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary"
+              disabled={pipeBusy}
+              onClick={() => void syncAllCareers()}
+              title="Pull every careers application into Hiring (matched role or General Applications queue)"
+            >
+              Sync to Hiring{careersUnmapped ? ` (${careersUnmapped})` : ''}
+            </button>
+          ) : null}
         </div>
         <button type="button" className="admin-btn admin-btn-primary enq-export-btn" onClick={() => openExport('view')}>
           <span aria-hidden>⇩</span> Export…
@@ -264,6 +356,18 @@ export default function EnquiriesPage() {
                             {String(enq.payload_json.role)}
                           </span>
                         ) : null}
+                        {enq.pipeline ? (
+                          <a
+                            className={`enq-pipe ${pipeClass(enq.pipeline)}`}
+                            href={enq.pipeline.hiringUrl}
+                            title="Open in Hiring pipeline"
+                          >
+                            {enq.pipeline.stageLabel}
+                            <span className="enq-pipe-job">{enq.pipeline.jobTitle}</span>
+                          </a>
+                        ) : (
+                          <span className={`enq-pipe ${pipeClass(null)}`}>Not in pipeline</span>
+                        )}
                       </div>
                     ) : null}
                   </td>
@@ -282,6 +386,7 @@ export default function EnquiriesPage() {
                         setSelected(enq);
                         setNotes(enq.admin_notes || '');
                         setMessage('');
+                        setAssignJobId('');
                       }}
                     >
                       View
@@ -310,9 +415,106 @@ export default function EnquiriesPage() {
             <p style={{ color: 'var(--admin-muted)', marginTop: 0 }}>
               {selected.item_title || selected.item_type || 'General'} · {new Date(selected.created_at).toLocaleString()}
             </p>
+
+            {enquiryKind(selected) === 'careers' ? (
+              <div className="enq-pipe-panel">
+                <h3>Hiring pipeline</h3>
+                {selected.pipeline ? (
+                  <>
+                    <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                      <strong>{selected.pipeline.stageLabel}</strong>
+                      {selected.pipeline.holding ? ' · holding queue' : ''} · {selected.pipeline.jobTitle}
+                    </p>
+                    <div className="enq-pipe-actions">
+                      <a className="admin-btn admin-btn-primary az-admin-mini" href={selected.pipeline.hiringUrl}>
+                        Open in Hiring →
+                      </a>
+                      {selected.pipeline.holding || selected.pipeline.jobTitle === 'General Applications' ? (
+                        <>
+                          <select
+                            className="admin-select"
+                            value={assignJobId}
+                            onChange={(e) => setAssignJobId(e.target.value)}
+                            aria-label="Assign to role"
+                          >
+                            <option value="">Assign to a live role…</option>
+                            {jobs
+                              .filter((j) => j.slug !== 'general-applications')
+                              .map((j) => (
+                                <option key={j.id} value={j.id}>
+                                  {j.title} ({j.status})
+                                </option>
+                              ))}
+                          </select>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-secondary az-admin-mini"
+                            disabled={pipeBusy || !assignJobId}
+                            onClick={() => void addToPipeline(selected.id, Number(assignJobId))}
+                          >
+                            Reassign
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                      Not in Hiring yet. Sync will match an open role, or place them in the General Applications queue.
+                    </p>
+                    <div className="enq-pipe-actions">
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-primary az-admin-mini"
+                        disabled={pipeBusy}
+                        onClick={() => void addToPipeline(selected.id)}
+                      >
+                        Add to pipeline
+                      </button>
+                      <select
+                        className="admin-select"
+                        value={assignJobId}
+                        onChange={(e) => setAssignJobId(e.target.value)}
+                        aria-label="Force assign role"
+                      >
+                        <option value="">Or pick a role…</option>
+                        {jobs
+                          .filter((j) => j.slug !== 'general-applications')
+                          .map((j) => (
+                            <option key={j.id} value={j.id}>
+                              {j.title} ({j.status})
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary az-admin-mini"
+                        disabled={pipeBusy || !assignJobId}
+                        onClick={() => void addToPipeline(selected.id, Number(assignJobId))}
+                      >
+                        Assign role
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : null}
+
             <div className="admin-form-grid" style={{ marginBottom: '1rem' }}>
               {Object.entries(selected.payload_json || {}).map(([key, value]) => {
-                if (key === 'resume_file' || key === 'resume_mime' || key === 'resume_url') return null;
+                if (
+                  key === 'resume_file' ||
+                  key === 'resume_mime' ||
+                  key === 'resume_url' ||
+                  key === 'hiring_url' ||
+                  key === 'pipeline_matched' ||
+                  key === 'pipeline_duplicate' ||
+                  key === 'pipeline_holding' ||
+                  key === 'candidate_id'
+                ) {
+                  return null;
+                }
                 if (key === 'resume_name') {
                   if (!(selected.payload_json.resume_file || selected.payload_json.resume_url)) return null;
                   return (

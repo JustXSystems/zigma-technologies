@@ -31,7 +31,10 @@ import { deliver, effectiveProvider, verifySentFrom, type FromCheck, type Outgoi
 import { parseJsonField } from '@/lib/types';
 import { readResumeFile } from '@/lib/resumes';
 
-type AttachmentRef = { kind: 'resume'; stored: string; name: string; mime: string } | { kind: 'static'; id: string; name: string; mime: string };
+type AttachmentRef =
+  | { kind: 'resume'; stored: string; name: string; mime: string }
+  | { kind: 'static'; id: string; name: string; mime: string }
+  | { kind: 'bytes'; name: string; mime: string; content: Buffer };
 
 /** What the log keeps so a failed send can be retried without re-rendering. */
 type LoggedMessage = Omit<OutgoingMail, 'attachments'> & { attachments: AttachmentRef[] };
@@ -112,8 +115,10 @@ async function loadAttachments(refs: AttachmentRef[]): Promise<{ files: Outgoing
   const files: OutgoingAttachment[] = [];
   const missing: string[] = [];
   for (const ref of refs) {
-    const content =
-      ref.kind === 'resume' ? (await readResumeFile(ref.stored))?.buffer ?? null : await readMailAttachment(ref.id);
+    let content: Buffer | null = null;
+    if (ref.kind === 'bytes') content = ref.content;
+    else if (ref.kind === 'resume') content = (await readResumeFile(ref.stored))?.buffer ?? null;
+    else content = await readMailAttachment(ref.id);
     if (content) files.push({ name: ref.name, contentType: ref.mime || 'application/octet-stream', content });
     else missing.push(ref.name);
   }
@@ -214,7 +219,7 @@ export async function notifySubmission(input: {
       payload: input.payload,
       site: siteVars(ctx.site, ctx.config),
     });
-    for (const e of MAIL_EVENTS.filter((ev) => ev.kind === input.kind)) {
+    for (const e of MAIL_EVENTS.filter((ev) => ev.kind === input.kind && !ev.manualOnly)) {
       try {
         await dispatchEvent(ctx, e.key, vars, input.id, input.resume);
       } catch (err) {
@@ -297,6 +302,117 @@ export async function sendTestEmail(to: string, event?: MailEventKey, submission
       ? await verifySentFrom(ctx.config, ctx.secrets, message.subject, message.from)
       : undefined;
   return { ok: true, fromCheck, from: message.from || '', note };
+}
+
+/**
+ * Applicant email when HR moves a pipeline stage. Best-effort; never throws.
+ * Optional .ics attached when stage is interview and interviewAt is set.
+ */
+export async function notifyCandidateStageChange(input: {
+  candidateId: number;
+  name: string;
+  email?: string | null;
+  jobTitle: string;
+  stage: string;
+  fromStage: string;
+  interviewAt?: string | null;
+  interviewer?: string | null;
+  enquiryId?: number | null;
+  stageLabel: string;
+  fromStageLabel: string;
+}) {
+  try {
+    const email = (input.email || '').trim();
+    if (!email) return;
+    const ctx = await loadContext();
+    if (ctx.provider === 'off') return;
+    const interviewFriendly = input.interviewAt
+      ? new Date(input.interviewAt).toLocaleString('en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+          timeZone: 'Asia/Kolkata',
+        })
+      : '';
+    const vars = buildMailVars({
+      kind: 'careers',
+      id: input.enquiryId || input.candidateId,
+      itemType: 'careers',
+      itemTitle: input.jobTitle,
+      payload: {
+        name: input.name,
+        email,
+        role: input.jobTitle,
+        job_title: input.jobTitle,
+        source: 'careers_stage',
+        stage: input.stage,
+        stage_label: input.stageLabel,
+        stage_from: input.fromStage,
+        stage_from_label: input.fromStageLabel,
+        interview_at: interviewFriendly,
+        interviewer: input.interviewer || '',
+        hiring_url: `/admin/hiring?tab=pipeline`,
+      },
+      site: siteVars(ctx.site, ctx.config),
+    });
+    const event: MailEventKey = 'careers_stage';
+    const tpl = ctx.config.templates[event];
+    if (!tpl.enabled) return;
+    const mail = composeMail({
+      config: ctx.config,
+      tpl,
+      base: vars,
+      companyName: ctx.site.companyName,
+      siteUrl: siteUrl(),
+      accent: ctx.accent,
+    });
+    if (!mail.send) return;
+
+    const attachments: AttachmentRef[] = [...attachmentRefs(ctx, event)];
+    if (input.stage === 'interview' && input.interviewAt) {
+      const { buildInterviewIcs } = await import('@/lib/career-ics');
+      const ics = buildInterviewIcs({
+        title: input.jobTitle,
+        candidateName: input.name,
+        interviewAt: input.interviewAt,
+        interviewer: input.interviewer,
+      });
+      if (ics) attachments.push({ kind: 'bytes', name: ics.filename, mime: ics.mime, content: ics.content });
+    }
+
+    const logged: LoggedMessage = {
+      from: mail.from,
+      fromName: mail.fromName,
+      to: mail.to,
+      cc: mail.cc,
+      bcc: mail.bcc,
+      replyTo: mail.replyTo,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
+      // Persist only durable refs — inline .ics is send-once
+      attachments: attachments.filter((a) => a.kind !== 'bytes'),
+    };
+    const { files, missing } = await loadAttachments(attachments);
+    const result = await deliver(ctx.provider, ctx.config, ctx.secrets, { ...logged, attachments: files });
+    const error = result.ok
+      ? missing.length
+        ? `Sent without missing attachment(s): ${missing.join(', ')}`
+        : null
+      : result.error;
+    await insertMailLog({
+      event,
+      provider: ctx.provider,
+      status: result.ok ? 'sent' : 'failed',
+      to: logged.to,
+      cc: logged.cc,
+      subject: logged.subject,
+      error,
+      refId: input.enquiryId || input.candidateId,
+      message: logged,
+    }).catch((err) => console.error('[mail-log]', err));
+  } catch (err) {
+    console.error(`[mail] careers_stage for candidate #${input.candidateId} failed`, err);
+  }
 }
 
 /** Re-send a logged message exactly as rendered originally. */

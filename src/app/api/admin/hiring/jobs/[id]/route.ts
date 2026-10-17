@@ -27,6 +27,7 @@ const writeSchema = z.object({
   vacancies: z.number().int().min(1).max(99).optional(),
   sortOrder: z.number().int().optional(),
   durationDays: z.number().int().min(1).max(365).optional(),
+  allowDuplicateTitle: z.boolean().optional(),
 });
 
 type Ctx = { params: Promise<{ id: string }> };

@@ -1,15 +1,26 @@
 import { requireSession } from '@/lib/auth';
 import { jsonError, jsonOk } from '@/lib/api';
 import { listEnquiries } from '@/lib/catalog';
+import { autoSyncCareersEnquiries, enrichEnquiriesWithPipeline } from '@/lib/career-enquiry-bridge';
 import type { Enquiry } from '@/lib/types';
 
 export async function GET(request: Request) {
   try {
-    await requireSession();
+    const session = await requireSession();
     const status = (new URL(request.url).searchParams.get('status') || 'all') as
       | Enquiry['status']
       | 'all';
     const format = new URL(request.url).searchParams.get('format');
+    const sync = new URL(request.url).searchParams.get('sync') !== '0';
+
+    let syncMessage: string | undefined;
+    if (sync && format !== 'csv') {
+      const synced = await autoSyncCareersEnquiries(session.name || session.email || 'system');
+      if (synced?.created || synced?.linked || synced?.duplicates) {
+        syncMessage = synced.message;
+      }
+    }
+
     const enquiries = await listEnquiries(status);
 
     if (format === 'csv') {
@@ -47,7 +58,8 @@ export async function GET(request: Request) {
       });
     }
 
-    return jsonOk({ enquiries });
+    const enriched = await enrichEnquiriesWithPipeline(enquiries);
+    return jsonOk({ enquiries: enriched, pipelineSync: syncMessage });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
       return jsonError('Unauthorized', 401);

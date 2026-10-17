@@ -6,7 +6,7 @@ import { sendLeadToCrm } from '@/lib/crm';
 import { guardPublicForm } from '@/lib/form-guard';
 import { notifySubmission } from '@/lib/mail';
 import { saveResumeFile } from '@/lib/resumes';
-import { ingestWebsiteApplication } from '@/lib/career-hiring';
+import { ingestEnquiryIntoPipeline } from '@/lib/career-enquiry-bridge';
 
 const ALLOWED_RESUME = new Set([
   'application/pdf',
@@ -89,32 +89,20 @@ export async function POST(request: Request) {
     after(async () => {
       let notifyPayload = { ...payload };
       try {
-        const ingest = await ingestWebsiteApplication({
-          enquiryId: id,
-          role,
-          name,
-          email,
-          phone,
-          experience: experience || undefined,
-          resumeFile: storedName,
-          resumeName: resume.name,
-          message: message || undefined,
-          jobId,
-          publicId: jobPublicId || undefined,
-          slug: jobSlug || undefined,
-        });
-        if (ingest.job) {
+        const ingest = await ingestEnquiryIntoPipeline(id, 'website');
+        if (ingest.job && ingest.candidateId) {
           notifyPayload = {
             ...notifyPayload,
-            job_title: ingest.job.title,
+            job_title: ingest.holding ? role : ingest.job.title,
             job_id: ingest.job.id,
             job_public_id: ingest.job.publicId,
             job_slug: ingest.job.slug,
-            pipeline_matched: 'yes',
+            pipeline_matched: ingest.holding ? 'holding' : 'yes',
             candidate_id: ingest.candidateId,
-            hiring_url: `/admin/hiring?tab=pipeline&job=${ingest.job.id}`,
+            hiring_url: `/admin/hiring?tab=pipeline&job=${ingest.job.id}&candidate=${ingest.candidateId}`,
           };
           if (ingest.duplicate) notifyPayload.pipeline_duplicate = 'yes';
+          if (ingest.holding) notifyPayload.pipeline_holding = 'yes';
         } else {
           notifyPayload = {
             ...notifyPayload,

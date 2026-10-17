@@ -15,6 +15,13 @@ import {
 } from '@/lib/career-hiring-types';
 import JobTextAutofill from '@/components/admin/hiring/JobTextAutofill';
 import type { JobAutofillDraft } from '@/lib/careers-job-text';
+import {
+  buildCareersApplyUrl,
+  buildWhatsAppShareUrl,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+  validateJobForPublish,
+} from '@/lib/career-job-publish';
 
 type Stats = { open: number; draft: number; paused: number; archive: number; pipeline: number; hired: number };
 type Tab = 'openings' | 'pipeline' | 'archive';
@@ -90,18 +97,33 @@ function draftFromJob(job: CareerJob): JobAutofillDraft & { durationDays: number
 
 const STAGE_FLOW: CandidateStage[] = ['applied', 'screening', 'interview', 'offer', 'hired'];
 
-export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initialJobId?: string }) {
+export default function HiringWorkspace({
+  tab,
+  initialJobId,
+  initialCandidateId,
+}: {
+  tab: Tab;
+  initialJobId?: string;
+  initialCandidateId?: string;
+}) {
   const [jobs, setJobs] = useState<CareerJob[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [candidates, setCandidates] = useState<CareerCandidate[]>([]);
   const [events, setEvents] = useState<CareerEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
+  const [candQ, setCandQ] = useState('');
+  const [candStage, setCandStage] = useState<CandidateStage | ''>('');
   const [selectedId, setSelectedId] = useState<number | null>(initialJobId ? Number(initialJobId) || null : null);
-  const [candId, setCandId] = useState<number | null>(null);
+  const [candId, setCandId] = useState<number | null>(
+    initialCandidateId ? Number(initialCandidateId) || null : null
+  );
+  const [unmappedCount, setUnmappedCount] = useState(0);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const [editingNew, setEditingNew] = useState(!initialJobId);
+  const [allowDupTitle, setAllowDupTitle] = useState(false);
+  const [interviewLocal, setInterviewLocal] = useState('');
 
   const [draft, setDraft] = useState(blankDraft);
 
@@ -119,13 +141,19 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     return data.jobs as CareerJob[];
   }, [tab, q]);
 
-  const loadPipeline = useCallback(async (jobId?: number | null) => {
-    const url = jobId ? `/api/admin/hiring/candidates?jobId=${jobId}` : '/api/admin/hiring/candidates';
-    const res = await fetch(url);
+  const loadPipeline = useCallback(async (jobId?: number | null, search?: string, stage?: CandidateStage | '') => {
+    const params = new URLSearchParams();
+    if (jobId) params.set('jobId', String(jobId));
+    const sq = (search ?? candQ).trim();
+    if (sq) params.set('q', sq);
+    const st = stage ?? candStage;
+    if (st) params.set('stage', st);
+    const qs = params.toString();
+    const res = await fetch(`/api/admin/hiring/candidates${qs ? `?${qs}` : ''}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Load failed');
     setCandidates(data.candidates || []);
-  }, []);
+  }, [candQ, candStage]);
 
   const loadJobDetail = useCallback(async (id: number) => {
     const res = await fetch(`/api/admin/hiring/jobs/${id}`);
@@ -157,8 +185,21 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
 
   useEffect(() => {
     let current = true;
-    fetch(`/api/admin/hiring/jobs?status=${tab === 'archive' ? 'archive' : tab === 'openings' ? 'active' : 'all'}`)
-      .then(async (res) => {
+    (async () => {
+      try {
+        if (tab === 'pipeline') {
+          const syncRes = await fetch('/api/admin/hiring/sync-enquiries?mode=auto', { method: 'POST' });
+          const syncData = await syncRes.json().catch(() => ({}));
+          if (current && syncRes.ok && syncData.message && (syncData.created || syncData.linked || syncData.duplicates)) {
+            setMsg(syncData.message);
+          }
+          const countRes = await fetch('/api/admin/hiring/sync-enquiries');
+          const countData = await countRes.json().catch(() => ({}));
+          if (current && countRes.ok) setUnmappedCount(Number(countData.unmapped) || 0);
+        }
+        const res = await fetch(
+          `/api/admin/hiring/jobs?status=${tab === 'archive' ? 'archive' : tab === 'openings' ? 'active' : 'all'}`
+        );
         const data = await res.json();
         if (!current) return;
         if (!res.ok) throw new Error(data.error || 'Load failed');
@@ -166,22 +207,40 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
         setStats(data.stats || null);
         setLoading(false);
         if (tab === 'pipeline') {
-          const jobQ = selectedId ? `?jobId=${selectedId}` : '';
-          const cres = await fetch(`/api/admin/hiring/candidates${jobQ}`);
-          const cdata = await cres.json();
-          if (!current || !cres.ok) return;
-          setCandidates(cdata.candidates || []);
+          await loadPipeline(selectedId);
+          if (initialCandidateId) {
+            const cid = Number(initialCandidateId);
+            if (cid) setCandId(cid);
+          }
         }
-      })
-      .catch((e: Error) => {
+      } catch (e) {
         if (!current) return;
-        setMsg(e.message || 'Load failed');
+        setMsg(e instanceof Error ? e.message : 'Load failed');
         setLoading(false);
-      });
+      }
+    })();
     return () => {
       current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional tab mount reload
   }, [tab]);
+
+  async function syncFromEnquiries() {
+    setBusy(true);
+    setMsg('');
+    try {
+      const res = await fetch('/api/admin/hiring/sync-enquiries', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Sync failed');
+      setMsg(data.message || 'Synced');
+      setUnmappedCount(0);
+      await refresh();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Sync failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!selectedId || tab === 'pipeline') return;
@@ -206,7 +265,12 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     if (tab !== 'openings') return;
     if (editingNew || !selected) return;
     setDraft(draftFromJob(selected));
+    setAllowDupTitle(false);
   }, [selected, editingNew, tab]);
+
+  useEffect(() => {
+    setInterviewLocal(toDatetimeLocalValue(selectedCand?.interviewAt));
+  }, [selectedCand?.id, selectedCand?.interviewAt]);
 
   function startNewJob() {
     setSelectedId(null);
@@ -248,10 +312,51 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     };
   }
 
+  function publishGateErrors(): string[] {
+    return validateJobForPublish({
+      title: draft.title,
+      location: draft.location,
+      summary: draft.summary,
+      responsibilitiesText: draft.responsibilities,
+      requirementsText: draft.requirements,
+    });
+  }
+
+  function handleJobError(raw: string) {
+    if (raw.startsWith('DUPLICATE_TITLE:')) {
+      setAllowDupTitle(true);
+      setMsg(raw.replace(/^DUPLICATE_TITLE:\s*/, '') + ' Click publish again to confirm.');
+      return;
+    }
+    setMsg(raw);
+  }
+
+  async function copyApplyLink(job: CareerJob) {
+    const url = buildCareersApplyUrl({ publicId: job.publicId, slug: job.slug });
+    try {
+      await navigator.clipboard.writeText(url);
+      setMsg('Apply link copied');
+    } catch {
+      setMsg(url);
+    }
+  }
+
+  function shareWhatsApp(job: CareerJob) {
+    const applyUrl = buildCareersApplyUrl({ publicId: job.publicId, slug: job.slug });
+    window.open(buildWhatsAppShareUrl({ title: job.title, location: job.location, applyUrl }), '_blank', 'noopener,noreferrer');
+  }
+
   async function createJob(publish: boolean) {
     if (!draft.title.trim()) {
       setMsg('Job title is required');
       return;
+    }
+    if (publish) {
+      const gates = publishGateErrors();
+      if (gates.length) {
+        setMsg(gates.join(' · '));
+        return;
+      }
     }
     setBusy(true);
     setMsg('');
@@ -272,6 +377,7 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
           durationDays: draft.durationDays,
           status: publish ? 'open' : 'draft',
           content: buildContent(),
+          allowDuplicateTitle: publish ? allowDupTitle : undefined,
         }),
       });
       const data = await res.json();
@@ -279,10 +385,11 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
       setMsg(publish ? 'Published on /careers — applicants will land in Pipeline.' : 'Draft saved');
       setDraft(blankDraft());
       setEditingNew(false);
+      setAllowDupTitle(false);
       await refresh();
       if (data.id) setSelectedId(data.id);
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : 'Create failed');
+      handleJobError(e instanceof Error ? e.message : 'Create failed');
     } finally {
       setBusy(false);
     }
@@ -293,6 +400,13 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     if (!draft.title.trim()) {
       setMsg('Job title is required');
       return;
+    }
+    if (publish) {
+      const gates = publishGateErrors();
+      if (gates.length) {
+        setMsg(gates.join(' · '));
+        return;
+      }
     }
     setBusy(true);
     setMsg('');
@@ -310,7 +424,10 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
         durationDays: draft.durationDays,
         content: buildContent(),
       };
-      if (publish) body.status = 'open';
+      if (publish) {
+        body.status = 'open';
+        body.allowDuplicateTitle = allowDupTitle;
+      }
       const res = await fetch(`/api/admin/hiring/jobs/${selectedId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -319,9 +436,10 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
       setMsg(publish ? 'Saved and live on /careers' : 'Job updated');
+      setAllowDupTitle(false);
       await refresh();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : 'Save failed');
+      handleJobError(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setBusy(false);
     }
@@ -329,6 +447,7 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
 
   async function patchJob(id: number, body: Record<string, unknown>) {
     setBusy(true);
+    setMsg('');
     try {
       const res = await fetch(`/api/admin/hiring/jobs/${id}`, {
         method: 'PATCH',
@@ -338,9 +457,10 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
       setMsg('Saved');
+      setAllowDupTitle(false);
       await refresh();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : 'Update failed');
+      handleJobError(e instanceof Error ? e.message : 'Update failed');
     } finally {
       setBusy(false);
     }
@@ -395,14 +515,23 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     setBusy(true);
     setMsg('');
     try {
+      const body: Record<string, unknown> = { stage };
+      if (stage === 'interview') {
+        const iso = fromDatetimeLocalValue(interviewLocal);
+        if (iso) body.interviewAt = iso;
+      }
       const res = await fetch(`/api/admin/hiring/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Update failed');
-      setMsg(`Moved to ${STAGE_LABELS[stage]}`);
+      setMsg(
+        stage === 'interview' && !fromDatetimeLocalValue(interviewLocal)
+          ? `Moved to Interview — set a date below so the candidate email can include it.`
+          : `Moved to ${STAGE_LABELS[stage]}`
+      );
       setCandId(id);
       await loadPipeline(selectedId);
       if (tab !== 'pipeline' && selectedId) await loadJobDetail(selectedId);
@@ -411,6 +540,43 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
     } finally {
       setBusy(false);
     }
+  }
+
+  async function saveInterviewSchedule() {
+    if (!candId) return;
+    const iso = fromDatetimeLocalValue(interviewLocal);
+    if (!iso) {
+      setMsg('Pick an interview date and time');
+      return;
+    }
+    setBusy(true);
+    setMsg('');
+    try {
+      const body: Record<string, unknown> = { interviewAt: iso };
+      if (selectedCand && selectedCand.stage !== 'interview') body.stage = 'interview';
+      const res = await fetch(`/api/admin/hiring/candidates/${candId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Schedule failed');
+      setMsg('Interview scheduled — applicant notified if email is on');
+      await loadPipeline(selectedId);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Schedule failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function exportCsv() {
+    const params = new URLSearchParams();
+    if (selectedId) params.set('jobId', String(selectedId));
+    if (candQ.trim()) params.set('q', candQ.trim());
+    if (candStage) params.set('stage', candStage);
+    const qs = params.toString();
+    window.location.href = `/api/admin/hiring/candidates/export${qs ? `?${qs}` : ''}`;
   }
 
   async function saveNote() {
@@ -464,7 +630,17 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
       </div>
 
       <div className="hr-toolbar">
-        <input className="admin-input" placeholder="Search roles…" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void refresh()} />
+        {tab !== 'pipeline' ? (
+          <input className="admin-input" placeholder="Search roles…" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void refresh()} />
+        ) : (
+          <input
+            className="admin-input"
+            placeholder="Search candidates (name, email, phone)…"
+            value={candQ}
+            onChange={(e) => setCandQ(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void loadPipeline(selectedId)}
+          />
+        )}
         <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void refresh()} disabled={loading}>
           Refresh
         </button>
@@ -474,24 +650,57 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
           </button>
         ) : null}
         {tab === 'pipeline' ? (
-          <select
-            className="admin-select"
-            value={selectedId || ''}
-            onChange={(e) => {
-              const id = e.target.value ? Number(e.target.value) : null;
-              setSelectedId(id);
-              void loadPipeline(id);
-            }}
-          >
-            <option value="">All open roles</option>
-            {jobs
-              .filter((j) => j.status === 'open' || j.status === 'paused')
-              .map((j) => (
-                <option key={j.id} value={j.id}>
-                  {j.title}
+          <>
+            <select
+              className="admin-select"
+              value={selectedId || ''}
+              onChange={(e) => {
+                const id = e.target.value ? Number(e.target.value) : null;
+                setSelectedId(id);
+                void loadPipeline(id);
+              }}
+            >
+              <option value="">All open roles</option>
+              {jobs
+                .filter((j) => j.status === 'open' || j.status === 'paused')
+                .map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.title}
+                  </option>
+                ))}
+            </select>
+            <select
+              className="admin-select"
+              value={candStage}
+              onChange={(e) => {
+                const st = e.target.value as CandidateStage | '';
+                setCandStage(st);
+                void loadPipeline(selectedId, candQ, st);
+              }}
+            >
+              <option value="">All stages</option>
+              {PIPELINE_COLS.map((s) => (
+                <option key={s} value={s}>
+                  {STAGE_LABELS[s]}
                 </option>
               ))}
-          </select>
+            </select>
+            <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void loadPipeline(selectedId)} disabled={loading}>
+              Find
+            </button>
+            <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={exportCsv} title="Download CSV of the current filter">
+              Export CSV
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn-secondary az-admin-mini"
+              disabled={busy}
+              onClick={() => void syncFromEnquiries()}
+              title="Pull careers applications from Enquiries into this pipeline"
+            >
+              Sync Enquiries{unmappedCount ? ` (${unmappedCount})` : ''}
+            </button>
+          </>
         ) : null}
         <span className="hr-toolbar-spacer" />
         {msg ? <span className="az-admin-hint" style={{ margin: 0 }}>{msg}</span> : null}
@@ -537,8 +746,18 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                         </div>
                       </div>
                       <div className="hr-job-actions" onClick={(e) => e.stopPropagation()}>
+                        {j.status === 'open' || j.status === 'paused' ? (
+                          <>
+                            <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void copyApplyLink(j)}>
+                              Copy link
+                            </button>
+                            <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => shareWhatsApp(j)}>
+                              WhatsApp
+                            </button>
+                          </>
+                        ) : null}
                         {j.status === 'draft' ? (
-                          <button type="button" className="admin-btn admin-btn-primary az-admin-mini" disabled={busy} onClick={() => void patchJob(j.id, { status: 'open', durationDays: 30 })}>
+                          <button type="button" className="admin-btn admin-btn-primary az-admin-mini" disabled={busy} onClick={() => void patchJob(j.id, { status: 'open', durationDays: 30, allowDuplicateTitle: allowDupTitle })}>
                             Publish
                           </button>
                         ) : null}
@@ -640,6 +859,16 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                 <StatusPill status={selected.status} />
                 <span className="hr-pill">{selected.candidateCount ?? 0} applicants</span>
                 {selected.closesAt ? <span className="hr-pill">Ends {fmtDate(selected.closesAt)}</span> : null}
+                {selected.status === 'open' || selected.status === 'paused' ? (
+                  <>
+                    <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => void copyApplyLink(selected)}>
+                      Copy apply link
+                    </button>
+                    <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={() => shareWhatsApp(selected)}>
+                      WhatsApp
+                    </button>
+                  </>
+                ) : null}
               </div>
             ) : null}
             <JobTextAutofill
@@ -719,11 +948,16 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                 <textarea className="admin-textarea" rows={2} value={draft.facts} onChange={(e) => setDraft((d) => ({ ...d, facts: e.target.value }))} />
               </label>
             </div>
+            {allowDupTitle ? (
+              <p className="az-admin-hint" style={{ marginTop: '0.75rem', color: 'var(--orange, #FF6B1A)' }}>
+                Duplicate title acknowledged — next Publish / Go live will create another open role with this title.
+              </p>
+            ) : null}
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
               {editingNew || !selected ? (
                 <>
                   <button type="button" className="admin-btn admin-btn-primary" disabled={busy} onClick={() => void createJob(true)}>
-                    Publish live
+                    {allowDupTitle ? 'Publish anyway' : 'Publish live'}
                   </button>
                   <button type="button" className="admin-btn admin-btn-secondary" disabled={busy} onClick={() => void createJob(false)}>
                     Save draft
@@ -736,7 +970,7 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                   </button>
                   {selected.status !== 'open' ? (
                     <button type="button" className="admin-btn admin-btn-secondary" disabled={busy} onClick={() => void saveSelected(true)}>
-                      Go live
+                      {allowDupTitle ? 'Go live anyway' : 'Go live'}
                     </button>
                   ) : null}
                   <a className="admin-btn admin-btn-secondary az-admin-mini" href={`/admin/hiring?tab=pipeline&job=${selected.id}`}>
@@ -764,7 +998,10 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                     <div key={c.id} className={`hr-card${candId === c.id ? ' is-on' : ''}`} onClick={() => setCandId(c.id)}>
                       <p className="hr-card-name">{c.name}</p>
                       <p className="hr-card-sub">{c.jobTitle || '—'}</p>
-                      <p className="hr-card-sub">{c.email || c.phone || c.source}</p>
+                      <p className="hr-card-sub">
+                        {c.email || c.phone || c.source}
+                        {c.enquiryId ? ` · #${c.enquiryId}` : ''}
+                      </p>
                     </div>
                   ))}
                   {!col.length ? <p className="hr-empty" style={{ padding: '0.75rem' }}>Empty</p> : null}
@@ -863,6 +1100,24 @@ export default function HiringWorkspace({ tab, initialJobId }: { tab: Tab; initi
                     }}
                   />
                 </label>
+                <label className="admin-field">
+                  <span>Interview date &amp; time</span>
+                  <input
+                    className="admin-input"
+                    type="datetime-local"
+                    value={interviewLocal}
+                    onChange={(e) => setInterviewLocal(e.target.value)}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary az-admin-mini"
+                  style={{ marginBottom: '0.85rem' }}
+                  disabled={busy || !interviewLocal}
+                  onClick={() => void saveInterviewSchedule()}
+                >
+                  Save schedule{selectedCand.stage !== 'interview' ? ' & move to Interview' : ''}
+                </button>
                 <label className="admin-field">
                   <span>Add note</span>
                   <textarea className="admin-textarea" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Interview feedback, next steps…" />

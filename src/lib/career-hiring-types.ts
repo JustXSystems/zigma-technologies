@@ -156,6 +156,8 @@ export type JobWriteInput = {
   sortOrder?: number;
   /** When publishing without closesAt: days from now (default 30). */
   durationDays?: number;
+  /** Skip soft block when another open role already uses the same title. */
+  allowDuplicateTitle?: boolean;
 };
 
 export type CloseJobInput = {

@@ -20,6 +20,7 @@ import {
   type JobStatus,
   type JobWriteInput,
 } from '@/lib/career-hiring-types';
+import { normalizeJobTitleKey, validateJobForPublish } from '@/lib/career-job-publish';
 
 export type {
   CandidateSource,
@@ -342,12 +343,54 @@ export async function getCareerJobBySlug(slug: string): Promise<CareerJob | null
   return rows[0] ? mapJob(rows[0]) : null;
 }
 
+export async function findOpenJobsByTitle(title: string, excludeId?: number): Promise<CareerJob[]> {
+  const key = normalizeJobTitleKey(title);
+  if (!key) return [];
+  const open = await listCareerJobs({ status: 'open' });
+  return open.filter((j) => j.id !== excludeId && normalizeJobTitleKey(j.title) === key);
+}
+
+function assertPublishReady(input: {
+  title: string;
+  location?: string | null;
+  summary?: string | null;
+  content?: CareerJobContent | null;
+}) {
+  const errors = validateJobForPublish({
+    title: input.title,
+    location: input.location,
+    summary: input.summary,
+    content: input.content || undefined,
+  });
+  if (errors.length) throw new Error(errors.join(' · '));
+}
+
 export async function createCareerJob(input: JobWriteInput, actor: string): Promise<number> {
   await ensureCareerHiringTables();
   const title = t(input.title);
   if (!title) throw new Error('Job title is required');
   const slug = await uniqueSlug(input.slug || title);
   const status: JobStatus = input.status && JOB_STATUSES.includes(input.status) ? input.status : 'draft';
+  const content: CareerJobContent = {
+    ...(input.content || {}),
+    role: t(input.content?.role) || title,
+  };
+  if (status === 'open') {
+    assertPublishReady({
+      title,
+      location: input.location,
+      summary: input.summary,
+      content,
+    });
+    if (!input.allowDuplicateTitle) {
+      const dupes = await findOpenJobsByTitle(title);
+      if (dupes.length) {
+        throw new Error(
+          `DUPLICATE_TITLE: An open role already uses “${dupes[0].title}”. Publish anyway to confirm, or rename this posting.`
+        );
+      }
+    }
+  }
   let closesAt = mysqlDt(input.closesAt ?? null);
   let opensAt = mysqlDt(input.opensAt ?? null);
   let publishedAt: string | null = null;
@@ -361,10 +404,6 @@ export async function createCareerJob(input: JobWriteInput, actor: string): Prom
       closesAt = mysqlDt(end.toISOString());
     }
   }
-  const content: CareerJobContent = {
-    ...(input.content || {}),
-    role: t(input.content?.role) || title,
-  };
   const [res] = await pool.query<ResultSetHeader>(
     `INSERT INTO career_jobs (
        public_id, slug, title, department, location, job_type, experience, education, badge, summary,
@@ -424,6 +463,26 @@ export async function updateCareerJob(id: number, input: Partial<JobWriteInput>,
   let closesAt = input.closesAt !== undefined ? mysqlDt(input.closesAt) : mysqlDt(current.closesAt);
   let publishedAt = mysqlDt(current.publishedAt);
 
+  const content: CareerJobContent =
+    input.content !== undefined
+      ? { ...(input.content || {}), role: t(input.content?.role) || title }
+      : { ...current.content, role: t(current.content.role) || title };
+
+  const location = t(input.location ?? current.location) || null;
+  const summary = t(input.summary ?? current.summary) || null;
+
+  if (status === 'open') {
+    assertPublishReady({ title, location, summary, content });
+    if (!input.allowDuplicateTitle && (status !== current.status || title !== current.title)) {
+      const dupes = await findOpenJobsByTitle(title, id);
+      if (dupes.length) {
+        throw new Error(
+          `DUPLICATE_TITLE: An open role already uses “${dupes[0].title}”. Publish anyway to confirm, or rename this posting.`
+        );
+      }
+    }
+  }
+
   if (status === 'open' && current.status !== 'open') {
     opensAt = opensAt || mysqlDt(new Date().toISOString());
     publishedAt = publishedAt || opensAt;
@@ -435,11 +494,6 @@ export async function updateCareerJob(id: number, input: Partial<JobWriteInput>,
     }
   }
 
-  const content: CareerJobContent =
-    input.content !== undefined
-      ? { ...(input.content || {}), role: t(input.content?.role) || title }
-      : { ...current.content, role: t(current.content.role) || title };
-
   await pool.query(
     `UPDATE career_jobs SET
        slug = ?, title = ?, department = ?, location = ?, job_type = ?, experience = ?, education = ?,
@@ -450,12 +504,12 @@ export async function updateCareerJob(id: number, input: Partial<JobWriteInput>,
       slug,
       title,
       t(input.department ?? current.department) || null,
-      t(input.location ?? current.location) || null,
+      location,
       t(input.jobType ?? current.jobType) || null,
       t(input.experience ?? current.experience) || null,
       t(input.education ?? current.education) || null,
       t(input.badge ?? current.badge) || null,
-      t(input.summary ?? current.summary) || null,
+      summary,
       JSON.stringify(content),
       status,
       opensAt,
@@ -665,14 +719,14 @@ export async function updateCandidate(
 
   const stage =
     input.stage && CANDIDATE_STAGES.includes(input.stage) ? input.stage : current.stage;
-  let interviewAt = input.interviewAt !== undefined ? mysqlDt(input.interviewAt) : mysqlDt(current.interviewAt);
+  const interviewAtIso =
+    input.interviewAt !== undefined ? input.interviewAt : current.interviewAt;
+  let interviewAt = mysqlDt(interviewAtIso);
   let offerAt = input.offerAt !== undefined ? mysqlDt(input.offerAt) : mysqlDt(current.offerAt);
   let joinedAt = input.joinedAt !== undefined ? mysqlDt(input.joinedAt) : mysqlDt(current.joinedAt);
   let rejectedAt = input.rejectedAt !== undefined ? mysqlDt(input.rejectedAt) : mysqlDt(current.rejectedAt);
 
-  if (stage === 'interview' && !interviewAt && current.stage !== 'interview') {
-    interviewAt = mysqlDt(new Date().toISOString());
-  }
+  // Do not auto-stamp interview_at to "now" — HR sets a real datetime in the UI.
   if (stage === 'offer' && !offerAt && current.stage !== 'offer') {
     offerAt = mysqlDt(new Date().toISOString());
   }
@@ -715,6 +769,12 @@ export async function updateCandidate(
     ]
   );
 
+  const interviewRescheduled =
+    stage === 'interview' &&
+    stage === current.stage &&
+    input.interviewAt !== undefined &&
+    String(input.interviewAt || '') !== String(current.interviewAt || '');
+
   if (stage !== current.stage) {
     await recordEvent({
       jobId: current.jobId,
@@ -725,6 +785,14 @@ export async function updateCandidate(
       toValue: stage,
       message: `${current.name}: ${STAGE_LABELS[current.stage]} → ${STAGE_LABELS[stage]}.`,
     });
+  } else if (interviewRescheduled) {
+    await recordEvent({
+      jobId: current.jobId,
+      candidateId: id,
+      actor,
+      eventType: 'candidate.interview',
+      message: `Interview scheduled for ${current.name}.`,
+    });
   } else {
     await recordEvent({
       jobId: current.jobId,
@@ -733,6 +801,28 @@ export async function updateCandidate(
       eventType: 'candidate.updated',
       message: `Updated ${current.name}.`,
     });
+  }
+
+  if (stage !== current.stage || interviewRescheduled) {
+    const { notifyCandidateStageChange } = await import('@/lib/mail');
+    void notifyCandidateStageChange({
+      candidateId: id,
+      name: t(input.name ?? current.name),
+      email: t(input.email ?? current.email),
+      jobTitle: current.jobTitle || 'your application',
+      stage,
+      fromStage: current.stage,
+      stageLabel: STAGE_LABELS[stage],
+      fromStageLabel: STAGE_LABELS[current.stage],
+      interviewAt: interviewAtIso,
+      interviewer: t(input.interviewer ?? current.interviewer) || null,
+      enquiryId: current.enquiryId,
+    });
+  }
+
+  if (stage !== current.stage && current.enquiryId) {
+    const { syncEnquiryStatusFromCandidate } = await import('@/lib/career-enquiry-bridge');
+    void syncEnquiryStatusFromCandidate(current.enquiryId, stage);
   }
 }
 

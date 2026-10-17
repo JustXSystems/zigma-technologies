@@ -1186,6 +1186,14 @@ export async function updateEnquiry(
   await pool.query(`UPDATE enquiries SET ${fields.join(', ')} WHERE id = ?`, params);
 }
 
+/** Merge keys into payload_json (e.g. Hiring pipeline refs after careers ingest). */
+export async function mergeEnquiryPayload(id: number, patch: Record<string, unknown>) {
+  const current = await getEnquiry(id);
+  if (!current) return;
+  const next = { ...current.payload_json, ...patch };
+  await pool.query('UPDATE enquiries SET payload_json = ? WHERE id = ?', [JSON.stringify(next), id]);
+}
+
 export async function updateEnquiryStatus(id: number, status: Enquiry['status']) {
   await updateEnquiry(id, { status });
 }
