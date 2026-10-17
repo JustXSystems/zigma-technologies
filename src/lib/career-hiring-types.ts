@@ -21,7 +21,15 @@ export const CANDIDATE_STAGES = [
 ] as const;
 export type CandidateStage = (typeof CANDIDATE_STAGES)[number];
 
-export const CANDIDATE_SOURCES = ['website', 'referral', 'agency', 'walk_in', 'linkedin', 'other'] as const;
+export const CANDIDATE_SOURCES = [
+  'website',
+  'referral',
+  'agency',
+  'email',
+  'walk_in',
+  'linkedin',
+  'other',
+] as const;
 export type CandidateSource = (typeof CANDIDATE_SOURCES)[number];
 
 export const STAGE_LABELS: Record<CandidateStage, string> = {
@@ -33,6 +41,16 @@ export const STAGE_LABELS: Record<CandidateStage, string> = {
   rejected: 'Rejected',
   withdrawn: 'Withdrawn',
   on_hold: 'On hold',
+};
+
+export const SOURCE_LABELS: Record<CandidateSource, string> = {
+  website: 'Website',
+  referral: 'Referral',
+  agency: 'Agency',
+  email: 'Email / WhatsApp',
+  walk_in: 'Walk-in',
+  linkedin: 'LinkedIn',
+  other: 'Other channel',
 };
 
 export const STATUS_LABELS: Record<JobStatus, string> = {

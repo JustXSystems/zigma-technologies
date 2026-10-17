@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  CANDIDATE_SOURCES,
   CLOSE_REASON_LABELS,
+  SOURCE_LABELS,
   STAGE_LABELS,
   STATUS_LABELS,
+  type CandidateSource,
   type CandidateStage,
   type CareerCandidate,
   type CareerEvent,
@@ -13,6 +16,7 @@ import {
   type CloseReason,
   type JobStatus,
 } from '@/lib/career-hiring-types';
+import CandidateTextAutofill from '@/components/admin/hiring/CandidateTextAutofill';
 import JobTextAutofill from '@/components/admin/hiring/JobTextAutofill';
 import type { JobAutofillDraft } from '@/lib/careers-job-text';
 import {
@@ -124,6 +128,18 @@ export default function HiringWorkspace({
   const [editingNew, setEditingNew] = useState(!initialJobId);
   const [allowDupTitle, setAllowDupTitle] = useState(false);
   const [interviewLocal, setInterviewLocal] = useState('');
+  const [addingCandidate, setAddingCandidate] = useState(false);
+  const [manualCand, setManualCand] = useState({
+    jobId: '',
+    name: '',
+    email: '',
+    phone: '',
+    experience: '',
+    source: 'referral' as CandidateSource,
+    stage: 'applied' as CandidateStage,
+    notes: '',
+  });
+  const [manualResume, setManualResume] = useState<File | null>(null);
 
   const [draft, setDraft] = useState(blankDraft);
 
@@ -240,6 +256,71 @@ export default function HiringWorkspace({
     } finally {
       setBusy(false);
     }
+  }
+
+  function openAddCandidate() {
+    setAddingCandidate(true);
+    setCandId(null);
+    setManualCand({
+      jobId: selectedId ? String(selectedId) : '',
+      name: '',
+      email: '',
+      phone: '',
+      experience: '',
+      source: 'referral',
+      stage: 'applied',
+      notes: '',
+    });
+    setManualResume(null);
+    setMsg('');
+  }
+
+  async function submitManualCandidate() {
+    if (!manualCand.jobId) {
+      setMsg('Select the role this candidate is for');
+      return;
+    }
+    if (!manualCand.name.trim()) {
+      setMsg('Candidate name is required');
+      return;
+    }
+    setBusy(true);
+    setMsg('');
+    try {
+      const form = new FormData();
+      form.set('jobId', manualCand.jobId);
+      form.set('name', manualCand.name.trim());
+      form.set('email', manualCand.email.trim());
+      form.set('phone', manualCand.phone.trim());
+      form.set('experience', manualCand.experience.trim());
+      form.set('source', manualCand.source);
+      form.set('stage', manualCand.stage);
+      form.set('notes', manualCand.notes.trim());
+      if (manualResume) form.set('resume', manualResume);
+
+      const res = await fetch('/api/admin/hiring/candidates', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not add candidate');
+
+      const jobId = Number(manualCand.jobId);
+      setSelectedId(jobId);
+      setAddingCandidate(false);
+      setManualResume(null);
+      setMsg(`Added ${manualCand.name.trim()} via ${SOURCE_LABELS[manualCand.source]}`);
+      await loadPipeline(jobId);
+      if (data.id) setCandId(Number(data.id));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Could not add candidate');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function sourceLabel(raw: string) {
+    if ((CANDIDATE_SOURCES as readonly string[]).includes(raw)) {
+      return SOURCE_LABELS[raw as CandidateSource];
+    }
+    return raw || 'Other';
   }
 
   useEffect(() => {
@@ -700,6 +781,9 @@ export default function HiringWorkspace({
             >
               Sync Enquiries{unmappedCount ? ` (${unmappedCount})` : ''}
             </button>
+            <button type="button" className="admin-btn admin-btn-primary az-admin-mini" disabled={busy} onClick={openAddCandidate}>
+              + Add candidate
+            </button>
           </>
         ) : null}
         <span className="hr-toolbar-spacer" />
@@ -999,7 +1083,8 @@ export default function HiringWorkspace({
                       <p className="hr-card-name">{c.name}</p>
                       <p className="hr-card-sub">{c.jobTitle || '—'}</p>
                       <p className="hr-card-sub">
-                        {c.email || c.phone || c.source}
+                        {sourceLabel(c.source)}
+                        {c.email ? ` · ${c.email}` : c.phone ? ` · ${c.phone}` : ''}
                         {c.enquiryId ? ` · #${c.enquiryId}` : ''}
                       </p>
                     </div>
@@ -1010,10 +1095,169 @@ export default function HiringWorkspace({
             })}
           </div>
           <aside className="hr-panel">
-            <h3>Candidate</h3>
-            {!selectedCand ? (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0 }}>{addingCandidate ? 'Add candidate' : 'Candidate'}</h3>
+              {!addingCandidate ? (
+                <button type="button" className="admin-btn admin-btn-secondary az-admin-mini" onClick={openAddCandidate}>
+                  + Add
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary az-admin-mini"
+                  onClick={() => {
+                    setAddingCandidate(false);
+                    setManualResume(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+
+            {addingCandidate ? (
+              <>
+                <p className="az-admin-hint" style={{ marginTop: 0 }}>
+                  Referral, email, agency, LinkedIn, walk-in — paste the message, attach the CV, add to pipeline.
+                </p>
+                <CandidateTextAutofill
+                  defaultOpen
+                  value={manualCand}
+                  jobs={jobs.filter((j) => j.status === 'open' || j.status === 'paused')}
+                  onFill={(next) =>
+                    setManualCand((d) => ({
+                      ...d,
+                      name: next.name,
+                      email: next.email,
+                      phone: next.phone,
+                      experience: next.experience,
+                      source: next.source,
+                      notes: next.notes,
+                      jobId: next.jobId || d.jobId,
+                    }))
+                  }
+                />
+                <div className="hr-field-grid" style={{ marginTop: '0.75rem' }}>
+                  <label className="admin-field full">
+                    <span>Role</span>
+                    <select
+                      className="admin-select"
+                      value={manualCand.jobId}
+                      onChange={(e) => setManualCand((d) => ({ ...d, jobId: e.target.value }))}
+                    >
+                      <option value="">Select open / paused role…</option>
+                      {jobs
+                        .filter((j) => j.status === 'open' || j.status === 'paused')
+                        .map((j) => (
+                          <option key={j.id} value={j.id}>
+                            {j.title}
+                            {j.slug === 'general-applications' ? ' (holding)' : ''}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                  <label className="admin-field full">
+                    <span>Full name</span>
+                    <input
+                      className="admin-input"
+                      value={manualCand.name}
+                      onChange={(e) => setManualCand((d) => ({ ...d, name: e.target.value }))}
+                      placeholder="Candidate name"
+                    />
+                  </label>
+                  <label className="admin-field">
+                    <span>Email</span>
+                    <input
+                      className="admin-input"
+                      type="email"
+                      value={manualCand.email}
+                      onChange={(e) => setManualCand((d) => ({ ...d, email: e.target.value }))}
+                    />
+                  </label>
+                  <label className="admin-field">
+                    <span>Phone</span>
+                    <input
+                      className="admin-input"
+                      value={manualCand.phone}
+                      onChange={(e) => setManualCand((d) => ({ ...d, phone: e.target.value }))}
+                    />
+                  </label>
+                  <label className="admin-field">
+                    <span>Source</span>
+                    <select
+                      className="admin-select"
+                      value={manualCand.source}
+                      onChange={(e) => setManualCand((d) => ({ ...d, source: e.target.value as CandidateSource }))}
+                    >
+                      {CANDIDATE_SOURCES.filter((s) => s !== 'website').map((s) => (
+                        <option key={s} value={s}>
+                          {SOURCE_LABELS[s]}
+                        </option>
+                      ))}
+                      <option value="website">Website (manual)</option>
+                    </select>
+                  </label>
+                  <label className="admin-field">
+                    <span>Start stage</span>
+                    <select
+                      className="admin-select"
+                      value={manualCand.stage}
+                      onChange={(e) => setManualCand((d) => ({ ...d, stage: e.target.value as CandidateStage }))}
+                    >
+                      {(['applied', 'screening', 'interview', 'on_hold'] as CandidateStage[]).map((s) => (
+                        <option key={s} value={s}>
+                          {STAGE_LABELS[s]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="admin-field full">
+                    <span>Experience</span>
+                    <input
+                      className="admin-input"
+                      value={manualCand.experience}
+                      onChange={(e) => setManualCand((d) => ({ ...d, experience: e.target.value }))}
+                      placeholder="e.g. 3 years · Fresher"
+                    />
+                  </label>
+                  <label className="admin-field full">
+                    <span>Resume / CV (PDF or Word)</span>
+                    <input
+                      className="admin-input"
+                      type="file"
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={(e) => setManualResume(e.target.files?.[0] || null)}
+                    />
+                    {manualResume ? (
+                      <span className="az-admin-hint" style={{ marginTop: '0.35rem' }}>
+                        {manualResume.name}
+                      </span>
+                    ) : null}
+                  </label>
+                  <label className="admin-field full">
+                    <span>Notes (referrer, email thread, etc.)</span>
+                    <textarea
+                      className="admin-textarea"
+                      rows={3}
+                      value={manualCand.notes}
+                      onChange={(e) => setManualCand((d) => ({ ...d, notes: e.target.value }))}
+                      placeholder="Referred by Priya · CV from agency mail…"
+                    />
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-primary"
+                  style={{ marginTop: '0.85rem' }}
+                  disabled={busy}
+                  onClick={() => void submitManualCandidate()}
+                >
+                  Add to pipeline
+                </button>
+              </>
+            ) : !selectedCand ? (
               <p className="hr-empty" style={{ padding: '1rem 0' }}>
-                Select a card to update stage, interviewer, or notes.
+                Select a card, or use <strong>+ Add</strong> for referral / email / agency CVs.
               </p>
             ) : (
               <>
@@ -1021,6 +1265,7 @@ export default function HiringWorkspace({
                 <div className="hr-job-meta" style={{ marginBottom: '0.85rem' }}>
                   <span className="hr-pill">{STAGE_LABELS[selectedCand.stage]}</span>
                   <span className="hr-pill">{selectedCand.jobTitle}</span>
+                  <span className="hr-pill">{sourceLabel(selectedCand.source)}</span>
                 </div>
                 <p className="az-admin-hint" style={{ marginTop: 0 }}>
                   {selectedCand.email}

@@ -42,6 +42,7 @@ export {
   CLOSE_REASON_LABELS,
   CLOSE_REASONS,
   JOB_STATUSES,
+  SOURCE_LABELS,
   STAGE_LABELS,
   STATUS_LABELS,
 } from '@/lib/career-hiring-types';
