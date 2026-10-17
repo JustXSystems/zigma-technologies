@@ -4,7 +4,7 @@ import AdminHub from '@/components/admin/AdminHub';
 import { AdminLink } from '@/components/admin/unsaved-changes';
 import { HIRING_TABS } from '@/lib/admin-hub-tabs';
 import HiringWorkspace from './HiringWorkspace';
-import './hiring.css';
+import './Hiring.css';
 
 export default function HiringHub({ initialTab, initialJob }: { initialTab?: string; initialJob?: string }) {
   return (

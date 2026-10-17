@@ -13,7 +13,7 @@ import {
   type CareerJobContent,
   type CloseReason,
   type JobStatus,
-} from '@/lib/career-hiring';
+} from '@/lib/career-hiring-types';
 
 type Stats = { open: number; draft: number; paused: number; archive: number; pipeline: number; hired: number };
 type Tab = 'openings' | 'pipeline' | 'archive';
