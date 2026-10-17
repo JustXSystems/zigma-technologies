@@ -312,8 +312,13 @@ export function CareersJobsSection({ content, sectionKey }: SectionProps) {
   const c = withCareersDefaults<CareersJobsContent>('careers_jobs', content);
   const jobs = (c.jobs || []).filter((j) => !j.hidden && t(j.title));
   const ids = jobs.map((j, i) => {
-    const base = jobSlug(t(j.title));
-    return jobs.slice(0, i).some((p) => jobSlug(t(p.title)) === base) ? `${base}-${i + 1}` : base;
+    const fromAts = t((j as CareersJob & { slug?: string }).slug);
+    const base = fromAts ? `job-${fromAts}` : jobSlug(t(j.title));
+    const taken = jobs.slice(0, i).map((p) => {
+      const s = t((p as CareersJob & { slug?: string }).slug);
+      return s ? `job-${s}` : jobSlug(t(p.title));
+    });
+    return taken.includes(base) ? `${base}-${i + 1}` : base;
   });
   const [dept, setDept] = useState('');
   const [openId, setOpenId] = useState<string | null>(null);

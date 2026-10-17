@@ -181,9 +181,31 @@ export const BLOG_TABS = [
   },
 ] as const satisfies readonly AdminHubTab<string>[];
 
+export const HIRING_TABS = [
+  {
+    id: 'openings',
+    label: 'Openings',
+    screen: 'hiring',
+    description: 'Create and publish time-bound job postings shown on /careers. Expired or filled roles leave the public page automatically.',
+  },
+  {
+    id: 'pipeline',
+    label: 'Pipeline',
+    screen: 'hiring',
+    description: 'Move candidates through Applied → Screening → Interview → Offer → Hired. Website applications land here automatically.',
+  },
+  {
+    id: 'archive',
+    label: 'Archive',
+    screen: 'hiring',
+    description: 'Closed postings kept for audit: who was hired, interview dates, and how each role was closed. Not shown on the public site.',
+  },
+] as const satisfies readonly AdminHubTab<string>[];
+
 /** Tabbed hub screens: the screen that hosts them and their tabs (for search and deep links). */
 export const ADMIN_HUBS: readonly { screen: AdminScreenKey; href: string; tabs: readonly AdminHubTab<string>[] }[] = [
   { screen: 'resources', href: '/admin/resources', tabs: BLOG_TABS },
+  { screen: 'hiring', href: '/admin/hiring', tabs: HIRING_TABS },
   { screen: 'nav', href: '/admin/header-footer', tabs: HEADER_FOOTER_TABS },
   { screen: 'forms', href: '/admin/forms', tabs: LEADS_TABS },
   { screen: 'redirects', href: '/admin/seo', tabs: SEO_TABS },

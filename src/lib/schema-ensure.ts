@@ -388,6 +388,108 @@ export function ensureResourcePostColumns(): Promise<void> {
   return resourcePostColumnsReady;
 }
 
+let careerHiringReady: Promise<void> | null = null;
+
+const CAREER_JOBS_TABLE = `CREATE TABLE IF NOT EXISTS career_jobs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  public_id CHAR(12) NOT NULL,
+  slug VARCHAR(160) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  department VARCHAR(120) NULL,
+  location VARCHAR(120) NULL,
+  job_type VARCHAR(80) NULL,
+  experience VARCHAR(120) NULL,
+  education VARCHAR(255) NULL,
+  badge VARCHAR(80) NULL,
+  summary TEXT NULL,
+  content_json JSON NULL,
+  status ENUM('draft','open','paused','closed') NOT NULL DEFAULT 'draft',
+  close_reason ENUM('filled','expired','cancelled','other') NULL,
+  close_notes TEXT NULL,
+  opens_at DATETIME NULL,
+  closes_at DATETIME NULL,
+  published_at DATETIME NULL,
+  closed_at DATETIME NULL,
+  vacancies INT UNSIGNED NOT NULL DEFAULT 1,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_by VARCHAR(120) NULL,
+  updated_by VARCHAR(120) NULL,
+  closed_by VARCHAR(120) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_career_job_slug (slug),
+  UNIQUE KEY uq_career_job_public (public_id),
+  INDEX idx_career_job_status (status, closes_at, sort_order),
+  INDEX idx_career_job_dept (department)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`;
+
+const CAREER_CANDIDATES_TABLE = `CREATE TABLE IF NOT EXISTS career_candidates (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  job_id INT UNSIGNED NOT NULL,
+  enquiry_id INT UNSIGNED NULL,
+  name VARCHAR(160) NOT NULL,
+  email VARCHAR(255) NULL,
+  phone VARCHAR(80) NULL,
+  experience VARCHAR(120) NULL,
+  resume_file VARCHAR(255) NULL,
+  resume_name VARCHAR(255) NULL,
+  stage ENUM('applied','screening','interview','offer','hired','rejected','withdrawn','on_hold') NOT NULL DEFAULT 'applied',
+  source VARCHAR(80) NOT NULL DEFAULT 'website',
+  interviewer VARCHAR(160) NULL,
+  interview_at DATETIME NULL,
+  offer_at DATETIME NULL,
+  joined_at DATETIME NULL,
+  rejected_at DATETIME NULL,
+  rating TINYINT UNSIGNED NULL,
+  notes TEXT NULL,
+  tags_json JSON NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_by VARCHAR(120) NULL,
+  updated_by VARCHAR(120) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_cand_job_stage (job_id, stage),
+  INDEX idx_cand_enquiry (enquiry_id),
+  INDEX idx_cand_email (email),
+  CONSTRAINT fk_cand_job FOREIGN KEY (job_id) REFERENCES career_jobs(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`;
+
+const CAREER_EVENTS_TABLE = `CREATE TABLE IF NOT EXISTS career_events (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  job_id INT UNSIGNED NULL,
+  candidate_id INT UNSIGNED NULL,
+  actor VARCHAR(120) NULL,
+  event_type VARCHAR(64) NOT NULL,
+  from_value VARCHAR(120) NULL,
+  to_value VARCHAR(120) NULL,
+  message TEXT NULL,
+  meta_json JSON NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_evt_job (job_id, created_at),
+  INDEX idx_evt_cand (candidate_id, created_at),
+  INDEX idx_evt_type (event_type, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`;
+
+/** Idempotent: careers hiring ATS tables (jobs, candidates, audit events). */
+export function ensureCareerHiringTables(): Promise<void> {
+  if (!careerHiringReady) {
+    careerHiringReady = (async () => {
+      try {
+        await pool.query(CAREER_JOBS_TABLE);
+        await pool.query(CAREER_CANDIDATES_TABLE);
+        await pool.query(CAREER_EVENTS_TABLE);
+      } catch (err) {
+        if (isDbUnavailableError(err)) throw err;
+        console.error('[schema] could not ensure career hiring tables — run scripts/migrate-career-hiring.sql', err);
+      }
+    })().catch((err) => {
+      careerHiringReady = null;
+      throw err;
+    });
+  }
+  return careerHiringReady;
+}
+
 /** Idempotent: ensure catalog discovery + standard-panel columns exist. */
 export function ensureCatalogDiscoveryColumns(): Promise<void> {
   if (!discoveryColumnsReady) {

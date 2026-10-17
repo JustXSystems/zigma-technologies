@@ -1,7 +1,7 @@
 import { getPageBySlug } from '@/lib/cms';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
 import { HOME_SEED_SECTIONS } from '@/lib/home-sections';
-import { CAREERS_SEED_SECTIONS_V2 } from '@/lib/careers-sections';
+import { CAREERS_SEED_SECTIONS_V2, type CareersApplicationContent, type CareersJobsContent } from '@/lib/careers-sections';
 import { CERTIFICATIONS_SEED_SECTIONS_V2 } from '@/lib/certifications-sections';
 import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
 import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
@@ -9,6 +9,7 @@ import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
 import { BLOG_SEED_SECTIONS, BLOG_SLUG } from '@/lib/blog-sections';
 import { PROJECTS101_SEED_SECTIONS, PROJECTS101_SLUG } from '@/lib/projects101-sections';
+import { careerJobToPublicCard, listOpenCareerJobs } from '@/lib/career-hiring';
 
 function seedForSlug(slug: string) {
   if (slug === BLOG_SLUG) return BLOG_SEED_SECTIONS;
@@ -61,6 +62,38 @@ export type PublicCmsPageResult = {
   preview: boolean;
 };
 
+/** Replace careers_jobs.jobs with live open postings from the hiring ATS (admin-only archive). */
+async function hydrateCareersHiring(page: CmsPage): Promise<CmsPage> {
+  if (page.slug !== 'careers') return page;
+  let openCards: ReturnType<typeof careerJobToPublicCard>[] = [];
+  try {
+    openCards = (await listOpenCareerJobs()).map(careerJobToPublicCard);
+  } catch (err) {
+    console.error('[careers] could not load hiring jobs', err);
+    return page;
+  }
+  const roles = openCards.map((j) => j.role || j.title).filter(Boolean);
+  const sections = page.sections || [];
+  return {
+    ...page,
+    sections: sections.map((section) => {
+      if (section.type === 'careers_jobs') {
+        const content = { ...(section.content_json || {}) } as CareersJobsContent;
+        /* Prefer ATS open roles; fall back to section JSON until HR imports into Hiring. */
+        const jobs = openCards.length ? openCards : content.jobs || [];
+        return { ...section, content_json: { ...content, jobs, _hiringSource: openCards.length ? 'ats' : 'legacy' } };
+      }
+      if (section.type === 'careers_application' && roles.length) {
+        const content = { ...(section.content_json || {}) } as CareersApplicationContent;
+        const existing = Array.isArray(content.roles) ? content.roles.map(String).filter(Boolean) : [];
+        const merged = Array.from(new Set([...roles, ...existing, 'General Application']));
+        return { ...section, content_json: { ...content, roles: merged } };
+      }
+      return section;
+    }),
+  };
+}
+
 /** Load a public CMS page (DB or seed fallback) — for SSR and API routes. */
 export async function loadPublicCmsPage(
   slug: string,
@@ -69,12 +102,12 @@ export async function loadPublicCmsPage(
   const page = await getPageBySlug(slug, allowPreview);
 
   if (page?.sections?.length) {
-    return { page, source: 'database', preview: allowPreview };
+    return { page: await hydrateCareersHiring(page), source: 'database', preview: allowPreview };
   }
 
   const seed = seedForSlug(slug);
   if (seed) {
-    return { page: seedPage(slug, seed), source: 'seed', preview: allowPreview };
+    return { page: await hydrateCareersHiring(seedPage(slug, seed)), source: 'seed', preview: allowPreview };
   }
 
   return null;

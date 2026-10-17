@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import AdminCollapsible from '@/components/admin/AdminCollapsible';
-import { extractEducation, hasStructuredDetails, parseJobText, type ParsedJobText } from '@/lib/careers-job-text';
+import Link from 'next/link';
 import {
   AccentHeaderEditor,
   AlignButtons,
@@ -39,7 +37,6 @@ import {
   type CareersCardsContent,
   type CareersFieldText,
   type CareersInternshipContent,
-  type CareersJob,
   type CareersJobLabels,
   type CareersJobsContent,
   type CareersProgramPoint,
@@ -66,9 +63,6 @@ const ALIGN_ITEMS_OPTIONS = [
   { value: 'end', label: 'Bottom' },
   { value: 'stretch', label: 'Stretch (equal height)' },
 ] as const;
-
-const JOB_DESCRIPTION_HINT =
-  'Plain text or HTML: <p>, <br>, <strong>, <em>, <ul>/<ol> + <li>, <a href="…">. Escape a literal < or & as &lt; / &amp;.';
 
 const JOB_LABEL_NAMES: Record<keyof CareersJobLabels, string> = {
   view: '“View details” button',
@@ -228,136 +222,6 @@ function CareersWhyEditor({ content: c, onChange }: EditorProps<CareersWhyConten
 /* Current openings                                                    */
 /* ------------------------------------------------------------------ */
 
-const JOB_TYPE_OPTIONS = ['Full-Time', 'Part-Time', 'Contract', 'Internship', 'Trainee', 'Third-Party Payroll'];
-const EXPERIENCE_CHIP = /\b(exp|experience|years?|yrs?|fresher)/i;
-
-/** Text input with suggestions; keeps department names consistent so the filter tabs group correctly. */
-function SuggestInput({ label, value, onChange, options, placeholder, hint }: {
-  label: string;
-  value?: string;
-  onChange: (v: string) => void;
-  options: string[];
-  placeholder?: string;
-  hint?: string;
-}) {
-  const listId = `crs-suggest-${label.toLowerCase().replace(/[^a-z]+/g, '-')}`;
-  return (
-    <Field label={label} hint={hint}>
-      <input className="admin-input" list={listId} value={value || ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
-      <datalist id={listId}>
-        {options.map((o) => (
-          <option key={o} value={o} />
-        ))}
-      </datalist>
-    </Field>
-  );
-}
-
-function applyParsed(job: CareersJob, p: ParsedJobText, fromOldDescription: boolean): CareersJob {
-  const chips = job.chips || [];
-  const expChip = fromOldDescription && !job.experience ? chips.find((ch) => EXPERIENCE_CHIP.test(ch)) : undefined;
-  const pick = (list: string[] | undefined, current: string[] | undefined) => (list?.length ? list : current || []);
-  return {
-    ...job,
-    department: job.department || p.department,
-    location: job.location || p.location,
-    type: job.type || p.type,
-    experience: job.experience || expChip || p.experience,
-    education: job.education || p.education,
-    chips: expChip ? chips.filter((ch) => ch !== expChip) : chips,
-    summary: p.summary || job.summary,
-    responsibilities: pick(p.responsibilities, job.responsibilities),
-    requirements: pick(p.requirements, job.requirements),
-    benefits: pick(p.benefits, job.benefits),
-    facts: pick(p.facts, job.facts),
-    description: fromOldDescription ? '' : job.description,
-  };
-}
-
-/** Education field; offers to pull degree / diploma lines out of Requirements when it is empty. */
-function EducationInput({ job, onChange }: { job: CareersJob; onChange: (next: CareersJob) => void }) {
-  const found = String(job.education || '').trim() ? null : extractEducation(job.requirements || []);
-  return (
-    <Field label="Education" hint={found?.education ? undefined : 'Shown as a tag and in “At a glance”'}>
-      <input
-        className="admin-input"
-        value={job.education || ''}
-        placeholder="Diploma / BE – EEE / ECE"
-        onChange={(e) => onChange({ ...job, education: e.target.value })}
-      />
-      {found?.education ? (
-        <button
-          type="button"
-          className="admin-btn admin-btn-secondary az-admin-mini"
-          style={{ alignSelf: 'start', marginTop: '0.35rem' }}
-          title={found.education}
-          onClick={() => onChange({ ...job, education: found.education, requirements: found.rest })}
-        >
-          Take it from Requirements
-        </button>
-      ) : null}
-    </Field>
-  );
-}
-
-/** Paste a whole job description; headings like "Key Responsibilities" / "Requirements" sort it into the boxes below. */
-function JobAutoFill({ job, onFill }: { job: CareersJob; onFill: (next: CareersJob) => void }) {
-  const [text, setText] = useState('');
-  const [done, setDone] = useState(false);
-  const legacy = Boolean(String(job.description || '').trim()) && !hasStructuredDetails(job);
-  return (
-    <>
-      {legacy ? (
-        <div className="admin-guide-callout admin-guide-callout--warn">
-          <strong>This job still uses the old single text box.</strong> It shows on the site inside &ldquo;View details&rdquo;, but
-          splitting it into Summary / Responsibilities / Requirements looks much cleaner.
-          <div style={{ marginTop: '0.6rem' }}>
-            <button
-              type="button"
-              className="admin-btn admin-btn-secondary az-admin-mini"
-              onClick={() => onFill(applyParsed(job, parseJobText(job.description || ''), true))}
-            >
-              Split it into sections automatically
-            </button>
-          </div>
-        </div>
-      ) : null}
-      <AdminCollapsible
-        title="Paste a full job description (auto-fill)"
-        description="Copy the job ad from Word, PDF, email or WhatsApp — the boxes below are filled in for you"
-        className="az-admin-group"
-      >
-        <TextArea
-          label="Job description text"
-          rows={8}
-          value={text}
-          onChange={(v) => {
-            setText(v);
-            setDone(false);
-          }}
-          placeholder={'About the role…\n\nKey Responsibilities\n- …\n\nRequirements\n- …'}
-          hint="Headings such as Key Responsibilities, Requirements, Eligibility, Education / Qualifications, Benefits and lines like “Vacancies: 2” are recognised. Degree / diploma lines go into Education. Bullets, numbers and emojis are removed. “How to apply” text is skipped — the Apply button handles that."
-        />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
-          <button
-            type="button"
-            className="admin-btn admin-btn-primary az-admin-mini"
-            disabled={!text.trim()}
-            onClick={() => {
-              onFill(applyParsed(job, parseJobText(text), false));
-              setText('');
-              setDone(true);
-            }}
-          >
-            Fill in the boxes below
-          </button>
-          {done ? <span className="az-admin-hint" style={{ margin: 0 }}>Done — check the boxes below, then save. Cancel undoes it.</span> : null}
-        </div>
-      </AdminCollapsible>
-    </>
-  );
-}
-
 function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsContent>) {
   const set = (patch: Partial<CareersJobsContent>) => onChange({ ...c, ...patch });
   const cs = c.cardStyle || {};
@@ -375,110 +239,15 @@ function CareersJobsEditor({ content: c, onChange }: EditorProps<CareersJobsCont
       <Group title="Section heading" description="Eyebrow, heading (H2 by default), highlight and intro">
         <AccentHeaderEditor value={c.header} onChange={(header) => set({ header })} />
       </Group>
-      <Group title="Job openings" open description="Add, hide or reorder jobs. Apply buttons scroll to the application form and preselect the role">
-        <ListEditor<CareersJob>
-          label="Jobs"
-          items={c.jobs || []}
-          onChange={(jobs) => set({ jobs })}
-          addLabel="Job"
-          create={() => ({
-            title: 'New role',
-            department: departments[0] || '',
-            location: 'Bengaluru',
-            type: 'Full-Time',
-            badge: 'New',
-            chips: [],
-            responsibilities: [],
-            requirements: [],
-            benefits: [],
-            facts: [],
-          })}
-          itemTitle={(j) => `${j.hidden ? '(hidden) ' : ''}${j.title || 'Job'}${j.location ? ` · ${j.location}` : ''}`}
-          renderItem={(j, patch) => (
-            <>
-              <JobAutoFill job={j} onFill={patch} />
-              <div className="admin-form-grid">
-                <TextInput label="Job title" value={j.title} onChange={(title) => patch({ ...j, title })} placeholder="Solar Design Engineer" />
-                <SuggestInput
-                  label="Department"
-                  value={j.department}
-                  onChange={(department) => patch({ ...j, department })}
-                  options={departments}
-                  placeholder="Solar, UPS, Sales…"
-                  hint="Pick an existing one so the filter tabs stay tidy"
-                />
-                <TextInput label="Location" value={j.location} onChange={(location) => patch({ ...j, location })} placeholder="Bengaluru" />
-                <SuggestInput label="Job type" value={j.type} onChange={(type) => patch({ ...j, type })} options={JOB_TYPE_OPTIONS} placeholder="Full-Time" />
-                <TextInput label="Experience" value={j.experience} onChange={(experience) => patch({ ...j, experience })} placeholder="1–2 years / Freshers" />
-                <EducationInput job={j} onChange={patch} />
-                <TextInput label="Badge (optional)" value={j.badge} onChange={(badge) => patch({ ...j, badge })} placeholder="New, Urgent, Hiring fast…" />
-                <Field label="Visibility">
-                  <Toggle label="Show this job on the website" checked={!j.hidden} onChange={(on) => patch({ ...j, hidden: !on })} />
-                </Field>
-              </div>
-              <TextArea
-                label="Short summary"
-                rows={2}
-                value={j.summary}
-                onChange={(summary) => patch({ ...j, summary })}
-                placeholder="We're looking for a Sales Executive to grow our UPS business across Bengaluru."
-                hint="One or two sentences shown on the card before visitors open it."
-              />
-              <TextArea
-                label="Key responsibilities"
-                rows={6}
-                value={linesOf(j.responsibilities)}
-                onChange={(v) => patch({ ...j, responsibilities: toLines(v) })}
-                placeholder={'Generate leads and develop new business\nVisit customers and conduct site surveys\nPrepare quotations and follow up for closure'}
-                hint="One point per line — no bullets or numbers needed."
-              />
-              <TextArea
-                label="Requirements"
-                rows={6}
-                value={linesOf(j.requirements)}
-                onChange={(v) => patch({ ...j, requirements: toLines(v) })}
-                placeholder={'Diploma / Degree in Electrical or Electronics\n1–2 years of sales experience\nWillingness to travel'}
-                hint="One point per line."
-              />
-              <TextArea
-                label="What we offer (optional)"
-                rows={3}
-                value={linesOf(j.benefits)}
-                onChange={(v) => patch({ ...j, benefits: toLines(v) })}
-                placeholder={'1 month paid training\nTravel allowance'}
-                hint="One point per line. Leave empty to hide."
-              />
-              <TextArea
-                label="Extra details for “At a glance” (optional)"
-                rows={3}
-                value={linesOf(j.facts)}
-                onChange={(v) => patch({ ...j, facts: toLines(v) })}
-                placeholder={'Vacancies: 2\nTraining: Erode – 1 month\nSalary: As per industry standards'}
-                hint="One per line as Label: value. Department, location, job type and experience are added automatically."
-              />
-              <AdminCollapsible title="More options" description="Extra tags, apply button, external link, card colour, old HTML description" className="az-admin-group">
-                <TextArea label="Extra tags (one per line)" rows={2} value={linesOf(j.chips)} onChange={(v) => patch({ ...j, chips: toLines(v) })} placeholder="Hybrid" />
-                <div className="admin-form-grid">
-                  <TextInput label="Role in the apply form" value={j.role} onChange={(role) => patch({ ...j, role })} placeholder="Empty = job title" />
-                  <TextInput label="Apply button label" value={j.applyLabel} onChange={(applyLabel) => patch({ ...j, applyLabel })} placeholder="Empty = section default" />
-                  <TextInput label="External link (optional)" value={j.href} onChange={(href) => patch({ ...j, href })} placeholder="/files/job-description.pdf" />
-                  <TextInput label="External link label" value={j.linkLabel} onChange={(linkLabel) => patch({ ...j, linkLabel })} placeholder="Download JD →" />
-                  <Field label="External link">
-                    <Toggle label="Open in a new tab" checked={Boolean(j.newTab)} onChange={(newTab) => patch({ ...j, newTab })} />
-                  </Field>
-                  <ColorInput label="Card background" value={j.background} onChange={(background) => patch({ ...j, background })} fallback="#FFFFFF" />
-                </div>
-                <TextArea
-                  label="About the role (HTML, optional)"
-                  rows={4}
-                  value={j.description}
-                  onChange={(description) => patch({ ...j, description })}
-                  hint={`Shown at the top of the details panel. ${JOB_DESCRIPTION_HINT}`}
-                />
-              </AdminCollapsible>
-            </>
-          )}
-        />
+      <Group title="Job openings" open description="Live roles come from Hiring ATS — time-bound, auto-archive, candidate pipeline">
+        <div className="admin-guide-callout admin-guide-callout--info">
+          <strong>Jobs are managed in Hiring.</strong> Create, publish, close and archive roles under{' '}
+          <Link href="/admin/hiring">Admin → Hiring</Link>. This section only styles the public cards (filters, buttons, wording).
+          Open jobs on /careers are loaded automatically; archived jobs never appear on the website.
+          {departments.length ? (
+            <p style={{ margin: '0.5rem 0 0' }}>Legacy list still in this section: {departments.join(', ')} — use Hiring → Import if the Hiring table is empty.</p>
+          ) : null}
+        </div>
       </Group>
       <Group title="Apply button">
         <div className="admin-form-grid">

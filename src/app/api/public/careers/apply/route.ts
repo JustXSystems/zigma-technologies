@@ -6,6 +6,7 @@ import { sendLeadToCrm } from '@/lib/crm';
 import { guardPublicForm } from '@/lib/form-guard';
 import { notifySubmission } from '@/lib/mail';
 import { saveResumeFile } from '@/lib/resumes';
+import { ingestWebsiteApplication } from '@/lib/career-hiring';
 
 const ALLOWED_RESUME = new Set([
   'application/pdf',
@@ -76,6 +77,24 @@ export async function POST(request: Request) {
       item_id: null,
       item_type: 'general',
       payload_json: payload,
+    });
+
+    after(async () => {
+      try {
+        await ingestWebsiteApplication({
+          enquiryId: id,
+          role,
+          name,
+          email,
+          phone,
+          experience: experience || undefined,
+          resumeFile: storedName,
+          resumeName: resume.name,
+          message: message || undefined,
+        });
+      } catch (err) {
+        console.error('[careers] pipeline ingest failed', err);
+      }
     });
 
     after(() =>

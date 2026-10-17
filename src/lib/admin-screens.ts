@@ -10,6 +10,7 @@ export type AdminScreenKey =
   | 'press'
   | 'testimonials'
   | 'enquiries'
+  | 'hiring'
   | 'forms'
   | 'newsletter'
   | 'nav'
@@ -82,6 +83,15 @@ export const ADMIN_SCREEN_DEFS: AdminScreenDef[] = [
   { key: 'press', label: 'Press', href: '/admin/press', group: 'Content', summary: 'Press releases and coverage' },
   { key: 'testimonials', label: 'Testimonials', href: '/admin/testimonials', group: 'Content', summary: 'Client quotes shown across the site' },
   { key: 'enquiries', label: 'Enquiries', href: '/admin/enquiries', group: 'Leads', summary: 'Leads from the enquiry, contact and quote forms' },
+  {
+    key: 'hiring',
+    label: 'Hiring',
+    href: '/admin/hiring',
+    group: 'Leads',
+    summary: 'Job openings, candidate pipeline and hiring archive for /careers',
+    openWith: ['enquiries', 'pages'],
+    accessLabel: 'Hiring ATS (jobs & candidates)',
+  },
   {
     key: 'forms',
     label: 'Forms & CRM',
