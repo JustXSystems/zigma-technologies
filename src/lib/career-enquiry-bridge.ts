@@ -106,6 +106,39 @@ export async function ensureGeneralApplicationsJob(actor = 'system'): Promise<Ca
   return job;
 }
 
+function roleKey(s: string) {
+  return t(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function isHoldingJob(job: CareerJob | null | undefined) {
+  return Boolean(job && job.slug === GENERAL_APPLICATIONS_SLUG);
+}
+
+function pickJobByRole(jobs: CareerJob[], role: string): CareerJob | null {
+  const key = roleKey(role);
+  if (!key || /^general applications?$/.test(key)) return null;
+  const real = jobs.filter((j) => j.slug !== GENERAL_APPLICATIONS_SLUG);
+  const exact =
+    real.find((j) => roleKey(j.title) === key) ||
+    real.find((j) => roleKey(t(j.content.role)) === key) ||
+    real.find((j) => roleKey(j.slug) === key);
+  if (exact) return exact;
+  // Fuzzy: "UPS Service Engineer – Bengaluru" vs "UPS Service Engineer"
+  const partial = real.find((j) => {
+    const title = roleKey(j.title);
+    const contentRole = roleKey(t(j.content.role));
+    return (
+      (title.length >= 4 && (key.includes(title) || title.includes(key))) ||
+      (contentRole.length >= 4 && (key.includes(contentRole) || contentRole.includes(key)))
+    );
+  });
+  return partial || null;
+}
+
 /** Resolve job for ingest/backfill — open first, then any status by id/slug/title. */
 export async function resolveJobForIngest(ref: {
   jobId?: number | null;
@@ -114,33 +147,33 @@ export async function resolveJobForIngest(ref: {
   role?: string | null;
 }): Promise<CareerJob | null> {
   const open = await resolveOpenJob(ref);
-  if (open) return open;
+  if (open && !isHoldingJob(open)) return open;
 
   const jobId = Number(ref.jobId) || 0;
   if (jobId > 0) {
     const byId = await getCareerJob(jobId);
-    if (byId) return byId;
+    if (byId && !isHoldingJob(byId)) return byId;
   }
   const publicId = t(ref.publicId);
   if (publicId) {
     const byPid = await getCareerJobByPublicId(publicId);
-    if (byPid) return byPid;
+    if (byPid && !isHoldingJob(byPid)) return byPid;
   }
   const slug = t(ref.slug).toLowerCase();
-  if (slug) {
+  if (slug && slug !== GENERAL_APPLICATIONS_SLUG) {
     const bySlug = await getCareerJobBySlug(slug);
-    if (bySlug) return bySlug;
+    if (bySlug && !isHoldingJob(bySlug)) return bySlug;
   }
   const role = t(ref.role);
   if (!role || /^general\s*application/i.test(role)) return null;
 
-  const all = await listCareerJobs({ status: 'all', q: role });
-  const key = role.toLowerCase();
-  const exact =
-    all.find((j) => j.title.toLowerCase() === key) ||
-    all.find((j) => t(j.content.role).toLowerCase() === key) ||
-    all.find((j) => j.slug.toLowerCase() === key);
-  return exact || null;
+  // Prefer open/paused, then any status (historical applies against closed roles)
+  const active = await listCareerJobs({ status: 'active' });
+  const fromActive = pickJobByRole(active, role);
+  if (fromActive) return fromActive;
+
+  const all = await listCareerJobs({ status: 'all' });
+  return pickJobByRole(all, role);
 }
 
 function hiringUrl(jobId: number, candidateId?: number | null) {
@@ -196,9 +229,10 @@ export async function getPipelineByEnquiryIds(ids: number[]): Promise<Map<number
     map.set(enquiryId, {
       candidateId,
       stage,
-      stageLabel: STAGE_LABELS[stage] || stage,
+      // Holding queue is still "Applied" in ATS; badge says Unassigned so HR isn't confused with On hold.
+      stageLabel: holding ? 'Unassigned' : STAGE_LABELS[stage] || stage,
       jobId,
-      jobTitle,
+      jobTitle: holding ? 'Needs role assign' : jobTitle,
       holding,
       hiringUrl: hiringUrl(jobId, candidateId),
     });
@@ -366,6 +400,7 @@ export async function ingestEnquiryIntoPipeline(
     `Synced from enquiry #${enquiryId}`,
   ].filter(Boolean);
 
+  // Always start as Applied — On hold is an HR action later, not the default for new website applies.
   const candidateId = await createCandidate(
     {
       jobId: job.id,
@@ -378,7 +413,7 @@ export async function ingestEnquiryIntoPipeline(
       resumeName: resumeName || undefined,
       notes: noteParts.join('\n\n'),
       source: 'website',
-      stage: holding ? 'on_hold' : 'applied',
+      stage: 'applied',
       tags: holding ? ['unmatched', 'from-enquiry'] : ['from-enquiry'],
     },
     actor
@@ -390,7 +425,7 @@ export async function ingestEnquiryIntoPipeline(
     actor,
     eventType: holding ? 'candidate.holding' : 'candidate.backfill',
     message: holding
-      ? `${name} queued in General Applications (enquiry #${enquiryId}).`
+      ? `${name} applied (unassigned — enquiry #${enquiryId}; intended: ${role || '—'}).`
       : `${name} synced from enquiry #${enquiryId} → ${job.title}.`,
     meta: { enquiryId, holding },
   });
@@ -412,8 +447,91 @@ export async function ingestEnquiryIntoPipeline(
   };
 }
 
+/**
+ * Fix candidates stuck On hold in General Applications:
+ * re-match intended role → Applied on that job, else keep queue but stage = Applied.
+ */
+export async function repairHoldingQueueCandidates(actor = 'system'): Promise<{
+  repaired: number;
+  reassigned: number;
+  stageFixed: number;
+}> {
+  await ensureCareerHoldingReady(actor);
+  const holdingJob = await getCareerJobBySlug(GENERAL_APPLICATIONS_SLUG);
+  if (!holdingJob) return { repaired: 0, reassigned: 0, stageFixed: 0 };
+
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT c.id, c.enquiry_id, c.stage, c.notes, c.name
+     FROM career_candidates c
+     WHERE c.job_id = ?`,
+    [holdingJob.id]
+  );
+
+  let reassigned = 0;
+  let stageFixed = 0;
+
+  for (const row of rows) {
+    const candId = Number(row.id);
+    const enquiryId = row.enquiry_id != null ? Number(row.enquiry_id) : null;
+    let roleHint = '';
+    if (enquiryId) {
+      const enq = await getEnquiry(enquiryId);
+      roleHint = t(enq?.payload_json?.role);
+    }
+    if (!roleHint) {
+      const noteMatch = String(row.notes || '').match(/Intended role:\s*(.+)/i);
+      if (noteMatch) roleHint = t(noteMatch[1]);
+    }
+
+    const matched = roleHint ? await resolveJobForIngest({ role: roleHint }) : null;
+    if (matched && !isHoldingJob(matched)) {
+      await pool.query(
+        `UPDATE career_candidates SET job_id = ?, stage = 'applied', tags_json = ?, updated_by = ?, updated_at = UTC_TIMESTAMP()
+         WHERE id = ?`,
+        [matched.id, JSON.stringify(['reassigned', 'from-enquiry']), actor.slice(0, 120), candId]
+      );
+      await recordEvent({
+        jobId: matched.id,
+        candidateId: candId,
+        actor,
+        eventType: 'candidate.reassigned',
+        message: `Auto-matched “${row.name}” from holding queue → ${matched.title}.`,
+        meta: { fromJobId: holdingJob.id, enquiryId },
+      });
+      if (enquiryId) {
+        await persistPipelineOnEnquiry(enquiryId, {
+          candidateId: candId,
+          job: matched,
+          holding: false,
+          duplicate: false,
+        });
+      }
+      reassigned += 1;
+      continue;
+    }
+
+    if (String(row.stage) === 'on_hold') {
+      await pool.query(
+        `UPDATE career_candidates SET stage = 'applied', updated_by = ?, updated_at = UTC_TIMESTAMP() WHERE id = ?`,
+        [actor.slice(0, 120), candId]
+      );
+      stageFixed += 1;
+    }
+  }
+
+  return { repaired: reassigned + stageFixed, reassigned, stageFixed };
+}
+
+async function ensureCareerHoldingReady(actor: string) {
+  await ensureCareerHiringTables();
+  await ensureGeneralApplicationsJob(actor);
+}
+
 /** Bulk sync all unmapped careers enquiries into Hiring (idempotent). */
 export async function syncCareersEnquiriesToPipeline(actor = 'system'): Promise<SyncEnquiriesResult> {
+  await ensureCareerHoldingReady(actor);
+  const repair = await repairHoldingQueueCandidates(actor);
+
   const ids = await listUnmappedCareersEnquiryIds(500);
   const result: SyncEnquiriesResult = {
     scanned: ids.length,
@@ -425,13 +543,6 @@ export async function syncCareersEnquiriesToPipeline(actor = 'system'): Promise<
     errors: 0,
     message: '',
   };
-
-  if (!ids.length) {
-    result.message = 'All careers applications are already in the Hiring pipeline.';
-    return result;
-  }
-
-  await ensureGeneralApplicationsJob(actor);
 
   for (const id of ids) {
     try {
@@ -447,15 +558,18 @@ export async function syncCareersEnquiriesToPipeline(actor = 'system'): Promise<
   }
 
   const placed = result.created + result.linked + result.duplicates;
-  result.message =
-    placed > 0
-      ? `Synced ${placed} application(s) into Hiring` +
-        (result.holding ? ` · ${result.holding} in General Applications queue` : '') +
-        (result.errors ? ` · ${result.errors} failed` : '') +
-        '.'
-      : result.errors
-        ? `Sync finished with ${result.errors} error(s).`
-        : 'Nothing to sync.';
+  const parts: string[] = [];
+  if (placed > 0) {
+    parts.push(`Synced ${placed} application(s) into Hiring`);
+    if (result.holding) parts.push(`${result.holding} still need a role assign`);
+  }
+  if (repair.reassigned) parts.push(`re-matched ${repair.reassigned} from holding queue`);
+  if (repair.stageFixed) parts.push(`set ${repair.stageFixed} to Applied`);
+  if (result.errors) parts.push(`${result.errors} failed`);
+
+  result.message = parts.length
+    ? `${parts.join(' · ')}.`
+    : 'All careers applications are already in the Hiring pipeline as Applied.';
 
   return result;
 }
@@ -539,8 +653,7 @@ export async function assignEnquiryToJob(
 /** Soft auto-sync used when Hiring / Enquiries loads — capped, never throws. */
 export async function autoSyncCareersEnquiries(actor = 'system'): Promise<SyncEnquiriesResult | null> {
   try {
-    const n = await countUnmappedCareersEnquiries();
-    if (n === 0) return null;
+    // Always run: rematches holding-queue mistakes even when every enquiry is already linked.
     return await syncCareersEnquiriesToPipeline(actor);
   } catch (err) {
     console.error('[hiring] auto-sync failed', err);

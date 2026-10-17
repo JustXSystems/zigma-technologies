@@ -423,7 +423,9 @@ export default function EnquiriesPage() {
                   <>
                     <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.5 }}>
                       <strong>{selected.pipeline.stageLabel}</strong>
-                      {selected.pipeline.holding ? ' · holding queue' : ''} · {selected.pipeline.jobTitle}
+                      {selected.pipeline.holding
+                        ? ' — website apply that still needs a role; pick one below'
+                        : ` · ${selected.pipeline.jobTitle}`}
                     </p>
                     <div className="enq-pipe-actions">
                       <a className="admin-btn admin-btn-primary az-admin-mini" href={selected.pipeline.hiringUrl}>

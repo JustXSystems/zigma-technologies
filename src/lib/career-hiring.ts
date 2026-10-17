@@ -871,18 +871,33 @@ export async function getCareerJobByPublicId(publicId: string): Promise<CareerJo
 
 export async function findOpenJobByRole(role: string): Promise<CareerJob | null> {
   const r = t(role);
-  if (!r) return null;
+  if (!r || /^general\s*application/i.test(r)) return null;
   const open = await listOpenCareerJobs();
+  const key = r
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
   const exact = open.find((j) => j.title === r || t(j.content.role) === r);
   if (exact) return exact;
   const lower = r.toLowerCase();
-  return (
+  const ci =
     open.find(
       (j) =>
         j.title.toLowerCase() === lower ||
         t(j.content.role).toLowerCase() === lower ||
         j.slug.toLowerCase() === lower
-    ) || null
+    ) || null;
+  if (ci) return ci;
+  return (
+    open.find((j) => {
+      const title = j.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+      return title.length >= 4 && (key.includes(title) || title.includes(key));
+    }) || null
   );
 }
 
