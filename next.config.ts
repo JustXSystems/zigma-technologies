@@ -35,8 +35,12 @@ function resolveUploadBodyLimit(): `${number}mb` {
 
 const uploadBodyLimit = resolveUploadBodyLimit();
 
-/** Only production builds set NEXT_PUBLIC_SEO_INDEXABLE=true; every other build is noindex. */
-const seoIndexable = process.env.NEXT_PUBLIC_SEO_INDEXABLE === 'true';
+/**
+ * Only production builds may be indexed.
+ * basePath is set on PreProd (subdirectory deploy) — never index those builds,
+ * even if NEXT_PUBLIC_SEO_INDEXABLE was set by mistake.
+ */
+const seoIndexable = process.env.NEXT_PUBLIC_SEO_INDEXABLE === 'true' && !basePath;
 
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath } : {}),

@@ -10,8 +10,46 @@ You do not need to understand the code. Where a step needs someone with GitHub o
 
 ---
 
+## Current status (live audit — 17 Oct 2026)
+
+Use this section to see **where you are right now**. Tick boxes in [Appendix F](#appendix-f--master-checklist) as you finish remaining work.
+
+### What is already live on Production
+
+| Check | Result (17 Oct 2026) |
+| --- | --- |
+| Phase 1 SEO code on `master` and Production | **Done** (merged via `#34`; site serves indexable metadata) |
+| Apex `https://zigma-technologies.com` | `index, follow`; home canonical correct; **1** H1 |
+| `/projects` (sample inner page) | Own canonical; brand once in title; **1** H1 |
+| `/sitemap.xml` | **84** `<loc>` entries |
+| `/robots.txt` | `Allow: /`, private `Disallow:` paths, `Host:` + `Sitemap:` |
+| `/thank-you`, city×service (e.g. `/locations/bengaluru/ups-amc`) | `noindex` as designed |
+| `http://` → `https://` apex | **301** works |
+
+### Gaps still open (do these next)
+
+| Priority | Item | Phase | Who |
+| --- | --- | --- | --- |
+| **P0** | **PreProd is indexable** (`justxsystems.com/zigma-technologies` returns `index, follow`, advertises a full sitemap). Must be `noindex` + empty sitemap. Redeploy PreProd from `master` after the basePath noindex guard lands; then re-check step 1.3 B. If PreProd URLs appear in Google, use step 1.8 Removals. | 1.3 / 1.8 | Developer |
+| **P0** | **`www` does not redirect to apex** — `https://www.zigma-technologies.com` returns **200** (full site), splitting signals (P4). Apply nginx config in [step 1.6](#16-make-www-and-http-redirect-to-the-official-address-nginx-developer). | 1.6 | Developer |
+| **P1** | Confirm Search Console / Bing / GA4 (Phase 0) and submit sitemap (1.7) if not already done. | 0, 1.7 | You |
+| **P2** | Structured data + NAP in Site Settings; Rich Results Test. | 2 | You |
+| **P2** | Hand-write titles/descriptions for the top ~20 pages in admin. | 3 | You |
+| **P2** | Google Business Profile claim/verify (start in parallel). | 5 | You |
+
+### Code hardening shipped with this update (needs deploy)
+
+- `isIndexable()` and `next.config.ts` **refuse indexing whenever `NEXT_PUBLIC_BASE_PATH` is set** (PreProd), even if `NEXT_PUBLIC_SEO_INDEXABLE=true` leaked in by mistake.
+- `scripts/verify-seo-build.mjs` runs in PreProd and Production GitHub Actions (and `deploy.sh`) and fails the build if the SEO flags are wrong.
+- PreProd workflows explicitly clear `NEXT_PUBLIC_SEO_INDEXABLE` before build.
+
+**Next developer action:** merge/deploy this hardening to PreProd, then complete nginx step 1.6 on Production (`deploy@200.234.45.106`).
+
+---
+
 ## Table of contents
 
+- [Current status (live audit)](#current-status-live-audit--17-oct-2026)
 - [How to use this guide](#how-to-use-this-guide)
 - [The plan at a glance](#the-plan-at-a-glance)
 - [Glossary — SEO words in plain English](#glossary--seo-words-in-plain-english)
@@ -146,15 +184,15 @@ Technical SEO is a gate: it cannot make you rank by itself, but when it is broke
 
 ### What was wrong with the website, and what is already fixed
 
-The website code was audited. The problems below were found. **All code problems are already fixed** in the branch `seo/fix-technical-bugs`. They only need to be deployed (Phase 1). The last column tells you what is left for you.
+The website code was audited. The problems below were found. **Phase 1 SEO code is merged to `master` and live on Production** (PR `#34`). A live re-check on **17 Oct 2026** confirmed Production indexing, sitemap, and noindex rules. Two items remain open: **PreProd must stay noindex** (regression found live — see Current status), and **www → apex nginx** (still serving 200). The last column tells you what is left.
 
 | # | Problem found (plain English) | Status | Left for you |
 | --- | --- | --- | --- |
-| P1 | Every inner page told Google "I am a copy of the homepage" (wrong canonical). Inner pages could drop out of Google. | Fixed in code | Deploy (Phase 1) |
-| P2 | A script replaced every page's description with the same default text after loading. | Fixed in code | Deploy |
-| P3 | The PreProd test copy was open to Google, competing with the real site. | Fixed in code: every non-production build is hidden from search | Deploy; optionally remove old PreProd results (Phase 1.8) |
-| P4 | Both `www.zigma-technologies.com` and `zigma-technologies.com` served the site, splitting Google's signals. | Code uses the apex everywhere | **[Developer]** nginx redirect (Phase 1.6) |
-| P5 | Titles showed the brand twice ("Projects \| Zigma Technologies \| Zigma Technologies"). | Fixed in code | Write better titles over time (Phase 3) |
+| P1 | Every inner page told Google "I am a copy of the homepage" (wrong canonical). Inner pages could drop out of Google. | **Fixed and live on Production** | Nothing (re-check after deploys) |
+| P2 | A script replaced every page's description with the same default text after loading. | **Fixed and live** | Nothing |
+| P3 | The PreProd test copy was open to Google, competing with the real site. | Code + CI guards exist; **live PreProd was indexable again on 17 Oct 2026** | **[Developer]** Redeploy PreProd with current guards; confirm step 1.3 B; Removals if needed (1.8) |
+| P4 | Both `www.zigma-technologies.com` and `zigma-technologies.com` served the site, splitting Google's signals. | Code uses the apex everywhere; **www still returns 200 live** | **[Developer]** nginx redirect (Phase 1.6) — still required |
+| P5 | Titles showed the brand twice ("Projects \| Zigma Technologies \| Zigma Technologies"). | **Fixed and live** on Production | Write better titles over time (Phase 3) |
 | P6 | Pages shared on LinkedIn/WhatsApp had no image or wrong details. | Fixed; a 1200×630 share image was added at `/og.png` | Nothing |
 | P7 | Pages had no main heading (H1). | Fixed: every page hero is now an H1 (looks the same) | Nothing |
 | P8 | 36 city × service pages were near-identical templates, which Google can treat as spam. | Fixed: they are hidden from Google until real content is written | Write real city pages (Phase 6) |
@@ -610,9 +648,11 @@ Requirements: your Google account is **Administrator** on the GA4 property and a
 
 ## Phase 1 — Put the technical fixes live (Days 2–3)
 
-**Goal:** deploy the SEO code (already written and committed on the branch `seo/fix-technical-bugs`), first to PreProd, then to Production. Then make `www` redirect to the apex, and tell Google about the site.
+**Goal:** deploy the SEO code, first to PreProd, then to Production. Then make `www` redirect to the apex, and tell Google about the site.
 
-**Who:** steps 1.1–1.2, 1.4 and 1.6 are **[Developer]**; steps 1.3, 1.5, 1.7 and 1.8 are **[You]**.
+**Status (17 Oct 2026):** Production already runs the Phase 1 SEO build (indexable, sitemap ~84 URLs). **Still open:** (1) fix PreProd noindex regression and redeploy PreProd, (2) nginx www → apex (1.6), (3) sitemap submit / Removals if not done (1.7–1.8). Skip 1.1–1.5 if those checks already match [Current status](#current-status-live-audit--17-oct-2026); do not skip 1.6.
+
+**Who:** steps 1.1–1.2, 1.4 and 1.6 are **[Developer]**; steps 1.3, 1.5, 1.7 and 1.8 are **[You]** (or Developer for re-checks).
 
 **Safety:** the changes only add things. No content is deleted, and the four new database columns are created automatically. If anything goes wrong, redeploying the previous version puts the site back as it was; the extra columns do no harm.
 
@@ -680,9 +720,24 @@ Open each address below in Chrome and tick it off. PreProd lives at `https://jus
 **B. PreProd is hidden from Google (correct for a test site)**
 
 1. Open `https://justxsystems.com/zigma-technologies/` → press **Ctrl + U** → press **Ctrl + F** → search `name="robots"`.
-2. **Expect:** `<meta name="robots" content="noindex, follow"/>`.
+2. **Expect:** `<meta name="robots" content="noindex, follow"/>` (or `noindex` present).
 3. Open `https://justxsystems.com/zigma-technologies/sitemap.xml`.
-4. **Expect:** an almost empty XML page with just `<urlset ...></urlset>`. That is correct: the test site lists nothing for Google.
+4. **Expect:** an almost empty XML page with just `<urlset ...></urlset>` (zero `<loc>` entries). That is correct: the test site lists nothing for Google.
+5. **[Developer]** Header check:
+
+   ```powershell
+   curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-robots-tag"
+   curl.exe -s https://justxsystems.com/zigma-technologies/robots.txt
+   ```
+
+   **Expect:** `X-Robots-Tag: noindex, nofollow`. `robots.txt` must **not** advertise a `Sitemap:` line.
+
+**If PreProd shows `index, follow` or a full sitemap (regression seen 17 Oct 2026):**
+
+1. Confirm PreProd `.env` does **not** contain `NEXT_PUBLIC_SEO_INDEXABLE=true` (deploy.sh refuses the build if it does).
+2. Redeploy PreProd from current `master` (**Actions → Deploy PreProd**). The build must pass `scripts/verify-seo-build.mjs --env preprod`.
+3. Re-run checks B above. Code now also refuses indexing whenever `NEXT_PUBLIC_BASE_PATH` is set, so a leaked indexing flag alone cannot open PreProd to Google again.
+4. If Google already listed PreProd URLs, continue with step 1.8 Removals.
 
 **C. The new SEO tab works in the admin panel**
 
@@ -777,7 +832,7 @@ Do these checks within an hour of the deploy.
 
 **What:** Change the web server so that `http://…`, `http://www…` and `https://www…` all send visitors (and Google) to `https://zigma-technologies.com` with one permanent (301) redirect.
 
-**Why:** Google should see exactly one address per page. Today `www` also serves the full site, which splits signals (problem P4).
+**Why:** Google should see exactly one address per page. **As of 17 Oct 2026, `https://www.zigma-technologies.com` still returns HTTP 200** (full site), which splits signals (problem P4). Apex `http://` → `https://` already redirects; www HTTPS does not.
 
 **Time:** 15 minutes. **Risk:** a typo can take the site down, so follow the backup and test steps exactly.
 
@@ -1943,7 +1998,7 @@ Once a month: Search Console → left menu **Links** → **Top linking sites**. 
 | Business Profile suspended | Name with keywords, address issue, or suspicious edits | Follow the email → **Request reinstatement** with documents (5.2) |
 | Business Profile not showing for searches | New profile, few reviews, far from searcher | Complete all fields, add photos weekly, collect reviews; takes 1–3 months |
 | GA4 shows no data | Cookie banner not accepted, CSP blocking, wrong measurement ID | Follow GA4 troubleshooting in 0.3 |
-| Preprod site appears in Google | Preprod built with the indexing flag | Developer: rebuild preprod without the flag; then Search Console → **Removals** for the preprod address (step 1.8) |
+| PreProd site appears in Google / PreProd HTML shows `index, follow` | PreProd was built or run with indexing enabled (seen live 17 Oct 2026) | Developer: remove `NEXT_PUBLIC_SEO_INDEXABLE=true` from PreProd `.env` if present; redeploy PreProd from `master` (build must pass `verify-seo-build.mjs --env preprod`); confirm step 1.3 B (`noindex`, empty sitemap, `X-Robots-Tag`); then Search Console → **Removals** (step 1.8) |
 
 ---
 
@@ -2095,13 +2150,13 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 
 ## Appendix E — Technical reference for developers
 
-**Architecture in one paragraph:** all metadata is built on the server with `buildPageMetadata()` from `src/lib/seo.ts` (canonical, Open Graph, Twitter, robots, hreflang). `isIndexable()` returns true only when `NEXT_PUBLIC_SEO_INDEXABLE === 'true'` at **build** time (it is a `NEXT_PUBLIC_` variable, so it is inlined into the build). The production GitHub workflow and `scripts/deploy.sh` (prod branch) set it; PreProd refuses to build with it. When false: every page is `noindex`, `next.config.ts` adds `X-Robots-Tag: noindex, nofollow`, `robots.ts` omits the sitemap, and `sitemap.ts` returns an empty list. The sitemap is `force-dynamic` because CI builds have no database.
+**Architecture in one paragraph:** all metadata is built on the server with `buildPageMetadata()` from `src/lib/seo.ts` (canonical, Open Graph, Twitter, robots, hreflang). `isIndexable()` returns true only when `NEXT_PUBLIC_SEO_INDEXABLE === 'true'` **and** `NEXT_PUBLIC_BASE_PATH` is empty (PreProd always has a basePath and is therefore never indexable, even if the indexing flag leaks). These are `NEXT_PUBLIC_` variables, so they are baked at **build** time. The production GitHub workflow and `scripts/deploy.sh` (prod) set the indexing flag; PreProd workflows clear it and `deploy.sh` aborts if PreProd `.env` sets it. `scripts/verify-seo-build.mjs` fails CI if the wrong combination is baked. When not indexable: every page is `noindex`, `next.config.ts` adds `X-Robots-Tag: noindex, nofollow`, `robots.ts` omits the sitemap, and `sitemap.ts` returns an empty list. The sitemap is `force-dynamic` because CI builds have no database.
 
 **Key files:**
 
 | File | Purpose |
 | --- | --- |
-| `src/lib/seo.ts` | `siteOrigin()`, `absoluteUrl()`, `isIndexable()`, `buildPageMetadata()`, `localeAlternates()`, `breadcrumbJsonLd()`, `organizationId()` / `websiteId()`, `toIsoDate()` |
+| `src/lib/seo.ts` | `siteOrigin()`, `absoluteUrl()`, `isIndexable()` (basePath blocks indexing), `buildPageMetadata()`, `localeAlternates()`, `breadcrumbJsonLd()`, `organizationId()` / `websiteId()`, `toIsoDate()` |
 | `src/components/JsonLd.tsx` | Safe JSON-LD script tag (escapes `<`) |
 | `src/components/OrganizationJsonLd.tsx` | Site-wide `@graph`: Organization + LocalBusiness and WebSite, from Site Settings |
 | `src/lib/nap.ts` | NAP placeholders (`{{phone}}` …) filled from Site Settings in nav (`loadSiteShell`) and page sections (`CmsPageShell` / `CmsPageClient`) |
@@ -2110,6 +2165,7 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 | `src/lib/catalog-case-study-page.tsx` | Catalog detail metadata and JSON-LD; `parsePriceInr()` (plain amounts only → Offer) |
 | `src/components/admin/SeoFieldsEditor.tsx` | Inventory SEO tab (meta title/description, share image, noindex, preview) |
 | `scripts/migrate-catalog-seo.sql` | Adds `meta_title`, `meta_description`, `og_image_url`, `seo_noindex` to catalog items (also auto-ensured by `schema-ensure.ts`) |
+| `scripts/verify-seo-build.mjs` | Post-build guard: PreProd must have basePath and must not be indexable; Prod must have no basePath and `SEO_INDEXABLE=true` |
 | `src/app/robots.ts` | Private path disallows; sitemap + host only when indexable |
 | `src/app/sitemap.ts` | Indexable URLs only, with `lastModified` from the database |
 | `src/app/og.png/route.tsx` | Default 1200×630 share image |
@@ -2117,17 +2173,19 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 | `src/lib/locale-locations.ts` | Hindi/Kannada city translations; only translated cities are indexable |
 | `src/components/SiteHeading.tsx` | Page heroes always render `h1` (`secondary` → `h2` for extra slides); CMS level only changes the size class |
 | `src/app/(site)/_components/CatalogPageClient.tsx` | Listing cards include a crawlable `<a>` to each detail page; server-rendered first page of items |
-| `next.config.ts` | CSP (includes GA4 hosts), `X-Robots-Tag` when not indexable |
-| `.github/workflows/deploy-prod.yml` | Builds with `NEXT_PUBLIC_SEO_INDEXABLE=true` and the verification variables |
-| `scripts/deploy.sh` | Prod forces the flag; PreProd aborts if it is set |
-| `src/lib/admin-guide-hostinger-prod.ts` | nginx reference config with the www → apex redirect |
+| `next.config.ts` | CSP (includes GA4 hosts), `X-Robots-Tag` when not indexable (also blocked when basePath is set) |
+| `.github/workflows/deploy-prod.yml` | Builds with `NEXT_PUBLIC_SEO_INDEXABLE=true` + `verify-seo-build.mjs --env prod` |
+| `.github/workflows/deploy-preprod.yml` | Clears indexing flag; verifies PreProd SEO build |
+| `scripts/deploy.sh` | Prod forces the flag; PreProd unsets it and aborts if `.env` sets it; runs verify script after build |
+| `src/lib/admin-guide-hostinger-prod.ts` | nginx reference config; Production still needs the www → apex servers from Phase 1.6 applied on the VPS |
 
 **Environment variables (build time):**
 
 | Variable | Production | PreProd / local |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | `https://zigma-technologies.com` | PreProd/local address |
-| `NEXT_PUBLIC_SEO_INDEXABLE` | `true` (set by the workflow) | **unset** |
+| `NEXT_PUBLIC_BASE_PATH` | **unset** (domain root) | `/zigma-technologies` (forces noindex) |
+| `NEXT_PUBLIC_SEO_INDEXABLE` | `true` (set by the workflow) | **unset / empty** |
 | `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | optional (GitHub variable `GOOGLE_SITE_VERIFICATION`); not needed with DNS verification | unset |
 | `NEXT_PUBLIC_BING_SITE_VERIFICATION` | optional (GitHub variable `BING_SITE_VERIFICATION`) | unset |
 
@@ -2137,7 +2195,8 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 - Never set `document.title` or meta tags from client components.
 - Structured data must describe only what is visible on the page. No review/rating markup for your own company. Product markup needs a real offer (price).
 - One `h1` per page: use `SiteHeading role="pageHero"`; pass `secondary` for additional hero slides.
-- Never add `NEXT_PUBLIC_SEO_INDEXABLE=true` to PreProd or `.env` files.
+- Never add `NEXT_PUBLIC_SEO_INDEXABLE=true` to PreProd or `.env` files. Never build PreProd without `NEXT_PUBLIC_BASE_PATH=/zigma-technologies`.
+- After every PreProd or Prod deploy, run Appendix C checks (and step 1.3 B for PreProd).
 - Next.js 16: read `node_modules/next/dist/docs/` before changing metadata, caching or routing APIs; `revalidateTag` needs a second argument.
 
 ---
@@ -2158,14 +2217,17 @@ Print this or copy it into your sheet. Tick each box when the step and its **Exp
 - [ ] 0.5 Screaming Frog "before" crawl exported
 
 **Phase 1 — Technical fixes live**
-- [ ] 1.1 All changes committed and pushed
-- [ ] 1.2 PreProd deployed
-- [ ] 1.3 PreProd checks passed (noindex everywhere, pages work, one H1, share image)
-- [ ] 1.4 Branch merged; production deployed (database backup + migration)
-- [ ] 1.5 Production checks passed (index, follow; canonical; robots.txt; sitemap)
-- [ ] 1.6 nginx `www`/`http` → apex redirect live; `curl` checks show 301
+
+*(Status note — 17 Oct 2026 live audit: Production indexing/sitemap/canonicals look good. PreProd noindex and www→apex were **not** OK. Tick only after you re-verify.)*
+
+- [x] 1.1 All changes committed and pushed *(SEO Phase 1 on `master` via `#34`)*
+- [ ] 1.2 PreProd redeployed from current `master` *(required after noindex hardening)*
+- [ ] 1.3 PreProd checks passed (noindex everywhere, empty sitemap, no `Sitemap:` in robots.txt, pages work, one H1)
+- [x] 1.4 Branch merged; production deployed *(live Production serves indexable build)*
+- [x] 1.5 Production checks passed (index, follow; canonical; robots.txt; sitemap ~84 URLs) — re-run Appendix C after each deploy
+- [ ] 1.6 nginx `www`/`http` → apex redirect live; `curl` checks show 301 *(www still returned 200 on 17 Oct 2026)*
 - [ ] 1.7 Sitemap submitted to Google and Bing; top pages requested for indexing
-- [ ] 1.8 Old PreProd results removed (only if any appeared)
+- [ ] 1.8 Old PreProd results removed (do this if `site:justxsystems.com/zigma-technologies` shows pages)
 - [ ] 1.9 Search Console reports checked weekly for the first month
 
 **Phase 2 — Structured data**

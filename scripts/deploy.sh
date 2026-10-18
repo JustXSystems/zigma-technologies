@@ -188,6 +188,9 @@ if [[ "$ENV_NAME" == "preprod" ]]; then
   if grep -qE '^NEXT_PUBLIC_SEO_INDEXABLE=true' .env; then
     die "PreProd .env must NOT set NEXT_PUBLIC_SEO_INDEXABLE=true (PreProd must stay out of search results)."
   fi
+  # Belt-and-suspenders: never let a shell/export leak the prod flag into a PreProd build.
+  unset NEXT_PUBLIC_SEO_INDEXABLE || true
+  export NEXT_PUBLIC_SEO_INDEXABLE=
 else
   if grep -qE '^NEXT_PUBLIC_BASE_PATH=.+' .env; then
     die "Production .env must NOT set NEXT_PUBLIC_BASE_PATH (domain-root deploy on Zigma VPS)."
@@ -262,6 +265,7 @@ if [[ "$DO_BUILD" -eq 1 ]]; then
   else
     die ".next/routes-manifest.json missing after build"
   fi
+  node scripts/verify-seo-build.mjs --env "$ENV_NAME" || die "SEO build verification failed"
 else
   log "Skip build"
 fi

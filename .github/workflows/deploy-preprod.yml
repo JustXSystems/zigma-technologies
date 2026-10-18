@@ -95,11 +95,14 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /zigma-technologies
           NEXT_PUBLIC_SITE_URL: https://justxsystems.com/zigma-technologies
           MEDIA_BASE_URL: /assets
+          # Never index PreProd. Unset explicitly so a runner/org secret cannot leak through.
+          NEXT_PUBLIC_SEO_INDEXABLE: ''
         run: |
           set -euo pipefail
+          unset NEXT_PUBLIC_SEO_INDEXABLE || true
           npm ci
           npm run build
-          node -e "const b=require('./.next/routes-manifest.json').basePath||''; if(b!=='/zigma-technologies'){console.error('bad basePath',b); process.exit(1)} console.log('basePath',b)"
+          node scripts/verify-seo-build.mjs --env preprod
 
       - name: Package release tarball
         id: pack

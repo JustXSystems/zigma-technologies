@@ -41,10 +41,13 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /zigma-technologies
           NEXT_PUBLIC_SITE_URL: https://justxsystems.com/zigma-technologies
           MEDIA_BASE_URL: /assets
+          NEXT_PUBLIC_SEO_INDEXABLE: ''
         run: |
           set -euo pipefail
+          unset NEXT_PUBLIC_SEO_INDEXABLE || true
           npm ci
           npm run build
+          node scripts/verify-seo-build.mjs --env preprod
           chmod +x scripts/package-release.sh scripts/apply-release.sh
           ./scripts/package-release.sh --env preprod --out /tmp/zigma-preprod.tgz
 

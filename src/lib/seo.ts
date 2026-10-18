@@ -10,8 +10,14 @@ export function siteOrigin(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || 'https://zigma-technologies.com').replace(/\/$/, '');
 }
 
-/** Only builds made with NEXT_PUBLIC_SEO_INDEXABLE=true (production) may be indexed. */
+/**
+ * Only production builds may be indexed.
+ * PreProd always sets NEXT_PUBLIC_BASE_PATH — refuse indexing even if SEO_INDEXABLE
+ * was set by mistake (that regression shipped once; this guard prevents a repeat).
+ */
 export function isIndexable(): boolean {
+  const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || '').trim();
+  if (basePath && basePath !== '/') return false;
   return process.env.NEXT_PUBLIC_SEO_INDEXABLE === 'true';
 }
 

@@ -102,7 +102,7 @@ jobs:
           unset NEXT_PUBLIC_BASE_PATH || true
           npm ci
           npm run build
-          node -e "const b=require('./.next/routes-manifest.json').basePath||''; if(b){console.error('prod must not have basePath',b); process.exit(1)} console.log('basePath empty OK')"
+          node scripts/verify-seo-build.mjs --env prod
 
       - name: Package release tarball
         run: |
