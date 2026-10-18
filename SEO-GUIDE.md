@@ -18,7 +18,7 @@ Use this section to see **where you are right now**. Tick boxes in [Appendix F](
 
 | Check | Result |
 | --- | --- |
-| Phase 1 code on Production | **Done** (`247af69` / earlier `84f6344`) |
+| Phase 1 code on Production | **Done** (Meridian live `dbd988e`; earlier `247af69` / `84f6344`) |
 | Home, `/projects`, `/products`, `/services`, `/locations`, `/contact`, `/locations/bengaluru` | Each: `index, follow`, own canonical, **1** H1, brand once in title |
 | Sample project `/projects/amc-engineering-college-200kw-bangalore` | Own canonical; descriptive title; `index, follow` |
 | `/sitemap.xml` | **84** `<loc>` |
@@ -53,8 +53,8 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 | Company name, phone, email, street, Bengaluru, Karnataka, PIN | Present | Keep identical on GBP (Phase 5.1) |
 | Office hours | `Mon–Sat 9:30–18:30 IST` | Match GBP |
 | Social profile URLs (LinkedIn, Facebook, YouTube, …) | **All empty** → no `sameAs` in JSON-LD | Add real profile URLs in **Site Settings → Social links** |
-| Default meta description | Long keyword list | Replace with one 120–160 char sentence (formula in step 2.1) |
-| Default OG image in settings | Still points at square logo | **Clear the field** (site already serves `/og.png`) |
+| Default meta description | **Polished 18 Oct 2026** (114 chars; Phase 2.1 sentence) | Keep; tweak in Admin if needed |
+| Default OG image in settings | **Set to `/og.png`** (was square logo) | Done via `seo-phase2-polish.mjs` |
 | Rich Results Test | Not run yet | Step 2.2 on home + one project + one product + one service |
 
 ### Code hardening (shipped)
