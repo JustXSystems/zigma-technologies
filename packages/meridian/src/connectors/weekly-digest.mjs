@@ -12,17 +12,42 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
   const hard = findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
   const signals = scan?.report?.signals || {};
   const health = actions.find((a) => a.id === 'sitemap-health');
+  const form = actions.find((a) => a.id === 'form-health');
+  const images = actions.find((a) => a.id === 'image-weight');
   const draft = actions.find((a) => a.id === 'draft-meta');
   const gscAct = actions.filter((a) =>
     ['submit-sitemap', 'inspect-priority', 'inspect-sitemap-delta', 'act-auth'].includes(a.id)
   );
   const bingAct = actions.find((a) => a.id === 'bing-submit-sitemap');
+  const formOk = form?.ok === true;
 
   const humanChecklist = [
     { id: 'gsc-email', task: 'Check Search Console emails for issues', who: 'You', auto: false },
     { id: 'gbp-reviews', task: 'Reply to new Google Business Profile reviews', who: 'You', auto: false },
     { id: 'gbp-update', task: 'Post one GBP update', who: 'You', auto: false },
-    { id: 'enquiries', task: 'Check Admin → Enquiries (or GA4 enquiry_submit)', who: 'You', auto: false },
+    {
+      id: 'enquiries',
+      task: formOk
+        ? 'Skim Admin → Enquiries volume (form endpoints already probed OK)'
+        : 'Check Admin → Enquiries — form health probe failed',
+      who: 'You',
+      auto: formOk,
+      needed: true,
+    },
+    {
+      id: 'orphans',
+      task: `Add internal links to ${health?.data?.linkGraph?.orphanCount ?? '?'} orphan sitemap pages`,
+      who: 'You',
+      auto: false,
+      needed: (health?.data?.linkGraph?.orphanCount || 0) >= 3,
+    },
+    {
+      id: 'heavy-images',
+      task: `Compress ${images?.data?.heavyCount ?? 0} heavy image(s) on key pages`,
+      who: 'Developer',
+      auto: false,
+      needed: (images?.data?.heavyCount || 0) >= 1,
+    },
     {
       id: 'social-sameas',
       task: 'Add social profile URLs in Site Settings (clears SCHEMA_SAMEAS)',
@@ -50,6 +75,8 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     { id: 'scan', ok: !!scan?.ok, note: `Score ${score.overall ?? '—'} (${score.grade ?? '—'}) · ${trend?.message || 'no trend yet'}` },
     { id: 'draft-meta', ok: draft?.ok !== false, note: draft?.message || '—' },
     { id: 'sitemap-health', ok: health?.ok !== false, note: health?.message || '—' },
+    { id: 'form-health', ok: form?.ok !== false, note: form?.message || '—' },
+    { id: 'image-weight', ok: images?.ok !== false, note: images?.message || '—' },
     ...gscAct.map((a) => ({ id: a.id, ok: a.ok !== false || a.status === 'auth_required', note: a.message || a.status })),
     ...(bingAct ? [{ id: 'bing-submit-sitemap', ok: bingAct.ok !== false || bingAct.status === 'auth_required', note: bingAct.message }] : []),
   ];

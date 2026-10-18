@@ -8,6 +8,9 @@ import { applyAlt, applyMeta, draftAlt, draftMeta } from './connectors/meta-auto
 import { crawlSitemapHealth } from './connectors/sitemap-health.mjs';
 import { submitBingSitemap } from './connectors/bing-act.mjs';
 import { writeWeeklyDigest } from './connectors/weekly-digest.mjs';
+import { writeMonthlyDigest } from './connectors/monthly-digest.mjs';
+import { probeFormHealth } from './connectors/form-health.mjs';
+import { scanImageWeight } from './connectors/image-weight.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -167,6 +170,25 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'monthly-digest') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const scan = await runMeridian(profile, { outDir: resolve(outDir) });
+      const result = await writeMonthlyDigest(profile, { scan, actions: [], outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'form-health') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await probeFormHealth(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'image-weight') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await scanImageWeight(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
@@ -204,12 +226,13 @@ Usage:
   meridian act inspect-priority --profile ./profiles/site.json [--limit 5]
   meridian act inspect-sitemap-delta --profile ./profiles/site.json [--limit 10]
   meridian act sitemap-health --profile ./profiles/site.json [--limit 120]
+  meridian act form-health | image-weight --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
-  meridian act weekly-digest --profile ./profiles/site.json
+  meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = scan + draft/apply meta+alt + sitemap health + Bing submit + GSC act + weekly digest + webhook.
+Autopilot = scan + meta/alt + sitemap health/orphans + form health + image weight + Bing/GSC + weekly/monthly digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

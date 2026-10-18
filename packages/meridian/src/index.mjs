@@ -9,5 +9,8 @@ export { draftMeta, applyMeta, draftAlt, applyAlt } from './connectors/meta-auto
 export { crawlSitemapHealth } from './connectors/sitemap-health.mjs';
 export { submitBingSitemap, submitBingUrls } from './connectors/bing-act.mjs';
 export { writeWeeklyDigest } from './connectors/weekly-digest.mjs';
+export { writeMonthlyDigest } from './connectors/monthly-digest.mjs';
+export { probeFormHealth } from './connectors/form-health.mjs';
+export { scanImageWeight } from './connectors/image-weight.mjs';
 export { renderHtmlReport } from './report/html.mjs';
 export { renderMarkdownReport } from './report/markdown.mjs';

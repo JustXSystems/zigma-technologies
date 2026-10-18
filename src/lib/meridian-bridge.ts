@@ -16,6 +16,8 @@ export type MeridianAct =
   | { action: 'inspect-priority'; limit?: number }
   | { action: 'inspect-sitemap-delta'; limit?: number }
   | { action: 'sitemap-health'; limit?: number }
+  | { action: 'form-health' }
+  | { action: 'image-weight' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -233,6 +235,12 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     const args = ['act', 'sitemap-health', '--profile', profile];
     if (act.limit) args.push('--limit', String(act.limit));
     return spawnMeridian(args);
+  }
+  if (act.action === 'form-health') {
+    return spawnMeridian(['act', 'form-health', '--profile', profile]);
+  }
+  if (act.action === 'image-weight') {
+    return spawnMeridian(['act', 'image-weight', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

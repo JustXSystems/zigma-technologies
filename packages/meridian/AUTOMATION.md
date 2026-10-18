@@ -6,72 +6,59 @@ Once secrets are set (see [SETUP.md](./SETUP.md)), Meridian is designed so **wee
 
 | Layer | What it does | Trigger |
 | --- | --- | --- |
-| **Autopilot** | Scan → CMS gaps → **draft meta + alt** → (optional apply) → **sitemap health crawl** → **Bing sitemap** → (if OAuth) GSC submit + inspect priority + **new URLs** → **Phase 9 weekly digest** → score trend → webhook | CLI / Admin / cron / CI |
+| **Autopilot** | Scan → draft/apply meta+alt → **sitemap health + orphans/thin** → **form health** → **image weight** → Bing sitemap → GSC act → **weekly + monthly digests** → webhook | CLI / Admin / cron / CI |
 | **Post-deploy** | Autopilot after Production deploy | `scripts/deploy.sh` |
 | **Weekly schedule** | GitHub Action cron (Mondays 03:30 UTC) | `.github/workflows/meridian-autopilot.yml` |
-| **VPS cron** | Same autopilot on the server | `scripts/meridian-cron.sh` + crontab |
-| **Score history** | `score-history.jsonl` + trend | Every scan |
-| **Weekly digest history** | `weekly-digest-history.jsonl` (12 weeks) | Every autopilot |
+| **VPS cron** | Same autopilot on the server | `scripts/meridian-cron.sh` |
+| **Score / digest history** | `score-history.jsonl`, `weekly-digest-history.jsonl`, `monthly-digest-history.jsonl` | Every run |
 | **Webhook** | POST summary + remaining human checklist | `MERIDIAN_WEBHOOK_URL` |
 
 ## Commands
 
 ```bash
-# Full automation (Production)
-npm run meridian:autopilot
+npm run meridian:autopilot          # full loop (prod profile auto-applies meta/alt)
+npm run meridian:autopilot:preprod  # scan + drafts + health (no search-engine act)
 
-# Autopilot + write empty CMS meta + image alt
-npm run meridian:autopilot:apply
-
-# PreProd (scan + drafts + health — never touches Google/Bing act)
-npm run meridian:autopilot:preprod
-
-# Meta / alt
-npm run meridian:meta:draft && npm run meridian:meta:apply:dry
-npm run meridian:alt:draft && npm run meridian:alt:apply:dry
-
-# Sitemap health (no auth) + Bing submit + GSC delta
-npm run meridian:act:health
-npm run meridian:act:bing
-npm run meridian:act:delta
+npm run meridian:act:health         # sitemap health + link-graph.json
+npm run meridian:act:form           # enquiry form / contact / API probe
+npm run meridian:act:images         # heavy images on key pages
+npm run meridian:digest:monthly     # Phase 9.2 monthly report stub
 ```
 
 ## Autopilot behaviour (exact)
 
-1. Load SiteProfile (`zigma.prod.json`).
-2. Full technical crawl + connectors (GSC/GA4/Bing/PSI if secrets set).
-3. CMS SEO gaps via `scripts/meridian-cms-gaps.mjs`.
-4. Report + `score-history.jsonl`.
-5. **Draft meta** → `meta-drafts.json` (Appendix B).
-6. **Draft alt** → `alt-drafts.json` (Phase 3.6 title-based).
-7. **Apply** meta/alt only if `MERIDIAN_AUTO_APPLY_META=1` / `MERIDIAN_AUTO_APPLY_ALT=1` / `--apply-meta` / Admin “Autopilot + apply”.
-8. **Sitemap health**: crawl up to 120 sitemap URLs for 4xx/5xx, unexpected noindex, soft-404, canonical mismatch → `sitemap-health.json`.
-9. **Bing** `SubmitFeed` if `MERIDIAN_BING_API_KEY` set (independent of Google).
-10. If Google OAuth ready: submit GSC sitemap + inspect priority + **sitemap delta** new URLs.
-11. **Weekly digest** (`weekly-digest.md` / `.json`) — automated rows + remaining human Phase 9.1 tasks.
-12. `autopilot-latest.json` + optional webhook.
-13. Exit `1` on critical/high findings (including health) or `MERIDIAN_FAIL_ON_REGRESSION=1` score drop ≥3.
+1. Technical crawl + connectors (GSC/GA4/Bing/PSI if secrets set).
+2. CMS SEO gaps.
+3. **Draft + apply** meta and image alt when `autoApplyMeta` / `autoApplyAlt` (Zigma prod profile: **on**) or env flags.
+4. **Sitemap health** (4xx/5xx/noindex/soft-404/canonical) + **orphan / thin** link graph → `sitemap-health.json` + `link-graph.json`.
+5. **Form health** — schema GET, `/contact` markup, enquiry API alive (empty POST → 4xx) → `form-health.json`.
+6. **Image weight** — HEAD oversized images on sample paths → `image-weight.json`.
+7. **Bing** SubmitFeed if `MERIDIAN_BING_API_KEY`.
+8. **GSC** submit + inspect priority + sitemap delta if Google OAuth ready.
+9. **Weekly digest** (Phase 9.1) + **monthly digest** (Phase 9.2 template, auto-fills connector metrics).
+10. `autopilot-latest.json` + optional webhook.
+11. Exit `1` on critical/high findings or score regression when `MERIDIAN_FAIL_ON_REGRESSION=1`.
 
 ## Optional env
 
 | Variable | Effect |
 | --- | --- |
-| `MERIDIAN_WEBHOOK_URL` | Notify after autopilot (includes human checklist count) |
+| `MERIDIAN_WEBHOOK_URL` | Notify after autopilot |
 | `MERIDIAN_FAIL_ON_REGRESSION=1` | CI fails on score drop ≥3 |
-| `MERIDIAN_AUTO_APPLY_META=1` | Write drafted meta (+ alt) into empty CMS fields |
-| `MERIDIAN_AUTO_APPLY_ALT=1` | Write drafted image alt only |
-| `MERIDIAN_BING_API_KEY` | Enables Bing sitemap submit in autopilot |
+| `MERIDIAN_AUTO_APPLY_META=1` | Force apply meta (+ alt) even if profile flag off |
+| `MERIDIAN_AUTO_APPLY_ALT=1` | Force apply alt only |
+| `MERIDIAN_BING_API_KEY` | Bing sitemap submit |
+| `MERIDIAN_GOOGLE_*` / `MERIDIAN_GA4_PROPERTY_ID` | GSC/GA4 signals + act |
 
 ## What still cannot be automated
 
 | Step | Why |
 | --- | --- |
-| Google OAuth consent (first time) | Human must approve company account |
-| DNS TXT for GSC domain verify | Registrar UI |
-| GBP postcard / reviews / posts | Google physical + relationship work |
-| Hand-polished marketing copy & photo alt | Quality judgment (auto-draft is a starting point) |
+| Google OAuth consent / DNS GSC verify | Human + registrar |
+| GBP postcard, reviews, posts | Google physical + relationship |
+| Polishing marketing copy & photo alt beyond drafts | Quality judgment |
 | Buying/asking for backlinks | Relationship work |
 
 ## Admin
 
-**SEO → Meridian** — Run autopilot, Draft/Apply meta & alt, Sitemap health, GSC/Bing sitemap, Inspect URLs. Phase 9 human checklist appears when digest finds remaining manual tasks.
+**SEO → Meridian** — Run autopilot, form/image/sitemap probes, draft/apply, GSC/Bing. Phase 9 human checklist + monthly metrics appear after autopilot.

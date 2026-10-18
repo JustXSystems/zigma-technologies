@@ -38,8 +38,10 @@
     "inspectLimit": 5,
     "deltaLimit": 10,
     "healthLimit": 120,
-    "autoApplyMeta": false,
-    "autoApplyAlt": false
+    "thinWords": 280,
+    "maxImageBytes": 350000,
+    "autoApplyMeta": true,
+    "autoApplyAlt": true
   },
   "outputDir": "../../storage/meridian/zigma-prod"
 }

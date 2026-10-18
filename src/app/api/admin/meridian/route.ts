@@ -115,13 +115,17 @@ export async function POST(request: Request) {
       action === 'apply-meta' ||
       action === 'draft-alt' ||
       action === 'apply-alt' ||
-      action === 'sitemap-health'
+      action === 'sitemap-health' ||
+      action === 'form-health' ||
+      action === 'image-weight'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
       else if (action === 'apply-meta') act = { action: 'apply-meta', dryRun: !!body.dryRun, force: !!body.force };
       else if (action === 'draft-alt') act = { action: 'draft-alt' };
       else if (action === 'apply-alt') act = { action: 'apply-alt', dryRun: !!body.dryRun, force: !!body.force };
+      else if (action === 'form-health') act = { action: 'form-health' };
+      else if (action === 'image-weight') act = { action: 'image-weight' };
       else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;

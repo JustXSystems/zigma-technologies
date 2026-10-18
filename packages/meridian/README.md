@@ -70,19 +70,19 @@ npm run meridian:act:inspect    # Inspect home + sample paths
 
 Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
 
-## Meta / alt / health / digest (M4–M5)
+## Meta / alt / health / conversion (M4–M6)
 
 ```bash
-npm run meridian:meta:draft          # Appendix B drafts → meta-drafts.json
-npm run meridian:alt:draft           # catalog_media alt drafts
-npm run meridian:autopilot:apply     # full loop + fill empty CMS meta + alt
-npm run meridian:act:health          # crawl sitemap for 4xx/noindex/soft-404
+npm run meridian:autopilot           # full loop (prod auto-applies empty meta/alt)
+npm run meridian:act:health          # 4xx/noindex + orphans/thin → link-graph.json
+npm run meridian:act:form            # enquiry form / contact / API probe
+npm run meridian:act:images          # oversized images on key pages
+npm run meridian:digest:monthly      # Phase 9.2 monthly report stub
 npm run meridian:act:bing            # Bing SubmitFeed
-npm run meridian:act:delta           # GSC inspect URLs new since last snapshot
+npm run meridian:act:delta           # GSC inspect new sitemap URLs
 ```
 
-Autopilot also writes `weekly-digest.md` (Phase 9: automated vs remaining human tasks).  
-Set `MERIDIAN_AUTO_APPLY_META=1` on the VPS to apply drafts on every weekly cron (empty fields only).
+Writes `weekly-digest.md`, `monthly-digest.md`, `form-health.json`, `image-weight.json`.
 
 ## CI gate
 

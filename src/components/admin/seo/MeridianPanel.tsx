@@ -365,8 +365,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: <strong>Autopilot</strong> = scan + meta/alt drafts + sitemap health + Bing/GSC act +
-            Phase 9 weekly digest. Secrets: <code>packages/meridian/SETUP.md</code> / SEO-GUIDE Appendix G.
+            Maximum automation: <strong>Autopilot</strong> = scan + meta/alt + sitemap health/orphans + form health +
+            image weight + Bing/GSC + weekly/monthly digests. Secrets: <code>packages/meridian/SETUP.md</code>.
           </p>
         </div>
         <div className="actions">
@@ -419,9 +419,25 @@ export default function MeridianPanel() {
             type="button"
             disabled={pending}
             onClick={() => postAction({ action: 'sitemap-health', limit: 120 }, 'Sitemap health crawl')}
-            title="Check every sitemap URL for 4xx/5xx, noindex, soft-404, canonical mismatch"
+            title="Health + orphan/thin link graph across sitemap URLs"
           >
             Sitemap health
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'form-health' }, 'Form health probe')}
+            title="Probe enquiry form schema, /contact, and enquiry API"
+          >
+            Form health
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'image-weight' }, 'Image weight scan')}
+            title="Find oversized images on key pages (Phase 4 lite)"
+          >
+            Image weight
           </button>
           <button
             type="button"

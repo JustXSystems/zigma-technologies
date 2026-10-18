@@ -8,19 +8,24 @@ import { applyAlt, applyMeta, draftAlt, draftMeta } from './connectors/meta-auto
 import { crawlSitemapHealth } from './connectors/sitemap-health.mjs';
 import { submitBingSitemap } from './connectors/bing-act.mjs';
 import { writeWeeklyDigest } from './connectors/weekly-digest.mjs';
+import { writeMonthlyDigest } from './connectors/monthly-digest.mjs';
+import { probeFormHealth } from './connectors/form-health.mjs';
+import { scanImageWeight } from './connectors/image-weight.mjs';
+
+function mergeFindings(scan, result) {
+  if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
+  scan.report.findings.push(...result.findings);
+  const hard = result.findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
+  if (hard.length) {
+    scan.hardFailCount = (scan.hardFailCount || 0) + hard.length;
+    scan.ok = false;
+  }
+}
 
 /**
- * Maximum automation loop:
- * 1) Full scan (technical + connectors + CMS gaps)
- * 2) Draft (+ optional apply) meta + image alt
- * 3) Sitemap health crawl (no auth)
- * 4) Bing sitemap submit (if API key)
- * 5) GSC act: submit + inspect priority + sitemap delta (if OAuth)
- * 6) Weekly Phase 9 digest
- * 7) autopilot-latest.json + webhook
- *
- * @param {object} profile
- * @param {{ outDir?: string, skipAct?: boolean, inspectLimit?: number, applyMeta?: boolean, applyAlt?: boolean, skipHealth?: boolean }} [opts]
+ * Maximum automation loop (M5 + M6):
+ * scan → draft/apply meta+alt → sitemap health+link graph → form health → image weight
+ * → Bing → GSC act → weekly + monthly digests → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
   const started = Date.now();
@@ -76,28 +81,33 @@ export async function runAutopilot(profile, opts = {}) {
     });
   }
 
-  // --- Sitemap health (always on indexable; capped crawl, no auth) ---
+  // --- Sitemap health + link graph ---
   if (!opts.skipHealth && profile.autopilot?.skipHealth !== true) {
     const health = await crawlSitemapHealth(profile, {
       outDir,
       limit: opts.healthLimit ?? profile.autopilot?.healthLimit ?? 120,
     });
     actions.push({ id: 'sitemap-health', ...health });
-    // Merge health findings into scan report for digest/hard-fail awareness
-    if (Array.isArray(health.findings) && health.findings.length && scan.report?.findings) {
-      scan.report.findings.push(...health.findings);
-      const hard = health.findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
-      if (hard.length) {
-        scan.hardFailCount = (scan.hardFailCount || 0) + hard.length;
-        scan.ok = false;
-      }
-    }
+    mergeFindings(scan, health);
   }
 
-  // --- Bing act (independent of Google) ---
+  // --- Form / enquiry health (Phase 9.1) ---
+  if (profile.autopilot?.skipFormHealth !== true) {
+    const form = await probeFormHealth(profile, { outDir });
+    actions.push({ id: 'form-health', ...form });
+    mergeFindings(scan, form);
+  }
+
+  // --- Image weight on key pages (Phase 4 lite) ---
+  if (profile.autopilot?.skipImageWeight !== true) {
+    const images = await scanImageWeight(profile, { outDir });
+    actions.push({ id: 'image-weight', ...images });
+    mergeFindings(scan, images);
+  }
+
+  // --- Bing act ---
   if (profile.indexable && !opts.skipAct) {
-    const bing = await submitBingSitemap(profile);
-    actions.push({ id: 'bing-submit-sitemap', ...bing });
+    actions.push({ id: 'bing-submit-sitemap', ...(await submitBingSitemap(profile)) });
   }
 
   // --- GSC act ---
@@ -131,9 +141,12 @@ export async function runAutopilot(profile, opts = {}) {
     });
   }
 
-  // --- Weekly digest (Phase 9) ---
+  // --- Digests ---
   const digest = await writeWeeklyDigest(profile, { scan, actions, outDir });
   actions.push({ id: 'weekly-digest', ...digest });
+
+  const monthly = await writeMonthlyDigest(profile, { scan, actions, outDir });
+  actions.push({ id: 'monthly-digest', ...monthly });
 
   const trend = scan.report.trend || null;
   const autopilot = {
@@ -152,7 +165,9 @@ export async function runAutopilot(profile, opts = {}) {
     hardFailCount: scan.hardFailCount,
     findingCount: scan.report.findings?.length ?? 0,
     actions,
-    actionsOk: actions.every((a) => a.ok !== false || a.status === 'auth_required' || a.status === 'skipped' || a.status === 'degraded'),
+    actionsOk: actions.every(
+      (a) => a.ok !== false || a.status === 'auth_required' || a.status === 'skipped' || a.status === 'degraded'
+    ),
     paths: scan.paths,
   };
 
@@ -164,6 +179,7 @@ export async function runAutopilot(profile, opts = {}) {
     metaDrafts: draftOut,
     altDrafts: altOut,
     weeklyDigest: digest.data?.paths?.mdPath,
+    monthlyDigest: monthly.data?.paths?.mdPath,
   };
 
   await maybeWebhook(autopilot, digest);
