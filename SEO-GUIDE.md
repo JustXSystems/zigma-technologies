@@ -63,7 +63,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** Autopilot (`npm run meridian:autopilot`) = scan + **auto-apply meta/alt** + sitemap health (**orphans/thin**) + **form health** + **image weight** + Bing/GSC act + **weekly + monthly digests**; weekly GH Action + VPS cron; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Automation map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
+- **Meridian (SEO Command):** Autopilot = scan + auto-apply meta/alt + health/orphans + form health + **image WebP optimize** + **orphan hub footers** + **content briefs** + **JSON-LD validate** + Bing/GSC act + weekly/monthly digests; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 

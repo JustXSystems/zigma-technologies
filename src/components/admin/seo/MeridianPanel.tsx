@@ -365,8 +365,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: <strong>Autopilot</strong> = scan + meta/alt + sitemap health/orphans + form health +
-            image weight + Bing/GSC + weekly/monthly digests. Secrets: <code>packages/meridian/SETUP.md</code>.
+            Maximum automation: <strong>Autopilot</strong> = scan + meta/alt + health/orphans + form + image
+            optimize + orphan fix + content briefs + schema + Bing/GSC + digests.
           </p>
         </div>
         <div className="actions">
@@ -438,6 +438,36 @@ export default function MeridianPanel() {
             title="Find oversized images on key pages (Phase 4 lite)"
           >
             Image weight
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'image-optimize' }, 'Optimizing heavy images')}
+            title="Compress heavy images to WebP via sharp"
+          >
+            Optimize images
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'orphan-remediate', apply: true }, 'Remediating orphans')}
+            title="Prescribe hub links + apply catalog footers"
+          >
+            Fix orphans
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'content-briefs' }, 'Writing content briefs')}
+          >
+            Content briefs
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'schema-validate' }, 'Validating JSON-LD')}
+          >
+            Schema check
           </button>
           <button
             type="button"

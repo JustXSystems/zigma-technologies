@@ -11,6 +11,10 @@ import { writeWeeklyDigest } from './connectors/weekly-digest.mjs';
 import { writeMonthlyDigest } from './connectors/monthly-digest.mjs';
 import { probeFormHealth } from './connectors/form-health.mjs';
 import { scanImageWeight } from './connectors/image-weight.mjs';
+import { remediateOrphans } from './connectors/orphan-remediate.mjs';
+import { optimizeHeavyImages } from './connectors/image-optimize.mjs';
+import { writeContentBriefs } from './connectors/content-briefs.mjs';
+import { validateSchema } from './connectors/schema-validate.mjs';
 
 function mergeFindings(scan, result) {
   if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
@@ -103,6 +107,46 @@ export async function runAutopilot(profile, opts = {}) {
     const images = await scanImageWeight(profile, { outDir });
     actions.push({ id: 'image-weight', ...images });
     mergeFindings(scan, images);
+
+    // Optimize heavy images (sharp) when flagged
+    if ((images.data?.heavyCount || 0) > 0 && profile.autopilot?.skipImageOptimize !== true) {
+      const opt = await optimizeHeavyImages(profile, {
+        outDir,
+        apply:
+          opts.optimizeImages === true ||
+          process.env.MERIDIAN_AUTO_OPTIMIZE_IMAGES === '1' ||
+          profile.autopilot?.autoOptimizeImages === true,
+      });
+      actions.push({ id: 'image-optimize', ...opt });
+    }
+  }
+
+  // --- Orphan prescriptions (+ optional catalog hub footer apply) ---
+  if (profile.autopilot?.skipOrphanRemediate !== true) {
+    const orphans = await remediateOrphans(profile, {
+      outDir,
+      orphans: actions.find((a) => a.id === 'sitemap-health')?.data?.linkGraph?.orphans,
+      apply:
+        opts.applyOrphans === true ||
+        process.env.MERIDIAN_AUTO_APPLY_ORPHANS === '1' ||
+        profile.autopilot?.autoApplyOrphans === true,
+    });
+    actions.push({ id: 'orphan-remediate', ...orphans });
+    mergeFindings(scan, orphans);
+  }
+
+  // --- Content briefs for thin/orphan pages ---
+  if (profile.autopilot?.skipContentBriefs !== true) {
+    const briefs = await writeContentBriefs(profile, { outDir });
+    actions.push({ id: 'content-briefs', ...briefs });
+    mergeFindings(scan, briefs);
+  }
+
+  // --- JSON-LD / Rich Results readiness ---
+  if (profile.autopilot?.skipSchemaValidate !== true) {
+    const schema = await validateSchema(profile, { outDir });
+    actions.push({ id: 'schema-validate', ...schema });
+    mergeFindings(scan, schema);
   }
 
   // --- Bing act ---

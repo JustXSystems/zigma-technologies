@@ -200,8 +200,9 @@ Fails the pipeline if hard technical findings exist (same contract as today’s 
 | **M3 — Autopilot** | `meridian autopilot`: scan + CMS gaps + act + trend + history + weekly cron/GH + post-deploy + webhook | Hands-off ops after secrets |
 | **M4 — Meta write-back + sitemap delta** | Auto-draft/apply CMS meta (Appendix B); inspect new sitemap URLs since last run | Content + crawl automation |
 | **M5 — Ops loop** | Sitemap health; Bing SubmitFeed; image alt draft/apply; Phase 9 weekly digest | Hands-off weekly ops |
-| **M6 — Conversion & content ops (current)** | Orphan/thin link graph; form/enquiry health; image-weight scan; monthly digest; prod auto-apply meta/alt | Maximum Phase 4/9 automation without OAuth |
-| **M7 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
+| **M6 — Conversion & content ops** | Orphan/thin link graph; form health; image-weight; monthly digest; auto-apply meta/alt | Phase 4/9 without OAuth |
+| **M7 — Remediation loop (current)** | Auto-optimize heavy images (WebP); orphan hub footers; content briefs; JSON-LD validate | Close the loop on crawl findings |
+| **M8 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
 
 ---
 

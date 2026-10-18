@@ -70,19 +70,17 @@ npm run meridian:act:inspect    # Inspect home + sample paths
 
 Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
 
-## Meta / alt / health / conversion (M4–M6)
+## Automation (M4–M7)
 
 ```bash
-npm run meridian:autopilot           # full loop (prod auto-applies empty meta/alt)
-npm run meridian:act:health          # 4xx/noindex + orphans/thin → link-graph.json
-npm run meridian:act:form            # enquiry form / contact / API probe
-npm run meridian:act:images          # oversized images on key pages
-npm run meridian:digest:monthly      # Phase 9.2 monthly report stub
-npm run meridian:act:bing            # Bing SubmitFeed
-npm run meridian:act:delta           # GSC inspect new sitemap URLs
+npm run meridian:autopilot           # full remediation loop
+npm run meridian:act:optimize        # heavy images → WebP + DB url swap
+npm run meridian:act:orphans         # hub link prescriptions + catalog footers
+npm run meridian:act:briefs          # Phase 7 content briefs for thin/orphan pages
+npm run meridian:act:schema          # JSON-LD / sameAs readiness
+npm run meridian:act:health          # sitemap health + link-graph
+npm run meridian:digest:monthly
 ```
-
-Writes `weekly-digest.md`, `monthly-digest.md`, `form-health.json`, `image-weight.json`.
 
 ## CI gate
 

@@ -18,6 +18,10 @@ export type MeridianAct =
   | { action: 'sitemap-health'; limit?: number }
   | { action: 'form-health' }
   | { action: 'image-weight' }
+  | { action: 'image-optimize' }
+  | { action: 'orphan-remediate'; apply?: boolean }
+  | { action: 'content-briefs' }
+  | { action: 'schema-validate' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -241,6 +245,20 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'image-weight') {
     return spawnMeridian(['act', 'image-weight', '--profile', profile]);
+  }
+  if (act.action === 'image-optimize') {
+    return spawnMeridian(['act', 'image-optimize', '--profile', profile]);
+  }
+  if (act.action === 'orphan-remediate') {
+    const args = ['act', 'orphan-remediate', '--profile', profile];
+    if (act.apply) args.push('--apply');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'content-briefs') {
+    return spawnMeridian(['act', 'content-briefs', '--profile', profile]);
+  }
+  if (act.action === 'schema-validate') {
+    return spawnMeridian(['act', 'schema-validate', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

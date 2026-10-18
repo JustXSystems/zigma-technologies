@@ -11,6 +11,10 @@ import { writeWeeklyDigest } from './connectors/weekly-digest.mjs';
 import { writeMonthlyDigest } from './connectors/monthly-digest.mjs';
 import { probeFormHealth } from './connectors/form-health.mjs';
 import { scanImageWeight } from './connectors/image-weight.mjs';
+import { remediateOrphans } from './connectors/orphan-remediate.mjs';
+import { optimizeHeavyImages } from './connectors/image-optimize.mjs';
+import { writeContentBriefs } from './connectors/content-briefs.mjs';
+import { validateSchema } from './connectors/schema-validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -189,6 +193,36 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'image-optimize') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await optimizeHeavyImages(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--dry-run'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'orphan-remediate') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await remediateOrphans(profile, {
+        outDir: resolve(outDir),
+        apply: argv.includes('--apply'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'content-briefs') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeContentBriefs(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'schema-validate') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await validateSchema(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
@@ -226,13 +260,14 @@ Usage:
   meridian act inspect-priority --profile ./profiles/site.json [--limit 5]
   meridian act inspect-sitemap-delta --profile ./profiles/site.json [--limit 10]
   meridian act sitemap-health --profile ./profiles/site.json [--limit 120]
-  meridian act form-health | image-weight --profile ./profiles/site.json
+  meridian act form-health | image-weight | image-optimize --profile ./profiles/site.json
+  meridian act orphan-remediate [--apply] | content-briefs | schema-validate --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = scan + meta/alt + sitemap health/orphans + form health + image weight + Bing/GSC + weekly/monthly digests.
+Autopilot = scan + meta/alt + health/orphans + form + images(+optimize) + orphan fix + briefs + schema + Bing/GSC + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

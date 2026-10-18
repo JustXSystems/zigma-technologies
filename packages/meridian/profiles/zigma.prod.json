@@ -41,7 +41,9 @@
     "thinWords": 280,
     "maxImageBytes": 350000,
     "autoApplyMeta": true,
-    "autoApplyAlt": true
+    "autoApplyAlt": true,
+    "autoApplyOrphans": true,
+    "autoOptimizeImages": true
   },
   "outputDir": "../../storage/meridian/zigma-prod"
 }

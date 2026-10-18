@@ -117,7 +117,11 @@ export async function POST(request: Request) {
       action === 'apply-alt' ||
       action === 'sitemap-health' ||
       action === 'form-health' ||
-      action === 'image-weight'
+      action === 'image-weight' ||
+      action === 'image-optimize' ||
+      action === 'orphan-remediate' ||
+      action === 'content-briefs' ||
+      action === 'schema-validate'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -126,6 +130,10 @@ export async function POST(request: Request) {
       else if (action === 'apply-alt') act = { action: 'apply-alt', dryRun: !!body.dryRun, force: !!body.force };
       else if (action === 'form-health') act = { action: 'form-health' };
       else if (action === 'image-weight') act = { action: 'image-weight' };
+      else if (action === 'image-optimize') act = { action: 'image-optimize' };
+      else if (action === 'orphan-remediate') act = { action: 'orphan-remediate', apply: !!body.apply };
+      else if (action === 'content-briefs') act = { action: 'content-briefs' };
+      else if (action === 'schema-validate') act = { action: 'schema-validate' };
       else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;
