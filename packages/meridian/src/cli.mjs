@@ -4,7 +4,10 @@ import { loadProfile, runMeridian } from './orchestrator.mjs';
 import { runAutopilot } from './autopilot.mjs';
 import { inspectPriorityUrls, inspectUrl, submitSitemap } from './connectors/gsc-act.mjs';
 import { inspectSitemapDelta } from './connectors/sitemap-delta.mjs';
-import { applyMeta, draftMeta } from './connectors/meta-automation.mjs';
+import { applyAlt, applyMeta, draftAlt, draftMeta } from './connectors/meta-automation.mjs';
+import { crawlSitemapHealth } from './connectors/sitemap-health.mjs';
+import { submitBingSitemap } from './connectors/bing-act.mjs';
+import { writeWeeklyDigest } from './connectors/weekly-digest.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -57,6 +60,7 @@ export async function runCli(argv) {
       outDir: outDir ? resolve(outDir) : undefined,
       skipAct,
       applyMeta: applyMetaFlag,
+      applyAlt: applyMetaFlag || argv.includes('--apply-alt'),
       inspectLimit: Number(argValue(argv, '--limit') || 5),
     });
     console.log(`  score:  ${result.report.scorecard.overall} (${result.report.scorecard.grade})`);
@@ -88,6 +92,12 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'bing-submit-sitemap') {
+      const feed = argValue(argv, '--feed');
+      const result = await submitBingSitemap(profile, feed);
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'inspect-url') {
       const url = argValue(argv, '--url') || profile.origin;
       const result = await inspectUrl(profile, url);
@@ -107,6 +117,13 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'sitemap-health') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const limit = Number(argValue(argv, '--limit') || 120);
+      const result = await crawlSitemapHealth(profile, { outDir: resolve(outDir), limit });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'draft-meta') {
       const outFile = argValue(argv, '--out');
       const result = await draftMeta(profile, outFile ? { outFile: resolve(outFile) } : {});
@@ -122,6 +139,31 @@ export async function runCli(argv) {
         force,
         file: file ? resolve(file) : undefined,
       });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'draft-alt') {
+      const outFile = argValue(argv, '--out');
+      const result = await draftAlt(profile, outFile ? { outFile: resolve(outFile) } : {});
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'apply-alt') {
+      const file = argValue(argv, '--file');
+      const force = argv.includes('--force');
+      const dry = argv.includes('--dry-run');
+      const result = await applyAlt(profile, {
+        apply: !dry,
+        force,
+        file: file ? resolve(file) : undefined,
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'weekly-digest') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const scan = await runMeridian(profile, { outDir: resolve(outDir) });
+      const result = await writeWeeklyDigest(profile, { scan, actions: [], outDir: resolve(outDir) });
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
@@ -157,21 +199,24 @@ Usage:
   meridian verify --profile ./profiles/site.json
   meridian autopilot --profile ./profiles/site.json [--skip-act] [--apply-meta] [--limit 5]
   meridian act submit-sitemap --profile ./profiles/site.json [--feed https://…/sitemap.xml]
+  meridian act bing-submit-sitemap --profile ./profiles/site.json
   meridian act inspect-url --profile ./profiles/site.json --url https://…
   meridian act inspect-priority --profile ./profiles/site.json [--limit 5]
   meridian act inspect-sitemap-delta --profile ./profiles/site.json [--limit 10]
-  meridian act draft-meta --profile ./profiles/site.json
-  meridian act apply-meta --profile ./profiles/site.json [--dry-run] [--force]
+  meridian act sitemap-health --profile ./profiles/site.json [--limit 120]
+  meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
+  meridian act weekly-digest --profile ./profiles/site.json
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = scan + draft meta + (optional apply) + submit sitemap + inspect priority + new sitemap URLs + trend + webhook.
+Autopilot = scan + draft/apply meta+alt + sitemap health + Bing submit + GSC act + weekly digest + webhook.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY
   MERIDIAN_WEBHOOK_URL          POST summary JSON after autopilot
   MERIDIAN_FAIL_ON_REGRESSION=1 Fail autopilot/verify CI when score drops ≥3
-  MERIDIAN_AUTO_APPLY_META=1    Autopilot writes drafted meta into CMS (empty fields only)
+  MERIDIAN_AUTO_APPLY_META=1    Write drafted meta (+ alt) into CMS empty fields
+  MERIDIAN_AUTO_APPLY_ALT=1     Write drafted image alt only
 
 Docs: packages/meridian/SETUP.md · AUTOMATION.md
 `);

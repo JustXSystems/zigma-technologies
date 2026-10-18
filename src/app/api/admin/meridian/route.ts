@@ -4,6 +4,7 @@ import {
   meridianConnectorReadiness,
   meridianLatestPaths,
   readLatestAutopilot,
+  readLatestDigest,
   readLatestMeridianReport,
   runMeridianAct,
   runMeridianCli,
@@ -15,7 +16,7 @@ import { readFile } from 'node:fs/promises';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 /** Live crawl + connectors can exceed default serverless limits on some hosts. */
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 function parseEnv(raw: unknown): MeridianEnv {
   return raw === 'preprod' ? 'preprod' : 'prod';
@@ -47,8 +48,9 @@ export async function GET(request: Request) {
     }
     const report = await readLatestMeridianReport(env);
     const autopilot = await readLatestAutopilot(env);
+    const digest = await readLatestDigest(env);
     const readiness = meridianConnectorReadiness();
-    return NextResponse.json({ env, report, autopilot, hasReport: !!report, readiness });
+    return NextResponse.json({ env, report, autopilot, digest, hasReport: !!report, readiness });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
     return NextResponse.json({ error: msg }, { status: authStatus(e) });
@@ -94,6 +96,7 @@ export async function POST(request: Request) {
       });
       const report = await readLatestMeridianReport(env);
       const autopilot = await readLatestAutopilot(env);
+      const digest = await readLatestDigest(env);
       return NextResponse.json({
         env,
         action,
@@ -103,14 +106,23 @@ export async function POST(request: Request) {
         stderr: result.stderr.slice(-2000),
         report,
         autopilot,
+        digest,
       });
     }
 
-    if (action === 'draft-meta' || action === 'apply-meta') {
-      const act: MeridianAct =
-        action === 'draft-meta'
-          ? { action: 'draft-meta' }
-          : { action: 'apply-meta', dryRun: !!body.dryRun, force: !!body.force };
+    if (
+      action === 'draft-meta' ||
+      action === 'apply-meta' ||
+      action === 'draft-alt' ||
+      action === 'apply-alt' ||
+      action === 'sitemap-health'
+    ) {
+      let act: MeridianAct;
+      if (action === 'draft-meta') act = { action: 'draft-meta' };
+      else if (action === 'apply-meta') act = { action: 'apply-meta', dryRun: !!body.dryRun, force: !!body.force };
+      else if (action === 'draft-alt') act = { action: 'draft-alt' };
+      else if (action === 'apply-alt') act = { action: 'apply-alt', dryRun: !!body.dryRun, force: !!body.force };
+      else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;
       try {
@@ -126,12 +138,13 @@ export async function POST(request: Request) {
         stdout: result.stdout.slice(-6000),
         stderr: result.stderr.slice(-2000),
         result: parsed,
+        digest: action === 'sitemap-health' ? await readLatestDigest(env) : undefined,
       });
     }
 
     if (env === 'preprod') {
       return NextResponse.json(
-        { error: 'GSC act commands are Production-only (PreProd must stay out of Google).' },
+        { error: 'GSC/Bing act commands are Production-only (PreProd must stay out of search indexes).' },
         { status: 400 }
       );
     }
@@ -139,6 +152,8 @@ export async function POST(request: Request) {
     let act: MeridianAct;
     if (action === 'submit-sitemap') {
       act = { action: 'submit-sitemap', feed: body.feed };
+    } else if (action === 'bing-submit-sitemap') {
+      act = { action: 'bing-submit-sitemap', feed: body.feed };
     } else if (action === 'inspect-url') {
       if (!body.url?.trim()) {
         return NextResponse.json({ error: 'url is required for inspect-url' }, { status: 400 });

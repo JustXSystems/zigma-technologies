@@ -45,6 +45,7 @@ export default function MeridianPanel() {
   const [env, setEnv] = useState<Env>('prod');
   const [report, setReport] = useState<Report | null>(null);
   const [autopilot, setAutopilot] = useState<Record<string, unknown> | null>(null);
+  const [digest, setDigest] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
@@ -61,6 +62,7 @@ export default function MeridianPanel() {
     }
     setReport(data.report || null);
     setAutopilot(data.autopilot || null);
+    setDigest(data.digest || null);
     setReadiness(data.readiness || null);
   }, []);
 
@@ -89,6 +91,8 @@ export default function MeridianPanel() {
         }
         if (data.report) setReport(data.report);
         if (data.autopilot) setAutopilot(data.autopilot);
+        if (data.digest) setDigest(data.digest);
+        await load(env);
         const out = data.autopilot
           ? JSON.stringify(data.autopilot, null, 2)
           : data.result
@@ -361,9 +365,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: <strong>Autopilot</strong> = scan + draft meta + (optional apply) + submit sitemap +
-            inspect priority &amp; new URLs + score trend. Secrets: <code>packages/meridian/SETUP.md</code> / SEO-GUIDE
-            Appendix G.
+            Maximum automation: <strong>Autopilot</strong> = scan + meta/alt drafts + sitemap health + Bing/GSC act +
+            Phase 9 weekly digest. Secrets: <code>packages/meridian/SETUP.md</code> / SEO-GUIDE Appendix G.
           </p>
         </div>
         <div className="actions">
@@ -390,39 +393,51 @@ export default function MeridianPanel() {
             onClick={() =>
               postAction(
                 { action: 'autopilot', skipAct: env === 'preprod', applyMeta: true },
-                'Autopilot + apply meta'
+                'Autopilot + apply meta/alt'
               )
             }
-            title="Same as autopilot, then writes drafted meta into empty CMS SEO fields"
+            title="Writes drafted meta + image alt into empty CMS fields"
           >
-            Autopilot + apply meta
+            Autopilot + apply
           </button>
           <button type="button" disabled={pending} onClick={runScan}>
             Scan only
           </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'draft-meta' }, 'Drafting meta')}
-            title="Writes meta-drafts.json from CMS gaps (Appendix B formulas)"
-          >
+          <button type="button" disabled={pending} onClick={() => postAction({ action: 'draft-meta' }, 'Drafting meta')}>
             Draft meta
+          </button>
+          <button type="button" disabled={pending} onClick={() => postAction({ action: 'apply-meta' }, 'Applying meta')}>
+            Apply meta
+          </button>
+          <button type="button" disabled={pending} onClick={() => postAction({ action: 'draft-alt' }, 'Drafting alt')}>
+            Draft alt
+          </button>
+          <button type="button" disabled={pending} onClick={() => postAction({ action: 'apply-alt' }, 'Applying alt')}>
+            Apply alt
           </button>
           <button
             type="button"
             disabled={pending}
-            onClick={() => postAction({ action: 'apply-meta' }, 'Applying meta drafts')}
-            title="Fills empty/short meta_title and meta_description only"
+            onClick={() => postAction({ action: 'sitemap-health', limit: 120 }, 'Sitemap health crawl')}
+            title="Check every sitemap URL for 4xx/5xx, noindex, soft-404, canonical mismatch"
           >
-            Apply meta
+            Sitemap health
           </button>
           <button
             type="button"
             disabled={pending || env !== 'prod'}
-            onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting sitemap')}
+            onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting GSC sitemap')}
             title="Requires MERIDIAN_GOOGLE_* with webmasters scope"
           >
-            Submit sitemap
+            GSC sitemap
+          </button>
+          <button
+            type="button"
+            disabled={pending || env !== 'prod'}
+            onClick={() => postAction({ action: 'bing-submit-sitemap' }, 'Submitting Bing sitemap')}
+            title="Requires MERIDIAN_BING_API_KEY"
+          >
+            Bing sitemap
           </button>
           <button
             type="button"
@@ -435,7 +450,6 @@ export default function MeridianPanel() {
             type="button"
             disabled={pending || env !== 'prod'}
             onClick={() => postAction({ action: 'inspect-sitemap-delta', limit: 10 }, 'Inspecting new sitemap URLs')}
-            title="Diff sitemap vs last run and request inspection for new URLs"
           >
             Inspect new URLs
           </button>
@@ -503,6 +517,18 @@ export default function MeridianPanel() {
                   {String((autopilot.meta as { finishedAt?: string })?.finishedAt || '—')} · score{' '}
                   {String((autopilot.scorecard as { overall?: number })?.overall ?? '—')}
                 </p>
+              ) : null}
+              {digest && Array.isArray(digest.humanChecklist) && (digest.humanChecklist as unknown[]).length > 0 ? (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <div className="mark">Phase 9 — still needs a human</div>
+                  <ul className="sub" style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem' }}>
+                    {(digest.humanChecklist as { task?: string; who?: string }[]).slice(0, 6).map((h, i) => (
+                      <li key={i}>
+                        {h.task} <em>({h.who || 'You'})</em>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : null}
               <div className="pillars">
                 {Object.entries(report.scorecard?.pillars || {}).map(([k, v]) => (

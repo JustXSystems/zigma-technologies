@@ -63,7 +63,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** Autopilot (`npm run meridian:autopilot`) = scan + CMS SEO gaps + **auto-draft meta** + (optional **apply** via `MERIDIAN_AUTO_APPLY_META=1` / `npm run meridian:autopilot:apply`) + GSC submit sitemap + inspect priority **and new sitemap URLs** + score trend; weekly GH Action + VPS cron; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Automation map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
+- **Meridian (SEO Command):** Autopilot (`npm run meridian:autopilot`) = scan + CMS gaps + **draft/apply meta & image alt** + **sitemap health crawl** + Bing sitemap + GSC submit/inspect (when secrets set) + **Phase 9 weekly digest** + score trend; weekly GH Action + VPS cron; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Automation map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 
@@ -2336,15 +2336,18 @@ Leave blank if unused. Never use `#` or fake URLs. After Save: home page source 
 | Automation | How |
 | --- | --- |
 | One-click | Admin → Meridian → **Run autopilot** |
-| Auto-fill empty CMS meta | **Autopilot + apply meta** or `MERIDIAN_AUTO_APPLY_META=1` / `npm run meridian:autopilot:apply` |
+| Auto-fill empty CMS meta + alt | **Autopilot + apply** or `MERIDIAN_AUTO_APPLY_META=1` |
+| Broken / noindex / soft-404 in sitemap | Autopilot **sitemap health** (or Admin button) |
+| Bing sitemap | Autopilot when `MERIDIAN_BING_API_KEY` set |
 | New pages → GSC inspect | Autopilot sitemap delta (or **Inspect new URLs**) |
+| Phase 9 weekly checklist | `weekly-digest.md` lists what’s done vs still human |
 | CLI | `npm run meridian:autopilot` |
 | After every Production deploy | `deploy.sh` runs autopilot automatically |
 | Weekly | GitHub Action **Meridian autopilot** (Mondays) and/or `scripts/meridian-cron.sh` on VPS |
 | Alerts | Set `MERIDIAN_WEBHOOK_URL` (Slack/Discord-compatible) |
 | CI fail on score drop | `MERIDIAN_FAIL_ON_REGRESSION=1` |
 
-Still manual (cannot automate): first Google OAuth consent, DNS GSC verify, GBP postcard, polishing marketing copy beyond auto-drafts.
+Still manual: first Google OAuth consent, DNS GSC verify, GBP postcard/reviews/posts, polishing copy beyond auto-drafts.
 
 ---
 

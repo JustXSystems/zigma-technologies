@@ -11,11 +11,15 @@ export type MeridianAct =
   | { action: 'scan' }
   | { action: 'autopilot'; skipAct?: boolean; applyMeta?: boolean }
   | { action: 'submit-sitemap'; feed?: string }
+  | { action: 'bing-submit-sitemap'; feed?: string }
   | { action: 'inspect-url'; url: string }
   | { action: 'inspect-priority'; limit?: number }
   | { action: 'inspect-sitemap-delta'; limit?: number }
+  | { action: 'sitemap-health'; limit?: number }
   | { action: 'draft-meta' }
-  | { action: 'apply-meta'; dryRun?: boolean; force?: boolean };
+  | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
+  | { action: 'draft-alt' }
+  | { action: 'apply-alt'; dryRun?: boolean; force?: boolean };
 
 const PROFILES: Record<MeridianEnv, string> = {
   prod: path.join(ROOT, 'packages', 'meridian', 'profiles', 'zigma.prod.json'),
@@ -33,6 +37,9 @@ export function meridianLatestPaths(env: MeridianEnv) {
     json: path.join(dir, 'report-latest.json'),
     html: path.join(dir, 'report-latest.html'),
     autopilot: path.join(dir, 'autopilot-latest.json'),
+    digest: path.join(dir, 'weekly-digest.json'),
+    digestMd: path.join(dir, 'weekly-digest.md'),
+    sitemapHealth: path.join(dir, 'sitemap-health.json'),
   };
 }
 
@@ -54,6 +61,18 @@ export async function readLatestAutopilot(env: MeridianEnv) {
     await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
     await access(/*turbopackIgnore: true*/ autopilot);
     const raw = await readFile(/*turbopackIgnore: true*/ autopilot, 'utf8');
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+export async function readLatestDigest(env: MeridianEnv) {
+  const { digest, dir } = meridianLatestPaths(env);
+  try {
+    await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+    await access(/*turbopackIgnore: true*/ digest);
+    const raw = await readFile(/*turbopackIgnore: true*/ digest, 'utf8');
     return JSON.parse(raw) as Record<string, unknown>;
   } catch {
     return null;
@@ -192,6 +211,11 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     if (act.feed) args.push('--feed', act.feed);
     return spawnMeridian(args);
   }
+  if (act.action === 'bing-submit-sitemap') {
+    const args = ['act', 'bing-submit-sitemap', '--profile', profile];
+    if (act.feed) args.push('--feed', act.feed);
+    return spawnMeridian(args);
+  }
   if (act.action === 'inspect-url') {
     return spawnMeridian(['act', 'inspect-url', '--profile', profile, '--url', act.url]);
   }
@@ -205,11 +229,25 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     if (act.limit) args.push('--limit', String(act.limit));
     return spawnMeridian(args);
   }
+  if (act.action === 'sitemap-health') {
+    const args = ['act', 'sitemap-health', '--profile', profile];
+    if (act.limit) args.push('--limit', String(act.limit));
+    return spawnMeridian(args);
+  }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);
   }
   if (act.action === 'apply-meta') {
     const args = ['act', 'apply-meta', '--profile', profile];
+    if (act.dryRun) args.push('--dry-run');
+    if (act.force) args.push('--force');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'draft-alt') {
+    return spawnMeridian(['act', 'draft-alt', '--profile', profile]);
+  }
+  if (act.action === 'apply-alt') {
+    const args = ['act', 'apply-alt', '--profile', profile];
     if (act.dryRun) args.push('--dry-run');
     if (act.force) args.push('--force');
     return spawnMeridian(args);
