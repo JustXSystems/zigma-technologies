@@ -6,6 +6,7 @@ import {
   readLatestAutopilot,
   readLatestDigest,
   readLatestMeridianReport,
+  readLatestUnlock,
   runMeridianAct,
   runMeridianCli,
   type MeridianAct,
@@ -46,11 +47,23 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'No report yet — run a scan first.' }, { status: 404 });
       }
     }
+    if (format === 'cockpit') {
+      const { opsCockpit } = meridianLatestPaths(env);
+      try {
+        const body = await readFile(opsCockpit, 'utf8');
+        return new NextResponse(body, {
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      } catch {
+        return NextResponse.json({ error: 'No ops cockpit yet — run autopilot first.' }, { status: 404 });
+      }
+    }
     const report = await readLatestMeridianReport(env);
     const autopilot = await readLatestAutopilot(env);
     const digest = await readLatestDigest(env);
+    const unlock = await readLatestUnlock(env);
     const readiness = meridianConnectorReadiness();
-    return NextResponse.json({ env, report, autopilot, digest, hasReport: !!report, readiness });
+    return NextResponse.json({ env, report, autopilot, digest, unlock, hasReport: !!report, readiness });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
     return NextResponse.json({ error: msg }, { status: authStatus(e) });
@@ -126,7 +139,12 @@ export async function POST(request: Request) {
       action === 'schema-validate' ||
       action === 'hreflang-validate' ||
       action === 'nap-audit' ||
-      action === 'keyword-map'
+      action === 'keyword-map' ||
+      action === 'citations-playbook' ||
+      action === 'city-pages-readiness' ||
+      action === 'backlink-outreach' ||
+      action === 'unlock-readiness' ||
+      action === 'ops-cockpit'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -143,6 +161,11 @@ export async function POST(request: Request) {
       else if (action === 'hreflang-validate') act = { action: 'hreflang-validate' };
       else if (action === 'nap-audit') act = { action: 'nap-audit' };
       else if (action === 'keyword-map') act = { action: 'keyword-map' };
+      else if (action === 'citations-playbook') act = { action: 'citations-playbook' };
+      else if (action === 'city-pages-readiness') act = { action: 'city-pages-readiness' };
+      else if (action === 'backlink-outreach') act = { action: 'backlink-outreach' };
+      else if (action === 'unlock-readiness') act = { action: 'unlock-readiness' };
+      else if (action === 'ops-cockpit') act = { action: 'ops-cockpit' };
       else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;

@@ -46,6 +46,7 @@ export default function MeridianPanel() {
   const [report, setReport] = useState<Report | null>(null);
   const [autopilot, setAutopilot] = useState<Record<string, unknown> | null>(null);
   const [digest, setDigest] = useState<Record<string, unknown> | null>(null);
+  const [unlock, setUnlock] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
@@ -63,6 +64,7 @@ export default function MeridianPanel() {
     setReport(data.report || null);
     setAutopilot(data.autopilot || null);
     setDigest(data.digest || null);
+    setUnlock(data.unlock || null);
     setReadiness(data.readiness || null);
   }, []);
 
@@ -365,8 +367,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: closed-loop SEO ops — remediate findings, seed Phase 5–7 artefacts (NAP/GBP,
-            hreflang, keywords, FAQ stubs), re-verify, then digests.
+            Maximum automation: closed-loop SEO ops — remediate, Phase 5–8 playbooks (citations, city pages,
+            backlinks), unlock score, ops cockpit, then digests.
           </p>
         </div>
         <div className="actions">
@@ -496,6 +498,46 @@ export default function MeridianPanel() {
           </button>
           <button
             type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'citations-playbook' }, 'Citations playbook')}
+            title="Phase 5.5 directory list pre-filled with live NAP"
+          >
+            Citations
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'city-pages-readiness' }, 'City pages readiness')}
+            title="Phase 6 — which city×service templates are still noindex"
+          >
+            City pages
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'backlink-outreach' }, 'Backlink outreach pack')}
+            title="Phase 8 email drafts from published projects"
+          >
+            Backlinks
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'unlock-readiness' }, 'Unlock readiness')}
+            title="Score secrets + human gates still blocking full automation"
+          >
+            Unlock %
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'ops-cockpit' }, 'Writing ops cockpit')}
+            title="Regenerate ops-cockpit.html"
+          >
+            Ops cockpit
+          </button>
+          <button
+            type="button"
             disabled={pending || env !== 'prod'}
             onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting GSC sitemap')}
             title="Requires MERIDIAN_GOOGLE_* with webmasters scope"
@@ -526,6 +568,14 @@ export default function MeridianPanel() {
           </button>
           <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
             Open HTML report
+          </a>
+          <a
+            className="link"
+            href={withBasePath(`/api/admin/meridian?env=${env}&format=cockpit`)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ops cockpit
           </a>
         </div>
       </div>
@@ -587,6 +637,15 @@ export default function MeridianPanel() {
                   Last autopilot:{' '}
                   {String((autopilot.meta as { finishedAt?: string })?.finishedAt || '—')} · score{' '}
                   {String((autopilot.scorecard as { overall?: number })?.overall ?? '—')}
+                </p>
+              ) : null}
+              {unlock && typeof unlock.percent === 'number' ? (
+                <p className="sub" style={{ marginTop: '0.5rem' }}>
+                  Automation unlock: <strong>{String(unlock.percent)}%</strong> (
+                  {String(unlock.grade || '—')})
+                  {Array.isArray(unlock.nextUnlock) && unlock.nextUnlock.length > 0
+                    ? ` · next: ${String((unlock.nextUnlock[0] as { label?: string })?.label || '')}`
+                    : ''}
                 </p>
               ) : null}
               {digest && Array.isArray(digest.humanChecklist) && (digest.humanChecklist as unknown[]).length > 0 ? (

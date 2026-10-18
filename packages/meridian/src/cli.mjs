@@ -19,6 +19,11 @@ import { validateHreflang } from './connectors/hreflang-validate.mjs';
 import { auditNap } from './connectors/nap-audit.mjs';
 import { buildKeywordMap } from './connectors/keyword-map.mjs';
 import { seedThinContent } from './connectors/content-seed.mjs';
+import { writeCitationsPlaybook } from './connectors/citations-playbook.mjs';
+import { assessCityPages } from './connectors/city-pages-readiness.mjs';
+import { writeBacklinkOutreach } from './connectors/backlink-outreach.mjs';
+import { assessUnlockReadiness } from './connectors/unlock-readiness.mjs';
+import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -254,6 +259,36 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'citations-playbook') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeCitationsPlaybook(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'city-pages-readiness') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await assessCityPages(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'backlink-outreach') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeBacklinkOutreach(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'unlock-readiness') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await assessUnlockReadiness(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'ops-cockpit') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeOpsCockpit(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
@@ -294,12 +329,14 @@ Usage:
   meridian act form-health | image-weight | image-optimize --profile ./profiles/site.json
   meridian act orphan-remediate [--apply] | content-briefs | content-seed | schema-validate --profile ./profiles/site.json
   meridian act hreflang-validate | nap-audit | keyword-map --profile ./profiles/site.json
+  meridian act citations-playbook | city-pages-readiness | backlink-outreach --profile ./profiles/site.json
+  meridian act unlock-readiness | ops-cockpit --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 5–7 seeds (NAP/GBP, hreflang, keywords, content seed) + closed-loop recheck + digests.
+Autopilot = full remediation + Phase 5–8 playbooks + unlock score + ops cockpit + closed-loop + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

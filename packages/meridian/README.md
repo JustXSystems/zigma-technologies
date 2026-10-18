@@ -70,11 +70,16 @@ npm run meridian:act:inspect    # Inspect home + sample paths
 
 Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
 
-## Automation (M4–M8)
+## Automation (M4–M9)
 
 ```bash
-npm run meridian:autopilot           # full closed-loop ops
+npm run meridian:autopilot           # full closed-loop ops + playbooks + cockpit
 npm run meridian:act:nap             # GBP / NAP checklist from live JSON-LD
+npm run meridian:act:citations       # Phase 5.5 directory playbook
+npm run meridian:act:city-pages      # Phase 6 city×service readiness
+npm run meridian:act:backlinks       # Phase 8 outreach drafts
+npm run meridian:act:unlock          # Secrets + human-gate unlock %
+npm run meridian:act:cockpit         # ops-cockpit.html
 npm run meridian:act:hreflang        # EN ↔ HI/KN reciprocal checks
 npm run meridian:act:keywords        # Phase 7 keyword map from CMS
 npm run meridian:act:seed            # FAQ stubs on thin catalog pages

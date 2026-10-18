@@ -202,8 +202,9 @@ Fails the pipeline if hard technical findings exist (same contract as today’s 
 | **M5 — Ops loop** | Sitemap health; Bing SubmitFeed; image alt draft/apply; Phase 9 weekly digest | Hands-off weekly ops |
 | **M6 — Conversion & content ops** | Orphan/thin link graph; form health; image-weight; monthly digest; auto-apply meta/alt | Phase 4/9 without OAuth |
 | **M7 — Remediation loop** | WebP optimize; orphan hub footers; content briefs; JSON-LD validate | Fix crawl findings |
-| **M8 — Closed loop + Phase 5–7 seed (current)** | hreflang; NAP/GBP checklist; keyword map; FAQ content seed; closed-loop recheck | Maximum automation without OAuth |
-| **M9 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
+| **M8 — Closed loop + Phase 5–7 seed** | hreflang; NAP/GBP checklist; keyword map; FAQ content seed; closed-loop recheck | Maximum automation without OAuth |
+| **M9 — Human-gate unlock + ops cockpit (current)** | Citations / city / backlink playbooks; unlock %; ops-cockpit.html; Admin cockpit | Max automation of remaining SEO-GUIDE phases |
+| **M10 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
 
 ---
 

@@ -26,6 +26,11 @@ export type MeridianAct =
   | { action: 'hreflang-validate' }
   | { action: 'nap-audit' }
   | { action: 'keyword-map' }
+  | { action: 'citations-playbook' }
+  | { action: 'city-pages-readiness' }
+  | { action: 'backlink-outreach' }
+  | { action: 'unlock-readiness' }
+  | { action: 'ops-cockpit' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -50,7 +55,22 @@ export function meridianLatestPaths(env: MeridianEnv) {
     digest: path.join(dir, 'weekly-digest.json'),
     digestMd: path.join(dir, 'weekly-digest.md'),
     sitemapHealth: path.join(dir, 'sitemap-health.json'),
+    unlock: path.join(dir, 'unlock-readiness.json'),
+    opsCockpit: path.join(dir, 'ops-cockpit.html'),
+    opsCockpitJson: path.join(dir, 'ops-cockpit.json'),
   };
+}
+
+export async function readLatestUnlock(env: MeridianEnv) {
+  const { unlock, dir } = meridianLatestPaths(env);
+  try {
+    await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+    await access(/*turbopackIgnore: true*/ unlock);
+    const raw = await readFile(/*turbopackIgnore: true*/ unlock, 'utf8');
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
 }
 
 export async function readLatestMeridianReport(env: MeridianEnv) {
@@ -275,6 +295,21 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'keyword-map') {
     return spawnMeridian(['act', 'keyword-map', '--profile', profile]);
+  }
+  if (act.action === 'citations-playbook') {
+    return spawnMeridian(['act', 'citations-playbook', '--profile', profile]);
+  }
+  if (act.action === 'city-pages-readiness') {
+    return spawnMeridian(['act', 'city-pages-readiness', '--profile', profile]);
+  }
+  if (act.action === 'backlink-outreach') {
+    return spawnMeridian(['act', 'backlink-outreach', '--profile', profile]);
+  }
+  if (act.action === 'unlock-readiness') {
+    return spawnMeridian(['act', 'unlock-readiness', '--profile', profile]);
+  }
+  if (act.action === 'ops-cockpit') {
+    return spawnMeridian(['act', 'ops-cockpit', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

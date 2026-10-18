@@ -69,7 +69,30 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
       auto: false,
       needed: bingAct?.status === 'auth_required',
     },
+    {
+      id: 'citations',
+      task: 'Claim/create next directory listing from citations-playbook.md (Phase 5.5)',
+      who: 'You',
+      auto: false,
+      needed: !!actions.find((a) => a.id === 'citations-playbook')?.ok,
+    },
+    {
+      id: 'city-content',
+      task: 'Write unique content for a noindex city×service page (city-pages-readiness.md)',
+      who: 'You',
+      auto: false,
+      needed: (actions.find((a) => a.id === 'city-pages-readiness')?.data?.blocked || 0) > 0,
+    },
+    {
+      id: 'backlink-send',
+      task: 'Send 1–2 outreach emails from backlink-outreach.md (Phase 8)',
+      who: 'You',
+      auto: false,
+      needed: (actions.find((a) => a.id === 'backlink-outreach')?.data?.count || 0) > 0,
+    },
   ].filter((h) => h.needed !== false);
+
+  const unlockPct = actions.find((a) => a.id === 'unlock-readiness')?.data?.percent;
 
   const automated = [
     { id: 'scan', ok: !!scan?.ok, note: `Score ${score.overall ?? '—'} (${score.grade ?? '—'}) · ${trend?.message || 'no trend yet'}` },
@@ -96,6 +119,7 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
       bing: !!signals.bing,
       pagespeed: !!signals.pagespeed,
     },
+    unlockPercent: unlockPct ?? null,
     phase9: {
       weeklyMinutesTarget: 15,
       note: 'Automated rows are done by Meridian autopilot/cron. Complete humanChecklist each week.',
@@ -110,7 +134,7 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     `## Score`,
     '',
     `**${score.overall ?? '—'}** (${score.grade ?? '—'}) — ${trend?.message || 'first run'}`,
-    '',
+    unlockPct != null ? `\nAutomation unlock: **${unlockPct}%** (see unlock-readiness.md / ops-cockpit.html)\n` : '',
     `## Automated this week`,
     '',
     ...automated.map((a) => `- [${a.ok ? 'x' : ' '}] **${a.id}**: ${a.note}`),

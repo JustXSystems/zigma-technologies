@@ -20,6 +20,11 @@ import { auditNap } from './connectors/nap-audit.mjs';
 import { buildKeywordMap } from './connectors/keyword-map.mjs';
 import { seedThinContent } from './connectors/content-seed.mjs';
 import { runClosedLoop } from './connectors/closed-loop.mjs';
+import { writeCitationsPlaybook } from './connectors/citations-playbook.mjs';
+import { assessCityPages } from './connectors/city-pages-readiness.mjs';
+import { writeBacklinkOutreach } from './connectors/backlink-outreach.mjs';
+import { assessUnlockReadiness } from './connectors/unlock-readiness.mjs';
+import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
 
 function mergeFindings(scan, result) {
   if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
@@ -32,9 +37,8 @@ function mergeFindings(scan, result) {
 }
 
 /**
- * Maximum automation loop (M5 + M6):
- * scan → draft/apply meta+alt → sitemap health+link graph → form health → image weight
- * → Bing → GSC act → weekly + monthly digests → webhook
+ * Maximum automation loop (M5–M9):
+ * scan → remediate → Phase 5–8 playbooks → unlock score → ops cockpit → digests → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
   const started = Date.now();
@@ -202,6 +206,38 @@ export async function runAutopilot(profile, opts = {}) {
     actions.push({ id: 'closed-loop', ...loop });
   }
 
+  // --- Citations playbook (Phase 5.5) ---
+  if (profile.autopilot?.skipCitations !== true) {
+    const napAction = actions.find((a) => a.id === 'nap-audit');
+    const cites = await writeCitationsPlaybook(profile, {
+      outDir,
+      nap: napAction?.data?.nap,
+    });
+    actions.push({ id: 'citations-playbook', ...cites });
+    mergeFindings(scan, cites);
+  }
+
+  // --- City × service readiness (Phase 6) ---
+  if (profile.autopilot?.skipCityPages !== true) {
+    const city = await assessCityPages(profile, { outDir });
+    actions.push({ id: 'city-pages-readiness', ...city });
+    mergeFindings(scan, city);
+  }
+
+  // --- Backlink outreach pack (Phase 8) ---
+  if (profile.autopilot?.skipBacklinks !== true) {
+    const bl = await writeBacklinkOutreach(profile, { outDir });
+    actions.push({ id: 'backlink-outreach', ...bl });
+    mergeFindings(scan, bl);
+  }
+
+  // --- Secrets / human-gate unlock score ---
+  if (profile.autopilot?.skipUnlock !== true) {
+    const unlock = await assessUnlockReadiness(profile, { outDir });
+    actions.push({ id: 'unlock-readiness', ...unlock });
+    mergeFindings(scan, unlock);
+  }
+
   // --- Bing act ---
   if (profile.indexable && !opts.skipAct) {
     actions.push({ id: 'bing-submit-sitemap', ...(await submitBingSitemap(profile)) });
@@ -245,6 +281,19 @@ export async function runAutopilot(profile, opts = {}) {
   const monthly = await writeMonthlyDigest(profile, { scan, actions, outDir });
   actions.push({ id: 'monthly-digest', ...monthly });
 
+  // --- Ops cockpit HTML (M9) ---
+  if (profile.autopilot?.skipOpsCockpit !== true) {
+    const unlockAction = actions.find((a) => a.id === 'unlock-readiness');
+    const cockpit = await writeOpsCockpit(profile, {
+      outDir,
+      scan,
+      actions,
+      unlock: unlockAction?.data,
+      scorecard: scan.report.scorecard,
+    });
+    actions.push({ id: 'ops-cockpit', ...cockpit });
+  }
+
   const trend = scan.report.trend || null;
   const autopilot = {
     meta: {
@@ -277,6 +326,8 @@ export async function runAutopilot(profile, opts = {}) {
     altDrafts: altOut,
     weeklyDigest: digest.data?.paths?.mdPath,
     monthlyDigest: monthly.data?.paths?.mdPath,
+    opsCockpit: actions.find((a) => a.id === 'ops-cockpit')?.data?.paths?.html,
+    unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,
   };
 
   await maybeWebhook(autopilot, digest);
