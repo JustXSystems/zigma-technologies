@@ -1,0 +1,65 @@
+# Scheduled + manual Meridian autopilot (scan → act when secrets present).
+name: Meridian autopilot
+
+on:
+  schedule:
+    # Mondays 03:30 UTC ≈ 09:00 IST
+    - cron: '30 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target
+        type: choice
+        options:
+          - prod
+          - preprod
+        default: prod
+      skip_act:
+        description: Skip GSC act (sitemap/inspect)
+        type: boolean
+        default: false
+
+jobs:
+  autopilot:
+    name: Autopilot (${{ github.event.inputs.target || 'prod' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Meridian autopilot
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+          MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+          MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
+          MERIDIAN_FAIL_ON_REGRESSION: '1'
+          # CMS gaps need DB — skip on Actions unless secrets provided later
+          DB_HOST: ${{ secrets.MERIDIAN_DB_HOST }}
+          DB_PORT: ${{ secrets.MERIDIAN_DB_PORT }}
+          DB_USER: ${{ secrets.MERIDIAN_DB_USER }}
+          DB_PASSWORD: ${{ secrets.MERIDIAN_DB_PASSWORD }}
+          DB_NAME: ${{ secrets.MERIDIAN_DB_NAME }}
+        run: |
+          set -euo pipefail
+          TARGET="${{ github.event.inputs.target || 'prod' }}"
+          SKIP="${{ github.event.inputs.skip_act || 'false' }}"
+          if [ "$TARGET" = "preprod" ]; then
+            npm run meridian:autopilot:preprod
+          elif [ "$SKIP" = "true" ]; then
+            node packages/meridian/bin/meridian.mjs autopilot --profile packages/meridian/profiles/zigma.prod.json --skip-act
+          else
+            npm run meridian:autopilot
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meridian-autopilot-${{ github.event.inputs.target || 'prod' }}
+          path: storage/meridian/
+          if-no-files-found: ignore
+          retention-days: 30

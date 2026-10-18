@@ -3,6 +3,7 @@ import { requireScreen } from '@/lib/auth';
 import {
   meridianConnectorReadiness,
   meridianLatestPaths,
+  readLatestAutopilot,
   readLatestMeridianReport,
   runMeridianAct,
   runMeridianCli,
@@ -45,8 +46,9 @@ export async function GET(request: Request) {
       }
     }
     const report = await readLatestMeridianReport(env);
+    const autopilot = await readLatestAutopilot(env);
     const readiness = meridianConnectorReadiness();
-    return NextResponse.json({ env, report, hasReport: !!report, readiness });
+    return NextResponse.json({ env, report, autopilot, hasReport: !!report, readiness });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
     return NextResponse.json({ error: msg }, { status: authStatus(e) });
@@ -62,6 +64,7 @@ export async function POST(request: Request) {
       feed?: string;
       url?: string;
       limit?: number;
+      skipAct?: boolean;
     };
     const env = parseEnv(body.env);
     const action = body.action || 'scan';
@@ -77,6 +80,25 @@ export async function POST(request: Request) {
         stdout: result.stdout.slice(-4000),
         stderr: result.stderr.slice(-2000),
         report,
+      });
+    }
+
+    if (action === 'autopilot') {
+      const result = await runMeridianAct(env, {
+        action: 'autopilot',
+        skipAct: env === 'preprod' || !!body.skipAct,
+      });
+      const report = await readLatestMeridianReport(env);
+      const autopilot = await readLatestAutopilot(env);
+      return NextResponse.json({
+        env,
+        action,
+        ok: result.ok,
+        code: result.code,
+        stdout: result.stdout.slice(-6000),
+        stderr: result.stderr.slice(-2000),
+        report,
+        autopilot,
       });
     }
 

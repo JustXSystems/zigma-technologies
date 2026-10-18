@@ -4,11 +4,12 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runTechnicalEngine } from './engine/technical.mjs';
 import { buildRoadmap, buildScorecard } from './engine/score.mjs';
-import { runConnectors, signalsFromConnectors } from './connectors/registry.mjs';
+import { buildScoreTrend, readPreviousReport } from './engine/trend.mjs';
+import { findingsFromConnectors, runConnectors, signalsFromConnectors } from './connectors/registry.mjs';
 import { renderHtmlReport } from './report/html.mjs';
 import { renderMarkdownReport } from './report/markdown.mjs';
 
-const MERIDIAN_VERSION = '0.3.0';
+const MERIDIAN_VERSION = '0.4.0';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
@@ -18,12 +19,24 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export async function runMeridian(profile, opts = {}) {
   const started = Date.now();
   const runId = randomUUID().slice(0, 8);
+
+  const outDir = resolve(
+    opts.outDir ||
+      (profile.outputDir
+        ? resolve(__dirname, '..', profile.outputDir)
+        : resolve(__dirname, '..', 'out', profile.id || 'run'))
+  );
+  await mkdir(outDir, { recursive: true });
+  const previous = await readPreviousReport(outDir);
+
   const technical = await runTechnicalEngine(profile);
   const connectors = await runConnectors(profile, { technical });
   const signalFindings = findingsFromSignals(connectors, profile);
-  const findings = [...technical.findings, ...signalFindings];
+  const connectorFindings = findingsFromConnectors(connectors);
+  const findings = [...technical.findings, ...signalFindings, ...connectorFindings];
   const scorecard = buildScorecard({ findings, connectors });
   const roadmap = buildRoadmap({ findings, connectors, profile });
+  const trend = buildScoreTrend(previous, scorecard, findings);
 
   const report = {
     meta: {
@@ -41,6 +54,7 @@ export async function runMeridian(profile, opts = {}) {
       indexable: profile.indexable,
     },
     scorecard,
+    trend,
     findings,
     pages: technical.pages.map(({ issues, ...rest }) => ({
       ...rest,
@@ -52,13 +66,6 @@ export async function runMeridian(profile, opts = {}) {
     extras: technical.extras || {},
   };
 
-  const outDir = resolve(
-    opts.outDir ||
-      (profile.outputDir
-        ? resolve(__dirname, '..', profile.outputDir)
-        : resolve(__dirname, '..', 'out', profile.id || 'run'))
-  );
-  await mkdir(outDir, { recursive: true });
   const jsonPath = resolve(outDir, `report-${runId}.json`);
   const latestJson = resolve(outDir, 'report-latest.json');
   const htmlPath = resolve(outDir, `report-${runId}.html`);
@@ -73,6 +80,32 @@ export async function runMeridian(profile, opts = {}) {
   await writeFile(htmlPath, html, 'utf8');
   await writeFile(latestHtml, html, 'utf8');
   await writeFile(mdPath, md, 'utf8');
+
+  // Append to history (keep last 30)
+  try {
+    const histPath = resolve(outDir, 'score-history.jsonl');
+    const line = JSON.stringify({
+      at: report.meta.finishedAt,
+      runId,
+      overall: scorecard.overall,
+      grade: scorecard.grade,
+      hardFails: findings.filter((f) => f.severity === 'critical' || f.severity === 'high').length,
+      trend: trend.status,
+    });
+    const { appendFile, readFile: rf } = await import('node:fs/promises');
+    await appendFile(histPath, line + '\n', 'utf8');
+    try {
+      const raw = await rf(histPath, 'utf8');
+      const lines = raw.trim().split(/\n+/);
+      if (lines.length > 30) {
+        await writeFile(histPath, lines.slice(-30).join('\n') + '\n', 'utf8');
+      }
+    } catch {
+      /* ignore */
+    }
+  } catch {
+    /* ignore history errors */
+  }
 
   const hardFails = findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
   return {
@@ -93,7 +126,7 @@ function findingsFromSignals(connectors, profile) {
       severity: 'medium',
       title: 'Search Console has no sitemap records',
       detail: `Submit ${profile.origin.replace(/\/$/, '')}/sitemap.xml in GSC if not done.`,
-      remediation: 'GSC → Sitemaps → Add a new sitemap → sitemap.xml',
+      remediation: 'Run Meridian autopilot or GSC → Sitemaps → sitemap.xml',
       owner: 'marketing',
       pillar: 'signals',
       evidence: gsc.data?.siteUrl,

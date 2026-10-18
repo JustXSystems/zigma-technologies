@@ -167,6 +167,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.78rem}
     <div class="summary-card">
       <div class="mark">Scorecard</div>
       <p>${esc(scorecard.summary)}</p>
+      ${report.trend ? `<p class="sub" style="margin-top:.75rem"><span class="mark">Trend</span> ${esc(report.trend.message || report.trend.status)}</p>` : ''}
       <div class="pillars">${pillars}</div>
     </div>
   </section>

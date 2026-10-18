@@ -311,20 +311,21 @@ if [[ "$DO_HEALTHCHECK" -eq 1 && "$DO_RESTART" -eq 1 ]]; then
   fi
 fi
 
-# Optional live Meridian gate (technical crawl against public origin). Skip if package absent.
+# Meridian automation after healthy deploy (autopilot on prod; scan-only on preprod).
 if [[ "$DO_HEALTHCHECK" -eq 1 && -f packages/meridian/bin/meridian.mjs ]]; then
-  PROFILE="packages/meridian/profiles/zigma.${ENV_NAME}.json"
   if [[ "$ENV_NAME" == "prod" ]]; then
-    PROFILE="packages/meridian/profiles/zigma.prod.json"
-  elif [[ "$ENV_NAME" == "preprod" ]]; then
-    PROFILE="packages/meridian/profiles/zigma.preprod.json"
-  fi
-  if [[ -f "$PROFILE" ]]; then
-    log "Meridian verify ($PROFILE)"
-    if node packages/meridian/bin/meridian.mjs verify --profile "$PROFILE"; then
-      log "Meridian verify OK"
+    log "Meridian autopilot (prod)"
+    if node packages/meridian/bin/meridian.mjs autopilot --profile packages/meridian/profiles/zigma.prod.json; then
+      log "Meridian autopilot OK"
     else
-      log "WARNING: Meridian verify reported findings — review storage/meridian/ or Admin → SEO → Meridian"
+      log "WARNING: Meridian autopilot reported findings — review Admin → SEO → Meridian"
+    fi
+  elif [[ "$ENV_NAME" == "preprod" ]]; then
+    log "Meridian autopilot --skip-act (preprod)"
+    if node packages/meridian/bin/meridian.mjs autopilot --profile packages/meridian/profiles/zigma.preprod.json --skip-act; then
+      log "Meridian preprod scan OK"
+    else
+      log "WARNING: Meridian preprod scan reported findings"
     fi
   fi
 fi

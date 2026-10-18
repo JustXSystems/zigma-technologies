@@ -27,6 +27,7 @@ type Report = {
     summary?: string;
     pillars?: Record<string, number>;
   };
+  trend?: { status?: string; message?: string; delta?: number | null };
   findings?: { code: string; severity: string; title: string; remediation: string; owner: string }[];
   connectors?: { id: string; label: string; status: string; message?: string }[];
   roadmap?: { priority: number; title: string; owner: string; phase: string }[];
@@ -43,6 +44,7 @@ type Report = {
 export default function MeridianPanel() {
   const [env, setEnv] = useState<Env>('prod');
   const [report, setReport] = useState<Report | null>(null);
+  const [autopilot, setAutopilot] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
@@ -58,6 +60,7 @@ export default function MeridianPanel() {
       return;
     }
     setReport(data.report || null);
+    setAutopilot(data.autopilot || null);
     setReadiness(data.readiness || null);
   }, []);
 
@@ -85,9 +88,12 @@ export default function MeridianPanel() {
           return;
         }
         if (data.report) setReport(data.report);
-        const out = data.result
-          ? JSON.stringify(data.result, null, 2)
-          : [data.stdout, data.stderr].filter(Boolean).join('\n');
+        if (data.autopilot) setAutopilot(data.autopilot);
+        const out = data.autopilot
+          ? JSON.stringify(data.autopilot, null, 2)
+          : data.result
+            ? JSON.stringify(data.result, null, 2)
+            : [data.stdout, data.stderr].filter(Boolean).join('\n');
         setLog(String(out).slice(-4000));
       } catch (err) {
         setError(err instanceof Error ? err.message : `${label} failed`);
@@ -355,8 +361,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Verify → score → report → act. Connectors need server secrets (`MERIDIAN_GOOGLE_*`). Act commands submit
-            the sitemap and inspect URLs in Search Console (Production only).
+            Maximum automation: <strong>Autopilot</strong> = scan + CMS SEO gaps + (when OAuth ready) submit sitemap +
+            inspect URLs + score trend. Secrets: <code>packages/meridian/SETUP.md</code> / SEO-GUIDE Appendix G.
           </p>
         </div>
         <div className="actions">
@@ -369,8 +375,16 @@ export default function MeridianPanel() {
             <option value="prod">Production</option>
             <option value="preprod">PreProd</option>
           </select>
-          <button type="button" className="primary" disabled={pending} onClick={runScan}>
-            {pending ? 'Working…' : 'Run scan'}
+          <button
+            type="button"
+            className="primary"
+            disabled={pending}
+            onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Running autopilot')}
+          >
+            {pending ? 'Working…' : 'Run autopilot'}
+          </button>
+          <button type="button" disabled={pending} onClick={runScan}>
+            Scan only
           </button>
           <button
             type="button"
@@ -440,6 +454,18 @@ export default function MeridianPanel() {
             <div className="summary">
               <div className="mark">Scorecard</div>
               <p style={{ margin: '0.4rem 0 0' }}>{report.scorecard?.summary}</p>
+              {report.trend?.message ? (
+                <p className="sub" style={{ marginTop: '0.5rem' }}>
+                  Trend: {report.trend.message}
+                </p>
+              ) : null}
+              {autopilot && typeof autopilot === 'object' && 'meta' in autopilot ? (
+                <p className="sub" style={{ marginTop: '0.35rem' }}>
+                  Last autopilot:{' '}
+                  {String((autopilot.meta as { finishedAt?: string })?.finishedAt || '—')} · score{' '}
+                  {String((autopilot.scorecard as { overall?: number })?.overall ?? '—')}
+                </p>
+              ) : null}
               <div className="pillars">
                 {Object.entries(report.scorecard?.pillars || {}).map(([k, v]) => (
                   <div className="pillar" key={k}>

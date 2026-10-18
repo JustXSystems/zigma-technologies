@@ -9,11 +9,16 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design.
 ## Quick start
 
 ```bash
+# Maximum automation (recommended)
+npm run meridian:autopilot
+
 # From repo root
 npm run meridian:run
 npm run meridian:verify
 npm run meridian:verify:preprod
 ```
+
+Automation map: [AUTOMATION.md](./AUTOMATION.md).
 
 Open the HTML report path printed at the end (`storage/meridian/.../report-latest.html`).  
 Admin: **SEO → Meridian**.

@@ -63,7 +63,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** `packages/meridian` — run/verify/act; Admin → **SEO → Meridian** (readiness checklist). **Exact secret setup:** [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`packages/meridian/SETUP.md`](packages/meridian/SETUP.md). Architecture: `ARCHITECTURE.md`. GitHub Action: **Meridian live verify**.
+- **Meridian (SEO Command):** Autopilot (`npm run meridian:autopilot`) = scan + CMS SEO gaps + GSC act + score trend; weekly GH Action + VPS cron; Admin → **SEO → Meridian → Run autopilot**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Automation map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 
@@ -2326,9 +2326,22 @@ Leave blank if unused. Never use `#` or fake URLs. After Save: home page source 
 
 ### G.6 After secrets + social URLs
 
-1. Admin → SEO → Meridian → **Run scan** → connectors `ok`, Signals populated.  
-2. **Submit sitemap** → **Inspect top URLs**.  
+1. Admin → SEO → Meridian → **Run autopilot** (or `npm run meridian:autopilot`) → connectors `ok`, Signals populated, sitemap submitted, URLs inspected.  
+2. Install weekly automation: see `packages/meridian/AUTOMATION.md` (GitHub schedule already defined; optional VPS crontab).  
 3. Rich Results Test (Phase 2.2) on home + one project + one product + one service.
+
+### G.7 Automation (hands-off after secrets)
+
+| Automation | How |
+| --- | --- |
+| One-click | Admin → Meridian → **Run autopilot** |
+| CLI | `npm run meridian:autopilot` |
+| After every Production deploy | `deploy.sh` runs autopilot automatically |
+| Weekly | GitHub Action **Meridian autopilot** (Mondays) and/or `scripts/meridian-cron.sh` on VPS |
+| Alerts | Set `MERIDIAN_WEBHOOK_URL` (Slack/Discord-compatible) |
+| CI fail on score drop | `MERIDIAN_FAIL_ON_REGRESSION=1` |
+
+Still manual (cannot automate): first Google OAuth consent, DNS GSC verify, GBP postcard, writing marketing copy.
 
 ---
 

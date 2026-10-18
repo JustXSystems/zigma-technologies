@@ -9,6 +9,7 @@ export type MeridianEnv = 'prod' | 'preprod';
 
 export type MeridianAct =
   | { action: 'scan' }
+  | { action: 'autopilot'; skipAct?: boolean }
   | { action: 'submit-sitemap'; feed?: string }
   | { action: 'inspect-url'; url: string }
   | { action: 'inspect-priority'; limit?: number };
@@ -28,6 +29,7 @@ export function meridianLatestPaths(env: MeridianEnv) {
     dir,
     json: path.join(dir, 'report-latest.json'),
     html: path.join(dir, 'report-latest.html'),
+    autopilot: path.join(dir, 'autopilot-latest.json'),
   };
 }
 
@@ -37,6 +39,18 @@ export async function readLatestMeridianReport(env: MeridianEnv) {
     await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
     await access(/*turbopackIgnore: true*/ json);
     const raw = await readFile(/*turbopackIgnore: true*/ json, 'utf8');
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+export async function readLatestAutopilot(env: MeridianEnv) {
+  const { autopilot, dir } = meridianLatestPaths(env);
+  try {
+    await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+    await access(/*turbopackIgnore: true*/ autopilot);
+    const raw = await readFile(/*turbopackIgnore: true*/ autopilot, 'utf8');
     return JSON.parse(raw) as Record<string, unknown>;
   } catch {
     return null;
@@ -163,6 +177,11 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   const profile = meridianProfilePath(env);
   if (act.action === 'scan') {
     return spawnMeridian(['run', '--profile', profile]);
+  }
+  if (act.action === 'autopilot') {
+    const args = ['autopilot', '--profile', profile];
+    if (act.skipAct || env === 'preprod') args.push('--skip-act');
+    return spawnMeridian(args);
   }
   if (act.action === 'submit-sitemap') {
     const args = ['act', 'submit-sitemap', '--profile', profile];
