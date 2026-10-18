@@ -28,22 +28,23 @@ node packages/meridian/bin/meridian.mjs run --profile ./acme.profile.json
 
 ## Connectors (M1)
 
-Without credentials, Meridian still completes a full technical run and marks connectors `auth_required`.
+**Exact field-by-field setup (first-timers):** [SETUP.md](./SETUP.md)  
+Also mirrored in the site guide: `SEO-GUIDE.md` → **Appendix G**.
 
-| Variable | Connector |
-| --- | --- |
-| `MERIDIAN_GOOGLE_CLIENT_ID` | GSC + GA4 OAuth |
-| `MERIDIAN_GOOGLE_CLIENT_SECRET` | GSC + GA4 OAuth |
-| `MERIDIAN_GOOGLE_REFRESH_TOKEN` | GSC + GA4 OAuth |
-| `MERIDIAN_GA4_PROPERTY_ID` | GA4 (numeric property id, **not** `G-…`) |
-| `MERIDIAN_BING_API_KEY` | Bing Webmaster |
-| `MERIDIAN_PSI_API_KEY` | PageSpeed Insights (recommended) |
+Without credentials, Meridian still completes a full technical run and marks connectors `auth_required`. Admin → **SEO → Meridian** shows **Connectors readiness** (set/missing only; secrets never displayed).
 
-### One-time Google OAuth
+| Variable | Connector | Value tip |
+| --- | --- | --- |
+| `MERIDIAN_GOOGLE_CLIENT_ID` | GSC + GA4 + Act | `….apps.googleusercontent.com` |
+| `MERIDIAN_GOOGLE_CLIENT_SECRET` | GSC + GA4 + Act | `GOCSPX-…` |
+| `MERIDIAN_GOOGLE_REFRESH_TOKEN` | GSC + GA4 + Act | From `google-oauth-setup.mjs` |
+| `MERIDIAN_GA4_PROPERTY_ID` | GA4 | Digits only — **not** `G-…` |
+| `MERIDIAN_BING_API_KEY` | Bing | Bing Webmaster → API Access |
+| `MERIDIAN_PSI_API_KEY` | PageSpeed | Google Cloud API key + PSI API |
 
-1. Google Cloud → enable **Search Console API** + **Google Analytics Data API**.
-2. Create OAuth client type **Desktop**.
-3. Run:
+### One-time Google OAuth (summary)
+
+Follow SETUP.md Parts **A.1–A.6**. Short version:
 
 ```powershell
 $env:MERIDIAN_GOOGLE_CLIENT_ID="..."
@@ -51,17 +52,7 @@ $env:MERIDIAN_GOOGLE_CLIENT_SECRET="..."
 node packages/meridian/scripts/google-oauth-setup.mjs
 ```
 
-4. Put the printed refresh token in Production secrets / local env (never commit).
-5. Set `MERIDIAN_GA4_PROPERTY_ID` from GA4 Admin → Property settings.
-6. Re-run `npm run meridian:run` — GSC top queries + GA4 organic sessions appear under **Signals**.
-
-### Bing
-
-Bing Webmaster → Settings → API Access → create key → `MERIDIAN_BING_API_KEY`.
-
-### PageSpeed
-
-Google Cloud API key with PageSpeed Insights API → `MERIDIAN_PSI_API_KEY`.
+Then put all printed values into Production `.env` and run `pm2 restart zigma --update-env`.
 
 ## Act (M2)
 

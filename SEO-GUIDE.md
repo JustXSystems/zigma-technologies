@@ -38,13 +38,14 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 
 | # | Do this next | Phase | Who | Notes from live check |
 | --- | --- | --- | --- | --- |
-| **1** | Verify domain in **Google Search Console** (if not done) → submit `https://zigma-technologies.com/sitemap.xml` → Request indexing for home + top listings | 0.1, **1.7** | You | Highest leverage right now |
-| **2** | Bing Webmaster (import from GSC) + confirm GA4 Realtime with the ID already in Site Settings | 0.2, 0.3 | You | GA4 ID `G-RFXQRYYX48` is already on the site |
-| **3** | **Phase 2 Site Settings polish** (see checklist below) → Rich Results Test | **2** | You | NAP mostly filled; gaps listed below |
-| **4** | Start **Google Business Profile** claim/verify (slow mail/postcard) | **5.2** | You | Parallel with 1–3 |
-| **5** | Hand-write meta titles/descriptions for top ~20 pages | **3** | You | Listing pages already have good titles |
-| **6** | Optional: nginx one-hop www/http → apex | 1.6 | Developer | Needs root: `sudo bash scripts/apply-nginx-apex-redirect.sh` |
-| **7** | Optional: Removals for old PreProd URLs if they appear in Google | 1.8 | You | Only if `site:justxsystems.com/zigma-technologies` shows hits |
+| **1** | Verify domain in **Google Search Console** (if not done) → submit sitemap → Request indexing | 0.1, **1.7** | You | Highest leverage right now |
+| **2** | **[Developer]** Set Meridian secrets (`MERIDIAN_GOOGLE_*`, `MERIDIAN_GA4_PROPERTY_ID`, …) using [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) / `packages/meridian/SETUP.md` | Meridian | Developer | Then Admin → SEO → Meridian → Submit sitemap |
+| **3** | Bing Webmaster (import from GSC) + confirm GA4 Realtime (`G-RFXQRYYX48`) | 0.2, 0.3 | You | |
+| **4** | Add **Social profile URLs** in Site Settings (clears Meridian `SCHEMA_SAMEAS`) → Rich Results Test | **2** | You | Meta description + OG already polished |
+| **5** | Start **Google Business Profile** claim/verify (slow mail/postcard) | **5.2** | You | Parallel with 1–4 |
+| **6** | Hand-write meta titles/descriptions for top ~20 pages | **3** | You | Listing pages already have good titles |
+| **7** | Optional: nginx one-hop www/http → apex | 1.6 | Developer | Needs root: `sudo bash scripts/apply-nginx-apex-redirect.sh` |
+| **8** | Optional: Removals for old PreProd URLs if they appear in Google | 1.8 | You | Only if `site:justxsystems.com/zigma-technologies` shows hits |
 
 ### Phase 2 readiness (from live Site Settings / JSON-LD)
 
@@ -62,7 +63,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** `packages/meridian` — `npm run meridian:run` / `meridian:verify` / `meridian:act:sitemap` / `meridian:act:inspect`; Admin → **SEO → Meridian**. Architecture: `packages/meridian/ARCHITECTURE.md`. Set `MERIDIAN_GOOGLE_*` (webmasters scope) + `MERIDIAN_GA4_PROPERTY_ID` for live signals and GSC act — `node packages/meridian/scripts/google-oauth-setup.mjs`. GitHub Action: **Meridian live verify**.
+- **Meridian (SEO Command):** `packages/meridian` — run/verify/act; Admin → **SEO → Meridian** (readiness checklist). **Exact secret setup:** [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`packages/meridian/SETUP.md`](packages/meridian/SETUP.md). Architecture: `ARCHITECTURE.md`. GitHub Action: **Meridian live verify**.
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 
@@ -91,6 +92,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - [Appendix D — Things NOT to waste time on](#appendix-d--things-not-to-waste-time-on)
 - [Appendix E — Technical reference for developers](#appendix-e--technical-reference-for-developers)
 - [Appendix F — Master checklist](#appendix-f--master-checklist)
+- [Appendix G — Meridian connectors & Site Settings fields (exact values)](#appendix-g--meridian-connectors--site-settings-fields-exact-values)
 
 ---
 
@@ -2107,7 +2109,7 @@ npm run seo:verify:preprod
 
 **What Meridian checks (M0+M1):** technical crawl + pillar scorecard + connector status + **live signals** when credentials are set (GSC top queries/sitemaps, GA4 organic sessions, Bing crawl, PageSpeed/CrUX) + roadmap + boardroom HTML report.
 
-**Credentials (ops / developer secrets — never commit):** see `packages/meridian/README.md`. One-time Google OAuth: `node packages/meridian/scripts/google-oauth-setup.mjs`. Without secrets, connectors show `auth_required` and the technical scan still completes.
+**Credentials (ops / developer secrets — never commit):** full field-by-field guide in [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) and `packages/meridian/SETUP.md`. One-time Google OAuth: `node packages/meridian/scripts/google-oauth-setup.mjs`. Without secrets, connectors show `auth_required` and the technical scan still completes. Admin → **SEO → Meridian** shows **Connectors readiness** (set/missing only).
 
 **What stays human:** GBP postcard verification, writing marketing copy, directory outreach.
 
@@ -2252,6 +2254,84 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 
 ---
 
+## Appendix G — Meridian connectors & Site Settings fields (exact values)
+
+**Full click-by-click document (keep open while configuring):** [`packages/meridian/SETUP.md`](packages/meridian/SETUP.md)
+
+This appendix is the short map. SETUP.md has every button, Expect check, and “If it goes wrong” table.
+
+### G.1 Environment variables (Production `.env` + GitHub Actions secrets)
+
+| Field name | Required? | Correct value looks like | How to get it (summary) |
+| --- | --- | --- | --- |
+| `MERIDIAN_GOOGLE_CLIENT_ID` | Yes for GSC/GA4/Act | `….apps.googleusercontent.com` | Google Cloud → Credentials → OAuth client **Desktop** → Client ID. SETUP **A.5** |
+| `MERIDIAN_GOOGLE_CLIENT_SECRET` | Yes for GSC/GA4/Act | `GOCSPX-…` | Same client → Client secret. SETUP **A.5** |
+| `MERIDIAN_GOOGLE_REFRESH_TOKEN` | Yes for GSC/GA4/Act | `1//0…` (long) | `node packages/meridian/scripts/google-oauth-setup.mjs` while signed into the **company** Google account. SETUP **A.6** |
+| `MERIDIAN_GA4_PROPERTY_ID` | Yes for GA4 signals | Digits only, e.g. `251234567` | GA4 → Admin → **Property settings** → Property ID. **Not** `G-RFXQRYYX48`. SETUP **B** |
+| `MERIDIAN_BING_API_KEY` | Optional (Bing signals) | Long opaque string | Bing Webmaster → Settings → API Access. SETUP **D** |
+| `MERIDIAN_PSI_API_KEY` | Optional (PageSpeed) | `AIza…` | Google Cloud → API key; enable PageSpeed Insights API. SETUP **E** |
+
+After editing Production `.env`:
+
+```bash
+ssh deploy@200.234.45.106
+cd /var/www/zigma-technologies
+# edit .env
+pm2 restart zigma --update-env
+```
+
+**Expect:** Admin → **SEO → Meridian** → **Connectors readiness** shows **set** for each filled field (values are never displayed).
+
+**Common mistakes**
+
+| Mistake | Result | Fix |
+| --- | --- | --- |
+| Using `G-…` as `MERIDIAN_GA4_PROPERTY_ID` | GA4 connector error | Use numeric Property ID from Property settings |
+| OAuth with **readonly** webmasters scope | Submit sitemap / Inspect fail | Re-run oauth setup (requests full `webmasters`) |
+| Forgot `pm2 restart … --update-env` | Admin still shows **missing** | Restart with `--update-env` |
+| Personal Gmail OAuth | Cannot see company GSC/GA4 | Use company Google account; add as GSC/GA4 user |
+
+### G.2 Search Console property string (already in Meridian profile)
+
+| Profile field | Current Zigma value | When to change |
+| --- | --- | --- |
+| `connectors.gsc.siteUrl` in `packages/meridian/profiles/zigma.prod.json` | `sc-domain:zigma-technologies.com` | Only if GSC is a **URL-prefix** property → then use `https://zigma-technologies.com/` exactly |
+
+How to tell: Search Console property picker — domain-only name → `sc-domain:…`; full `https://…/` → URL-prefix form. SETUP **C**.
+
+### G.3 Website GA4 measurement ID (Site Settings — already live)
+
+| Admin field | Path | Correct value | Notes |
+| --- | --- | --- | --- |
+| **GA4 measurement ID** | Site Settings → Analytics & cookies | `G-RFXQRYYX48` | This tags the website. Meridian API uses **Property ID** (G.1), not this. |
+
+### G.4 Social links (Site Settings — fills JSON-LD `sameAs`)
+
+| Admin field | Path | Correct value example | How to get it |
+| --- | --- | --- | --- |
+| **LinkedIn URL** | Site Settings → Social links | `https://www.linkedin.com/company/your-slug/` | Company page → copy address bar |
+| **Facebook URL** | same | `https://www.facebook.com/YourPage` | Page → copy link |
+| **YouTube URL** | same | `https://www.youtube.com/@Handle` | Channel → copy URL |
+| **Instagram URL** | same | `https://www.instagram.com/handle/` | Profile → copy link |
+| **X (Twitter) URL** | same | `https://x.com/handle` | Profile → copy link |
+
+Leave blank if unused. Never use `#` or fake URLs. After Save: home page source should contain `"sameAs"`. Meridian finding `SCHEMA_SAMEAS` should clear on next scan. SETUP **H**.
+
+### G.5 Default SEO fields (already polished 18 Oct 2026)
+
+| Admin field | Path | Correct value | How to get / maintain |
+| --- | --- | --- | --- |
+| **Default meta description** | SEO → Defaults (or Site Settings → SEO & social) | One sentence, **120–160 characters** | Formula in Phase 2.1 / Appendix B. Current live text is ~114 chars from `seo-phase2-polish.mjs` |
+| **Default social share image** | same | `/og.png` (1200×630) | Do **not** use the square logo. Clear or set `/og.png` |
+
+### G.6 After secrets + social URLs
+
+1. Admin → SEO → Meridian → **Run scan** → connectors `ok`, Signals populated.  
+2. **Submit sitemap** → **Inspect top URLs**.  
+3. Rich Results Test (Phase 2.2) on home + one project + one product + one service.
+
+---
+
 ## Appendix F — Master checklist
 
 Print this or copy it into your sheet. Tick each box when the step and its **Expect** check are done.
@@ -2337,3 +2417,13 @@ Print this or copy it into your sheet. Tick each box when the step and its **Exp
 - [ ] 9.1 Weekly 15-minute check in calendar
 - [ ] 9.2 Monthly report template set up; first report done
 - [ ] 9.3 Quarterly review in calendar
+
+**Meridian connectors (Appendix G / SETUP.md)**
+- [ ] Google Cloud project + Search Console API + Analytics Data API enabled
+- [ ] OAuth Desktop client created; Client ID + Secret saved
+- [ ] Refresh token obtained via `google-oauth-setup.mjs`
+- [ ] `MERIDIAN_GA4_PROPERTY_ID` is numeric Property ID (not `G-…`)
+- [ ] Secrets in Production `.env` + `pm2 restart zigma --update-env`
+- [ ] Admin → SEO → Meridian → Connectors readiness all required fields **set**
+- [ ] Meridian scan shows GSC/GA4 `ok`; Submit sitemap + Inspect top URLs once
+- [ ] Site Settings → Social links filled with real URLs; `sameAs` in page source

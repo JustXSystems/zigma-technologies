@@ -116,13 +116,38 @@ const SECTIONS: SectionDef[] = [
     id: 'social-links',
     title: 'Social links',
     description:
-      'Profile URLs as icons in the footer Contact column (after office block). Blank = hidden. Also Organization JSON-LD sameAs.',
+      'Real public profile URLs only (footer icons + Organization JSON-LD sameAs). Leave blank if you do not have that network — never invent placeholders like # or https://#. Exact how-to: packages/meridian/SETUP.md Part H / SEO-GUIDE Appendix G.',
     fields: [
-      { key: 'facebookUrl', label: 'Facebook URL', hint: 'Leave blank to hide', full: true },
-      { key: 'instagramUrl', label: 'Instagram URL', hint: 'Leave blank to hide', full: true },
-      { key: 'linkedinUrl', label: 'LinkedIn URL', hint: 'Leave blank to hide', full: true },
-      { key: 'xUrl', label: 'X (Twitter) URL', hint: 'Leave blank to hide', full: true },
-      { key: 'youtubeUrl', label: 'YouTube URL', hint: 'Leave blank to hide', full: true },
+      {
+        key: 'facebookUrl',
+        label: 'Facebook URL',
+        hint: 'Facebook Page → copy address bar, e.g. https://www.facebook.com/YourPage — blank = hide',
+        full: true,
+      },
+      {
+        key: 'instagramUrl',
+        label: 'Instagram URL',
+        hint: 'Instagram profile → copy link, e.g. https://www.instagram.com/yourhandle/ — blank = hide',
+        full: true,
+      },
+      {
+        key: 'linkedinUrl',
+        label: 'LinkedIn URL',
+        hint: 'LinkedIn Company page → copy URL, e.g. https://www.linkedin.com/company/your-slug/ — prefer company over personal',
+        full: true,
+      },
+      {
+        key: 'xUrl',
+        label: 'X (Twitter) URL',
+        hint: 'X profile → copy link, e.g. https://x.com/yourhandle — blank if unused',
+        full: true,
+      },
+      {
+        key: 'youtubeUrl',
+        label: 'YouTube URL',
+        hint: 'YouTube channel → copy URL (/@handle or /channel/UC…) — blank = hide',
+        full: true,
+      },
     ],
   },
   {

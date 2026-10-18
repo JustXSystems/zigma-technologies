@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireScreen } from '@/lib/auth';
 import {
+  meridianConnectorReadiness,
   meridianLatestPaths,
   readLatestMeridianReport,
   runMeridianAct,
@@ -44,7 +45,8 @@ export async function GET(request: Request) {
       }
     }
     const report = await readLatestMeridianReport(env);
-    return NextResponse.json({ env, report, hasReport: !!report });
+    const readiness = meridianConnectorReadiness();
+    return NextResponse.json({ env, report, hasReport: !!report, readiness });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
     return NextResponse.json({ error: msg }, { status: authStatus(e) });

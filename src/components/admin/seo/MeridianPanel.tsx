@@ -5,6 +5,20 @@ import { withBasePath } from '@/lib/base-path';
 
 type Env = 'prod' | 'preprod';
 
+type ReadinessField = {
+  id: string;
+  label: string;
+  set: boolean;
+  requiredFor: string[];
+  howTo: string;
+};
+
+type Readiness = {
+  docsPath?: string;
+  fields?: ReadinessField[];
+  connectors?: Record<string, { ready: boolean; missing: string[] }>;
+};
+
 type Report = {
   meta?: { runId?: string; finishedAt?: string; durationMs?: number };
   scorecard?: {
@@ -29,6 +43,7 @@ type Report = {
 export default function MeridianPanel() {
   const [env, setEnv] = useState<Env>('prod');
   const [report, setReport] = useState<Report | null>(null);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
   const [pending, startTransition] = useTransition();
@@ -43,6 +58,7 @@ export default function MeridianPanel() {
       return;
     }
     setReport(data.report || null);
+    setReadiness(data.readiness || null);
   }, []);
 
   useEffect(() => {
@@ -295,6 +311,43 @@ export default function MeridianPanel() {
           color: var(--m-muted);
           font-size: 0.92rem;
         }
+        .ready-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.82rem;
+          margin-top: 0.5rem;
+        }
+        .ready-table th,
+        .ready-table td {
+          text-align: left;
+          padding: 0.45rem 0.4rem;
+          border-bottom: 1px solid var(--m-line);
+          vertical-align: top;
+        }
+        .ready-table th {
+          color: var(--m-muted);
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.65rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .badge {
+          font-family: 'IBM Plex Mono', monospace;
+          font-size: 0.65rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .badge.on {
+          color: #3dd68c;
+        }
+        .badge.off {
+          color: #ff9f43;
+        }
+        .howto {
+          color: var(--m-muted);
+          font-size: 0.78rem;
+          margin-top: 0.15rem;
+        }
       `}</style>
 
       <div className="head">
@@ -341,6 +394,39 @@ export default function MeridianPanel() {
       </div>
 
       {error ? <p className="err">{error}</p> : null}
+
+      {readiness?.fields?.length ? (
+        <>
+          <div className="section-title">Connectors readiness</div>
+          <p className="sub" style={{ marginBottom: '0.5rem' }}>
+            Secrets are set on the server <code>.env</code> (never shown here). Full click-by-click guide:{' '}
+            <code>{readiness.docsPath || 'packages/meridian/SETUP.md'}</code> and SEO-GUIDE Appendix G.
+          </p>
+          <table className="ready-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Status</th>
+                <th>How to get the value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {readiness.fields.map((f) => (
+                <tr key={f.id}>
+                  <td>
+                    <code>{f.id}</code>
+                    <div className="howto">{f.label}</div>
+                  </td>
+                  <td>
+                    <span className={`badge ${f.set ? 'on' : 'off'}`}>{f.set ? 'set' : 'missing'}</span>
+                  </td>
+                  <td className="howto">{f.howTo}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : null}
 
       {!report ? (
         <p className="empty">No report yet. Run a scan to generate the consolidated Meridian report.</p>
