@@ -47,13 +47,12 @@ npm run meridian:verify
 ssh deploy@200.234.45.106
 cd /var/www/zigma-technologies
 chmod +x scripts/meridian-cron.sh
-# Every Monday 09:00 IST (03:30 UTC)
-crontab -e
-# add:
-# 30 3 * * 1 /var/www/zigma-technologies/scripts/meridian-cron.sh >> /var/www/zigma-technologies/storage/meridian/cron.log 2>&1
+# Every Monday 03:30 UTC ≈ 09:00 IST
+(crontab -l 2>/dev/null | grep -v meridian-cron; echo '30 3 * * 1 /var/www/zigma-technologies/scripts/meridian-cron.sh >> /var/www/zigma-technologies/storage/meridian/cron.log 2>&1') | crontab -
+crontab -l | grep meridian
 ```
 
-Or rely on GitHub Actions schedule (needs secrets in the repo).
+**Installed on Production 18 Oct 2026.** Also: GitHub Action **Meridian autopilot** schedule (needs repo secrets for GSC act).
 
 ## Optional env
 
