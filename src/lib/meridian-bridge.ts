@@ -21,7 +21,11 @@ export type MeridianAct =
   | { action: 'image-optimize' }
   | { action: 'orphan-remediate'; apply?: boolean }
   | { action: 'content-briefs' }
+  | { action: 'content-seed' }
   | { action: 'schema-validate' }
+  | { action: 'hreflang-validate' }
+  | { action: 'nap-audit' }
+  | { action: 'keyword-map' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -257,8 +261,20 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   if (act.action === 'content-briefs') {
     return spawnMeridian(['act', 'content-briefs', '--profile', profile]);
   }
+  if (act.action === 'content-seed') {
+    return spawnMeridian(['act', 'content-seed', '--profile', profile]);
+  }
   if (act.action === 'schema-validate') {
     return spawnMeridian(['act', 'schema-validate', '--profile', profile]);
+  }
+  if (act.action === 'hreflang-validate') {
+    return spawnMeridian(['act', 'hreflang-validate', '--profile', profile]);
+  }
+  if (act.action === 'nap-audit') {
+    return spawnMeridian(['act', 'nap-audit', '--profile', profile]);
+  }
+  if (act.action === 'keyword-map') {
+    return spawnMeridian(['act', 'keyword-map', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

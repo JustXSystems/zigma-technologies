@@ -15,6 +15,11 @@ import { remediateOrphans } from './connectors/orphan-remediate.mjs';
 import { optimizeHeavyImages } from './connectors/image-optimize.mjs';
 import { writeContentBriefs } from './connectors/content-briefs.mjs';
 import { validateSchema } from './connectors/schema-validate.mjs';
+import { validateHreflang } from './connectors/hreflang-validate.mjs';
+import { auditNap } from './connectors/nap-audit.mjs';
+import { buildKeywordMap } from './connectors/keyword-map.mjs';
+import { seedThinContent } from './connectors/content-seed.mjs';
+import { runClosedLoop } from './connectors/closed-loop.mjs';
 
 function mergeFindings(scan, result) {
   if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
@@ -140,6 +145,18 @@ export async function runAutopilot(profile, opts = {}) {
     const briefs = await writeContentBriefs(profile, { outDir });
     actions.push({ id: 'content-briefs', ...briefs });
     mergeFindings(scan, briefs);
+
+    // Seed FAQ stubs into thin catalog pages
+    if (profile.autopilot?.skipContentSeed !== true) {
+      const seeded = await seedThinContent(profile, {
+        outDir,
+        apply:
+          opts.seedContent === true ||
+          process.env.MERIDIAN_AUTO_SEED_CONTENT === '1' ||
+          profile.autopilot?.autoSeedContent === true,
+      });
+      actions.push({ id: 'content-seed', ...seeded });
+    }
   }
 
   // --- JSON-LD / Rich Results readiness ---
@@ -147,6 +164,42 @@ export async function runAutopilot(profile, opts = {}) {
     const schema = await validateSchema(profile, { outDir });
     actions.push({ id: 'schema-validate', ...schema });
     mergeFindings(scan, schema);
+  }
+
+  // --- hreflang (Phase 6) ---
+  if (profile.autopilot?.skipHreflang !== true) {
+    const hf = await validateHreflang(profile, { outDir });
+    actions.push({ id: 'hreflang-validate', ...hf });
+    mergeFindings(scan, hf);
+  }
+
+  // --- NAP / GBP checklist (Phase 5) ---
+  if (profile.autopilot?.skipNapAudit !== true) {
+    const nap = await auditNap(profile, { outDir });
+    actions.push({ id: 'nap-audit', ...nap });
+    mergeFindings(scan, nap);
+  }
+
+  // --- Keyword map (Phase 7) ---
+  if (profile.autopilot?.skipKeywordMap !== true) {
+    const kw = await buildKeywordMap(profile, { outDir });
+    actions.push({ id: 'keyword-map', ...kw });
+    mergeFindings(scan, kw);
+  }
+
+  // --- Closed-loop recheck after remediations ---
+  if (profile.autopilot?.skipClosedLoop !== true) {
+    const healthBefore = actions.find((a) => a.id === 'sitemap-health');
+    const imagesBefore = actions.find((a) => a.id === 'image-weight');
+    const loop = await runClosedLoop(profile, {
+      outDir,
+      before: {
+        heavyCount: imagesBefore?.data?.heavyCount,
+        orphanCount: healthBefore?.data?.linkGraph?.orphanCount,
+        thinCount: healthBefore?.data?.linkGraph?.thinCount,
+      },
+    });
+    actions.push({ id: 'closed-loop', ...loop });
   }
 
   // --- Bing act ---

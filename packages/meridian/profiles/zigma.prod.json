@@ -43,7 +43,9 @@
     "autoApplyMeta": true,
     "autoApplyAlt": true,
     "autoApplyOrphans": true,
-    "autoOptimizeImages": true
+    "autoOptimizeImages": true,
+    "autoSeedContent": true,
+    "closedLoopHealthLimit": 40
   },
   "outputDir": "../../storage/meridian/zigma-prod"
 }

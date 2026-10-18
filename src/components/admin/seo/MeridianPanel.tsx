@@ -365,8 +365,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: <strong>Autopilot</strong> = scan + meta/alt + health/orphans + form + image
-            optimize + orphan fix + content briefs + schema + Bing/GSC + digests.
+            Maximum automation: closed-loop SEO ops — remediate findings, seed Phase 5–7 artefacts (NAP/GBP,
+            hreflang, keywords, FAQ stubs), re-verify, then digests.
           </p>
         </div>
         <div className="actions">
@@ -468,6 +468,31 @@ export default function MeridianPanel() {
             onClick={() => postAction({ action: 'schema-validate' }, 'Validating JSON-LD')}
           >
             Schema check
+          </button>
+          <button type="button" disabled={pending} onClick={() => postAction({ action: 'nap-audit' }, 'NAP / GBP audit')}>
+            NAP / GBP
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'hreflang-validate' }, 'Checking hreflang')}
+          >
+            hreflang
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'keyword-map' }, 'Building keyword map')}
+          >
+            Keyword map
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'content-seed' }, 'Seeding FAQ content')}
+            title="Append FAQ stubs to thin catalog pages"
+          >
+            Seed content
           </button>
           <button
             type="button"

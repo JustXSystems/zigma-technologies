@@ -70,15 +70,15 @@ npm run meridian:act:inspect    # Inspect home + sample paths
 
 Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
 
-## Automation (M4–M7)
+## Automation (M4–M8)
 
 ```bash
-npm run meridian:autopilot           # full remediation loop
-npm run meridian:act:optimize        # heavy images → WebP + DB url swap
-npm run meridian:act:orphans         # hub link prescriptions + catalog footers
-npm run meridian:act:briefs          # Phase 7 content briefs for thin/orphan pages
-npm run meridian:act:schema          # JSON-LD / sameAs readiness
-npm run meridian:act:health          # sitemap health + link-graph
+npm run meridian:autopilot           # full closed-loop ops
+npm run meridian:act:nap             # GBP / NAP checklist from live JSON-LD
+npm run meridian:act:hreflang        # EN ↔ HI/KN reciprocal checks
+npm run meridian:act:keywords        # Phase 7 keyword map from CMS
+npm run meridian:act:seed            # FAQ stubs on thin catalog pages
+npm run meridian:act:optimize        # WebP + DB swap
 npm run meridian:digest:monthly
 ```
 

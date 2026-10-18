@@ -201,8 +201,9 @@ Fails the pipeline if hard technical findings exist (same contract as today’s 
 | **M4 — Meta write-back + sitemap delta** | Auto-draft/apply CMS meta (Appendix B); inspect new sitemap URLs since last run | Content + crawl automation |
 | **M5 — Ops loop** | Sitemap health; Bing SubmitFeed; image alt draft/apply; Phase 9 weekly digest | Hands-off weekly ops |
 | **M6 — Conversion & content ops** | Orphan/thin link graph; form health; image-weight; monthly digest; auto-apply meta/alt | Phase 4/9 without OAuth |
-| **M7 — Remediation loop (current)** | Auto-optimize heavy images (WebP); orphan hub footers; content briefs; JSON-LD validate | Close the loop on crawl findings |
-| **M8 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
+| **M7 — Remediation loop** | WebP optimize; orphan hub footers; content briefs; JSON-LD validate | Fix crawl findings |
+| **M8 — Closed loop + Phase 5–7 seed (current)** | hreflang; NAP/GBP checklist; keyword map; FAQ content seed; closed-loop recheck | Maximum automation without OAuth |
+| **M9 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
 
 ---
 

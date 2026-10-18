@@ -15,6 +15,10 @@ import { remediateOrphans } from './connectors/orphan-remediate.mjs';
 import { optimizeHeavyImages } from './connectors/image-optimize.mjs';
 import { writeContentBriefs } from './connectors/content-briefs.mjs';
 import { validateSchema } from './connectors/schema-validate.mjs';
+import { validateHreflang } from './connectors/hreflang-validate.mjs';
+import { auditNap } from './connectors/nap-audit.mjs';
+import { buildKeywordMap } from './connectors/keyword-map.mjs';
+import { seedThinContent } from './connectors/content-seed.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -223,6 +227,33 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'hreflang-validate') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await validateHreflang(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'nap-audit') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await auditNap(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'keyword-map') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await buildKeywordMap(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'content-seed') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await seedThinContent(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--dry-run'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
@@ -261,13 +292,14 @@ Usage:
   meridian act inspect-sitemap-delta --profile ./profiles/site.json [--limit 10]
   meridian act sitemap-health --profile ./profiles/site.json [--limit 120]
   meridian act form-health | image-weight | image-optimize --profile ./profiles/site.json
-  meridian act orphan-remediate [--apply] | content-briefs | schema-validate --profile ./profiles/site.json
+  meridian act orphan-remediate [--apply] | content-briefs | content-seed | schema-validate --profile ./profiles/site.json
+  meridian act hreflang-validate | nap-audit | keyword-map --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = scan + meta/alt + health/orphans + form + images(+optimize) + orphan fix + briefs + schema + Bing/GSC + digests.
+Autopilot = full remediation + Phase 5–7 seeds (NAP/GBP, hreflang, keywords, content seed) + closed-loop recheck + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY
