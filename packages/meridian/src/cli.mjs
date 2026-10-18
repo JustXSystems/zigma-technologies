@@ -388,6 +388,22 @@ export async function runCli(argv) {
     process.exit(2);
   }
 
+  if (cmd === 'unlock-verify') {
+    const { spawn } = await import('node:child_process');
+    const script = resolve(PKG, 'scripts/unlock-verify.mjs');
+    const extra = argv.slice(1);
+    const code = await new Promise((resolvePromise) => {
+      const child = spawn(process.execPath, [script, ...extra], {
+        cwd: process.cwd(),
+        env: process.env,
+        stdio: 'inherit',
+        windowsHide: true,
+      });
+      child.on('close', (c) => resolvePromise(c ?? 1));
+    });
+    process.exit(code);
+  }
+
   if (cmd === 'profiles') {
     const registry = resolve(PKG, 'profiles/index.json');
     try {
@@ -446,6 +462,7 @@ Usage:
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian profiles
+  meridian unlock-verify [--act]
   meridian init-profile --out ./my-site.json
   meridian help
 
