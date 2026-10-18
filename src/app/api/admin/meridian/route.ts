@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       limit?: number;
       skipAct?: boolean;
       applyMeta?: boolean;
+      apply?: boolean;
       dryRun?: boolean;
       force?: boolean;
     };
