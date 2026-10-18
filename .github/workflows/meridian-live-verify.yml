@@ -1,0 +1,49 @@
+# Live Meridian SEO verify against Production / PreProd (no deploy).
+# Manual: Actions → Meridian live verify → Run workflow
+name: Meridian live verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - prod
+          - preprod
+        default: prod
+
+jobs:
+  verify:
+    name: Meridian verify (${{ inputs.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Meridian verify
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+          MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.target }}" = "preprod" ]; then
+            npm run meridian:verify:preprod
+          else
+            npm run meridian:verify
+          fi
+          echo "Report under storage/meridian/ (artifact next)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meridian-report-${{ inputs.target }}
+          path: storage/meridian/
+          if-no-files-found: ignore
+          retention-days: 14

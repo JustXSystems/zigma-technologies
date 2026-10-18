@@ -62,7 +62,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** portable package `packages/meridian` — `npm run meridian:run` / `meridian:verify`; Admin → **SEO → Meridian**. Architecture: `packages/meridian/ARCHITECTURE.md`. **M1 connectors:** set `MERIDIAN_GOOGLE_*` + `MERIDIAN_GA4_PROPERTY_ID` (and optional Bing/PSI keys) to attach live GSC/GA4/Bing/PageSpeed signals — setup: `node packages/meridian/scripts/google-oauth-setup.mjs`.
+- **Meridian (SEO Command):** `packages/meridian` — `npm run meridian:run` / `meridian:verify` / `meridian:act:sitemap` / `meridian:act:inspect`; Admin → **SEO → Meridian**. Architecture: `packages/meridian/ARCHITECTURE.md`. Set `MERIDIAN_GOOGLE_*` (webmasters scope) + `MERIDIAN_GA4_PROPERTY_ID` for live signals and GSC act — `node packages/meridian/scripts/google-oauth-setup.mjs`. GitHub Action: **Meridian live verify**.
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 

@@ -8,7 +8,7 @@ import { runConnectors, signalsFromConnectors } from './connectors/registry.mjs'
 import { renderHtmlReport } from './report/html.mjs';
 import { renderMarkdownReport } from './report/markdown.mjs';
 
-const MERIDIAN_VERSION = '0.2.0';
+const MERIDIAN_VERSION = '0.3.0';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**

@@ -16,6 +16,8 @@
     "meridian:run": "node packages/meridian/bin/meridian.mjs run --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:verify": "node packages/meridian/bin/meridian.mjs verify --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:verify:preprod": "node packages/meridian/bin/meridian.mjs verify --profile packages/meridian/profiles/zigma.preprod.json",
+    "meridian:act:sitemap": "node packages/meridian/bin/meridian.mjs act submit-sitemap --profile packages/meridian/profiles/zigma.prod.json",
+    "meridian:act:inspect": "node packages/meridian/bin/meridian.mjs act inspect-priority --profile packages/meridian/profiles/zigma.prod.json",
     "db:export": "node scripts/db-export.mjs",
     "db:import": "node scripts/db-import.mjs",
     "db:push": "node scripts/db-push-remote.mjs",

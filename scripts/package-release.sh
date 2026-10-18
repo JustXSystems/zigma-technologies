@@ -139,6 +139,21 @@ cp -a package.json package-lock.json "$STAGE/"
 [[ -f next.config.ts ]] && cp -a next.config.ts "$STAGE/"
 [[ -f .env.example ]] && cp -a .env.example "$STAGE/"
 
+# Meridian SEO command package (Admin → SEO → Meridian + CLI on VPS)
+if [[ -d packages/meridian ]]; then
+  mkdir -p "$STAGE/packages"
+  rsync -a \
+    --exclude 'out/' \
+    --exclude 'node_modules/' \
+    --exclude '.git/' \
+    packages/meridian/ "$STAGE/packages/meridian/"
+  [[ -f "$STAGE/packages/meridian/bin/meridian.mjs" ]] || die "packages/meridian missing after staging"
+  mkdir -p "$STAGE/storage/meridian"
+  echo "==> Staged packages/meridian (SEO command center)"
+else
+  echo "==> WARNING: packages/meridian not found — Admin Meridian tab will not run on VPS" >&2
+fi
+
 # Ops scripts (db:import / db:export) need a root-resolvable mysql2 tree.
 # Do NOT hand-copy dep names — versions drift (e.g. sql-escaper). Install the
 # package into the stage so npm pulls the full runtime dependency tree.
@@ -199,4 +214,7 @@ require_in_tar '(\./)?scripts/apply-release\.sh'
 require_in_tar '(\./)?scripts/migrate-catalog-background\.sql'
 require_in_tar '(\./)?scripts/schema\.sql'
 require_in_tar '(\./)?server\.js'
-echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js in tarball"
+if [[ -d packages/meridian ]]; then
+  require_in_tar '(\./)?packages/meridian/bin/meridian\.mjs'
+fi
+echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js$([[ -d packages/meridian ]] && echo ', packages/meridian') in tarball"

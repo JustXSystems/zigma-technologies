@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { requireScreen } from '@/lib/auth';
-import { meridianLatestPaths, readLatestMeridianReport, runMeridianCli, type MeridianEnv } from '@/lib/meridian-bridge';
+import {
+  meridianLatestPaths,
+  readLatestMeridianReport,
+  runMeridianAct,
+  runMeridianCli,
+  type MeridianAct,
+  type MeridianEnv,
+} from '@/lib/meridian-bridge';
 import { readFile } from 'node:fs/promises';
 
 export const runtime = 'nodejs';
@@ -47,17 +54,66 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await requireScreen('redirects');
-    const body = (await request.json().catch(() => ({}))) as { env?: string };
+    const body = (await request.json().catch(() => ({}))) as {
+      env?: string;
+      action?: string;
+      feed?: string;
+      url?: string;
+      limit?: number;
+    };
     const env = parseEnv(body.env);
-    const result = await runMeridianCli(env);
-    const report = await readLatestMeridianReport(env);
+    const action = body.action || 'scan';
+
+    if (action === 'scan') {
+      const result = await runMeridianCli(env);
+      const report = await readLatestMeridianReport(env);
+      return NextResponse.json({
+        env,
+        action,
+        ok: result.ok,
+        code: result.code,
+        stdout: result.stdout.slice(-4000),
+        stderr: result.stderr.slice(-2000),
+        report,
+      });
+    }
+
+    let act: MeridianAct;
+    if (action === 'submit-sitemap') {
+      act = { action: 'submit-sitemap', feed: body.feed };
+    } else if (action === 'inspect-url') {
+      if (!body.url?.trim()) {
+        return NextResponse.json({ error: 'url is required for inspect-url' }, { status: 400 });
+      }
+      act = { action: 'inspect-url', url: body.url.trim() };
+    } else if (action === 'inspect-priority') {
+      act = { action: 'inspect-priority', limit: body.limit ?? 5 };
+    } else {
+      return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
+    }
+
+    if (env === 'preprod' && action !== 'scan') {
+      return NextResponse.json(
+        { error: 'GSC act commands are Production-only (PreProd must stay out of Google).' },
+        { status: 400 }
+      );
+    }
+
+    const result = await runMeridianAct(env, act);
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(result.stdout);
+    } catch {
+      parsed = null;
+    }
     return NextResponse.json({
       env,
+      action,
       ok: result.ok,
       code: result.code,
-      stdout: result.stdout.slice(-4000),
+      stdout: result.stdout.slice(-6000),
       stderr: result.stderr.slice(-2000),
-      report,
+      result: parsed,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Failed';

@@ -1,11 +1,17 @@
 import { spawn } from 'node:child_process';
-import { access, readFile } from 'node:fs/promises';
+import { access, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const ROOT = process.cwd();
 const MERIDIAN_BIN = path.join(ROOT, 'packages', 'meridian', 'bin', 'meridian.mjs');
 
 export type MeridianEnv = 'prod' | 'preprod';
+
+export type MeridianAct =
+  | { action: 'scan' }
+  | { action: 'submit-sitemap'; feed?: string }
+  | { action: 'inspect-url'; url: string }
+  | { action: 'inspect-priority'; limit?: number };
 
 const PROFILES: Record<MeridianEnv, string> = {
   prod: path.join(ROOT, 'packages', 'meridian', 'profiles', 'zigma.prod.json'),
@@ -26,8 +32,9 @@ export function meridianLatestPaths(env: MeridianEnv) {
 }
 
 export async function readLatestMeridianReport(env: MeridianEnv) {
-  const { json } = meridianLatestPaths(env);
+  const { json, dir } = meridianLatestPaths(env);
   try {
+    await mkdir(dir, { recursive: true });
     await access(json);
     const raw = await readFile(json, 'utf8');
     return JSON.parse(raw) as Record<string, unknown>;
@@ -36,16 +43,14 @@ export async function readLatestMeridianReport(env: MeridianEnv) {
   }
 }
 
-/** Run Meridian CLI as a child process (server-side only). */
-export function runMeridianCli(env: MeridianEnv): Promise<{
+function spawnMeridian(args: string[]): Promise<{
   ok: boolean;
   code: number | null;
   stdout: string;
   stderr: string;
 }> {
-  const profile = meridianProfilePath(env);
   return new Promise((resolvePromise) => {
-    const child = spawn(process.execPath, [MERIDIAN_BIN, 'run', '--profile', profile], {
+    const child = spawn(process.execPath, [MERIDIAN_BIN, ...args], {
       cwd: ROOT,
       env: process.env,
       windowsHide: true,
@@ -65,4 +70,31 @@ export function runMeridianCli(env: MeridianEnv): Promise<{
       resolvePromise({ ok: false, code: null, stdout, stderr: String(err) });
     });
   });
+}
+
+/** Run Meridian CLI as a child process (server-side only). */
+export function runMeridianCli(env: MeridianEnv) {
+  const profile = meridianProfilePath(env);
+  return spawnMeridian(['run', '--profile', profile]);
+}
+
+export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
+  const profile = meridianProfilePath(env);
+  if (act.action === 'scan') {
+    return spawnMeridian(['run', '--profile', profile]);
+  }
+  if (act.action === 'submit-sitemap') {
+    const args = ['act', 'submit-sitemap', '--profile', profile];
+    if (act.feed) args.push('--feed', act.feed);
+    return spawnMeridian(args);
+  }
+  if (act.action === 'inspect-url') {
+    return spawnMeridian(['act', 'inspect-url', '--profile', profile, '--url', act.url]);
+  }
+  if (act.action === 'inspect-priority') {
+    const args = ['act', 'inspect-priority', '--profile', profile];
+    if (act.limit) args.push('--limit', String(act.limit));
+    return spawnMeridian(args);
+  }
+  return Promise.resolve({ ok: false, code: 2, stdout: '', stderr: 'Unknown action' });
 }

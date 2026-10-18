@@ -268,3 +268,37 @@ jobs:
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
             rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh
+
+  meridian-live-verify:
+    name: Meridian live verify (Production)
+    needs: deploy-release
+    if: ${{ !inputs.dry_run && inputs.apply_release && inputs.healthcheck }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Meridian verify against live apex
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+          MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+        run: |
+          set -euo pipefail
+          # Give PM2 a moment after healthcheck before external crawl
+          sleep 8
+          npm run meridian:verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meridian-report-prod
+          path: storage/meridian/
+          if-no-files-found: ignore
+          retention-days: 14

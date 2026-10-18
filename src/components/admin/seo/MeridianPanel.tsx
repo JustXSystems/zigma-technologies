@@ -51,29 +51,36 @@ export default function MeridianPanel() {
     });
   }, [env, load]);
 
-  function runScan() {
+  function postAction(payload: Record<string, unknown>, label: string) {
     setError(null);
-    setLog('Running Meridian…');
+    setLog(`${label}…`);
     startTransition(async () => {
       try {
         const res = await fetch(withBasePath('/api/admin/meridian'), {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ env }),
+          body: JSON.stringify({ env, ...payload }),
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error || 'Scan failed');
-          setLog(data.stderr || '');
+          setError(data.error || `${label} failed`);
+          setLog(data.stderr || data.stdout || '');
           return;
         }
-        setReport(data.report || null);
-        setLog([data.stdout, data.stderr].filter(Boolean).join('\n').slice(-2500));
+        if (data.report) setReport(data.report);
+        const out = data.result
+          ? JSON.stringify(data.result, null, 2)
+          : [data.stdout, data.stderr].filter(Boolean).join('\n');
+        setLog(String(out).slice(-4000));
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Scan failed');
+        setError(err instanceof Error ? err.message : `${label} failed`);
       }
     });
+  }
+
+  function runScan() {
+    postAction({ action: 'scan' }, 'Running Meridian');
   }
 
   const score = report?.scorecard?.overall;
@@ -295,8 +302,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Portable verify → score → report. Technical crawl runs now; GSC / GA4 / Bing / PageSpeed connectors show
-            auth status until M1 credentials are connected.
+            Verify → score → report → act. Connectors need server secrets (`MERIDIAN_GOOGLE_*`). Act commands submit
+            the sitemap and inspect URLs in Search Console (Production only).
           </p>
         </div>
         <div className="actions">
@@ -310,7 +317,22 @@ export default function MeridianPanel() {
             <option value="preprod">PreProd</option>
           </select>
           <button type="button" className="primary" disabled={pending} onClick={runScan}>
-            {pending ? 'Scanning…' : 'Run scan'}
+            {pending ? 'Working…' : 'Run scan'}
+          </button>
+          <button
+            type="button"
+            disabled={pending || env !== 'prod'}
+            onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting sitemap')}
+            title="Requires MERIDIAN_GOOGLE_* with webmasters scope"
+          >
+            Submit sitemap
+          </button>
+          <button
+            type="button"
+            disabled={pending || env !== 'prod'}
+            onClick={() => postAction({ action: 'inspect-priority', limit: 5 }, 'Inspecting priority URLs')}
+          >
+            Inspect top URLs
           </button>
           <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
             Open HTML report

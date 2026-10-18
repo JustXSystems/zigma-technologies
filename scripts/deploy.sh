@@ -311,5 +311,23 @@ if [[ "$DO_HEALTHCHECK" -eq 1 && "$DO_RESTART" -eq 1 ]]; then
   fi
 fi
 
+# Optional live Meridian gate (technical crawl against public origin). Skip if package absent.
+if [[ "$DO_HEALTHCHECK" -eq 1 && -f packages/meridian/bin/meridian.mjs ]]; then
+  PROFILE="packages/meridian/profiles/zigma.${ENV_NAME}.json"
+  if [[ "$ENV_NAME" == "prod" ]]; then
+    PROFILE="packages/meridian/profiles/zigma.prod.json"
+  elif [[ "$ENV_NAME" == "preprod" ]]; then
+    PROFILE="packages/meridian/profiles/zigma.preprod.json"
+  fi
+  if [[ -f "$PROFILE" ]]; then
+    log "Meridian verify ($PROFILE)"
+    if node packages/meridian/bin/meridian.mjs verify --profile "$PROFILE"; then
+      log "Meridian verify OK"
+    else
+      log "WARNING: Meridian verify reported findings — review storage/meridian/ or Admin → SEO → Meridian"
+    fi
+  fi
+fi
+
 log "Deploy finished OK ($ENV_NAME @ $SSH_HINT → $PUBLIC_HINT)"
 log "Note: runtime uploads live under public/assets/{images,svg,video} (untracked). Never git clean -fd here."

@@ -24,8 +24,9 @@ const CLIENT_SECRET = (process.env.MERIDIAN_GOOGLE_CLIENT_SECRET || '').trim();
 const PORT = Number(process.env.MERIDIAN_OAUTH_PORT || 8765);
 const REDIRECT = `http://127.0.0.1:${PORT}/callback`;
 
+// webmasters (full) required for M2 sitemap submit + URL inspect; readonly is not enough.
 const SCOPES = [
-  'https://www.googleapis.com/auth/webmasters.readonly',
+  'https://www.googleapis.com/auth/webmasters',
   'https://www.googleapis.com/auth/analytics.readonly',
 ].join(' ');
 

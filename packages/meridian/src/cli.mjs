@@ -1,6 +1,7 @@
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadProfile, runMeridian } from './orchestrator.mjs';
+import { inspectPriorityUrls, inspectUrl, submitSitemap } from './connectors/gsc-act.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -37,6 +38,37 @@ export async function runCli(argv) {
     return;
   }
 
+  if (cmd === 'act') {
+    const action = argv[1];
+    const profilePath = argValue(argv, '--profile');
+    if (!profilePath) {
+      console.error('Missing --profile path/to/site.json');
+      process.exit(2);
+    }
+    const profile = await loadProfile(resolve(profilePath));
+    if (action === 'submit-sitemap') {
+      const feed = argValue(argv, '--feed');
+      const result = await submitSitemap(profile, feed);
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'inspect-url') {
+      const url = argValue(argv, '--url') || profile.origin;
+      const result = await inspectUrl(profile, url);
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'inspect-priority') {
+      const limit = Number(argValue(argv, '--limit') || 5);
+      const result = await inspectPriorityUrls(profile, { limit });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    console.error(`Unknown act action: ${action || '(none)'}`);
+    printHelp();
+    process.exit(2);
+  }
+
   if (cmd === 'init-profile') {
     const dest = argValue(argv, '--out') || './meridian.profile.json';
     const example = resolve(PKG, 'profiles/acme.example.json');
@@ -62,6 +94,9 @@ function printHelp() {
 Usage:
   meridian run --profile ./profiles/site.json [--out ./out]
   meridian verify --profile ./profiles/site.json
+  meridian act submit-sitemap --profile ./profiles/site.json [--feed https://…/sitemap.xml]
+  meridian act inspect-url --profile ./profiles/site.json --url https://…
+  meridian act inspect-priority --profile ./profiles/site.json [--limit 5]
   meridian init-profile --out ./my-site.json
   meridian help
 
@@ -69,10 +104,13 @@ Profiles ship for Zigma:
   packages/meridian/profiles/zigma.prod.json
   packages/meridian/profiles/zigma.preprod.json
 
-Connectors (M1 auth):
-  MERIDIAN_GOOGLE_CLIENT_ID / SECRET / REFRESH_TOKEN
+Connectors:
+  MERIDIAN_GOOGLE_CLIENT_ID / SECRET / REFRESH_TOKEN  (scope: webmasters + analytics.readonly)
   MERIDIAN_GA4_PROPERTY_ID
   MERIDIAN_BING_API_KEY
   MERIDIAN_PSI_API_KEY
+
+OAuth setup:
+  node packages/meridian/scripts/google-oauth-setup.mjs
 `);
 }

@@ -63,9 +63,22 @@ Bing Webmaster → Settings → API Access → create key → `MERIDIAN_BING_API
 
 Google Cloud API key with PageSpeed Insights API → `MERIDIAN_PSI_API_KEY`.
 
+## Act (M2)
+
+Requires Google OAuth with **webmasters** (full) scope — re-run `google-oauth-setup.mjs` if you previously used readonly.
+
+```bash
+npm run meridian:act:sitemap    # PUT sitemap into Search Console
+npm run meridian:act:inspect    # Inspect home + sample paths
+```
+
+Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
+
 ## CI gate
 
 ```bash
 npm run meridian:verify
 # exit 1 if critical/high findings
 ```
+
+GitHub Actions: **Meridian live verify** workflow, and automatic after **Deploy Production** (when apply + healthcheck).

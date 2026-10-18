@@ -195,8 +195,8 @@ Fails the pipeline if hard technical findings exist (same contract as today’s 
 | Phase | Ships | Outcome |
 | --- | --- | --- |
 | **M0 — Foundation** | Package, profile, technical engine, scorecard, JSON+HTML report, CLI, Zigma Admin tab | Portable truth layer + boardroom report |
-| **M1 — Google/Bing auth (current)** | Live GSC + GA4 collectors (OAuth refresh), Bing API key, PageSpeed/CrUX, signals in report + Admin | Full 2C **read** path when secrets are set |
-| **M2 — Act** | Sitemap submit, URL inspect queue, Zigma CMS meta write adapter | Closed loop for ops |
+| **M1 — Google/Bing auth** | Live GSC + GA4 collectors (OAuth refresh), Bing API key, PageSpeed/CrUX, signals in report + Admin | Full 2C **read** path when secrets are set |
+| **M2 — Act (current)** | GSC sitemap submit + URL Inspection (CLI + Admin); package shipped in release tarball; live verify workflow | Closed loop for indexing ops (CMS meta write still later) |
 | **M3 — Multi-site SaaS shell** | Multi-profile workspace, schedule, diff vs last run | Agency / multi-brand |
 
 ---
