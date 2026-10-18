@@ -25,13 +25,14 @@ Use this section to see **where you are right now**. Tick boxes in [Appendix F](
 | `/robots.txt` | `Allow: /`, private `Disallow:` paths, `Host:` + `Sitemap:` |
 | `/thank-you`, city×service (e.g. `/locations/bengaluru/ups-amc`) | `noindex` as designed |
 | `http://` → `https://` apex | **301** works |
+| **`https://www` → apex** | **Fixed 18 Oct 2026** — app-level permanent redirect (`308` to `https://zigma-technologies.com…`, Production deploy `247af69`) |
 | **PreProd noindex** (`justxsystems.com/zigma-technologies`) | **Fixed 18 Oct 2026** — `robots=noindex, follow`; sitemap **0** `<loc>`; `robots.txt` has no `Sitemap:` line (release `84f6344`) |
 
 ### Gaps still open (do these next)
 
 | Priority | Item | Phase | Who |
 | --- | --- | --- | --- |
-| **P0** | **`www` → apex** — nginx still serves both hosts on 443 (Certbot default). App-level permanent redirect in `next.config.ts` covers `https://www…` after the next Production deploy. Preferred one-hop fix: on Production as root run `sudo bash scripts/apply-nginx-apex-redirect.sh` (config in `scripts/nginx-zigma-apex.conf`; same as [step 1.6](#16-make-www-and-http-redirect-to-the-official-address-nginx-developer)). | 1.6 | Developer |
+| **P1** | **nginx one-hop `www`/http → apex** — optional polish. App-level permanent redirect is **live** (`https://www…` → `308` → apex, verified 18 Oct 2026). nginx still proxies both hosts; as root on Production run `sudo bash scripts/apply-nginx-apex-redirect.sh` when you have sudo (see [step 1.6](#16-make-www-and-http-redirect-to-the-official-address-nginx-developer)). | 1.6 | Developer |
 | **P1** | If PreProd URLs ever appeared in Google, use step 1.8 Removals. | 1.8 | You |
 | **P1** | Confirm Search Console / Bing / GA4 (Phase 0) and submit sitemap (1.7) if not already done. | 0, 1.7 | You |
 | **P2** | Structured data + NAP in Site Settings; Rich Results Test. | 2 | You |
@@ -2225,7 +2226,7 @@ Print this or copy it into your sheet. Tick each box when the step and its **Exp
 - [x] 1.3 PreProd checks passed *(noindex; empty sitemap; no `Sitemap:` in robots.txt — verified 18 Oct 2026)*
 - [x] 1.4 Branch merged; production deployed *(live Production serves indexable build)*
 - [x] 1.5 Production checks passed (index, follow; canonical; robots.txt; sitemap ~84 URLs) — re-run Appendix C after each deploy
-- [ ] 1.6 `www`/`http` → apex redirect live; `curl` checks show 301 *(app-level redirect in `next.config.ts`; preferred nginx apply still needs root: `sudo bash scripts/apply-nginx-apex-redirect.sh`)*
+- [x] 1.6 `www` → apex redirect live *(app-level `308` verified 18 Oct 2026 on Production `247af69`; optional nginx one-hop still needs root: `sudo bash scripts/apply-nginx-apex-redirect.sh`)*
 - [ ] 1.7 Sitemap submitted to Google and Bing; top pages requested for indexing
 - [ ] 1.8 Old PreProd results removed (do this if `site:justxsystems.com/zigma-technologies` shows pages)
 - [ ] 1.9 Search Console reports checked weekly for the first month
