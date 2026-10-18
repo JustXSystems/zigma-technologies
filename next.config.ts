@@ -57,6 +57,18 @@ const nextConfig: NextConfig = {
       bodySizeLimit: uploadBodyLimit,
     },
   },
+  async redirects() {
+    // Apex-only canonical host (Phase 1.6 / P4). Prefer nginx for the same rule when
+    // sudo is available; this app-level 301 covers www until nginx is updated.
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.zigma-technologies.com' }],
+        destination: 'https://zigma-technologies.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     // beforeFiles: always serve CMS media from disk via API (PreProd + Prod).
     // Next production does not reliably expose files added to public/ after start;
