@@ -330,8 +330,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   poweredByPrefix: 'Powered by',
   poweredByName: 'JustX Systems',
   poweredByUrl: 'https://www.justxsystems.com/',
+  // 120–160 chars (SEO-GUIDE Phase 2.1). DB overrides this if set in Admin → SEO → Defaults.
   defaultMetaDescription:
-    'Zigma Technologies delivers Solar EPC, UPS, BESS, EV charging, and industrial engineering solutions across India.',
+    'Solar EPC, UPS, BESS and EV charging for industries, hospitals and campuses across India. 20+ years, 24×7 support.',
   ogImage: '/og.png',
   enquiryNotifyEmail: 'info@zigma-technologies.com',
   logoUrl: '/assets/images/zigma-technologies-logo.png',

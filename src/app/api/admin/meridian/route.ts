@@ -78,6 +78,13 @@ export async function POST(request: Request) {
       });
     }
 
+    if (env === 'preprod') {
+      return NextResponse.json(
+        { error: 'GSC act commands are Production-only (PreProd must stay out of Google).' },
+        { status: 400 }
+      );
+    }
+
     let act: MeridianAct;
     if (action === 'submit-sitemap') {
       act = { action: 'submit-sitemap', feed: body.feed };
@@ -90,13 +97,6 @@ export async function POST(request: Request) {
       act = { action: 'inspect-priority', limit: body.limit ?? 5 };
     } else {
       return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
-    }
-
-    if (env === 'preprod' && action !== 'scan') {
-      return NextResponse.json(
-        { error: 'GSC act commands are Production-only (PreProd must stay out of Google).' },
-        { status: 400 }
-      );
     }
 
     const result = await runMeridianAct(env, act);

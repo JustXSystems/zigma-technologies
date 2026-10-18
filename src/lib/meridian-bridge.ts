@@ -34,9 +34,9 @@ export function meridianLatestPaths(env: MeridianEnv) {
 export async function readLatestMeridianReport(env: MeridianEnv) {
   const { json, dir } = meridianLatestPaths(env);
   try {
-    await mkdir(dir, { recursive: true });
-    await access(json);
-    const raw = await readFile(json, 'utf8');
+    await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+    await access(/*turbopackIgnore: true*/ json);
+    const raw = await readFile(/*turbopackIgnore: true*/ json, 'utf8');
     return JSON.parse(raw) as Record<string, unknown>;
   } catch {
     return null;
