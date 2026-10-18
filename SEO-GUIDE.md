@@ -10,47 +10,65 @@ You do not need to understand the code. Where a step needs someone with GitHub o
 
 ---
 
-## Current status (live audit — updated 18 Oct 2026)
+## Current status (live audit — re-checked 18 Oct 2026)
 
 Use this section to see **where you are right now**. Tick boxes in [Appendix F](#appendix-f--master-checklist) as you finish remaining work.
 
-### What is already live
+### Technical SEO — Production (verified live)
 
 | Check | Result |
 | --- | --- |
-| Phase 1 SEO code on `master` and Production | **Done** (merged via `#34`; release `84f6344`+) |
-| Apex `https://zigma-technologies.com` | `index, follow`; home canonical correct; **1** H1 |
-| `/projects` (sample inner page) | Own canonical; brand once in title; **1** H1 |
-| `/sitemap.xml` | **84** `<loc>` entries (17 Oct) |
-| `/robots.txt` | `Allow: /`, private `Disallow:` paths, `Host:` + `Sitemap:` |
-| `/thank-you`, city×service (e.g. `/locations/bengaluru/ups-amc`) | `noindex` as designed |
-| `http://` → `https://` apex | **301** works |
-| **`https://www` → apex** | **Fixed 18 Oct 2026** — app-level permanent redirect (`308` to `https://zigma-technologies.com…`, Production deploy `247af69`) |
-| **PreProd noindex** (`justxsystems.com/zigma-technologies`) | **Fixed 18 Oct 2026** — `robots=noindex, follow`; sitemap **0** `<loc>`; `robots.txt` has no `Sitemap:` line (release `84f6344`) |
+| Phase 1 code on Production | **Done** (`247af69` / earlier `84f6344`) |
+| Home, `/projects`, `/products`, `/services`, `/locations`, `/contact`, `/locations/bengaluru` | Each: `index, follow`, own canonical, **1** H1, brand once in title |
+| Sample project `/projects/amc-engineering-college-200kw-bangalore` | Own canonical; descriptive title; `index, follow` |
+| `/sitemap.xml` | **84** `<loc>` |
+| `/robots.txt` | Private `Disallow:` + `Host:` + `Sitemap:` |
+| `/thank-you`, `/locations/bengaluru/ups-amc` | `noindex` |
+| `/search` | Feature off → **307** to `/` (when enabled, layout sets `noindex`) |
+| Share image | `og:image` / Twitter → `/og.png` (1200×630) |
+| GA4 snippet | Present (`G-RFXQRYYX48` in page HTML) |
+| Org JSON-LD | Name, phone, street, city, PIN, email present |
+| `http://` apex → `https://` apex | **301** |
+| `https://www` → apex | **308** (app redirect) |
+| PreProd | `noindex`; sitemap **0**; no `Sitemap:` line |
 
-### Gaps still open (do these next)
+### Next actions (in order)
 
-| Priority | Item | Phase | Who |
-| --- | --- | --- | --- |
-| **P1** | **nginx one-hop `www`/http → apex** — optional polish. App-level permanent redirect is **live** (`https://www…` → `308` → apex, verified 18 Oct 2026). nginx still proxies both hosts; as root on Production run `sudo bash scripts/apply-nginx-apex-redirect.sh` when you have sudo (see [step 1.6](#16-make-www-and-http-redirect-to-the-official-address-nginx-developer)). | 1.6 | Developer |
-| **P1** | If PreProd URLs ever appeared in Google, use step 1.8 Removals. | 1.8 | You |
-| **P1** | Confirm Search Console / Bing / GA4 (Phase 0) and submit sitemap (1.7) if not already done. | 0, 1.7 | You |
-| **P2** | Structured data + NAP in Site Settings; Rich Results Test. | 2 | You |
-| **P2** | Hand-write titles/descriptions for the top ~20 pages in admin. | 3 | You |
-| **P2** | Google Business Profile claim/verify (start in parallel). | 5 | You |
+Technical Phase 1 is **complete enough for Google**. Remaining work is accounts, Site Settings polish, and content.
+
+| # | Do this next | Phase | Who | Notes from live check |
+| --- | --- | --- | --- | --- |
+| **1** | Verify domain in **Google Search Console** (if not done) → submit `https://zigma-technologies.com/sitemap.xml` → Request indexing for home + top listings | 0.1, **1.7** | You | Highest leverage right now |
+| **2** | Bing Webmaster (import from GSC) + confirm GA4 Realtime with the ID already in Site Settings | 0.2, 0.3 | You | GA4 ID `G-RFXQRYYX48` is already on the site |
+| **3** | **Phase 2 Site Settings polish** (see checklist below) → Rich Results Test | **2** | You | NAP mostly filled; gaps listed below |
+| **4** | Start **Google Business Profile** claim/verify (slow mail/postcard) | **5.2** | You | Parallel with 1–3 |
+| **5** | Hand-write meta titles/descriptions for top ~20 pages | **3** | You | Listing pages already have good titles |
+| **6** | Optional: nginx one-hop www/http → apex | 1.6 | Developer | Needs root: `sudo bash scripts/apply-nginx-apex-redirect.sh` |
+| **7** | Optional: Removals for old PreProd URLs if they appear in Google | 1.8 | You | Only if `site:justxsystems.com/zigma-technologies` shows hits |
+
+### Phase 2 readiness (from live Site Settings / JSON-LD)
+
+| Field | Live state | Action |
+| --- | --- | --- |
+| Company name, phone, email, street, Bengaluru, Karnataka, PIN | Present | Keep identical on GBP (Phase 5.1) |
+| Office hours | `Mon–Sat 9:30–18:30 IST` | Match GBP |
+| Social profile URLs (LinkedIn, Facebook, YouTube, …) | **All empty** → no `sameAs` in JSON-LD | Add real profile URLs in **Site Settings → Social links** |
+| Default meta description | Long keyword list | Replace with one 120–160 char sentence (formula in step 2.1) |
+| Default OG image in settings | Still points at square logo | **Clear the field** (site already serves `/og.png`) |
+| Rich Results Test | Not run yet | Step 2.2 on home + one project + one product + one service |
 
 ### Code hardening (shipped)
 
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
-- Host-based `www` → apex **301** in `next.config.ts` (app layer).
+- Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 
 ---
 
 ## Table of contents
 
-- [Current status (live audit)](#current-status-live-audit--17-oct-2026)
+- [Current status (live audit)](#current-status-live-audit--re-checked-18-oct-2026)
 - [How to use this guide](#how-to-use-this-guide)
 - [The plan at a glance](#the-plan-at-a-glance)
 - [Glossary — SEO words in plain English](#glossary--seo-words-in-plain-english)
@@ -185,14 +203,14 @@ Technical SEO is a gate: it cannot make you rank by itself, but when it is broke
 
 ### What was wrong with the website, and what is already fixed
 
-The website code was audited. The problems below were found. **Phase 1 SEO code is merged to `master` and live on Production** (PR `#34`). A live re-check on **17 Oct 2026** confirmed Production indexing, sitemap, and noindex rules. Two items remain open: **PreProd must stay noindex** (regression found live — see Current status), and **www → apex nginx** (still serving 200). The last column tells you what is left.
+The website code was audited. The problems below were found. **Phase 1 SEO code is merged to `master` and live on Production** (PR `#34`). Re-checks on **18 Oct 2026** confirmed Production indexing, sitemap, noindex rules, PreProd hidden, and `https://www` → apex. Remaining work is accounts (GSC/Bing), Site Settings polish (Phase 2), content (Phase 3), and Google Business Profile (Phase 5).
 
 | # | Problem found (plain English) | Status | Left for you |
 | --- | --- | --- | --- |
 | P1 | Every inner page told Google "I am a copy of the homepage" (wrong canonical). Inner pages could drop out of Google. | **Fixed and live on Production** | Nothing (re-check after deploys) |
 | P2 | A script replaced every page's description with the same default text after loading. | **Fixed and live** | Nothing |
-| P3 | The PreProd test copy was open to Google, competing with the real site. | Code + CI guards exist; **live PreProd was indexable again on 17 Oct 2026** | **[Developer]** Redeploy PreProd with current guards; confirm step 1.3 B; Removals if needed (1.8) |
-| P4 | Both `www.zigma-technologies.com` and `zigma-technologies.com` served the site, splitting Google's signals. | Code uses the apex everywhere; **www still returns 200 live** | **[Developer]** nginx redirect (Phase 1.6) — still required |
+| P3 | The PreProd test copy was open to Google, competing with the real site. | **Fixed and verified 18 Oct 2026** (`noindex`, empty sitemap) | Removals only if old PreProd URLs still show in Google (1.8) |
+| P4 | Both `www.zigma-technologies.com` and `zigma-technologies.com` served the site, splitting Google's signals. | **App-level `308` www → apex live**; optional nginx one-hop still available | Optional: `sudo bash scripts/apply-nginx-apex-redirect.sh` |
 | P5 | Titles showed the brand twice ("Projects \| Zigma Technologies \| Zigma Technologies"). | **Fixed and live** on Production | Write better titles over time (Phase 3) |
 | P6 | Pages shared on LinkedIn/WhatsApp had no image or wrong details. | Fixed; a 1200×630 share image was added at `/og.png` | Nothing |
 | P7 | Pages had no main heading (H1). | Fixed: every page hero is now an H1 (looks the same) | Nothing |
@@ -651,7 +669,7 @@ Requirements: your Google account is **Administrator** on the GA4 property and a
 
 **Goal:** deploy the SEO code, first to PreProd, then to Production. Then make `www` redirect to the apex, and tell Google about the site.
 
-**Status (17 Oct 2026):** Production already runs the Phase 1 SEO build (indexable, sitemap ~84 URLs). **Still open:** (1) fix PreProd noindex regression and redeploy PreProd, (2) nginx www → apex (1.6), (3) sitemap submit / Removals if not done (1.7–1.8). Skip 1.1–1.5 if those checks already match [Current status](#current-status-live-audit--17-oct-2026); do not skip 1.6.
+**Status (18 Oct 2026):** Production + PreProd technical checks pass (see [Current status](#current-status-live-audit--re-checked-18-oct-2026)). **Still open for you:** sitemap submit / indexing requests (1.7), optional Removals (1.8), then Phase 2. Optional developer polish: nginx one-hop (1.6) when root sudo is available.
 
 **Who:** steps 1.1–1.2, 1.4 and 1.6 are **[Developer]**; steps 1.3, 1.5, 1.7 and 1.8 are **[You]** (or Developer for re-checks).
 
