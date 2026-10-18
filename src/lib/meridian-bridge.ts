@@ -9,10 +9,13 @@ export type MeridianEnv = 'prod' | 'preprod';
 
 export type MeridianAct =
   | { action: 'scan' }
-  | { action: 'autopilot'; skipAct?: boolean }
+  | { action: 'autopilot'; skipAct?: boolean; applyMeta?: boolean }
   | { action: 'submit-sitemap'; feed?: string }
   | { action: 'inspect-url'; url: string }
-  | { action: 'inspect-priority'; limit?: number };
+  | { action: 'inspect-priority'; limit?: number }
+  | { action: 'inspect-sitemap-delta'; limit?: number }
+  | { action: 'draft-meta' }
+  | { action: 'apply-meta'; dryRun?: boolean; force?: boolean };
 
 const PROFILES: Record<MeridianEnv, string> = {
   prod: path.join(ROOT, 'packages', 'meridian', 'profiles', 'zigma.prod.json'),
@@ -181,6 +184,7 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   if (act.action === 'autopilot') {
     const args = ['autopilot', '--profile', profile];
     if (act.skipAct || env === 'preprod') args.push('--skip-act');
+    if (act.applyMeta) args.push('--apply-meta');
     return spawnMeridian(args);
   }
   if (act.action === 'submit-sitemap') {
@@ -194,6 +198,20 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   if (act.action === 'inspect-priority') {
     const args = ['act', 'inspect-priority', '--profile', profile];
     if (act.limit) args.push('--limit', String(act.limit));
+    return spawnMeridian(args);
+  }
+  if (act.action === 'inspect-sitemap-delta') {
+    const args = ['act', 'inspect-sitemap-delta', '--profile', profile];
+    if (act.limit) args.push('--limit', String(act.limit));
+    return spawnMeridian(args);
+  }
+  if (act.action === 'draft-meta') {
+    return spawnMeridian(['act', 'draft-meta', '--profile', profile]);
+  }
+  if (act.action === 'apply-meta') {
+    const args = ['act', 'apply-meta', '--profile', profile];
+    if (act.dryRun) args.push('--dry-run');
+    if (act.force) args.push('--force');
     return spawnMeridian(args);
   }
   return Promise.resolve({ ok: false, code: 2, stdout: '', stderr: 'Unknown action' });

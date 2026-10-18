@@ -70,6 +70,17 @@ npm run meridian:act:inspect    # Inspect home + sample paths
 
 Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
 
+## Meta write-back + sitemap delta (M4)
+
+```bash
+npm run meridian:meta:draft          # Appendix B drafts → meta-drafts.json
+npm run meridian:meta:apply:dry      # preview DB writes
+npm run meridian:autopilot:apply     # full loop + fill empty CMS meta
+npm run meridian:act:delta           # inspect URLs new since last sitemap snapshot
+```
+
+Set `MERIDIAN_AUTO_APPLY_META=1` on the VPS to apply drafts on every weekly cron/autopilot (empty fields only).
+
 ## CI gate
 
 ```bash

@@ -34,6 +34,6 @@
     "cmsGaps": { "enabled": true, "script": "scripts/meridian-cms-gaps.mjs" },
     "cms": { "enabled": false, "adapter": "zigma" }
   },
-  "autopilot": { "inspectLimit": 5 },
+  "autopilot": { "inspectLimit": 5, "deltaLimit": 10, "autoApplyMeta": false },
   "outputDir": "../../storage/meridian/zigma-prod"
 }

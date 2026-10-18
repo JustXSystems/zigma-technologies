@@ -45,7 +45,7 @@ export async function collectCmsGaps(profile) {
                 .map((g) => g.title || g.path)
                 .join('; '),
               remediation:
-                'Fill SEO tabs in Admin → Inventory / Pages / Blog. Full list in Meridian report signals.cmsGaps / autopilot JSON.',
+                'Run Meridian autopilot (draft-meta) or Admin → SEO → Meridian → Draft meta, then Apply meta / set MERIDIAN_AUTO_APPLY_META=1. Or hand-edit SEO tabs. List: signals.cmsGaps.',
               owner: 'marketing',
               pillar: 'onpage',
               evidence: `scanned catalog=${data.scanned?.catalog ?? '?'} pages=${data.scanned?.pages ?? '?'}`,

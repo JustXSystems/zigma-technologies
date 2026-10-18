@@ -197,8 +197,9 @@ Fails the pipeline if hard technical findings exist (same contract as today’s 
 | **M0 — Foundation** | Package, profile, technical engine, scorecard, JSON+HTML report, CLI, Zigma Admin tab | Portable truth layer + boardroom report |
 | **M1 — Google/Bing auth** | Live GSC + GA4 collectors (OAuth refresh), Bing API key, PageSpeed/CrUX, signals in report + Admin | Full 2C **read** path when secrets are set |
 | **M2 — Act** | GSC sitemap submit + URL Inspection (CLI + Admin); package in release tarball | Closed loop for indexing ops |
-| **M3 — Autopilot (current)** | `meridian autopilot`: scan + CMS gaps + act + trend + history + weekly cron/GH + post-deploy + webhook | Maximum hands-off ops after secrets |
-| **M4 — Multi-site SaaS shell** | Multi-profile workspace, schedules, CMS meta write-back | Agency / multi-brand |
+| **M3 — Autopilot** | `meridian autopilot`: scan + CMS gaps + act + trend + history + weekly cron/GH + post-deploy + webhook | Hands-off ops after secrets |
+| **M4 — Meta write-back + sitemap delta (current)** | Auto-draft/apply CMS meta (Appendix B); inspect new sitemap URLs since last run; Admin draft/apply buttons | Maximum content + crawl automation |
+| **M5 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
 
 ---
 

@@ -361,8 +361,9 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: <strong>Autopilot</strong> = scan + CMS SEO gaps + (when OAuth ready) submit sitemap +
-            inspect URLs + score trend. Secrets: <code>packages/meridian/SETUP.md</code> / SEO-GUIDE Appendix G.
+            Maximum automation: <strong>Autopilot</strong> = scan + draft meta + (optional apply) + submit sitemap +
+            inspect priority &amp; new URLs + score trend. Secrets: <code>packages/meridian/SETUP.md</code> / SEO-GUIDE
+            Appendix G.
           </p>
         </div>
         <div className="actions">
@@ -383,8 +384,37 @@ export default function MeridianPanel() {
           >
             {pending ? 'Working…' : 'Run autopilot'}
           </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() =>
+              postAction(
+                { action: 'autopilot', skipAct: env === 'preprod', applyMeta: true },
+                'Autopilot + apply meta'
+              )
+            }
+            title="Same as autopilot, then writes drafted meta into empty CMS SEO fields"
+          >
+            Autopilot + apply meta
+          </button>
           <button type="button" disabled={pending} onClick={runScan}>
             Scan only
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'draft-meta' }, 'Drafting meta')}
+            title="Writes meta-drafts.json from CMS gaps (Appendix B formulas)"
+          >
+            Draft meta
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'apply-meta' }, 'Applying meta drafts')}
+            title="Fills empty/short meta_title and meta_description only"
+          >
+            Apply meta
           </button>
           <button
             type="button"
@@ -400,6 +430,14 @@ export default function MeridianPanel() {
             onClick={() => postAction({ action: 'inspect-priority', limit: 5 }, 'Inspecting priority URLs')}
           >
             Inspect top URLs
+          </button>
+          <button
+            type="button"
+            disabled={pending || env !== 'prod'}
+            onClick={() => postAction({ action: 'inspect-sitemap-delta', limit: 10 }, 'Inspecting new sitemap URLs')}
+            title="Diff sitemap vs last run and request inspection for new URLs"
+          >
+            Inspect new URLs
           </button>
           <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
             Open HTML report

@@ -65,6 +65,9 @@ export async function POST(request: Request) {
       url?: string;
       limit?: number;
       skipAct?: boolean;
+      applyMeta?: boolean;
+      dryRun?: boolean;
+      force?: boolean;
     };
     const env = parseEnv(body.env);
     const action = body.action || 'scan';
@@ -87,6 +90,7 @@ export async function POST(request: Request) {
       const result = await runMeridianAct(env, {
         action: 'autopilot',
         skipAct: env === 'preprod' || !!body.skipAct,
+        applyMeta: !!body.applyMeta,
       });
       const report = await readLatestMeridianReport(env);
       const autopilot = await readLatestAutopilot(env);
@@ -99,6 +103,29 @@ export async function POST(request: Request) {
         stderr: result.stderr.slice(-2000),
         report,
         autopilot,
+      });
+    }
+
+    if (action === 'draft-meta' || action === 'apply-meta') {
+      const act: MeridianAct =
+        action === 'draft-meta'
+          ? { action: 'draft-meta' }
+          : { action: 'apply-meta', dryRun: !!body.dryRun, force: !!body.force };
+      const result = await runMeridianAct(env, act);
+      let parsed: unknown = null;
+      try {
+        parsed = JSON.parse(result.stdout);
+      } catch {
+        parsed = null;
+      }
+      return NextResponse.json({
+        env,
+        action,
+        ok: result.ok,
+        code: result.code,
+        stdout: result.stdout.slice(-6000),
+        stderr: result.stderr.slice(-2000),
+        result: parsed,
       });
     }
 
@@ -119,6 +146,8 @@ export async function POST(request: Request) {
       act = { action: 'inspect-url', url: body.url.trim() };
     } else if (action === 'inspect-priority') {
       act = { action: 'inspect-priority', limit: body.limit ?? 5 };
+    } else if (action === 'inspect-sitemap-delta') {
+      act = { action: 'inspect-sitemap-delta', limit: body.limit ?? 10 };
     } else {
       return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
     }

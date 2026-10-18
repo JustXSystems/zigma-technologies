@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { loadProfile, runMeridian } from './orchestrator.mjs';
 import { runAutopilot } from './autopilot.mjs';
 import { inspectPriorityUrls, inspectUrl, submitSitemap } from './connectors/gsc-act.mjs';
+import { inspectSitemapDelta } from './connectors/sitemap-delta.mjs';
+import { applyMeta, draftMeta } from './connectors/meta-automation.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -49,10 +51,12 @@ export async function runCli(argv) {
     const profile = await loadProfile(resolve(profilePath));
     const outDir = argValue(argv, '--out');
     const skipAct = argv.includes('--skip-act');
+    const applyMetaFlag = argv.includes('--apply-meta');
     console.log(`Meridian autopilot → ${profile.displayName || profile.id}`);
     const result = await runAutopilot(profile, {
       outDir: outDir ? resolve(outDir) : undefined,
       skipAct,
+      applyMeta: applyMetaFlag,
       inspectLimit: Number(argValue(argv, '--limit') || 5),
     });
     console.log(`  score:  ${result.report.scorecard.overall} (${result.report.scorecard.grade})`);
@@ -96,6 +100,31 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'inspect-sitemap-delta') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const limit = Number(argValue(argv, '--limit') || 10);
+      const result = await inspectSitemapDelta(profile, { outDir: resolve(outDir), limit });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'draft-meta') {
+      const outFile = argValue(argv, '--out');
+      const result = await draftMeta(profile, outFile ? { outFile: resolve(outFile) } : {});
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'apply-meta') {
+      const file = argValue(argv, '--file');
+      const force = argv.includes('--force');
+      const dry = argv.includes('--dry-run');
+      const result = await applyMeta(profile, {
+        apply: !dry,
+        force,
+        file: file ? resolve(file) : undefined,
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
@@ -126,19 +155,23 @@ function printHelp() {
 Usage:
   meridian run --profile ./profiles/site.json [--out ./out]
   meridian verify --profile ./profiles/site.json
-  meridian autopilot --profile ./profiles/site.json [--skip-act] [--limit 5]
+  meridian autopilot --profile ./profiles/site.json [--skip-act] [--apply-meta] [--limit 5]
   meridian act submit-sitemap --profile ./profiles/site.json [--feed https://…/sitemap.xml]
   meridian act inspect-url --profile ./profiles/site.json --url https://…
   meridian act inspect-priority --profile ./profiles/site.json [--limit 5]
+  meridian act inspect-sitemap-delta --profile ./profiles/site.json [--limit 10]
+  meridian act draft-meta --profile ./profiles/site.json
+  meridian act apply-meta --profile ./profiles/site.json [--dry-run] [--force]
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = scan + (if OAuth ready) submit sitemap + inspect priority URLs + trend + optional webhook.
+Autopilot = scan + draft meta + (optional apply) + submit sitemap + inspect priority + new sitemap URLs + trend + webhook.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY
   MERIDIAN_WEBHOOK_URL          POST summary JSON after autopilot
   MERIDIAN_FAIL_ON_REGRESSION=1 Fail autopilot/verify CI when score drops ≥3
+  MERIDIAN_AUTO_APPLY_META=1    Autopilot writes drafted meta into CMS (empty fields only)
 
 Docs: packages/meridian/SETUP.md · AUTOMATION.md
 `);

@@ -6,7 +6,7 @@ Once secrets are set (see [SETUP.md](./SETUP.md)), Meridian is designed so **wee
 
 | Layer | What it does | Trigger |
 | --- | --- | --- |
-| **Autopilot** | Scan → CMS SEO gaps → (if OAuth) submit sitemap + inspect top URLs → score trend → optional webhook | CLI / Admin / cron / CI |
+| **Autopilot** | Scan → CMS SEO gaps → **draft meta** → (optional **apply meta**) → (if OAuth) submit sitemap + inspect priority + **new sitemap URLs** → score trend → webhook | CLI / Admin / cron / CI |
 | **Post-deploy** | Autopilot (or verify) after Production deploy | `scripts/deploy.sh` |
 | **Weekly schedule** | GitHub Action cron (Mondays 03:30 UTC) | `.github/workflows/meridian-autopilot.yml` |
 | **VPS cron** | Same autopilot on the server | `scripts/meridian-cron.sh` + crontab |
@@ -16,11 +16,22 @@ Once secrets are set (see [SETUP.md](./SETUP.md)), Meridian is designed so **wee
 ## Commands
 
 ```bash
-# Full automation (Production)
+# Full automation (Production) — drafts meta; does not write CMS unless apply flag/env
 npm run meridian:autopilot
 
-# PreProd (scan only — never touches Google)
+# Autopilot + write empty CMS meta fields from drafts
+npm run meridian:autopilot:apply
+
+# PreProd (scan + draft only — never touches Google)
 npm run meridian:autopilot:preprod
+
+# Meta only
+npm run meridian:meta:draft
+npm run meridian:meta:apply:dry
+npm run meridian:meta:apply
+
+# New sitemap URLs since last run → GSC URL Inspection
+npm run meridian:act:delta
 
 # Scan only
 npm run meridian:run
@@ -34,12 +45,15 @@ npm run meridian:verify
 3. Technical crawl + connectors (GSC/GA4/Bing/PSI if secrets set).
 4. **CMS SEO gaps** via `scripts/meridian-cms-gaps.mjs` (missing meta titles/descriptions).
 5. Write JSON/HTML/MD report + append `score-history.jsonl`.
-6. If `indexable` **and** Google OAuth env complete:
+6. **Draft meta** via `scripts/meridian-meta-draft.mjs` → `storage/meridian/zigma-prod/meta-drafts.json` (Appendix B formulas; never invents fake specs).
+7. **Apply meta** only if `MERIDIAN_AUTO_APPLY_META=1`, `--apply-meta`, Admin “Autopilot + apply meta”, or profile `autopilot.autoApplyMeta: true`. Fills **empty/short** fields only (never overwrites good copy unless `--force`).
+8. If `indexable` **and** Google OAuth env complete **and** not `--skip-act`:
    - Submit sitemap to Search Console
    - Inspect up to 5 priority URLs
-7. Write `autopilot-latest.json`.
-8. If `MERIDIAN_WEBHOOK_URL` set → POST summary.
-9. Exit `1` if critical/high findings (always) or if `MERIDIAN_FAIL_ON_REGRESSION=1` and score dropped ≥3.
+   - **Sitemap delta**: diff live `/sitemap.xml` vs `sitemap-locs-latest.json`; inspect up to 10 new URLs (first run baselines only)
+9. Write `autopilot-latest.json`.
+10. If `MERIDIAN_WEBHOOK_URL` set → POST summary.
+11. Exit `1` if critical/high findings (always) or if `MERIDIAN_FAIL_ON_REGRESSION=1` and score dropped ≥3.
 
 ## Install VPS weekly cron **[Developer]**
 
@@ -54,6 +68,12 @@ crontab -l | grep meridian
 
 **Installed on Production 18 Oct 2026.** Also: GitHub Action **Meridian autopilot** schedule (needs repo secrets for GSC act).
 
+To auto-apply meta on the weekly cron, add to server `.env`:
+
+```bash
+MERIDIAN_AUTO_APPLY_META=1
+```
+
 ## Optional env
 
 | Variable | Effect |
@@ -61,6 +81,9 @@ crontab -l | grep meridian
 | `MERIDIAN_WEBHOOK_URL` | Notify after autopilot |
 | `MERIDIAN_FAIL_ON_REGRESSION=1` | CI fails on score drop ≥3 |
 | `MERIDIAN_CMS_GAPS_SCRIPT` | Override path to CMS gap script |
+| `MERIDIAN_AUTO_APPLY_META=1` | Autopilot writes drafted meta into empty CMS fields |
+| `MERIDIAN_META_DRAFT_SCRIPT` | Override draft script path |
+| `MERIDIAN_META_APPLY_SCRIPT` | Override apply script path |
 
 ## What still cannot be automated
 
@@ -69,9 +92,18 @@ crontab -l | grep meridian
 | Google OAuth consent (first time) | Human must approve company account |
 | DNS TXT for GSC domain verify | Registrar UI |
 | GBP postcard / video verify | Google physical verification |
-| Writing unique marketing copy | Quality judgment |
+| Hand-polished marketing copy | Quality judgment (auto-draft is a starting point) |
 | Buying/asking for backlinks | Relationship work |
 
 ## Admin
 
-**SEO → Meridian → Run autopilot** — one click. Readiness table shows which secrets are still missing.
+**SEO → Meridian**
+
+| Button | Effect |
+| --- | --- |
+| **Run autopilot** | Full loop; drafts meta; does not write CMS |
+| **Autopilot + apply meta** | Same + fills empty SEO fields in DB |
+| **Draft meta** / **Apply meta** | Isolated meta steps |
+| **Inspect new URLs** | Sitemap delta → GSC inspection |
+
+Readiness table shows which secrets are still missing.
