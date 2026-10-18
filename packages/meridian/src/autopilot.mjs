@@ -24,6 +24,13 @@ import { writeCitationsPlaybook } from './connectors/citations-playbook.mjs';
 import { assessCityPages } from './connectors/city-pages-readiness.mjs';
 import { writeBacklinkOutreach } from './connectors/backlink-outreach.mjs';
 import { assessUnlockReadiness } from './connectors/unlock-readiness.mjs';
+import { writeRichResultsPack } from './connectors/rich-results-pack.mjs';
+import { writeTop20MetaPack } from './connectors/top20-meta-pack.mjs';
+import { writeReviewKit } from './connectors/review-kit.mjs';
+import { writeContentCalendar } from './connectors/content-calendar.mjs';
+import { writeSpeedBaseline } from './connectors/speed-baseline.mjs';
+import { writePreprodRemovals } from './connectors/preprod-removals.mjs';
+import { writeQuarterlyDigest } from './connectors/quarterly-digest.mjs';
 import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
 
 function mergeFindings(scan, result) {
@@ -37,8 +44,8 @@ function mergeFindings(scan, result) {
 }
 
 /**
- * Maximum automation loop (M5–M9):
- * scan → remediate → Phase 5–8 playbooks → unlock score → ops cockpit → digests → webhook
+ * Maximum automation loop (M5–M10):
+ * scan → remediate → Phase 2–9 packs → unlock → digests → ops cockpit → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
   const started = Date.now();
@@ -238,6 +245,55 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, unlock);
   }
 
+  // --- Rich Results pack (Phase 2.2) ---
+  if (profile.autopilot?.skipRichResults !== true) {
+    const rr = await writeRichResultsPack(profile, { outDir });
+    actions.push({ id: 'rich-results-pack', ...rr });
+    mergeFindings(scan, rr);
+  }
+
+  // --- Top meta pack (Phase 3) ---
+  if (profile.autopilot?.skipTop20Meta !== true) {
+    const top = await writeTop20MetaPack(profile, { outDir });
+    actions.push({ id: 'top20-meta-pack', ...top });
+    mergeFindings(scan, top);
+  }
+
+  // --- Review kit (Phase 5.6) ---
+  if (profile.autopilot?.skipReviewKit !== true) {
+    const napAction = actions.find((a) => a.id === 'nap-audit');
+    const rk = await writeReviewKit(profile, { outDir, nap: napAction?.data?.nap });
+    actions.push({ id: 'review-kit', ...rk });
+    mergeFindings(scan, rk);
+  }
+
+  // --- Content calendar (Phase 7) ---
+  if (profile.autopilot?.skipContentCalendar !== true) {
+    const cal = await writeContentCalendar(profile, { outDir });
+    actions.push({ id: 'content-calendar', ...cal });
+    mergeFindings(scan, cal);
+  }
+
+  // --- Speed baseline (Phase 4) — links always; PSI API only when MERIDIAN_AUTO_PSI=1 ---
+  if (profile.autopilot?.skipSpeedBaseline !== true) {
+    const speed = await writeSpeedBaseline(profile, {
+      outDir,
+      skipApi:
+        opts.runPsi !== true &&
+        process.env.MERIDIAN_AUTO_PSI !== '1' &&
+        profile.autopilot?.autoPsi !== true,
+    });
+    actions.push({ id: 'speed-baseline', ...speed });
+    mergeFindings(scan, speed);
+  }
+
+  // --- PreProd removals checklist (Phase 1.8) ---
+  if (profile.autopilot?.skipPreprodRemovals !== true) {
+    const rem = await writePreprodRemovals(profile, { outDir });
+    actions.push({ id: 'preprod-removals', ...rem });
+    mergeFindings(scan, rem);
+  }
+
   // --- Bing act ---
   if (profile.indexable && !opts.skipAct) {
     actions.push({ id: 'bing-submit-sitemap', ...(await submitBingSitemap(profile)) });
@@ -281,7 +337,13 @@ export async function runAutopilot(profile, opts = {}) {
   const monthly = await writeMonthlyDigest(profile, { scan, actions, outDir });
   actions.push({ id: 'monthly-digest', ...monthly });
 
-  // --- Ops cockpit HTML (M9) ---
+  // --- Quarterly digest (Phase 9.3) ---
+  if (profile.autopilot?.skipQuarterly !== true) {
+    const q = await writeQuarterlyDigest(profile, { outDir, scan, actions });
+    actions.push({ id: 'quarterly-digest', ...q });
+  }
+
+  // --- Ops cockpit HTML (M9–M10) ---
   if (profile.autopilot?.skipOpsCockpit !== true) {
     const unlockAction = actions.find((a) => a.id === 'unlock-readiness');
     const cockpit = await writeOpsCockpit(profile, {

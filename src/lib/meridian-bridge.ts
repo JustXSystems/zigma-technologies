@@ -31,6 +31,13 @@ export type MeridianAct =
   | { action: 'backlink-outreach' }
   | { action: 'unlock-readiness' }
   | { action: 'ops-cockpit' }
+  | { action: 'rich-results-pack' }
+  | { action: 'top20-meta-pack' }
+  | { action: 'review-kit' }
+  | { action: 'content-calendar' }
+  | { action: 'speed-baseline' }
+  | { action: 'preprod-removals' }
+  | { action: 'quarterly-digest' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -310,6 +317,27 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'ops-cockpit') {
     return spawnMeridian(['act', 'ops-cockpit', '--profile', profile]);
+  }
+  if (act.action === 'rich-results-pack') {
+    return spawnMeridian(['act', 'rich-results-pack', '--profile', profile]);
+  }
+  if (act.action === 'top20-meta-pack') {
+    return spawnMeridian(['act', 'top20-meta-pack', '--profile', profile]);
+  }
+  if (act.action === 'review-kit') {
+    return spawnMeridian(['act', 'review-kit', '--profile', profile]);
+  }
+  if (act.action === 'content-calendar') {
+    return spawnMeridian(['act', 'content-calendar', '--profile', profile]);
+  }
+  if (act.action === 'speed-baseline') {
+    return spawnMeridian(['act', 'speed-baseline', '--profile', profile, '--skip-api']);
+  }
+  if (act.action === 'preprod-removals') {
+    return spawnMeridian(['act', 'preprod-removals', '--profile', profile]);
+  }
+  if (act.action === 'quarterly-digest') {
+    return spawnMeridian(['act', 'quarterly-digest', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

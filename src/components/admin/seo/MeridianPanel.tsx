@@ -367,8 +367,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: closed-loop SEO ops — remediate, Phase 5–8 playbooks (citations, city pages,
-            backlinks), unlock score, ops cockpit, then digests.
+            Maximum automation: closed-loop SEO ops — remediate, Phase 1–9 packs (rich results, top meta,
+            reviews, calendar, speed, PreProd), unlock score, ops cockpit, digests.
           </p>
         </div>
         <div className="actions">
@@ -535,6 +535,62 @@ export default function MeridianPanel() {
             title="Regenerate ops-cockpit.html"
           >
             Ops cockpit
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}
+            title="Phase 2.2 — schema sniff + Google Rich Results Test links"
+          >
+            Rich Results
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'top20-meta-pack' }, 'Top meta pack')}
+            title="Phase 3 — priority title/description audit"
+          >
+            Top meta
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'review-kit' }, 'Review kit')}
+            title="Phase 5.6 WhatsApp/email review templates"
+          >
+            Review kit
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'content-calendar' }, 'Content calendar')}
+            title="Phase 7 — 4-week calendar from keyword map"
+          >
+            Calendar
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'speed-baseline' }, 'Speed baseline')}
+            title="Phase 4 — PageSpeed links for key pages"
+          >
+            Speed
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'preprod-removals' }, 'PreProd removals check')}
+            title="Phase 1.8 — PreProd noindex probe + Removals checklist"
+          >
+            PreProd
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'quarterly-digest' }, 'Quarterly digest')}
+            title="Phase 9.3 quarterly checklist"
+          >
+            Quarterly
           </button>
           <button
             type="button"

@@ -24,6 +24,13 @@ import { assessCityPages } from './connectors/city-pages-readiness.mjs';
 import { writeBacklinkOutreach } from './connectors/backlink-outreach.mjs';
 import { assessUnlockReadiness } from './connectors/unlock-readiness.mjs';
 import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
+import { writeRichResultsPack } from './connectors/rich-results-pack.mjs';
+import { writeTop20MetaPack } from './connectors/top20-meta-pack.mjs';
+import { writeReviewKit } from './connectors/review-kit.mjs';
+import { writeContentCalendar } from './connectors/content-calendar.mjs';
+import { writeSpeedBaseline } from './connectors/speed-baseline.mjs';
+import { writePreprodRemovals } from './connectors/preprod-removals.mjs';
+import { writeQuarterlyDigest } from './connectors/quarterly-digest.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -289,6 +296,51 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'rich-results-pack') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeRichResultsPack(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'top20-meta-pack') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeTop20MetaPack(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'review-kit') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeReviewKit(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'content-calendar') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeContentCalendar(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'speed-baseline') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeSpeedBaseline(profile, {
+        outDir: resolve(outDir),
+        skipApi: argv.includes('--skip-api'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'preprod-removals') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writePreprodRemovals(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'quarterly-digest') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeQuarterlyDigest(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
@@ -331,12 +383,14 @@ Usage:
   meridian act hreflang-validate | nap-audit | keyword-map --profile ./profiles/site.json
   meridian act citations-playbook | city-pages-readiness | backlink-outreach --profile ./profiles/site.json
   meridian act unlock-readiness | ops-cockpit --profile ./profiles/site.json
+  meridian act rich-results-pack | top20-meta-pack | review-kit | content-calendar --profile ./profiles/site.json
+  meridian act speed-baseline | preprod-removals | quarterly-digest --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 5–8 playbooks + unlock score + ops cockpit + closed-loop + digests.
+Autopilot = full remediation + Phase 1–9 packs + unlock + ops cockpit + closed-loop + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

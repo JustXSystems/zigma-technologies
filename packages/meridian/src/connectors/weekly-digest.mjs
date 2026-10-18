@@ -90,6 +90,34 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
       auto: false,
       needed: (actions.find((a) => a.id === 'backlink-outreach')?.data?.count || 0) > 0,
     },
+    {
+      id: 'rich-results',
+      task: 'Click through rich-results-pack.md (Phase 2.2 Rich Results Test)',
+      who: 'You',
+      auto: false,
+      needed: !!actions.find((a) => a.id === 'rich-results-pack'),
+    },
+    {
+      id: 'top-meta',
+      task: `Polish ${actions.find((a) => a.id === 'top20-meta-pack')?.data?.needsPolish ?? '?'} priority titles/descriptions (top20-meta-pack.md)`,
+      who: 'You',
+      auto: false,
+      needed: (actions.find((a) => a.id === 'top20-meta-pack')?.data?.needsPolish || 0) > 0,
+    },
+    {
+      id: 'reviews-send',
+      task: 'Send review requests from review-kit.md for completed jobs (Phase 5.6)',
+      who: 'You',
+      auto: false,
+      needed: !!actions.find((a) => a.id === 'review-kit')?.ok,
+    },
+    {
+      id: 'calendar-publish',
+      task: 'Publish this week’s item from content-calendar.md (Phase 7)',
+      who: 'You',
+      auto: false,
+      needed: !!actions.find((a) => a.id === 'content-calendar')?.ok,
+    },
   ].filter((h) => h.needed !== false);
 
   const unlockPct = actions.find((a) => a.id === 'unlock-readiness')?.data?.percent;

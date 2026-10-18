@@ -70,10 +70,17 @@ npm run meridian:act:inspect    # Inspect home + sample paths
 
 Admin → **SEO → Meridian**: **Submit sitemap** / **Inspect top URLs** (Production only).
 
-## Automation (M4–M9)
+## Automation (M4–M10)
 
 ```bash
-npm run meridian:autopilot           # full closed-loop ops + playbooks + cockpit
+npm run meridian:autopilot           # full closed-loop ops + Phase 1–9 packs + cockpit
+npm run meridian:act:rich            # Phase 2.2 Rich Results Test pack
+npm run meridian:act:top-meta        # Phase 3 priority title/description audit
+npm run meridian:act:reviews         # Phase 5.6 review request kit
+npm run meridian:act:calendar        # Phase 7 content calendar
+npm run meridian:act:speed           # Phase 4 PageSpeed baseline links
+npm run meridian:act:preprod         # Phase 1.8 PreProd removals probe
+npm run meridian:act:quarterly       # Phase 9.3 quarterly checklist
 npm run meridian:act:nap             # GBP / NAP checklist from live JSON-LD
 npm run meridian:act:citations       # Phase 5.5 directory playbook
 npm run meridian:act:city-pages      # Phase 6 city×service readiness

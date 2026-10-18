@@ -144,7 +144,14 @@ export async function POST(request: Request) {
       action === 'city-pages-readiness' ||
       action === 'backlink-outreach' ||
       action === 'unlock-readiness' ||
-      action === 'ops-cockpit'
+      action === 'ops-cockpit' ||
+      action === 'rich-results-pack' ||
+      action === 'top20-meta-pack' ||
+      action === 'review-kit' ||
+      action === 'content-calendar' ||
+      action === 'speed-baseline' ||
+      action === 'preprod-removals' ||
+      action === 'quarterly-digest'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -166,6 +173,13 @@ export async function POST(request: Request) {
       else if (action === 'backlink-outreach') act = { action: 'backlink-outreach' };
       else if (action === 'unlock-readiness') act = { action: 'unlock-readiness' };
       else if (action === 'ops-cockpit') act = { action: 'ops-cockpit' };
+      else if (action === 'rich-results-pack') act = { action: 'rich-results-pack' };
+      else if (action === 'top20-meta-pack') act = { action: 'top20-meta-pack' };
+      else if (action === 'review-kit') act = { action: 'review-kit' };
+      else if (action === 'content-calendar') act = { action: 'content-calendar' };
+      else if (action === 'speed-baseline') act = { action: 'speed-baseline' };
+      else if (action === 'preprod-removals') act = { action: 'preprod-removals' };
+      else if (action === 'quarterly-digest') act = { action: 'quarterly-digest' };
       else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;
