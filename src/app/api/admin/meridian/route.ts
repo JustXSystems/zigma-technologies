@@ -1,0 +1,66 @@
+import { NextResponse } from 'next/server';
+import { requireScreen } from '@/lib/auth';
+import { meridianLatestPaths, readLatestMeridianReport, runMeridianCli, type MeridianEnv } from '@/lib/meridian-bridge';
+import { readFile } from 'node:fs/promises';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+/** Live crawl + connectors can exceed default serverless limits on some hosts. */
+export const maxDuration = 120;
+
+function parseEnv(raw: unknown): MeridianEnv {
+  return raw === 'preprod' ? 'preprod' : 'prod';
+}
+
+function authStatus(err: unknown) {
+  const msg = err instanceof Error ? err.message : 'Error';
+  if (msg === 'UNAUTHORIZED' || msg === 'Unauthorized') return 401;
+  if (msg === 'FORBIDDEN') return 403;
+  return 500;
+}
+
+export async function GET(request: Request) {
+  try {
+    await requireScreen('redirects');
+    const url = new URL(request.url);
+    const env = parseEnv(url.searchParams.get('env'));
+    const format = url.searchParams.get('format') || 'json';
+    if (format === 'html') {
+      const { html } = meridianLatestPaths(env);
+      try {
+        const body = await readFile(html, 'utf8');
+        return new NextResponse(body, {
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      } catch {
+        return NextResponse.json({ error: 'No report yet — run a scan first.' }, { status: 404 });
+      }
+    }
+    const report = await readLatestMeridianReport(env);
+    return NextResponse.json({ env, report, hasReport: !!report });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Error';
+    return NextResponse.json({ error: msg }, { status: authStatus(e) });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    await requireScreen('redirects');
+    const body = (await request.json().catch(() => ({}))) as { env?: string };
+    const env = parseEnv(body.env);
+    const result = await runMeridianCli(env);
+    const report = await readLatestMeridianReport(env);
+    return NextResponse.json({
+      env,
+      ok: result.ok,
+      code: result.code,
+      stdout: result.stdout.slice(-4000),
+      stderr: result.stderr.slice(-2000),
+      report,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Failed';
+    return NextResponse.json({ error: msg }, { status: authStatus(e) });
+  }
+}

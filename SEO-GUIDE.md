@@ -61,6 +61,8 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
+- **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
+- **Meridian (SEO Command):** portable package `packages/meridian` — `npm run meridian:run` / `meridian:verify`; Admin → **SEO → Meridian**. Architecture: `packages/meridian/ARCHITECTURE.md`. **M1 connectors:** set `MERIDIAN_GOOGLE_*` + `MERIDIAN_GA4_PROPERTY_ID` (and optional Bing/PSI keys) to attach live GSC/GA4/Bing/PageSpeed signals — setup: `node packages/meridian/scripts/google-oauth-setup.mjs`.
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 
@@ -2084,6 +2086,35 @@ Every indexable page has a **canonical** pointing to itself on `https://zigma-te
 
 ## Appendix C — Verification commands
 
+### Automated check (recommended)
+
+**Meridian** is the master SEO command tool (portable to other sites via a SiteProfile JSON).
+
+```powershell
+npm run meridian:run              # Production scan + JSON/HTML/MD report
+npm run meridian:verify           # CI gate — exit 1 on critical/high findings
+npm run meridian:verify:preprod   # PreProd must stay noindex + empty sitemap
+```
+
+Reports land in `storage/meridian/zigma-prod/` (`report-latest.html`). Admin UI: **SEO → Meridian**.
+
+Lightweight Appendix C-only scripts (still available):
+
+```powershell
+npm run seo:verify
+npm run seo:verify:preprod
+```
+
+**What Meridian checks (M0+M1):** technical crawl + pillar scorecard + connector status + **live signals** when credentials are set (GSC top queries/sitemaps, GA4 organic sessions, Bing crawl, PageSpeed/CrUX) + roadmap + boardroom HTML report.
+
+**Credentials (ops / developer secrets — never commit):** see `packages/meridian/README.md`. One-time Google OAuth: `node packages/meridian/scripts/google-oauth-setup.mjs`. Without secrets, connectors show `auth_required` and the technical scan still completes.
+
+**What stays human:** GBP postcard verification, writing marketing copy, directory outreach.
+
+Build-time flag guard: `npm run seo:verify:build -- --env prod` after `npm run build`.
+
+### Manual PowerShell (same checks, one-off)
+
 Run these after every production deploy, or when something looks wrong. **Windows PowerShell** (on your computer):
 
 **1. Page check — title, description, canonical, robots and H1 count for key pages:**
@@ -2120,7 +2151,7 @@ curl.exe -sI http://zigma-technologies.com/ | Select-String "HTTP/|location"
 curl.exe -sI http://www.zigma-technologies.com/ | Select-String "HTTP/|location"
 ```
 
-**Expect:** the first shows `HTTP/1.1 200` (or `HTTP/2 200`) and **no** `x-robots-tag`. The other three show `301` and `location: https://zigma-technologies.com/`.
+**Expect:** the first shows `HTTP/1.1 200` (or `HTTP/2 200`) and **no** `x-robots-tag`. The other three show `301` or `308` and `location` pointing at `https://zigma-technologies.com/` (www may hop via app-level redirect until nginx one-hop is applied).
 
 **3. robots.txt and sitemap:**
 
@@ -2185,6 +2216,7 @@ curl.exe -sI https://justxsystems.com/zigma-technologies/ | Select-String "x-rob
 | `src/components/admin/SeoFieldsEditor.tsx` | Inventory SEO tab (meta title/description, share image, noindex, preview) |
 | `scripts/migrate-catalog-seo.sql` | Adds `meta_title`, `meta_description`, `og_image_url`, `seo_noindex` to catalog items (also auto-ensured by `schema-ensure.ts`) |
 | `scripts/verify-seo-build.mjs` | Post-build guard: PreProd must have basePath and must not be indexable; Prod must have no basePath and `SEO_INDEXABLE=true` |
+| `scripts/verify-seo-live.mjs` | Live deploy verification (`npm run seo:verify` / `seo:verify:preprod`) — Appendix C automated |
 | `src/app/robots.ts` | Private path disallows; sitemap + host only when indexable |
 | `src/app/sitemap.ts` | Indexable URLs only, with `lastModified` from the database |
 | `src/app/og.png/route.tsx` | Default 1200×630 share image |

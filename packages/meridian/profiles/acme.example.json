@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "acme-example",
+  "displayName": "Acme Corp (example profile — copy for other sites)",
+  "brand": {
+    "name": "Acme Corp",
+    "maxBrandMentionsInTitle": 1
+  },
+  "origin": "https://www.example.com",
+  "indexable": true,
+  "wwwHost": "https://www.example.com",
+  "samplePaths": ["/", "/about", "/contact"],
+  "expectNoindex": ["/thank-you", "/search"],
+  "allowRedirectHome": [],
+  "sampleDetailPath": null,
+  "minSitemapLocs": 5,
+  "connectors": {
+    "http-site": { "enabled": true },
+    "gsc": { "enabled": true, "siteUrl": "sc-domain:example.com" },
+    "bing": { "enabled": true },
+    "ga4": { "enabled": true },
+    "pagespeed": { "enabled": true },
+    "cms": { "enabled": false }
+  },
+  "outputDir": "./out/acme"
+}

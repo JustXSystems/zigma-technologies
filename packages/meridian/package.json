@@ -1,0 +1,30 @@
+{
+  "name": "@justx/meridian",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Meridian — portable SEO command center (verify, score, report, connectors)",
+  "type": "module",
+  "bin": {
+    "meridian": "./bin/meridian.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./report": "./src/report/build.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "meridian": "node ./bin/meridian.mjs",
+    "run:zigma": "node ./bin/meridian.mjs run --profile ./profiles/zigma.prod.json",
+    "verify:zigma": "node ./bin/meridian.mjs verify --profile ./profiles/zigma.prod.json",
+    "verify:zigma-preprod": "node ./bin/meridian.mjs verify --profile ./profiles/zigma.preprod.json"
+  },
+  "files": [
+    "bin",
+    "src",
+    "profiles",
+    "ARCHITECTURE.md",
+    "README.md"
+  ]
+}

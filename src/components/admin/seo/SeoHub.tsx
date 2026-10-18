@@ -6,6 +6,7 @@ import SiteSettingsEditor from '@/components/admin/site-settings/SiteSettingsEdi
 import { AdminLink } from '@/components/admin/unsaved-changes';
 import SeoPageTitlesEditor from './SeoPageTitlesEditor';
 import RedirectsEditor from './RedirectsEditor';
+import MeridianPanel from './MeridianPanel';
 
 export default function SeoHub({ initialTab }: { initialTab?: string }) {
   return (
@@ -13,8 +14,9 @@ export default function SeoHub({ initialTab }: { initialTab?: string }) {
       title="SEO"
       intro={
         <>
-          How the site appears in search and when shared. CMS pages, catalog items and blog articles have their own SEO
-          fields in <AdminLink href="/admin/pages">Pages</AdminLink>,{' '}
+          How the site appears in search and when shared. Use <strong>Meridian</strong> for live verify and the
+          consolidated report. CMS pages, catalog items and blog articles have their own SEO fields in{' '}
+          <AdminLink href="/admin/pages">Pages</AdminLink>,{' '}
           <AdminLink href="/admin/inventory">Inventory → SEO</AdminLink> and{' '}
           <AdminLink href="/admin/resources">Blog → Articles</AdminLink>.
         </>
@@ -23,7 +25,9 @@ export default function SeoHub({ initialTab }: { initialTab?: string }) {
       initialTab={initialTab}
     >
       {(active) =>
-        active === 'defaults' ? (
+        active === 'meridian' ? (
+          <MeridianPanel />
+        ) : active === 'defaults' ? (
           <SiteSettingsEditor group="seo" />
         ) : active === 'pages' ? (
           <SeoPageTitlesEditor />

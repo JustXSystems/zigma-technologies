@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "zigma-prod",
+  "displayName": "Zigma Technologies (Production)",
+  "brand": {
+    "name": "Zigma Technologies",
+    "maxBrandMentionsInTitle": 1
+  },
+  "origin": "https://zigma-technologies.com",
+  "indexable": true,
+  "wwwHost": "https://www.zigma-technologies.com",
+  "samplePaths": [
+    "/",
+    "/projects",
+    "/products",
+    "/services",
+    "/locations",
+    "/locations/bengaluru",
+    "/contact"
+  ],
+  "expectNoindex": [
+    "/thank-you",
+    "/locations/bengaluru/ups-amc"
+  ],
+  "allowRedirectHome": ["/search"],
+  "sampleDetailPath": "/projects/amc-engineering-college-200kw-bangalore",
+  "minSitemapLocs": 20,
+  "connectors": {
+    "http-site": { "enabled": true },
+    "gsc": { "enabled": true, "siteUrl": "sc-domain:zigma-technologies.com" },
+    "bing": { "enabled": true },
+    "ga4": { "enabled": true, "measurementIdHint": "G-RFXQRYYX48" },
+    "pagespeed": { "enabled": true },
+    "cms": { "enabled": false, "adapter": "zigma" }
+  },
+  "outputDir": "../../storage/meridian/zigma-prod"
+}

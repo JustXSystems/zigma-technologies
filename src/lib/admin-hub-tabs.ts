@@ -62,6 +62,13 @@ export const LEADS_TABS = [
 
 export const SEO_TABS = [
   {
+    id: 'meridian',
+    label: 'Meridian',
+    screen: 'redirects',
+    description:
+      'SEO command desk: live verify, pillar scorecard, connector status (GSC / GA4 / Bing), and boardroom HTML report. Portable core lives in packages/meridian.',
+  },
+  {
     id: 'defaults',
     label: 'Defaults',
     screen: 'siteSettings',
