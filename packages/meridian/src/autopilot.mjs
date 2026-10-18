@@ -31,6 +31,11 @@ import { writeContentCalendar } from './connectors/content-calendar.mjs';
 import { writeSpeedBaseline } from './connectors/speed-baseline.mjs';
 import { writePreprodRemovals } from './connectors/preprod-removals.mjs';
 import { writeQuarterlyDigest } from './connectors/quarterly-digest.mjs';
+import { polishMeta } from './connectors/meta-polish.mjs';
+import { writePhase0Wizard } from './connectors/phase0-wizard.mjs';
+import { writeOgSharePack } from './connectors/og-share-pack.mjs';
+import { writeIndexingQueue } from './connectors/indexing-queue.mjs';
+import { assessLocaleDecision } from './connectors/locale-decision.mjs';
 import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
 
 function mergeFindings(scan, result) {
@@ -44,8 +49,8 @@ function mergeFindings(scan, result) {
 }
 
 /**
- * Maximum automation loop (M5–M10):
- * scan → remediate → Phase 2–9 packs → unlock → digests → ops cockpit → webhook
+ * Maximum automation loop (M5–M11):
+ * scan → remediate → Phase 0–9 packs → meta polish → unlock → digests → cockpit → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
   const started = Date.now();
@@ -75,6 +80,19 @@ export async function runAutopilot(profile, opts = {}) {
       message: 'Drafts ready — set MERIDIAN_AUTO_APPLY_META=1 or pass --apply-meta',
       data: { outPath: draftOut, count: drafted.data.count },
     });
+  }
+
+  // --- Meta polish (Phase 3 length/brand) ---
+  if (profile.autopilot?.skipMetaPolish !== true) {
+    const polished = await polishMeta(profile, {
+      outDir,
+      apply:
+        opts.polishMeta === true ||
+        process.env.MERIDIAN_AUTO_POLISH_META === '1' ||
+        profile.autopilot?.autoPolishMeta === true,
+    });
+    actions.push({ id: 'meta-polish', ...polished });
+    mergeFindings(scan, polished);
   }
 
   // --- Alt drafts ---
@@ -245,6 +263,23 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, unlock);
   }
 
+  // --- Phase 0 unlock wizard ---
+  if (profile.autopilot?.skipPhase0Wizard !== true) {
+    const wiz = await writePhase0Wizard(profile, { outDir });
+    actions.push({ id: 'phase0-wizard', ...wiz });
+    mergeFindings(scan, wiz);
+  }
+
+  // --- Indexing queue (Phase 1.7) ---
+  if (profile.autopilot?.skipIndexingQueue !== true) {
+    const iq = await writeIndexingQueue(profile, {
+      outDir,
+      skipInspect: opts.skipAct === true || !profile.indexable,
+    });
+    actions.push({ id: 'indexing-queue', ...iq });
+    mergeFindings(scan, iq);
+  }
+
   // --- Rich Results pack (Phase 2.2) ---
   if (profile.autopilot?.skipRichResults !== true) {
     const rr = await writeRichResultsPack(profile, { outDir });
@@ -285,6 +320,20 @@ export async function runAutopilot(profile, opts = {}) {
     });
     actions.push({ id: 'speed-baseline', ...speed });
     mergeFindings(scan, speed);
+  }
+
+  // --- OG / social share pack (Phase 2.4) ---
+  if (profile.autopilot?.skipOgShare !== true) {
+    const og = await writeOgSharePack(profile, { outDir });
+    actions.push({ id: 'og-share-pack', ...og });
+    mergeFindings(scan, og);
+  }
+
+  // --- Locale decision (Phase 6.3) ---
+  if (profile.autopilot?.skipLocaleDecision !== true) {
+    const loc = await assessLocaleDecision(profile, { outDir });
+    actions.push({ id: 'locale-decision', ...loc });
+    mergeFindings(scan, loc);
   }
 
   // --- PreProd removals checklist (Phase 1.8) ---

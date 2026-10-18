@@ -38,6 +38,11 @@ export type MeridianAct =
   | { action: 'speed-baseline' }
   | { action: 'preprod-removals' }
   | { action: 'quarterly-digest' }
+  | { action: 'meta-polish'; apply?: boolean }
+  | { action: 'phase0-wizard' }
+  | { action: 'og-share-pack' }
+  | { action: 'indexing-queue' }
+  | { action: 'locale-decision' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -65,6 +70,7 @@ export function meridianLatestPaths(env: MeridianEnv) {
     unlock: path.join(dir, 'unlock-readiness.json'),
     opsCockpit: path.join(dir, 'ops-cockpit.html'),
     opsCockpitJson: path.join(dir, 'ops-cockpit.json'),
+    phase0Wizard: path.join(dir, 'phase0-wizard.html'),
   };
 }
 
@@ -338,6 +344,23 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'quarterly-digest') {
     return spawnMeridian(['act', 'quarterly-digest', '--profile', profile]);
+  }
+  if (act.action === 'meta-polish') {
+    const args = ['act', 'meta-polish', '--profile', profile];
+    if (act.apply) args.push('--apply');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase0-wizard') {
+    return spawnMeridian(['act', 'phase0-wizard', '--profile', profile]);
+  }
+  if (act.action === 'og-share-pack') {
+    return spawnMeridian(['act', 'og-share-pack', '--profile', profile]);
+  }
+  if (act.action === 'indexing-queue') {
+    return spawnMeridian(['act', 'indexing-queue', '--profile', profile]);
+  }
+  if (act.action === 'locale-decision') {
+    return spawnMeridian(['act', 'locale-decision', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

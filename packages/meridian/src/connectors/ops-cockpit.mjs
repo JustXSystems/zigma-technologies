@@ -37,10 +37,15 @@ export async function writeOpsCockpit(profile, opts = {}) {
   }));
 
   const artefacts = [
+    { name: 'Phase 0 wizard', file: 'phase0-wizard.html' },
     { name: 'Weekly digest', file: 'weekly-digest.md' },
     { name: 'Monthly digest', file: 'monthly-digest.md' },
     { name: 'Quarterly digest', file: 'quarterly-digest.md' },
     { name: 'Unlock readiness', file: 'unlock-readiness.md' },
+    { name: 'Indexing queue', file: 'indexing-queue.md' },
+    { name: 'Meta polish', file: 'meta-polish.md' },
+    { name: 'OG / share pack', file: 'og-share-pack.md' },
+    { name: 'Locale decision', file: 'locale-decision.md' },
     { name: 'GBP / NAP checklist', file: 'gbp-checklist.md' },
     { name: 'Citations playbook', file: 'citations-playbook.md' },
     { name: 'Review kit', file: 'review-kit.md' },

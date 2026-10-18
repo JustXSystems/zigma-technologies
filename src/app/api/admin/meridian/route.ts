@@ -58,6 +58,17 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'No ops cockpit yet — run autopilot first.' }, { status: 404 });
       }
     }
+    if (format === 'phase0') {
+      const { phase0Wizard } = meridianLatestPaths(env);
+      try {
+        const body = await readFile(phase0Wizard, 'utf8');
+        return new NextResponse(body, {
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      } catch {
+        return NextResponse.json({ error: 'No Phase 0 wizard yet — run autopilot first.' }, { status: 404 });
+      }
+    }
     const report = await readLatestMeridianReport(env);
     const autopilot = await readLatestAutopilot(env);
     const digest = await readLatestDigest(env);
@@ -151,7 +162,12 @@ export async function POST(request: Request) {
       action === 'content-calendar' ||
       action === 'speed-baseline' ||
       action === 'preprod-removals' ||
-      action === 'quarterly-digest'
+      action === 'quarterly-digest' ||
+      action === 'meta-polish' ||
+      action === 'phase0-wizard' ||
+      action === 'og-share-pack' ||
+      action === 'indexing-queue' ||
+      action === 'locale-decision'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -180,6 +196,11 @@ export async function POST(request: Request) {
       else if (action === 'speed-baseline') act = { action: 'speed-baseline' };
       else if (action === 'preprod-removals') act = { action: 'preprod-removals' };
       else if (action === 'quarterly-digest') act = { action: 'quarterly-digest' };
+      else if (action === 'meta-polish') act = { action: 'meta-polish', apply: !!body.apply };
+      else if (action === 'phase0-wizard') act = { action: 'phase0-wizard' };
+      else if (action === 'og-share-pack') act = { action: 'og-share-pack' };
+      else if (action === 'indexing-queue') act = { action: 'indexing-queue' };
+      else if (action === 'locale-decision') act = { action: 'locale-decision' };
       else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;

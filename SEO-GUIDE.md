@@ -63,7 +63,7 @@ Technical Phase 1 is **complete enough for Google**. Remaining work is accounts,
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** Autopilot = remediate + Phase 1–9 packs (**Rich Results**, **top meta**, **review kit**, **content calendar**, **speed**, **PreProd removals**, **GBP/citations/city/backlinks**, **quarterly**) + **unlock %** + **ops cockpit** + closed-loop + Bing/GSC + digests; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
+- **Meridian (SEO Command):** Autopilot = remediate + **Phase 0 wizard** + **meta polish** + **indexing queue** + Phase 1–9 packs (Rich Results, OG share, review kit, calendar, speed, locales, PreProd, GBP/citations/city/backlinks, quarterly) + unlock % + ops cockpit + Bing/GSC + digests; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
 - Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
 - `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
 

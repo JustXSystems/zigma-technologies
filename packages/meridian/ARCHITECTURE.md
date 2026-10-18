@@ -204,8 +204,9 @@ Fails the pipeline if hard technical findings exist (same contract as today’s 
 | **M7 — Remediation loop** | WebP optimize; orphan hub footers; content briefs; JSON-LD validate | Fix crawl findings |
 | **M8 — Closed loop + Phase 5–7 seed** | hreflang; NAP/GBP checklist; keyword map; FAQ content seed; closed-loop recheck | Maximum automation without OAuth |
 | **M9 — Human-gate unlock + ops cockpit** | Citations / city / backlink playbooks; unlock %; ops-cockpit.html; Admin cockpit | Max automation of remaining SEO-GUIDE phases |
-| **M10 — SEO-GUIDE remaining ops (current)** | Rich Results + top-20 meta + review kit + content calendar + speed baseline + PreProd removals + quarterly digest | Close Phase 1.8 / 2.2 / 3 / 4 / 5.6 / 7 / 9.3 loops |
-| **M11 — Multi-site SaaS shell** | Multi-profile workspace, agency schedules | Agency / multi-brand |
+| **M10 — SEO-GUIDE remaining ops** | Rich Results + top-20 meta + review kit + content calendar + speed baseline + PreProd removals + quarterly digest | Close Phase 1.8 / 2.2 / 3 / 4 / 5.6 / 7 / 9.3 loops |
+| **M11 — Unlock wizard + polish + multi-profile (current)** | Phase 0 HTML wizard; meta polish apply; indexing queue; OG pack; locale decision; `profiles/index.json` | Max automation of remaining human friction + portable multi-site registry |
+| **M12 — Agency schedules / SaaS tenancy** | Multi-tenant schedules, shared digests | Agency productization |
 
 ---
 

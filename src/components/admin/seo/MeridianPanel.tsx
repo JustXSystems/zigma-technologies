@@ -367,8 +367,8 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: closed-loop SEO ops — remediate, Phase 1–9 packs (rich results, top meta,
-            reviews, calendar, speed, PreProd), unlock score, ops cockpit, digests.
+            Maximum automation: closed-loop SEO ops — Phase 0 wizard, meta polish, indexing queue, OG/share,
+            locale decision, plus prior packs, unlock score, ops cockpit.
           </p>
         </div>
         <div className="actions">
@@ -594,6 +594,46 @@ export default function MeridianPanel() {
           </button>
           <button
             type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'phase0-wizard' }, 'Phase 0 wizard')}
+            title="GSC / OAuth / Bing / GA4 unlock wizard"
+          >
+            Phase 0
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'meta-polish', apply: true }, 'Polishing meta')}
+            title="Rewrite too-long/short CMS meta and apply"
+          >
+            Polish meta
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'indexing-queue' }, 'Indexing queue')}
+            title="Priority URLs for GSC inspect / request indexing"
+          >
+            Index queue
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'og-share-pack' }, 'OG share pack')}
+            title="Phase 2.4 Open Graph + LinkedIn inspector"
+          >
+            OG share
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => postAction({ action: 'locale-decision' }, 'Locale decision')}
+            title="Phase 6.3 Hindi/Kannada keep-or-off"
+          >
+            Locales
+          </button>
+          <button
+            type="button"
             disabled={pending || env !== 'prod'}
             onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting GSC sitemap')}
             title="Requires MERIDIAN_GOOGLE_* with webmasters scope"
@@ -632,6 +672,14 @@ export default function MeridianPanel() {
             rel="noreferrer"
           >
             Ops cockpit
+          </a>
+          <a
+            className="link"
+            href={withBasePath(`/api/admin/meridian?env=${env}&format=phase0`)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Phase 0 wizard
           </a>
         </div>
       </div>

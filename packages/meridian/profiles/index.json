@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "description": "Meridian multi-site profile registry (M11)",
+  "profiles": [
+    {
+      "id": "zigma-prod",
+      "path": "./zigma.prod.json",
+      "env": "prod",
+      "displayName": "Zigma Technologies (Production)"
+    },
+    {
+      "id": "zigma-preprod",
+      "path": "./zigma.preprod.json",
+      "env": "preprod",
+      "displayName": "Zigma Technologies (PreProd)"
+    }
+  ]
+}

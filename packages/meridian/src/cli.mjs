@@ -31,6 +31,12 @@ import { writeContentCalendar } from './connectors/content-calendar.mjs';
 import { writeSpeedBaseline } from './connectors/speed-baseline.mjs';
 import { writePreprodRemovals } from './connectors/preprod-removals.mjs';
 import { writeQuarterlyDigest } from './connectors/quarterly-digest.mjs';
+import { polishMeta } from './connectors/meta-polish.mjs';
+import { writePhase0Wizard } from './connectors/phase0-wizard.mjs';
+import { writeOgSharePack } from './connectors/og-share-pack.mjs';
+import { writeIndexingQueue } from './connectors/indexing-queue.mjs';
+import { assessLocaleDecision } from './connectors/locale-decision.mjs';
+import { readFile } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG = resolve(__dirname, '..');
@@ -341,9 +347,60 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'meta-polish') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await polishMeta(profile, {
+        outDir: resolve(outDir),
+        apply: argv.includes('--apply'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase0-wizard') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writePhase0Wizard(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'og-share-pack') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeOgSharePack(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'indexing-queue') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeIndexingQueue(profile, {
+        outDir: resolve(outDir),
+        skipInspect: argv.includes('--skip-inspect'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'locale-decision') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await assessLocaleDecision(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     console.error(`Unknown act action: ${action || '(none)'}`);
     printHelp();
     process.exit(2);
+  }
+
+  if (cmd === 'profiles') {
+    const registry = resolve(PKG, 'profiles/index.json');
+    try {
+      const data = JSON.parse(await readFile(registry, 'utf8'));
+      console.log(JSON.stringify(data, null, 2));
+      for (const p of data.profiles || []) {
+        console.error(`  ${p.id} → ${p.path} (${p.env})`);
+      }
+    } catch (e) {
+      console.error(`No profiles registry: ${e.message || e}`);
+      process.exit(1);
+    }
+    return;
   }
 
   if (cmd === 'init-profile') {
@@ -385,12 +442,14 @@ Usage:
   meridian act unlock-readiness | ops-cockpit --profile ./profiles/site.json
   meridian act rich-results-pack | top20-meta-pack | review-kit | content-calendar --profile ./profiles/site.json
   meridian act speed-baseline | preprod-removals | quarterly-digest --profile ./profiles/site.json
+  meridian act meta-polish [--apply] | phase0-wizard | og-share-pack | indexing-queue | locale-decision
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
+  meridian profiles
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 1–9 packs + unlock + ops cockpit + closed-loop + digests.
+Autopilot = full remediation + Phase 0–9 packs + meta polish + unlock + ops cockpit + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY
