@@ -17,7 +17,7 @@ Technical SEO, meta, schema, digests, and forever health checks are owned by **M
 <!-- MERIDIAN:CANON:START -->
 ## Current status (live audit — Meridian canon)
 
-_Re-checked 19 Oct 2026 (auto)._
+_Re-checked 20 Oct 2026 (auto)._
 
 > **Auto-maintained by Meridian Phase 31.** Re-run `npm run meridian:observe` after deploys. Do **not** hand-edit between the `MERIDIAN:CANON` markers.
 
@@ -255,7 +255,7 @@ Authoritative status is the automation ledger below (synced by Meridian). Do **n
 <!-- MERIDIAN:LEDGER:START -->
 ### Automation ledger (Meridian — authoritative)
 
-_Re-checked 19 Oct 2026 (auto). Do **not** hand-edit between `MERIDIAN:LEDGER` markers. Obsolete Phase 0–9 checklists live only in `docs/archive/`._
+_Re-checked 20 Oct 2026 (auto). Do **not** hand-edit between `MERIDIAN:LEDGER` markers. Obsolete Phase 0–9 checklists live only in `docs/archive/`._
 
 | Area | Status |
 | --- | --- |
@@ -274,7 +274,7 @@ _Re-checked 19 Oct 2026 (auto). Do **not** hand-edit between `MERIDIAN:LEDGER` m
 | Conversion continuum / yield | **ONLINE** (enq 28d=40) (Phase 26) |
 | Integrity lattice / perpetual seal | **SEALED** (7/7) (Phase 27) |
 | Sovereign continuity / board charter | **LOCKED** (10/10) (Phase 28) |
-| Autonomic chronos / temporal nexus | **ARMED** (3 pts) (Phase 29) |
+| Autonomic chronos / temporal nexus | **ARMED** (5 pts) (Phase 29) |
 | Dominion apex / eternal crown | **CROWNED** (11/11) (Phase 30) |
 | Silent steward / zero-checklist | **NOMINAL** (8/8) (Phase 31) |
 | Growth radar opportunities | **1** |

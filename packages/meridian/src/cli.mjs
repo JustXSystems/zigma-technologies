@@ -136,17 +136,18 @@ export async function runCli(argv) {
       console.error(
         '\nAUTOPILOT FAILED —' +
           (result.regressed ? ' score regression' : ' hard findings') +
-          (result.softHard ? ' (CI soft-hard was on but still failed)' : '') +
+          (result.softHard ? ' (soft-hard was on but still failed)' : '') +
           '.'
       );
       process.exit(1);
     }
     if (result.softHard && (result.hardFailCount || 0) > 0) {
       console.warn(
-        `\nAUTOPILOT OK (CI soft-hard) — ${result.hardFailCount} hard finding(s) recorded; artifacts uploaded.`
+        `\nAUTOPILOT OK (soft-hard) — ${result.hardFailCount} hard finding(s) recorded; artifacts uploaded.`
       );
     }
-    return;
+    // Explicit exit so open DB pools / timers cannot leave a non-zero zombie for Admin spawn
+    process.exit(0);
   }
 
   if (cmd === 'act') {

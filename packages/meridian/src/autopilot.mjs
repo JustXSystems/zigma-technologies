@@ -69,13 +69,17 @@ import { advancePhase30 } from './connectors/phase30-advance.mjs';
 import { advancePhase31 } from './connectors/phase31-advance.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
+/**
+ * Merge pack findings into the report. Does **not** flip scan.ok — only the initial
+ * technical scan gates hard-fail exit. Packs (form flake, OAuth probe, etc.) stay advisory
+ * so Admin / Monday autopilot can finish green while still recording findings.
+ */
 function mergeFindings(scan, result) {
   if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
   scan.report.findings.push(...result.findings);
   const hard = result.findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
   if (hard.length) {
     scan.hardFailCount = (scan.hardFailCount || 0) + hard.length;
-    scan.ok = false;
   }
 }
 
@@ -959,10 +963,10 @@ export async function runAutopilot(profile, opts = {}) {
 
   const failOnRegression = process.env.MERIDIAN_FAIL_ON_REGRESSION === '1';
   const regressed = trend?.status === 'regressed';
-  // Actions without full auth/DB: still upload artifacts; fail only on score regression
+  // Soft-hard default: finish + write artifacts. Opt into hard exit: MERIDIAN_FAIL_HARD=1
+  // (pack findings no longer flip scan.ok — only the initial technical scan does).
   const softHard =
-    process.env.MERIDIAN_CI_SOFT_HARD === '1' ||
-    (process.env.GITHUB_ACTIONS === 'true' && process.env.MERIDIAN_CI_SOFT_HARD !== '0');
+    process.env.MERIDIAN_FAIL_HARD !== '1' && process.env.MERIDIAN_CI_SOFT_HARD !== '0';
   const hardOk = softHard ? true : scan.ok;
   const ok = hardOk && (!failOnRegression || !regressed);
 

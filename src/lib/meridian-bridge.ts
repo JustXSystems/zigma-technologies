@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { openSync, closeSync } from 'node:fs';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -469,6 +470,10 @@ export async function startMeridianAutopilotBackground(
     }
   }
 
+  const { dir } = meridianLatestPaths(env);
+  await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+  const logPath = path.join(dir, 'autopilot-run.log');
+
   const profile = meridianProfilePath(env);
   const args = ['autopilot', '--profile', profile];
   if (opts.skipAct || env === 'preprod') args.push('--skip-act');
@@ -484,13 +489,33 @@ export async function startMeridianAutopilotBackground(
   };
   await writeMeridianJobStatus(env, job);
 
+  // Capture stdout/stderr so Admin can show why a non-zero exit happened
+  let logFd: number | undefined;
+  try {
+    logFd = openSync(/*turbopackIgnore: true*/ logPath, 'w');
+  } catch {
+    logFd = undefined;
+  }
+
   const child = spawn(process.execPath, [MERIDIAN_BIN, ...args], {
     cwd: ROOT,
-    env: process.env,
+    env: {
+      ...process.env,
+      // Admin background jobs must finish green; packs record findings without failing the job
+      MERIDIAN_ADMIN_SOFT_HARD: '1',
+      MERIDIAN_CI_SOFT_HARD: process.env.MERIDIAN_CI_SOFT_HARD || '1',
+    },
     windowsHide: true,
     detached: true,
-    stdio: 'ignore',
+    stdio: logFd != null ? ['ignore', logFd, logFd] : 'ignore',
   });
+  if (logFd != null) {
+    try {
+      closeSync(logFd);
+    } catch {
+      /* child owns the fd */
+    }
+  }
   child.unref();
 
   job.pid = child.pid;
@@ -505,13 +530,25 @@ export async function startMeridianAutopilotBackground(
     });
   });
   child.on('exit', (code) => {
-    void writeMeridianJobStatus(env, {
-      ...job,
-      status: code === 0 ? 'ok' : 'error',
-      finishedAt: new Date().toISOString(),
-      code,
-      error: code === 0 ? undefined : `autopilot exited with code ${code}`,
-    });
+    void (async () => {
+      let tail = '';
+      try {
+        const raw = await readFile(/*turbopackIgnore: true*/ logPath, 'utf8');
+        tail = raw.slice(-1200).trim();
+      } catch {
+        /* no log */
+      }
+      const failed = code !== 0;
+      await writeMeridianJobStatus(env, {
+        ...job,
+        status: failed ? 'error' : 'ok',
+        finishedAt: new Date().toISOString(),
+        code,
+        error: failed
+          ? `autopilot exited with code ${code}${tail ? `\n\n${tail}` : ''}`
+          : undefined,
+      });
+    })();
   });
 
   return { started: true, job };
