@@ -35,10 +35,21 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 29. **Phase 12 score lift** (fill CMS meta, auto-publish calendar week, deploy one-command, rescan)  
 30. **Phase 13 sovereign autoclose** (SSH apply LinkedIn into prod `theme_settings` + PM2 restart + clear deploy gate — no full redeploy required when code already has sameAs)  
 31. **Phase 14 perpetual ops** (unlock 100% without optional webhook · live GSC/GA4 signal cache · monthly digest fill · sameAs self-heal · cron guardian)  
+32. **Phase 15 sovereign fleet** (Actions `npm ci` audit · secret coverage · optional `gh` sync/dispatch · Phase 9/14 refresh · `phase15-ops.html`)  
+33. **Phase 16 autonomous continuum** (score apex · authority evidence · GBP pulse ingest · meta chase · quarterly autoclose · `phase16-ops.html`)  
+34. **Phase 17 mission archive** (guide briefs · deps audit · rich re-probe · continuum seal)  
+35. **Phase 18 observatory** (post-archive epoch · GSC→GBP proxy · silent drift heal)  
+36. **Phase 19 living canon** (auto-sync **`SEO-GUIDE.md`** status/next-actions)  
+37. **Phase 20 autonomic desk** (one-click NAP/calendar/GBP/citations · human-debt · executive brief)  
+38. **Phase 21 presence sentinel** (auto-detect/seal GBP · `ack-gbp`)  
+39. **Phase 22 quiet throne** (park Google gate · Appendix F ledger · sovereign certificate · `hasMap` from NAP)  
+40. **Phase 23 eternal horizon** (live `hasMap` probe · deploy gate · GSC growth radar)  
+41. **Phase 24 deploy courier** (local build → SSH apply · never VPS `next build`)  
+42. **Phase 25 growth closer** (FAQ publish + homepage proof + indexing · **primary forever ops**)  
 
 ## Highest-leverage human step
 
-Optional **GBP metrics** (no public API). Everything else: **`npm run meridian:act:phase14`** + weekly autopilot cron. Day-to-day: **`phase14-ops.html`**.
+Usually **none** — observe auto-closes GSC opportunities. Forever: **`npm run meridian:observe`**. Drift: **`npm run meridian:prod:hasmap`**. Optional GBP: `ack-gbp`.
 
 ## Multi-site (M11)
 
@@ -67,6 +78,30 @@ npm run meridian:act:phase11         # live convergence + refresh Phase 9 + coll
 npm run meridian:act:phase12         # score lift + calendar auto-publish + deploy pack
 npm run meridian:act:phase13         # SSH sameAs autoclose + mission-complete dashboards
 npm run meridian:act:phase14         # perpetual signals + unlock 100% + digest fill
+npm run meridian:act:phase15         # sovereign fleet board (Actions audit + secret coverage)
+npm run meridian:act:phase15:gh      # same + push Meridian secrets to GitHub Actions (gh auth)
+npm run meridian:act:phase15:dispatch # trigger meridian-autopilot.yml once
+npm run meridian:act:phase16         # continuum apex + GBP pulse + score chase
+npm run meridian:act:phase17         # mission archive (guides + deps + rich + seal)
+npm run meridian:guard               # alias of phase17 — full re-seal
+npm run meridian:act:phase18         # observatory only (GBP proxy + drift heal)
+npm run meridian:act:phase19         # observatory + SEO-GUIDE canon sync
+npm run meridian:act:phase20         # autonomic desk (includes phase19)
+npm run meridian:act:phase21         # presence sentinel (includes phase20)
+npm run meridian:act:phase22         # quiet throne (includes phase21)
+npm run meridian:act:phase23         # eternal horizon (includes phase22)
+npm run meridian:act:phase24         # deploy courier (includes phase23)
+npm run meridian:act:phase25         # growth closer / signal forge (includes phase24)
+npm run meridian:observe             # alias of phase25 — primary forever ops
+npm run meridian:forge               # alias of phase25
+npm run meridian:courier             # alias of phase24
+npm run meridian:horizon             # alias of phase23
+npm run meridian:throne              # alias of phase22
+npm run meridian:presence            # alias of phase21
+npm run meridian:desk                # alias of phase20
+npm run meridian:prod:hasmap         # local build → tarball → SSH apply (hasMap seal)
+npm run meridian:ack-gbp             # seal GBP after browser verify
+npm run meridian:canon               # SEO-GUIDE status sync only (no observe)
 npm run meridian:prod:sameas         # SSH LinkedIn → prod theme_settings + pm2 restart
 npm run meridian:deploy:prod         # optional full gh Deploy Production (needs gh auth)
 npm run meridian:act:polish
@@ -87,5 +122,22 @@ Ops HTML dashboards (open after each act):
 - `phase11-ops.html` — live convergence (+ GBP draft)  
 - `phase12-ops.html` — score lift + deploy pack  
 - `phase13-ops.html` — sovereign autoclose / mission complete  
-- `phase14-ops.html` — **primary** perpetual ops + signal board  
+- `phase14-ops.html` — perpetual ops + signal board  
+- `phase15-ops.html` — sovereign fleet (CI + secrets + last runs)  
+- `phase16-ops.html` — autonomous continuum (score apex + GBP pulse)  
+- `phase17-ops.html` — mission archive / full re-seal  
+- `phase18-ops.html` — observatory (sensors + GBP proxy + heal)  
+- `phase19-ops.html` — living canon (SEO-GUIDE sync)  
+- `phase20-ops.html` — autonomic desk (NAP · calendar · citations · debt)  
+- `phase21-ops.html` — presence sentinel (GBP evidence · seal · verify kit)  
+- `phase22-ops.html` — quiet throne  
+- `phase23-ops.html` — eternal horizon (live seal + growth)  
+- `phase24-ops.html` — deploy courier (SSH hasMap ship)  
+- `phase25-ops.html` — **primary** growth closer / signal forge  
+- `sovereign-certificate.html` — board certificate of autonomic ops  
+- `live-throne.md` / `growth-radar.md` / `growth-closer.md` / `signal-forge.json` — live seal + GSC autoclose  
+- `presence-sentinel.json` / `presence-seal.json` — local presence state  
+- `automation-ledger.md` — Appendix F Meridian ledger  
+- `executive-brief.md` — board one-pager  
+- Root `SEO-GUIDE.md` — **Current status** + Appendix F ledger auto-owned by Meridian  
 

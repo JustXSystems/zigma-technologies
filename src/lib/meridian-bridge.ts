@@ -56,6 +56,131 @@ export type MeridianAct =
   | { action: 'phase12-advance'; apply?: boolean; triggerDeploy?: boolean; skipScan?: boolean; skipVerify?: boolean }
   | { action: 'phase13-advance'; apply?: boolean; restart?: boolean; skipAct?: boolean; skipVerify?: boolean }
   | { action: 'phase14-advance'; apply?: boolean; skipHeal?: boolean }
+  | {
+      action: 'phase15-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      dispatch?: boolean;
+      skipHeal?: boolean;
+      skipPhase14?: boolean;
+    }
+  | {
+      action: 'phase16-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipScan?: boolean;
+      skipMeta?: boolean;
+      skipPhase15?: boolean;
+    }
+  | {
+      action: 'phase17-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipScan?: boolean;
+      skipMeta?: boolean;
+      skipPhase16?: boolean;
+    }
+  | {
+      action: 'phase18-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase19-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase20-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipCanon?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase21-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipCanon?: boolean;
+      skipDesk?: boolean;
+      ack?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase22-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase23-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase24-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipHotpatch?: boolean;
+      skipBuild?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      forceGhDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase25-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -91,6 +216,35 @@ export function meridianLatestPaths(env: MeridianEnv) {
     phase12Ops: path.join(dir, 'phase12-ops.html'),
     phase13Ops: path.join(dir, 'phase13-ops.html'),
     phase14Ops: path.join(dir, 'phase14-ops.html'),
+    phase15Ops: path.join(dir, 'phase15-ops.html'),
+    phase16Ops: path.join(dir, 'phase16-ops.html'),
+    phase17Ops: path.join(dir, 'phase17-ops.html'),
+    phase18Ops: path.join(dir, 'phase18-ops.html'),
+    phase19Ops: path.join(dir, 'phase19-ops.html'),
+    phase20Ops: path.join(dir, 'phase20-ops.html'),
+    phase21Ops: path.join(dir, 'phase21-ops.html'),
+    phase22Ops: path.join(dir, 'phase22-ops.html'),
+    phase23Ops: path.join(dir, 'phase23-ops.html'),
+    phase24Ops: path.join(dir, 'phase24-ops.html'),
+    phase25Ops: path.join(dir, 'phase25-ops.html'),
+    fleetAssurance: path.join(dir, 'fleet-assurance.json'),
+    continuumOps: path.join(dir, 'continuum-ops.json'),
+    missionArchive: path.join(dir, 'mission-archive.json'),
+    observatory: path.join(dir, 'observatory.json'),
+    canonSync: path.join(dir, 'canon-sync.json'),
+    humanDebt: path.join(dir, 'human-debt.json'),
+    presenceSentinel: path.join(dir, 'presence-sentinel.json'),
+    presenceSeal: path.join(dir, 'presence-seal.json'),
+    quietThrone: path.join(dir, 'quiet-throne.json'),
+    sovereignCertificate: path.join(dir, 'sovereign-certificate.html'),
+    liveThrone: path.join(dir, 'live-throne.json'),
+    growthRadar: path.join(dir, 'growth-radar.md'),
+    deployCourier: path.join(dir, 'deploy-courier.json'),
+    growthCloser: path.join(dir, 'growth-closer.md'),
+    signalForge: path.join(dir, 'signal-forge.json'),
+    automationLedger: path.join(dir, 'automation-ledger.md'),
+    executiveBrief: path.join(dir, 'executive-brief.md'),
+    gbpPulse: path.join(dir, 'gbp-pulse.json'),
     phaseMatrix: path.join(dir, 'phase-matrix.json'),
     jobStatus: path.join(dir, 'job-status.json'),
   };
@@ -549,6 +703,142 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     const args = ['act', 'phase14-advance', '--profile', profile];
     if (act.apply === false) args.push('--no-apply');
     if (act.skipHeal) args.push('--skip-heal');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase15-advance') {
+    const args = ['act', 'phase15-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.dispatch) args.push('--dispatch');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipPhase14) args.push('--skip-phase14');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase16-advance') {
+    const args = ['act', 'phase16-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipScan) args.push('--skip-scan');
+    if (act.skipMeta) args.push('--skip-meta');
+    if (act.skipPhase15) args.push('--skip-phase15');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase17-advance') {
+    const args = ['act', 'phase17-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipScan) args.push('--skip-scan');
+    if (act.skipMeta) args.push('--skip-meta');
+    if (act.skipPhase16) args.push('--skip-phase16');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase18-advance') {
+    const args = ['act', 'phase18-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase19-advance') {
+    const args = ['act', 'phase19-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase20-advance') {
+    const args = ['act', 'phase20-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipCanon) args.push('--skip-canon');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase21-advance') {
+    const args = ['act', 'phase21-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipCanon) args.push('--skip-canon');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase22-advance') {
+    const args = ['act', 'phase22-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase23-advance') {
+    const args = ['act', 'phase23-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase24-advance') {
+    const args = ['act', 'phase24-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipBuild) args.push('--skip-build');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.forceGhDeploy) args.push('--force-gh-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase25-advance') {
+    const args = ['act', 'phase25-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
     return spawnMeridian(args);
   }
   if (act.action === 'draft-meta') {

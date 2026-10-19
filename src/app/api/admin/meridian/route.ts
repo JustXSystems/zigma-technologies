@@ -106,6 +106,27 @@ export async function POST(request: Request) {
       skipScan?: boolean;
       restart?: boolean;
       skipHeal?: boolean;
+      dispatch?: boolean;
+      skipPhase14?: boolean;
+      skipMeta?: boolean;
+      skipPhase15?: boolean;
+      skipPhase16?: boolean;
+      gscProxy?: boolean;
+      skipObserve?: boolean;
+      skipCanon?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipBuild?: boolean;
+      skipDeploy?: boolean;
+      forceGhDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
     };
     const env = parseEnv(body.env);
     const action = body.action || 'scan';
@@ -188,7 +209,18 @@ export async function POST(request: Request) {
       action === 'phase11-advance' ||
       action === 'phase12-advance' ||
       action === 'phase13-advance' ||
-      action === 'phase14-advance'
+      action === 'phase14-advance' ||
+      action === 'phase15-advance' ||
+      action === 'phase16-advance' ||
+      action === 'phase17-advance' ||
+      action === 'phase18-advance' ||
+      action === 'phase19-advance' ||
+      action === 'phase20-advance' ||
+      action === 'phase21-advance' ||
+      action === 'phase22-advance' ||
+      action === 'phase23-advance' ||
+      action === 'phase24-advance' ||
+      action === 'phase25-advance'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -269,6 +301,142 @@ export async function POST(request: Request) {
           action: 'phase14-advance',
           apply: body.apply !== false,
           skipHeal: !!body.skipHeal,
+        };
+      } else if (action === 'phase15-advance') {
+        act = {
+          action: 'phase15-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          dispatch: !!body.dispatch,
+          skipHeal: !!body.skipHeal,
+          skipPhase14: !!body.skipPhase14,
+        };
+      } else if (action === 'phase16-advance') {
+        act = {
+          action: 'phase16-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipScan: !!body.skipScan,
+          skipMeta: !!body.skipMeta,
+          skipPhase15: !!body.skipPhase15,
+        };
+      } else if (action === 'phase17-advance') {
+        act = {
+          action: 'phase17-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipScan: !!body.skipScan,
+          skipMeta: !!body.skipMeta,
+          skipPhase16: !!body.skipPhase16,
+        };
+      } else if (action === 'phase18-advance') {
+        act = {
+          action: 'phase18-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase19-advance') {
+        act = {
+          action: 'phase19-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase20-advance') {
+        act = {
+          action: 'phase20-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipCanon: !!body.skipCanon,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase21-advance') {
+        act = {
+          action: 'phase21-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipCanon: !!body.skipCanon,
+          skipDesk: !!body.skipDesk,
+          ack: !!body.ack,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase22-advance') {
+        act = {
+          action: 'phase22-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase23-advance') {
+        act = {
+          action: 'phase23-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase24-advance') {
+        act = {
+          action: 'phase24-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipHotpatch: !!body.skipHotpatch,
+          skipBuild: !!body.skipBuild,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          forceGhDeploy: !!body.forceGhDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase25-advance') {
+        act = {
+          action: 'phase25-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
         };
       } else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);

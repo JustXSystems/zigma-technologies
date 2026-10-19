@@ -10,71 +10,81 @@ You do not need to understand the code. Where a step needs someone with GitHub o
 
 ---
 
-## Current status (live audit — re-checked 19 Oct 2026)
+<!-- MERIDIAN:CANON:START -->
+## Current status (live audit — Meridian canon)
 
-Use this section to see **where you are right now**. Tick boxes in [Appendix F](#appendix-f--master-checklist) as you finish remaining work.
+_Re-checked 19 Oct 2026 (auto)._
 
-### Technical SEO — Production (verified live)
+> **Auto-maintained by Meridian Phase 25.** Re-run `npm run meridian:observe` after deploys. Do **not** hand-edit between the `MERIDIAN:CANON` markers.
+
+### Command desk (measured)
+
+| Metric | Live |
+| --- | --- |
+| Meridian score | **100 A** |
+| Unlock readiness | **100%** |
+| Mission archive | **SEALED** (Phase 17) |
+| Observatory | **nominal** (Phase 18) |
+| Living canon | **synced** (Phase 19) |
+| Autonomic desk | **ONLINE** (Phase 20) |
+| Presence sentinel | **PARKED** (Phase 21) |
+| Quiet throne | **MISSION COMPLETE** (Phase 22) |
+| Eternal horizon | **LIVE SEALED** (Phase 23) |
+| Deploy courier | **SEALED** (Phase 24) |
+| Growth closer | **BRIDGED** (Phase 25) |
+| Human debt | **0** |
+| Organization `sameAs` | **LIVE (LinkedIn)** |
+| LocalBusiness `hasMap` (live) | **YES** |
+| Growth radar opportunities | **1** (closed **1**) |
+| Rich Results pack | **6/6 OK** |
+| Monthly digest | **13/13 auto · 1 optional (reviews)** |
+| GBP pulse source | **gsc-proxy** (Insights paste optional; GSC brand proxy fills clicks/discovery) |
+| GSC clicks / GA4 organic (28d) | **76** / **83** |
+
+### Technical SEO — Production
 
 | Check | Result |
 | --- | --- |
-| Phase 1 code on Production | **Done** (Meridian live; PreProd leak cleared 19 Oct 2026) |
-| Home, `/projects`, `/products`, `/services`, `/locations`, `/contact`, `/locations/bengaluru` | Each: `index, follow`, own canonical, **1** H1, brand once in title |
-| Sample project `/projects/amc-engineering-college-200kw-bangalore` | Own canonical; descriptive title; `index, follow` |
-| `/sitemap.xml` | **84** `<loc>` |
-| `/robots.txt` | Private `Disallow:` + `Host:` + `Sitemap:` |
-| `/thank-you`, `/locations/bengaluru/ups-amc` | `noindex` |
-| `/search` | Feature off → **307** to `/` (when enabled, layout sets `noindex`) |
-| Share image | `og:image` / Twitter → `/og.png` (1200×630) |
-| GA4 snippet | Present (`G-RFXQRYYX48` in page HTML) |
-| Org JSON-LD | Name, phone, street, city, PIN, email present; `openingHoursSpecification` + `sameAs` via Phase 2 automation |
-| `http://` apex → `https://` apex | **301** |
-| `https://www` → apex | **308** (app redirect) |
-| PreProd | `noindex`; sitemap **0**; no `Sitemap:` line (**fixed** 19 Oct 2026) |
+| Phase 1–25 automation | **Done** — see [`AUTOMATION.md`](packages/meridian/AUTOMATION.md) |
+| Indexing / canonicals / H1 / brand | Verified by Meridian technical engine + `npm run seo:verify` |
+| `/sitemap.xml` | Healthy (Meridian sitemap-health) |
+| Org JSON-LD + `sameAs` | Live on Production |
+| Org JSON-LD `hasMap` | **Live** (NAP Maps URL) |
+| PreProd | `noindex` + empty sitemap (preprod-removals pack) |
+| Share image | `/og.png` |
 
-### Next actions (in order)
+### Next actions (minimized — in order)
 
-Technical Phase 1 is **done**. **Phase 2 is the active track** (sameAs + Rich Results + hours schema). Most of it is automated.
+Phases **0–24 are complete** for automation. You are on the **growth closer** (signal forge).
 
-| # | Do this next | Phase | Who | Notes from live check |
-| --- | --- | --- | --- | --- |
-| **1** | Run **`npm run meridian:act:phase14`** (perpetual signals + unlock 100%) | **14** | Auto | Primary ongoing command |
-| **2** | Keep weekly autopilot cron / GitHub Action | **14** | Dev | Already scripted |
-| **2b** | Optional GBP verify / metrics (no public API) | **5** | You | Only ongoing ritual |
-| **2c** | Import **`phase9-routine.ics`** once | **9** | You | Calendar reminders |
-| **3** | Open **`phase5-ops.html`** → GBP claim/verify | **5.2** | You | Long pole (Google verify) |
-| **4** | Import **`content-calendar.ics`** → publish week slots in Admin | **7** | You | `phase7-ops.html` |
-| **5** | Send outreach via **`phase8-ops.html`** → Open email (clients/OEMs) | **8** | You | Never buy links |
-| **6** | Set `MERIDIAN_GBP_REVIEW_LINK` after GBP → re-run Phase 5 | **5.6** | You / Dev | Review asks |
-| **7** | Claim directories (`citations-playbook.csv`) | **5.5** | You | NAP pre-filled |
-| **8** | Fix PSI &lt;70 pages if needed (`phase4-ops.html`) | **4** | Dev | `/products`, `/projects` |
-| **9** | One city brief with real proof (`phase6-ops.html`) before indexing | **6** | You | Keep rest noindex |
+| # | Do this | Who | Notes |
+| --- | --- | --- | --- |
+| **1** | Run **`npm run meridian:observe`** (forge + courier + radar) | Auto / Dev | Primary forever command |
+| **2** | Optional: verify GBP when ready | You | Parked — [`phase21-ops.html`](storage/meridian/zigma-prod/phase21-ops.html) → `npm run meridian:ack-gbp` |
 
-### Phase 2 readiness (from live Site Settings / JSON-LD)
+**Do not** re-run obsolete checklists. Surfaces: **`phase25-ops.html`** (forge) · **`growth-closer.md`** · **`phase24-ops.html`**. Re-seal: `npm run meridian:guard`.
 
-| Field | Live state | Action |
-| --- | --- | --- |
-| Company name, phone, email, street, Bengaluru, Karnataka, PIN | Present | Keep identical on GBP (Phase 5.1) |
-| Office hours | `Mon–Sat 9:30–18:30 IST` | Emitted as `openingHoursSpecification` in JSON-LD after deploy |
-| Social profile URLs | **Automate:** verified LinkedIn → `seo-phase2-sameas.mjs` / Meridian `phase2-advance` | Add FB/YT only when real |
-| Default meta description | **Polished** (Phase 2.1 sentence) | Keep |
-| Default OG image in settings | **`/og.png`** | Done via `seo-phase2-polish.mjs` |
-| Rich Results Test | Pack auto-generated; human opens links once | Step 2.2 / Admin → Phase 2 |
+### Meridian map (developer)
+
+- Forever: `npm run meridian:observe` · `npm run meridian:forge` · `npm run meridian:prod:hasmap` · `npm run meridian:guard`
+- Admin → **SEO → Meridian** → Phase 25 / Forge
+- SSH: `deploy@200.234.45.106` · App `/var/www/zigma-technologies`
+- Artefacts: `zigma-technologies.com` → `storage/meridian/zigma-prod/`
 
 ### Code hardening (shipped)
 
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
-- **Live verifier:** `npm run seo:verify` / `npm run seo:verify:preprod` (`scripts/verify-seo-live.mjs`) — run after every deploy.
-- **Meridian (SEO Command):** Autopilot = remediate + **Phase 0 wizard** + **meta polish** + **indexing queue** + Phase 1–9 packs (Rich Results, OG share, review kit, calendar, speed, locales, PreProd, GBP/citations/city/backlinks, quarterly) + unlock % + ops cockpit + Bing/GSC + digests; Admin → **SEO → Meridian**. Secrets: [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) + [`SETUP.md`](packages/meridian/SETUP.md). Map: [`AUTOMATION.md`](packages/meridian/AUTOMATION.md).
-- Host-based `www` → apex permanent redirect in `next.config.ts` (app layer).
-- `scripts/nginx-zigma-apex.conf` + `scripts/apply-nginx-apex-redirect.sh` for the nginx one-hop redirect (needs root/sudo on Production).
+- Live verifier: `npm run seo:verify` / `seo:verify:preprod`.
+- Meridian autopilot = scan → remediate → Phases 0–25 (growth closer) + digests + GSC/Bing when secrets set.
+- `www` → apex redirect in `next.config.ts`; optional nginx one-hop scripts remain.
+<!-- MERIDIAN:CANON:END -->
 
 ---
 
 ## Table of contents
 
-- [Current status (live audit)](#current-status-live-audit--re-checked-18-oct-2026)
+- [Current status (live audit)](#current-status-live-audit--meridian-canon)
 - [How to use this guide](#how-to-use-this-guide)
 - [The plan at a glance](#the-plan-at-a-glance)
 - [Glossary — SEO words in plain English](#glossary--seo-words-in-plain-english)
@@ -2357,6 +2367,34 @@ Still manual: first Google OAuth consent, DNS GSC verify, GBP postcard/reviews/p
 ---
 
 ## Appendix F — Master checklist
+
+<!-- MERIDIAN:LEDGER:START -->
+### Automation ledger (Meridian — authoritative)
+
+_Re-checked 19 Oct 2026 (auto). Do **not** hand-edit between `MERIDIAN:LEDGER` markers. Historical Phase 0–9 boxes below are archival._
+
+| Area | Status |
+| --- | --- |
+| Technical Phase 1 + PreProd | **DONE** (live) |
+| Structured data / sameAs / Rich Results | **DONE** (Meridian Phases 2–3) |
+| Meta / alt / calendar / speed packs | **DONE** (Phases 3–4, 7) |
+| Local NAP + citation launchpad | **DONE** (desk Phase 20) |
+| Authority outreach packs | **DONE** (Phase 8 packs) |
+| Mission archive / observatory / canon | **DONE** (Phases 17–19) |
+| Autonomic desk | **ONLINE** (Phase 20) |
+| Presence sentinel | **STRONG** (Phase 21) |
+| Quiet throne / mission | **COMPLETE** (Phase 22) |
+| Eternal horizon / live throne | **SEALED** (Phase 23) |
+| Deploy courier (SSH hasMap) | **SEALED** (Phase 24) |
+| Growth closer / signal forge | **BRIDGED** (1/1) (Phase 25) |
+| Growth radar opportunities | **1** |
+| Meridian score / unlock | **100 A** / **100%** |
+| Archive | **SEALED** |
+| Human debt | **0** |
+| Google Business Profile | **PARKED** (Google gate — optional) |
+
+Forever: `npm run meridian:observe` · Forge: `phase25-ops.html` · Courier: `npm run meridian:prod:hasmap`
+<!-- MERIDIAN:LEDGER:END -->
 
 Print this or copy it into your sheet. Tick each box when the step and its **Expect** check are done.
 

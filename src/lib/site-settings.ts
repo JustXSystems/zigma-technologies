@@ -288,6 +288,15 @@ export type SiteSettings = {
   analyticsConsentRequired: string;
   marketingConsentEnabled: string;
   officeHours: string;
+  /**
+   * Optional Google Maps / GBP URL for LocalBusiness `hasMap`.
+   * Blank → site builds a Maps search URL from NAP (name + address).
+   */
+  mapsUrl: string;
+  /** Optional WGS84 latitude for LocalBusiness geo (string, e.g. "12.97"). */
+  geoLat: string;
+  /** Optional WGS84 longitude for LocalBusiness geo. */
+  geoLng: string;
   responseSla: string;
   bookingUrl: string;
   /** Generic CRM webhook (Zapier/Make/HubSpot/custom) */
@@ -427,6 +436,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   analyticsConsentRequired: 'true',
   marketingConsentEnabled: 'true',
   officeHours: 'Mon–Sat 9:30–18:30 IST',
+  mapsUrl: '',
+  geoLat: '',
+  geoLng: '',
   responseSla: 'within 1 business day',
   bookingUrl: '',
   crmWebhookUrl: '',

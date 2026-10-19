@@ -672,6 +672,90 @@ export default function MeridianPanel() {
             >
               Phase 14
             </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase15-advance', syncGh: true }, 'Phase 15 sovereign fleet')}
+            >
+              Phase 15
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase16-advance' }, 'Phase 16 autonomous continuum')}
+            >
+              Phase 16
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase17-advance' }, 'Phase 17 mission archive')}
+            >
+              Phase 17 / Guard
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase18-advance' }, 'Phase 18 observatory')}
+            >
+              Phase 18
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase19-advance' }, 'Phase 19 living canon')}
+            >
+              Phase 19 / Canon
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase20-advance' }, 'Phase 20 autonomic desk')}
+            >
+              Phase 20 / Desk
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase21-advance' }, 'Phase 21 presence sentinel')}
+            >
+              Phase 21 / Presence
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase22-advance' }, 'Phase 22 quiet throne')}
+            >
+              Phase 22 / Throne
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase23-advance' }, 'Phase 23 eternal horizon')}
+            >
+              Phase 23 / Horizon
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase24-advance' }, 'Phase 24 deploy courier')}
+            >
+              Phase 24 / Courier
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase25-advance' }, 'Phase 25 growth closer')}
+            >
+              Phase 25 / Forge
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase25-advance', ack: true, skipObserve: true }, 'Ack GBP verified')}
+            >
+              Ack GBP
+            </button>
             <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}>
               Rich Results
             </button>

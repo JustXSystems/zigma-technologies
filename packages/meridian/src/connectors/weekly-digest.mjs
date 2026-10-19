@@ -107,7 +107,10 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
       task: `Add internal links to ${health?.data?.linkGraph?.orphanCount ?? '?'} orphan sitemap pages`,
       who: 'You',
       auto: false,
-      needed: (health?.data?.linkGraph?.orphanCount || 0) >= 3,
+      // Prescriptions + autopilot orphan apply cover this — don't nag when pack exists
+      needed:
+        (health?.data?.linkGraph?.orphanCount || 0) >= 3 &&
+        !(await readJson(resolve(outDir, 'orphan-prescriptions.json'))),
     },
     {
       id: 'heavy-images',
@@ -206,28 +209,32 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
   let humanChecklist = candidates.filter((h) => h.needed !== false);
   const actionable = humanChecklist.filter((h) => h.id !== 'phase11-cockpit');
   const missionDone = !!(await readJson(resolve(outDir, 'mission-complete.json')));
-  if (actionable.length === 0) {
-    // Zero-nag steady state when Phase 13 closed measured gates
+  const archiveSealed = (await readJson(resolve(outDir, 'mission-archive.json')))?.sealed === true;
+  const observatoryOk = !!(await readJson(resolve(outDir, 'observatory.json')));
+  const scoreOk = (score.overall ?? 0) >= 99;
+  // Post-archive / observatory era: zero-nag when measured gates green
+  if (archiveSealed || (observatoryOk && scoreOk && missionDone)) {
+    humanChecklist = [];
+  } else if (actionable.length === 0) {
     humanChecklist = missionDone
       ? []
       : [
           {
             id: 'phase11-cockpit',
-            task: 'Glance phase13-ops.html — measured gates green; optional GBP pulse only',
+            task: 'Glance phase18-ops.html — observatory nominal; optional GBP Insights paste',
             who: 'You',
             auto: true,
             needed: true,
           },
         ];
   } else if (actionable.length === 1 && actionable[0].id === 'deploy-sameas') {
-    // Single remaining gate — no need for a second "open dashboard" nag
     humanChecklist = actionable;
-  } else if (actionable.length <= 3) {
+  } else if (actionable.length <= 3 && !scoreOk) {
     humanChecklist = [
       ...actionable,
       {
         id: 'phase11-cockpit',
-        task: 'Open phase12-ops.html (score lift + deploy command) · 5 min max',
+        task: 'Open phase18-ops.html (observatory) · 5 min max',
         who: 'You',
         auto: false,
         needed: true,

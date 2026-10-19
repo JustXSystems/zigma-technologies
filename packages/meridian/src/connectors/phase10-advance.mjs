@@ -250,65 +250,10 @@ exit $LASTEXITCODE
 }
 
 async function trySyncGhSecrets(outDir) {
-  const unlockPath = resolve(outDir, 'unlock-secrets.json');
-  const secrets = await readJson(unlockPath);
+  const { syncGhSecretsFromMap } = await import('../lib/gh-ops.mjs');
+  const secrets = await readJson(resolve(outDir, 'unlock-secrets.json'));
   if (!secrets) return { ok: true, status: 'skipped', message: 'No unlock-secrets.json', synced: [] };
-
-  const keys = [
-    'MERIDIAN_GOOGLE_CLIENT_ID',
-    'MERIDIAN_GOOGLE_CLIENT_SECRET',
-    'MERIDIAN_GOOGLE_REFRESH_TOKEN',
-    'MERIDIAN_GA4_PROPERTY_ID',
-    'MERIDIAN_BING_API_KEY',
-    'MERIDIAN_PSI_API_KEY',
-    'MERIDIAN_WEBHOOK_URL',
-  ].filter((k) => secrets[k]);
-
-  if (!keys.length) return { ok: true, status: 'skipped', message: 'No keys to sync', synced: [] };
-
-  const run = (args, input) =>
-    new Promise((resolvePromise) => {
-      const child = spawn('gh', args, { stdio: ['pipe', 'pipe', 'pipe'], shell: true });
-      let stdout = '';
-      let stderr = '';
-      child.stdout.on('data', (d) => (stdout += d));
-      child.stderr.on('data', (d) => (stderr += d));
-      if (input != null) {
-        child.stdin.write(String(input));
-        child.stdin.end();
-      }
-      child.on('close', (code) => resolvePromise({ code, stdout, stderr }));
-      child.on('error', (e) => resolvePromise({ code: 1, stdout: '', stderr: String(e.message || e) }));
-    });
-
-  const auth = await run(['auth', 'status']);
-  if (auth.code !== 0) {
-    return {
-      ok: true,
-      status: 'skipped',
-      message: 'gh CLI not authenticated — skip GitHub secret sync (run gh auth login)',
-      synced: [],
-    };
-  }
-
-  const synced = [];
-  const failed = [];
-  for (const k of keys) {
-    const r = await run(['secret', 'set', k], secrets[k]);
-    if (r.code === 0) synced.push(k);
-    else failed.push({ key: k, err: (r.stderr || r.stdout || 'failed').slice(0, 120) });
-  }
-
-  return {
-    ok: failed.length === 0,
-    status: failed.length ? 'degraded' : 'ok',
-    message:
-      failed.length === 0
-        ? `Synced ${synced.length} secret(s) to GitHub Actions`
-        : `Synced ${synced.length}; failed ${failed.length}`,
-    synced,
-    failed,
-  };
+  return syncGhSecretsFromMap(secrets);
 }
 
 /**

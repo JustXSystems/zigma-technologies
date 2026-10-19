@@ -33,6 +33,21 @@ export default async function OrganizationJsonLd() {
   const streetAddress = formatStreetAddress(site);
   const openingHoursSpecification = openingHoursFromOfficeHours(site.officeHours);
 
+  const mapQuery = [site.companyName, streetAddress, site.addressLocality || 'Bengaluru', site.addressRegion || 'Karnataka', site.addressPostal]
+    .filter((p) => String(p || '').trim())
+    .join(', ');
+  const hasMap =
+    String(site.mapsUrl || '').trim() ||
+    (mapQuery
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`
+      : undefined);
+  const lat = Number(String(site.geoLat || '').trim());
+  const lng = Number(String(site.geoLng || '').trim());
+  const geo =
+    Number.isFinite(lat) && Number.isFinite(lng) && String(site.geoLat || '').trim() && String(site.geoLng || '').trim()
+      ? { '@type': 'GeoCoordinates', latitude: lat, longitude: lng }
+      : undefined;
+
   const organization = {
     '@type': ['Organization', 'LocalBusiness'],
     '@id': organizationId(),
@@ -53,6 +68,8 @@ export default async function OrganizationJsonLd() {
       ...(site.addressPostal?.trim() ? { postalCode: site.addressPostal.trim() } : {}),
       addressCountry: site.addressCountry || 'IN',
     },
+    ...(hasMap ? { hasMap } : {}),
+    ...(geo ? { geo } : {}),
     ...(openingHoursSpecification ? { openingHoursSpecification } : {}),
     contactPoint: [
       ...(site.phone

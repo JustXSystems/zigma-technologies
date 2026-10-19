@@ -34,9 +34,38 @@ export async function runMeridian(profile, opts = {}) {
   const signalFindings = findingsFromSignals(connectors, profile);
   const connectorFindings = findingsFromConnectors(connectors);
   const findings = [...technical.findings, ...signalFindings, ...connectorFindings];
-  const scorecard = buildScorecard({ findings, connectors });
-  const roadmap = buildRoadmap({ findings, connectors, profile });
-  const trend = buildScoreTrend(previous, scorecard, findings);
+
+  // Continuum evidence (Phase 16) — lifts authority + suppresses stale sameAs findings
+  let evidence = {};
+  try {
+    evidence = JSON.parse(await readFile(resolve(outDir, 'authority-evidence.json'), 'utf8')) || {};
+  } catch {
+    try {
+      const nap = JSON.parse(await readFile(resolve(outDir, 'nap-audit.json'), 'utf8'));
+      if ((nap.sameAsCount ?? nap.nap?.sameAs?.length ?? 0) > 0) evidence.sameAsLive = true;
+    } catch {
+      /* optional */
+    }
+    try {
+      const cites = JSON.parse(await readFile(resolve(outDir, 'citations-playbook.json'), 'utf8'));
+      if (cites && (cites.rows?.length || cites.count)) evidence.citationsReady = true;
+    } catch {
+      /* optional */
+    }
+    try {
+      const bl = JSON.parse(await readFile(resolve(outDir, 'backlink-outreach.json'), 'utf8'));
+      evidence.outreachDrafts = bl.drafts?.length || bl.count || bl.unsent || 0;
+    } catch {
+      /* optional */
+    }
+  }
+
+  const scorecard = buildScorecard({ findings, connectors, evidence });
+  const reportFindings = evidence.sameAsLive
+    ? findings.filter((f) => f.code !== 'SCHEMA_SAMEAS' && f.code !== 'PHASE2_SAMEAS_APPLY')
+    : findings;
+  const roadmap = buildRoadmap({ findings: reportFindings, connectors, profile });
+  const trend = buildScoreTrend(previous, scorecard, reportFindings);
 
   const report = {
     meta: {
@@ -55,7 +84,7 @@ export async function runMeridian(profile, opts = {}) {
     },
     scorecard,
     trend,
-    findings,
+    findings: reportFindings,
     pages: technical.pages.map(({ issues, ...rest }) => ({
       ...rest,
       issues: (issues || []).map((i) => i.code),
@@ -107,7 +136,7 @@ export async function runMeridian(profile, opts = {}) {
     /* ignore history errors */
   }
 
-  const hardFails = findings.filter((f) => f.severity === 'critical' || f.severity === 'high');
+  const hardFails = reportFindings.filter((f) => f.severity === 'critical' || f.severity === 'high');
   return {
     report,
     paths: { outDir, jsonPath, htmlPath, mdPath, latestHtml, latestJson },

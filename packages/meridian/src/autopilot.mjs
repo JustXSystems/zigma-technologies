@@ -50,6 +50,17 @@ import { advancePhase11 } from './connectors/phase11-advance.mjs';
 import { advancePhase12 } from './connectors/phase12-advance.mjs';
 import { advancePhase13 } from './connectors/phase13-advance.mjs';
 import { advancePhase14 } from './connectors/phase14-advance.mjs';
+import { advancePhase15 } from './connectors/phase15-advance.mjs';
+import { advancePhase16 } from './connectors/phase16-advance.mjs';
+import { advancePhase17 } from './connectors/phase17-advance.mjs';
+import { advancePhase18 } from './connectors/phase18-advance.mjs';
+import { advancePhase19 } from './connectors/phase19-advance.mjs';
+import { advancePhase20 } from './connectors/phase20-advance.mjs';
+import { advancePhase21 } from './connectors/phase21-advance.mjs';
+import { advancePhase22 } from './connectors/phase22-advance.mjs';
+import { advancePhase23 } from './connectors/phase23-advance.mjs';
+import { advancePhase24 } from './connectors/phase24-advance.mjs';
+import { advancePhase25 } from './connectors/phase25-advance.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
 function mergeFindings(scan, result) {
@@ -466,7 +477,193 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, p12);
   }
   let digestsDone = false;
-  if (profile.autopilot?.skipPhase14Advance !== true) {
+  if (profile.autopilot?.skipPhase25Advance !== true) {
+    const p25 = await advancePhase25(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase25-advance', ...p25 });
+    mergeFindings(scan, p25);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p25.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase24Advance !== true) {
+    const p24 = await advancePhase24(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase24-advance', ...p24 });
+    mergeFindings(scan, p24);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p24.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase23Advance !== true) {
+    const p23 = await advancePhase23(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase23-advance', ...p23 });
+    mergeFindings(scan, p23);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p23.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase22Advance !== true) {
+    const p22 = await advancePhase22(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+    });
+    actions.push({ id: 'phase22-advance', ...p22 });
+    mergeFindings(scan, p22);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p22.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase21Advance !== true) {
+    const p21 = await advancePhase21(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+    });
+    actions.push({ id: 'phase21-advance', ...p21 });
+    mergeFindings(scan, p21);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p21.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase20Advance !== true) {
+    const p20 = await advancePhase20(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+    });
+    actions.push({ id: 'phase20-advance', ...p20 });
+    mergeFindings(scan, p20);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p20.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase19Advance !== true) {
+    const p19 = await advancePhase19(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+    });
+    actions.push({ id: 'phase19-advance', ...p19 });
+    mergeFindings(scan, p19);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p19.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase18Advance !== true) {
+    const p18 = await advancePhase18(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+    });
+    actions.push({ id: 'phase18-advance', ...p18 });
+    mergeFindings(scan, p18);
+    if (p18.data?.score?.overall != null && scan.report?.scorecard) {
+      scan.report.scorecard = {
+        ...scan.report.scorecard,
+        ...p18.data.score,
+        pillars: p18.data.score.pillars || scan.report.scorecard.pillars,
+      };
+    }
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p18.data?.digests?.phase9 };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase17Advance !== true) {
+    const p17 = await advancePhase17(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipScan: false,
+      skipPhase16: false,
+      skipPhase15: true,
+    });
+    actions.push({ id: 'phase17-advance', ...p17 });
+    mergeFindings(scan, p17);
+    if (p17.data?.score?.overall != null && scan.report?.scorecard) {
+      scan.report.scorecard = {
+        ...scan.report.scorecard,
+        ...p17.data.score,
+        pillars: p17.data.score.pillars || scan.report.scorecard.pillars,
+      };
+    }
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p17.data?.digests?.phase9 };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase16Advance !== true) {
+    const p16 = await advancePhase16(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipScan: false,
+      skipPhase15: false,
+      skipPhase14: true,
+    });
+    actions.push({ id: 'phase16-advance', ...p16 });
+    mergeFindings(scan, p16);
+    if (p16.data?.score?.overall != null && scan.report?.scorecard) {
+      scan.report.scorecard = {
+        ...scan.report.scorecard,
+        ...p16.data.score,
+        pillars: p16.data.score.pillars || scan.report.scorecard.pillars,
+      };
+    }
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p16.data?.digests?.phase9 };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase15Advance !== true) {
+    const p15 = await advancePhase15(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      dispatch: process.env.MERIDIAN_DISPATCH_AUTOPILOT === '1',
+      skipHeal: false,
+      skipPhase14: false,
+      skipPhase9: false,
+    });
+    actions.push({ id: 'phase15-advance', ...p15 });
+    mergeFindings(scan, p15);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p15.data?.digests?.phase9 };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase14Advance !== true) {
     const p14 = await advancePhase14(profile, {
       outDir,
       scan,
@@ -579,6 +776,48 @@ export async function runAutopilot(profile, opts = {}) {
     phase12Ops: actions.find((a) => a.id === 'phase12-advance')?.data?.paths?.html,
     phase13Ops: actions.find((a) => a.id === 'phase13-advance')?.data?.paths?.html,
     phase14Ops: actions.find((a) => a.id === 'phase14-advance')?.data?.paths?.html,
+    phase15Ops:
+      actions.find((a) => a.id === 'phase15-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase15-ops.html'),
+    phase16Ops:
+      actions.find((a) => a.id === 'phase16-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase16-ops.html'),
+    phase17Ops:
+      actions.find((a) => a.id === 'phase17-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase17-ops.html'),
+    phase18Ops:
+      actions.find((a) => a.id === 'phase18-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase18-ops.html'),
+    phase19Ops:
+      actions.find((a) => a.id === 'phase19-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase19-ops.html'),
+    phase20Ops:
+      actions.find((a) => a.id === 'phase20-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase20-ops.html'),
+    phase21Ops:
+      actions.find((a) => a.id === 'phase21-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase21-ops.html'),
+    phase22Ops:
+      actions.find((a) => a.id === 'phase22-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase22-ops.html'),
+    phase23Ops:
+      actions.find((a) => a.id === 'phase23-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase23-ops.html'),
+    phase24Ops:
+      actions.find((a) => a.id === 'phase24-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase24-ops.html'),
+    phase25Ops:
+      actions.find((a) => a.id === 'phase25-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase25-ops.html'),
+    presenceSentinel: resolve(outDir, 'presence-sentinel.json'),
+    sovereignCertificate: resolve(outDir, 'sovereign-certificate.html'),
+    liveThrone: resolve(outDir, 'live-throne.json'),
+    growthRadar: resolve(outDir, 'growth-radar.md'),
+    growthCloser: resolve(outDir, 'growth-closer.md'),
+    deployCourier: resolve(outDir, 'deploy-courier.json'),
+    signalForge: resolve(outDir, 'signal-forge.json'),
+    executiveBrief: resolve(outDir, 'executive-brief.md'),
+    humanDebt: resolve(outDir, 'human-debt.json'),
     unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,
   };
 

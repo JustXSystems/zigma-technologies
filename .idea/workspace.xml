@@ -8,19 +8,59 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases 14 together">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/meridian-autopilot.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/meridian-autopilot.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/meridian-live-verify.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/meridian-live-verify.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/deps-audit.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/gbp-pulse.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/growth-closer.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/growth-radar.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/guide-refresh.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/human-debt.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/ledger-sync.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/live-throne-probe.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase15-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase16-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase17-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase18-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase19-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase20-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase21-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase22-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase23-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase24-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase25-advance.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/presence-sentinel.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/meridian/src/lib/gh-ops.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/_probe-hasmap.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/_remote-diag-hasmap.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/_remote-excerpt-hasmap.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/_remote-growth-closer.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/_remote-ls-react.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/_remote-patch-hasmap.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/meridian-guide-refresh.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/meridian-prod-hasmap-ssh.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/package-release.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/cms-gaps.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/cms-gaps.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/content-seed.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/content-seed.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/image-optimize.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/image-optimize.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/keyword-map.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/keyword-map.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/meta-automation.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/meta-automation.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/meta-polish.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/meta-polish.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/orphan-remediate.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/orphan-remediate.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase12-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase12-advance.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase2-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase2-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/indexing-queue.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/indexing-queue.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/monthly-digest.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/monthly-digest.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase10-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase10-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase11-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase11-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase9-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase9-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/quarterly-digest.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/quarterly-digest.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/weekly-digest.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/weekly-digest.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/engine/score.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/engine/score.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/index.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/index.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/orchestrator.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/orchestrator.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

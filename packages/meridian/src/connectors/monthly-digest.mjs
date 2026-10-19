@@ -12,10 +12,21 @@ async function readJson(path) {
 /**
  * Phase 9.2 monthly report — fills what Meridian already knows; leaves GBP blanks.
  */
-export async function writeMonthlyDigest(profile, { scan, actions = [], outDir }) {
+export async function writeMonthlyDigest(profile, { scan, actions = [], outDir, gbpPulse: gbpPulseOpt } = {}) {
   const score = scan?.report?.scorecard || {};
   const signals = scan?.report?.signals || {};
   const cache = outDir ? await readJson(resolve(outDir, 'signal-cache.json')) : null;
+  const gbpPulseRaw =
+    gbpPulseOpt ||
+    (outDir ? await readJson(resolve(outDir, 'gbp-pulse.json')) : null) ||
+    null;
+  const gbpFilled = gbpPulseRaw
+    ? ['calls', 'clicks', 'directions', 'newReviews', 'rating'].filter((k) => gbpPulseRaw[k] != null).length
+    : 0;
+  const gbpPulse = gbpPulseRaw
+    ? { ...gbpPulseRaw, filled: gbpFilled, complete: gbpPulseRaw.complete === true || gbpFilled >= 2 }
+    : null;
+  const opts = { gbpPulse };
   const gsc = cache?.gsc || signals.gsc || {};
   const ga4 = cache?.ga4 || signals.ga4 || {};
   const psi = cache?.pagespeed || signals.pagespeed || {};
@@ -28,8 +39,22 @@ export async function writeMonthlyDigest(profile, { scan, actions = [], outDir }
   const images =
     actions.find((a) => a.id === 'image-weight') ||
     (outDir ? { data: await readJson(resolve(outDir, 'image-weight.json')) } : null);
+  const linkGraph = outDir ? await readJson(resolve(outDir, 'link-graph.json')) : null;
   const healthData = health?.data || health || {};
   const formOk = form?.ok === true || form?.status === 'ok';
+  const healthyUrls =
+    healthData.okCount ??
+    healthData.healthy ??
+    healthData.summary?.ok ??
+    healthData.checked ??
+    healthData.urls?.length ??
+    null;
+  const orphanCount =
+    healthData.linkGraph?.orphanCount ??
+    linkGraph?.orphanCount ??
+    linkGraph?.orphans?.length ??
+    linkGraph?.topOrphans?.length ??
+    null;
   const now = new Date();
   const monthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
 
@@ -61,13 +86,13 @@ export async function writeMonthlyDigest(profile, { scan, actions = [], outDir }
     {
       metric: 'Sitemap URLs healthy',
       where: 'sitemap-health.json',
-      value: healthData.okCount ?? healthData.summary?.ok ?? null,
+      value: healthyUrls,
       note: health?.message || healthData.message || '',
     },
     {
       metric: 'Orphan pages',
       where: 'link-graph.json',
-      value: healthData.linkGraph?.orphanCount ?? null,
+      value: orphanCount,
       note: '',
     },
     {
@@ -121,16 +146,36 @@ export async function writeMonthlyDigest(profile, { scan, actions = [], outDir }
     {
       metric: 'GBP calls / clicks / directions',
       where: 'Business Profile → Performance',
-      value: null,
-      note: 'Always manual (no public API)',
-      alwaysManual: true,
+      value: (() => {
+        const p = opts.gbpPulse || null;
+        if (!p) return null;
+        const parts = [p.calls, p.clicks, p.directions].filter((v) => v != null);
+        return parts.length ? parts.join(' / ') : null;
+      })(),
+      note: opts.gbpPulse?.complete
+        ? opts.gbpPulse.source === 'gsc-proxy'
+          ? `GSC brand-query proxy (${opts.gbpPulse.monthKey}) — override with Insights anytime`
+          : `from gbp-pulse.json (${opts.gbpPulse.monthKey} · ${opts.gbpPulse.source || 'manual'})`
+        : 'Fill gbp-pulse.json / MERIDIAN_GBP_* or enable GSC for auto-proxy',
+      alwaysManual: !opts.gbpPulse?.complete,
     },
     {
       metric: 'New Google reviews / rating',
       where: 'Business Profile → Reviews',
-      value: null,
-      note: 'Always manual (no public API)',
-      alwaysManual: true,
+      value: (() => {
+        const p = opts.gbpPulse || null;
+        if (!p) return null;
+        if (p.newReviews != null && p.rating != null) return `${p.newReviews} / ${p.rating}`;
+        if (p.newReviews != null) return String(p.newReviews);
+        if (p.rating != null) return String(p.rating);
+        return null;
+      })(),
+      note:
+        opts.gbpPulse?.newReviews != null || opts.gbpPulse?.rating != null
+          ? 'from gbp-pulse.json'
+          : 'Reviews still need Insights paste (no public API / no GSC proxy)',
+      // Reviews cannot be proxied from GSC — keep optional manual, don't block fillable count when clicks/directions filled
+      alwaysManual: opts.gbpPulse?.newReviews == null && opts.gbpPulse?.rating == null,
     },
   ];
 

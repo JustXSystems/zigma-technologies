@@ -15,18 +15,37 @@ const SEVERITY_PENALTY = {
 };
 
 /**
- * @param {{ findings: object[], connectors: object[] }} input
+ * @param {{ findings: object[], connectors: object[], evidence?: {
+ *   sameAsLive?: boolean,
+ *   citationsReady?: boolean,
+ *   outreachDrafts?: number,
+ *   authorityBonus?: number,
+ * } }} input
  */
-export function buildScorecard({ findings, connectors }) {
+export function buildScorecard({ findings, connectors, evidence = {} }) {
+  // Drop stale SCHEMA_SAMEAS when live HTML already has sameAs (Phase 13+/16 continuum)
+  const effectiveFindings = (findings || []).filter((f) => {
+    if (evidence.sameAsLive && (f.code === 'SCHEMA_SAMEAS' || f.code === 'PHASE2_SAMEAS_APPLY')) return false;
+    return true;
+  });
+
+  // Authority: soft baseline + evidence lifts (citations / outreach / sameAs / continuum)
+  let authority = 85;
+  if (evidence.sameAsLive) authority += 5;
+  if (evidence.citationsReady) authority += 5;
+  if ((evidence.outreachDrafts || 0) > 0) authority += 5;
+  if (typeof evidence.authorityBonus === 'number') authority += evidence.authorityBonus;
+  authority = Math.max(70, Math.min(100, authority));
+
   const byPillar = {
     technical: 100,
     onpage: 100,
     local: 100,
-    authority: 85, // no backlink connector yet — soft baseline
+    authority,
     signals: 100,
   };
 
-  for (const f of findings) {
+  for (const f of effectiveFindings) {
     const pillar = f.pillar && byPillar[f.pillar] !== undefined ? f.pillar : 'technical';
     byPillar[pillar] = Math.max(0, byPillar[pillar] - (SEVERITY_PENALTY[f.severity] || 0));
   }

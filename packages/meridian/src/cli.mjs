@@ -49,6 +49,18 @@ import { advancePhase11 } from './connectors/phase11-advance.mjs';
 import { advancePhase12 } from './connectors/phase12-advance.mjs';
 import { advancePhase13 } from './connectors/phase13-advance.mjs';
 import { advancePhase14 } from './connectors/phase14-advance.mjs';
+import { advancePhase15 } from './connectors/phase15-advance.mjs';
+import { advancePhase16 } from './connectors/phase16-advance.mjs';
+import { advancePhase17 } from './connectors/phase17-advance.mjs';
+import { advancePhase18 } from './connectors/phase18-advance.mjs';
+import { advancePhase19 } from './connectors/phase19-advance.mjs';
+import { advancePhase20 } from './connectors/phase20-advance.mjs';
+import { advancePhase21 } from './connectors/phase21-advance.mjs';
+import { advancePhase22 } from './connectors/phase22-advance.mjs';
+import { advancePhase23 } from './connectors/phase23-advance.mjs';
+import { advancePhase24 } from './connectors/phase24-advance.mjs';
+import { advancePhase25 } from './connectors/phase25-advance.mjs';
+import { syncSeoGuideCanon } from './connectors/canon-sync.mjs';
 import { readFile } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -487,6 +499,209 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'phase15-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase15(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        dispatch: argv.includes('--dispatch'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipPhase14: argv.includes('--skip-phase14'),
+        skipPhase9: argv.includes('--skip-phase9'),
+        skipAct: argv.includes('--skip-act'),
+        target: argValue(argv, '--target') || 'prod',
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase16-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase16(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipScan: argv.includes('--skip-scan'),
+        skipMeta: argv.includes('--skip-meta'),
+        skipPhase15: argv.includes('--skip-phase15'),
+        skipPhase14: !argv.includes('--with-phase14'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase17-advance' || action === 'guard') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase17(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipScan: argv.includes('--skip-scan'),
+        skipMeta: argv.includes('--skip-meta'),
+        skipPhase16: argv.includes('--skip-phase16'),
+        skipPhase15: !argv.includes('--with-phase15'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase18-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase18(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'canon') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await syncSeoGuideCanon(profile, { outDir: resolve(outDir), root: process.cwd() });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase19-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase19(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase20-advance' || action === 'desk') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase20(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipCanon: argv.includes('--skip-canon'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'ack-gbp') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase25(profile, {
+        outDir: resolve(outDir),
+        ack: true,
+        skipObserve: true,
+        apply: !argv.includes('--no-apply'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase21-advance' || action === 'presence') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase21(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipCanon: argv.includes('--skip-canon'),
+        skipDesk: argv.includes('--skip-desk'),
+        ack: argv.includes('--ack-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase22-advance' || action === 'throne') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase22(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase23-advance' || action === 'horizon') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase23(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase24-advance' || action === 'courier') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase24(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipBuild: argv.includes('--skip-build'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        forceGhDeploy: argv.includes('--force-gh-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase25-advance' || action === 'observe' || action === 'forge') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase25(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'quarterly-digest') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await writeQuarterlyDigest(profile, { outDir: resolve(outDir) });
@@ -618,6 +833,19 @@ Usage:
   meridian act phase12-advance [--no-apply] [--trigger-deploy] [--skip-scan] [--skip-verify] --profile ./profiles/site.json
   meridian act phase13-advance [--no-apply] [--no-restart] [--skip-act] [--skip-verify] --profile ./profiles/site.json
   meridian act phase14-advance [--no-apply] [--skip-heal] --profile ./profiles/site.json
+  meridian act phase15-advance [--sync-gh] [--dispatch] [--skip-heal] [--skip-phase14] --profile ./profiles/site.json
+  meridian act phase16-advance [--sync-gh] [--skip-scan] [--skip-meta] [--skip-phase15] --profile ./profiles/site.json
+  meridian act phase17-advance|guard [--skip-phase16] [--skip-scan] --profile ./profiles/site.json
+  meridian act phase18-advance [--skip-heal] [--no-gsc-proxy] --profile ./profiles/site.json
+  meridian act phase19-advance [--skip-observe] [--skip-heal] --profile ./profiles/site.json
+  meridian act phase20-advance|desk [--skip-observe] [--skip-canon] [--skip-heal] --profile ./profiles/site.json
+  meridian act phase21-advance|presence [--skip-desk] [--ack-gbp] [--skip-heal] --profile ./profiles/site.json
+  meridian act phase22-advance|throne [--skip-presence] [--ack-gbp] [--no-park-gbp] --profile ./profiles/site.json
+  meridian act phase23-advance|horizon [--trigger-deploy] [--skip-deploy] [--skip-throne] --profile ./profiles/site.json
+  meridian act phase24-advance|courier [--skip-hotpatch] [--trigger-deploy] [--force-gh-deploy] --profile ./profiles/site.json
+  meridian act phase25-advance|observe|forge [--skip-closer] [--skip-courier] --profile ./profiles/site.json
+  meridian act ack-gbp --profile ./profiles/site.json
+  meridian act canon --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian profiles
@@ -625,7 +853,8 @@ Usage:
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 0–14 packs + perpetual signals + sameAs heal + digests.
+Autopilot = full remediation + Phase 0–25 packs + growth closer + digests.
+Forever ops: npm run meridian:observe  (forge · courier · growth radar · re-seal: meridian:guard)
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

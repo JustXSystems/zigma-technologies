@@ -9,11 +9,15 @@ import { inspectUrl } from './gsc-act.mjs';
 export async function writeIndexingQueue(profile, opts = {}) {
   const origin = profile.origin.replace(/\/$/, '');
   const outDir = opts.outDir || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
-  const paths = [
-    ...(profile.samplePaths || ['/', '/projects', '/products', '/services', '/contact']),
-    profile.sampleDetailPath,
-    '/locations/bengaluru',
-  ].filter(Boolean);
+  const paths = (
+    opts.paths?.length
+      ? opts.paths
+      : [
+          ...(profile.samplePaths || ['/', '/projects', '/products', '/services', '/contact']),
+          profile.sampleDetailPath,
+          '/locations/bengaluru',
+        ]
+  ).filter(Boolean);
   const unique = [...new Set(paths)].slice(0, opts.limit || profile.autopilot?.indexingLimit || 12);
   const queue = unique.map((path) => ({
     path,
