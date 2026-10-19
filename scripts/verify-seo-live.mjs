@@ -24,6 +24,7 @@ function argValue(flag) {
 const envName = argValue('--env');
 const baseOverride = argValue('--base');
 const sampleProject = argValue('--project') || '/projects/amc-engineering-college-200kw-bangalore';
+const AS_JSON = args.includes('--json');
 
 const PRESETS = {
   prod: {
@@ -63,15 +64,15 @@ const passes = [];
 
 function pass(msg) {
   passes.push(msg);
-  console.log(`  ✓ ${msg}`);
+  if (!AS_JSON) console.log(`  ✓ ${msg}`);
 }
 function fail(msg) {
   failures.push(msg);
-  console.error(`  ✗ ${msg}`);
+  if (!AS_JSON) console.error(`  ✗ ${msg}`);
 }
 function warn(msg) {
   warnings.push(msg);
-  console.warn(`  ⚠ ${msg}`);
+  if (!AS_JSON) console.warn(`  ⚠ ${msg}`);
 }
 
 function decodeEntities(s) {
@@ -342,7 +343,7 @@ async function checkHomeExtras() {
 }
 
 async function main() {
-  console.log(`SEO live verify → ${base} (indexable=${indexable})`);
+  if (!AS_JSON) console.log(`SEO live verify → ${base} (indexable=${indexable})`);
   const indexPaths = ['/', '/projects', '/products', '/services', '/locations', '/locations/bengaluru', '/contact'];
   for (const p of indexPaths) {
     await checkPage(p, { expectNoindex: !indexable });
@@ -356,6 +357,22 @@ async function main() {
   await checkRobotsAndSitemap();
   await checkRedirects();
   await checkHomeExtras();
+
+  if (AS_JSON) {
+    const payload = {
+      ok: failures.length === 0,
+      base,
+      indexable,
+      passed: passes.length,
+      warnings: warnings.length,
+      failed: failures.length,
+      passes,
+      warningMessages: warnings,
+      failures,
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    process.exit(failures.length ? 1 : 0);
+  }
 
   console.log(`\n—— summary ——`);
   console.log(`passed:   ${passes.length}`);

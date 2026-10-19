@@ -98,6 +98,12 @@ export async function POST(request: Request) {
       apply?: boolean;
       dryRun?: boolean;
       force?: boolean;
+      skipForm?: boolean;
+      syncGh?: boolean;
+      skipVerify?: boolean;
+      skipPhase10?: boolean;
+      triggerDeploy?: boolean;
+      skipScan?: boolean;
     };
     const env = parseEnv(body.env);
     const action = body.action || 'scan';
@@ -176,7 +182,9 @@ export async function POST(request: Request) {
       action === 'phase7-advance' ||
       action === 'phase8-advance' ||
       action === 'phase9-advance' ||
-      action === 'phase10-advance'
+      action === 'phase10-advance' ||
+      action === 'phase11-advance' ||
+      action === 'phase12-advance'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -229,6 +237,20 @@ export async function POST(request: Request) {
           skipAct: !!body.skipAct,
           syncGh: !!body.syncGh,
           force: !!body.force,
+        };
+      } else if (action === 'phase11-advance') {
+        act = {
+          action: 'phase11-advance',
+          skipVerify: !!body.skipVerify,
+          skipPhase10: !!body.skipPhase10,
+        };
+      } else if (action === 'phase12-advance') {
+        act = {
+          action: 'phase12-advance',
+          apply: body.apply !== false,
+          triggerDeploy: !!body.triggerDeploy,
+          skipScan: !!body.skipScan,
+          skipVerify: !!body.skipVerify,
         };
       } else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);

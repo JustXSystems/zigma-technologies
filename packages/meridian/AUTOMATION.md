@@ -31,10 +31,12 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 25. Weekly + monthly + quarterly digests + webhook  
 26. **Ops cockpit** / Phase 9 command center  
 27. **Phase 10 continuous unlock** (live connector probes, sameAs/meta recovery, Windows/VPS cron pack; GSC/Bing acts already run above)  
+28. **Phase 11 live convergence** (seo:verify, deploy gate, cadence-collapsed checklist, refresh Phase 9, GBP draft)  
+29. **Phase 12 score lift** (fill CMS meta, auto-publish calendar week, deploy one-command, rescan)  
 
 ## Highest-leverage human step
 
-OAuth secrets in `unlock-secrets.json` / `.env` unlock GSC + GA4. Remaining: optional webhook, **prod deploy** for live sameAs, GBP verify.
+**One Production deploy** (`gh auth login` once → `npm run meridian:deploy:prod` or command on `phase12-ops.html`). Then GBP verify. Day-to-day: **`phase12-ops.html`** / **`phase11-ops.html`**.
 
 ## Multi-site (M11)
 
@@ -59,6 +61,9 @@ npm run meridian:act:phase8          # backlink mailto ops
 npm run meridian:act:phase9          # command center + digests + routine ICS
 npm run meridian:act:phase10         # continuous unlock + GSC/Bing + score recovery
 npm run meridian:act:phase10:gh      # same + push secrets to GitHub Actions (gh auth)
+npm run meridian:act:phase11         # live convergence + refresh Phase 9 + collapsed checklist
+npm run meridian:act:phase12         # score lift + calendar auto-publish + deploy pack
+npm run meridian:deploy:prod         # gh workflow Deploy Production (needs gh auth)
 npm run meridian:act:polish
 npm run meridian:act:index-queue
 npm run meridian:act:og
@@ -74,4 +79,6 @@ Ops HTML dashboards (open after each act):
 - `phase8-ops.html` — outreach mailto  
 - `phase9-ops.html` — master command center (+ `phase9-routine.ics`)  
 - `phase10-ops.html` — continuous unlock (+ `phase10-schtasks.xml` / `meridian-cron.ps1`)  
+- `phase11-ops.html` — live convergence (+ GBP draft, deploy gate)  
+- `phase12-ops.html` — **primary** score lift + one-command deploy  
 

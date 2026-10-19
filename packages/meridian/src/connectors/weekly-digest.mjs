@@ -1,9 +1,19 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { loadOpsCadence, saveOpsCadence, isDue, markShown } from '../lib/ops-cadence.mjs';
+
+async function readJson(path) {
+  try {
+    return JSON.parse(await readFile(path, 'utf8'));
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Phase 9 weekly ops digest — automates what can be measured; lists remaining human tasks.
  * Writes weekly-digest.md + weekly-digest.json under outDir.
+ * Phase 11: cadence + evidence-based collapse so the list stays short.
  */
 export async function writeWeeklyDigest(profile, { scan, actions = [], outDir }) {
   const score = scan?.report?.scorecard || {};
@@ -20,19 +30,73 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
   );
   const bingAct = actions.find((a) => a.id === 'bing-submit-sitemap');
   const formOk = form?.ok === true;
+  const unlock = actions.find((a) => a.id === 'unlock-readiness')?.data;
+  const unlockPct = unlock?.percent;
+  const cmsSocial = unlock?.cmsSocialCount ?? 0;
+  const liveSameAs = unlock?.sameAsCount ?? 0;
 
-  const humanChecklist = [
-    { id: 'gsc-email', task: 'Check Search Console emails for issues', who: 'You', auto: false },
-    { id: 'gbp-reviews', task: 'Reply to new Google Business Profile reviews', who: 'You', auto: false },
-    { id: 'gbp-update', task: 'Post one GBP update', who: 'You', auto: false },
+  const rich =
+    actions.find((a) => a.id === 'rich-results-pack') ||
+    actions.find((a) => a.id === 'phase2-advance');
+  const richFail = Number(rich?.data?.fail ?? rich?.data?.richFail ?? 0);
+  const phase3 = actions.find((a) => a.id === 'phase3-advance');
+  const topNeeds = Number(
+    actions.find((a) => a.id === 'top20-meta-pack')?.data?.needsPolish ??
+      phase3?.data?.topMeta?.needsPolish ??
+      0
+  );
+  const backlinkTodo = Number(
+    actions.find((a) => a.id === 'phase8-advance')?.data?.todo ||
+      actions.find((a) => a.id === 'backlink-outreach')?.data?.count ||
+      0
+  );
+  const progress = (await readJson(resolve(outDir, 'backlink-progress.json'))) || { sent: [] };
+  const sentCount = Array.isArray(progress.sent) ? progress.sent.length : 0;
+  const cityBlocked = Number(actions.find((a) => a.id === 'city-pages-readiness')?.data?.blocked || 0);
+  const reviewLink = !!(process.env.MERIDIAN_GBP_REVIEW_LINK || '').trim();
+  const hasSchemaSameAs = findings.some((f) => f.code === 'SCHEMA_SAMEAS');
+  const gscLive =
+    gscAct.some((a) => a.ok && a.id === 'submit-sitemap') ||
+    actions.find((a) => a.id === 'phase10-advance')?.data?.probes?.gsc?.ok === true;
+
+  let cadence = await loadOpsCadence(outDir);
+
+  const candidates = [
+    {
+      id: 'deploy-sameas',
+      task: 'Deploy Production (phase12-ops.html one-command / npm run meridian:deploy:prod) so live JSON-LD sameAs ships',
+      who: 'Developer',
+      auto: false,
+      needed: hasSchemaSameAs && cmsSocial > 0 && liveSameAs === 0,
+    },
+    {
+      id: 'social-sameas',
+      task: 'Add social profile URLs in Site Settings (clears SCHEMA_SAMEAS)',
+      who: 'You',
+      auto: false,
+      needed: hasSchemaSameAs && cmsSocial === 0,
+    },
+    {
+      id: 'gsc-email',
+      task: 'Check Search Console emails for issues',
+      who: 'You',
+      auto: false,
+      // GSC API + autopilot cover routine monitoring; only nudge on hard findings
+      needed: hard.length > 0 || (!gscLive && isDue(cadence, 'gsc-email', 14)),
+    },
+    {
+      id: 'gbp-pulse',
+      task: 'GBP 5‑min pulse — reply new reviews + post one update (draft in phase11-gbp-draft.txt)',
+      who: 'You',
+      auto: false,
+      needed: isDue(cadence, 'gbp-pulse', 7),
+    },
     {
       id: 'enquiries',
-      task: formOk
-        ? 'Skim Admin → Enquiries volume (form endpoints already probed OK)'
-        : 'Check Admin → Enquiries — form health probe failed',
+      task: 'Check Admin → Enquiries — form health probe failed',
       who: 'You',
-      auto: formOk,
-      needed: true,
+      auto: false,
+      needed: form?.ok === false,
     },
     {
       id: 'orphans',
@@ -47,13 +111,6 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
       who: 'Developer',
       auto: false,
       needed: (images?.data?.heavyCount || 0) >= 1,
-    },
-    {
-      id: 'social-sameas',
-      task: 'Add social profile URLs in Site Settings (clears SCHEMA_SAMEAS)',
-      who: 'You',
-      auto: false,
-      needed: findings.some((f) => f.code === 'SCHEMA_SAMEAS'),
     },
     {
       id: 'oauth',
@@ -71,69 +128,112 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     },
     {
       id: 'citations',
-      task: 'Claim/create next directory listing from citations-playbook.md (Phase 5.5)',
+      task: 'Claim next directory from citations-playbook.csv / phase5-ops.html',
       who: 'You',
       auto: false,
-      needed: !!actions.find((a) => a.id === 'citations-playbook')?.ok,
+      needed:
+        !!(
+          actions.find((a) => a.id === 'citations-playbook')?.ok ||
+          actions.find((a) => a.id === 'phase5-advance')?.ok
+        ) && isDue(cadence, 'citations', 14),
     },
     {
       id: 'city-content',
-      task: 'Write unique content for a noindex city×service page (city-pages-readiness.md)',
+      task: 'Write unique proof for one noindex city×service page (phase6-ops.html)',
       who: 'You',
       auto: false,
-      needed: (actions.find((a) => a.id === 'city-pages-readiness')?.data?.blocked || 0) > 0,
+      needed: cityBlocked > 0 && isDue(cadence, 'city-content', 14),
     },
     {
       id: 'backlink-send',
       task: 'Send 1–2 outreach emails from phase8-ops.html (Open email)',
       who: 'You',
       auto: false,
-      needed:
-        (actions.find((a) => a.id === 'phase8-advance')?.data?.todo ||
-          actions.find((a) => a.id === 'backlink-outreach')?.data?.count ||
-          0) > 0,
+      needed: backlinkTodo > 0 && sentCount < 2 && isDue(cadence, 'backlink-send', 7),
     },
     {
       id: 'rich-results',
-      task: 'Click through rich-results-pack.md (Phase 2.2 Rich Results Test)',
+      task: 'Open failing Rich Results Test links (rich-results-pack.md)',
       who: 'You',
       auto: false,
-      needed: !!actions.find((a) => a.id === 'rich-results-pack'),
+      needed: richFail > 0 && isDue(cadence, 'rich-results', 30),
     },
     {
       id: 'top-meta',
-      task: `Polish ${actions.find((a) => a.id === 'top20-meta-pack')?.data?.needsPolish ?? '?'} priority titles/descriptions (top20-meta-pack.md)`,
+      task: `Polish ${topNeeds} priority titles/descriptions (top20-meta-pack.md)`,
       who: 'You',
       auto: false,
-      needed: (actions.find((a) => a.id === 'top20-meta-pack')?.data?.needsPolish || 0) > 0,
+      needed: topNeeds > 0,
     },
     {
       id: 'reviews-send',
-      task: 'Send review requests from review-kit.md for completed jobs (Phase 5.6)',
+      task: reviewLink
+        ? 'Send review requests from review-kit.md for completed jobs'
+        : 'Set MERIDIAN_GBP_REVIEW_LINK after GBP verify, then send review asks',
       who: 'You',
       auto: false,
-      needed: !!actions.find((a) => a.id === 'review-kit')?.ok,
+      needed:
+        !!actions.find((a) => a.id === 'review-kit' || a.id === 'phase5-advance')?.ok &&
+        isDue(cadence, 'reviews-send', 14),
     },
     {
       id: 'calendar-publish',
-      task: 'Publish this week’s item from phase7-ops.html / content-calendar.ics',
+      task: 'Publish this week’s slot from phase7-ops.html / content-calendar.ics',
       who: 'You',
       auto: false,
-      needed: !!(
-        actions.find((a) => a.id === 'phase7-advance')?.ok ||
-        actions.find((a) => a.id === 'content-calendar')?.ok
-      ),
+      needed:
+        !cadence?.completed?.['calendar-publish'] &&
+        !!(
+          actions.find((a) => a.id === 'phase7-advance')?.ok ||
+          actions.find((a) => a.id === 'content-calendar')?.ok ||
+          actions.find((a) => a.id === 'phase12-advance')?.ok
+        ) &&
+        isDue(cadence, 'calendar-publish', 7),
     },
     {
-      id: 'phase9-cockpit',
-      task: 'Open phase9-ops.html command center (15 min routine)',
+      id: 'phase11-cockpit',
+      task: 'Open phase11-ops.html (live convergence) · 10 min max',
       who: 'You',
       auto: false,
-      needed: true,
+      needed: true, // trimmed below if nothing else remains
     },
-  ].filter((h) => h.needed !== false);
+  ];
 
-  const unlockPct = actions.find((a) => a.id === 'unlock-readiness')?.data?.percent;
+  let humanChecklist = candidates.filter((h) => h.needed !== false);
+  const actionable = humanChecklist.filter((h) => h.id !== 'phase11-cockpit');
+  if (actionable.length === 0) {
+    humanChecklist = [
+      {
+        id: 'phase11-cockpit',
+        task: 'Glance phase12-ops.html — all measured gates green; optional GBP pulse only',
+        who: 'You',
+        auto: true,
+        needed: true,
+      },
+    ];
+  } else if (actionable.length === 1 && actionable[0].id === 'deploy-sameas') {
+    // Single remaining gate — no need for a second "open dashboard" nag
+    humanChecklist = actionable;
+  } else if (actionable.length <= 3) {
+    humanChecklist = [
+      ...actionable,
+      {
+        id: 'phase11-cockpit',
+        task: 'Open phase12-ops.html (score lift + deploy command) · 5 min max',
+        who: 'You',
+        auto: false,
+        needed: true,
+      },
+    ];
+  } else {
+    humanChecklist = actionable.slice(0, 8);
+  }
+
+  cadence = markShown(
+    cadence,
+    humanChecklist.map((h) => h.id)
+  );
+  await saveOpsCadence(outDir, cadence);
 
   const automated = [
     { id: 'scan', ok: !!scan?.ok, note: `Score ${score.overall ?? '—'} (${score.grade ?? '—'}) · ${trend?.message || 'no trend yet'}` },
@@ -162,8 +262,12 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     },
     unlockPercent: unlockPct ?? null,
     phase9: {
-      weeklyMinutesTarget: 15,
-      note: 'Automated rows are done by Meridian autopilot/cron. Complete humanChecklist each week.',
+      weeklyMinutesTarget: 10,
+      note: 'Cadence-collapsed checklist (Phase 11). Autopilot owns measured work.',
+    },
+    phase11: {
+      collapsedFrom: candidates.filter((c) => c.needed !== false).length,
+      cadenceFile: 'ops-cadence.json',
     },
   };
 
@@ -175,12 +279,12 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     `## Score`,
     '',
     `**${score.overall ?? '—'}** (${score.grade ?? '—'}) — ${trend?.message || 'first run'}`,
-    unlockPct != null ? `\nAutomation unlock: **${unlockPct}%** (see unlock-readiness.md / ops-cockpit.html)\n` : '',
+    unlockPct != null ? `\nAutomation unlock: **${unlockPct}%** (see unlock-readiness.md / phase11-ops.html)\n` : '',
     `## Automated this week`,
     '',
     ...automated.map((a) => `- [${a.ok ? 'x' : ' '}] **${a.id}**: ${a.note}`),
     '',
-    `## Still needs a human (Phase 9.1)`,
+    `## Still needs a human (cadence-collapsed)`,
     '',
     ...humanChecklist.map((h) => `- [ ] ${h.task} _(${h.who})_`),
     '',
@@ -191,7 +295,7 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
           .join('\n')}`
       : '## Hard findings\n\nNone.',
     '',
-    `Full report: \`report-latest.html\` · Autopilot: \`autopilot-latest.json\``,
+    `Full report: \`report-latest.html\` · Command: \`phase11-ops.html\``,
     '',
   ].join('\n');
 
@@ -201,7 +305,6 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
   await writeFile(jsonPath, JSON.stringify(digest, null, 2), 'utf8');
   await writeFile(mdPath, md, 'utf8');
 
-  // Append to history (last 12 weeks)
   const histPath = resolve(outDir, 'weekly-digest-history.jsonl');
   try {
     const prev = await readFile(histPath, 'utf8').catch(() => '');
@@ -210,6 +313,7 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
       score: score.overall,
       grade: score.grade,
       hard: hard.length,
+      human: humanChecklist.length,
       healthIssues: health?.data?.issueCount ?? null,
     });
     const lines = [...prev.trim().split('\n').filter(Boolean), line].slice(-12);

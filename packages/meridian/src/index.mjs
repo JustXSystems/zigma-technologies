@@ -47,5 +47,7 @@ export { advancePhase7 } from './connectors/phase7-advance.mjs';
 export { advancePhase8 } from './connectors/phase8-advance.mjs';
 export { advancePhase9 } from './connectors/phase9-advance.mjs';
 export { advancePhase10 } from './connectors/phase10-advance.mjs';
+export { advancePhase11 } from './connectors/phase11-advance.mjs';
+export { advancePhase12 } from './connectors/phase12-advance.mjs';
 export { renderHtmlReport } from './report/html.mjs';
 export { renderMarkdownReport } from './report/markdown.mjs';

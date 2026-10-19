@@ -46,6 +46,8 @@ import { advancePhase7 } from './connectors/phase7-advance.mjs';
 import { advancePhase8 } from './connectors/phase8-advance.mjs';
 import { advancePhase9 } from './connectors/phase9-advance.mjs';
 import { advancePhase10 } from './connectors/phase10-advance.mjs';
+import { advancePhase11 } from './connectors/phase11-advance.mjs';
+import { advancePhase12 } from './connectors/phase12-advance.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
 function mergeFindings(scan, result) {
@@ -60,7 +62,7 @@ function mergeFindings(scan, result) {
 
 /**
  * Maximum automation loop (M5–M11):
- * scan → remediate → Phase 0–10 packs → meta polish → unlock → digests → continuous ops → webhook
+ * scan → remediate → Phase 0–12 packs → meta polish → unlock → score lift → live convergence → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
   hydrateMeridianSecrets();
@@ -445,29 +447,40 @@ export async function runAutopilot(profile, opts = {}) {
     });
   }
 
-  // --- Phase 10 continuous unlock (connectors + GSC/Bing + score recovery) ---
-  // Runs before Phase 9 digests so unlock % / acts appear in the weekly checklist.
-  if (profile.autopilot?.skipPhase10Advance !== true) {
-    const p10 = await advancePhase10(profile, {
-      outDir,
-      // Phase 2/3 + GSC/Bing already ran earlier in this autopilot pass
-      apply: false,
-      skipAct: true,
-      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1',
-    });
-    actions.push({ id: 'phase10-advance', ...p10 });
-    mergeFindings(scan, p10);
-  }
-
-  // --- Phase 9 command center (digests + cockpit + routine ICS) ---
+  // --- Phase 12 score lift (meta + calendar) then Phase 11 convergence ---
   let digest = { data: { paths: {} } };
   let monthly = { data: { paths: {} } };
-  if (profile.autopilot?.skipPhase9Advance !== true) {
+  if (profile.autopilot?.skipPhase12Advance !== true) {
+    const p12 = await advancePhase12(profile, {
+      outDir,
+      scan,
+      apply: true,
+      // Avoid double full-site scan inside autopilot (already scanned at start)
+      skipScan: true,
+      skipPhase11: true,
+      skipVerify: true,
+    });
+    actions.push({ id: 'phase12-advance', ...p12 });
+    mergeFindings(scan, p12);
+  }
+  if (profile.autopilot?.skipPhase11Advance !== true) {
+    const p11 = await advancePhase11(profile, {
+      outDir,
+      scan,
+      actions,
+      skipForm: true,
+      skipPhase10: profile.autopilot?.skipPhase10Advance === true,
+    });
+    actions.push({ id: 'phase11-advance', ...p11 });
+    mergeFindings(scan, p11);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p11.data?.phase9?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+  } else if (profile.autopilot?.skipPhase9Advance !== true) {
     const p9 = await advancePhase9(profile, {
       outDir,
       scan,
       actions,
-      skipForm: true, // already probed earlier in autopilot
+      skipForm: true,
     });
     actions.push({ id: 'phase9-advance', ...p9 });
     mergeFindings(scan, p9);
@@ -532,6 +545,8 @@ export async function runAutopilot(profile, opts = {}) {
       actions.find((a) => a.id === 'ops-cockpit')?.data?.paths?.html,
     phase9Ops: actions.find((a) => a.id === 'phase9-advance')?.data?.paths?.html,
     phase10Ops: actions.find((a) => a.id === 'phase10-advance')?.data?.paths?.html,
+    phase11Ops: actions.find((a) => a.id === 'phase11-advance')?.data?.paths?.html,
+    phase12Ops: actions.find((a) => a.id === 'phase12-advance')?.data?.paths?.html,
     unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,
   };
 

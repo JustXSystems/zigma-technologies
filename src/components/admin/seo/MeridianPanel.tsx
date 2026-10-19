@@ -644,6 +644,20 @@ export default function MeridianPanel() {
             >
               Phase 10
             </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase11-advance' }, 'Phase 11 live convergence')}
+            >
+              Phase 11
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase12-advance' }, 'Phase 12 score lift')}
+            >
+              Phase 12
+            </button>
             <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}>
               Rich Results
             </button>

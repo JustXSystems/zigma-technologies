@@ -62,6 +62,8 @@ export async function writeOpsCockpit(profile, opts = {}) {
     { name: 'Phase 8 ops', file: 'phase8-ops.html' },
     { name: 'Phase 9 command center', file: 'phase9-ops.html' },
     { name: 'Phase 10 continuous', file: 'phase10-ops.html' },
+    { name: 'Phase 11 convergence', file: 'phase11-ops.html' },
+    { name: 'Phase 12 score lift', file: 'phase12-ops.html' },
     { name: 'PreProd removals', file: 'preprod-removals.md' },
     { name: 'City pages readiness', file: 'city-pages-readiness.md' },
     { name: 'Backlink outreach', file: 'backlink-outreach.md' },

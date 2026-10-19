@@ -118,6 +118,8 @@ const PHASE_PACKS = [
   { id: '8', name: 'Phase 8 Authority', file: 'phase8-ops.html', kind: 'html' },
   { id: '9', name: 'Phase 9 Routine', file: 'phase9-ops.html', kind: 'html' },
   { id: '10', name: 'Phase 10 Continuous', file: 'phase10-ops.html', kind: 'html' },
+  { id: '11', name: 'Phase 11 Convergence', file: 'phase11-ops.html', kind: 'html' },
+  { id: '12', name: 'Phase 12 Score Lift', file: 'phase12-ops.html', kind: 'html' },
 ];
 
 /**
