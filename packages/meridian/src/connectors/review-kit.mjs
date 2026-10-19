@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 import { auditNap } from './nap-audit.mjs';
 
 /**
- * Phase 5.6 — review request + reply templates (GBP review link stays a human placeholder).
+ * Phase 5.6 — review request + reply templates.
+ * Review URL auto from Place ID → live hasMap → Maps search (no paste ritual).
  */
 export async function writeReviewKit(profile, opts = {}) {
   const outDir = opts.outDir || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
@@ -19,7 +20,27 @@ export async function writeReviewKit(profile, opts = {}) {
 
   const phone = nap.telephone || '[phone]';
   const brand = nap.name || profile.brand?.name || 'Zigma Technologies';
-  const reviewLink = opts.reviewLink || process.env.MERIDIAN_GBP_REVIEW_LINK || '[your Google review link from GBP → Ask for reviews]';
+  let reviewLink = opts.reviewLink || process.env.MERIDIAN_GBP_REVIEW_LINK || '';
+  if (!reviewLink.trim()) {
+    // Auto from Place ID → official write-a-review URL (no human paste)
+    const placeId = (process.env.MERIDIAN_GBP_PLACE_ID || '').trim();
+    if (placeId) {
+      reviewLink = `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`;
+    }
+  }
+  if (!reviewLink.trim()) {
+    try {
+      const live = JSON.parse(await readFile(resolve(outDir, 'live-throne.json'), 'utf8'));
+      if (live?.hasMapValue) reviewLink = String(live.hasMapValue);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (!reviewLink.trim() && nap.hasMap) reviewLink = String(nap.hasMap);
+  if (!reviewLink.trim()) {
+    const q = encodeURIComponent(`${brand}, Bengaluru`);
+    reviewLink = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  }
 
   const templates = {
     whatsapp: `Hello [Name], thank you for choosing ${brand} for [project/service]. If you're happy with our work, would you share a short Google review? It takes one minute and helps other companies find us: ${reviewLink} Thank you! – [Your name], ${brand}`,
@@ -47,7 +68,12 @@ ${brand} | ${phone}`,
     brand,
     phone,
     reviewLink,
-    reviewLinkSet: !reviewLink.includes('[your Google'),
+    reviewLinkSet: true,
+    reviewLinkSource: process.env.MERIDIAN_GBP_REVIEW_LINK
+      ? 'env'
+      : process.env.MERIDIAN_GBP_PLACE_ID
+        ? 'place-id'
+        : 'maps-proxy',
     rules: [
       'Ask all customers (no review gating)',
       'Never offer money/gifts for reviews',
@@ -64,9 +90,9 @@ ${brand} | ${phone}`,
     `Generated: ${payload.generatedAt}`,
     '',
     `**Review link:** ${reviewLink}`,
-    reviewLink.includes('[your Google')
-      ? '\n> Set `MERIDIAN_GBP_REVIEW_LINK` on the server after GBP → Ask for reviews, or paste the link into this file.\n'
-      : '',
+    '',
+    `Source: **${payload.reviewLinkSource}** (auto — no paste ritual). Optional override: \`MERIDIAN_GBP_REVIEW_LINK\` or \`MERIDIAN_GBP_PLACE_ID\`.`,
+    '',
     '## Rules',
     '',
     ...payload.rules.map((r) => `- ${r}`),

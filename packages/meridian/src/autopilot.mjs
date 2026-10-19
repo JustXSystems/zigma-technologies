@@ -61,6 +61,12 @@ import { advancePhase22 } from './connectors/phase22-advance.mjs';
 import { advancePhase23 } from './connectors/phase23-advance.mjs';
 import { advancePhase24 } from './connectors/phase24-advance.mjs';
 import { advancePhase25 } from './connectors/phase25-advance.mjs';
+import { advancePhase26 } from './connectors/phase26-advance.mjs';
+import { advancePhase27 } from './connectors/phase27-advance.mjs';
+import { advancePhase28 } from './connectors/phase28-advance.mjs';
+import { advancePhase29 } from './connectors/phase29-advance.mjs';
+import { advancePhase30 } from './connectors/phase30-advance.mjs';
+import { advancePhase31 } from './connectors/phase31-advance.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
 function mergeFindings(scan, result) {
@@ -477,7 +483,103 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, p12);
   }
   let digestsDone = false;
-  if (profile.autopilot?.skipPhase25Advance !== true) {
+  if (profile.autopilot?.skipPhase31Advance !== true) {
+    const p31 = await advancePhase31(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase31-advance', ...p31 });
+    mergeFindings(scan, p31);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p31.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase30Advance !== true) {
+    const p30 = await advancePhase30(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase30-advance', ...p30 });
+    mergeFindings(scan, p30);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p30.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase29Advance !== true) {
+    const p29 = await advancePhase29(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase29-advance', ...p29 });
+    mergeFindings(scan, p29);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p29.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase28Advance !== true) {
+    const p28 = await advancePhase28(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase28-advance', ...p28 });
+    mergeFindings(scan, p28);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p28.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase27Advance !== true) {
+    const p27 = await advancePhase27(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase27-advance', ...p27 });
+    mergeFindings(scan, p27);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p27.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase26Advance !== true) {
+    const p26 = await advancePhase26(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase26-advance', ...p26 });
+    mergeFindings(scan, p26);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p26.data?.steps?.find?.((s) => s.id === 'phase9')?.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase25Advance !== true) {
     const p25 = await advancePhase25(profile, {
       outDir,
       scan,
@@ -809,13 +911,45 @@ export async function runAutopilot(profile, opts = {}) {
     phase25Ops:
       actions.find((a) => a.id === 'phase25-advance')?.data?.paths?.html ||
       resolve(outDir, 'phase25-ops.html'),
+    phase26Ops:
+      actions.find((a) => a.id === 'phase26-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase26-ops.html'),
+    phase27Ops:
+      actions.find((a) => a.id === 'phase27-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase27-ops.html'),
+    phase28Ops:
+      actions.find((a) => a.id === 'phase28-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase28-ops.html'),
+    phase29Ops:
+      actions.find((a) => a.id === 'phase29-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase29-ops.html'),
+    phase30Ops:
+      actions.find((a) => a.id === 'phase30-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase30-ops.html'),
+    phase31Ops:
+      actions.find((a) => a.id === 'phase31-advance')?.data?.paths?.html ||
+      resolve(outDir, 'phase31-ops.html'),
     presenceSentinel: resolve(outDir, 'presence-sentinel.json'),
     sovereignCertificate: resolve(outDir, 'sovereign-certificate.html'),
     liveThrone: resolve(outDir, 'live-throne.json'),
     growthRadar: resolve(outDir, 'growth-radar.md'),
     growthCloser: resolve(outDir, 'growth-closer.md'),
+    conversionContinuum: resolve(outDir, 'conversion-continuum.md'),
+    integrityLattice: resolve(outDir, 'integrity-lattice.md'),
+    sovereignContinuity: resolve(outDir, 'sovereign-continuity.md'),
+    continuityCharter: resolve(outDir, 'continuity-charter.json'),
     deployCourier: resolve(outDir, 'deploy-courier.json'),
     signalForge: resolve(outDir, 'signal-forge.json'),
+    yieldApex: resolve(outDir, 'yield-apex.json'),
+    perpetualSeal: resolve(outDir, 'perpetual-seal.json'),
+    sovereignCharter: resolve(outDir, 'sovereign-charter.json'),
+    autonomicChronos: resolve(outDir, 'autonomic-chronos.md'),
+    chronosPulse: resolve(outDir, 'chronos-pulse.json'),
+    temporalNexus: resolve(outDir, 'temporal-nexus.json'),
+    dominionApex: resolve(outDir, 'dominion-apex.md'),
+    eternalCrown: resolve(outDir, 'eternal-crown.json'),
+    silentSteward: resolve(outDir, 'silent-steward.md'),
+    stewardShip: resolve(outDir, 'steward-ship.json'),
     executiveBrief: resolve(outDir, 'executive-brief.md'),
     humanDebt: resolve(outDir, 'human-debt.json'),
     unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,

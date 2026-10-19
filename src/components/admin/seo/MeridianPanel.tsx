@@ -752,7 +752,49 @@ export default function MeridianPanel() {
             <button
               type="button"
               disabled={pending || jobRunning}
-              onClick={() => postAction({ action: 'phase25-advance', ack: true, skipObserve: true }, 'Ack GBP verified')}
+              onClick={() => postAction({ action: 'phase26-advance' }, 'Phase 26 conversion continuum')}
+            >
+              Phase 26 / Yield
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase27-advance' }, 'Phase 27 integrity lattice')}
+            >
+              Phase 27 / Lattice
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase28-advance' }, 'Phase 28 sovereign continuity')}
+            >
+              Phase 28 / Continuity
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase29-advance' }, 'Phase 29 autonomic chronos')}
+            >
+              Phase 29 / Chronos
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase30-advance' }, 'Phase 30 dominion apex')}
+            >
+              Phase 30 / Dominion
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase31-advance' }, 'Phase 31 silent steward')}
+            >
+              Phase 31 / Steward
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase31-advance', ack: true, skipObserve: true }, 'Ack GBP verified')}
             >
               Ack GBP
             </button>

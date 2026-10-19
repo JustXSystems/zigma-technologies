@@ -45,6 +45,12 @@ export function buildCanonMarkdown({
   growth,
   courier,
   forge,
+  continuum,
+  lattice,
+  continuity,
+  chronos,
+  dominion,
+  steward,
 }) {
   const origin = String(profile.origin || '').replace(/\/$/, '');
   const score = observatory?.score?.overall ?? archive?.score?.overall ?? report?.scorecard?.overall ?? '—';
@@ -57,8 +63,10 @@ export function buildCanonMarkdown({
     : '—';
   const gbpSrc = gbp?.source || observatory?.gbp?.source || '—';
   const sealed = archive?.sealed === true;
-  const gscClicks = observatory?.signals?.gscClicks ?? '—';
-  const ga4 = observatory?.signals?.ga4Organic ?? '—';
+  const gscClicks = continuum?.signals?.gscClicks28 ?? observatory?.signals?.gscClicks ?? '—';
+  const ga4 = continuum?.signals?.ga4OrganicSessions28 ?? observatory?.signals?.ga4Organic ?? '—';
+  const enq28 = continuum?.signals?.enquiries28 ?? '—';
+  const yieldPct = continuum?.signals?.yieldRatePct;
   const debtScore = debt?.debtScore ?? '—';
   const autonomic = debt?.autonomic === true;
   const presenceSealed = presence?.sealed === true || debt?.presenceSealed === true;
@@ -83,6 +91,48 @@ export function buildCanonMarkdown({
     : courier?.hotpatch?.status
       ? String(courier.hotpatch.status).toUpperCase()
       : 'ACTIVE';
+  const continuumStatus = continuum?.continuumOnline
+    ? 'ONLINE'
+    : continuum?.formOk === false
+      ? 'FORM ALERT'
+      : continuum
+        ? 'WATCHING'
+        : '—';
+  const latticeStatus = lattice?.latticeSealed
+    ? 'SEALED'
+    : lattice?.failCount > 0
+      ? `DRIFT (${lattice.failCount})`
+      : lattice
+        ? 'WATCHING'
+        : '—';
+  const continuityStatus = continuity?.continuityLocked
+    ? 'LOCKED'
+    : continuity?.failCount > 0
+      ? `OPEN (${continuity.failCount})`
+      : continuity
+        ? 'WATCHING'
+        : '—';
+  const chronosStatus = chronos?.chronosArmed
+    ? 'ARMED'
+    : chronos?.alertCount > 0
+      ? `ALERT (${chronos.alertCount})`
+      : chronos
+        ? 'WATCHING'
+        : '—';
+  const dominionStatus = dominion?.dominionCrowned
+    ? 'CROWNED'
+    : dominion?.failCount > 0
+      ? `OPEN (${dominion.failCount})`
+      : dominion
+        ? 'WATCHING'
+        : '—';
+  const stewardStatus = steward?.stewardNominal
+    ? 'NOMINAL'
+    : steward?.failCount > 0
+      ? `ALERT (${steward.failCount})`
+      : steward
+        ? 'WATCHING'
+        : '—';
   const external = (debt?.items || []).filter((i) => i.status === 'external' || i.status === 'open');
   const nextRows = [];
   let n = 2;
@@ -91,19 +141,50 @@ export function buildCanonMarkdown({
       `| **${n++}** | Ship \`hasMap\` to Production | Auto / Dev | \`npm run meridian:prod:hasmap\` · [\`phase24-ops.html\`](storage/meridian/zigma-prod/phase24-ops.html) |`
     );
   }
+  if (continuum?.formOk === false) {
+    nextRows.push(
+      `| **${n++}** | Fix enquiry form health | Auto / Dev | [\`conversion-continuum.md\`](storage/meridian/zigma-prod/conversion-continuum.md) |`
+    );
+  }
+  if (lattice && !lattice.latticeSealed && lattice.failCount > 0) {
+    nextRows.push(
+      `| **${n++}** | Resolve integrity drift | Auto | \`npm run meridian:observe\` · [\`integrity-lattice.md\`](storage/meridian/zigma-prod/integrity-lattice.md) |`
+    );
+  }
+  if (continuity && !continuity.continuityLocked && continuity.failCount > 0) {
+    nextRows.push(
+      `| **${n++}** | Close continuity gates | Auto | \`npm run meridian:observe\` · [\`sovereign-continuity.md\`](storage/meridian/zigma-prod/sovereign-continuity.md) |`
+    );
+  }
+  if (chronos && !chronos.chronosArmed && chronos.alertCount > 0) {
+    nextRows.push(
+      `| **${n++}** | Investigate chronos regressions | Auto | \`npm run meridian:observe\` · [\`autonomic-chronos.md\`](storage/meridian/zigma-prod/autonomic-chronos.md) |`
+    );
+  }
+  if (dominion && !dominion.dominionCrowned && dominion.failCount > 0) {
+    nextRows.push(
+      `| **${n++}** | Close dominion pillars | Auto | \`npm run meridian:observe\` · [\`dominion-apex.md\`](storage/meridian/zigma-prod/dominion-apex.md) |`
+    );
+  }
+  if (steward && !steward.stewardNominal && steward.failCount > 0) {
+    nextRows.push(
+      `| **${n++}** | Fix silent steward | Auto | \`npm run meridian:observe\` · [\`silent-steward.md\`](storage/meridian/zigma-prod/silent-steward.md) |`
+    );
+  }
   if (external.length > 0) {
     for (const i of external) {
       nextRows.push(
         `| **${n++}** | ${i.label} | ${i.who} | ${i.note || i.status} — [\`phase21-ops.html\`](storage/meridian/zigma-prod/phase21-ops.html) |`
       );
     }
-  } else if (gbpParked && !presenceSealed) {
-    nextRows.push(
-      `| **${n++}** | Optional: verify GBP when ready | You | Parked — [\`phase21-ops.html\`](storage/meridian/zigma-prod/phase21-ops.html) → \`npm run meridian:ack-gbp\` |`
-    );
   }
+  // Parked GBP is status-only (not a next-action ritual) — zero-checklist ops
   if (!nextRows.length) {
-    nextRows.push('| **2** | None — forge + throne sealed | — | Forever observe auto-closes radar |');
+    nextRows.push(
+      gbpParked && !presenceSealed
+        ? '| **2** | None — zero human debt | — | GBP verify remains optional (parked) · forever observe |'
+        : '| **2** | None — silent steward nominal | — | Forever observe keeps stewards green |'
+    );
   }
   const nextBlock = nextRows.join('\n');
 
@@ -112,7 +193,7 @@ export function buildCanonMarkdown({
 
 _Re-checked ${todayLabel()} (auto)._
 
-> **Auto-maintained by Meridian Phase 25.** Re-run \`npm run meridian:observe\` after deploys. Do **not** hand-edit between the \`MERIDIAN:CANON\` markers.
+> **Auto-maintained by Meridian Phase 31.** Re-run \`npm run meridian:observe\` after deploys. Do **not** hand-edit between the \`MERIDIAN:CANON\` markers.
 
 ### Command desk (measured)
 
@@ -129,20 +210,31 @@ _Re-checked ${todayLabel()} (auto)._
 | Eternal horizon | **${liveSealed ? 'LIVE SEALED' : hasMapLive ? 'PARTIAL' : 'WATCHING'}** (Phase 23) |
 | Deploy courier | **${courierStatus}** (Phase 24) |
 | Growth closer | **${forgeStatus}** (Phase 25) |
+| Conversion continuum | **${continuumStatus}** (Phase 26) |
+| Integrity lattice | **${latticeStatus}** (Phase 27) |
+| Sovereign continuity | **${continuityStatus}** (Phase 28) |
+| Autonomic chronos | **${chronosStatus}** (Phase 29) |
+| Dominion apex | **${dominionStatus}** (Phase 30) |
+| Silent steward | **${stewardStatus}** (Phase 31) |
 | Human debt | **${debtScore}** |
 | Organization \`sameAs\` | **${sameAs}** |
 | LocalBusiness \`hasMap\` (live) | **${hasMapLive ? 'YES' : 'NO — courier shipping'}** |
 | Growth radar opportunities | **${growthN}** (closed **${closedN}**) |
+| Enquiries / yield (28d) | **${enq28}** / **${yieldPct != null ? yieldPct + '%' : '—'}** |
 | Rich Results pack | **${richFail === 0 ? '6/6 OK' : 'fail ' + richFail}** |
 | Monthly digest | **${monthlyFill}** |
 | GBP pulse source | **${gbpSrc}** (Insights paste optional; GSC brand proxy fills clicks/discovery) |
 | GSC clicks / GA4 organic (28d) | **${gscClicks}** / **${ga4}** |
 
+### Status legend (badges ≠ frozen)
+
+SEALED / LOCKED / ARMED / CROWNED / NOMINAL = **last observe passed** for that layer. Re-run \`npm run meridian:observe\` (alias: \`meridian:guard\`) to refresh. PARKED = optional Google gate only. See [\`AUTOMATION.md\`](packages/meridian/AUTOMATION.md#status-words-what-sealed--locked-mean).
+
 ### Technical SEO — Production
 
 | Check | Result |
 | --- | --- |
-| Phase 1–25 automation | **Done** — see [\`AUTOMATION.md\`](packages/meridian/AUTOMATION.md) |
+| Phase 1–31 automation | **Done** — see [\`AUTOMATION.md\`](packages/meridian/AUTOMATION.md) |
 | Indexing / canonicals / H1 / brand | Verified by Meridian technical engine + \`npm run seo:verify\` |
 | \`/sitemap.xml\` | Healthy (Meridian sitemap-health) |
 | Org JSON-LD + \`sameAs\` | Live on Production |
@@ -152,19 +244,19 @@ _Re-checked ${todayLabel()} (auto)._
 
 ### Next actions (minimized — in order)
 
-Phases **0–24 are complete** for automation. You are on the **growth closer** (signal forge).
+Phases **0–30 are complete** for automation. You are on **silent steward** (zero-checklist ops).
 
 | # | Do this | Who | Notes |
 | --- | --- | --- | --- |
-| **1** | Run **\`npm run meridian:observe\`** (forge + courier + radar) | Auto / Dev | Primary forever command |
+| **1** | Run **\`npm run meridian:observe\`** (steward + dominion + chronos) | Auto / Dev | Primary forever command |
 ${nextBlock}
 
-**Do not** re-run obsolete checklists. Surfaces: **\`phase25-ops.html\`** (forge) · **\`growth-closer.md\`** · **\`phase24-ops.html\`**. Re-seal: \`npm run meridian:guard\`.
+**Do not** re-run obsolete checklists. Surfaces: **\`phase31-ops.html\`** (steward) · **\`silent-steward.md\`** · **\`phase30-ops.html\`**. Re-seal: \`npm run meridian:guard\`.
 
 ### Meridian map (developer)
 
-- Forever: \`npm run meridian:observe\` · \`npm run meridian:forge\` · \`npm run meridian:prod:hasmap\` · \`npm run meridian:guard\`
-- Admin → **SEO → Meridian** → Phase 25 / Forge
+- Forever: \`npm run meridian:observe\` · \`npm run meridian:steward\` · \`npm run meridian:dominion\` · \`npm run meridian:guard\`
+- Admin → **SEO → Meridian** → Phase 31 / Steward
 - SSH: \`deploy@200.234.45.106\` · App \`/var/www/zigma-technologies\`
 - Artefacts: \`${origin.replace('https://', '')}\` → \`storage/meridian/zigma-prod/\`
 
@@ -173,7 +265,7 @@ ${nextBlock}
 - \`isIndexable()\` / \`next.config.ts\` refuse indexing when \`NEXT_PUBLIC_BASE_PATH\` is set.
 - \`scripts/verify-seo-build.mjs\` in PreProd/Prod CI and \`deploy.sh\`.
 - Live verifier: \`npm run seo:verify\` / \`seo:verify:preprod\`.
-- Meridian autopilot = scan → remediate → Phases 0–25 (growth closer) + digests + GSC/Bing when secrets set.
+- Meridian autopilot = scan → remediate → Phases 0–31 (silent steward) + digests + GSC/Bing when secrets set.
 - \`www\` → apex redirect in \`next.config.ts\`; optional nginx one-hop scripts remain.
 ${END}`;
 }
@@ -201,6 +293,20 @@ export async function syncSeoGuideCanon(profile, opts = {}) {
   const courier = await readJson(resolve(outDir, 'deploy-courier.json'));
   const forge = await readJson(resolve(outDir, 'signal-forge.json'));
   const closer = await readJson(resolve(outDir, 'growth-closer.json'));
+  const continuum = await readJson(resolve(outDir, 'conversion-continuum.json'));
+  const lattice = await readJson(resolve(outDir, 'integrity-lattice.json'));
+  const continuity =
+    (await readJson(resolve(outDir, 'continuity-charter.json'))) ||
+    (await readJson(resolve(outDir, 'sovereign-charter.json')));
+  const chronos =
+    (await readJson(resolve(outDir, 'chronos-pulse.json'))) ||
+    (await readJson(resolve(outDir, 'temporal-nexus.json')));
+  const dominion =
+    (await readJson(resolve(outDir, 'dominion-apex.json'))) ||
+    (await readJson(resolve(outDir, 'eternal-crown.json')));
+  const steward =
+    (await readJson(resolve(outDir, 'silent-steward.json'))) ||
+    (await readJson(resolve(outDir, 'steward-ship.json')));
 
   const block = buildCanonMarkdown({
     profile,
@@ -224,6 +330,12 @@ export async function syncSeoGuideCanon(profile, opts = {}) {
     growth,
     courier,
     forge: forge || closer,
+    continuum,
+    lattice,
+    continuity,
+    chronos,
+    dominion,
+    steward,
   });
 
   const guidePath = resolve(root, opts.guidePath || 'SEO-GUIDE.md');

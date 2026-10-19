@@ -109,6 +109,7 @@ function buildRoutineIcs(origin) {
 
 const PHASE_PACKS = [
   { id: '0', name: 'Phase 0 Unlock', file: 'phase0-wizard.html', kind: 'html' },
+  { id: '1', name: 'Phase 1 Technical', file: 'phase1-ops.html', kind: 'html' },
   { id: '2', name: 'Phase 2 Structured data', file: 'phase2-advance.md', kind: 'md' },
   { id: '3', name: 'Phase 3 Meta', file: 'phase3-advance.md', kind: 'md' },
   { id: '4', name: 'Phase 4 Speed', file: 'phase4-ops.html', kind: 'html' },
@@ -133,6 +134,12 @@ const PHASE_PACKS = [
   { id: '23', name: 'Phase 23 Eternal Horizon', file: 'phase23-ops.html', kind: 'html' },
   { id: '24', name: 'Phase 24 Deploy Courier', file: 'phase24-ops.html', kind: 'html' },
   { id: '25', name: 'Phase 25 Growth Closer', file: 'phase25-ops.html', kind: 'html' },
+  { id: '26', name: 'Phase 26 Conversion Continuum', file: 'phase26-ops.html', kind: 'html' },
+  { id: '27', name: 'Phase 27 Integrity Lattice', file: 'phase27-ops.html', kind: 'html' },
+  { id: '28', name: 'Phase 28 Sovereign Continuity', file: 'phase28-ops.html', kind: 'html' },
+  { id: '29', name: 'Phase 29 Autonomic Chronos', file: 'phase29-ops.html', kind: 'html' },
+  { id: '30', name: 'Phase 30 Dominion Apex', file: 'phase30-ops.html', kind: 'html' },
+  { id: '31', name: 'Phase 31 Silent Steward', file: 'phase31-ops.html', kind: 'html' },
 ];
 
 /**

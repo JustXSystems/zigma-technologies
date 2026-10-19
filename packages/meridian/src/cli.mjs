@@ -27,6 +27,7 @@ import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
 import { writeRichResultsPack } from './connectors/rich-results-pack.mjs';
 import { writeTop20MetaPack } from './connectors/top20-meta-pack.mjs';
 import { writeReviewKit } from './connectors/review-kit.mjs';
+import { writeCityDraft } from './connectors/city-draft.mjs';
 import { writeContentCalendar } from './connectors/content-calendar.mjs';
 import { writeSpeedBaseline } from './connectors/speed-baseline.mjs';
 import { writePreprodRemovals } from './connectors/preprod-removals.mjs';
@@ -60,6 +61,12 @@ import { advancePhase22 } from './connectors/phase22-advance.mjs';
 import { advancePhase23 } from './connectors/phase23-advance.mjs';
 import { advancePhase24 } from './connectors/phase24-advance.mjs';
 import { advancePhase25 } from './connectors/phase25-advance.mjs';
+import { advancePhase26 } from './connectors/phase26-advance.mjs';
+import { advancePhase27 } from './connectors/phase27-advance.mjs';
+import { advancePhase28 } from './connectors/phase28-advance.mjs';
+import { advancePhase29 } from './connectors/phase29-advance.mjs';
+import { advancePhase30 } from './connectors/phase30-advance.mjs';
+import { advancePhase31 } from './connectors/phase31-advance.mjs';
 import { syncSeoGuideCanon } from './connectors/canon-sync.mjs';
 import { readFile } from 'node:fs/promises';
 
@@ -355,6 +362,12 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'city-draft') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeCityDraft(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'content-calendar') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await writeContentCalendar(profile, { outDir: resolve(outDir) });
@@ -529,7 +542,7 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
-    if (action === 'phase17-advance' || action === 'guard') {
+    if (action === 'phase17-advance') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await advancePhase17(profile, {
         outDir: resolve(outDir),
@@ -590,7 +603,7 @@ export async function runCli(argv) {
     }
     if (action === 'ack-gbp') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
-      const result = await advancePhase25(profile, {
+      const result = await advancePhase27(profile, {
         outDir: resolve(outDir),
         ack: true,
         skipObserve: true,
@@ -677,7 +690,7 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
-    if (action === 'phase25-advance' || action === 'observe' || action === 'forge') {
+    if (action === 'phase25-advance' || action === 'forge') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await advancePhase25(profile, {
         outDir: resolve(outDir),
@@ -693,6 +706,189 @@ export async function runCli(argv) {
         skipHotpatch: argv.includes('--skip-hotpatch'),
         skipCloser: argv.includes('--skip-closer'),
         skipIndex: argv.includes('--skip-index'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase26-advance' || action === 'yield') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase26(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase27-advance' || action === 'lattice') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase27(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase28-advance' || action === 'continuity') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase28(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipLattice: argv.includes('--skip-lattice'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase29-advance' || action === 'chronos') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase29(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipLattice: argv.includes('--skip-lattice'),
+        skipContinuity: argv.includes('--skip-continuity'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase30-advance' || action === 'dominion') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase30(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipLattice: argv.includes('--skip-lattice'),
+        skipContinuity: argv.includes('--skip-continuity'),
+        skipChronos: argv.includes('--skip-chronos'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase31-advance' || action === 'observe' || action === 'steward' || action === 'guard') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase31(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipLattice: argv.includes('--skip-lattice'),
+        skipContinuity: argv.includes('--skip-continuity'),
+        skipChronos: argv.includes('--skip-chronos'),
+        skipDominion: argv.includes('--skip-dominion'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
         skipDeploy: argv.includes('--skip-deploy'),
         triggerDeploy: argv.includes('--trigger-deploy'),
         ack: argv.includes('--ack-gbp'),
@@ -843,7 +1039,13 @@ Usage:
   meridian act phase22-advance|throne [--skip-presence] [--ack-gbp] [--no-park-gbp] --profile ./profiles/site.json
   meridian act phase23-advance|horizon [--trigger-deploy] [--skip-deploy] [--skip-throne] --profile ./profiles/site.json
   meridian act phase24-advance|courier [--skip-hotpatch] [--trigger-deploy] [--force-gh-deploy] --profile ./profiles/site.json
-  meridian act phase25-advance|observe|forge [--skip-closer] [--skip-courier] --profile ./profiles/site.json
+  meridian act phase25-advance|forge [--skip-closer] [--skip-courier] --profile ./profiles/site.json
+  meridian act phase26-advance|yield [--skip-forge] [--skip-yield] [--skip-sitemap] --profile ./profiles/site.json
+  meridian act phase27-advance|lattice [--skip-lattice-heal] [--skip-yield] --profile ./profiles/site.json
+  meridian act phase28-advance|continuity [--skip-lattice] [--skip-yield] --profile ./profiles/site.json
+  meridian act phase29-advance|chronos [--skip-continuity] [--skip-yield] --profile ./profiles/site.json
+  meridian act phase30-advance|dominion [--skip-chronos] [--skip-yield] --profile ./profiles/site.json
+  meridian act phase31-advance|observe|steward|guard [--skip-dominion] [--skip-yield] --profile ./profiles/site.json
   meridian act ack-gbp --profile ./profiles/site.json
   meridian act canon --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
@@ -853,8 +1055,8 @@ Usage:
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 0–25 packs + growth closer + digests.
-Forever ops: npm run meridian:observe  (forge · courier · growth radar · re-seal: meridian:guard)
+Autopilot = full remediation + Phase 0–27 packs + integrity lattice + digests.
+Forever ops: npm run meridian:observe  (steward · dominion · chronos · continuity · re-seal: meridian:guard)
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

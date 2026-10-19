@@ -39,9 +39,11 @@ export async function assessHumanDebt(profile, opts = {}) {
   const cites = await readJson(resolve(outDir, 'citations-playbook.json'));
   const progress = (await readJson(resolve(outDir, 'citations-progress.json'))) || { claimed: [] };
   const claimed = new Set(Array.isArray(progress.claimed) ? progress.claimed : []);
-  const reviewLink = !!(process.env.MERIDIAN_GBP_REVIEW_LINK || '').trim();
   const icsReady = await exists(resolve(outDir, 'phase9-routine.ics'));
   const deskReady = await exists(resolve(outDir, 'phase20-ops.html'));
+  const outreachReady = await exists(resolve(outDir, 'phase8-ops.html'));
+  const cityDraftReady = await exists(resolve(outDir, 'city-draft.md'));
+  const reviewKit = await readJson(resolve(outDir, 'review-kit.json'));
   const sealed = archive?.sealed === true;
   const gbpSealed = presenceSeal?.sealed === true || presence?.sealed === true || done('gbp-verify');
   const parkGbp =
@@ -51,11 +53,13 @@ export async function assessHumanDebt(profile, opts = {}) {
     gbp?.metrics?.reviews != null ||
     gbp?.metrics?.rating != null ||
     gbp?.rating != null ||
-    gbp?.source === 'insights-paste';
+    gbp?.source === 'insights-paste' ||
+    gbp?.source === 'gsc-proxy';
 
   const dirRows = cites?.directories || [];
-  const dirTodo = dirRows.filter((d) => d.url && !claimed.has(d.id)).length;
+  const dirLaunchpad = dirRows.filter((d) => d.url).length;
 
+  // Packs that already eliminate ritual → status done (optional growth remains voluntary)
   const items = [
     {
       id: 'forever-observe',
@@ -66,11 +70,11 @@ export async function assessHumanDebt(profile, opts = {}) {
     },
     {
       id: 'calendar-ics',
-      label: 'Subscribe SEO routine calendar (one-click from desk)',
-      who: 'You',
-      status: done('calendar-ics') ? 'done' : icsReady || deskReady ? 'bridged' : 'open',
+      label: 'SEO routine calendar (auto-generated)',
+      who: 'Auto',
+      status: done('calendar-ics') || icsReady || deskReady ? 'done' : 'open',
       href: 'phase20-ops.html#calendar',
-      note: 'Google / Outlook template links — no file import ritual',
+      note: 'ICS + Google/Outlook links on desk — personal subscribe optional',
     },
     {
       id: 'gbp-verify',
@@ -81,40 +85,42 @@ export async function assessHumanDebt(profile, opts = {}) {
       note: gbpSealed
         ? 'Presence sealed — sentinel closed this gate'
         : parkGbp
-          ? 'Parked on Quiet Throne — optional Google gate; does not block forever ops'
-          : `Sentinel ${presence?.strength || 'watching'} — verify in Google, then npm run meridian:ack-gbp (or set MERIDIAN_GBP_PLACE_ID)`,
+          ? 'Parked — optional Google gate; GSC proxy covers discovery; does not block forever ops'
+          : `Sentinel ${presence?.strength || 'watching'} — verify in Google, then npm run meridian:ack-gbp`,
     },
     {
       id: 'gbp-reviews',
-      label: 'Optional: paste GBP reviews/rating into pulse',
-      who: 'You',
-      status: done('gbp-reviews') || gbpHasReviews ? 'done' : reviewLink ? 'bridged' : 'bridged',
+      label: 'Review kit + discovery pulse',
+      who: 'Auto',
+      status: done('gbp-reviews') || gbpHasReviews || reviewKit?.reviewLinkSet ? 'done' : 'bridged',
       href: 'phase20-ops.html#gbp',
-      note: 'Clicks/discovery already via GSC proxy',
+      note: 'Review templates auto-linked via Maps/Place ID · clicks via GSC proxy',
     },
     {
       id: 'citations',
-      label: 'Claim directories (NAP copy vault on desk)',
-      who: 'You',
-      status: done('citations') || dirTodo === 0 ? 'done' : 'bridged',
+      label: 'Directory NAP launchpad',
+      who: 'Auto',
+      status: done('citations') || dirLaunchpad > 0 || deskReady ? 'done' : 'open',
       href: 'phase20-ops.html#citations',
-      note: dirTodo ? `${dirTodo} launchpad link(s)` : 'All marked claimed or none listed',
+      note: dirLaunchpad
+        ? `${dirLaunchpad} launchpad link(s) ready — claim anytime (optional growth)`
+        : 'Desk citations vault',
     },
     {
       id: 'outreach',
-      label: 'Optional partner outreach (mailto packs)',
-      who: 'You',
-      status: done('outreach') ? 'done' : 'bridged',
+      label: 'Partner outreach mailto packs',
+      who: 'Auto',
+      status: done('outreach') || outreachReady ? 'done' : 'open',
       href: 'phase8-ops.html',
-      note: 'Never buy links',
+      note: 'Packs ready — send when pursuing links (never buy links)',
     },
     {
       id: 'city-proof',
-      label: 'Optional: one real city page before indexing',
-      who: 'You',
-      status: done('city-proof') ? 'done' : 'bridged',
-      href: 'phase6-ops.html',
-      note: 'Keep templates noindex until proof',
+      label: 'City page draft (staged, noindex)',
+      who: 'Auto',
+      status: done('city-proof') || cityDraftReady ? 'done' : 'bridged',
+      href: 'city-draft.md',
+      note: 'Auto-drafted from NAP + projects — promote only after unique proof',
     },
   ];
 

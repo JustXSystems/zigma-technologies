@@ -119,9 +119,17 @@ export async function POST(request: Request) {
       skipThrone?: boolean;
       skipHorizon?: boolean;
       skipCourier?: boolean;
+      skipForge?: boolean;
       skipHotpatch?: boolean;
       skipCloser?: boolean;
       skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipContinuity?: boolean;
+      skipChronos?: boolean;
+      skipDominion?: boolean;
       skipBuild?: boolean;
       skipDeploy?: boolean;
       forceGhDeploy?: boolean;
@@ -220,7 +228,13 @@ export async function POST(request: Request) {
       action === 'phase22-advance' ||
       action === 'phase23-advance' ||
       action === 'phase24-advance' ||
-      action === 'phase25-advance'
+      action === 'phase25-advance' ||
+      action === 'phase26-advance' ||
+      action === 'phase27-advance' ||
+      action === 'phase28-advance' ||
+      action === 'phase29-advance' ||
+      action === 'phase30-advance' ||
+      action === 'phase31-advance'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -432,6 +446,165 @@ export async function POST(request: Request) {
           skipHotpatch: !!body.skipHotpatch,
           skipCloser: !!body.skipCloser,
           skipIndex: !!body.skipIndex,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase26-advance') {
+        act = {
+          action: 'phase26-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase27-advance') {
+        act = {
+          action: 'phase27-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase28-advance') {
+        act = {
+          action: 'phase28-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipLattice: !!body.skipLattice,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase29-advance') {
+        act = {
+          action: 'phase29-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipLattice: !!body.skipLattice,
+          skipContinuity: !!body.skipContinuity,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase30-advance') {
+        act = {
+          action: 'phase30-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipLattice: !!body.skipLattice,
+          skipContinuity: !!body.skipContinuity,
+          skipChronos: !!body.skipChronos,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase31-advance') {
+        act = {
+          action: 'phase31-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipLattice: !!body.skipLattice,
+          skipContinuity: !!body.skipContinuity,
+          skipChronos: !!body.skipChronos,
+          skipDominion: !!body.skipDominion,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
           skipDeploy: !!body.skipDeploy,
           triggerDeploy: !!body.triggerDeploy,
           ack: !!body.ack,

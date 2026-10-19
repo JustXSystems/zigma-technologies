@@ -4,7 +4,14 @@
 
 Use on Zigma **or any other website** via a SiteProfile JSON.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design.
+| Doc | Role |
+| --- | --- |
+| [`../../SEO-GUIDE.md`](../../SEO-GUIDE.md) | Site SEO ops + live status (Zigma) |
+| [AUTOMATION.md](./AUTOMATION.md) | Forever commands + phase pipeline |
+| [SETUP.md](./SETUP.md) | Connector secrets |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Design |
+
+**Forever (Zigma):** `npm run meridian:observe`
 
 ## Quick start
 
@@ -33,8 +40,8 @@ node packages/meridian/bin/meridian.mjs run --profile ./acme.profile.json
 
 ## Connectors (M1)
 
-**Exact field-by-field setup (first-timers):** [SETUP.md](./SETUP.md)  
-Also mirrored in the site guide: `SEO-GUIDE.md` → **Appendix G**.
+**Exact field-by-field setup:** [SETUP.md](./SETUP.md)  
+Short map: [`SEO-GUIDE.md`](../../SEO-GUIDE.md) → **Connectors and Site Settings**.
 
 Without credentials, Meridian still completes a full technical run and marks connectors `auth_required`. Admin → **SEO → Meridian** shows **Connectors readiness** (set/missing only; secrets never displayed).
 

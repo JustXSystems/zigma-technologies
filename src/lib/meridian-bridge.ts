@@ -181,6 +181,159 @@ export type MeridianAct =
       parkGbp?: boolean;
       gscProxy?: boolean;
     }
+  | {
+      action: 'phase26-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase27-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase28-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase29-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipContinuity?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase30-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipContinuity?: boolean;
+      skipChronos?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
+  | {
+      action: 'phase31-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipContinuity?: boolean;
+      skipChronos?: boolean;
+      skipDominion?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -227,6 +380,12 @@ export function meridianLatestPaths(env: MeridianEnv) {
     phase23Ops: path.join(dir, 'phase23-ops.html'),
     phase24Ops: path.join(dir, 'phase24-ops.html'),
     phase25Ops: path.join(dir, 'phase25-ops.html'),
+    phase26Ops: path.join(dir, 'phase26-ops.html'),
+    phase27Ops: path.join(dir, 'phase27-ops.html'),
+    phase28Ops: path.join(dir, 'phase28-ops.html'),
+    phase29Ops: path.join(dir, 'phase29-ops.html'),
+    phase30Ops: path.join(dir, 'phase30-ops.html'),
+    phase31Ops: path.join(dir, 'phase31-ops.html'),
     fleetAssurance: path.join(dir, 'fleet-assurance.json'),
     continuumOps: path.join(dir, 'continuum-ops.json'),
     missionArchive: path.join(dir, 'mission-archive.json'),
@@ -242,6 +401,19 @@ export function meridianLatestPaths(env: MeridianEnv) {
     deployCourier: path.join(dir, 'deploy-courier.json'),
     growthCloser: path.join(dir, 'growth-closer.md'),
     signalForge: path.join(dir, 'signal-forge.json'),
+    conversionContinuum: path.join(dir, 'conversion-continuum.md'),
+    yieldApex: path.join(dir, 'yield-apex.json'),
+    integrityLattice: path.join(dir, 'integrity-lattice.md'),
+    perpetualSeal: path.join(dir, 'perpetual-seal.json'),
+    sovereignContinuity: path.join(dir, 'sovereign-continuity.md'),
+    continuityCharter: path.join(dir, 'continuity-charter.json'),
+    autonomicChronos: path.join(dir, 'autonomic-chronos.md'),
+    chronosPulse: path.join(dir, 'chronos-pulse.json'),
+    temporalNexus: path.join(dir, 'temporal-nexus.json'),
+    dominionApex: path.join(dir, 'dominion-apex.md'),
+    eternalCrown: path.join(dir, 'eternal-crown.json'),
+    silentSteward: path.join(dir, 'silent-steward.md'),
+    stewardShip: path.join(dir, 'steward-ship.json'),
     automationLedger: path.join(dir, 'automation-ledger.md'),
     executiveBrief: path.join(dir, 'executive-brief.md'),
     gbpPulse: path.join(dir, 'gbp-pulse.json'),
@@ -834,6 +1006,165 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     if (act.skipHotpatch) args.push('--skip-hotpatch');
     if (act.skipCloser) args.push('--skip-closer');
     if (act.skipIndex) args.push('--skip-index');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase26-advance') {
+    const args = ['act', 'phase26-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase27-advance') {
+    const args = ['act', 'phase27-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase28-advance') {
+    const args = ['act', 'phase28-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipLattice) args.push('--skip-lattice');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase29-advance') {
+    const args = ['act', 'phase29-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipLattice) args.push('--skip-lattice');
+    if (act.skipContinuity) args.push('--skip-continuity');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase30-advance') {
+    const args = ['act', 'phase30-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipLattice) args.push('--skip-lattice');
+    if (act.skipContinuity) args.push('--skip-continuity');
+    if (act.skipChronos) args.push('--skip-chronos');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase31-advance') {
+    const args = ['act', 'phase31-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipLattice) args.push('--skip-lattice');
+    if (act.skipContinuity) args.push('--skip-continuity');
+    if (act.skipChronos) args.push('--skip-chronos');
+    if (act.skipDominion) args.push('--skip-dominion');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
     if (act.skipDeploy) args.push('--skip-deploy');
     if (act.triggerDeploy) args.push('--trigger-deploy');
     if (act.ack) args.push('--ack-gbp');

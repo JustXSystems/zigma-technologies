@@ -28,7 +28,7 @@ function todayLabel() {
 /**
  * Compact automation ledger for Appendix F — authoritative vs hand-ticked boxes.
  */
-export function buildLedgerMarkdown({ score, unlock, archive, presence, debt, throne, live, growth, courier, forge }) {
+export function buildLedgerMarkdown({ score, unlock, archive, presence, debt, throne, live, growth, courier, forge, continuum, lattice, continuity, chronos, dominion, steward }) {
   const sealed = archive?.sealed === true;
   const presenceSealed = presence?.sealed === true || debt?.presenceSealed === true;
   const debtScore = debt?.debtScore ?? '—';
@@ -57,15 +57,57 @@ export function buildLedgerMarkdown({ score, unlock, archive, presence, debt, th
         : forge
           ? `**${String(forge.closerStatus || 'ACTIVE').toUpperCase()}**`
           : '—';
+  const continuumLine = continuum?.continuumOnline
+    ? `**ONLINE** (enq 28d=${continuum.signals?.enquiries28 ?? '—'})`
+    : continuum?.formOk === false
+      ? '**FORM ALERT**'
+      : continuum
+        ? '**WATCHING**'
+        : '—';
+  const latticeLine = lattice?.latticeSealed
+    ? `**SEALED** (${lattice.checkCount || 0}/${lattice.checkCount || 0})`
+    : lattice?.failCount > 0
+      ? `**DRIFT** (${lattice.failCount})`
+      : lattice
+        ? '**WATCHING**'
+        : '—';
+  const continuityLine = continuity?.continuityLocked
+    ? `**LOCKED** (${continuity.gateCount || 0}/${continuity.gateCount || 0})`
+    : continuity?.failCount > 0
+      ? `**OPEN** (${continuity.failCount})`
+      : continuity
+        ? '**WATCHING**'
+        : '—';
+  const chronosLine = chronos?.chronosArmed
+    ? `**ARMED** (${chronos.pointCount || 0} pts)`
+    : chronos?.alertCount > 0
+      ? `**ALERT** (${chronos.alertCount})`
+      : chronos
+        ? '**WATCHING**'
+        : '—';
+  const dominionLine = dominion?.dominionCrowned
+    ? `**CROWNED** (${dominion.pillarCount || 0}/${dominion.pillarCount || 0})`
+    : dominion?.failCount > 0
+      ? `**OPEN** (${dominion.failCount})`
+      : dominion
+        ? '**WATCHING**'
+        : '—';
+  const stewardLine = steward?.stewardNominal
+    ? `**NOMINAL** (${steward.stewardCount || 0}/${steward.stewardCount || 0})`
+    : steward?.failCount > 0
+      ? `**ALERT** (${steward.failCount})`
+      : steward
+        ? '**WATCHING**'
+        : '—';
 
   return `${START}
 ### Automation ledger (Meridian — authoritative)
 
-_Re-checked ${todayLabel()} (auto). Do **not** hand-edit between \`MERIDIAN:LEDGER\` markers. Historical Phase 0–9 boxes below are archival._
+_Re-checked ${todayLabel()} (auto). Do **not** hand-edit between \`MERIDIAN:LEDGER\` markers. Obsolete Phase 0–9 checklists live only in \`docs/archive/\`._
 
 | Area | Status |
 | --- | --- |
-| Technical Phase 1 + PreProd | **DONE** (live) |
+| Technical Phase 1 + PreProd | **DONE** (live · pack restored) |
 | Structured data / sameAs / Rich Results | **DONE** (Meridian Phases 2–3) |
 | Meta / alt / calendar / speed packs | **DONE** (Phases 3–4, 7) |
 | Local NAP + citation launchpad | **DONE** (desk Phase 20) |
@@ -77,13 +119,19 @@ _Re-checked ${todayLabel()} (auto). Do **not** hand-edit between \`MERIDIAN:LEDG
 | Eternal horizon / live throne | ${liveThrone} (Phase 23) |
 | Deploy courier (SSH hasMap) | ${courierLine} (Phase 24) |
 | Growth closer / signal forge | ${forgeLine} (Phase 25) |
+| Conversion continuum / yield | ${continuumLine} (Phase 26) |
+| Integrity lattice / perpetual seal | ${latticeLine} (Phase 27) |
+| Sovereign continuity / board charter | ${continuityLine} (Phase 28) |
+| Autonomic chronos / temporal nexus | ${chronosLine} (Phase 29) |
+| Dominion apex / eternal crown | ${dominionLine} (Phase 30) |
+| Silent steward / zero-checklist | ${stewardLine} (Phase 31) |
 | Growth radar opportunities | **${growth?.opportunityCount ?? '—'}** |
 | Meridian score / unlock | **${score?.overall ?? '—'} ${score?.grade || ''}** / **${unlock?.percent ?? '—'}%** |
 | Archive | **${sealed ? 'SEALED' : 'open'}** |
 | Human debt | **${debtScore}** |
 | Google Business Profile | ${gbp} |
 
-Forever: \`npm run meridian:observe\` · Forge: \`phase25-ops.html\` · Courier: \`npm run meridian:prod:hasmap\`
+Forever: \`npm run meridian:observe\` · Steward: \`phase31-ops.html\` · Dominion: \`phase30-ops.html\`
 ${END}`;
 }
 
@@ -106,6 +154,20 @@ export async function syncAppendixLedger(profile, opts = {}) {
   const growth = await readJson(resolve(outDir, 'growth-radar.json'));
   const courier = await readJson(resolve(outDir, 'deploy-courier.json'));
   const forge = (await readJson(resolve(outDir, 'signal-forge.json'))) || (await readJson(resolve(outDir, 'growth-closer.json')));
+  const continuum = await readJson(resolve(outDir, 'conversion-continuum.json'));
+  const lattice = await readJson(resolve(outDir, 'integrity-lattice.json'));
+  const continuity =
+    (await readJson(resolve(outDir, 'continuity-charter.json'))) ||
+    (await readJson(resolve(outDir, 'sovereign-charter.json')));
+  const chronos =
+    (await readJson(resolve(outDir, 'chronos-pulse.json'))) ||
+    (await readJson(resolve(outDir, 'temporal-nexus.json')));
+  const dominion =
+    (await readJson(resolve(outDir, 'dominion-apex.json'))) ||
+    (await readJson(resolve(outDir, 'eternal-crown.json')));
+  const steward =
+    (await readJson(resolve(outDir, 'silent-steward.json'))) ||
+    (await readJson(resolve(outDir, 'steward-ship.json')));
   const score = observatory?.score || archive?.score || report?.scorecard || {};
 
   const block = buildLedgerMarkdown({
@@ -119,6 +181,12 @@ export async function syncAppendixLedger(profile, opts = {}) {
     growth,
     courier,
     forge,
+    continuum,
+    lattice,
+    continuity,
+    chronos,
+    dominion,
+    steward,
   });
 
   const guidePath = resolve(root, opts.guidePath || 'SEO-GUIDE.md');

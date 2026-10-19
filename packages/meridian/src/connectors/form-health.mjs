@@ -2,9 +2,24 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fetchManual } from '../lib/html.mjs';
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function withRetry(fn, { attempts = 3, delayMs = 900 } = {}) {
+  let last;
+  for (let i = 0; i < attempts; i++) {
+    last = await fn();
+    const status = last?.status ?? 0;
+    const transient = status >= 500 || status === 0 || last?.retry === true;
+    if (!transient) return last;
+    if (i < attempts - 1) await sleep(delayMs * (i + 1));
+  }
+  return last;
+}
+
 /**
  * Phase 9.1 #5 — probe enquiry form endpoints without submitting spam.
  * GET form schema + contact page; confirm enquiry API rejects empty POST (alive).
+ * Retries transient 5xx so continuum / lattice aren't flapped by brief PM2 blips.
  */
 export async function probeFormHealth(profile, opts = {}) {
   const origin = profile.origin.replace(/\/$/, '');
@@ -13,9 +28,16 @@ export async function probeFormHealth(profile, opts = {}) {
   const enquiryUrl = `${origin}/api/public/enquiries`;
   const checks = [];
   const findings = [];
+  const attempts = opts.attempts ?? 3;
 
   try {
-    const form = await fetchManual(formUrl, { forceBody: true });
+    const form = await withRetry(
+      async () => {
+        const r = await fetchManual(formUrl, { forceBody: true });
+        return { status: r.status, body: r.body };
+      },
+      { attempts }
+    );
     const ok = form.status >= 200 && form.status < 300;
     let fields = 0;
     try {
@@ -49,7 +71,13 @@ export async function probeFormHealth(profile, opts = {}) {
   }
 
   try {
-    const contact = await fetchManual(contactUrl, { forceBody: true });
+    const contact = await withRetry(
+      async () => {
+        const r = await fetchManual(contactUrl, { forceBody: true });
+        return { status: r.status, body: r.body };
+      },
+      { attempts }
+    );
     const hasForm =
       /enquiry|contact.?form|name=["']email["']|api\/public\/enquiries/i.test(contact.body || '');
     checks.push({
@@ -75,11 +103,17 @@ export async function probeFormHealth(profile, opts = {}) {
 
   // Alive check: empty POST should fail validation (4xx), not 5xx / network error
   try {
-    const res = await fetch(enquiryUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'user-agent': 'MeridianSEO/0.1' },
-      body: JSON.stringify({ meridianProbe: true }),
-    });
+    const res = await withRetry(
+      async () => {
+        const r = await fetch(enquiryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'user-agent': 'MeridianSEO/0.1' },
+          body: JSON.stringify({ meridianProbe: true }),
+        });
+        return { status: r.status };
+      },
+      { attempts }
+    );
     const alive = res.status >= 400 && res.status < 500;
     checks.push({ id: 'enquiry-api', url: enquiryUrl, status: res.status, ok: alive || res.status === 200 });
     if (res.status >= 500) {

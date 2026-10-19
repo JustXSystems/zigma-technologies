@@ -2,6 +2,19 @@
 
 Production profile runs the full loop on **deploy**, **weekly cron**, and **Admin → Run autopilot**.
 
+## Docs map
+
+| Doc | Role |
+| --- | --- |
+| [`SEO-GUIDE.md`](../../SEO-GUIDE.md) | Live status + ops (canon + ledger auto-synced) |
+| **This file** | Phase pipeline, forever commands, badge meanings |
+| [`SETUP.md`](./SETUP.md) | Connector secrets (first-time OAuth / GA4 / Bing) |
+| [`README.md`](./README.md) | Package quick start |
+| [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Design |
+| [`docs/archive/SEO-GUIDE-phases-walkthrough.md`](../../docs/archive/SEO-GUIDE-phases-walkthrough.md) | Historical Day-1 phase walkthrough (do not re-run) |
+
+**Primary forever command:** `npm run meridian:observe` (alias: `meridian:steward`, `meridian:guard`).
+
 ## Autopilot pipeline
 
 1. Scan + connectors  
@@ -45,11 +58,39 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 39. **Phase 22 quiet throne** (park Google gate · Appendix F ledger · sovereign certificate · `hasMap` from NAP)  
 40. **Phase 23 eternal horizon** (live `hasMap` probe · deploy gate · GSC growth radar)  
 41. **Phase 24 deploy courier** (local build → SSH apply · never VPS `next build`)  
-42. **Phase 25 growth closer** (FAQ publish + homepage proof + indexing · **primary forever ops**)  
+42. **Phase 25 growth closer** (FAQ publish + homepage proof + indexing)  
+43. **Phase 26 conversion continuum** (form health · GA4 · enquiry yield · sitemap)  
+44. **Phase 27 integrity lattice** (cross-stack seal · auto-heal)  
+45. **Phase 28 sovereign continuity** (board charter · forever gates)  
+46. **Phase 29 autonomic chronos** (temporal nexus · regression detect)  
+47. **Phase 30 dominion apex** (eternal crown · automation complete)  
+48. **Phase 31 silent steward** (meta · city draft staged · review link auto · growth · **primary forever ops**)  
 
 ## Highest-leverage human step
 
-Usually **none** — observe auto-closes GSC opportunities. Forever: **`npm run meridian:observe`**. Drift: **`npm run meridian:prod:hasmap`**. Optional GBP: `ack-gbp`.
+Usually **none** — human debt for automation is **0**. Forever: **`npm run meridian:observe`**.
+
+| Still human (cannot code away) | Why |
+| --- | --- |
+| Optional GBP claim/verify | Google identity gate — parked; GSC proxy covers discovery |
+| Promote a city draft to indexable | Needs unique photos/proof (spam risk if auto-published) |
+| Send outreach / claim directories | Optional growth — packs + mailto already generated |
+
+## Status words (what SEALED / LOCKED mean)
+
+These are **health badges from live checks**, not locks that freeze the tool. Green badges mean “this layer’s invariants passed on the last `observe`.” Re-run `npm run meridian:observe` (or `meridian:guard`) anytime — seals refresh automatically.
+
+| Badge | Meaning |
+| --- | --- |
+| **SEALED** | Layer invariants green (archive, lattice, deploy, live throne) |
+| **LOCKED** | Continuity gates green (aliases, GH Action, lattice + yield) |
+| **ARMED** | Chronos tracking deltas with no critical regressions |
+| **CROWNED** | Dominion apex: all crown pillars green — automation complete |
+| **NOMINAL** | Silent steward: meta/city/review/growth stewards OK |
+| **ONLINE / LIVE** | Continuum measuring yield · production emitting schema |
+| **BRIDGED** | Auto-pack ready; optional human click (mailto / launchpad) |
+| **PARKED** | Waiting on an external Google gate (GBP verify) — does **not** block forever ops |
+| **MISSION COMPLETE** | Quiet throne: no open human debt for automation |
 
 ## Multi-site (M11)
 
@@ -83,7 +124,8 @@ npm run meridian:act:phase15:gh      # same + push Meridian secrets to GitHub Ac
 npm run meridian:act:phase15:dispatch # trigger meridian-autopilot.yml once
 npm run meridian:act:phase16         # continuum apex + GBP pulse + score chase
 npm run meridian:act:phase17         # mission archive (guides + deps + rich + seal)
-npm run meridian:guard               # alias of phase17 — full re-seal
+npm run meridian:guard               # alias of observe (Phase 31) — full re-seal
+npm run meridian:act:phase17         # mission archive seal only (legacy pack)
 npm run meridian:act:phase18         # observatory only (GBP proxy + drift heal)
 npm run meridian:act:phase19         # observatory + SEO-GUIDE canon sync
 npm run meridian:act:phase20         # autonomic desk (includes phase19)
@@ -92,7 +134,19 @@ npm run meridian:act:phase22         # quiet throne (includes phase21)
 npm run meridian:act:phase23         # eternal horizon (includes phase22)
 npm run meridian:act:phase24         # deploy courier (includes phase23)
 npm run meridian:act:phase25         # growth closer / signal forge (includes phase24)
-npm run meridian:observe             # alias of phase25 — primary forever ops
+npm run meridian:act:phase26         # conversion continuum / yield apex (includes phase25)
+npm run meridian:act:phase27         # integrity lattice / perpetual seal (includes phase26)
+npm run meridian:act:phase28         # sovereign continuity / board charter (includes phase27)
+npm run meridian:act:phase29         # autonomic chronos / temporal nexus (includes phase28)
+npm run meridian:act:phase30         # dominion apex / eternal crown (includes phase29)
+npm run meridian:act:phase31         # silent steward (includes phase30)
+npm run meridian:observe             # alias of phase31 — primary forever ops
+npm run meridian:steward             # alias of phase31
+npm run meridian:dominion            # alias of phase30
+npm run meridian:chronos             # alias of phase29
+npm run meridian:continuity          # alias of phase28
+npm run meridian:lattice             # alias of phase27
+npm run meridian:yield               # alias of phase26
 npm run meridian:forge               # alias of phase25
 npm run meridian:courier             # alias of phase24
 npm run meridian:horizon             # alias of phase23
@@ -111,33 +165,17 @@ npm run meridian:act:locales
 npm run meridian:act:cockpit
 ```
 
-Ops HTML dashboards (open after each act):
-- `phase5-ops.html` — GBP NAP copy vault  
-- `phase4-ops.html` — speed / PSI  
-- `phase6-ops.html` — city briefs + locale  
-- `phase7-ops.html` — content calendar (+ `.ics`)  
-- `phase8-ops.html` — outreach mailto  
-- `phase9-ops.html` — master command center (+ `phase9-routine.ics`)  
-- `phase10-ops.html` — continuous unlock (+ `phase10-schtasks.xml` / `meridian-cron.ps1`)  
-- `phase11-ops.html` — live convergence (+ GBP draft)  
-- `phase12-ops.html` — score lift + deploy pack  
-- `phase13-ops.html` — sovereign autoclose / mission complete  
-- `phase14-ops.html` — perpetual ops + signal board  
-- `phase15-ops.html` — sovereign fleet (CI + secrets + last runs)  
-- `phase16-ops.html` — autonomous continuum (score apex + GBP pulse)  
-- `phase17-ops.html` — mission archive / full re-seal  
-- `phase18-ops.html` — observatory (sensors + GBP proxy + heal)  
-- `phase19-ops.html` — living canon (SEO-GUIDE sync)  
-- `phase20-ops.html` — autonomic desk (NAP · calendar · citations · debt)  
-- `phase21-ops.html` — presence sentinel (GBP evidence · seal · verify kit)  
-- `phase22-ops.html` — quiet throne  
-- `phase23-ops.html` — eternal horizon (live seal + growth)  
-- `phase24-ops.html` — deploy courier (SSH hasMap ship)  
-- `phase25-ops.html` — **primary** growth closer / signal forge  
-- `sovereign-certificate.html` — board certificate of autonomic ops  
-- `live-throne.md` / `growth-radar.md` / `growth-closer.md` / `signal-forge.json` — live seal + GSC autoclose  
-- `presence-sentinel.json` / `presence-seal.json` — local presence state  
-- `automation-ledger.md` — Appendix F Meridian ledger  
-- `executive-brief.md` — board one-pager  
-- Root `SEO-GUIDE.md` — **Current status** + Appendix F ledger auto-owned by Meridian  
+### Primary ops surfaces (`storage/meridian/zigma-prod/`)
+
+| File | Use |
+| --- | --- |
+| `phase31-ops.html` | **Primary** silent steward / zero-checklist |
+| `phase30-ops.html` | Dominion crown |
+| `phase20-ops.html` | NAP · calendar · citations desk |
+| `phase21-ops.html` | Optional GBP verify kit |
+| `silent-steward.md` · `human-debt.md` · `city-draft.md` · `review-kit.md` | Steward briefs |
+| `report-latest.html` · `executive-brief.md` | Board scan / one-pager |
+| Root [`SEO-GUIDE.md`](../../SEO-GUIDE.md) | Canon status + Appendix F ledger (auto) |
+
+Older `phase0`–`phase29` HTML packs remain on disk for forensics; day-to-day use observe + Phase 31 only.
 

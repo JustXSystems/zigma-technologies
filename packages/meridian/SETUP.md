@@ -3,6 +3,8 @@
 This guide tells you **exactly** how to fill every Meridian configuration value.  
 You do **not** need to understand code. Steps marked **[Developer]** need SSH / GitHub secrets / server `.env`. Steps marked **[You]** are done in a browser.
 
+**After secrets are set:** day-to-day SEO ops live in [`SEO-GUIDE.md`](../../SEO-GUIDE.md) (`npm run meridian:observe`). Pipeline reference: [`AUTOMATION.md`](./AUTOMATION.md).
+
 After secrets are set, Meridian can:
 
 - Pull **Search Console** queries and sitemaps  
