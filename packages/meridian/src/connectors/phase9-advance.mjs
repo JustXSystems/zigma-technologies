@@ -120,6 +120,8 @@ const PHASE_PACKS = [
   { id: '10', name: 'Phase 10 Continuous', file: 'phase10-ops.html', kind: 'html' },
   { id: '11', name: 'Phase 11 Convergence', file: 'phase11-ops.html', kind: 'html' },
   { id: '12', name: 'Phase 12 Score Lift', file: 'phase12-ops.html', kind: 'html' },
+  { id: '13', name: 'Phase 13 Autoclose', file: 'phase13-ops.html', kind: 'html' },
+  { id: '14', name: 'Phase 14 Perpetual', file: 'phase14-ops.html', kind: 'html' },
 ];
 
 /**

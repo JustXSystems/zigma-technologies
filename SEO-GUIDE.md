@@ -38,9 +38,9 @@ Technical Phase 1 is **done**. **Phase 2 is the active track** (sameAs + Rich Re
 
 | # | Do this next | Phase | Who | Notes from live check |
 | --- | --- | --- | --- | --- |
-| **1** | Run **`npm run meridian:act:phase12`** (meta + calendar auto-publish) | **12** | Dev / Auto | Then open `phase12-ops.html` |
-| **2** | **[Developer]** One Production deploy (`npm run meridian:deploy:prod` after `gh auth login`) | **12** | Developer | Ships live sameAs |
-| **2b** | Open **`phase11-ops.html`** / **`phase12-ops.html`** — collapsed weekly list | **11–12** | You | GBP pulse when due |
+| **1** | Run **`npm run meridian:act:phase14`** (perpetual signals + unlock 100%) | **14** | Auto | Primary ongoing command |
+| **2** | Keep weekly autopilot cron / GitHub Action | **14** | Dev | Already scripted |
+| **2b** | Optional GBP verify / metrics (no public API) | **5** | You | Only ongoing ritual |
 | **2c** | Import **`phase9-routine.ics`** once | **9** | You | Calendar reminders |
 | **3** | Open **`phase5-ops.html`** → GBP claim/verify | **5.2** | You | Long pole (Google verify) |
 | **4** | Import **`content-calendar.ics`** → publish week slots in Admin | **7** | You | `phase7-ops.html` |

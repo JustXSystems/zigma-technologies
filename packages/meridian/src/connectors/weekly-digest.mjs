@@ -64,10 +64,14 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
   const candidates = [
     {
       id: 'deploy-sameas',
-      task: 'Deploy Production (phase12-ops.html one-command / npm run meridian:deploy:prod) so live JSON-LD sameAs ships',
+      task: 'Ship live sameAs (npm run meridian:act:phase13 SSH autoclose — or Production deploy)',
       who: 'Developer',
       auto: false,
-      needed: hasSchemaSameAs && cmsSocial > 0 && liveSameAs === 0,
+      needed:
+        !cadence?.completed?.['deploy-sameas'] &&
+        hasSchemaSameAs &&
+        cmsSocial > 0 &&
+        liveSameAs === 0,
     },
     {
       id: 'social-sameas',
@@ -201,16 +205,20 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
 
   let humanChecklist = candidates.filter((h) => h.needed !== false);
   const actionable = humanChecklist.filter((h) => h.id !== 'phase11-cockpit');
+  const missionDone = !!(await readJson(resolve(outDir, 'mission-complete.json')));
   if (actionable.length === 0) {
-    humanChecklist = [
-      {
-        id: 'phase11-cockpit',
-        task: 'Glance phase12-ops.html — all measured gates green; optional GBP pulse only',
-        who: 'You',
-        auto: true,
-        needed: true,
-      },
-    ];
+    // Zero-nag steady state when Phase 13 closed measured gates
+    humanChecklist = missionDone
+      ? []
+      : [
+          {
+            id: 'phase11-cockpit',
+            task: 'Glance phase13-ops.html — measured gates green; optional GBP pulse only',
+            who: 'You',
+            auto: true,
+            needed: true,
+          },
+        ];
   } else if (actionable.length === 1 && actionable[0].id === 'deploy-sameas') {
     // Single remaining gate — no need for a second "open dashboard" nag
     humanChecklist = actionable;

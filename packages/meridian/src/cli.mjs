@@ -47,6 +47,8 @@ import { advancePhase9 } from './connectors/phase9-advance.mjs';
 import { advancePhase10 } from './connectors/phase10-advance.mjs';
 import { advancePhase11 } from './connectors/phase11-advance.mjs';
 import { advancePhase12 } from './connectors/phase12-advance.mjs';
+import { advancePhase13 } from './connectors/phase13-advance.mjs';
+import { advancePhase14 } from './connectors/phase14-advance.mjs';
 import { readFile } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -453,6 +455,28 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'phase13-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase13(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        restart: !argv.includes('--no-restart'),
+        skipAct: argv.includes('--skip-act'),
+        skipVerify: argv.includes('--skip-verify'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase14-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase14(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        skipHeal: argv.includes('--skip-heal'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'quarterly-digest') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await writeQuarterlyDigest(profile, { outDir: resolve(outDir) });
@@ -582,6 +606,8 @@ Usage:
   meridian act phase10-advance [--no-apply] [--skip-act] [--sync-gh] [--force] --profile ./profiles/site.json
   meridian act phase11-advance [--skip-verify] [--skip-phase10] --profile ./profiles/site.json
   meridian act phase12-advance [--no-apply] [--trigger-deploy] [--skip-scan] [--skip-verify] --profile ./profiles/site.json
+  meridian act phase13-advance [--no-apply] [--no-restart] [--skip-act] [--skip-verify] --profile ./profiles/site.json
+  meridian act phase14-advance [--no-apply] [--skip-heal] --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian profiles
@@ -589,7 +615,7 @@ Usage:
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 0–12 packs + sameAs + meta polish + unlock + score lift + live convergence + digests.
+Autopilot = full remediation + Phase 0–14 packs + perpetual signals + sameAs heal + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

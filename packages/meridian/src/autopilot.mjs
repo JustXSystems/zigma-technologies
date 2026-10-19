@@ -48,6 +48,8 @@ import { advancePhase9 } from './connectors/phase9-advance.mjs';
 import { advancePhase10 } from './connectors/phase10-advance.mjs';
 import { advancePhase11 } from './connectors/phase11-advance.mjs';
 import { advancePhase12 } from './connectors/phase12-advance.mjs';
+import { advancePhase13 } from './connectors/phase13-advance.mjs';
+import { advancePhase14 } from './connectors/phase14-advance.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
 function mergeFindings(scan, result) {
@@ -62,7 +64,7 @@ function mergeFindings(scan, result) {
 
 /**
  * Maximum automation loop (M5–M11):
- * scan → remediate → Phase 0–12 packs → meta polish → unlock → score lift → live convergence → webhook
+ * scan → remediate → Phase 0–14 packs → meta polish → unlock → perpetual signals → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
   hydrateMeridianSecrets();
@@ -463,7 +465,33 @@ export async function runAutopilot(profile, opts = {}) {
     actions.push({ id: 'phase12-advance', ...p12 });
     mergeFindings(scan, p12);
   }
-  if (profile.autopilot?.skipPhase11Advance !== true) {
+  let digestsDone = false;
+  if (profile.autopilot?.skipPhase14Advance !== true) {
+    const p14 = await advancePhase14(profile, {
+      outDir,
+      scan,
+      apply: true,
+      skipHeal: false,
+    });
+    actions.push({ id: 'phase14-advance', ...p14 });
+    mergeFindings(scan, p14);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p14.data?.digests?.weekly };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase13Advance !== true) {
+    const p13 = await advancePhase13(profile, {
+      outDir,
+      scan,
+      apply: true,
+      skipPhase11: true,
+      skipVerify: true,
+      skipAct: true,
+    });
+    actions.push({ id: 'phase13-advance', ...p13 });
+    mergeFindings(scan, p13);
+  }
+
+  if (!digestsDone && profile.autopilot?.skipPhase11Advance !== true) {
     const p11 = await advancePhase11(profile, {
       outDir,
       scan,
@@ -475,7 +503,8 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, p11);
     digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p11.data?.phase9?.message };
     monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
-  } else if (profile.autopilot?.skipPhase9Advance !== true) {
+    digestsDone = true;
+  } else if (!digestsDone && profile.autopilot?.skipPhase9Advance !== true) {
     const p9 = await advancePhase9(profile, {
       outDir,
       scan,
@@ -486,7 +515,8 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, p9);
     digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p9.data?.digests?.weekly };
     monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
-  } else {
+    digestsDone = true;
+  } else if (!digestsDone) {
     digest = await writeWeeklyDigest(profile, { scan, actions, outDir });
     actions.push({ id: 'weekly-digest', ...digest });
     monthly = await writeMonthlyDigest(profile, { scan, actions, outDir });
@@ -547,6 +577,8 @@ export async function runAutopilot(profile, opts = {}) {
     phase10Ops: actions.find((a) => a.id === 'phase10-advance')?.data?.paths?.html,
     phase11Ops: actions.find((a) => a.id === 'phase11-advance')?.data?.paths?.html,
     phase12Ops: actions.find((a) => a.id === 'phase12-advance')?.data?.paths?.html,
+    phase13Ops: actions.find((a) => a.id === 'phase13-advance')?.data?.paths?.html,
+    phase14Ops: actions.find((a) => a.id === 'phase14-advance')?.data?.paths?.html,
     unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,
   };
 

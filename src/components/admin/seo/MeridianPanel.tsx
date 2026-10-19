@@ -658,6 +658,20 @@ export default function MeridianPanel() {
             >
               Phase 12
             </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase13-advance' }, 'Phase 13 sovereign autoclose')}
+            >
+              Phase 13
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase14-advance' }, 'Phase 14 perpetual ops')}
+            >
+              Phase 14
+            </button>
             <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}>
               Rich Results
             </button>

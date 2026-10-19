@@ -33,10 +33,12 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 27. **Phase 10 continuous unlock** (live connector probes, sameAs/meta recovery, Windows/VPS cron pack; GSC/Bing acts already run above)  
 28. **Phase 11 live convergence** (seo:verify, deploy gate, cadence-collapsed checklist, refresh Phase 9, GBP draft)  
 29. **Phase 12 score lift** (fill CMS meta, auto-publish calendar week, deploy one-command, rescan)  
+30. **Phase 13 sovereign autoclose** (SSH apply LinkedIn into prod `theme_settings` + PM2 restart + clear deploy gate — no full redeploy required when code already has sameAs)  
+31. **Phase 14 perpetual ops** (unlock 100% without optional webhook · live GSC/GA4 signal cache · monthly digest fill · sameAs self-heal · cron guardian)  
 
 ## Highest-leverage human step
 
-**One Production deploy** (`gh auth login` once → `npm run meridian:deploy:prod` or command on `phase12-ops.html`). Then GBP verify. Day-to-day: **`phase12-ops.html`** / **`phase11-ops.html`**.
+Optional **GBP metrics** (no public API). Everything else: **`npm run meridian:act:phase14`** + weekly autopilot cron. Day-to-day: **`phase14-ops.html`**.
 
 ## Multi-site (M11)
 
@@ -63,7 +65,10 @@ npm run meridian:act:phase10         # continuous unlock + GSC/Bing + score reco
 npm run meridian:act:phase10:gh      # same + push secrets to GitHub Actions (gh auth)
 npm run meridian:act:phase11         # live convergence + refresh Phase 9 + collapsed checklist
 npm run meridian:act:phase12         # score lift + calendar auto-publish + deploy pack
-npm run meridian:deploy:prod         # gh workflow Deploy Production (needs gh auth)
+npm run meridian:act:phase13         # SSH sameAs autoclose + mission-complete dashboards
+npm run meridian:act:phase14         # perpetual signals + unlock 100% + digest fill
+npm run meridian:prod:sameas         # SSH LinkedIn → prod theme_settings + pm2 restart
+npm run meridian:deploy:prod         # optional full gh Deploy Production (needs gh auth)
 npm run meridian:act:polish
 npm run meridian:act:index-queue
 npm run meridian:act:og
@@ -79,6 +84,8 @@ Ops HTML dashboards (open after each act):
 - `phase8-ops.html` — outreach mailto  
 - `phase9-ops.html` — master command center (+ `phase9-routine.ics`)  
 - `phase10-ops.html` — continuous unlock (+ `phase10-schtasks.xml` / `meridian-cron.ps1`)  
-- `phase11-ops.html` — live convergence (+ GBP draft, deploy gate)  
-- `phase12-ops.html` — **primary** score lift + one-command deploy  
+- `phase11-ops.html` — live convergence (+ GBP draft)  
+- `phase12-ops.html` — score lift + deploy pack  
+- `phase13-ops.html` — sovereign autoclose / mission complete  
+- `phase14-ops.html` — **primary** perpetual ops + signal board  
 

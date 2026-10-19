@@ -130,13 +130,47 @@ export async function assessUnlockReadiness(profile, opts = {}) {
     },
   ];
 
+  // Probe live sameAs so unlock reflects Production, not only nap artefacts
+  try {
+    const origin = String(profile.origin || '').replace(/\/$/, '');
+    if (origin && sameAsCount === 0) {
+      const res = await fetch(`${origin}/?unlock=${Date.now()}`, {
+        headers: { 'user-agent': 'MeridianUnlock/1.0', 'cache-control': 'no-cache' },
+      });
+      const html = await res.text();
+      if (/"sameAs"\s*:/i.test(html)) {
+        const urls = [];
+        for (const m of html.matchAll(/"sameAs"\s*:\s*(\[[^\]]*\]|"[^"]+")/g)) {
+          try {
+            const v = JSON.parse(m[1]);
+            if (Array.isArray(v)) urls.push(...v);
+            else if (typeof v === 'string') urls.push(v);
+          } catch {
+            /* ignore */
+          }
+        }
+        sameAsCount = Math.max(sameAsCount, urls.length || 1);
+        const social = humanGates.find((g) => g.id === 'social_sameas');
+        if (social) {
+          social.ready = true;
+          social.howTo = 'OK — live sameAs present';
+          social.note = `Live sameAs: ${sameAsCount}`;
+        }
+      }
+    }
+  } catch {
+    /* network best-effort */
+  }
+
   const all = [...secrets, ...humanGates];
-  const totalWeight = all.reduce((s, g) => s + g.weight, 0);
-  const earned = all.reduce((s, g) => s + (g.ready ? g.weight : 0), 0);
+  // Optional gates (webhook) never block 100% unlock
+  const required = all.filter((g) => !g.optional);
+  const totalWeight = required.reduce((s, g) => s + g.weight, 0);
+  const earned = required.reduce((s, g) => s + (g.ready ? g.weight : 0), 0);
   const percent = totalWeight ? Math.round((earned / totalWeight) * 100) : 0;
 
   const nextUnlock = all
-    .filter((g) => !g.ready)
+    .filter((g) => !g.ready && !g.optional)
     .sort((a, b) => b.weight - a.weight)
     .slice(0, 5)
     .map((g) => ({

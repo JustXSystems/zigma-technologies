@@ -214,6 +214,8 @@ export async function advancePhase11(profile, opts = {}) {
     { id: '10', name: 'Phase 10 Continuous', file: 'phase10-ops.html' },
     { id: '11', name: 'Phase 11 Convergence', file: 'phase11-ops.html' },
     { id: '12', name: 'Phase 12 Score Lift', file: 'phase12-ops.html' },
+    { id: '13', name: 'Phase 13 Autoclose', file: 'phase13-ops.html' },
+    { id: '14', name: 'Phase 14 Perpetual', file: 'phase14-ops.html' },
     { id: '5', name: 'Phase 5 GBP', file: 'phase5-ops.html' },
     { id: '8', name: 'Phase 8 Outreach', file: 'phase8-ops.html' },
     { id: 'cockpit', name: 'Ops cockpit', file: 'ops-cockpit.html' },

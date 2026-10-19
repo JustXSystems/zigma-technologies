@@ -54,6 +54,8 @@ export type MeridianAct =
   | { action: 'phase10-advance'; apply?: boolean; skipAct?: boolean; syncGh?: boolean; force?: boolean }
   | { action: 'phase11-advance'; skipVerify?: boolean; skipPhase10?: boolean }
   | { action: 'phase12-advance'; apply?: boolean; triggerDeploy?: boolean; skipScan?: boolean; skipVerify?: boolean }
+  | { action: 'phase13-advance'; apply?: boolean; restart?: boolean; skipAct?: boolean; skipVerify?: boolean }
+  | { action: 'phase14-advance'; apply?: boolean; skipHeal?: boolean }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -87,6 +89,8 @@ export function meridianLatestPaths(env: MeridianEnv) {
     phase10Ops: path.join(dir, 'phase10-ops.html'),
     phase11Ops: path.join(dir, 'phase11-ops.html'),
     phase12Ops: path.join(dir, 'phase12-ops.html'),
+    phase13Ops: path.join(dir, 'phase13-ops.html'),
+    phase14Ops: path.join(dir, 'phase14-ops.html'),
     phaseMatrix: path.join(dir, 'phase-matrix.json'),
     jobStatus: path.join(dir, 'job-status.json'),
   };
@@ -531,6 +535,20 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     if (act.triggerDeploy) args.push('--trigger-deploy');
     if (act.skipScan) args.push('--skip-scan');
     if (act.skipVerify) args.push('--skip-verify');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase13-advance') {
+    const args = ['act', 'phase13-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.restart === false) args.push('--no-restart');
+    if (act.skipAct) args.push('--skip-act');
+    if (act.skipVerify) args.push('--skip-verify');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase14-advance') {
+    const args = ['act', 'phase14-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.skipHeal) args.push('--skip-heal');
     return spawnMeridian(args);
   }
   if (act.action === 'draft-meta') {
