@@ -18,12 +18,15 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 12. Citations / city / backlink playbooks  
 13. **Unlock readiness** + **Phase 0 wizard**  
 14. **Indexing queue** (auto-inspect when OAuth set)  
-15. Rich Results / top-meta / review kit / content calendar  
-16. Speed baseline + **OG share** + **locale decision**  
-17. PreProd removals  
-18. Bing + GSC act (when secrets set)  
-19. Weekly + monthly + quarterly digests + webhook  
-20. **Ops cockpit**  
+15. **Phase 2 advance** (verified sameAs → Site Settings + NAP + Rich Results pack)  
+16. **Phase 3 advance** (meta polish apply + alt + top-URL audit; hubs via `hub-seo.ts`)  
+17. **Phase 5 advance** (GBP ops HTML copy-vault + citations CSV + review kit)  
+18. Content calendar  
+19. Speed baseline + **OG share** + **locale decision**  
+20. PreProd removals  
+21. Bing + GSC act (when secrets set)  
+22. Weekly + monthly + quarterly digests + webhook  
+23. **Ops cockpit**  
 
 ## Highest-leverage human step
 
@@ -41,9 +44,15 @@ npm run meridian:profiles
 ```bash
 npm run meridian:autopilot
 npm run meridian:act:phase0
+npm run meridian:act:phase2          # sameAs + Rich Results (DB on host)
+npm run seo:phase2:sameas            # apply LinkedIn sameAs only
+npm run meridian:act:phase3          # meta polish + alt + top audit
+npm run meridian:act:phase5          # GBP ops HTML + citations CSV + review kit
 npm run meridian:act:polish
 npm run meridian:act:index-queue
 npm run meridian:act:og
 npm run meridian:act:locales
 npm run meridian:act:cockpit
 ```
+
+Open `storage/meridian/zigma-prod/phase5-ops.html` after Phase 5 — one-click NAP copy into Google Business Profile.

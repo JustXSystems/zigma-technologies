@@ -43,6 +43,9 @@ export type MeridianAct =
   | { action: 'og-share-pack' }
   | { action: 'indexing-queue' }
   | { action: 'locale-decision' }
+  | { action: 'phase2-advance'; apply?: boolean; force?: boolean }
+  | { action: 'phase3-advance'; apply?: boolean; force?: boolean }
+  | { action: 'phase5-advance' }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -457,6 +460,21 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'locale-decision') {
     return spawnMeridian(['act', 'locale-decision', '--profile', profile]);
+  }
+  if (act.action === 'phase2-advance') {
+    const args = ['act', 'phase2-advance', '--profile', profile];
+    if (act.apply) args.push('--apply');
+    if (act.force) args.push('--force');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase3-advance') {
+    const args = ['act', 'phase3-advance', '--profile', profile];
+    if (act.apply) args.push('--apply');
+    if (act.force) args.push('--force');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase5-advance') {
+    return spawnMeridian(['act', 'phase5-advance', '--profile', profile]);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

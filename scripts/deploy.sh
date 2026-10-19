@@ -314,6 +314,11 @@ fi
 # Meridian automation after healthy deploy (autopilot on prod; scan-only on preprod).
 if [[ "$DO_HEALTHCHECK" -eq 1 && -f packages/meridian/bin/meridian.mjs ]]; then
   if [[ "$ENV_NAME" == "prod" ]]; then
+    # Phase 2 sameAs before full autopilot so JSON-LD is live for NAP / Rich Results packs.
+    if [[ -f scripts/seo-phase2-sameas.mjs ]]; then
+      log "Phase 2 sameAs apply (verified LinkedIn → Site Settings)"
+      node scripts/seo-phase2-sameas.mjs || log "WARNING: sameAs apply skipped/failed — fill Admin → Site Settings → Social"
+    fi
     log "Meridian autopilot (prod)"
     if node packages/meridian/bin/meridian.mjs autopilot --profile packages/meridian/profiles/zigma.prod.json; then
       log "Meridian autopilot OK"

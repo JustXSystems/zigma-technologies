@@ -19,7 +19,7 @@ export async function writeRichResultsPack(profile, opts = {}) {
       { path: detail, expect: ['BreadcrumbList'] },
       { path: '/products', expect: ['BreadcrumbList'] },
       { path: '/services', expect: ['BreadcrumbList'] },
-      { path: '/contact', expect: [] },
+      { path: '/contact', expect: ['BreadcrumbList'] },
     ];
 
   const results = [];

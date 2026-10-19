@@ -36,6 +36,9 @@ import { writePhase0Wizard } from './connectors/phase0-wizard.mjs';
 import { writeOgSharePack } from './connectors/og-share-pack.mjs';
 import { writeIndexingQueue } from './connectors/indexing-queue.mjs';
 import { assessLocaleDecision } from './connectors/locale-decision.mjs';
+import { advancePhase2 } from './connectors/phase2-advance.mjs';
+import { advancePhase3 } from './connectors/phase3-advance.mjs';
+import { advancePhase5 } from './connectors/phase5-advance.mjs';
 import { readFile } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -341,6 +344,33 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'phase2-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase2(profile, {
+        outDir: resolve(outDir),
+        apply: argv.includes('--apply') || profile.autopilot?.autoApplySameAs === true,
+        force: argv.includes('--force'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase3-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase3(profile, {
+        outDir: resolve(outDir),
+        apply: argv.includes('--apply') || profile.autopilot?.autoPolishMeta === true,
+        applyAlt: argv.includes('--apply') || profile.autopilot?.autoApplyAlt === true,
+        force: argv.includes('--force'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase5-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase5(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'quarterly-digest') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await writeQuarterlyDigest(profile, { outDir: resolve(outDir) });
@@ -459,6 +489,9 @@ Usage:
   meridian act rich-results-pack | top20-meta-pack | review-kit | content-calendar --profile ./profiles/site.json
   meridian act speed-baseline | preprod-removals | quarterly-digest --profile ./profiles/site.json
   meridian act meta-polish [--apply] | phase0-wizard | og-share-pack | indexing-queue | locale-decision
+  meridian act phase2-advance [--apply] [--force] --profile ./profiles/site.json
+  meridian act phase3-advance [--apply] [--force] --profile ./profiles/site.json
+  meridian act phase5-advance --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian profiles
@@ -466,7 +499,7 @@ Usage:
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 0–9 packs + meta polish + unlock + ops cockpit + digests.
+Autopilot = full remediation + Phase 0–9 packs + Phase 2 sameAs + meta polish + unlock + ops cockpit + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY
@@ -474,6 +507,7 @@ Env:
   MERIDIAN_FAIL_ON_REGRESSION=1 Fail autopilot/verify CI when score drops ≥3
   MERIDIAN_AUTO_APPLY_META=1    Write drafted meta (+ alt) into CMS empty fields
   MERIDIAN_AUTO_APPLY_ALT=1     Write drafted image alt only
+  MERIDIAN_AUTO_APPLY_SAMEAS=1  Write verified social URLs into Site Settings (Phase 2)
 
 Docs: packages/meridian/SETUP.md · AUTOMATION.md
 `);

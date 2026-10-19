@@ -38,5 +38,8 @@ export { writePhase0Wizard } from './connectors/phase0-wizard.mjs';
 export { writeOgSharePack } from './connectors/og-share-pack.mjs';
 export { writeIndexingQueue } from './connectors/indexing-queue.mjs';
 export { assessLocaleDecision } from './connectors/locale-decision.mjs';
+export { advancePhase2 } from './connectors/phase2-advance.mjs';
+export { advancePhase3 } from './connectors/phase3-advance.mjs';
+export { advancePhase5 } from './connectors/phase5-advance.mjs';
 export { renderHtmlReport } from './report/html.mjs';
 export { renderMarkdownReport } from './report/markdown.mjs';

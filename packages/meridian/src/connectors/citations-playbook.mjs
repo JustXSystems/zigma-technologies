@@ -3,7 +3,12 @@ import { resolve } from 'node:path';
 import { auditNap } from './nap-audit.mjs';
 
 const DIRECTORIES = [
-  { id: 'linkedin', name: 'LinkedIn company page', url: 'https://www.linkedin.com/company/setup/new/', why: 'B2B trust + Site Settings social' },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn company page',
+    url: 'https://www.linkedin.com/company/zigmatechnologiesind',
+    why: 'Existing company page — claim/admin access + Site Settings sameAs',
+  },
   { id: 'indiamart', name: 'IndiaMART', url: 'https://seller.indiamart.com', why: 'Largest Indian B2B marketplace' },
   { id: 'tradeindia', name: 'TradeIndia', url: 'https://www.tradeindia.com', why: 'B2B marketplace' },
   { id: 'justdial', name: 'Justdial', url: 'https://www.justdial.com/Free-Listing', why: 'Local search presence' },

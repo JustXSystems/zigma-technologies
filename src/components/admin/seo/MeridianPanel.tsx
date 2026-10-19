@@ -581,6 +581,27 @@ export default function MeridianPanel() {
             <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'ops-cockpit' }, 'Writing ops cockpit')}>
               Regen cockpit
             </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase2-advance', apply: true }, 'Phase 2 advance (sameAs + Rich Results)')}
+            >
+              Phase 2
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase3-advance', apply: true }, 'Phase 3 advance (meta + alt)')}
+            >
+              Phase 3
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase5-advance' }, 'Phase 5 local SEO ops pack')}
+            >
+              Phase 5
+            </button>
             <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}>
               Rich Results
             </button>

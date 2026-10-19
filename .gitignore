@@ -73,3 +73,9 @@ next-env.d.ts
 /storage/meridian/**
 !/storage/meridian/.gitkeep
 /packages/meridian/out/
+
+# Google OAuth Desktop client downloads (never commit)
+/client_secret.json
+/clientid.json
+**/client_secret*.json
+!/packages/meridian/**/client_secret*.md

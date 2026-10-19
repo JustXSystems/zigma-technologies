@@ -46,6 +46,40 @@
     "autoOptimizeImages": true,
     "autoSeedContent": true,
     "autoPolishMeta": true,
+    "autoApplySameAs": true,
+    "sameAsVerified": {
+      "linkedinUrl": "https://www.linkedin.com/company/zigmatechnologiesind"
+    },
+    "gbp": {
+      "foundingYear": "2006",
+      "primaryCategory": "Solar energy company",
+      "whatsappDigits": "919590137666",
+      "categories": [
+        "Solar energy company",
+        "Solar energy system service",
+        "Electrical installation service",
+        "Energy equipment and solutions",
+        "Battery wholesaler",
+        "Electric vehicle charging station contractor"
+      ],
+      "services": [
+        "Solar EPC (rooftop and ground-mount)",
+        "UPS supply and installation",
+        "UPS AMC and repair",
+        "Battery energy storage (BESS)",
+        "EV charger installation",
+        "Electrical field services and commissioning"
+      ],
+      "serviceAreas": ["Bengaluru", "Chennai", "Hyderabad", "Mumbai", "Pune", "Delhi"]
+    },
+    "richResultsPages": [
+      { "path": "/", "expect": ["Organization", "LocalBusiness"] },
+      { "path": "/projects", "expect": ["BreadcrumbList"] },
+      { "path": "/projects/amc-engineering-college-200kw-bangalore", "expect": ["BreadcrumbList"] },
+      { "path": "/products", "expect": ["BreadcrumbList"] },
+      { "path": "/services", "expect": ["BreadcrumbList"] },
+      { "path": "/contact", "expect": ["BreadcrumbList"] }
+    ],
     "closedLoopHealthLimit": 40
   },
   "outputDir": "../../storage/meridian/zigma-prod"

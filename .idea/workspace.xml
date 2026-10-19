@@ -8,9 +8,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO updates">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/bin/meridian.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/bin/meridian.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/SETUP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/profiles/zigma.prod.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/profiles/zigma.prod.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/rich-results-pack.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/rich-results-pack.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/index.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/index.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/deploy.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
     </list>
@@ -70,23 +83,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0001055343299936" />
-      <entry key="S2" value="1.1013562028614408" />
-      <entry key="S5" value="1.4037539623449964" />
-      <entry key="S10" value="1.7115481558335273" />
-      <entry key="S30" value="2.5297237178586673" />
-      <entry key="S60" value="3.1152362391224178" />
-      <entry key="M2" value="3.8687221480527185" />
-      <entry key="M5" value="6.746662536450423" />
-      <entry key="M10" value="11.962908162437996" />
-      <entry key="M15" value="15.657689150994122" />
-      <entry key="M30" value="21.302923672918954" />
-      <entry key="H1" value="25.728790098219566" />
-      <entry key="H2" value="40.434908643983704" />
-      <entry key="H4" value="123.84671887646724" />
-      <entry key="D1" value="1427.1181890527816" />
-      <entry key="W1" value="11607.400954734021" />
+      <entry key="MS100" value="1.0000000000000047" />
+      <entry key="MS500" value="1.0023488591039522" />
+      <entry key="S2" value="1.585692641694239" />
+      <entry key="S5" value="3.104949095362487" />
+      <entry key="S10" value="4.977502558730565" />
+      <entry key="S30" value="13.36974541055476" />
+      <entry key="S60" value="27.43674210591403" />
+      <entry key="M2" value="46.4632123941369" />
+      <entry key="M5" value="67.64510661027526" />
+      <entry key="M10" value="77.41253984955314" />
+      <entry key="M15" value="81.08402394842783" />
+      <entry key="M30" value="85.95280086570087" />
+      <entry key="H1" value="93.69378253209622" />
+      <entry key="H2" value="110.28023196323792" />
+      <entry key="H4" value="175.8263498926237" />
+      <entry key="D1" value="1422.7165507361321" />
+      <entry key="W1" value="11582.348011765598" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -101,30 +114,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="9.454456790204258E-208" />
-      <entry key="H2" value="3.074810041319939E-104" />
-      <entry key="H4" value="1.7535136273840683E-52" />
-      <entry key="D1" value="2.403767560747617E-9" />
-      <entry key="W1" value="0.09103014296489735" />
+      <entry key="H1" value="1.4485141085729913E-208" />
+      <entry key="H2" value="1.203542316901502E-104" />
+      <entry key="H4" value="1.09706076264777E-52" />
+      <entry key="D1" value="2.2230337670127646E-9" />
+      <entry key="W1" value="0.09001932199097634" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.5783440919526437" />
-      <entry key="MS500" value="0.8963690638497321" />
-      <entry key="S2" value="1.0735784218112001" />
-      <entry key="S5" value="1.3915740225114257" />
-      <entry key="S10" value="1.704387273489347" />
-      <entry key="S30" value="2.5254825019447855" />
-      <entry key="S60" value="3.1123025279837964" />
-      <entry key="M2" value="3.866434580720169" />
-      <entry key="M5" value="6.744580533251849" />
-      <entry key="M10" value="11.96107560228633" />
-      <entry key="M15" value="15.656126796435696" />
-      <entry key="M30" value="21.301892076970745" />
-      <entry key="H1" value="25.728184117955102" />
-      <entry key="H2" value="40.434540885328936" />
-      <entry key="H4" value="123.84645813293963" />
-      <entry key="D1" value="1427.1180424362044" />
-      <entry key="W1" value="11607.491812730132" />
+      <entry key="MS100" value="2.400769147131109E-7" />
+      <entry key="MS500" value="0.04960273992713565" />
+      <entry key="S2" value="1.0380131537764143" />
+      <entry key="S5" value="2.8204590989820004" />
+      <entry key="S10" value="4.815906871577543" />
+      <entry key="S30" value="13.300349722307796" />
+      <entry key="S60" value="27.39113460223338" />
+      <entry key="M2" value="46.43305636031945" />
+      <entry key="M5" value="67.62973535242412" />
+      <entry key="M10" value="77.40408576982117" />
+      <entry key="M15" value="81.07819193188058" />
+      <entry key="M30" value="85.94971242610681" />
+      <entry key="H1" value="93.69202716516021" />
+      <entry key="H2" value="110.2791662699649" />
+      <entry key="H4" value="175.82568569362138" />
+      <entry key="D1" value="1422.7163235393914" />
+      <entry key="W1" value="11582.437847524918" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -151,41 +164,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
-    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/storage/meridian/zigma-prod&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "master",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\storage\meridian\zigma-prod" />
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies" />
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\storage\resumes" />
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\storage\meridian\zigma-prod" />
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\.next" />
     </key>

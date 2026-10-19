@@ -3,6 +3,7 @@ import CatalogPageClient from '../_components/CatalogPageClient';
 import SocialProofStrip from '@/components/SocialProofStrip';
 import JsonLd from '@/components/JsonLd';
 import { loadInitialCatalogListing } from '@/lib/catalog-listing';
+import { HUB_SEO } from '@/lib/hub-seo';
 import { breadcrumbJsonLd, buildPageMetadata } from '@/lib/seo';
 import { pageSeo } from '@/lib/site-copy';
 import { getSiteCopy } from '@/lib/site-content';
@@ -10,11 +11,7 @@ import { getSiteCopy } from '@/lib/site-content';
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = pageSeo(await getSiteCopy(), '/services', {
-    title: 'UPS AMC, Solar O&M, Installation & Power Services',
-    description:
-      'Annual maintenance contracts, engineering design, installation, commissioning and 24×7 support for UPS, solar, BESS and EV charging assets across India.',
-  });
+  const seo = pageSeo(await getSiteCopy(), '/services', HUB_SEO.services);
   return buildPageMetadata({ ...seo, path: '/services' });
 }
 

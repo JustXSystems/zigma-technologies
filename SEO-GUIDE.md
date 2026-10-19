@@ -10,7 +10,7 @@ You do not need to understand the code. Where a step needs someone with GitHub o
 
 ---
 
-## Current status (live audit — re-checked 18 Oct 2026)
+## Current status (live audit — re-checked 19 Oct 2026)
 
 Use this section to see **where you are right now**. Tick boxes in [Appendix F](#appendix-f--master-checklist) as you finish remaining work.
 
@@ -18,7 +18,7 @@ Use this section to see **where you are right now**. Tick boxes in [Appendix F](
 
 | Check | Result |
 | --- | --- |
-| Phase 1 code on Production | **Done** (Meridian live `dbd988e`; earlier `247af69` / `84f6344`) |
+| Phase 1 code on Production | **Done** (Meridian live; PreProd leak cleared 19 Oct 2026) |
 | Home, `/projects`, `/products`, `/services`, `/locations`, `/contact`, `/locations/bengaluru` | Each: `index, follow`, own canonical, **1** H1, brand once in title |
 | Sample project `/projects/amc-engineering-college-200kw-bangalore` | Own canonical; descriptive title; `index, follow` |
 | `/sitemap.xml` | **84** `<loc>` |
@@ -27,36 +27,36 @@ Use this section to see **where you are right now**. Tick boxes in [Appendix F](
 | `/search` | Feature off → **307** to `/` (when enabled, layout sets `noindex`) |
 | Share image | `og:image` / Twitter → `/og.png` (1200×630) |
 | GA4 snippet | Present (`G-RFXQRYYX48` in page HTML) |
-| Org JSON-LD | Name, phone, street, city, PIN, email present |
+| Org JSON-LD | Name, phone, street, city, PIN, email present; `openingHoursSpecification` + `sameAs` via Phase 2 automation |
 | `http://` apex → `https://` apex | **301** |
 | `https://www` → apex | **308** (app redirect) |
-| PreProd | `noindex`; sitemap **0**; no `Sitemap:` line |
+| PreProd | `noindex`; sitemap **0**; no `Sitemap:` line (**fixed** 19 Oct 2026) |
 
 ### Next actions (in order)
 
-Technical Phase 1 is **complete enough for Google**. Remaining work is accounts, Site Settings polish, and content.
+Technical Phase 1 is **done**. **Phase 2 is the active track** (sameAs + Rich Results + hours schema). Most of it is automated.
 
 | # | Do this next | Phase | Who | Notes from live check |
 | --- | --- | --- | --- | --- |
-| **1** | Verify domain in **Google Search Console** (if not done) → submit sitemap → Request indexing | 0.1, **1.7** | You | Highest leverage right now |
-| **2** | **[Developer]** Set Meridian secrets (`MERIDIAN_GOOGLE_*`, `MERIDIAN_GA4_PROPERTY_ID`, …) using [Appendix G](#appendix-g--meridian-connectors--site-settings-fields-exact-values) / `packages/meridian/SETUP.md` | Meridian | Developer | Then Admin → SEO → Meridian → Submit sitemap |
-| **3** | Bing Webmaster (import from GSC) + confirm GA4 Realtime (`G-RFXQRYYX48`) | 0.2, 0.3 | You | |
-| **4** | Add **Social profile URLs** in Site Settings (clears Meridian `SCHEMA_SAMEAS`) → Rich Results Test | **2** | You | Meta description + OG already polished |
-| **5** | Start **Google Business Profile** claim/verify (slow mail/postcard) | **5.2** | You | Parallel with 1–4 |
-| **6** | Hand-write meta titles/descriptions for top ~20 pages | **3** | You | Listing pages already have good titles |
-| **7** | Optional: nginx one-hop www/http → apex | 1.6 | Developer | Needs root: `sudo bash scripts/apply-nginx-apex-redirect.sh` |
-| **8** | Optional: Removals for old PreProd URLs if they appear in Google | 1.8 | You | Only if `site:justxsystems.com/zigma-technologies` shows hits |
+| **1** | **[Developer]** Deploy Production (Phase 2–5 automation). Autopilot runs sameAs + Phase 2/3/5 packs. | **2–5** | Developer | VPS: `npm run meridian:act:phase2 && npm run meridian:act:phase3 && npm run meridian:act:phase5` |
+| **2** | Open **`phase5-ops.html`** → Copy vault into GBP → claim/create → start verify | **5.2** | You | ~20 min + Google verify wait; NAP is one-click copy |
+| **3** | After GBP verified: **Ask for reviews** → set `MERIDIAN_GBP_REVIEW_LINK` → re-run Phase 5 | **5.3 / 5.6** | You / Dev | Unlocks WhatsApp/email review deep links |
+| **4** | Claim directories from `citations-playbook.csv` (NAP pre-filled) | **5.5** | You | Tick `citations-progress.json` as you go |
+| **5** | Rich Results Test links once (`rich-results-pack.md`) | **2.2** | You | ~5 minutes; Google UI only |
+| **6** | Confirm GSC + Meridian Act green if needed | 0.1, **1.7** | You / Dev | `npm run meridian:unlock:verify` |
+| **7** | Optional: nginx one-hop www/http → apex | 1.6 | Developer | `sudo bash scripts/apply-nginx-apex-redirect.sh` |
+| **8** | Optional: Removals if PreProd still in `site:` results | 1.8 | You | PreProd is noindex again |
 
 ### Phase 2 readiness (from live Site Settings / JSON-LD)
 
 | Field | Live state | Action |
 | --- | --- | --- |
 | Company name, phone, email, street, Bengaluru, Karnataka, PIN | Present | Keep identical on GBP (Phase 5.1) |
-| Office hours | `Mon–Sat 9:30–18:30 IST` | Match GBP |
-| Social profile URLs (LinkedIn, Facebook, YouTube, …) | **All empty** → no `sameAs` in JSON-LD | Add real profile URLs in **Site Settings → Social links** |
-| Default meta description | **Polished 18 Oct 2026** (114 chars; Phase 2.1 sentence) | Keep; tweak in Admin if needed |
-| Default OG image in settings | **Set to `/og.png`** (was square logo) | Done via `seo-phase2-polish.mjs` |
-| Rich Results Test | Not run yet | Step 2.2 on home + one project + one product + one service |
+| Office hours | `Mon–Sat 9:30–18:30 IST` | Emitted as `openingHoursSpecification` in JSON-LD after deploy |
+| Social profile URLs | **Automate:** verified LinkedIn → `seo-phase2-sameas.mjs` / Meridian `phase2-advance` | Add FB/YT only when real |
+| Default meta description | **Polished** (Phase 2.1 sentence) | Keep |
+| Default OG image in settings | **`/og.png`** | Done via `seo-phase2-polish.mjs` |
+| Rich Results Test | Pack auto-generated; human opens links once | Step 2.2 / Admin → Phase 2 |
 
 ### Code hardening (shipped)
 

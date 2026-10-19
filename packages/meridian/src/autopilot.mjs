@@ -37,6 +37,9 @@ import { writeOgSharePack } from './connectors/og-share-pack.mjs';
 import { writeIndexingQueue } from './connectors/indexing-queue.mjs';
 import { assessLocaleDecision } from './connectors/locale-decision.mjs';
 import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
+import { advancePhase2 } from './connectors/phase2-advance.mjs';
+import { advancePhase3 } from './connectors/phase3-advance.mjs';
+import { advancePhase5 } from './connectors/phase5-advance.mjs';
 
 function mergeFindings(scan, result) {
   if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
@@ -231,8 +234,8 @@ export async function runAutopilot(profile, opts = {}) {
     actions.push({ id: 'closed-loop', ...loop });
   }
 
-  // --- Citations playbook (Phase 5.5) ---
-  if (profile.autopilot?.skipCitations !== true) {
+  // --- Citations playbook (Phase 5.5) — skipped when Phase 5 advance bundles it ---
+  if (profile.autopilot?.skipCitations !== true && profile.autopilot?.skipPhase5Advance === true) {
     const napAction = actions.find((a) => a.id === 'nap-audit');
     const cites = await writeCitationsPlaybook(profile, {
       outDir,
@@ -280,22 +283,44 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, iq);
   }
 
-  // --- Rich Results pack (Phase 2.2) ---
-  if (profile.autopilot?.skipRichResults !== true) {
+  // --- Phase 2 advance (sameAs apply + NAP + Rich Results) ---
+  if (profile.autopilot?.skipPhase2Advance !== true) {
+    const p2 = await advancePhase2(profile, {
+      outDir,
+      apply:
+        opts.applySameAs === true ||
+        process.env.MERIDIAN_AUTO_APPLY_SAMEAS === '1' ||
+        profile.autopilot?.autoApplySameAs === true,
+    });
+    actions.push({ id: 'phase2-advance', ...p2 });
+    mergeFindings(scan, p2);
+  } else if (profile.autopilot?.skipRichResults !== true) {
     const rr = await writeRichResultsPack(profile, { outDir });
     actions.push({ id: 'rich-results-pack', ...rr });
     mergeFindings(scan, rr);
   }
 
-  // --- Top meta pack (Phase 3) ---
-  if (profile.autopilot?.skipTop20Meta !== true) {
+  // --- Phase 3 advance (meta polish apply + alt + top audit) ---
+  if (profile.autopilot?.skipPhase3Advance !== true) {
+    const p3 = await advancePhase3(profile, {
+      outDir,
+      apply: profile.autopilot?.autoPolishMeta === true || process.env.MERIDIAN_AUTO_POLISH_META === '1',
+      applyAlt: profile.autopilot?.autoApplyAlt === true || process.env.MERIDIAN_AUTO_APPLY_ALT === '1',
+    });
+    actions.push({ id: 'phase3-advance', ...p3 });
+    mergeFindings(scan, p3);
+  } else if (profile.autopilot?.skipTop20Meta !== true) {
     const top = await writeTop20MetaPack(profile, { outDir });
     actions.push({ id: 'top20-meta-pack', ...top });
     mergeFindings(scan, top);
   }
 
-  // --- Review kit (Phase 5.6) ---
-  if (profile.autopilot?.skipReviewKit !== true) {
+  // --- Phase 5 advance (GBP ops HTML + citations CSV + review kit) ---
+  if (profile.autopilot?.skipPhase5Advance !== true) {
+    const p5 = await advancePhase5(profile, { outDir });
+    actions.push({ id: 'phase5-advance', ...p5 });
+    mergeFindings(scan, p5);
+  } else if (profile.autopilot?.skipReviewKit !== true) {
     const napAction = actions.find((a) => a.id === 'nap-audit');
     const rk = await writeReviewKit(profile, { outDir, nap: napAction?.data?.nap });
     actions.push({ id: 'review-kit', ...rk });

@@ -167,7 +167,10 @@ export async function POST(request: Request) {
       action === 'phase0-wizard' ||
       action === 'og-share-pack' ||
       action === 'indexing-queue' ||
-      action === 'locale-decision'
+      action === 'locale-decision' ||
+      action === 'phase2-advance' ||
+      action === 'phase3-advance' ||
+      action === 'phase5-advance'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -201,6 +204,11 @@ export async function POST(request: Request) {
       else if (action === 'og-share-pack') act = { action: 'og-share-pack' };
       else if (action === 'indexing-queue') act = { action: 'indexing-queue' };
       else if (action === 'locale-decision') act = { action: 'locale-decision' };
+      else if (action === 'phase2-advance') {
+        act = { action: 'phase2-advance', apply: body.apply !== false, force: !!body.force };
+      } else if (action === 'phase3-advance') {
+        act = { action: 'phase3-advance', apply: body.apply !== false, force: !!body.force };
+      } else if (action === 'phase5-advance') act = { action: 'phase5-advance' };
       else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;

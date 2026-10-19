@@ -2,18 +2,28 @@ import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fetchManual, titleOf, meta as metaOf } from '../lib/html.mjs';
 
+/** Score the unique title only — layout appends "| Brand" so full <title> is longer. */
+function stripBrandSuffix(title, brand) {
+  let t = (title || '').trim();
+  if (!brand) return t;
+  const esc = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  t = t.replace(new RegExp(`\\s*[|–—-]\\s*${esc}\\s*$`, 'i'), '').trim();
+  return t;
+}
+
 function scoreTitle(title, brand) {
-  const t = (title || '').trim();
+  const raw = (title || '').trim();
+  const t = stripBrandSuffix(raw, brand);
   const len = t.length;
   const brandHits = brand
-    ? (t.match(new RegExp(brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
+    ? (raw.match(new RegExp(brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
     : 0;
   const issues = [];
-  if (len < 30) issues.push('short');
-  if (len > 65) issues.push('long');
+  if (len < 28) issues.push('short');
+  if (len > 60) issues.push('long');
   if (brandHits > 1) issues.push('brand-twice');
   if (!t) issues.push('empty');
-  return { len, brandHits, issues, ok: issues.length === 0 };
+  return { len, brandHits, uniqueTitle: t, issues, ok: issues.length === 0 };
 }
 
 function scoreDesc(desc) {
@@ -147,7 +157,8 @@ export async function writeTop20MetaPack(profile, opts = {}) {
         code: 'TOP20_META',
         severity: polish >= 5 ? 'medium' : 'low',
         title: `${polish} priority page(s) outside ideal title/description length`,
-        remediation: 'Hand-polish using top20-meta-pack.md (Phase 3). Autopilot already fills empty CMS meta.',
+        remediation:
+          'Run meridian act phase3-advance --apply (or Autopilot). Hub titles: src/lib/hub-seo.ts. Spot-check top20-meta-pack.md only for remaining gaps.',
         owner: 'marketing',
         pillar: 'onpage',
       },

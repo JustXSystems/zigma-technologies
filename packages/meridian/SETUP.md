@@ -303,10 +303,24 @@ npm run meridian:act:inspect
 
 ---
 
-## Part H — Site Settings social URLs (sameAs) **[You]**
+## Part H — Site Settings social URLs (sameAs) **[You]** / automated
 
-Meridian finding `SCHEMA_SAMEAS` means Organization JSON-LD has no social profiles.  
-This is **not** a Meridian secret — it is Admin content.
+Meridian finding `SCHEMA_SAMEAS` means Organization JSON-LD has no social profiles.
+
+### Automated (preferred)
+
+Zigma Production ships a **verified** LinkedIn company URL in `zigma.prod.json` → `autopilot.sameAsVerified`.
+
+On the Production VPS (DB access):
+
+```bash
+npm run meridian:act:phase2
+# or: npm run seo:phase2:sameas
+```
+
+That writes LinkedIn into Site Settings, rechecks NAP, and regenerates the Rich Results pack. Autopilot does the same when `autoApplySameAs` is true.
+
+### Manual (extra networks)
 
 1. Open `https://zigma-technologies.com/admin/site-settings`.
 2. Section **Social links**.
@@ -314,7 +328,7 @@ This is **not** a Meridian secret — it is Admin content.
 
 | Field | Correct value looks like | How to get it |
 | --- | --- | --- |
-| **LinkedIn URL** | `https://www.linkedin.com/company/your-company-slug/` | LinkedIn → Company page → copy address bar |
+| **LinkedIn URL** | `https://www.linkedin.com/company/zigmatechnologiesind` | Already auto-applied when Phase 2 runs |
 | **Facebook URL** | `https://www.facebook.com/YourPage` | Facebook Page → About / share → copy link |
 | **YouTube URL** | `https://www.youtube.com/@YourHandle` or `/channel/UC…` | YouTube → your channel → copy URL |
 | **Instagram URL** | `https://www.instagram.com/yourhandle/` | Instagram profile → copy link |
