@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runCli } from '../src/cli.mjs';
+import { hydrateMeridianSecrets } from '../src/lib/hydrate-secrets.mjs';
 
 /** Load repo-root .env if present (does not override existing process.env). */
 function loadDotEnv() {
@@ -19,6 +20,7 @@ function loadDotEnv() {
 }
 
 loadDotEnv();
+hydrateMeridianSecrets(resolve(dirname(fileURLToPath(import.meta.url)), '../../..'));
 
 runCli(process.argv.slice(2)).catch((err) => {
   console.error(err?.stack || err);

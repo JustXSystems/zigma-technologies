@@ -46,6 +46,12 @@ export type MeridianAct =
   | { action: 'phase2-advance'; apply?: boolean; force?: boolean }
   | { action: 'phase3-advance'; apply?: boolean; force?: boolean }
   | { action: 'phase5-advance' }
+  | { action: 'phase4-advance'; apply?: boolean }
+  | { action: 'phase6-advance' }
+  | { action: 'phase7-advance'; apply?: boolean }
+  | { action: 'phase8-advance' }
+  | { action: 'phase9-advance'; skipForm?: boolean }
+  | { action: 'phase10-advance'; apply?: boolean; skipAct?: boolean; syncGh?: boolean; force?: boolean }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -74,6 +80,10 @@ export function meridianLatestPaths(env: MeridianEnv) {
     opsCockpit: path.join(dir, 'ops-cockpit.html'),
     opsCockpitJson: path.join(dir, 'ops-cockpit.json'),
     phase0Wizard: path.join(dir, 'phase0-wizard.html'),
+    phase9Ops: path.join(dir, 'phase9-ops.html'),
+    phase9Ics: path.join(dir, 'phase9-routine.ics'),
+    phase10Ops: path.join(dir, 'phase10-ops.html'),
+    phaseMatrix: path.join(dir, 'phase-matrix.json'),
     jobStatus: path.join(dir, 'job-status.json'),
   };
 }
@@ -475,6 +485,35 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'phase5-advance') {
     return spawnMeridian(['act', 'phase5-advance', '--profile', profile]);
+  }
+  if (act.action === 'phase4-advance') {
+    const args = ['act', 'phase4-advance', '--profile', profile];
+    if (act.apply) args.push('--apply');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase6-advance') {
+    return spawnMeridian(['act', 'phase6-advance', '--profile', profile]);
+  }
+  if (act.action === 'phase7-advance') {
+    const args = ['act', 'phase7-advance', '--profile', profile];
+    if (act.apply) args.push('--apply');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase8-advance') {
+    return spawnMeridian(['act', 'phase8-advance', '--profile', profile]);
+  }
+  if (act.action === 'phase9-advance') {
+    const args = ['act', 'phase9-advance', '--profile', profile];
+    if (act.skipForm) args.push('--skip-form');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase10-advance') {
+    const args = ['act', 'phase10-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.skipAct) args.push('--skip-act');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.force) args.push('--force');
+    return spawnMeridian(args);
   }
   if (act.action === 'draft-meta') {
     return spawnMeridian(['act', 'draft-meta', '--profile', profile]);

@@ -1,6 +1,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { googleEnvStatus } from './google-auth.mjs';
+import { hydrateMeridianSecrets } from '../lib/hydrate-secrets.mjs';
 
 function envSet(k) {
   return !!(process.env[k] || '').trim();
@@ -11,6 +12,7 @@ function envSet(k) {
  * Never prints secret values — only set/missing.
  */
 export async function assessUnlockReadiness(profile, opts = {}) {
+  hydrateMeridianSecrets();
   const outDir = opts.outDir || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
   const google = googleEnvStatus();
   const ga4 = envSet('MERIDIAN_GA4_PROPERTY_ID');
@@ -19,6 +21,7 @@ export async function assessUnlockReadiness(profile, opts = {}) {
   const webhook = envSet('MERIDIAN_WEBHOOK_URL');
 
   let sameAsCount = 0;
+  let cmsSocialCount = 0;
   let napMissing = [];
   try {
     const nap = JSON.parse(await readFile(resolve(outDir, 'nap-audit.json'), 'utf8'));
@@ -27,6 +30,17 @@ export async function assessUnlockReadiness(profile, opts = {}) {
   } catch {
     /* nap not run yet */
   }
+  // CMS may already have LinkedIn etc. while live HTML awaits deploy
+  try {
+    const p2 = JSON.parse(await readFile(resolve(outDir, 'phase2-advance.json'), 'utf8'));
+    const row = p2.apply?.after || p2.apply?.before || {};
+    cmsSocialCount = ['linkedinUrl', 'facebookUrl', 'instagramUrl', 'youtubeUrl', 'xUrl'].filter((k) =>
+      String(row[k] || '').startsWith('http')
+    ).length;
+  } catch {
+    /* phase2 not run yet */
+  }
+  const socialReady = sameAsCount > 0 || cmsSocialCount > 0;
 
   const secrets = [
     {
@@ -82,9 +96,20 @@ export async function assessUnlockReadiness(profile, opts = {}) {
       id: 'social_sameas',
       label: 'Social profile URLs in Site Settings',
       weight: 15,
-      ready: sameAsCount > 0,
+      ready: socialReady,
       unlocks: ['JSON-LD sameAs', 'SCHEMA_SAMEAS clear'],
-      howTo: 'Admin → Site Settings → Social links (after citations LinkedIn/FB/YT)',
+      howTo:
+        sameAsCount > 0
+          ? 'OK — live sameAs present'
+          : cmsSocialCount > 0
+            ? 'CMS social set — deploy Production so JSON-LD sameAs goes live'
+            : 'Admin → Site Settings → Social links (or npm run seo:phase2:sameas)',
+      note:
+        sameAsCount > 0
+          ? `Live sameAs: ${sameAsCount}`
+          : cmsSocialCount > 0
+            ? `CMS social fields: ${cmsSocialCount} (awaiting deploy)`
+            : null,
     },
     {
       id: 'nap_complete',
@@ -147,6 +172,7 @@ export async function assessUnlockReadiness(profile, opts = {}) {
     })),
     nextUnlock,
     sameAsCount,
+    cmsSocialCount,
   };
 
   const md = [

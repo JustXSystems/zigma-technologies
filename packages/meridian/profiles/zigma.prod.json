@@ -46,6 +46,7 @@
     "autoOptimizeImages": true,
     "autoSeedContent": true,
     "autoPolishMeta": true,
+    "autoPsi": true,
     "autoApplySameAs": true,
     "sameAsVerified": {
       "linkedinUrl": "https://www.linkedin.com/company/zigmatechnologiesind"

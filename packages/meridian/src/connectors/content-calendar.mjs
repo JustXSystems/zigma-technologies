@@ -33,10 +33,10 @@ export async function writeContentCalendar(profile, opts = {}) {
   }));
 
   const briefTopics = briefs.slice(0, 8).map((b) => ({
-    topic: b.title || b.path || 'Expand thin page',
-    path: b.path || b.url || '',
+    topic: b.brief?.workingTitle || b.title || b.pathname || b.path || 'Expand thin page',
+    path: b.pathname || b.path || b.url || '',
     intent: 'thin-expansion',
-    notes: b.brief || b.summary || 'See content-briefs.md',
+    notes: Array.isArray(b.brief?.outline) ? b.brief.outline[0] : b.summary || 'See content-briefs.md',
   }));
 
   const topics = [...pool, ...briefTopics];

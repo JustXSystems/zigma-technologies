@@ -40,6 +40,13 @@ import { writeOpsCockpit } from './connectors/ops-cockpit.mjs';
 import { advancePhase2 } from './connectors/phase2-advance.mjs';
 import { advancePhase3 } from './connectors/phase3-advance.mjs';
 import { advancePhase5 } from './connectors/phase5-advance.mjs';
+import { advancePhase4 } from './connectors/phase4-advance.mjs';
+import { advancePhase6 } from './connectors/phase6-advance.mjs';
+import { advancePhase7 } from './connectors/phase7-advance.mjs';
+import { advancePhase8 } from './connectors/phase8-advance.mjs';
+import { advancePhase9 } from './connectors/phase9-advance.mjs';
+import { advancePhase10 } from './connectors/phase10-advance.mjs';
+import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
 function mergeFindings(scan, result) {
   if (!Array.isArray(result?.findings) || !result.findings.length || !scan.report?.findings) return;
@@ -53,9 +60,10 @@ function mergeFindings(scan, result) {
 
 /**
  * Maximum automation loop (M5–M11):
- * scan → remediate → Phase 0–9 packs → meta polish → unlock → digests → cockpit → webhook
+ * scan → remediate → Phase 0–10 packs → meta polish → unlock → digests → continuous ops → webhook
  */
 export async function runAutopilot(profile, opts = {}) {
+  hydrateMeridianSecrets();
   const started = Date.now();
   const scan = await runMeridian(profile, { outDir: opts.outDir });
   const actions = [];
@@ -245,15 +253,15 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, cites);
   }
 
-  // --- City × service readiness (Phase 6) ---
-  if (profile.autopilot?.skipCityPages !== true) {
+  // --- City × service readiness (Phase 6) — skipped when Phase 6 advance bundles it ---
+  if (profile.autopilot?.skipCityPages !== true && profile.autopilot?.skipPhase6Advance === true) {
     const city = await assessCityPages(profile, { outDir });
     actions.push({ id: 'city-pages-readiness', ...city });
     mergeFindings(scan, city);
   }
 
-  // --- Backlink outreach pack (Phase 8) ---
-  if (profile.autopilot?.skipBacklinks !== true) {
+  // --- Backlink outreach pack (Phase 8) — skipped when Phase 8 advance bundles it ---
+  if (profile.autopilot?.skipBacklinks !== true && profile.autopilot?.skipPhase8Advance === true) {
     const bl = await writeBacklinkOutreach(profile, { outDir });
     actions.push({ id: 'backlink-outreach', ...bl });
     mergeFindings(scan, bl);
@@ -327,15 +335,44 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, rk);
   }
 
-  // --- Content calendar (Phase 7) ---
-  if (profile.autopilot?.skipContentCalendar !== true) {
+  // --- Phase 7 advance (calendar ICS/CSV + ops; keywords/briefs/seed already ran) ---
+  if (profile.autopilot?.skipPhase7Advance !== true) {
+    const p7 = await advancePhase7(profile, {
+      outDir,
+      skipKeywordMap: true,
+      skipBriefs: true,
+      seed: false,
+    });
+    actions.push({ id: 'phase7-advance', ...p7 });
+    mergeFindings(scan, p7);
+  } else if (profile.autopilot?.skipContentCalendar !== true) {
     const cal = await writeContentCalendar(profile, { outDir });
     actions.push({ id: 'content-calendar', ...cal });
     mergeFindings(scan, cal);
   }
 
-  // --- Speed baseline (Phase 4) — links always; PSI API only when MERIDIAN_AUTO_PSI=1 ---
-  if (profile.autopilot?.skipSpeedBaseline !== true) {
+  // --- Phase 8 advance (outreach mailto + CSV + ops) ---
+  if (profile.autopilot?.skipPhase8Advance !== true) {
+    const p8 = await advancePhase8(profile, { outDir });
+    actions.push({ id: 'phase8-advance', ...p8 });
+    mergeFindings(scan, p8);
+  }
+
+  // --- Phase 4 advance (PSI + TTFB + ops HTML; images already scanned earlier) ---
+  if (profile.autopilot?.skipPhase4Advance !== true) {
+    const heavyCount = actions.find((a) => a.id === 'image-weight')?.data?.heavyCount;
+    const p4 = await advancePhase4(profile, {
+      outDir,
+      skipImages: true,
+      heavyCount,
+      runPsi:
+        opts.runPsi === true ||
+        process.env.MERIDIAN_AUTO_PSI === '1' ||
+        profile.autopilot?.autoPsi === true,
+    });
+    actions.push({ id: 'phase4-advance', ...p4 });
+    mergeFindings(scan, p4);
+  } else if (profile.autopilot?.skipSpeedBaseline !== true) {
     const speed = await writeSpeedBaseline(profile, {
       outDir,
       skipApi:
@@ -354,8 +391,12 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, og);
   }
 
-  // --- Locale decision (Phase 6.3) ---
-  if (profile.autopilot?.skipLocaleDecision !== true) {
+  // --- Phase 6 advance (city briefs + locale decision) ---
+  if (profile.autopilot?.skipPhase6Advance !== true) {
+    const p6 = await advancePhase6(profile, { outDir });
+    actions.push({ id: 'phase6-advance', ...p6 });
+    mergeFindings(scan, p6);
+  } else if (profile.autopilot?.skipLocaleDecision !== true) {
     const loc = await assessLocaleDecision(profile, { outDir });
     actions.push({ id: 'locale-decision', ...loc });
     mergeFindings(scan, loc);
@@ -404,30 +445,54 @@ export async function runAutopilot(profile, opts = {}) {
     });
   }
 
-  // --- Digests ---
-  const digest = await writeWeeklyDigest(profile, { scan, actions, outDir });
-  actions.push({ id: 'weekly-digest', ...digest });
-
-  const monthly = await writeMonthlyDigest(profile, { scan, actions, outDir });
-  actions.push({ id: 'monthly-digest', ...monthly });
-
-  // --- Quarterly digest (Phase 9.3) ---
-  if (profile.autopilot?.skipQuarterly !== true) {
-    const q = await writeQuarterlyDigest(profile, { outDir, scan, actions });
-    actions.push({ id: 'quarterly-digest', ...q });
+  // --- Phase 10 continuous unlock (connectors + GSC/Bing + score recovery) ---
+  // Runs before Phase 9 digests so unlock % / acts appear in the weekly checklist.
+  if (profile.autopilot?.skipPhase10Advance !== true) {
+    const p10 = await advancePhase10(profile, {
+      outDir,
+      // Phase 2/3 + GSC/Bing already ran earlier in this autopilot pass
+      apply: false,
+      skipAct: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1',
+    });
+    actions.push({ id: 'phase10-advance', ...p10 });
+    mergeFindings(scan, p10);
   }
 
-  // --- Ops cockpit HTML (M9–M10) ---
-  if (profile.autopilot?.skipOpsCockpit !== true) {
-    const unlockAction = actions.find((a) => a.id === 'unlock-readiness');
-    const cockpit = await writeOpsCockpit(profile, {
+  // --- Phase 9 command center (digests + cockpit + routine ICS) ---
+  let digest = { data: { paths: {} } };
+  let monthly = { data: { paths: {} } };
+  if (profile.autopilot?.skipPhase9Advance !== true) {
+    const p9 = await advancePhase9(profile, {
       outDir,
       scan,
       actions,
-      unlock: unlockAction?.data,
-      scorecard: scan.report.scorecard,
+      skipForm: true, // already probed earlier in autopilot
     });
-    actions.push({ id: 'ops-cockpit', ...cockpit });
+    actions.push({ id: 'phase9-advance', ...p9 });
+    mergeFindings(scan, p9);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p9.data?.digests?.weekly };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+  } else {
+    digest = await writeWeeklyDigest(profile, { scan, actions, outDir });
+    actions.push({ id: 'weekly-digest', ...digest });
+    monthly = await writeMonthlyDigest(profile, { scan, actions, outDir });
+    actions.push({ id: 'monthly-digest', ...monthly });
+    if (profile.autopilot?.skipQuarterly !== true) {
+      const q = await writeQuarterlyDigest(profile, { outDir, scan, actions });
+      actions.push({ id: 'quarterly-digest', ...q });
+    }
+    if (profile.autopilot?.skipOpsCockpit !== true) {
+      const unlockAction = actions.find((a) => a.id === 'unlock-readiness');
+      const cockpit = await writeOpsCockpit(profile, {
+        outDir,
+        scan,
+        actions,
+        unlock: unlockAction?.data,
+        scorecard: scan.report.scorecard,
+      });
+      actions.push({ id: 'ops-cockpit', ...cockpit });
+    }
   }
 
   const trend = scan.report.trend || null;
@@ -462,7 +527,11 @@ export async function runAutopilot(profile, opts = {}) {
     altDrafts: altOut,
     weeklyDigest: digest.data?.paths?.mdPath,
     monthlyDigest: monthly.data?.paths?.mdPath,
-    opsCockpit: actions.find((a) => a.id === 'ops-cockpit')?.data?.paths?.html,
+    opsCockpit:
+      actions.find((a) => a.id === 'phase9-advance')?.data?.paths?.cockpit ||
+      actions.find((a) => a.id === 'ops-cockpit')?.data?.paths?.html,
+    phase9Ops: actions.find((a) => a.id === 'phase9-advance')?.data?.paths?.html,
+    phase10Ops: actions.find((a) => a.id === 'phase10-advance')?.data?.paths?.html,
     unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,
   };
 

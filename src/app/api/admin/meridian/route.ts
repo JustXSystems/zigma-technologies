@@ -170,7 +170,13 @@ export async function POST(request: Request) {
       action === 'locale-decision' ||
       action === 'phase2-advance' ||
       action === 'phase3-advance' ||
-      action === 'phase5-advance'
+      action === 'phase5-advance' ||
+      action === 'phase4-advance' ||
+      action === 'phase6-advance' ||
+      action === 'phase7-advance' ||
+      action === 'phase8-advance' ||
+      action === 'phase9-advance' ||
+      action === 'phase10-advance'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -209,7 +215,22 @@ export async function POST(request: Request) {
       } else if (action === 'phase3-advance') {
         act = { action: 'phase3-advance', apply: body.apply !== false, force: !!body.force };
       } else if (action === 'phase5-advance') act = { action: 'phase5-advance' };
-      else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
+      else if (action === 'phase4-advance') {
+        act = { action: 'phase4-advance', apply: body.apply !== false };
+      } else if (action === 'phase6-advance') act = { action: 'phase6-advance' };
+      else if (action === 'phase7-advance') {
+        act = { action: 'phase7-advance', apply: body.apply !== false };
+      } else if (action === 'phase8-advance') act = { action: 'phase8-advance' };
+      else if (action === 'phase9-advance') act = { action: 'phase9-advance', skipForm: !!body.skipForm };
+      else if (action === 'phase10-advance') {
+        act = {
+          action: 'phase10-advance',
+          apply: body.apply !== false,
+          skipAct: !!body.skipAct,
+          syncGh: !!body.syncGh,
+          force: !!body.force,
+        };
+      } else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);
       let parsed: unknown = null;
       try {

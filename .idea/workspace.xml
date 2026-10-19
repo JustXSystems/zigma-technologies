@@ -7,23 +7,21 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO updates">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases 2–5 together">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/SETUP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/bin/meridian.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/bin/meridian.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/profiles/zigma.prod.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/profiles/zigma.prod.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/content-calendar.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/content-calendar.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/rich-results-pack.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/rich-results-pack.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/unlock-readiness.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/unlock-readiness.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/weekly-digest.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/weekly-digest.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian/src/index.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/index.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deploy.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(site)/contact/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OrganizationJsonLd.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
     </list>
@@ -289,7 +287,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 catalog settings in hero section customizattion" />
     <MESSAGE value="#45 catalog settings in section customizattion" />
     <MESSAGE value="#45 catalog settings section customizattion" />
     <MESSAGE value="#48 career enquiry email integration and configuration from admin" />
@@ -314,7 +311,8 @@
     <MESSAGE value="#52 About adding multple people" />
     <MESSAGE value="#52 Enhance careers" />
     <MESSAGE value="#52 SEO updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 SEO updates" />
+    <MESSAGE value="#52 SEO Phases 2–5 together" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52 SEO Phases 2–5 together" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -21,16 +21,20 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 15. **Phase 2 advance** (verified sameAs → Site Settings + NAP + Rich Results pack)  
 16. **Phase 3 advance** (meta polish apply + alt + top-URL audit; hubs via `hub-seo.ts`)  
 17. **Phase 5 advance** (GBP ops HTML copy-vault + citations CSV + review kit)  
-18. Content calendar  
-19. Speed baseline + **OG share** + **locale decision**  
-20. PreProd removals  
-21. Bing + GSC act (when secrets set)  
-22. Weekly + monthly + quarterly digests + webhook  
-23. **Ops cockpit**  
+18. **Phase 4 advance** (image optimize + PSI lab + TTFB probe + ops HTML)  
+19. **Phase 6 advance** (city content briefs + locale decision + ops HTML)  
+20. **Phase 7 advance** (keyword map + briefs + calendar ICS/CSV + ops HTML)  
+21. **Phase 8 advance** (outreach mailto + CSV + progress + ops HTML)  
+22. **OG share**  
+23. PreProd removals  
+24. Bing + GSC act (when secrets set)  
+25. Weekly + monthly + quarterly digests + webhook  
+26. **Ops cockpit** / Phase 9 command center  
+27. **Phase 10 continuous unlock** (live connector probes, sameAs/meta recovery, Windows/VPS cron pack; GSC/Bing acts already run above)  
 
 ## Highest-leverage human step
 
-Open **`phase0-wizard.html`** (Admin → Phase 0 wizard) and set `MERIDIAN_GOOGLE_*` — that unlocks GSC sitemap submit, URL inspect, and indexing-queue automation.
+OAuth secrets in `unlock-secrets.json` / `.env` unlock GSC + GA4. Remaining: optional webhook, **prod deploy** for live sameAs, GBP verify.
 
 ## Multi-site (M11)
 
@@ -48,6 +52,13 @@ npm run meridian:act:phase2          # sameAs + Rich Results (DB on host)
 npm run seo:phase2:sameas            # apply LinkedIn sameAs only
 npm run meridian:act:phase3          # meta polish + alt + top audit
 npm run meridian:act:phase5          # GBP ops HTML + citations CSV + review kit
+npm run meridian:act:phase4          # PSI lab + TTFB + image optimize
+npm run meridian:act:phase6          # city briefs + locale decision
+npm run meridian:act:phase7          # content calendar ICS + keywords
+npm run meridian:act:phase8          # backlink mailto ops
+npm run meridian:act:phase9          # command center + digests + routine ICS
+npm run meridian:act:phase10         # continuous unlock + GSC/Bing + score recovery
+npm run meridian:act:phase10:gh      # same + push secrets to GitHub Actions (gh auth)
 npm run meridian:act:polish
 npm run meridian:act:index-queue
 npm run meridian:act:og
@@ -55,4 +66,12 @@ npm run meridian:act:locales
 npm run meridian:act:cockpit
 ```
 
-Open `storage/meridian/zigma-prod/phase5-ops.html` after Phase 5 — one-click NAP copy into Google Business Profile.
+Ops HTML dashboards (open after each act):
+- `phase5-ops.html` — GBP NAP copy vault  
+- `phase4-ops.html` — speed / PSI  
+- `phase6-ops.html` — city briefs + locale  
+- `phase7-ops.html` — content calendar (+ `.ics`)  
+- `phase8-ops.html` — outreach mailto  
+- `phase9-ops.html` — master command center (+ `phase9-routine.ics`)  
+- `phase10-ops.html` — continuous unlock (+ `phase10-schtasks.xml` / `meridian-cron.ps1`)  
+

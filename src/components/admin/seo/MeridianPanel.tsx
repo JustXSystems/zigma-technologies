@@ -602,6 +602,48 @@ export default function MeridianPanel() {
             >
               Phase 5
             </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase4-advance', apply: true }, 'Phase 4 speed ops')}
+            >
+              Phase 4
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase6-advance' }, 'Phase 6 city & locale ops')}
+            >
+              Phase 6
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase7-advance', apply: true }, 'Phase 7 content ops')}
+            >
+              Phase 7
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase8-advance' }, 'Phase 8 backlink ops')}
+            >
+              Phase 8
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase9-advance' }, 'Phase 9 command center')}
+            >
+              Phase 9
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase10-advance' }, 'Phase 10 continuous unlock')}
+            >
+              Phase 10
+            </button>
             <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}>
               Rich Results
             </button>

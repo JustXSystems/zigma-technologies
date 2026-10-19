@@ -39,6 +39,12 @@ import { assessLocaleDecision } from './connectors/locale-decision.mjs';
 import { advancePhase2 } from './connectors/phase2-advance.mjs';
 import { advancePhase3 } from './connectors/phase3-advance.mjs';
 import { advancePhase5 } from './connectors/phase5-advance.mjs';
+import { advancePhase4 } from './connectors/phase4-advance.mjs';
+import { advancePhase6 } from './connectors/phase6-advance.mjs';
+import { advancePhase7 } from './connectors/phase7-advance.mjs';
+import { advancePhase8 } from './connectors/phase8-advance.mjs';
+import { advancePhase9 } from './connectors/phase9-advance.mjs';
+import { advancePhase10 } from './connectors/phase10-advance.mjs';
 import { readFile } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -371,6 +377,58 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'phase4-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase4(profile, {
+        outDir: resolve(outDir),
+        apply: argv.includes('--apply') || profile.autopilot?.autoOptimizeImages === true,
+        runPsi: !argv.includes('--skip-api'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase6-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase6(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase7-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase7(profile, {
+        outDir: resolve(outDir),
+        apply: argv.includes('--apply') || profile.autopilot?.autoSeedContent === true,
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase8-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase8(profile, { outDir: resolve(outDir) });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase9-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase9(profile, {
+        outDir: resolve(outDir),
+        skipForm: argv.includes('--skip-form'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase10-advance') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await advancePhase10(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        skipAct: argv.includes('--skip-act'),
+        syncGh: argv.includes('--sync-gh'),
+        force: argv.includes('--force'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (action === 'quarterly-digest') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await writeQuarterlyDigest(profile, { outDir: resolve(outDir) });
@@ -492,6 +550,12 @@ Usage:
   meridian act phase2-advance [--apply] [--force] --profile ./profiles/site.json
   meridian act phase3-advance [--apply] [--force] --profile ./profiles/site.json
   meridian act phase5-advance --profile ./profiles/site.json
+  meridian act phase4-advance [--apply] [--skip-api] --profile ./profiles/site.json
+  meridian act phase6-advance --profile ./profiles/site.json
+  meridian act phase7-advance [--apply] --profile ./profiles/site.json
+  meridian act phase8-advance --profile ./profiles/site.json
+  meridian act phase9-advance [--skip-form] --profile ./profiles/site.json
+  meridian act phase10-advance [--no-apply] [--skip-act] [--sync-gh] [--force] --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
   meridian act weekly-digest | monthly-digest --profile ./profiles/site.json
   meridian profiles
@@ -499,7 +563,7 @@ Usage:
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 0–9 packs + Phase 2 sameAs + meta polish + unlock + ops cockpit + digests.
+Autopilot = full remediation + Phase 0–10 packs + sameAs + meta polish + unlock + continuous ops + digests.
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

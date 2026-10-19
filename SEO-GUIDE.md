@@ -38,14 +38,16 @@ Technical Phase 1 is **done**. **Phase 2 is the active track** (sameAs + Rich Re
 
 | # | Do this next | Phase | Who | Notes from live check |
 | --- | --- | --- | --- | --- |
-| **1** | **[Developer]** Deploy Production (Phase 2–5 automation). Autopilot runs sameAs + Phase 2/3/5 packs. | **2–5** | Developer | VPS: `npm run meridian:act:phase2 && npm run meridian:act:phase3 && npm run meridian:act:phase5` |
-| **2** | Open **`phase5-ops.html`** → Copy vault into GBP → claim/create → start verify | **5.2** | You | ~20 min + Google verify wait; NAP is one-click copy |
-| **3** | After GBP verified: **Ask for reviews** → set `MERIDIAN_GBP_REVIEW_LINK` → re-run Phase 5 | **5.3 / 5.6** | You / Dev | Unlocks WhatsApp/email review deep links |
-| **4** | Claim directories from `citations-playbook.csv` (NAP pre-filled) | **5.5** | You | Tick `citations-progress.json` as you go |
-| **5** | Rich Results Test links once (`rich-results-pack.md`) | **2.2** | You | ~5 minutes; Google UI only |
-| **6** | Confirm GSC + Meridian Act green if needed | 0.1, **1.7** | You / Dev | `npm run meridian:unlock:verify` |
-| **7** | Optional: nginx one-hop www/http → apex | 1.6 | Developer | `sudo bash scripts/apply-nginx-apex-redirect.sh` |
-| **8** | Optional: Removals if PreProd still in `site:` results | 1.8 | You | PreProd is noindex again |
+| **1** | **[Developer]** Deploy Production (Phase 2–10 automation). Autopilot runs sameAs + continuous unlock. | **2–10** | Developer | Or `npm run meridian:act:phase2` … `phase10` |
+| **2** | Open **`phase10-ops.html`** · confirm unlock % + GSC/Bing live | **10** | You / Dev | Continuous ops pack |
+| **2b** | Open **`phase9-ops.html`** · import **`phase9-routine.ics`** (15‑min weekly) | **9** | You | Master command center |
+| **3** | Open **`phase5-ops.html`** → GBP claim/verify | **5.2** | You | Long pole (Google verify) |
+| **4** | Import **`content-calendar.ics`** → publish week slots in Admin | **7** | You | `phase7-ops.html` |
+| **5** | Send outreach via **`phase8-ops.html`** → Open email (clients/OEMs) | **8** | You | Never buy links |
+| **6** | Set `MERIDIAN_GBP_REVIEW_LINK` after GBP → re-run Phase 5 | **5.6** | You / Dev | Review asks |
+| **7** | Claim directories (`citations-playbook.csv`) | **5.5** | You | NAP pre-filled |
+| **8** | Fix PSI &lt;70 pages if needed (`phase4-ops.html`) | **4** | Dev | `/products`, `/projects` |
+| **9** | One city brief with real proof (`phase6-ops.html`) before indexing | **6** | You | Keep rest noindex |
 
 ### Phase 2 readiness (from live Site Settings / JSON-LD)
 

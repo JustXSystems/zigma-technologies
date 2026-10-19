@@ -85,10 +85,13 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     },
     {
       id: 'backlink-send',
-      task: 'Send 1–2 outreach emails from backlink-outreach.md (Phase 8)',
+      task: 'Send 1–2 outreach emails from phase8-ops.html (Open email)',
       who: 'You',
       auto: false,
-      needed: (actions.find((a) => a.id === 'backlink-outreach')?.data?.count || 0) > 0,
+      needed:
+        (actions.find((a) => a.id === 'phase8-advance')?.data?.todo ||
+          actions.find((a) => a.id === 'backlink-outreach')?.data?.count ||
+          0) > 0,
     },
     {
       id: 'rich-results',
@@ -113,10 +116,20 @@ export async function writeWeeklyDigest(profile, { scan, actions = [], outDir })
     },
     {
       id: 'calendar-publish',
-      task: 'Publish this week’s item from content-calendar.md (Phase 7)',
+      task: 'Publish this week’s item from phase7-ops.html / content-calendar.ics',
       who: 'You',
       auto: false,
-      needed: !!actions.find((a) => a.id === 'content-calendar')?.ok,
+      needed: !!(
+        actions.find((a) => a.id === 'phase7-advance')?.ok ||
+        actions.find((a) => a.id === 'content-calendar')?.ok
+      ),
+    },
+    {
+      id: 'phase9-cockpit',
+      task: 'Open phase9-ops.html command center (15 min routine)',
+      who: 'You',
+      auto: false,
+      needed: true,
     },
   ].filter((h) => h.needed !== false);
 
