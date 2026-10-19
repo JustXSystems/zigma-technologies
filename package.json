@@ -59,6 +59,8 @@
     "meridian:profiles": "node packages/meridian/bin/meridian.mjs profiles",
     "meridian:unlock:verify": "node packages/meridian/scripts/unlock-verify.mjs",
     "meridian:unlock:verify:act": "node packages/meridian/scripts/unlock-verify.mjs --act",
+    "meridian:unlock": "node packages/meridian/scripts/unlock-bootstrap.mjs",
+    "meridian:unlock:prod": "node packages/meridian/scripts/unlock-bootstrap.mjs --skip-login --apply-prod",
     "meridian:oauth": "node packages/meridian/scripts/google-oauth-setup.mjs",
     "meridian:act:bing": "node packages/meridian/bin/meridian.mjs act bing-submit-sitemap --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:digest:monthly": "node packages/meridian/bin/meridian.mjs act monthly-digest --profile packages/meridian/profiles/zigma.prod.json",
