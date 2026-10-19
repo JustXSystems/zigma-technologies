@@ -92,7 +92,11 @@ try {
   scanned.pages = pages.length;
   for (const row of pages) {
     const path = `/${String(row.slug || '').replace(/^\//, '')}`;
-    if (!row.meta_title || String(row.meta_title).trim().length < 15) {
+    // Site appends " | Zigma Technologies" — accept page title as SEO title when meta_title empty/short
+    const effectiveTitle = String(row.meta_title || row.title || '')
+      .trim()
+      .replace(/\s+/g, ' ');
+    if (!effectiveTitle || effectiveTitle.length < 8) {
       gaps.push({
         code: 'CMS_PAGE_TITLE',
         severity: 'medium',

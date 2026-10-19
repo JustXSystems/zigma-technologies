@@ -23,9 +23,14 @@ const SEVERITY_PENALTY = {
  * } }} input
  */
 export function buildScorecard({ findings, connectors, evidence = {} }) {
-  // Drop stale SCHEMA_SAMEAS when live HTML already has sameAs (Phase 13+/16 continuum)
+  // Drop stale SCHEMA_SAMEAS when live HTML / throne already has sameAs
   const effectiveFindings = (findings || []).filter((f) => {
-    if (evidence.sameAsLive && (f.code === 'SCHEMA_SAMEAS' || f.code === 'PHASE2_SAMEAS_APPLY')) return false;
+    if (
+      evidence.sameAsLive &&
+      (f.code === 'SCHEMA_SAMEAS' || f.code === 'PHASE2_SAMEAS_APPLY' || f.code === 'PHASE2_SAMEAS')
+    ) {
+      return false;
+    }
     return true;
   });
 

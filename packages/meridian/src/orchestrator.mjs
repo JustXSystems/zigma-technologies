@@ -35,29 +35,42 @@ export async function runMeridian(profile, opts = {}) {
   const connectorFindings = findingsFromConnectors(connectors);
   const findings = [...technical.findings, ...signalFindings, ...connectorFindings];
 
-  // Continuum evidence (Phase 16) — lifts authority + suppresses stale sameAs findings
+  // Continuum evidence — lifts authority + suppresses stale sameAs findings
   let evidence = {};
   try {
     evidence = JSON.parse(await readFile(resolve(outDir, 'authority-evidence.json'), 'utf8')) || {};
   } catch {
-    try {
-      const nap = JSON.parse(await readFile(resolve(outDir, 'nap-audit.json'), 'utf8'));
-      if ((nap.sameAsCount ?? nap.nap?.sameAs?.length ?? 0) > 0) evidence.sameAsLive = true;
-    } catch {
-      /* optional */
-    }
-    try {
-      const cites = JSON.parse(await readFile(resolve(outDir, 'citations-playbook.json'), 'utf8'));
-      if (cites && (cites.rows?.length || cites.count)) evidence.citationsReady = true;
-    } catch {
-      /* optional */
-    }
-    try {
-      const bl = JSON.parse(await readFile(resolve(outDir, 'backlink-outreach.json'), 'utf8'));
-      evidence.outreachDrafts = bl.drafts?.length || bl.count || bl.unsent || 0;
-    } catch {
-      /* optional */
-    }
+    /* optional */
+  }
+  try {
+    const nap = JSON.parse(await readFile(resolve(outDir, 'nap-audit.json'), 'utf8'));
+    if ((nap.sameAsCount ?? nap.nap?.sameAs?.length ?? 0) > 0) evidence.sameAsLive = true;
+  } catch {
+    /* optional */
+  }
+  try {
+    const liveThrone = JSON.parse(await readFile(resolve(outDir, 'live-throne.json'), 'utf8'));
+    if (liveThrone?.sameAs === true) evidence.sameAsLive = true;
+  } catch {
+    /* optional */
+  }
+  // This crawl: Org/LocalBusiness present and no SCHEMA_SAMEAS from technical → sameAs live
+  const homeSchema = technical?.extras?.homeSchemaTypes || technical?.homeSchemaTypes || [];
+  const techSameAsMissing = technical.findings?.some((f) => f.code === 'SCHEMA_SAMEAS');
+  if (!techSameAsMissing && homeSchema.some((t) => /Organization|LocalBusiness/i.test(t))) {
+    evidence.sameAsLive = true;
+  }
+  try {
+    const cites = JSON.parse(await readFile(resolve(outDir, 'citations-playbook.json'), 'utf8'));
+    if (cites && (cites.rows?.length || cites.count)) evidence.citationsReady = true;
+  } catch {
+    /* optional */
+  }
+  try {
+    const bl = JSON.parse(await readFile(resolve(outDir, 'backlink-outreach.json'), 'utf8'));
+    evidence.outreachDrafts = bl.drafts?.length || bl.count || bl.unsent || 0;
+  } catch {
+    /* optional */
   }
 
   const scorecard = buildScorecard({ findings, connectors, evidence });

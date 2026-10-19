@@ -7,43 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases 25 together">
-      <change afterPath="$PROJECT_DIR$/docs/archive/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/archive/SEO-GUIDE-phases-walkthrough.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/autonomic-chronos.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/city-draft.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/conversion-continuum.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/dominion-apex.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/integrity-lattice.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase26-advance.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase27-advance.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase28-advance.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase29-advance.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase30-advance.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase31-advance.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/silent-steward.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/sovereign-continuity.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/_remote-enquiry-yield.mjs" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases 31 together">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/SETUP.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/SETUP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/autopilot.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/cli.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/form-health.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/form-health.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/human-debt.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/human-debt.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/ledger-sync.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/ledger-sync.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/ops-cockpit.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase11-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase11-advance.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase9-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase9-advance.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/review-kit.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/review-kit.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/index.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/index.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/engine/score.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/engine/score.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/orchestrator.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/orchestrator.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/meridian-cms-gaps.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/meridian-cms-gaps.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/meridian-meta-draft.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/meridian-meta-draft.mjs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,23 +70,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000002811945376" />
-      <entry key="MS500" value="1.0776085321332545" />
-      <entry key="S2" value="1.5942942609338702" />
-      <entry key="S5" value="2.1809444649820664" />
-      <entry key="S10" value="2.9715008100473677" />
-      <entry key="S30" value="4.853430058772455" />
-      <entry key="S60" value="6.397530615575478" />
-      <entry key="M2" value="9.250300422122521" />
-      <entry key="M5" value="16.274760455804504" />
-      <entry key="M10" value="23.20603502316434" />
-      <entry key="M15" value="27.073286402094197" />
-      <entry key="M30" value="32.381241075779535" />
-      <entry key="H1" value="35.83544844185584" />
-      <entry key="H2" value="39.1062929727641" />
-      <entry key="H4" value="57.944015228163956" />
-      <entry key="D1" value="1020.3248135598059" />
-      <entry key="W1" value="11021.69030774298" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000000000000047" />
+      <entry key="S10" value="1.0000001383083672" />
+      <entry key="S30" value="1.0174584751627513" />
+      <entry key="S60" value="1.3836994174462032" />
+      <entry key="M2" value="3.265401694499936" />
+      <entry key="M5" value="10.270653696687479" />
+      <entry key="M10" value="18.51454340822025" />
+      <entry key="M15" value="23.442585861029773" />
+      <entry key="M30" value="30.48217018646265" />
+      <entry key="H1" value="35.19367842237864" />
+      <entry key="H2" value="39.19998032962629" />
+      <entry key="H4" value="58.26863491813278" />
+      <entry key="D1" value="1019.3330116095336" />
+      <entry key="W1" value="11019.614058656594" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -132,30 +101,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="1.7796614048858814E-212" />
-      <entry key="H2" value="1.33403950649351E-106" />
-      <entry key="H4" value="1.155006279869348E-53" />
-      <entry key="D1" value="1.52758365693378E-9" />
-      <entry key="W1" value="0.08532149250844226" />
+      <entry key="H1" value="1.6981277596713386E-212" />
+      <entry key="H2" value="1.3031223118613712E-106" />
+      <entry key="H4" value="1.1415438282888963E-53" />
+      <entry key="D1" value="1.5246016221281486E-9" />
+      <entry key="W1" value="0.08529767854197709" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.5703834729727257" />
-      <entry key="MS500" value="0.9632466725909905" />
-      <entry key="S2" value="1.5502937635916036" />
-      <entry key="S5" value="2.1553533279845896" />
-      <entry key="S10" value="2.9481576482879577" />
-      <entry key="S30" value="4.8337534237667" />
-      <entry key="S60" value="6.383626561202012" />
-      <entry key="M2" value="9.240871962227988" />
-      <entry key="M5" value="16.26875418862374" />
-      <entry key="M10" value="23.20190408812883" />
-      <entry key="M15" value="27.070114613393947" />
-      <entry key="M30" value="32.37937203242766" />
-      <entry key="H1" value="35.83442336640358" />
-      <entry key="H2" value="39.10574251371801" />
-      <entry key="H4" value="57.94366757684831" />
-      <entry key="D1" value="1020.3246089333003" />
-      <entry key="W1" value="11021.775448227694" />
+      <entry key="MS100" value="9.330104596875237E-224" />
+      <entry key="MS500" value="2.4772925837078827E-45" />
+      <entry key="S2" value="7.0549562617521055E-12" />
+      <entry key="S5" value="3.462563369490625E-5" />
+      <entry key="S10" value="0.005884492215421114" />
+      <entry key="S30" value="0.19792472333208716" />
+      <entry key="S60" value="0.8077619961471492" />
+      <entry key="M2" value="2.914933509169553" />
+      <entry key="M5" value="10.109900569848184" />
+      <entry key="M10" value="18.429395255039832" />
+      <entry key="M15" value="23.384493370289558" />
+      <entry key="M30" value="30.452341300880946" />
+      <entry key="H1" value="35.17853641367582" />
+      <entry key="H2" value="39.19233542353731" />
+      <entry key="H4" value="58.26473138023156" />
+      <entry key="D1" value="1019.3322131773646" />
+      <entry key="W1" value="11019.699090469792" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -307,7 +276,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#48 admin email" />
     <MESSAGE value="#48 admin email fix" />
     <MESSAGE value="#48 admin email fixed" />
     <MESSAGE value="#48 admin consoliation" />
@@ -332,7 +300,8 @@
     <MESSAGE value="#52 SEO Phases 12 together" />
     <MESSAGE value="#52 SEO Phases 14 together" />
     <MESSAGE value="#52 SEO Phases 25 together" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 SEO Phases 25 together" />
+    <MESSAGE value="#52 SEO Phases 31 together" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52 SEO Phases 31 together" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

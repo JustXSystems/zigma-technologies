@@ -77,11 +77,15 @@ function draftPage(row) {
   if (/^industries/i.test(slug)) {
     metaTitle = clip(`${titleBase} — Power & Energy Solutions`, 58);
   } else if (slug === 'privacy') {
-    metaTitle = 'Privacy Policy';
+    metaTitle = 'Privacy Policy – How We Protect Your Data';
   } else if (slug === 'terms') {
-    metaTitle = 'Terms of Use';
+    metaTitle = 'Terms of Use – Website & Enquiry Conditions';
+  } else if (slug === 'about-zigma' || /^about/i.test(slug)) {
+    metaTitle = clip('About Zigma – Solar EPC, UPS & Energy Experts', 58);
   } else if (slug === 'contact') {
     metaTitle = 'Contact Us – Solar, UPS & Energy Enquiries';
+  } else if (plain(metaTitle).length < 15) {
+    metaTitle = clip(`${titleBase} – Zigma Technologies India`, 58);
   } else {
     metaTitle = clip(titleBase, 58);
   }
