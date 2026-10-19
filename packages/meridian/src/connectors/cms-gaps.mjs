@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 /**
  * Optional CMS SEO-gap scan via host script (Zigma: scripts/meridian-cms-gaps.mjs).
@@ -10,6 +11,14 @@ export async function collectCmsGaps(profile) {
   const cfg = profile.connectors?.cmsGaps || profile.connectors?.['cms-gaps'] || {};
   if (cfg.enabled === false) {
     return { id: 'cms-gaps', label: 'CMS SEO gaps', status: 'skipped', message: 'Disabled in profile' };
+  }
+  if (!dbReady()) {
+    return {
+      id: 'cms-gaps',
+      label: 'CMS SEO gaps',
+      status: 'skipped',
+      message: `Skipped — ${dbSkipReason()}`,
+    };
   }
 
   const scriptRel = cfg.script || process.env.MERIDIAN_CMS_GAPS_SCRIPT || 'scripts/meridian-cms-gaps.mjs';

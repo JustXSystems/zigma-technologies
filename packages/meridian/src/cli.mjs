@@ -114,8 +114,18 @@ export async function runCli(argv) {
     console.log(`  autopilot: ${result.autopilot.paths.autopilotPath}`);
     console.log(`  report: ${result.paths.latestHtml}`);
     if (!result.ok) {
-      console.error('\nAUTOPILOT FAILED — hard findings' + (result.regressed ? ' and/or score regression' : '') + '.');
+      console.error(
+        '\nAUTOPILOT FAILED —' +
+          (result.regressed ? ' score regression' : ' hard findings') +
+          (result.softHard ? ' (CI soft-hard was on but still failed)' : '') +
+          '.'
+      );
       process.exit(1);
+    }
+    if (result.softHard && (result.hardFailCount || 0) > 0) {
+      console.warn(
+        `\nAUTOPILOT OK (CI soft-hard) — ${result.hardFailCount} hard finding(s) recorded; artifacts uploaded.`
+      );
     }
     return;
   }

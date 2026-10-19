@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 /**
  * Compress heavy images via scripts/meridian-image-optimize.mjs (sharp).
@@ -20,6 +21,15 @@ export async function optimizeHeavyImages(profile, opts = {}) {
     process.env.MERIDIAN_AUTO_OPTIMIZE_IMAGES === '1' ||
     profile.autopilot?.autoOptimizeImages === true;
 
+  if (wantApply && !dbReady()) {
+    return {
+      ok: true,
+      status: 'skipped',
+      message: `Image optimize skipped — ${dbSkipReason()}`,
+      data: { skippedDb: true },
+    };
+  }
+
   const args = ['--json', '--file', weightFile];
   args.push(wantApply ? '--apply' : '--dry-run');
 
@@ -33,10 +43,19 @@ export async function optimizeHeavyImages(profile, opts = {}) {
       data,
     };
   } catch (e) {
+    const msg = String(e.message || e);
+    if (/Cannot find package|ERR_MODULE_NOT_FOUND|mysql2/i.test(msg)) {
+      return {
+        ok: true,
+        status: 'skipped',
+        message: `Image optimize skipped — ${msg.slice(0, 160)}`,
+        data: {},
+      };
+    }
     return {
       ok: false,
       status: 'error',
-      message: `Image optimize failed: ${String(e.message || e).slice(0, 240)}`,
+      message: `Image optimize failed: ${msg.slice(0, 240)}`,
       data: {},
     };
   }

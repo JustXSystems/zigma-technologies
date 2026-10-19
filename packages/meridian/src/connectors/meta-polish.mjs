@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import { access } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { applyMeta } from './meta-automation.mjs';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 function runNode(script, args) {
   return new Promise((resolvePromise, reject) => {
@@ -30,6 +31,14 @@ function runNode(script, args) {
  * Phase 3 — draft (and optionally force-apply) polished meta for length/brand issues.
  */
 export async function polishMeta(profile, opts = {}) {
+  if (!dbReady()) {
+    return {
+      ok: true,
+      status: 'skipped',
+      message: `Meta polish skipped — ${dbSkipReason()}`,
+      data: { count: 0, skippedDb: true },
+    };
+  }
   const script = resolve(process.cwd(), process.env.MERIDIAN_META_POLISH_SCRIPT || 'scripts/meridian-meta-polish.mjs');
   try {
     await access(script);

@@ -9,6 +9,7 @@ import { assessUnlockReadiness } from './unlock-readiness.mjs';
 import { advancePhase11 } from './phase11-advance.mjs';
 import { runMeridian } from '../orchestrator.mjs';
 import { markCompleted, loadOpsCadence, saveOpsCadence } from '../lib/ops-cadence.mjs';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 const esc = (s) =>
   String(s ?? '')
@@ -107,7 +108,10 @@ export async function advancePhase12(profile, opts = {}) {
 
   // 4) Calendar week auto-publish
   let calendar = { ok: true, message: 'calendar skipped', metaUpdated: false, faqSeeded: false };
-  {
+  if (!dbReady()) {
+    calendar = { ok: true, message: `calendar skipped — ${dbSkipReason()}`, metaUpdated: false, faqSeeded: false };
+    steps.push({ id: 'calendar-publish', message: calendar.message, ok: true });
+  } else {
     const r = await runNode([
       'scripts/meridian-calendar-publish.mjs',
       ...(wantApply ? ['--apply'] : []),

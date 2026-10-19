@@ -1,10 +1,21 @@
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 /**
  * Host-side meta draft/apply via scripts/meridian-meta-*.mjs (portable: scripts optional).
  */
+
+function skipDb(label) {
+  const reason = dbSkipReason();
+  return {
+    ok: true,
+    status: 'skipped',
+    message: `${label} skipped — ${reason}`,
+    data: { count: 0, skippedDb: true },
+  };
+}
 
 function runNodeJson(script, args) {
   return new Promise((resolvePromise, reject) => {
@@ -51,6 +62,7 @@ export async function draftMeta(profile, opts = {}) {
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Meta draft disabled in profile', data: { count: 0 } };
   }
+  if (!dbReady()) return skipDb('Meta draft');
 
   const found = await resolveScript('draft', 'MERIDIAN_META_DRAFT_SCRIPT', 'scripts/meridian-meta-draft.mjs');
   if (!found.ok) {
@@ -96,6 +108,7 @@ export async function draftAlt(profile, opts = {}) {
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Alt draft disabled in profile', data: { count: 0 } };
   }
+  if (!dbReady()) return skipDb('Alt draft');
 
   const found = await resolveScript('alt-draft', 'MERIDIAN_ALT_DRAFT_SCRIPT', 'scripts/meridian-alt-draft.mjs');
   if (!found.ok) {
@@ -134,6 +147,7 @@ export async function applyAlt(profile, opts = {}) {
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Alt apply disabled in profile', data: {} };
   }
+  if (!dbReady()) return { ...skipDb('Alt apply'), data: {} };
 
   const found = await resolveScript('alt-apply', 'MERIDIAN_ALT_APPLY_SCRIPT', 'scripts/meridian-alt-apply.mjs');
   if (!found.ok) {
@@ -177,6 +191,7 @@ export async function applyMeta(profile, opts = {}) {
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Meta apply disabled in profile', data: {} };
   }
+  if (!dbReady()) return { ...skipDb('Meta apply'), data: {} };
 
   const found = await resolveScript('apply', 'MERIDIAN_META_APPLY_SCRIPT', 'scripts/meridian-meta-apply.mjs');
   if (!found.ok) {

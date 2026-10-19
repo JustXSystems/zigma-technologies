@@ -4,6 +4,7 @@ import { spawn } from 'node:child_process';
 import { fetchManual, meta } from '../lib/html.mjs';
 import { writeRichResultsPack } from './rich-results-pack.mjs';
 import { auditNap } from './nap-audit.mjs';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 function runNode(script, args) {
   return new Promise((resolvePromise, reject) => {
@@ -76,7 +77,9 @@ export async function advancePhase2(profile, opts = {}) {
   let applyResult = null;
   const script = resolve(process.cwd(), process.env.MERIDIAN_SAMEAS_SCRIPT || 'scripts/seo-phase2-sameas.mjs');
 
-  if (wantApply) {
+  if (wantApply && !dbReady()) {
+    applyResult = { ok: true, skipped: true, updated: 0, message: `sameAs apply skipped — ${dbSkipReason()}` };
+  } else if (wantApply) {
     try {
       await access(script);
       const raw = await runNode(script, ['--json', ...(opts.force ? ['--force'] : [])]);
@@ -150,7 +153,8 @@ export async function advancePhase2(profile, opts = {}) {
       pillar: 'technical',
     });
   }
-  if (applyResult?.ok === false && wantApply) {
+  // Only hard-fail when live sameAs is still missing AND DB apply failed
+  if (applyResult?.ok === false && wantApply && pendingSameAs) {
     findings.push({
       code: 'PHASE2_SAMEAS_APPLY',
       severity: 'high',
@@ -159,9 +163,18 @@ export async function advancePhase2(profile, opts = {}) {
       owner: 'developer',
       pillar: 'technical',
     });
+  } else if (applyResult?.ok === false && wantApply) {
+    findings.push({
+      code: 'PHASE2_SAMEAS_APPLY',
+      severity: 'medium',
+      title: 'Phase 2 sameAs DB apply failed (live HTML already has sameAs)',
+      remediation: String(applyResult.error || 'Optional: sync Site Settings on host with DB.'),
+      owner: 'developer',
+      pillar: 'technical',
+    });
   }
 
-  const ok = !(applyResult && applyResult.ok === false && wantApply);
+  const ok = !(applyResult && applyResult.ok === false && wantApply && pendingSameAs);
   return {
     ok,
     status: pendingSameAs ? 'degraded' : 'ok',

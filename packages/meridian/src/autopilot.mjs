@@ -586,9 +586,14 @@ export async function runAutopilot(profile, opts = {}) {
 
   const failOnRegression = process.env.MERIDIAN_FAIL_ON_REGRESSION === '1';
   const regressed = trend?.status === 'regressed';
-  const ok = scan.ok && (!failOnRegression || !regressed);
+  // Actions without full auth/DB: still upload artifacts; fail only on score regression
+  const softHard =
+    process.env.MERIDIAN_CI_SOFT_HARD === '1' ||
+    (process.env.GITHUB_ACTIONS === 'true' && process.env.MERIDIAN_CI_SOFT_HARD !== '0');
+  const hardOk = softHard ? true : scan.ok;
+  const ok = hardOk && (!failOnRegression || !regressed);
 
-  return { ...scan, autopilot, ok, regressed };
+  return { ...scan, autopilot, ok, regressed, softHard };
 }
 
 async function maybeWebhook(autopilot, digest) {

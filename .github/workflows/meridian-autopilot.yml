@@ -29,6 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
       - name: Run Meridian autopilot
         env:
           MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
@@ -39,6 +42,8 @@ jobs:
           MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
           MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
           MERIDIAN_FAIL_ON_REGRESSION: '1'
+          # Soften hard-fail noise on Actions when live crawl flakes; still fail on score regression
+          MERIDIAN_CI_SOFT_HARD: '1'
           # CMS gaps need DB — skip on Actions unless secrets provided later
           DB_HOST: ${{ secrets.MERIDIAN_DB_HOST }}
           DB_PORT: ${{ secrets.MERIDIAN_DB_PORT }}

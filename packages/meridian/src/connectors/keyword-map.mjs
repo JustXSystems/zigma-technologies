@@ -2,11 +2,20 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 /**
  * Phase 7.2 — keyword map seed from CMS catalog/pages (host script).
  */
 export async function buildKeywordMap(profile, opts = {}) {
+  if (!dbReady()) {
+    return {
+      ok: true,
+      status: 'skipped',
+      message: `Keyword map skipped — ${dbSkipReason()}`,
+      data: { count: 0, skippedDb: true },
+    };
+  }
   const script = resolve(process.cwd(), process.env.MERIDIAN_KEYWORD_MAP_SCRIPT || 'scripts/meridian-keyword-map.mjs');
   try {
     await access(script);

@@ -1,8 +1,17 @@
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 export async function seedThinContent(profile, opts = {}) {
+  if (!dbReady()) {
+    return {
+      ok: true,
+      status: 'skipped',
+      message: `Content seed skipped — ${dbSkipReason()}`,
+      data: { skippedDb: true },
+    };
+  }
   const script = resolve(process.cwd(), 'scripts/meridian-content-seed.mjs');
   try {
     await access(script);

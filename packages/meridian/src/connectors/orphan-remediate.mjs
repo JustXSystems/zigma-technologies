@@ -2,6 +2,7 @@ import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
+import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 function hubFor(url, origin) {
   try {
@@ -102,7 +103,11 @@ export async function remediateOrphans(profile, opts = {}) {
     profile.autopilot?.autoApplyOrphans === true;
 
   if (wantApply && prescriptions.some((p) => p.applyable)) {
-    applyResult = await runApplyScript(jsonPath);
+    if (!dbReady()) {
+      applyResult = { ok: true, message: `skipped — ${dbSkipReason()}` };
+    } else {
+      applyResult = await runApplyScript(jsonPath);
+    }
   }
 
   return {
