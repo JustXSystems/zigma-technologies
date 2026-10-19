@@ -7,16 +7,12 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 Enhance careers">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod-self-hosted.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod-self-hosted.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO updates">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/deploy.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/deploy.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/seo.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/seo.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/bin/meridian.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/bin/meridian.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,23 +70,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0385603675095616" />
-      <entry key="MS500" value="2.68073206859503" />
-      <entry key="S2" value="8.54794239288476" />
-      <entry key="S5" value="16.030722271348587" />
-      <entry key="S10" value="22.312057867663537" />
-      <entry key="S30" value="30.00680881264842" />
-      <entry key="S60" value="32.79321503070389" />
-      <entry key="M2" value="35.8865517185474" />
-      <entry key="M5" value="51.15442804287383" />
-      <entry key="M10" value="69.88915753973461" />
-      <entry key="M15" value="80.03242865512206" />
-      <entry key="M30" value="93.11564940945806" />
-      <entry key="H1" value="101.53525626211105" />
-      <entry key="H2" value="132.80422802512163" />
-      <entry key="H4" value="325.7126208920073" />
-      <entry key="D1" value="1723.3642702117447" />
-      <entry key="W1" value="12009.846012769345" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0001055343299936" />
+      <entry key="S2" value="1.1013562028614408" />
+      <entry key="S5" value="1.4037539623449964" />
+      <entry key="S10" value="1.7115481558335273" />
+      <entry key="S30" value="2.5297237178586673" />
+      <entry key="S60" value="3.1152362391224178" />
+      <entry key="M2" value="3.8687221480527185" />
+      <entry key="M5" value="6.746662536450423" />
+      <entry key="M10" value="11.962908162437996" />
+      <entry key="M15" value="15.657689150994122" />
+      <entry key="M30" value="21.302923672918954" />
+      <entry key="H1" value="25.728790098219566" />
+      <entry key="H2" value="40.434908643983704" />
+      <entry key="H4" value="123.84671887646724" />
+      <entry key="D1" value="1427.1181890527816" />
+      <entry key="W1" value="11607.400954734021" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -105,30 +101,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="3.199520795345776E-198" />
-      <entry key="H2" value="1.7887204352120124E-99" />
-      <entry key="H4" value="4.2293267020546043E-50" />
-      <entry key="D1" value="5.99725918375744E-9" />
-      <entry key="W1" value="0.1037308965849174" />
+      <entry key="H1" value="9.454456790204258E-208" />
+      <entry key="H2" value="3.074810041319939E-104" />
+      <entry key="H4" value="1.7535136273840683E-52" />
+      <entry key="D1" value="2.403767560747617E-9" />
+      <entry key="W1" value="0.09103014296489735" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9966918783385978" />
-      <entry key="MS500" value="2.6607797987584614" />
-      <entry key="S2" value="8.531917036137905" />
-      <entry key="S5" value="16.018468829990262" />
-      <entry key="S10" value="22.303448688989103" />
-      <entry key="S30" value="30.00291793130664" />
-      <entry key="S60" value="32.79108305009799" />
-      <entry key="M2" value="35.88536107848387" />
-      <entry key="M5" value="51.15366581814943" />
-      <entry key="M10" value="69.88859762876601" />
-      <entry key="M15" value="80.03199059052194" />
-      <entry key="M30" value="93.11538851891031" />
-      <entry key="H1" value="101.53511254070587" />
-      <entry key="H2" value="132.80413465011853" />
-      <entry key="H4" value="325.71250482666375" />
-      <entry key="D1" value="1723.3641391688247" />
-      <entry key="W1" value="12009.949566458452" />
+      <entry key="MS100" value="0.5783440919526437" />
+      <entry key="MS500" value="0.8963690638497321" />
+      <entry key="S2" value="1.0735784218112001" />
+      <entry key="S5" value="1.3915740225114257" />
+      <entry key="S10" value="1.704387273489347" />
+      <entry key="S30" value="2.5254825019447855" />
+      <entry key="S60" value="3.1123025279837964" />
+      <entry key="M2" value="3.866434580720169" />
+      <entry key="M5" value="6.744580533251849" />
+      <entry key="M10" value="11.96107560228633" />
+      <entry key="M15" value="15.656126796435696" />
+      <entry key="M30" value="21.301892076970745" />
+      <entry key="H1" value="25.728184117955102" />
+      <entry key="H2" value="40.434540885328936" />
+      <entry key="H4" value="123.84645813293963" />
+      <entry key="D1" value="1427.1180424362044" />
+      <entry key="W1" value="11607.491812730132" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -168,7 +164,7 @@
     &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
     &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/storage/meridian/zigma-prod&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -188,6 +184,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\storage\meridian\zigma-prod" />
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies" />
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\public" />
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies\.next" />
@@ -208,10 +205,6 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
     </configuration>
     <configuration name="Next.js: server-side" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/package.json" />
@@ -282,7 +275,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#45 layout settings  missing in few hero section editing" />
     <MESSAGE value="#45 catalog settings in hero section customizattion" />
     <MESSAGE value="#45 catalog settings in section customizattion" />
     <MESSAGE value="#45 catalog settings section customizattion" />
@@ -307,7 +299,8 @@
     <MESSAGE value="#52 20 yras badge position adjustmwnt" />
     <MESSAGE value="#52 About adding multple people" />
     <MESSAGE value="#52 Enhance careers" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 Enhance careers" />
+    <MESSAGE value="#52 SEO updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52 SEO updates" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

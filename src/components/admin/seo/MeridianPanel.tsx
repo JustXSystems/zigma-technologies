@@ -41,6 +41,30 @@ type Report = {
   };
 };
 
+type JobStatus = {
+  action?: string;
+  status?: 'running' | 'ok' | 'error';
+  startedAt?: string;
+  finishedAt?: string;
+  error?: string;
+};
+
+async function readApiJson(res: Response): Promise<Record<string, unknown>> {
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (!trimmed) return {};
+  if (trimmed.startsWith('<')) {
+    throw new Error(
+      `Server returned HTML instead of JSON (HTTP ${res.status}). Often a proxy timeout — use Run autopilot (background) or retry a lighter action.`
+    );
+  }
+  try {
+    return JSON.parse(trimmed) as Record<string, unknown>;
+  } catch {
+    throw new Error(`Invalid JSON from Meridian API (HTTP ${res.status}): ${trimmed.slice(0, 120)}`);
+  }
+}
+
 export default function MeridianPanel() {
   const [env, setEnv] = useState<Env>('prod');
   const [report, setReport] = useState<Report | null>(null);
@@ -48,6 +72,7 @@ export default function MeridianPanel() {
   const [digest, setDigest] = useState<Record<string, unknown> | null>(null);
   const [unlock, setUnlock] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [job, setJob] = useState<JobStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
   const [pending, startTransition] = useTransition();
@@ -55,17 +80,18 @@ export default function MeridianPanel() {
   const load = useCallback(async (e: Env) => {
     setError(null);
     const res = await fetch(withBasePath(`/api/admin/meridian?env=${e}`), { credentials: 'include' });
-    const data = await res.json();
+    const data = await readApiJson(res);
     if (!res.ok) {
-      setError(data.error || 'Failed to load report');
+      setError(String(data.error || 'Failed to load report'));
       setReport(null);
       return;
     }
-    setReport(data.report || null);
-    setAutopilot(data.autopilot || null);
-    setDigest(data.digest || null);
-    setUnlock(data.unlock || null);
-    setReadiness(data.readiness || null);
+    setReport((data.report as Report) || null);
+    setAutopilot((data.autopilot as Record<string, unknown>) || null);
+    setDigest((data.digest as Record<string, unknown>) || null);
+    setUnlock((data.unlock as Record<string, unknown>) || null);
+    setReadiness((data.readiness as Readiness) || null);
+    setJob((data.job as JobStatus) || null);
   }, []);
 
   useEffect(() => {
@@ -73,6 +99,27 @@ export default function MeridianPanel() {
       void load(env);
     });
   }, [env, load]);
+
+  // Poll while background autopilot is running
+  useEffect(() => {
+    if (job?.status !== 'running') return;
+    const id = window.setInterval(() => {
+      void load(env).then(() => {
+        /* load updates job */
+      });
+    }, 8000);
+    return () => window.clearInterval(id);
+  }, [job?.status, env, load]);
+
+  useEffect(() => {
+    if (job?.status === 'ok') {
+      setLog((prev) =>
+        prev.includes('Autopilot finished') ? prev : `Autopilot finished at ${job.finishedAt || '—'}.\n${prev}`
+      );
+    } else if (job?.status === 'error') {
+      setError(job.error || 'Autopilot failed');
+    }
+  }, [job?.status, job?.finishedAt, job?.error]);
 
   function postAction(payload: Record<string, unknown>, label: string) {
     setError(null);
@@ -85,15 +132,21 @@ export default function MeridianPanel() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ env, ...payload }),
         });
-        const data = await res.json();
+        const data = await readApiJson(res);
         if (!res.ok) {
-          setError(data.error || `${label} failed`);
-          setLog(data.stderr || data.stdout || '');
+          setError(String(data.error || `${label} failed`));
+          setLog(String(data.stderr || data.stdout || ''));
           return;
         }
-        if (data.report) setReport(data.report);
-        if (data.autopilot) setAutopilot(data.autopilot);
-        if (data.digest) setDigest(data.digest);
+        if (data.job) setJob(data.job as JobStatus);
+        if (data.started || data.alreadyRunning) {
+          setLog(String(data.message || 'Autopilot running in background…'));
+          await load(env);
+          return;
+        }
+        if (data.report) setReport(data.report as Report);
+        if (data.autopilot) setAutopilot(data.autopilot as Record<string, unknown>);
+        if (data.digest) setDigest(data.digest as Record<string, unknown>);
         await load(env);
         const out = data.autopilot
           ? JSON.stringify(data.autopilot, null, 2)
@@ -110,6 +163,8 @@ export default function MeridianPanel() {
   function runScan() {
     postAction({ action: 'scan' }, 'Running Meridian');
   }
+
+  const jobRunning = job?.status === 'running';
 
   const score = report?.scorecard?.overall;
   const grade = report?.scorecard?.grade;
@@ -186,6 +241,24 @@ export default function MeridianPanel() {
         a.link {
           color: var(--m-cyan);
           font-size: 0.85rem;
+        }
+        .more-actions {
+          width: 100%;
+          margin: 0 0 1.1rem;
+          border: 1px solid var(--m-line);
+          border-radius: 10px;
+          padding: 0.55rem 0.75rem 0.75rem;
+          background: rgba(18, 26, 38, 0.65);
+        }
+        .more-actions summary {
+          cursor: pointer;
+          color: var(--m-muted);
+          font-size: 0.85rem;
+          margin-bottom: 0.5rem;
+        }
+        .more-actions[open] summary {
+          margin-bottom: 0.65rem;
+          color: var(--m-text);
         }
         .score-row {
           display: grid;
@@ -367,14 +440,19 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Maximum automation: closed-loop SEO ops — Phase 0 wizard, meta polish, indexing queue, OG/share,
-            locale decision, plus prior packs, unlock score, ops cockpit.
+            Day-to-day: use <strong>Run autopilot</strong> (covers packs + unlock + cockpit). Extra buttons are
+            optional one-offs — still valid, not required weekly.
           </p>
+          {jobRunning ? (
+            <p className="sub" style={{ color: 'var(--accent, #0b6e4f)', marginTop: '0.35rem' }}>
+              Autopilot running in background since {job?.startedAt || '…'} — this page refreshes every few seconds.
+            </p>
+          ) : null}
         </div>
         <div className="actions">
           <select
             value={env}
-            disabled={pending}
+            disabled={pending || jobRunning}
             onChange={(e) => setEnv(e.target.value as Env)}
             aria-label="Environment"
           >
@@ -384,286 +462,50 @@ export default function MeridianPanel() {
           <button
             type="button"
             className="primary"
-            disabled={pending}
-            onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Running autopilot')}
+            disabled={pending || jobRunning}
+            onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot')}
           >
-            {pending ? 'Working…' : 'Run autopilot'}
+            {jobRunning ? 'Autopilot running…' : pending ? 'Working…' : 'Run autopilot'}
           </button>
           <button
             type="button"
-            disabled={pending}
+            disabled={pending || jobRunning}
             onClick={() =>
               postAction(
                 { action: 'autopilot', skipAct: env === 'preprod', applyMeta: true },
-                'Autopilot + apply meta/alt'
+                'Starting autopilot + apply'
               )
             }
             title="Writes drafted meta + image alt into empty CMS fields"
           >
             Autopilot + apply
           </button>
-          <button type="button" disabled={pending} onClick={runScan}>
+          <button type="button" disabled={pending || jobRunning} onClick={runScan}>
             Scan only
           </button>
-          <button type="button" disabled={pending} onClick={() => postAction({ action: 'draft-meta' }, 'Drafting meta')}>
-            Draft meta
-          </button>
-          <button type="button" disabled={pending} onClick={() => postAction({ action: 'apply-meta' }, 'Applying meta')}>
-            Apply meta
-          </button>
-          <button type="button" disabled={pending} onClick={() => postAction({ action: 'draft-alt' }, 'Drafting alt')}>
-            Draft alt
-          </button>
-          <button type="button" disabled={pending} onClick={() => postAction({ action: 'apply-alt' }, 'Applying alt')}>
-            Apply alt
-          </button>
           <button
             type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'sitemap-health', limit: 120 }, 'Sitemap health crawl')}
-            title="Health + orphan/thin link graph across sitemap URLs"
-          >
-            Sitemap health
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'form-health' }, 'Form health probe')}
-            title="Probe enquiry form schema, /contact, and enquiry API"
-          >
-            Form health
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'image-weight' }, 'Image weight scan')}
-            title="Find oversized images on key pages (Phase 4 lite)"
-          >
-            Image weight
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'image-optimize' }, 'Optimizing heavy images')}
-            title="Compress heavy images to WebP via sharp"
-          >
-            Optimize images
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'orphan-remediate', apply: true }, 'Remediating orphans')}
-            title="Prescribe hub links + apply catalog footers"
-          >
-            Fix orphans
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'content-briefs' }, 'Writing content briefs')}
-          >
-            Content briefs
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'schema-validate' }, 'Validating JSON-LD')}
-          >
-            Schema check
-          </button>
-          <button type="button" disabled={pending} onClick={() => postAction({ action: 'nap-audit' }, 'NAP / GBP audit')}>
-            NAP / GBP
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'hreflang-validate' }, 'Checking hreflang')}
-          >
-            hreflang
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'keyword-map' }, 'Building keyword map')}
-          >
-            Keyword map
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'content-seed' }, 'Seeding FAQ content')}
-            title="Append FAQ stubs to thin catalog pages"
-          >
-            Seed content
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'citations-playbook' }, 'Citations playbook')}
-            title="Phase 5.5 directory list pre-filled with live NAP"
-          >
-            Citations
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'city-pages-readiness' }, 'City pages readiness')}
-            title="Phase 6 — which city×service templates are still noindex"
-          >
-            City pages
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'backlink-outreach' }, 'Backlink outreach pack')}
-            title="Phase 8 email drafts from published projects"
-          >
-            Backlinks
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'unlock-readiness' }, 'Unlock readiness')}
-            title="Score secrets + human gates still blocking full automation"
-          >
-            Unlock %
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'ops-cockpit' }, 'Writing ops cockpit')}
-            title="Regenerate ops-cockpit.html"
-          >
-            Ops cockpit
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}
-            title="Phase 2.2 — schema sniff + Google Rich Results Test links"
-          >
-            Rich Results
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'top20-meta-pack' }, 'Top meta pack')}
-            title="Phase 3 — priority title/description audit"
-          >
-            Top meta
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'review-kit' }, 'Review kit')}
-            title="Phase 5.6 WhatsApp/email review templates"
-          >
-            Review kit
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'content-calendar' }, 'Content calendar')}
-            title="Phase 7 — 4-week calendar from keyword map"
-          >
-            Calendar
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'speed-baseline' }, 'Speed baseline')}
-            title="Phase 4 — PageSpeed links for key pages"
-          >
-            Speed
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'preprod-removals' }, 'PreProd removals check')}
-            title="Phase 1.8 — PreProd noindex probe + Removals checklist"
-          >
-            PreProd
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'quarterly-digest' }, 'Quarterly digest')}
-            title="Phase 9.3 quarterly checklist"
-          >
-            Quarterly
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'phase0-wizard' }, 'Phase 0 wizard')}
-            title="GSC / OAuth / Bing / GA4 unlock wizard"
-          >
-            Phase 0
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'meta-polish', apply: true }, 'Polishing meta')}
-            title="Rewrite too-long/short CMS meta and apply"
-          >
-            Polish meta
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'indexing-queue' }, 'Indexing queue')}
-            title="Priority URLs for GSC inspect / request indexing"
-          >
-            Index queue
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'og-share-pack' }, 'OG share pack')}
-            title="Phase 2.4 Open Graph + LinkedIn inspector"
-          >
-            OG share
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => postAction({ action: 'locale-decision' }, 'Locale decision')}
-            title="Phase 6.3 Hindi/Kannada keep-or-off"
-          >
-            Locales
-          </button>
-          <button
-            type="button"
-            disabled={pending || env !== 'prod'}
+            disabled={pending || jobRunning || env !== 'prod'}
             onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting GSC sitemap')}
-            title="Requires MERIDIAN_GOOGLE_* with webmasters scope"
           >
             GSC sitemap
           </button>
           <button
             type="button"
-            disabled={pending || env !== 'prod'}
+            disabled={pending || jobRunning || env !== 'prod'}
             onClick={() => postAction({ action: 'bing-submit-sitemap' }, 'Submitting Bing sitemap')}
-            title="Requires MERIDIAN_BING_API_KEY"
           >
             Bing sitemap
           </button>
           <button
             type="button"
-            disabled={pending || env !== 'prod'}
+            disabled={pending || jobRunning || env !== 'prod'}
             onClick={() => postAction({ action: 'inspect-priority', limit: 5 }, 'Inspecting priority URLs')}
           >
             Inspect top URLs
           </button>
-          <button
-            type="button"
-            disabled={pending || env !== 'prod'}
-            onClick={() => postAction({ action: 'inspect-sitemap-delta', limit: 10 }, 'Inspecting new sitemap URLs')}
-          >
-            Inspect new URLs
-          </button>
           <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
-            Open HTML report
+            HTML report
           </a>
           <a
             className="link"
@@ -673,16 +515,120 @@ export default function MeridianPanel() {
           >
             Ops cockpit
           </a>
-          <a
-            className="link"
-            href={withBasePath(`/api/admin/meridian?env=${env}&format=phase0`)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Phase 0 wizard
-          </a>
         </div>
       </div>
+
+      <details className="more-actions">
+        <summary>More one-off actions (optional — already inside autopilot)</summary>
+        <div className="actions">
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'draft-meta' }, 'Drafting meta')}>
+              Draft meta
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'apply-meta' }, 'Applying meta')}>
+              Apply meta
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'draft-alt' }, 'Drafting alt')}>
+              Draft alt
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'apply-alt' }, 'Applying alt')}>
+              Apply alt
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'sitemap-health', limit: 120 }, 'Sitemap health crawl')}>
+              Sitemap health
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'form-health' }, 'Form health probe')}>
+              Form health
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'image-weight' }, 'Image weight scan')}>
+              Image weight
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'image-optimize' }, 'Optimizing heavy images')}>
+              Optimize images
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'orphan-remediate', apply: true }, 'Remediating orphans')}>
+              Fix orphans
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'content-briefs' }, 'Writing content briefs')}>
+              Content briefs
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'schema-validate' }, 'Validating JSON-LD')}>
+              Schema check
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'nap-audit' }, 'NAP / GBP audit')}>
+              NAP / GBP
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'hreflang-validate' }, 'Checking hreflang')}>
+              hreflang
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'keyword-map' }, 'Building keyword map')}>
+              Keyword map
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'content-seed' }, 'Seeding FAQ content')}>
+              Seed content
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'citations-playbook' }, 'Citations playbook')}>
+              Citations
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'city-pages-readiness' }, 'City pages readiness')}>
+              City pages
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'backlink-outreach' }, 'Backlink outreach pack')}>
+              Backlinks
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'unlock-readiness' }, 'Unlock readiness')}>
+              Unlock %
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'ops-cockpit' }, 'Writing ops cockpit')}>
+              Regen cockpit
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'rich-results-pack' }, 'Rich Results pack')}>
+              Rich Results
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'top20-meta-pack' }, 'Top meta pack')}>
+              Top meta
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'review-kit' }, 'Review kit')}>
+              Review kit
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'content-calendar' }, 'Content calendar')}>
+              Calendar
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'speed-baseline' }, 'Speed baseline')}>
+              Speed
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'preprod-removals' }, 'PreProd removals check')}>
+              PreProd
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'quarterly-digest' }, 'Quarterly digest')}>
+              Quarterly
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'phase0-wizard' }, 'Phase 0 wizard')}>
+              Phase 0
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'meta-polish', apply: true }, 'Polishing meta')}>
+              Polish meta
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'indexing-queue' }, 'Indexing queue')}>
+              Index queue
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'og-share-pack' }, 'OG share pack')}>
+              OG share
+            </button>
+            <button type="button" disabled={pending || jobRunning} onClick={() => postAction({ action: 'locale-decision' }, 'Locale decision')}>
+              Locales
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning || env !== 'prod'}
+              onClick={() => postAction({ action: 'inspect-sitemap-delta', limit: 10 }, 'Inspecting new sitemap URLs')}
+            >
+              Inspect new URLs
+            </button>
+            <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=phase0`)} target="_blank" rel="noreferrer">
+              Phase 0 HTML
+            </a>
+        </div>
+      </details>
 
       {error ? <p className="err">{error}</p> : null}
 

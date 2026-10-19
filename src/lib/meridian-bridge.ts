@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { access, mkdir, readFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const ROOT = process.cwd();
@@ -71,7 +71,103 @@ export function meridianLatestPaths(env: MeridianEnv) {
     opsCockpit: path.join(dir, 'ops-cockpit.html'),
     opsCockpitJson: path.join(dir, 'ops-cockpit.json'),
     phase0Wizard: path.join(dir, 'phase0-wizard.html'),
+    jobStatus: path.join(dir, 'job-status.json'),
   };
+}
+
+export type MeridianJobStatus = {
+  action: string;
+  status: 'running' | 'ok' | 'error';
+  startedAt: string;
+  finishedAt?: string;
+  pid?: number;
+  code?: number | null;
+  error?: string;
+  applyMeta?: boolean;
+  skipAct?: boolean;
+};
+
+export async function readMeridianJobStatus(env: MeridianEnv): Promise<MeridianJobStatus | null> {
+  const { jobStatus, dir } = meridianLatestPaths(env);
+  try {
+    await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+    await access(/*turbopackIgnore: true*/ jobStatus);
+    const raw = await readFile(/*turbopackIgnore: true*/ jobStatus, 'utf8');
+    return JSON.parse(raw) as MeridianJobStatus;
+  } catch {
+    return null;
+  }
+}
+
+async function writeMeridianJobStatus(env: MeridianEnv, status: MeridianJobStatus) {
+  const { jobStatus, dir } = meridianLatestPaths(env);
+  await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+  await writeFile(/*turbopackIgnore: true*/ jobStatus, JSON.stringify(status, null, 2), 'utf8');
+}
+
+/**
+ * Start a long Meridian job (autopilot ~3 min) without blocking the HTTP request.
+ * Nginx/proxy often times out at ~60s and returns HTML — that caused Admin JSON parse errors.
+ */
+export async function startMeridianAutopilotBackground(
+  env: MeridianEnv,
+  opts: { skipAct?: boolean; applyMeta?: boolean } = {}
+): Promise<{ started: boolean; job: MeridianJobStatus; alreadyRunning?: boolean }> {
+  const existing = await readMeridianJobStatus(env);
+  if (existing?.status === 'running') {
+    const ageMs = Date.now() - new Date(existing.startedAt).getTime();
+    // Allow a stuck lock older than 20 minutes to be replaced
+    if (Number.isFinite(ageMs) && ageMs < 20 * 60 * 1000) {
+      return { started: false, alreadyRunning: true, job: existing };
+    }
+  }
+
+  const profile = meridianProfilePath(env);
+  const args = ['autopilot', '--profile', profile];
+  if (opts.skipAct || env === 'preprod') args.push('--skip-act');
+  if (opts.applyMeta) args.push('--apply-meta');
+
+  const startedAt = new Date().toISOString();
+  const job: MeridianJobStatus = {
+    action: 'autopilot',
+    status: 'running',
+    startedAt,
+    applyMeta: !!opts.applyMeta,
+    skipAct: !!(opts.skipAct || env === 'preprod'),
+  };
+  await writeMeridianJobStatus(env, job);
+
+  const child = spawn(process.execPath, [MERIDIAN_BIN, ...args], {
+    cwd: ROOT,
+    env: process.env,
+    windowsHide: true,
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.unref();
+
+  job.pid = child.pid;
+  await writeMeridianJobStatus(env, job);
+
+  child.on('error', (err) => {
+    void writeMeridianJobStatus(env, {
+      ...job,
+      status: 'error',
+      finishedAt: new Date().toISOString(),
+      error: String(err),
+    });
+  });
+  child.on('exit', (code) => {
+    void writeMeridianJobStatus(env, {
+      ...job,
+      status: code === 0 ? 'ok' : 'error',
+      finishedAt: new Date().toISOString(),
+      code,
+      error: code === 0 ? undefined : `autopilot exited with code ${code}`,
+    });
+  });
+
+  return { started: true, job };
 }
 
 export async function readLatestUnlock(env: MeridianEnv) {

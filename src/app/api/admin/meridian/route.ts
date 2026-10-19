@@ -7,8 +7,10 @@ import {
   readLatestDigest,
   readLatestMeridianReport,
   readLatestUnlock,
+  readMeridianJobStatus,
   runMeridianAct,
   runMeridianCli,
+  startMeridianAutopilotBackground,
   type MeridianAct,
   type MeridianEnv,
 } from '@/lib/meridian-bridge';
@@ -73,8 +75,9 @@ export async function GET(request: Request) {
     const autopilot = await readLatestAutopilot(env);
     const digest = await readLatestDigest(env);
     const unlock = await readLatestUnlock(env);
+    const job = await readMeridianJobStatus(env);
     const readiness = meridianConnectorReadiness();
-    return NextResponse.json({ env, report, autopilot, digest, unlock, hasReport: !!report, readiness });
+    return NextResponse.json({ env, report, autopilot, digest, unlock, job, hasReport: !!report, readiness });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
     return NextResponse.json({ error: msg }, { status: authStatus(e) });
@@ -114,24 +117,21 @@ export async function POST(request: Request) {
     }
 
     if (action === 'autopilot') {
-      const result = await runMeridianAct(env, {
-        action: 'autopilot',
+      // Background: full autopilot is ~3 min; waiting inline returns nginx HTML (not JSON) to the browser.
+      const bg = await startMeridianAutopilotBackground(env, {
         skipAct: env === 'preprod' || !!body.skipAct,
         applyMeta: !!body.applyMeta,
       });
-      const report = await readLatestMeridianReport(env);
-      const autopilot = await readLatestAutopilot(env);
-      const digest = await readLatestDigest(env);
       return NextResponse.json({
         env,
         action,
-        ok: result.ok,
-        code: result.code,
-        stdout: result.stdout.slice(-6000),
-        stderr: result.stderr.slice(-2000),
-        report,
-        autopilot,
-        digest,
+        ok: true,
+        started: bg.started,
+        alreadyRunning: !!bg.alreadyRunning,
+        job: bg.job,
+        message: bg.alreadyRunning
+          ? 'Autopilot already running — refresh in a minute.'
+          : 'Autopilot started in the background (~2–4 min). This page will refresh when finished.',
       });
     }
 
