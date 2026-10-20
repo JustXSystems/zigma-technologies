@@ -155,7 +155,6 @@ export async function POST(request: Request) {
       windowDays?: number;
       topN?: number;
       theme?: string;
-      skipScan?: boolean;
       skipLiveVerify?: boolean;
       skipPsi?: boolean;
     };
