@@ -64,7 +64,11 @@ function rewriteArgs(argv) {
 const args = rewriteArgs(process.argv.slice(2));
 const child = spawn(process.execPath, [bin, ...args], {
   cwd: root,
-  env: process.env,
+  env: {
+    ...process.env,
+    // Sidecar at /var/www/zigma-meridian must write artefacts under the site tree
+    MERIDIAN_SITE_ROOT: process.env.MERIDIAN_SITE_ROOT || process.env.ZIGMA_APP_DIR || root,
+  },
   stdio: 'inherit',
 });
 child.on('exit', (code, signal) => {

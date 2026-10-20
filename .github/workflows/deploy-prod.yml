@@ -319,27 +319,38 @@ jobs:
             rm -f /tmp/apply-release.sh
             # Keep $STAGE as delta cache for the next deploy.
 
-            # Pin MERIDIAN_HOME (best-effort — never fail the website deploy)
+            # Pin Meridian control-plane env (best-effort — never fail the website deploy)
             MDIR="${MERIDIAN_DIR:-/var/www/zigma-meridian}"
-            ENV_FILE=/var/www/zigma-technologies/.env
-            if [ -f "$MDIR/bin/meridian.mjs" ] && [ -f "$ENV_FILE" ]; then
-              WANT="MERIDIAN_HOME=$MDIR"
-              CUR="$(grep -E '^MERIDIAN_HOME=' "$ENV_FILE" 2>/dev/null | tail -n1 || true)"
-              if [ "$CUR" = "$WANT" ]; then
-                echo "MERIDIAN_HOME already correct ($MDIR)"
+            APP=/var/www/zigma-technologies
+            ENV_FILE="$APP/.env"
+            pin_env() {
+              local key="$1" val="$2" cur
+              cur="$(grep -E "^${key}=" "$ENV_FILE" 2>/dev/null | tail -n1 || true)"
+              if [ "$cur" = "${key}=${val}" ]; then
+                echo "$key already correct"
+                return 1
+              fi
+              if grep -qE "^${key}=" "$ENV_FILE"; then
+                sed -i "s|^${key}=.*|${key}=${val}|" "$ENV_FILE"
               else
-                if grep -qE '^MERIDIAN_HOME=' "$ENV_FILE"; then
-                  sed -i "s|^MERIDIAN_HOME=.*|$WANT|" "$ENV_FILE"
-                else
-                  printf '\n%s\n' "$WANT" >> "$ENV_FILE"
-                fi
-                echo "Updated .env → $WANT"
-                if [ "${IN_RESTART}" = "true" ] && [ "${IN_DRY}" != "true" ]; then
-                  pm2 restart zigma --update-env || echo "WARNING: pm2 --update-env failed (site already restarted by apply)"
-                fi
+                printf '\n%s=%s\n' "$key" "$val" >> "$ENV_FILE"
+              fi
+              echo "Updated .env → ${key}=${val}"
+              return 0
+            }
+            CHANGED=0
+            if [ -f "$ENV_FILE" ]; then
+              pin_env MERIDIAN_SITE_ROOT "$APP" && CHANGED=1 || true
+              if [ -f "$MDIR/bin/meridian.mjs" ]; then
+                pin_env MERIDIAN_HOME "$MDIR" && CHANGED=1 || true
+              else
+                echo "Skip MERIDIAN_HOME pin (sidecar missing at $MDIR)"
+              fi
+              if [ "$CHANGED" = "1" ] && [ "${IN_RESTART}" = "true" ] && [ "${IN_DRY}" != "true" ]; then
+                pm2 restart zigma --update-env || echo "WARNING: pm2 --update-env failed (site already restarted by apply)"
               fi
             else
-              echo "Skip MERIDIAN_HOME pin (sidecar missing at $MDIR or no .env) — site deploy OK"
+              echo "Skip Meridian env pin (no .env) — site deploy OK"
             fi
 
   # Control-plane desk (CI artefacts) — waits for Meridian job to finish/skip, never blocked by its failure

@@ -1,16 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { runTechnicalEngine } from './engine/technical.mjs';
 import { buildRoadmap, buildScorecard } from './engine/score.mjs';
 import { buildScoreTrend, readPreviousReport } from './engine/trend.mjs';
 import { findingsFromConnectors, runConnectors, signalsFromConnectors } from './connectors/registry.mjs';
 import { renderHtmlReport } from './report/html.mjs';
 import { renderMarkdownReport } from './report/markdown.mjs';
+import { resolveMeridianOutDir } from './lib/paths.mjs';
 
 const MERIDIAN_VERSION = '0.4.0';
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * @param {object} profile
@@ -20,12 +19,7 @@ export async function runMeridian(profile, opts = {}) {
   const started = Date.now();
   const runId = randomUUID().slice(0, 8);
 
-  const outDir = resolve(
-    opts.outDir ||
-      (profile.outputDir
-        ? resolve(__dirname, '..', profile.outputDir)
-        : resolve(__dirname, '..', 'out', profile.id || 'run'))
-  );
+  const outDir = resolveMeridianOutDir(profile, opts);
   await mkdir(outDir, { recursive: true });
   const previous = await readPreviousReport(outDir);
 

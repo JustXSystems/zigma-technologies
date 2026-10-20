@@ -64,6 +64,7 @@ Meridian is isolated for **risk**, not size. Website hot path = **delta rsync** 
 | Variable | Plane | Purpose |
 | --- | --- | --- |
 | `MERIDIAN_HOME` | Control on VPS | Absolute path to CLI (`…/bin/meridian.mjs`) |
+| `MERIDIAN_SITE_ROOT` | Control on VPS | Website app dir (artefacts → `$SITE/storage/meridian/…`; required when CLI is the sidecar) |
 | `MERIDIAN_GOOGLE_*` | Control | GSC/GA4 OAuth |
 | `MERIDIAN_BING_API_KEY` | Control | Bing Webmaster |
 | `MERIDIAN_PSI_API_KEY` | Control | PageSpeed (optional) |

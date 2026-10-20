@@ -635,6 +635,8 @@ export async function startMeridianAutopilotBackground(
     cwd: ROOT,
     env: {
       ...process.env,
+      // Sidecar CLI must write under the website tree, not /var/storage
+      MERIDIAN_SITE_ROOT: process.env.MERIDIAN_SITE_ROOT || process.env.ZIGMA_APP_DIR || ROOT,
       // Admin background jobs must finish green; packs record findings without failing the job
       MERIDIAN_ADMIN_SOFT_HARD: '1',
       MERIDIAN_CI_SOFT_HARD: process.env.MERIDIAN_CI_SOFT_HARD || '1',
@@ -752,7 +754,10 @@ async function spawnMeridian(args: string[]): Promise<{
   return new Promise((resolvePromise) => {
     const child = spawn(process.execPath, [bin, ...args], {
       cwd: ROOT,
-      env: process.env,
+      env: {
+        ...process.env,
+        MERIDIAN_SITE_ROOT: process.env.MERIDIAN_SITE_ROOT || process.env.ZIGMA_APP_DIR || ROOT,
+      },
       windowsHide: true,
     });
     let stdout = '';

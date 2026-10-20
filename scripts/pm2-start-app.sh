@@ -66,6 +66,7 @@ module.exports = {
       PORT: '${APP_PORT}',
       HOSTNAME: '127.0.0.1',
       ZIGMA_APP_DIR: '${APP_DIR}',
+      MERIDIAN_SITE_ROOT: '${APP_DIR}',
     },
   }],
 };
