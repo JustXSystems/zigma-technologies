@@ -74,15 +74,38 @@ EOF
 pm2 start "$ECO"
 rm -f "$ECO"
 pm2 save
-sleep 2
+sleep 3
 pm2 status "$PM2_NAME"
 
 if ! pm2 describe "$PM2_NAME" 2>/dev/null | grep -q "status.*online"; then
-  pm2 logs "$PM2_NAME" --lines 40 --nostream || true
+  pm2 logs "$PM2_NAME" --lines 80 --nostream || true
   echo "ERROR: $PM2_NAME failed to stay online" >&2
   exit 1
 fi
 
-echo "==> Listening check"
+echo "==> Waiting for TCP :${APP_PORT}"
+READY=0
+for i in $(seq 1 30); do
+  if command -v ss >/dev/null 2>&1 && ss -lptn "sport = :${APP_PORT}" 2>/dev/null | grep -q ":${APP_PORT}"; then
+    READY=1
+    break
+  fi
+  if (echo >/dev/tcp/127.0.0.1/"${APP_PORT}") 2>/dev/null; then
+    READY=1
+    break
+  fi
+  # Crash-loop detection
+  if pm2 describe "$PM2_NAME" 2>/dev/null | grep -qE 'status\s+errored|status\s+stopped'; then
+    pm2 logs "$PM2_NAME" --lines 80 --nostream || true
+    echo "ERROR: $PM2_NAME stopped/errored while waiting for port" >&2
+    exit 1
+  fi
+  sleep 1
+done
 ss -lptn "sport = :${APP_PORT}" || true
+if [[ "$READY" -ne 1 ]]; then
+  pm2 logs "$PM2_NAME" --lines 80 --nostream || true
+  echo "ERROR: $PM2_NAME never listened on :${APP_PORT}" >&2
+  exit 1
+fi
 echo "==> OK — $PM2_NAME on 127.0.0.1:${APP_PORT}"

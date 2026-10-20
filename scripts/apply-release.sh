@@ -269,8 +269,21 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
   fi
 
   log "Install release files into $APP_DIR"
+  # Standalone ships a lean node_modules. Leftover full-npm trees (eslint, babel, …)
+  # from older git/npm deploys block rsync --delete and can crash the new process.
+  if [[ -d "$APP_DIR/node_modules" ]]; then
+    log "Preparing node_modules for clean replace (chmod + prune stale trees)"
+    chmod -R u+w "$APP_DIR/node_modules" 2>/dev/null || true
+    if [[ -d "$STAGE/node_modules" ]]; then
+      # Drop destination tree so rsync copies a clean standalone set (avoids undeletable nests).
+      rm -rf "$APP_DIR/node_modules" 2>/dev/null || true
+      if [[ -d "$APP_DIR/node_modules" ]]; then
+        log "WARNING: could not fully remove $APP_DIR/node_modules — rsync --delete will try"
+      fi
+    fi
+  fi
+
   # VPS deploy users often cannot chown/chgrp/utime the app root dir (rsync code 23).
-  # Protect leftover git-deploy dirs so --delete does not try to remove them.
   # Excluded paths are not deleted unless --delete-excluded (which we do not use).
   set +e
   rsync -a --delete --no-owner --no-group --omit-dir-times \
@@ -282,19 +295,20 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     --exclude 'src/' \
     --exclude 'coverage/' \
     --exclude 'docs/' \
+    --exclude '.well-known/' \
     --exclude 'public/assets/uploads/resumes/' \
     --exclude 'public/assets/uploads/documents/' \
     "$STAGE"/ "$APP_DIR"/
   RSYNC_RC=$?
   set -e
-  # 0 = ok; 23 = partial transfer (usually dir utime/attrs on unowned APP_DIR)
+  # 0 = ok; 23 = partial transfer (dir utime/attrs, or undeletable leftovers we excluded/pruned)
   if [[ "$RSYNC_RC" -ne 0 && "$RSYNC_RC" -ne 23 ]]; then
     die "rsync failed with code $RSYNC_RC"
   fi
   [[ -f "$APP_DIR/server.js" && -f "$APP_DIR/release-manifest.json" ]] \
     || die "rsync finished (rc=$RSYNC_RC) but server.js / release-manifest.json missing"
   if [[ "$RSYNC_RC" -eq 23 ]]; then
-    log "rsync reported code 23 (directory attribute warnings on unowned app root) — release files OK, continuing"
+    log "rsync reported code 23 (attrs / leftover paths) — release files present, continuing"
   fi
 
   # Restore .env
@@ -396,17 +410,38 @@ else
 fi
 
 if [[ "$DO_HEALTHCHECK" -eq 1 && "$DO_RESTART" -eq 1 ]]; then
-  log "Healthcheck http://127.0.0.1:${APP_PORT}${HEALTH_PATH}"
-  sleep 3
-  CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "http://127.0.0.1:${APP_PORT}${HEALTH_PATH}" || true)"
+  HEALTH_URL="http://127.0.0.1:${APP_PORT}${HEALTH_PATH}"
+  log "Healthcheck $HEALTH_URL (retries)"
+  CODE=""
+  for attempt in $(seq 1 20); do
+    CODE="$(curl -sS -o /dev/null -w '%{http_code}' --connect-timeout 2 --max-time 15 "$HEALTH_URL" 2>/dev/null || true)"
+    case "$CODE" in
+      200|301|302|307|308)
+        log "Healthcheck OK (HTTP $CODE) on attempt $attempt"
+        break
+        ;;
+    esac
+    log "  attempt $attempt: HTTP ${CODE:-000} — waiting for Next ready…"
+    sleep 2
+  done
   case "$CODE" in
-    200|301|302|307|308) log "Healthcheck OK (HTTP $CODE)" ;;
-    *) die "Healthcheck failed (HTTP ${CODE:-none}). pm2 logs $PM2_NAME --lines 80" ;;
+    200|301|302|307|308) ;;
+    *)
+      log "Healthcheck failed (HTTP ${CODE:-000}) — recent PM2 logs:"
+      pm2 logs "$PM2_NAME" --lines 80 --nostream 2>&1 || true
+      pm2 describe "$PM2_NAME" 2>&1 || true
+      die "Healthcheck failed (HTTP ${CODE:-000}). See PM2 logs above."
+      ;;
   esac
   ASSET="assets/images/zigma-technologies-logo.png"
   if [[ -f "public/${ASSET}" ]]; then
     AURL="http://127.0.0.1:${APP_PORT}${EXPECT_BASE_PATH}/${ASSET}"
-    ACODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$AURL" || true)"
+    ACODE=""
+    for attempt in $(seq 1 10); do
+      ACODE="$(curl -sS -o /dev/null -w '%{http_code}' --connect-timeout 2 --max-time 15 "$AURL" 2>/dev/null || true)"
+      [[ "$ACODE" == "200" ]] && break
+      sleep 1
+    done
     [[ "$ACODE" == "200" ]] || die "Asset healthcheck failed ($AURL → HTTP $ACODE)"
     log "Asset healthcheck OK"
   fi
