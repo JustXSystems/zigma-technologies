@@ -130,11 +130,18 @@ copyFileSync(join(ROOT, 'package-lock.json'), join(STAGE, 'package-lock.json'));
 if (existsSync(join(ROOT, 'next.config.ts'))) copyFileSync(join(ROOT, 'next.config.ts'), join(STAGE, 'next.config.ts'));
 if (existsSync(join(ROOT, '.env.example'))) copyFileSync(join(ROOT, '.env.example'), join(STAGE, '.env.example'));
 
-if (existsSync(join(ROOT, 'packages/meridian'))) {
+// Meridian ops toolkit excluded by default (separate Deploy Meridian workflow).
+// Opt-in: SHIP_MERIDIAN=1
+mkdirSync(join(STAGE, 'storage/meridian'), { recursive: true });
+if (process.env.SHIP_MERIDIAN === '1' && existsSync(join(ROOT, 'packages/meridian'))) {
   mkdirSync(join(STAGE, 'packages'), { recursive: true });
   copyTree(join(ROOT, 'packages/meridian'), join(STAGE, 'packages/meridian'));
-  rmSync(join(STAGE, 'packages/meridian/node_modules'), { recursive: true, force: true });
-  mkdirSync(join(STAGE, 'storage/meridian'), { recursive: true });
+  for (const drop of ['node_modules', 'out', 'coverage', '.git']) {
+    rmSync(join(STAGE, 'packages/meridian', drop), { recursive: true, force: true });
+  }
+  console.log('==> Staged packages/meridian (SHIP_MERIDIAN=1)');
+} else {
+  console.log('==> Skipped packages/meridian in website tarball (deploy separately)');
 }
 
 const mysql2Ver = require(join(ROOT, 'node_modules/mysql2/package.json')).version;
@@ -204,7 +211,10 @@ if (!tarBin) {
   process.exit(1);
 }
 
-const pack = spawnSync(tarBin, ['-czf', OUT, '-C', STAGE, '.'], { encoding: 'utf8' });
+const pack = spawnSync(tarBin, ['-czf', OUT, '-C', STAGE, '.'], {
+  encoding: 'utf8',
+  env: { ...process.env, GZIP: '-9' },
+});
 if (pack.status !== 0) {
   console.error(pack.stderr || pack.stdout || 'tar failed');
   process.exit(1);

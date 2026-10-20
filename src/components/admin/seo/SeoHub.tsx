@@ -14,9 +14,9 @@ export default function SeoHub({ initialTab }: { initialTab?: string }) {
       title="SEO"
       intro={
         <>
-          How the site appears in search and when shared. Use <strong>Meridian</strong> for live verify and the
-          consolidated report. CMS pages, catalog items and blog articles have their own SEO fields in{' '}
-          <AdminLink href="/admin/pages">Pages</AdminLink>,{' '}
+          <strong>On-page SEO</strong> lives in the website (titles, sitemap, schema). <strong>Meridian</strong> is
+          the separate control plane for GSC/Bing reports — run via GitHub Actions when possible so Production
+          deploys stay clean. Edit page SEO in <AdminLink href="/admin/pages">Pages</AdminLink>,{' '}
           <AdminLink href="/admin/inventory">Inventory → SEO</AdminLink> and{' '}
           <AdminLink href="/admin/resources">Blog → Articles</AdminLink>.
         </>

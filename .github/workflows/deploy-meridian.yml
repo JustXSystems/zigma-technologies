@@ -1,0 +1,93 @@
+# Independent Meridian SEO ops deploy — does NOT rebuild or restart the live website.
+# Ships ~1 MiB of Node CLI to /opt/zigma-meridian on the VPS.
+#
+# Website deploys (deploy-prod.yml) no longer bundle packages/meridian.
+# After first Meridian deploy, set on the site PM2 process:
+#   MERIDIAN_HOME=/opt/zigma-meridian
+# so Admin → SEO → Meridian can call the toolkit without it living inside the site tarball.
+name: Deploy Meridian
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Git branch
+        type: string
+        default: master
+      target_dir:
+        description: Absolute path on VPS (outside website tree)
+        type: string
+        default: /var/www/zigma-meridian
+
+jobs:
+  deploy-meridian:
+    name: Ship Meridian CLI → VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          sparse-checkout: |
+            packages/meridian
+          sparse-checkout-cone-mode: false
+
+      - name: Require Production SSH secrets
+        id: ssh
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOST="${{ secrets.PROD_HOST }}"
+          USER="${{ secrets.PROD_SSH_USER }}"
+          KEY="${{ secrets.PROD_SSH_KEY }}"
+          if [[ -z "$HOST" || -z "$USER" || -z "$KEY" ]]; then
+            echo "Missing PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY" >&2
+            exit 1
+          fi
+          echo "host=$HOST" >> "$GITHUB_OUTPUT"
+          echo "user=$USER" >> "$GITHUB_OUTPUT"
+          {
+            echo "key<<EOF"
+            echo "$KEY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Pack Meridian only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f packages/meridian/bin/meridian.mjs
+          mkdir -p dist
+          tar -C packages/meridian -czf dist/meridian.tgz \
+            --exclude=node_modules --exclude=out --exclude=coverage --exclude=.git \
+            .
+          ls -lh dist/meridian.tgz
+          BYTES="$(wc -c < dist/meridian.tgz | tr -d ' ')"
+          if (( BYTES > 5000000 )); then
+            echo "ERROR: Meridian pack unexpectedly large ($BYTES bytes)" >&2
+            exit 1
+          fi
+
+      - name: Upload + extract on VPS (no website restart)
+        shell: bash
+        env:
+          TARGET_DIR: ${{ inputs.target_dir }}
+        run: |
+          set -euo pipefail
+          KEYFILE="$(mktemp)"
+          trap 'rm -f "$KEYFILE"' EXIT
+          printf '%s\n' "${{ steps.ssh.outputs.key }}" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          DEST_HOST="${{ steps.ssh.outputs.user }}@${{ steps.ssh.outputs.host }}"
+          SSH=(ssh -i "$KEYFILE" -p 22 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o Compression=no)
+          export RSYNC_RSH="${SSH[*]}"
+          rsync -a --partial --info=progress2 dist/meridian.tgz "$DEST_HOST:/tmp/meridian.tgz"
+          "${SSH[@]}" "$DEST_HOST" "set -euo pipefail
+            TARGET='${TARGET_DIR}'
+            mkdir -p \"\$TARGET\"
+            tar -xzf /tmp/meridian.tgz -C \"\$TARGET\"
+            test -f \"\$TARGET/bin/meridian.mjs\"
+            echo \"Meridian ready at \$TARGET\"
+            echo \"Set MERIDIAN_HOME=\$TARGET on the website PM2 env (pm2 restart) — never unpacks into the live site tree.\"
+            ls -la \"\$TARGET/bin\" \"\$TARGET/profiles\" | head -40
+          "

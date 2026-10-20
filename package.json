@@ -13,6 +13,7 @@
     "seo:verify:preprod": "node scripts/verify-seo-live.mjs --env preprod",
     "seo:verify:build": "node scripts/verify-seo-build.mjs",
     "seo:report": "node packages/meridian/bin/meridian.mjs act seo-report --profile packages/meridian/profiles/zigma.prod.json",
+    "seo:report:quick": "node packages/meridian/bin/meridian.mjs act seo-report --profile packages/meridian/profiles/zigma.prod.json --skip-scan --skip-psi",
     "meridian": "node packages/meridian/bin/meridian.mjs",
     "meridian:run": "node packages/meridian/bin/meridian.mjs run --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:verify": "node packages/meridian/bin/meridian.mjs verify --profile packages/meridian/profiles/zigma.prod.json",

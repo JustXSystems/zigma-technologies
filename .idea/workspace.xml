@@ -7,7 +7,22 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases report done" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases report done">
+      <change afterPath="$PROJECT_DIR$/packages/meridian/HOSTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SEO-GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SEO-GUIDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/ARCHITECTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/ARCHITECTURE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/AUTOMATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/package-release.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/package-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/package-release.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/MeridianPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/seo/SeoHub.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/seo/SeoHub.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -64,23 +79,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0082579534418858" />
-      <entry key="MS500" value="1.3831549900519458" />
-      <entry key="S2" value="1.786762445353566" />
-      <entry key="S5" value="1.90852618457964" />
-      <entry key="S10" value="1.95316657206013" />
-      <entry key="S30" value="2.026461151063825" />
-      <entry key="S60" value="3.0771913061978777" />
-      <entry key="M2" value="11.605288069500352" />
-      <entry key="M5" value="62.65348063501941" />
-      <entry key="M10" value="140.9766630885685" />
-      <entry key="M15" value="198.76586992148043" />
-      <entry key="M30" value="305.0714826850664" />
-      <entry key="H1" value="440.0094708135175" />
-      <entry key="H2" value="612.466260531382" />
-      <entry key="H4" value="778.6006159694164" />
-      <entry key="D1" value="1717.728455302816" />
-      <entry key="W1" value="11555.04359485637" />
+      <entry key="MS100" value="1.1987517948577935" />
+      <entry key="MS500" value="2.4672711741470543" />
+      <entry key="S2" value="4.38761514059391" />
+      <entry key="S5" value="8.456604876259064" />
+      <entry key="S10" value="16.999212640219554" />
+      <entry key="S30" value="52.15286717287819" />
+      <entry key="S60" value="93.90729277439536" />
+      <entry key="M2" value="163.23881588025944" />
+      <entry key="M5" value="317.40289434993605" />
+      <entry key="M10" value="461.0930519212939" />
+      <entry key="M15" value="555.1065717336471" />
+      <entry key="M30" value="743.3350887062544" />
+      <entry key="H1" value="967.4312170718681" />
+      <entry key="H2" value="1219.7774188958242" />
+      <entry key="H4" value="1454.3353326864162" />
+      <entry key="D1" value="2472.2427200248217" />
+      <entry key="W1" value="12314.178525435947" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -95,30 +110,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="9.714701092214256E-216" />
-      <entry key="H2" value="3.1168415250397124E-108" />
-      <entry key="H4" value="1.7654578797418912E-54" />
-      <entry key="D1" value="1.1169931399327422E-9" />
-      <entry key="W1" value="0.08158989472918583" />
+      <entry key="H1" value="5.727923032082724E-216" />
+      <entry key="H2" value="2.393307968499094E-108" />
+      <entry key="H4" value="1.547031986927931E-54" />
+      <entry key="D1" value="1.0926745504413452E-9" />
+      <entry key="W1" value="0.08133373277685083" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.94738958944883" />
-      <entry key="MS500" value="1.367055674688886" />
-      <entry key="S2" value="1.7817417583697295" />
-      <entry key="S5" value="1.9063980859920096" />
-      <entry key="S10" value="1.9520805670255947" />
-      <entry key="S30" value="2.026087767218661" />
-      <entry key="S60" value="3.0769279487850274" />
-      <entry key="M2" value="11.604882247739985" />
-      <entry key="M5" value="62.65271852234197" />
-      <entry key="M10" value="140.97582679108672" />
-      <entry key="M15" value="198.76508635723928" />
-      <entry key="M30" value="305.07087892405826" />
-      <entry key="H1" value="440.00901866113094" />
-      <entry key="H2" value="612.4657609883507" />
-      <entry key="H4" value="778.5998060787996" />
-      <entry key="D1" value="1717.7278239284005" />
-      <entry key="W1" value="11555.124923384135" />
+      <entry key="MS100" value="1.1586591692253194" />
+      <entry key="MS500" value="2.4509819546067453" />
+      <entry key="S2" value="4.380304969326894" />
+      <entry key="S5" value="8.451207987492776" />
+      <entry key="S10" value="16.993840683171527" />
+      <entry key="S30" value="52.14718003512462" />
+      <entry key="S60" value="93.90205579651662" />
+      <entry key="M2" value="163.23414600470056" />
+      <entry key="M5" value="317.39915316530335" />
+      <entry key="M10" value="461.0903025757839" />
+      <entry key="M15" value="555.1043578069136" />
+      <entry key="M30" value="743.3336030690098" />
+      <entry key="H1" value="967.4302408561293" />
+      <entry key="H2" value="1219.776659498086" />
+      <entry key="H4" value="1454.3344293795515" />
+      <entry key="D1" value="2472.242069290972" />
+      <entry key="W1" value="12314.25959387197" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

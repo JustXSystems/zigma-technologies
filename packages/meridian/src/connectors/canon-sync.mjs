@@ -278,17 +278,18 @@ ${nextBlock}
 
 ### Meridian map (developer)
 
-- Forever: \`npm run meridian:observe\` · \`npm run meridian:brief\` · \`npm run meridian:guard\`
-- Admin → **SEO → Meridian** → **Command Brief** · Phase 33 / Phase 32
-- SSH: \`deploy@200.234.45.106\` · App \`/var/www/zigma-technologies\`
-- Artefacts: \`${origin.replace('https://', '')}\` → \`storage/meridian/zigma-prod/\`
+- Architecture: [\`packages/meridian/ARCHITECTURE.md\`](packages/meridian/ARCHITECTURE.md) (product vs control plane)
+- Control plane: GitHub **Meridian SEO report** · \`npm run seo:report\`
+- Optional heal: \`npm run meridian:observe\` · Admin → **SEO → Meridian** → Command Brief
+- Website: \`/var/www/zigma-technologies\` · Meridian sidecar: \`/var/www/zigma-meridian\` + \`MERIDIAN_HOME\`
+- Artefacts: \`storage/meridian/zigma-prod/command-brief.html\`
 
 ### Code hardening (shipped)
 
 - \`isIndexable()\` / \`next.config.ts\` refuse indexing when \`NEXT_PUBLIC_BASE_PATH\` is set.
 - \`scripts/verify-seo-build.mjs\` in PreProd/Prod CI and \`deploy.sh\`.
 - Live verifier: \`npm run seo:verify\` / \`seo:verify:preprod\`.
-- Meridian autopilot = scan → catalog continuum → remediate → Phases 0–33 + Command Brief + digests + GSC/Bing when secrets set.
+- Website tarball excludes Meridian; control plane via Actions or Deploy Meridian.
 - Inventory Admin save auto-heals meta / alt / OG (\`catalog-seo-steward\`).
 - \`www\` → apex redirect in \`next.config.ts\`; optional nginx one-hop scripts remain.
 ${END}`;

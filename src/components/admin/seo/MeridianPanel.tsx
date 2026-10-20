@@ -13,8 +13,18 @@ type ReadinessField = {
   howTo: string;
 };
 
+type ControlPlane = {
+  mode?: string;
+  binExists?: boolean;
+  meridianHome?: string | null;
+  message?: string;
+  architectureDoc?: string;
+};
+
 type Readiness = {
   docsPath?: string;
+  setupPath?: string;
+  controlPlane?: ControlPlane;
   fields?: ReadinessField[];
   connectors?: Record<string, { ready: boolean; missing: string[] }>;
 };
@@ -437,16 +447,33 @@ export default function MeridianPanel() {
 
       <div className="head">
         <div>
-          <div className="mark">Meridian · SEO Command</div>
-          <h2>Command desk</h2>
+          <div className="mark">SEO architecture · control plane</div>
+          <h2>Command Brief desk</h2>
           <p className="sub">
-            Need a fresh SEO check? Use <strong>Generate SEO report</strong> — it logs into Google/Bing via
-            official APIs, verifies the live site, and builds one Command Brief. Day-to-day healing:{' '}
-            <strong>Run autopilot</strong>.
+            <strong>Product SEO</strong> (titles, sitemap, schema) ships with the website. <strong>Meridian</strong>{' '}
+            is the control plane: GSC/Bing login via APIs, live verify, one report — never inside the site tarball.
+            Prefer GitHub → <strong>Meridian SEO report</strong> so Production PM2 is untouched.
           </p>
+          {readiness?.controlPlane ? (
+            <p
+              className="sub"
+              style={{
+                marginTop: '0.45rem',
+                color: readiness.controlPlane.binExists ? 'var(--accent, #0b6e4f)' : 'var(--m-muted)',
+              }}
+            >
+              Control plane: <strong>{readiness.controlPlane.mode || '—'}</strong>
+              {readiness.controlPlane.meridianHome
+                ? ` · MERIDIAN_HOME=${readiness.controlPlane.meridianHome}`
+                : ''}
+              {!readiness.controlPlane.binExists
+                ? ' · CLI not on this web node (open last brief below, or run Actions / Deploy Meridian)'
+                : ''}
+            </p>
+          ) : null}
           {jobRunning ? (
             <p className="sub" style={{ color: 'var(--accent, #0b6e4f)', marginTop: '0.35rem' }}>
-              Autopilot running in background since {job?.startedAt || '…'} — this page refreshes every few seconds.
+              Job running since {job?.startedAt || '…'} — this page refreshes every few seconds.
             </p>
           ) : null}
         </div>
@@ -460,75 +487,39 @@ export default function MeridianPanel() {
             <option value="prod">Production</option>
             <option value="preprod">PreProd</option>
           </select>
-          <button
-            type="button"
-            className="primary"
-            disabled={pending || jobRunning || env !== 'prod'}
-            onClick={() =>
-              postAction(
-                { action: 'seo-report', skipScan: true },
-                'Generating live SEO report (login APIs → verify site → GSC/Bing → brief)'
-              )
-            }
-            title="Logs into GSC/Bing via OAuth/API key, verifies live SEO, writes one Command Brief. Full crawl: npm run seo:report"
-          >
-            {pending ? 'Working…' : 'Generate SEO report'}
-          </button>
-          <button
-            type="button"
-            disabled={pending || jobRunning}
-            onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot')}
-          >
-            {jobRunning ? 'Autopilot running…' : pending ? 'Working…' : 'Run autopilot'}
-          </button>
-          <button
-            type="button"
-            disabled={pending || jobRunning}
-            onClick={() =>
-              postAction(
-                { action: 'autopilot', skipAct: env === 'preprod', applyMeta: true },
-                'Starting autopilot + apply'
-              )
-            }
-            title="Writes drafted meta + image alt into empty CMS fields"
-          >
-            Autopilot + apply
-          </button>
-          <button type="button" disabled={pending || jobRunning} onClick={runScan}>
-            Scan only
-          </button>
-          <button
-            type="button"
-            disabled={pending || jobRunning || env !== 'prod'}
-            onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting GSC sitemap')}
-          >
-            GSC sitemap
-          </button>
-          <button
-            type="button"
-            disabled={pending || jobRunning || env !== 'prod'}
-            onClick={() => postAction({ action: 'bing-submit-sitemap' }, 'Submitting Bing sitemap')}
-          >
-            Bing sitemap
-          </button>
-          <button
-            type="button"
-            disabled={pending || jobRunning || env !== 'prod'}
-            onClick={() => postAction({ action: 'inspect-priority', limit: 5 }, 'Inspecting priority URLs')}
-          >
-            Inspect top URLs
-          </button>
-          <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
-            HTML report
-          </a>
           <a
             className="link"
             href={withBasePath(`/api/admin/meridian?env=${env}&format=brief`)}
             target="_blank"
             rel="noreferrer"
           >
-            Command Brief
+            Open Command Brief
           </a>
+          <button
+            type="button"
+            className="primary"
+            disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
+            onClick={() =>
+              postAction(
+                { action: 'seo-report', skipScan: true },
+                'Generating live SEO report (login APIs → verify site → GSC/Bing → brief)'
+              )
+            }
+            title={
+              readiness?.controlPlane?.binExists === false
+                ? 'CLI missing on this node — use GitHub Actions → Meridian SEO report'
+                : 'GSC/Bing APIs + live verify → Command Brief'
+            }
+          >
+            {pending ? 'Working…' : 'Generate report (this node)'}
+          </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || readiness?.controlPlane?.binExists === false}
+            onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot')}
+          >
+            {jobRunning ? 'Autopilot running…' : 'Autopilot (heal)'}
+          </button>
           <a
             className="link"
             href={withBasePath(`/api/admin/meridian?env=${env}&format=cockpit`)}
@@ -537,16 +528,64 @@ export default function MeridianPanel() {
           >
             Ops cockpit
           </a>
+        </div>
+      </div>
+
+      <details className="more-actions" open={false}>
+        <summary>Advanced · sitemaps, crawl, legacy packs</summary>
+        <div className="actions" style={{ marginTop: '0.65rem' }}>
           <button
             type="button"
-            disabled={pending || jobRunning || env !== 'prod'}
-            onClick={() => postAction({ action: 'seo-report' }, 'Full SEO report + Meridian crawl (may take ~2 min)')}
-            title="Same as Generate, plus full Meridian technical crawl"
+            disabled={pending || jobRunning || readiness?.controlPlane?.binExists === false}
+            onClick={() =>
+              postAction(
+                { action: 'autopilot', skipAct: env === 'preprod', applyMeta: true },
+                'Starting autopilot + apply'
+              )
+            }
+          >
+            Autopilot + apply meta
+          </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || readiness?.controlPlane?.binExists === false}
+            onClick={runScan}
+          >
+            Scan only
+          </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
+            onClick={() => postAction({ action: 'seo-report' }, 'Full SEO report + crawl')}
           >
             Full report + crawl
           </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
+            onClick={() => postAction({ action: 'submit-sitemap' }, 'Submitting GSC sitemap')}
+          >
+            GSC sitemap
+          </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
+            onClick={() => postAction({ action: 'bing-submit-sitemap' }, 'Submitting Bing sitemap')}
+          >
+            Bing sitemap
+          </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
+            onClick={() => postAction({ action: 'inspect-priority', limit: 5 }, 'Inspecting priority URLs')}
+          >
+            Inspect top URLs
+          </button>
+          <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
+            Technical HTML report
+          </a>
         </div>
-      </div>
+      </details>
 
       <details className="more-actions">
         <summary>More one-off actions (optional — already inside autopilot)</summary>
@@ -898,7 +937,8 @@ export default function MeridianPanel() {
           <div className="section-title">Connectors readiness</div>
           <p className="sub" style={{ marginBottom: '0.5rem' }}>
             Secrets are set on the server <code>.env</code> (never shown here). Full click-by-click guide:{' '}
-            <code>{readiness.docsPath || 'packages/meridian/SETUP.md'}</code> and SEO-GUIDE Appendix G.
+            <code>{readiness.docsPath || 'packages/meridian/ARCHITECTURE.md'}</code> · secrets:{' '}
+            <code>{readiness.setupPath || 'packages/meridian/SETUP.md'}</code>.
           </p>
           <table className="ready-table">
             <thead>

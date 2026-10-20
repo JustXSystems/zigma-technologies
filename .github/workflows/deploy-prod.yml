@@ -180,16 +180,26 @@ jobs:
           cp -f scripts/apply-release.sh ./apply-release.sh
           ls -lh ./zigma-prod.tgz ./apply-release.sh
 
-      - name: SCP tarball + apply script to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ steps.ssh.outputs.host }}
-          username: ${{ steps.ssh.outputs.user }}
-          key: ${{ steps.ssh.outputs.key }}
-          port: 22
-          source: "zigma-prod.tgz,apply-release.sh"
-          target: /tmp/
-          overwrite: true
+      # Direct rsync/scp (no appleboy double-tar). Already-gzipped .tgz → Compression=no.
+      - name: Upload tarball + apply script to VPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYFILE="$(mktemp)"
+          trap 'rm -f "$KEYFILE"' EXIT
+          printf '%s\n' "${{ steps.ssh.outputs.key }}" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
+          BYTES="$(wc -c < ./zigma-prod.tgz | tr -d ' ')"
+          echo "Upload size: $(numfmt --to=iec-i --suffix=B "$BYTES" 2>/dev/null || echo "${BYTES} bytes")"
+          DEST="${{ steps.ssh.outputs.user }}@${{ steps.ssh.outputs.host }}:/tmp/"
+          SSH_BASE=( -i "$KEYFILE" -p 22 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o Compression=no )
+          if command -v rsync >/dev/null 2>&1; then
+            export RSYNC_RSH="ssh ${SSH_BASE[*]}"
+            rsync -a --partial --info=progress2 ./zigma-prod.tgz ./apply-release.sh "$DEST"
+          else
+            scp "${SSH_BASE[@]}" ./zigma-prod.tgz ./apply-release.sh "$DEST"
+          fi
+          echo "Upload complete."
 
       - name: Apply release on VPS
         uses: appleboy/ssh-action@v1.2.0

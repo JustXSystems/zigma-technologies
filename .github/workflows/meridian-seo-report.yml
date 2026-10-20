@@ -1,0 +1,79 @@
+# Control-plane SEO report — does NOT deploy or restart the live website.
+# Authenticates to GSC/Bing APIs, verifies production HTML, writes Command Brief artefacts.
+name: Meridian SEO report
+
+on:
+  workflow_dispatch:
+    inputs:
+      window_days:
+        description: GSC window (days)
+        type: choice
+        options:
+          - '7'
+          - '28'
+          - '90'
+        default: '28'
+      skip_scan:
+        description: Skip full Meridian crawl (faster)
+        type: boolean
+        default: true
+      theme:
+        description: Command Brief theme
+        type: choice
+        options:
+          - aurora
+          - forge
+          - glass
+        default: aurora
+  schedule:
+    # Sundays 04:00 UTC ≈ 09:30 IST
+    - cron: '0 4 * * 0'
+
+jobs:
+  seo-report:
+    name: Live SEO verification report
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Meridian CLI is dependency-free Node — no npm ci / no Next build (keeps site blast radius zero).
+      - name: Generate SEO report (control plane)
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+          MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+        run: |
+          set -euo pipefail
+          WINDOW="${{ github.event.inputs.window_days || '28' }}"
+          THEME="${{ github.event.inputs.theme || 'aurora' }}"
+          SKIP="${{ github.event.inputs.skip_scan || 'true' }}"
+          ARGS=(act seo-report --profile packages/meridian/profiles/zigma.prod.json --window "$WINDOW" --theme "$THEME" --skip-psi)
+          if [ "$SKIP" = "true" ]; then
+            ARGS+=(--skip-scan)
+          fi
+          node packages/meridian/bin/meridian.mjs "${ARGS[@]}"
+          test -f storage/meridian/zigma-prod/command-brief.html
+          ls -lh storage/meridian/zigma-prod/command-brief.html storage/meridian/zigma-prod/seo-report.json || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seo-command-brief
+          path: |
+            storage/meridian/zigma-prod/command-brief.html
+            storage/meridian/zigma-prod/command-brief.md
+            storage/meridian/zigma-prod/command-brief.json
+            storage/meridian/zigma-prod/seo-report.json
+            storage/meridian/zigma-prod/seo-report.md
+            storage/meridian/zigma-prod/seo-live-verify.json
+            storage/meridian/zigma-prod/seo-report-sources.json
+          if-no-files-found: warn
+          retention-days: 60

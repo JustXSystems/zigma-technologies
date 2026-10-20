@@ -1,10 +1,46 @@
 import { spawn } from 'node:child_process';
-import { openSync, closeSync } from 'node:fs';
+import { existsSync, openSync, closeSync } from 'node:fs';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { describeControlPlane, type ControlPlaneStatus } from '@/lib/seo/control-plane';
 
 const ROOT = process.cwd();
-const MERIDIAN_BIN = path.join(ROOT, 'packages', 'meridian', 'bin', 'meridian.mjs');
+
+/** Prefer MERIDIAN_HOME so website deploys never need to ship the SEO toolkit. */
+function resolveMeridianBin(): string {
+  const home = (process.env.MERIDIAN_HOME || '').trim();
+  if (home) return path.join(home, 'bin', 'meridian.mjs');
+  return path.join(ROOT, 'packages', 'meridian', 'bin', 'meridian.mjs');
+}
+
+function resolveMeridianRoot(): string {
+  const home = (process.env.MERIDIAN_HOME || '').trim();
+  if (home) return home;
+  return path.join(ROOT, 'packages', 'meridian');
+}
+
+export function meridianControlPlaneStatus(): ControlPlaneStatus {
+  const home = (process.env.MERIDIAN_HOME || '').trim() || null;
+  const binPath = resolveMeridianBin();
+  return describeControlPlane({
+    meridianHome: home,
+    binPath,
+    binExists: existsSync(binPath),
+  });
+}
+
+async function assertMeridianCli(): Promise<string> {
+  const bin = resolveMeridianBin();
+  try {
+    await access(bin);
+    return bin;
+  } catch {
+    const status = meridianControlPlaneStatus();
+    throw new Error(
+      `Meridian control plane CLI missing at ${bin}. ${status.message} See ${status.architectureDoc}`
+    );
+  }
+}
 
 export type MeridianEnv = 'prod' | 'preprod';
 
@@ -419,13 +455,13 @@ export type MeridianAct =
   | { action: 'draft-alt' }
   | { action: 'apply-alt'; dryRun?: boolean; force?: boolean };
 
-const PROFILES: Record<MeridianEnv, string> = {
-  prod: path.join(ROOT, 'packages', 'meridian', 'profiles', 'zigma.prod.json'),
-  preprod: path.join(ROOT, 'packages', 'meridian', 'profiles', 'zigma.preprod.json'),
-};
+function meridianProfiles(env: MeridianEnv): string {
+  const root = resolveMeridianRoot();
+  return path.join(root, 'profiles', env === 'prod' ? 'zigma.prod.json' : 'zigma.preprod.json');
+}
 
 export function meridianProfilePath(env: MeridianEnv) {
-  return PROFILES[env];
+  return meridianProfiles(env);
 }
 
 export function meridianLatestPaths(env: MeridianEnv) {
@@ -585,7 +621,17 @@ export async function startMeridianAutopilotBackground(
     logFd = undefined;
   }
 
-  const child = spawn(process.execPath, [MERIDIAN_BIN, ...args], {
+  const bin = resolveMeridianBin();
+  if (!existsSync(bin)) {
+    const status = meridianControlPlaneStatus();
+    job.status = 'error';
+    job.finishedAt = new Date().toISOString();
+    job.error = status.message;
+    await writeMeridianJobStatus(env, job);
+    return { started: false, job };
+  }
+
+  const child = spawn(process.execPath, [bin, ...args], {
     cwd: ROOT,
     env: {
       ...process.env,
@@ -690,14 +736,21 @@ export async function readLatestDigest(env: MeridianEnv) {
   }
 }
 
-function spawnMeridian(args: string[]): Promise<{
+async function spawnMeridian(args: string[]): Promise<{
   ok: boolean;
   code: number | null;
   stdout: string;
   stderr: string;
 }> {
+  let bin: string;
+  try {
+    bin = await assertMeridianCli();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, code: null, stdout: '', stderr: msg };
+  }
   return new Promise((resolvePromise) => {
-    const child = spawn(process.execPath, [MERIDIAN_BIN, ...args], {
+    const child = spawn(process.execPath, [bin, ...args], {
       cwd: ROOT,
       env: process.env,
       windowsHide: true,
@@ -736,8 +789,12 @@ export function meridianConnectorReadiness() {
   const bingApiKey = envSet('MERIDIAN_BING_API_KEY');
   const psiApiKey = envSet('MERIDIAN_PSI_API_KEY');
 
+  const controlPlane = meridianControlPlaneStatus();
+
   return {
-    docsPath: 'packages/meridian/SETUP.md',
+    docsPath: 'packages/meridian/ARCHITECTURE.md',
+    setupPath: 'packages/meridian/SETUP.md',
+    controlPlane,
     fields: [
       {
         id: 'MERIDIAN_GOOGLE_CLIENT_ID',

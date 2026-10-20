@@ -7,6 +7,7 @@ Technical SEO, meta, schema, digests, and forever health checks are owned by **M
 | Role | Doc |
 | --- | --- |
 | **This file** | Live status (auto) · day-to-day ops · formulas · verify |
+| [`packages/meridian/ARCHITECTURE.md`](packages/meridian/ARCHITECTURE.md) | **Control plane vs product plane** (how SEO is hosted) |
 | [`packages/meridian/AUTOMATION.md`](packages/meridian/AUTOMATION.md) | Phase pipeline, commands, status badges |
 | [`packages/meridian/SETUP.md`](packages/meridian/SETUP.md) | Connector secrets (GSC / GA4 / Bing / PSI) |
 | [`packages/meridian/README.md`](packages/meridian/README.md) | Meridian package quick start |
@@ -81,17 +82,18 @@ Phases **0–30 are complete** for automation. You are on **silent steward** (ze
 
 ### Meridian map (developer)
 
-- Forever: `npm run meridian:observe` · `npm run meridian:steward` · `npm run meridian:dominion` · `npm run meridian:guard`
-- Admin → **SEO → Meridian** → Phase 31 / Steward
-- SSH: `deploy@200.234.45.106` · App `/var/www/zigma-technologies`
-- Artefacts: `zigma-technologies.com` → `storage/meridian/zigma-prod/`
+- Architecture: [`packages/meridian/ARCHITECTURE.md`](packages/meridian/ARCHITECTURE.md) (product vs control plane)
+- Control plane report: GitHub → **Meridian SEO report** · local `npm run seo:report`
+- Forever heal (optional): `npm run meridian:observe` · Admin → **SEO → Meridian** → Command Brief
+- Website app: `/var/www/zigma-technologies` · Meridian sidecar (optional): `/var/www/zigma-meridian` + `MERIDIAN_HOME`
+- Artefacts: `storage/meridian/zigma-prod/command-brief.html`
 
 ### Code hardening (shipped)
 
 - `isIndexable()` / `next.config.ts` refuse indexing when `NEXT_PUBLIC_BASE_PATH` is set.
 - `scripts/verify-seo-build.mjs` in PreProd/Prod CI and `deploy.sh`.
 - Live verifier: `npm run seo:verify` / `seo:verify:preprod`.
-- Meridian autopilot = scan → remediate → Phases 0–31 (silent steward) + digests + GSC/Bing when secrets set.
+- Website tarball excludes Meridian; control plane via Actions or Deploy Meridian.
 - `www` → apex redirect in `next.config.ts`; optional nginx one-hop scripts remain.
 <!-- MERIDIAN:CANON:END -->
 

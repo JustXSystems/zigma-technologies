@@ -139,19 +139,25 @@ cp -a package.json package-lock.json "$STAGE/"
 [[ -f next.config.ts ]] && cp -a next.config.ts "$STAGE/"
 [[ -f .env.example ]] && cp -a .env.example "$STAGE/"
 
-# Meridian SEO command package (Admin → SEO → Meridian + CLI on VPS)
-if [[ -d packages/meridian ]]; then
+# Meridian SEO ops toolkit — NOT part of the website blast radius by default.
+# Size note: Meridian source is ~1 MiB; the ~100 MiB tarball is Next standalone.
+# Ship Meridian via workflow "Deploy Meridian" → /opt/zigma-meridian (set MERIDIAN_HOME).
+# Opt-in only: SHIP_MERIDIAN=1 ./scripts/package-release.sh --env prod ...
+mkdir -p "$STAGE/storage/meridian"
+if [[ "${SHIP_MERIDIAN:-0}" == "1" && -d packages/meridian ]]; then
   mkdir -p "$STAGE/packages"
   rsync -a \
     --exclude 'out/' \
     --exclude 'node_modules/' \
     --exclude '.git/' \
+    --exclude 'coverage/' \
+    --exclude '**/*.test.mjs' \
+    --exclude '**/*.test.js' \
     packages/meridian/ "$STAGE/packages/meridian/"
   [[ -f "$STAGE/packages/meridian/bin/meridian.mjs" ]] || die "packages/meridian missing after staging"
-  mkdir -p "$STAGE/storage/meridian"
-  echo "==> Staged packages/meridian (SEO command center)"
+  echo "==> Staged packages/meridian (SHIP_MERIDIAN=1 — prefer separate Deploy Meridian workflow)"
 else
-  echo "==> WARNING: packages/meridian not found — Admin Meridian tab will not run on VPS" >&2
+  echo "==> Skipped packages/meridian in website tarball (deploy Meridian separately; SHIP_MERIDIAN=1 to bundle)"
 fi
 
 # Ops scripts (db:import / db:export) need a root-resolvable mysql2 tree.
@@ -193,9 +199,13 @@ if [[ "$ENV_NAME" == "prod" && -n "$BASE_PATH_VAL" ]]; then
 fi
 
 mkdir -p "$(dirname "$OUT")"
-tar -C "$STAGE" -czf "$OUT" .
+# Higher gzip level → smaller upload (SCP/rsync is the slow hop to Hostinger).
+GZIP=-9 tar -C "$STAGE" -czf "$OUT" .
 BYTES="$(wc -c < "$OUT" | tr -d ' ')"
-echo "==> Wrote $OUT ($BYTES bytes)"
+echo "==> Wrote $OUT ($BYTES bytes / $(numfmt --to=iec-i --suffix=B "$BYTES" 2>/dev/null || true))"
+if (( BYTES > 120000000 )); then
+  echo "==> WARNING: release tarball > 120 MiB — expect slow GitHub→VPS upload. Slim public/ or standalone deps." >&2
+fi
 echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
 
 # Hard guarantee for the VPS apply step.
@@ -214,7 +224,7 @@ require_in_tar '(\./)?scripts/apply-release\.sh'
 require_in_tar '(\./)?scripts/migrate-catalog-background\.sql'
 require_in_tar '(\./)?scripts/schema\.sql'
 require_in_tar '(\./)?server\.js'
-if [[ -d packages/meridian ]]; then
+if [[ "${SHIP_MERIDIAN:-0}" == "1" ]]; then
   require_in_tar '(\./)?packages/meridian/bin/meridian\.mjs'
 fi
-echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js$([[ -d packages/meridian ]] && echo ', packages/meridian') in tarball"
+echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js in tarball"

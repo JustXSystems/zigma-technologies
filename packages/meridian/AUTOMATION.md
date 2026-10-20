@@ -73,6 +73,8 @@ Admin saves auto-heal SEO (`catalog-seo-steward` + fleet). Manual SEO = `seo_met
 
 **On-demand SEO report (each request):** **`npm run seo:report`** → authenticates Google OAuth + Bing API key → pulls GSC/Bing/GA4/PageSpeed → runs live `seo:verify` + Meridian crawl → writes `command-brief.html` / `seo-report-latest.html`. One-time Google login: **`npm run meridian:oauth`**. Admin → SEO → Meridian → **Generate SEO report**. Customize via `autopilot.commandBrief` (`theme`, `windowDays`, `topN`, `sections`).
 
+**Architecture:** Product plane (Next SEO) vs control plane (Meridian) — see [`ARCHITECTURE.md`](./ARCHITECTURE.md). Website tarball excludes Meridian. Primary report path: GitHub **Meridian SEO report**. Optional sidecar: **Deploy Meridian** → `MERIDIAN_HOME`.
+
 ## Highest-leverage human step
 
 Usually **none** — human debt for automation is **0**. Forever: **`npm run meridian:observe`**.
