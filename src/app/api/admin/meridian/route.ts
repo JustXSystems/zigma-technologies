@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { requireScreen } from '@/lib/auth';
 import {
+  meridianArtefactAvailability,
   meridianConnectorReadiness,
   meridianLatestPaths,
   readLatestAutopilot,
   readLatestDigest,
   readLatestMeridianReport,
   readLatestUnlock,
+  readMeridianArtefactHtml,
   readMeridianJobStatus,
   runMeridianAct,
   runMeridianCli,
@@ -14,7 +16,6 @@ import {
   type MeridianAct,
   type MeridianEnv,
 } from '@/lib/meridian-bridge';
-import { readFile } from 'node:fs/promises';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -32,58 +33,80 @@ function authStatus(err: unknown) {
   return 500;
 }
 
+function missingArtefactHtml(title: string, hint: string, dir: string) {
+  const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>${title}</title>
+<style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:3rem auto;padding:0 1rem;line-height:1.5;color:#122}
+code{background:#f0f3f7;padding:.1rem .35rem;border-radius:4px}</style></head><body>
+<h1>${title}</h1>
+<p>${hint}</p>
+<p>Expected folder: <code>${dir}</code></p>
+<p>In Admin → SEO → Command: use <strong>Generate report</strong> or <strong>Autopilot (heal)</strong>, then reopen this link.</p>
+</body></html>`;
+  return new NextResponse(body, {
+    status: 404,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
 export async function GET(request: Request) {
   try {
     await requireScreen('redirects');
     const url = new URL(request.url);
     const env = parseEnv(url.searchParams.get('env'));
     const format = url.searchParams.get('format') || 'json';
+    const paths = meridianLatestPaths(env);
+
     if (format === 'html') {
-      const { html } = meridianLatestPaths(env);
-      try {
-        const body = await readFile(html, 'utf8');
+      const body = await readMeridianArtefactHtml(paths.html, paths.seoReport, paths.commandBrief);
+      if (body) {
         return new NextResponse(body, {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
-      } catch {
-        return NextResponse.json({ error: 'No report yet — run a scan first.' }, { status: 404 });
       }
+      return missingArtefactHtml(
+        'No technical HTML report yet',
+        'Run a Meridian scan or Generate report first.',
+        paths.dir
+      );
     }
     if (format === 'cockpit') {
-      const { opsCockpit } = meridianLatestPaths(env);
-      try {
-        const body = await readFile(opsCockpit, 'utf8');
+      const body = await readMeridianArtefactHtml(paths.opsCockpit);
+      if (body) {
         return new NextResponse(body, {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
-      } catch {
-        return NextResponse.json({ error: 'No ops cockpit yet — run autopilot first.' }, { status: 404 });
       }
+      return missingArtefactHtml(
+        'No ops cockpit yet',
+        'Run Autopilot (heal) once to build the cockpit HTML.',
+        paths.dir
+      );
     }
     if (format === 'brief' || format === 'command-brief') {
-      const { commandBrief } = meridianLatestPaths(env);
-      try {
-        const body = await readFile(commandBrief, 'utf8');
+      const body = await readMeridianArtefactHtml(paths.commandBrief, paths.seoReport);
+      if (body) {
         return new NextResponse(body, {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
-      } catch {
-        return NextResponse.json(
-          { error: 'No Command Brief yet — run npm run meridian:brief or observe first.' },
-          { status: 404 }
-        );
       }
+      return missingArtefactHtml(
+        'No Command Brief yet',
+        'Use <strong>Generate report (this node)</strong> or GitHub → Meridian SEO report, then reopen.',
+        paths.dir
+      );
     }
     if (format === 'phase0') {
-      const { phase0Wizard } = meridianLatestPaths(env);
-      try {
-        const body = await readFile(phase0Wizard, 'utf8');
+      const body = await readMeridianArtefactHtml(paths.phase0Wizard);
+      if (body) {
         return new NextResponse(body, {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
-      } catch {
-        return NextResponse.json({ error: 'No Phase 0 wizard yet — run autopilot first.' }, { status: 404 });
       }
+      return missingArtefactHtml(
+        'No Phase 0 wizard yet',
+        'Run Autopilot or the Phase 0 wizard action first.',
+        paths.dir
+      );
     }
     const report = await readLatestMeridianReport(env);
     const autopilot = await readLatestAutopilot(env);
@@ -91,7 +114,18 @@ export async function GET(request: Request) {
     const unlock = await readLatestUnlock(env);
     const job = await readMeridianJobStatus(env);
     const readiness = meridianConnectorReadiness();
-    return NextResponse.json({ env, report, autopilot, digest, unlock, job, hasReport: !!report, readiness });
+    const artefacts = await meridianArtefactAvailability(env);
+    return NextResponse.json({
+      env,
+      report,
+      autopilot,
+      digest,
+      unlock,
+      job,
+      hasReport: !!report,
+      readiness,
+      artefacts,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
     return NextResponse.json({ error: msg }, { status: authStatus(e) });

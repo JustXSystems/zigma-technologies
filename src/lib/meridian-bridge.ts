@@ -464,8 +464,19 @@ export function meridianProfilePath(env: MeridianEnv) {
   return meridianProfiles(env);
 }
 
+/** Website tree that owns `storage/meridian/*` (sidecar CLI must not invent /var/storage). */
+export function meridianSiteRoot(): string {
+  const site = (process.env.MERIDIAN_SITE_ROOT || process.env.ZIGMA_APP_DIR || '').trim();
+  return site || ROOT;
+}
+
 export function meridianLatestPaths(env: MeridianEnv) {
-  const dir = path.join(ROOT, 'storage', 'meridian', env === 'prod' ? 'zigma-prod' : 'zigma-preprod');
+  const dir = path.join(
+    meridianSiteRoot(),
+    'storage',
+    'meridian',
+    env === 'prod' ? 'zigma-prod' : 'zigma-preprod'
+  );
   return {
     dir,
     json: path.join(dir, 'report-latest.json'),
@@ -544,6 +555,60 @@ export function meridianLatestPaths(env: MeridianEnv) {
     gbpPulse: path.join(dir, 'gbp-pulse.json'),
     phaseMatrix: path.join(dir, 'phase-matrix.json'),
     jobStatus: path.join(dir, 'job-status.json'),
+  };
+}
+
+/** True when a readable artefact exists at any of the candidate paths. */
+export async function meridianArtefactExists(...candidates: string[]): Promise<boolean> {
+  for (const p of candidates) {
+    try {
+      await access(/*turbopackIgnore: true*/ p);
+      return true;
+    } catch {
+      /* try next */
+    }
+  }
+  return false;
+}
+
+export async function readMeridianArtefactHtml(...candidates: string[]): Promise<string | null> {
+  for (const p of candidates) {
+    try {
+      return await readFile(/*turbopackIgnore: true*/ p, 'utf8');
+    } catch {
+      /* try next */
+    }
+  }
+  // Legacy mis-resolve from sidecar ../../storage → /var/storage (pre MERIDIAN_SITE_ROOT)
+  for (const p of candidates) {
+    const base = path.basename(p);
+    const legacy = path.join('/var/storage/meridian', path.basename(path.dirname(p)), base);
+    try {
+      return await readFile(/*turbopackIgnore: true*/ legacy, 'utf8');
+    } catch {
+      /* ignore */
+    }
+  }
+  return null;
+}
+
+export async function meridianArtefactAvailability(env: MeridianEnv) {
+  const p = meridianLatestPaths(env);
+  const [brief, cockpit, html, phase0, seoReport] = await Promise.all([
+    meridianArtefactExists(p.commandBrief, p.seoReport),
+    meridianArtefactExists(p.opsCockpit),
+    meridianArtefactExists(p.html, p.seoReport, p.commandBrief),
+    meridianArtefactExists(p.phase0Wizard),
+    meridianArtefactExists(p.seoReportJson, p.commandBriefJson),
+  ]);
+  return {
+    dir: p.dir,
+    siteRoot: meridianSiteRoot(),
+    brief,
+    cockpit,
+    html,
+    phase0,
+    seoReport,
   };
 }
 

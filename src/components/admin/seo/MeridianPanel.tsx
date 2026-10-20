@@ -59,6 +59,16 @@ type JobStatus = {
   error?: string;
 };
 
+type Artefacts = {
+  dir?: string;
+  siteRoot?: string;
+  brief?: boolean;
+  cockpit?: boolean;
+  html?: boolean;
+  phase0?: boolean;
+  seoReport?: boolean;
+};
+
 async function readApiJson(res: Response): Promise<Record<string, unknown>> {
   const text = await res.text();
   const trimmed = text.trim();
@@ -83,6 +93,7 @@ export default function MeridianPanel() {
   const [unlock, setUnlock] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [job, setJob] = useState<JobStatus | null>(null);
+  const [artefacts, setArtefacts] = useState<Artefacts | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
   const [pending, startTransition] = useTransition();
@@ -96,6 +107,7 @@ export default function MeridianPanel() {
       setReport(null);
       return;
     }
+    setArtefacts((data.artefacts as Artefacts) || null);
     setReport((data.report as Report) || null);
     setAutopilot((data.autopilot as Record<string, unknown>) || null);
     setDigest((data.digest as Record<string, unknown>) || null);
@@ -487,14 +499,20 @@ export default function MeridianPanel() {
             <option value="prod">Production</option>
             <option value="preprod">PreProd</option>
           </select>
-          <a
-            className="link"
-            href={withBasePath(`/api/admin/meridian?env=${env}&format=brief`)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Open Command Brief
-          </a>
+          {artefacts?.brief ? (
+            <a
+              className="link"
+              href={withBasePath(`/api/admin/meridian?env=${env}&format=brief`)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open Command Brief
+            </a>
+          ) : (
+            <span className="link" title="Run Generate report first" style={{ opacity: 0.55, cursor: 'help' }}>
+              Open Command Brief (not generated yet)
+            </span>
+          )}
           <button
             type="button"
             className="primary"
@@ -520,14 +538,20 @@ export default function MeridianPanel() {
           >
             {jobRunning ? 'Autopilot running…' : 'Autopilot (heal)'}
           </button>
-          <a
-            className="link"
-            href={withBasePath(`/api/admin/meridian?env=${env}&format=cockpit`)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Ops cockpit
-          </a>
+          {artefacts?.cockpit ? (
+            <a
+              className="link"
+              href={withBasePath(`/api/admin/meridian?env=${env}&format=cockpit`)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Ops cockpit
+            </a>
+          ) : (
+            <span className="link" title="Run Autopilot first" style={{ opacity: 0.55, cursor: 'help' }}>
+              Ops cockpit (not generated yet)
+            </span>
+          )}
         </div>
       </div>
 
@@ -581,9 +605,15 @@ export default function MeridianPanel() {
           >
             Inspect top URLs
           </button>
-          <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
-            Technical HTML report
-          </a>
+          {artefacts?.html ? (
+            <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=html`)} target="_blank" rel="noreferrer">
+              Technical HTML report
+            </a>
+          ) : (
+            <span className="link" title="Run Scan or Generate report first" style={{ opacity: 0.55, cursor: 'help' }}>
+              Technical HTML report (not generated yet)
+            </span>
+          )}
         </div>
       </details>
 
@@ -924,9 +954,15 @@ export default function MeridianPanel() {
             >
               Inspect new URLs
             </button>
-            <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=phase0`)} target="_blank" rel="noreferrer">
-              Phase 0 HTML
-            </a>
+            {artefacts?.phase0 ? (
+              <a className="link" href={withBasePath(`/api/admin/meridian?env=${env}&format=phase0`)} target="_blank" rel="noreferrer">
+                Phase 0 HTML
+              </a>
+            ) : (
+              <span className="link" title="Run Phase 0 wizard or Autopilot first" style={{ opacity: 0.55, cursor: 'help' }}>
+                Phase 0 HTML (not generated yet)
+              </span>
+            )}
         </div>
       </details>
 

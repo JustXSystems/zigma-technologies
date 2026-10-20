@@ -7,15 +7,7 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases report done">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-preprod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-prod.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/ARCHITECTURE.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/ARCHITECTURE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/orchestrator.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/orchestrator.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/meridian-run.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/meridian-run.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/pm2-start-app.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/pm2-start-app.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
-    </list>
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases report done" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
