@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, openSync, closeSync } from 'node:fs';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { withBasePath } from '@/lib/base-path';
 import { describeControlPlane, type ControlPlaneStatus } from '@/lib/seo/control-plane';
 
 const ROOT = process.cwd();
@@ -610,6 +611,27 @@ export async function meridianArtefactAvailability(env: MeridianEnv) {
     phase0,
     seoReport,
   };
+}
+
+/**
+ * When Command Brief HTML is served from `/api/admin/meridian?format=brief`, browsers resolve
+ * relative hrefs like `ops-cockpit.html` to `/api/admin/ops-cockpit.html`.
+ * Rewrite those hrefs onto the stable Meridian format=file API.
+ */
+export function withMeridianFileBase(html: string, env: MeridianEnv): string {
+  const prefix = withBasePath('/api/admin/meridian');
+  return html.replace(
+    /\bhref=(["'])(?!https?:|\/|#|mailto:)([a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:html|md|json|ics))\1/gi,
+    (_m, q: string, name: string) =>
+      `href=${q}${prefix}?env=${encodeURIComponent(env)}&format=file&name=${encodeURIComponent(name)}${q}`
+  );
+}
+
+/** Absolute Admin URL for a Meridian desk file (Command Brief / MeridianPanel). */
+export function meridianArtefactAdminHref(env: MeridianEnv, name: string): string {
+  return withBasePath(
+    `/api/admin/meridian?env=${encodeURIComponent(env)}&format=file&name=${encodeURIComponent(name)}`
+  );
 }
 
 export type MeridianJobStatus = {

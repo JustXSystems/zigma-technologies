@@ -559,6 +559,18 @@ function buildHtml(profile, config, board) {
   }
 
   if (sections.has('actions')) {
+    const fileEnv = String(profile.id || '').includes('preprod') ? 'preprod' : 'prod';
+    let urlPrefix = '';
+    try {
+      const originPath = new URL(profile.origin || 'https://zigma-technologies.com').pathname || '/';
+      if (originPath !== '/') urlPrefix = originPath.replace(/\/$/, '');
+    } catch {
+      /* apex */
+    }
+    const arte = (name) =>
+      `${urlPrefix}/api/admin/meridian?env=${encodeURIComponent(fileEnv)}&format=file&name=${encodeURIComponent(name)}`;
+    const desk = (format) =>
+      `${urlPrefix}/api/admin/meridian?env=${encodeURIComponent(fileEnv)}&format=${encodeURIComponent(format)}`;
     parts.push(`
 <section class="panel" data-section="actions" id="sec-actions">
   <div class="panel-head"><h2>One-command ops</h2><p>Stay in Meridian — no tab-hopping GSC / Bing / GA</p></div>
@@ -569,12 +581,12 @@ function buildHtml(profile, config, board) {
     <code>Admin → SEO → Meridian → Generate SEO report</code>
   </div>
   <div class="links">
-    <a class="btn primary" href="command-brief.html">This report</a>
-    <a class="btn" href="phase32-ops.html">Catalog</a>
-    <a class="btn" href="phase31-ops.html">Steward</a>
-    <a class="btn" href="ops-cockpit.html">Ops cockpit</a>
-    <a class="btn" href="weekly-digest.md">Weekly digest</a>
-    <a class="btn" href="executive-brief.md">Executive brief</a>
+    <a class="btn primary" href="${desk('brief')}">This report</a>
+    <a class="btn" href="${arte('phase32-ops.html')}">Catalog</a>
+    <a class="btn" href="${arte('phase31-ops.html')}">Steward</a>
+    <a class="btn" href="${desk('cockpit')}">Ops cockpit</a>
+    <a class="btn" href="${desk('digest')}">Weekly digest</a>
+    <a class="btn" href="${desk('executive')}">Executive brief</a>
   </div>
 </section>`);
   }

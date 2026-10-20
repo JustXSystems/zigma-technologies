@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireScreen } from '@/lib/auth';
+import { serveMeridianArtefact } from '@/lib/meridian-artefact-http';
 import {
   meridianArtefactAvailability,
   meridianConnectorReadiness,
@@ -13,9 +14,11 @@ import {
   runMeridianAct,
   runMeridianCli,
   startMeridianAutopilotBackground,
+  withMeridianFileBase,
   type MeridianAct,
   type MeridianEnv,
 } from '@/lib/meridian-bridge';
+import { readFile } from 'node:fs/promises';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -59,7 +62,7 @@ export async function GET(request: Request) {
     if (format === 'html') {
       const body = await readMeridianArtefactHtml(paths.html, paths.seoReport, paths.commandBrief);
       if (body) {
-        return new NextResponse(body, {
+        return new NextResponse(withMeridianFileBase(body, env), {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
       }
@@ -72,7 +75,7 @@ export async function GET(request: Request) {
     if (format === 'cockpit') {
       const body = await readMeridianArtefactHtml(paths.opsCockpit);
       if (body) {
-        return new NextResponse(body, {
+        return new NextResponse(withMeridianFileBase(body, env), {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
       }
@@ -85,7 +88,7 @@ export async function GET(request: Request) {
     if (format === 'brief' || format === 'command-brief') {
       const body = await readMeridianArtefactHtml(paths.commandBrief, paths.seoReport);
       if (body) {
-        return new NextResponse(body, {
+        return new NextResponse(withMeridianFileBase(body, env), {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
       }
@@ -98,7 +101,7 @@ export async function GET(request: Request) {
     if (format === 'phase0') {
       const body = await readMeridianArtefactHtml(paths.phase0Wizard);
       if (body) {
-        return new NextResponse(body, {
+        return new NextResponse(withMeridianFileBase(body, env), {
           headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
         });
       }
@@ -107,6 +110,37 @@ export async function GET(request: Request) {
         'Run Autopilot or the Phase 0 wizard action first.',
         paths.dir
       );
+    }
+    if (format === 'digest' || format === 'weekly-digest') {
+      try {
+        const body = await readFile(/*turbopackIgnore: true*/ paths.digestMd, 'utf8');
+        return new NextResponse(body, {
+          headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      } catch {
+        return missingArtefactHtml(
+          'No weekly digest yet',
+          'Run Autopilot (heal) or Generate report so weekly-digest.md is written.',
+          paths.dir
+        );
+      }
+    }
+    if (format === 'executive' || format === 'executive-brief') {
+      try {
+        const body = await readFile(/*turbopackIgnore: true*/ paths.executiveBrief, 'utf8');
+        return new NextResponse(body, {
+          headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      } catch {
+        return missingArtefactHtml(
+          'No executive brief yet',
+          'Run Autopilot (heal) or Generate report so executive-brief.md is written.',
+          paths.dir
+        );
+      }
+    }
+    if (format === 'file') {
+      return serveMeridianArtefact(env, url.searchParams.get('name') || '');
     }
     const report = await readLatestMeridianReport(env);
     const autopilot = await readLatestAutopilot(env);

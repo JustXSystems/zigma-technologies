@@ -74,11 +74,18 @@ const nextConfig: NextConfig = {
     // Next production does not reliably expose files added to public/ after start;
     // admin MediaPicker + catalog backgrounds depend on this.
     // With basePath, Next prefixes source/destination automatically.
+    //
+    // Command Brief relative hrefs (ops-cockpit.html) → /api/admin/ops-cockpit.html.
+    // Catch-all rewrite onto the Meridian format=file API (no dotted dynamic segments).
     return {
       beforeFiles: [
         { source: '/assets/images/:path*', destination: '/api/public/assets/images/:path*' },
         { source: '/assets/svg/:path*', destination: '/api/public/assets/svg/:path*' },
         { source: '/assets/video/:path*', destination: '/api/public/assets/video/:path*' },
+        {
+          source: '/api/admin/:name([^/]+\\.(?:html|md|json|ics))',
+          destination: '/api/admin/meridian?env=prod&format=file&name=:name',
+        },
       ],
       afterFiles: [{ source: '/favicon.ico', destination: '/assets/images/zigma.png' }],
       fallback: [],
