@@ -46,6 +46,10 @@
     "autoOptimizeImages": true,
     "autoSeedContent": true,
     "autoPolishMeta": true,
+    "autoCatalogSteward": true,
+    "autoCatalogIndex": true,
+    "catalogProbeLimit": 6,
+    "catalogInspectLimit": 5,
     "autoPsi": true,
     "autoApplySameAs": true,
     "sameAsVerified": {

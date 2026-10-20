@@ -3,6 +3,7 @@ import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { cache } from 'react';
 import { parseJsonField, slugify } from '@/lib/types';
 import type { CmsPage, CmsSection } from '@/lib/cms-types';
+import { enqueueSeoUrlRemovalSafe, leftIndexableSet } from '@/lib/seo-url-queue';
 
 export type { CmsPage, CmsSection } from '@/lib/cms-types';
 export { SECTION_TYPES } from '@/lib/cms-types';
@@ -116,6 +117,7 @@ export async function updatePage(
     sort_order: number;
   }>
 ) {
+  const before = await getPageById(id);
   const fields: string[] = [];
   const params: unknown[] = [];
   const map: Record<string, unknown> = {
@@ -127,6 +129,21 @@ export async function updatePage(
     enabled: input.enabled === undefined ? undefined : input.enabled ? 1 : 0,
     sort_order: input.sort_order,
   };
+  if (input.meta_title !== undefined || input.meta_description !== undefined) {
+    try {
+      fields.push('seo_meta_source = ?');
+      params.push('manual');
+    } catch {
+      /* column optional */
+    }
+  } else if (input.title !== undefined || input.slug !== undefined) {
+    try {
+      fields.push('seo_dirty = ?');
+      params.push(1);
+    } catch {
+      /* optional */
+    }
+  }
   for (const [key, value] of Object.entries(map)) {
     if (value !== undefined) {
       fields.push(`${key} = ?`);
@@ -135,13 +152,47 @@ export async function updatePage(
   }
   if (fields.length) {
     params.push(id);
-    await pool.query(`UPDATE pages SET ${fields.join(', ')} WHERE id = ?`, params);
+    try {
+      await pool.query(`UPDATE pages SET ${fields.join(', ')} WHERE id = ?`, params);
+    } catch {
+      // Retry without optional SEO columns if schema lag
+      const core: string[] = [];
+      const coreParams: unknown[] = [];
+      for (const [key, value] of Object.entries(map)) {
+        if (value !== undefined) {
+          core.push(`${key} = ?`);
+          coreParams.push(value);
+        }
+      }
+      if (core.length) {
+        coreParams.push(id);
+        await pool.query(`UPDATE pages SET ${core.join(', ')} WHERE id = ?`, coreParams);
+      }
+    }
   }
-  return getPageById(id);
+  const after = await getPageById(id);
+  if (before && after && leftIndexableSet(before, after)) {
+    await enqueueSeoUrlRemovalSafe({
+      path: `/${String(before.slug).replace(/^\//, '')}`,
+      event: 'unpublish',
+      hubPath: '/',
+      redirectToHub: false,
+    });
+  }
+  return after;
 }
 
 export async function deletePage(id: number) {
+  const before = await getPageById(id);
   await pool.query('DELETE FROM pages WHERE id = ?', [id]);
+  if (before && before.status === 'published' && Number(before.enabled)) {
+    await enqueueSeoUrlRemovalSafe({
+      path: `/${String(before.slug).replace(/^\//, '')}`,
+      event: 'delete',
+      hubPath: '/',
+      redirectToHub: false,
+    });
+  }
 }
 
 export async function listSections(pageId: number, admin = false) {

@@ -86,6 +86,8 @@
     "meridian:act:phase29": "node packages/meridian/bin/meridian.mjs act phase29-advance --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:act:phase30": "node packages/meridian/bin/meridian.mjs act phase30-advance --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:act:phase31": "node packages/meridian/bin/meridian.mjs act phase31-advance --profile packages/meridian/profiles/zigma.prod.json",
+    "meridian:act:phase32": "node packages/meridian/bin/meridian.mjs act phase32-advance --profile packages/meridian/profiles/zigma.prod.json",
+    "meridian:catalog": "node packages/meridian/bin/meridian.mjs act catalog --fleet-only --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:observe": "node packages/meridian/bin/meridian.mjs act observe --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:desk": "node packages/meridian/bin/meridian.mjs act desk --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:presence": "node packages/meridian/bin/meridian.mjs act presence --profile packages/meridian/profiles/zigma.prod.json",

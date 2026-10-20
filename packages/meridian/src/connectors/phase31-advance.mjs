@@ -76,6 +76,8 @@ export async function advancePhase31(profile, opts = {}) {
     apply: opts.apply !== false,
     skipCloser: opts.skipCloser === true,
     skipIndex: opts.skipIndex !== false,
+    skipCatalogSteward: opts.skipCatalogSteward === true,
+    skipCatalogProbe: opts.skipCatalogProbe === true,
   });
   steps.push({ id: 'silent-steward', ok: steward.ok !== false, message: steward.message });
 
@@ -243,6 +245,7 @@ ul{margin:.35rem 0 0;padding-left:1.15rem;color:var(--muted);font-size:.86rem}
     outDir,
     apply: false,
     skipCloser: true,
+    skipCatalogSteward: true,
   });
   steps.push({ id: 'steward-reseal', ok: steward2.ok !== false, message: steward2.message });
   payload.steward = steward2.data;

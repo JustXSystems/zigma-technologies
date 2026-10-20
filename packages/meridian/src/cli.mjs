@@ -67,6 +67,8 @@ import { advancePhase28 } from './connectors/phase28-advance.mjs';
 import { advancePhase29 } from './connectors/phase29-advance.mjs';
 import { advancePhase30 } from './connectors/phase30-advance.mjs';
 import { advancePhase31 } from './connectors/phase31-advance.mjs';
+import { advancePhase32 } from './connectors/phase32-advance.mjs';
+import { runCatalogSteward } from './connectors/catalog-steward.mjs';
 import { syncSeoGuideCanon } from './connectors/canon-sync.mjs';
 import { readFile } from 'node:fs/promises';
 
@@ -866,7 +868,7 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
-    if (action === 'phase31-advance' || action === 'observe' || action === 'steward' || action === 'guard') {
+    if (action === 'phase31-advance') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       const result = await advancePhase31(profile, {
         outDir: resolve(outDir),
@@ -895,6 +897,58 @@ export async function runCli(argv) {
         ack: argv.includes('--ack-gbp'),
         parkGbp: !argv.includes('--no-park-gbp'),
         gscProxy: !argv.includes('--no-gsc-proxy'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (
+      action === 'phase32-advance' ||
+      action === 'observe' ||
+      action === 'steward' ||
+      action === 'guard' ||
+      action === 'catalog' ||
+      action === 'continuum'
+    ) {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      if (action === 'catalog' && argv.includes('--fleet-only')) {
+        const result = await runCatalogSteward(profile, {
+          outDir: resolve(outDir),
+          apply: !argv.includes('--no-apply'),
+          force: argv.includes('--force'),
+          skipIndex: argv.includes('--skip-index'),
+        });
+        console.log(JSON.stringify(result, null, 2));
+        process.exit(result.ok ? 0 : 1);
+      }
+      const result = await advancePhase32(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipLattice: argv.includes('--skip-lattice'),
+        skipContinuity: argv.includes('--skip-continuity'),
+        skipChronos: argv.includes('--skip-chronos'),
+        skipDominion: argv.includes('--skip-dominion'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+        forceCatalog: argv.includes('--force-catalog'),
+        skipPhase31: argv.includes('--skip-phase31'),
       });
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
@@ -1046,7 +1100,8 @@ Usage:
   meridian act phase28-advance|continuity [--skip-lattice] [--skip-yield] --profile ./profiles/site.json
   meridian act phase29-advance|chronos [--skip-continuity] [--skip-yield] --profile ./profiles/site.json
   meridian act phase30-advance|dominion [--skip-chronos] [--skip-yield] --profile ./profiles/site.json
-  meridian act phase31-advance|observe|steward|guard [--skip-dominion] [--skip-yield] --profile ./profiles/site.json
+  meridian act phase31-advance [--skip-dominion] [--skip-yield] --profile ./profiles/site.json
+  meridian act phase32-advance|observe|steward|guard|catalog|continuum [--skip-phase31] [--force-catalog] --profile ./profiles/site.json
   meridian act ack-gbp --profile ./profiles/site.json
   meridian act canon --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
@@ -1057,7 +1112,7 @@ Usage:
   meridian help
 
 Autopilot = full remediation + Phase 0–27 packs + integrity lattice + digests.
-Forever ops: npm run meridian:observe  (steward · dominion · chronos · continuity · re-seal: meridian:guard)
+Forever ops: npm run meridian:observe  (catalog continuum · steward · dominion · chronos · re-seal: meridian:guard)
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

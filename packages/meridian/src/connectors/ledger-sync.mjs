@@ -28,7 +28,7 @@ function todayLabel() {
 /**
  * Compact automation ledger for Appendix F — authoritative vs hand-ticked boxes.
  */
-export function buildLedgerMarkdown({ score, unlock, archive, presence, debt, throne, live, growth, courier, forge, continuum, lattice, continuity, chronos, dominion, steward }) {
+export function buildLedgerMarkdown({ score, unlock, archive, presence, debt, throne, live, growth, courier, forge, continuum, lattice, continuity, chronos, dominion, steward, catalog }) {
   const sealed = archive?.sealed === true;
   const presenceSealed = presence?.sealed === true || debt?.presenceSealed === true;
   const debtScore = debt?.debtScore ?? '—';
@@ -99,6 +99,13 @@ export function buildLedgerMarkdown({ score, unlock, archive, presence, debt, th
       : steward
         ? '**WATCHING**'
         : '—';
+  const catalogLine = catalog?.continuumNominal
+    ? `**NOMINAL** (scanned ${catalog.scanned ?? '—'})`
+    : catalog?.probeFails > 0
+      ? `**ALERT** (${catalog.probeFails})`
+      : catalog
+        ? '**WATCHING**'
+        : '—';
 
   return `${START}
 ### Automation ledger (Meridian — authoritative)
@@ -125,13 +132,14 @@ _Re-checked ${todayLabel()} (auto). Do **not** hand-edit between \`MERIDIAN:LEDG
 | Autonomic chronos / temporal nexus | ${chronosLine} (Phase 29) |
 | Dominion apex / eternal crown | ${dominionLine} (Phase 30) |
 | Silent steward / zero-checklist | ${stewardLine} (Phase 31) |
+| Catalog continuum / Inventory SEO | ${catalogLine} (Phase 32) |
 | Growth radar opportunities | **${growth?.opportunityCount ?? '—'}** |
 | Meridian score / unlock | **${score?.overall ?? '—'} ${score?.grade || ''}** / **${unlock?.percent ?? '—'}%** |
 | Archive | **${sealed ? 'SEALED' : 'open'}** |
 | Human debt | **${debtScore}** |
 | Google Business Profile | ${gbp} |
 
-Forever: \`npm run meridian:observe\` · Steward: \`phase31-ops.html\` · Dominion: \`phase30-ops.html\`
+Forever: \`npm run meridian:observe\` · Catalog: \`phase32-ops.html\` · Steward: \`phase31-ops.html\` · Dominion: \`phase30-ops.html\`
 ${END}`;
 }
 
@@ -168,6 +176,9 @@ export async function syncAppendixLedger(profile, opts = {}) {
   const steward =
     (await readJson(resolve(outDir, 'silent-steward.json'))) ||
     (await readJson(resolve(outDir, 'steward-ship.json')));
+  const catalog =
+    (await readJson(resolve(outDir, 'catalog-continuum.json'))) ||
+    (await readJson(resolve(outDir, 'catalog-ship.json')));
   const score = observatory?.score || archive?.score || report?.scorecard || {};
 
   const block = buildLedgerMarkdown({
@@ -187,6 +198,7 @@ export async function syncAppendixLedger(profile, opts = {}) {
     chronos,
     dominion,
     steward,
+    catalog,
   });
 
   const guidePath = resolve(root, opts.guidePath || 'SEO-GUIDE.md');

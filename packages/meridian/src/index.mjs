@@ -69,6 +69,8 @@ export { advancePhase28 } from './connectors/phase28-advance.mjs';
 export { advancePhase29 } from './connectors/phase29-advance.mjs';
 export { advancePhase30 } from './connectors/phase30-advance.mjs';
 export { advancePhase31 } from './connectors/phase31-advance.mjs';
+export { advancePhase32 } from './connectors/phase32-advance.mjs';
+export { runCatalogSteward } from './connectors/catalog-steward.mjs';
 export { probeLiveThrone } from './connectors/live-throne-probe.mjs';
 export { runGrowthRadar } from './connectors/growth-radar.mjs';
 export { runGrowthCloser } from './connectors/growth-closer.mjs';

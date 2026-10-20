@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { listPages } from '@/lib/cms';
-import { listCatalogItems } from '@/lib/catalog';
+import { listCatalogItems, listItemMedia } from '@/lib/catalog';
 import { catalogPublicPath } from '@/lib/catalog-case-study';
 import { isReservedSiteSlug } from '@/lib/reserved-slugs';
 import { listResourcePosts } from '@/lib/resources';
@@ -9,8 +9,9 @@ import { translatedCityKeys } from '@/lib/locale-locations';
 import { LOCATION_DEFS } from '@/lib/locations';
 import { allCityServicePairs, isCityServiceIndexable } from '@/lib/location-services';
 import { listPressPosts } from '@/lib/press';
-import { isIndexable, siteOrigin, toIsoDate } from '@/lib/seo';
+import { absoluteUrl, isIndexable, siteOrigin, toIsoDate } from '@/lib/seo';
 import { getSiteCopy } from '@/lib/site-content';
+import { publicMediaUrl } from '@/lib/media-url';
 
 // CI builds have no database, so a build-time sitemap would be frozen with static routes only.
 export const dynamic = 'force-dynamic';
@@ -106,29 +107,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       }));
 
-    const resourceEntries: MetadataRoute.Sitemap = (await listResourcePosts()).map((post) => ({
-      url: `${origin}/blog/${post.slug}`,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-      ...lastModified(post.updated_at, post.published_at),
-    }));
+    const resourceEntries: MetadataRoute.Sitemap = (await listResourcePosts()).map((post) => {
+      const cover = post.cover_url ? absoluteUrl(publicMediaUrl(post.cover_url) || post.cover_url) : null;
+      return {
+        url: `${origin}/blog/${post.slug}`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+        ...(cover ? { images: [cover] } : {}),
+        ...lastModified(post.updated_at, post.published_at),
+      };
+    });
 
-    const pressEntries: MetadataRoute.Sitemap = (await listPressPosts()).map((post) => ({
-      url: `${origin}/press/${post.slug}`,
-      changeFrequency: 'monthly' as const,
-      priority: 0.65,
-      ...lastModified(post.published_at),
-    }));
+    const pressEntries: MetadataRoute.Sitemap = (await listPressPosts()).map((post) => {
+      const cover = post.cover_url ? absoluteUrl(publicMediaUrl(post.cover_url) || post.cover_url) : null;
+      return {
+        url: `${origin}/press/${post.slug}`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.65,
+        ...(cover ? { images: [cover] } : {}),
+        ...lastModified(post.published_at),
+      };
+    });
 
     const catalogEntries: MetadataRoute.Sitemap = [];
     for (const itemType of ['project', 'product', 'service'] as const) {
       const items = await listCatalogItems({ itemType });
       for (const item of items) {
         if (item.seo_noindex) continue;
+        const media = await listItemMedia(item.id);
+        const images = media
+          .filter((m) => m.kind !== 'video')
+          .slice(0, 8)
+          .map((m) => absoluteUrl(publicMediaUrl(m.url) || m.url))
+          .filter(Boolean);
+        if (item.og_image_url) {
+          const og = absoluteUrl(publicMediaUrl(item.og_image_url) || item.og_image_url);
+          if (og && !images.includes(og)) images.unshift(og);
+        } else if (item.primary_image) {
+          const pri = absoluteUrl(publicMediaUrl(item.primary_image) || item.primary_image);
+          if (pri && !images.includes(pri)) images.unshift(pri);
+        }
         catalogEntries.push({
           url: `${origin}${catalogPublicPath(itemType, item.slug)}`,
           changeFrequency: 'monthly',
           priority: itemType === 'project' ? 0.85 : 0.75,
+          ...(images.length ? { images: images.slice(0, 10) } : {}),
           ...lastModified(item.updated_at),
         });
       }

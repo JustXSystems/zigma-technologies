@@ -117,8 +117,11 @@ export async function updatePressPost(
     published_at: string | null;
     enabled: boolean;
     sort_order: number;
+    meta_title: string | null;
+    meta_description: string | null;
   }>
 ) {
+  const before = await getPressPostById(id);
   const fields: string[] = [];
   const params: unknown[] = [];
   const map: Record<string, unknown> = {
@@ -133,7 +136,16 @@ export async function updatePressPost(
     published_at: input.published_at,
     enabled: input.enabled === undefined ? undefined : input.enabled ? 1 : 0,
     sort_order: input.sort_order,
+    meta_title: input.meta_title,
+    meta_description: input.meta_description,
   };
+  if (input.meta_title !== undefined || input.meta_description !== undefined) {
+    fields.push('seo_meta_source = ?');
+    params.push('manual');
+  } else if (input.title !== undefined || input.excerpt !== undefined || input.slug !== undefined) {
+    fields.push('seo_dirty = ?');
+    params.push(1);
+  }
   for (const [k, v] of Object.entries(map)) {
     if (v !== undefined) {
       fields.push(`${k} = ?`);
@@ -142,12 +154,49 @@ export async function updatePressPost(
   }
   if (!fields.length) return getPressPostById(id);
   params.push(id);
-  await pool.query(`UPDATE press_posts SET ${fields.join(', ')} WHERE id = ?`, params);
-  return getPressPostById(id);
+  try {
+    await pool.query(`UPDATE press_posts SET ${fields.join(', ')} WHERE id = ?`, params);
+  } catch {
+    const coreFields: string[] = [];
+    const coreParams: unknown[] = [];
+    for (const [k, v] of Object.entries(map)) {
+      if (v !== undefined && k !== 'meta_title' && k !== 'meta_description') {
+        coreFields.push(`${k} = ?`);
+        coreParams.push(v);
+      }
+    }
+    if (coreFields.length) {
+      coreParams.push(id);
+      await pool.query(`UPDATE press_posts SET ${coreFields.join(', ')} WHERE id = ?`, coreParams);
+    }
+  }
+  const after = await getPressPostById(id);
+  if (before && after) {
+    const { enqueueSeoUrlRemovalSafe, leftIndexableSet } = await import('@/lib/seo-url-queue');
+    if (leftIndexableSet(before, after)) {
+      await enqueueSeoUrlRemovalSafe({
+        path: `/press/${before.slug}`,
+        event: 'unpublish',
+        hubPath: '/press',
+        redirectToHub: true,
+      });
+    }
+  }
+  return after;
 }
 
 export async function deletePressPost(id: number) {
+  const before = await getPressPostById(id);
   await pool.query('DELETE FROM press_posts WHERE id = ?', [id]);
+  if (before && before.status === 'published' && Number(before.enabled)) {
+    const { enqueueSeoUrlRemovalSafe } = await import('@/lib/seo-url-queue');
+    await enqueueSeoUrlRemovalSafe({
+      path: `/press/${before.slug}`,
+      event: 'delete',
+      hubPath: '/press',
+      redirectToHub: true,
+    });
+  }
 }
 
 export async function seedPressPosts() {

@@ -135,6 +135,8 @@ export async function POST(request: Request) {
       forceGhDeploy?: boolean;
       ack?: boolean;
       parkGbp?: boolean;
+      skipPhase31?: boolean;
+      forceCatalog?: boolean;
     };
     const env = parseEnv(body.env);
     const action = body.action || 'scan';
@@ -234,7 +236,8 @@ export async function POST(request: Request) {
       action === 'phase28-advance' ||
       action === 'phase29-advance' ||
       action === 'phase30-advance' ||
-      action === 'phase31-advance'
+      action === 'phase31-advance' ||
+      action === 'phase32-advance'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -603,6 +606,37 @@ export async function POST(request: Request) {
           skipHotpatch: !!body.skipHotpatch,
           skipCloser: !!body.skipCloser,
           skipIndex: !!body.skipIndex,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase32-advance') {
+        act = {
+          action: 'phase32-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipLattice: !!body.skipLattice,
+          skipContinuity: !!body.skipContinuity,
+          skipChronos: !!body.skipChronos,
+          skipDominion: !!body.skipDominion,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipPhase31: !!body.skipPhase31,
+          forceCatalog: !!body.forceCatalog,
           skipYield: !!body.skipYield,
           skipSitemap: !!body.skipSitemap,
           skipDeploy: !!body.skipDeploy,

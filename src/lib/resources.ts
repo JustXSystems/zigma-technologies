@@ -206,6 +206,7 @@ export async function createResourcePost(input: ResourcePostInput) {
 
 export async function updateResourcePost(id: number, input: Partial<ResourcePostInput>) {
   await ensureResourcePostColumns();
+  const before = await getResourcePostById(id);
   const fields: string[] = [];
   const params: unknown[] = [];
   const map: Record<string, unknown> = {
@@ -225,6 +226,13 @@ export async function updateResourcePost(id: number, input: Partial<ResourcePost
     published_at: input.published_at,
     sort_order: input.sort_order,
   };
+  if (input.meta_title !== undefined || input.meta_description !== undefined) {
+    fields.push('seo_meta_source = ?');
+    params.push('manual');
+  } else if (input.title !== undefined || input.excerpt !== undefined || input.slug !== undefined) {
+    fields.push('seo_dirty = ?');
+    params.push(1);
+  }
   for (const [key, value] of Object.entries(map)) {
     if (value !== undefined) {
       fields.push(`${key} = ?`);
@@ -256,11 +264,71 @@ export async function updateResourcePost(id: number, input: Partial<ResourcePost
   }
   if (!fields.length) return;
   params.push(id);
-  await pool.query(`UPDATE resource_posts SET ${fields.join(', ')} WHERE id = ?`, params);
+  try {
+    await pool.query(`UPDATE resource_posts SET ${fields.join(', ')} WHERE id = ?`, params);
+  } catch {
+    const coreFields: string[] = [];
+    const coreParams: unknown[] = [];
+    for (const [key, value] of Object.entries(map)) {
+      if (value !== undefined) {
+        coreFields.push(`${key} = ?`);
+        coreParams.push(value);
+      }
+    }
+    if (input.tags_json !== undefined) {
+      coreFields.push('tags_json = CAST(? AS JSON)');
+      coreParams.push(cleanList(input.tags_json));
+    }
+    if (input.key_points_json !== undefined) {
+      coreFields.push('key_points_json = CAST(? AS JSON)');
+      coreParams.push(cleanList(input.key_points_json));
+    }
+    if (input.display_json !== undefined) {
+      coreFields.push('display_json = CAST(? AS JSON)');
+      coreParams.push(displayJson(input.display_json));
+    }
+    if (input.featured !== undefined) {
+      coreFields.push('featured = ?');
+      coreParams.push(input.featured ? 1 : 0);
+    }
+    if (input.enabled !== undefined) {
+      coreFields.push('enabled = ?');
+      coreParams.push(input.enabled ? 1 : 0);
+    }
+    if (input.status === 'published' && input.published_at === undefined) {
+      coreFields.push('published_at = COALESCE(published_at, NOW())');
+    }
+    if (coreFields.length) {
+      coreParams.push(id);
+      await pool.query(`UPDATE resource_posts SET ${coreFields.join(', ')} WHERE id = ?`, coreParams);
+    }
+  }
+  const after = await getResourcePostById(id);
+  if (before && after) {
+    const { enqueueSeoUrlRemovalSafe, leftIndexableSet } = await import('@/lib/seo-url-queue');
+    if (leftIndexableSet(before, after)) {
+      await enqueueSeoUrlRemovalSafe({
+        path: `/blog/${before.slug}`,
+        event: 'unpublish',
+        hubPath: '/blog',
+        redirectToHub: true,
+      });
+    }
+  }
 }
 
 export async function deleteResourcePost(id: number) {
+  const before = await getResourcePostById(id);
   await pool.query('DELETE FROM resource_posts WHERE id = ?', [id]);
+  if (before && before.status === 'published' && Number(before.enabled)) {
+    const { enqueueSeoUrlRemovalSafe } = await import('@/lib/seo-url-queue');
+    await enqueueSeoUrlRemovalSafe({
+      path: `/blog/${before.slug}`,
+      event: 'delete',
+      hubPath: '/blog',
+      redirectToHub: true,
+    });
+  }
 }
 
 const RESOURCE_SEEDS: Array<

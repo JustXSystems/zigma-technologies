@@ -51,6 +51,7 @@ export function buildCanonMarkdown({
   chronos,
   dominion,
   steward,
+  catalog,
 }) {
   const origin = String(profile.origin || '').replace(/\/$/, '');
   const score = observatory?.score?.overall ?? archive?.score?.overall ?? report?.scorecard?.overall ?? '—';
@@ -133,6 +134,13 @@ export function buildCanonMarkdown({
       : steward
         ? 'WATCHING'
         : '—';
+  const catalogStatus = catalog?.continuumNominal
+    ? 'NOMINAL'
+    : catalog?.probeFails > 0
+      ? `ALERT (${catalog.probeFails})`
+      : catalog
+        ? 'WATCHING'
+        : '—';
   const external = (debt?.items || []).filter((i) => i.status === 'external' || i.status === 'open');
   const nextRows = [];
   let n = 2;
@@ -171,6 +179,11 @@ export function buildCanonMarkdown({
       `| **${n++}** | Fix silent steward | Auto | \`npm run meridian:observe\` · [\`silent-steward.md\`](storage/meridian/zigma-prod/silent-steward.md) |`
     );
   }
+  if (catalog && catalog.continuumNominal === false) {
+    nextRows.push(
+      `| **${n++}** | Fix catalog continuum | Auto | \`npm run meridian:observe\` · [\`catalog-continuum.md\`](storage/meridian/zigma-prod/catalog-continuum.md) |`
+    );
+  }
   if (external.length > 0) {
     for (const i of external) {
       nextRows.push(
@@ -193,7 +206,7 @@ export function buildCanonMarkdown({
 
 _Re-checked ${todayLabel()} (auto)._
 
-> **Auto-maintained by Meridian Phase 31.** Re-run \`npm run meridian:observe\` after deploys. Do **not** hand-edit between the \`MERIDIAN:CANON\` markers.
+> **Auto-maintained by Meridian Phase 32.** Re-run \`npm run meridian:observe\` after deploys. Do **not** hand-edit between the \`MERIDIAN:CANON\` markers.
 
 ### Command desk (measured)
 
@@ -216,6 +229,7 @@ _Re-checked ${todayLabel()} (auto)._
 | Autonomic chronos | **${chronosStatus}** (Phase 29) |
 | Dominion apex | **${dominionStatus}** (Phase 30) |
 | Silent steward | **${stewardStatus}** (Phase 31) |
+| Catalog continuum | **${catalogStatus}** (Phase 32) |
 | Human debt | **${debtScore}** |
 | Organization \`sameAs\` | **${sameAs}** |
 | LocalBusiness \`hasMap\` (live) | **${hasMapLive ? 'YES' : 'NO — courier shipping'}** |
@@ -234,7 +248,7 @@ SEALED / LOCKED / ARMED / CROWNED / NOMINAL = **last observe passed** for that l
 
 | Check | Result |
 | --- | --- |
-| Phase 1–31 automation | **Done** — see [\`AUTOMATION.md\`](packages/meridian/AUTOMATION.md) |
+| Phase 1–32 automation | **Done** — see [\`AUTOMATION.md\`](packages/meridian/AUTOMATION.md) |
 | Indexing / canonicals / H1 / brand | Verified by Meridian technical engine + \`npm run seo:verify\` |
 | \`/sitemap.xml\` | Healthy (Meridian sitemap-health) |
 | Org JSON-LD + \`sameAs\` | Live on Production |
@@ -244,19 +258,19 @@ SEALED / LOCKED / ARMED / CROWNED / NOMINAL = **last observe passed** for that l
 
 ### Next actions (minimized — in order)
 
-Phases **0–30 are complete** for automation. You are on **silent steward** (zero-checklist ops).
+Phases **0–32 are complete** for automation. You are on **catalog continuum + silent steward** (zero-checklist ops).
 
 | # | Do this | Who | Notes |
 | --- | --- | --- | --- |
-| **1** | Run **\`npm run meridian:observe\`** (steward + dominion + chronos) | Auto / Dev | Primary forever command |
+| **1** | Run **\`npm run meridian:observe\`** (catalog + steward + dominion) | Auto / Dev | Primary forever command |
 ${nextBlock}
 
-**Do not** re-run obsolete checklists. Surfaces: **\`phase31-ops.html\`** (steward) · **\`silent-steward.md\`** · **\`phase30-ops.html\`**. Re-seal: \`npm run meridian:guard\`.
+**Do not** re-run obsolete checklists. Surfaces: **\`phase32-ops.html\`** (catalog) · **\`phase31-ops.html\`** (steward) · **\`phase30-ops.html\`**. Re-seal: \`npm run meridian:guard\`.
 
 ### Meridian map (developer)
 
 - Forever: \`npm run meridian:observe\` · \`npm run meridian:steward\` · \`npm run meridian:dominion\` · \`npm run meridian:guard\`
-- Admin → **SEO → Meridian** → Phase 31 / Steward
+- Admin → **SEO → Meridian** → Phase 32 / Catalog · Phase 31 / Steward
 - SSH: \`deploy@200.234.45.106\` · App \`/var/www/zigma-technologies\`
 - Artefacts: \`${origin.replace('https://', '')}\` → \`storage/meridian/zigma-prod/\`
 
@@ -265,7 +279,8 @@ ${nextBlock}
 - \`isIndexable()\` / \`next.config.ts\` refuse indexing when \`NEXT_PUBLIC_BASE_PATH\` is set.
 - \`scripts/verify-seo-build.mjs\` in PreProd/Prod CI and \`deploy.sh\`.
 - Live verifier: \`npm run seo:verify\` / \`seo:verify:preprod\`.
-- Meridian autopilot = scan → remediate → Phases 0–31 (silent steward) + digests + GSC/Bing when secrets set.
+- Meridian autopilot = scan → catalog continuum → remediate → Phases 0–32 + digests + GSC/Bing when secrets set.
+- Inventory Admin save auto-heals meta / alt / OG (\`catalog-seo-steward\`).
 - \`www\` → apex redirect in \`next.config.ts\`; optional nginx one-hop scripts remain.
 ${END}`;
 }
@@ -307,6 +322,9 @@ export async function syncSeoGuideCanon(profile, opts = {}) {
   const steward =
     (await readJson(resolve(outDir, 'silent-steward.json'))) ||
     (await readJson(resolve(outDir, 'steward-ship.json')));
+  const catalog =
+    (await readJson(resolve(outDir, 'catalog-continuum.json'))) ||
+    (await readJson(resolve(outDir, 'catalog-ship.json')));
 
   const block = buildCanonMarkdown({
     profile,
@@ -336,6 +354,7 @@ export async function syncSeoGuideCanon(profile, opts = {}) {
     chronos,
     dominion,
     steward,
+    catalog,
   });
 
   const guidePath = resolve(root, opts.guidePath || 'SEO-GUIDE.md');

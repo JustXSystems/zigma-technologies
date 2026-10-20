@@ -787,6 +787,13 @@ export default function MeridianPanel() {
             <button
               type="button"
               disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase32-advance' }, 'Phase 32 catalog continuum')}
+            >
+              Phase 32 / Catalog
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
               onClick={() => postAction({ action: 'phase31-advance' }, 'Phase 31 silent steward')}
             >
               Phase 31 / Steward

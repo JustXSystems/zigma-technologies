@@ -13,11 +13,12 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Design |
 | [`docs/archive/SEO-GUIDE-phases-walkthrough.md`](../../docs/archive/SEO-GUIDE-phases-walkthrough.md) | Historical Day-1 phase walkthrough (do not re-run) |
 
-**Primary forever command:** `npm run meridian:observe` (alias: `meridian:steward`, `meridian:guard`).
+**Primary forever command:** `npm run meridian:observe` (alias: `meridian:steward`, `meridian:guard`, Phase **32** Catalog Continuum).
 
 ## Autopilot pipeline
 
 1. Scan + connectors  
+1b. **Catalog Continuum** (Inventory / Media / Products / Services / Projects — meta · alt · OG · stale refresh · live probe · GSC queue)  
 2. Auto-apply empty **meta** + **alt**  
 3. **Meta polish** (Phase 3 length/brand — force-apply when `autoPolishMeta`)  
 4. Sitemap **health** + orphan/thin graph  
@@ -64,7 +65,10 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 45. **Phase 28 sovereign continuity** (board charter · forever gates)  
 46. **Phase 29 autonomic chronos** (temporal nexus · regression detect)  
 47. **Phase 30 dominion apex** (eternal crown · automation complete)  
-48. **Phase 31 silent steward** (meta · city draft staged · review link auto · growth · **primary forever ops**)  
+48. **Phase 31 silent steward** (meta · city draft staged · review link auto · growth)  
+49. **Phase 32 content continuum** (Inventory / Media / Products / Services / Projects / Pages / Blog / Press — **primary forever ops**)  
+
+Admin saves auto-heal SEO (`catalog-seo-steward` + fleet). Manual SEO = `seo_meta_source=manual` (never overwritten). Meridian-owned duplicate titles auto-uniquified. Unpublish/delete → `seo_url_queue` + hub 301 + GSC inspect. Sitemap image entries for catalog/blog/press. Product JSON-LD SKU/MPN/GTIN + availability; case-study VideoObject when present.
 
 ## Highest-leverage human step
 
@@ -86,7 +90,7 @@ These are **health badges from live checks**, not locks that freeze the tool. Gr
 | **LOCKED** | Continuity gates green (aliases, GH Action, lattice + yield) |
 | **ARMED** | Chronos tracking deltas with no critical regressions |
 | **CROWNED** | Dominion apex: all crown pillars green — automation complete |
-| **NOMINAL** | Silent steward: meta/city/review/growth stewards OK |
+| **NOMINAL** | Silent steward / content continuum: meta/city/review/growth/inventory/CMS stewards OK |
 | **ONLINE / LIVE** | Continuum measuring yield · production emitting schema |
 | **BRIDGED** | Auto-pack ready; optional human click (mailto / launchpad) |
 | **PARKED** | Waiting on an external Google gate (GBP verify) — does **not** block forever ops |
@@ -140,8 +144,10 @@ npm run meridian:act:phase28         # sovereign continuity / board charter (inc
 npm run meridian:act:phase29         # autonomic chronos / temporal nexus (includes phase28)
 npm run meridian:act:phase30         # dominion apex / eternal crown (includes phase29)
 npm run meridian:act:phase31         # silent steward (includes phase30)
-npm run meridian:observe             # alias of phase31 — primary forever ops
-npm run meridian:steward             # alias of phase31
+npm run meridian:act:phase32         # content continuum (includes phase31)
+npm run meridian:catalog             # fleet catalog heal only
+npm run meridian:observe             # alias of phase32 — primary forever ops
+npm run meridian:steward             # alias of phase32
 npm run meridian:dominion            # alias of phase30
 npm run meridian:chronos             # alias of phase29
 npm run meridian:continuity          # alias of phase28
@@ -169,7 +175,9 @@ npm run meridian:act:cockpit
 
 | File | Use |
 | --- | --- |
-| `phase31-ops.html` | **Primary** silent steward / zero-checklist |
+| `phase32-ops.html` | **Primary** content continuum / Inventory + CMS SEO |
+| `phase31-ops.html` | Silent steward / zero-checklist |
+| `catalog-continuum.md` · `catalog-steward.md` | Inventory heal briefs |
 | `phase30-ops.html` | Dominion crown |
 | `phase20-ops.html` | NAP · calendar · citations desk |
 | `phase21-ops.html` | Optional GBP verify kit |

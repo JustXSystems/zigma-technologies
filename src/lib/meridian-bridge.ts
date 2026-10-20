@@ -335,6 +335,36 @@ export type MeridianAct =
       parkGbp?: boolean;
       gscProxy?: boolean;
     }
+  | {
+      action: 'phase32-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipContinuity?: boolean;
+      skipChronos?: boolean;
+      skipDominion?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipPhase31?: boolean;
+      forceCatalog?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+    }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -387,6 +417,9 @@ export function meridianLatestPaths(env: MeridianEnv) {
     phase29Ops: path.join(dir, 'phase29-ops.html'),
     phase30Ops: path.join(dir, 'phase30-ops.html'),
     phase31Ops: path.join(dir, 'phase31-ops.html'),
+    phase32Ops: path.join(dir, 'phase32-ops.html'),
+    catalogContinuum: path.join(dir, 'catalog-continuum.json'),
+    catalogContinuumMd: path.join(dir, 'catalog-continuum.md'),
     fleetAssurance: path.join(dir, 'fleet-assurance.json'),
     continuumOps: path.join(dir, 'continuum-ops.json'),
     missionArchive: path.join(dir, 'mission-archive.json'),
@@ -1200,6 +1233,37 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     if (act.skipHotpatch) args.push('--skip-hotpatch');
     if (act.skipCloser) args.push('--skip-closer');
     if (act.skipIndex) args.push('--skip-index');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase32-advance') {
+    const args = ['act', 'phase32-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipLattice) args.push('--skip-lattice');
+    if (act.skipContinuity) args.push('--skip-continuity');
+    if (act.skipChronos) args.push('--skip-chronos');
+    if (act.skipDominion) args.push('--skip-dominion');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipPhase31) args.push('--skip-phase31');
+    if (act.forceCatalog) args.push('--force-catalog');
     if (act.skipYield) args.push('--skip-yield');
     if (act.skipSitemap) args.push('--skip-sitemap');
     if (act.skipDeploy) args.push('--skip-deploy');

@@ -46,6 +46,22 @@ const CATALOG_ITEM_MEDIA_COLUMNS: Array<{ name: string; ddl: string }> = [
     name: 'seo_noindex',
     ddl: `ALTER TABLE catalog_items ADD COLUMN seo_noindex TINYINT(1) NOT NULL DEFAULT 0 AFTER og_image_url`,
   },
+  {
+    name: 'seo_meta_source',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN seo_meta_source VARCHAR(20) NULL AFTER seo_noindex`,
+  },
+  {
+    name: 'seo_content_hash',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN seo_content_hash VARCHAR(64) NULL AFTER seo_meta_source`,
+  },
+  {
+    name: 'seo_dirty',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN seo_dirty TINYINT(1) NOT NULL DEFAULT 0 AFTER seo_content_hash`,
+  },
+  {
+    name: 'seo_steward_at',
+    ddl: `ALTER TABLE catalog_items ADD COLUMN seo_steward_at TIMESTAMP NULL AFTER seo_dirty`,
+  },
 ];
 
 const CATALOG_MEDIA_FIT_COLUMNS: Array<{ name: string; ddl: string }> = [

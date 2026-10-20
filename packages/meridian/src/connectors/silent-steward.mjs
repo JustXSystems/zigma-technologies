@@ -8,6 +8,7 @@ import { seedThinContent } from './content-seed.mjs';
 import { runGrowthRadar } from './growth-radar.mjs';
 import { runGrowthCloser } from './growth-closer.mjs';
 import { buildKeywordMap } from './keyword-map.mjs';
+import { runCatalogSteward } from './catalog-steward.mjs';
 
 async function readJson(path) {
   try {
@@ -51,6 +52,25 @@ export async function runSilentSteward(profile, opts = {}) {
   await writeFile(resolve(outDir, 'phase1-ops.html'), phase1Html, 'utf8');
 
   const stewards = [];
+  if (opts.skipCatalogSteward === true) {
+    stewards.push({
+      id: 'catalog-steward',
+      ok: true,
+      message: 'Catalog continuum skipped (already healed this cycle)',
+      status: 'skipped',
+    });
+  } else {
+    stewards.push(
+      await safe('catalog-steward', () =>
+        runCatalogSteward(profile, {
+          outDir,
+          apply: wantApply && profile.autopilot?.autoCatalogSteward !== false,
+          skipIndex: opts.skipIndex !== false,
+          skipProbe: opts.skipCatalogProbe === true,
+        })
+      )
+    );
+  }
   stewards.push(
     await safe('meta-polish', () =>
       polishMeta(profile, {
@@ -128,7 +148,7 @@ export async function runSilentSteward(profile, opts = {}) {
       : `Silent steward ALERT · ${failStewards.length} fail: ${failStewards.map((f) => f.id).join(', ')}`,
     forever: ['npm run meridian:observe', 'npm run meridian:steward', 'Monday meridian-autopilot.yml'],
     humanNote:
-      'All pack rituals auto. City draft staged (noindex). Review link from Maps/Place ID. GBP verify stays optional Google-only gate — not a checklist.',
+      'All pack rituals auto. Catalog continuum heals Inventory/Media/Products/Services/Projects each run + on Admin save. City draft staged (noindex). GBP verify stays optional Google-only gate.',
   };
 
   await writeFile(resolve(outDir, 'silent-steward.json'), JSON.stringify(board, null, 2), 'utf8');

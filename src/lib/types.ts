@@ -379,6 +379,11 @@ export type CatalogItem = {
   meta_description?: string | null;
   og_image_url?: string | null;
   seo_noindex?: boolean;
+  /** `manual` = Admin SEO tab; `meridian` = auto-steward (safe to refresh on content drift). */
+  seo_meta_source?: 'manual' | 'meridian' | null;
+  seo_content_hash?: string | null;
+  seo_dirty?: boolean;
+  seo_steward_at?: string | null;
   created_at?: string;
   updated_at?: string;
   media?: CatalogMedia[];

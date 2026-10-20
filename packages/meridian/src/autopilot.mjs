@@ -67,6 +67,8 @@ import { advancePhase28 } from './connectors/phase28-advance.mjs';
 import { advancePhase29 } from './connectors/phase29-advance.mjs';
 import { advancePhase30 } from './connectors/phase30-advance.mjs';
 import { advancePhase31 } from './connectors/phase31-advance.mjs';
+import { advancePhase32 } from './connectors/phase32-advance.mjs';
+import { runCatalogSteward } from './connectors/catalog-steward.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
 /**
@@ -95,6 +97,21 @@ export async function runAutopilot(profile, opts = {}) {
   const google = googleEnvStatus();
   const canGscAct = !!profile.indexable && google.ok && !opts.skipAct;
   const outDir = scan.paths.outDir;
+
+  // --- Catalog Continuum (Inventory / Media / Products / Services / Projects) ---
+  if (profile.autopilot?.skipCatalogSteward !== true) {
+    const catalog = await runCatalogSteward(profile, {
+      outDir,
+      apply:
+        opts.applyCatalog !== false &&
+        (opts.applyMeta === true ||
+          process.env.MERIDIAN_AUTO_CATALOG_STEWARD !== '0' ||
+          profile.autopilot?.autoCatalogSteward !== false),
+      skipIndex: opts.skipAct === true || !profile.indexable,
+    });
+    actions.push({ id: 'catalog-steward', ...catalog });
+    mergeFindings(scan, catalog);
+  }
 
   // --- Meta drafts ---
   const draftOut = resolve(outDir, 'meta-drafts.json');
@@ -487,7 +504,29 @@ export async function runAutopilot(profile, opts = {}) {
     mergeFindings(scan, p12);
   }
   let digestsDone = false;
-  if (profile.autopilot?.skipPhase31Advance !== true) {
+  if (profile.autopilot?.skipPhase32Advance !== true) {
+    const p32 = await advancePhase32(profile, {
+      outDir,
+      scan,
+      apply: true,
+      syncGh: process.env.MERIDIAN_SYNC_GH_SECRETS === '1' || profile.autopilot?.autoSyncGhSecrets === true,
+      skipHeal: false,
+      gscProxy: true,
+      parkGbp: true,
+      // Catalog already ran early in autopilot — seal Phase 32 from that continuum
+      skipCatalog: true,
+      skipCatalogSteward: true,
+      skipCatalogProbe: true,
+      skipIndex: true,
+      skipSteward: false,
+      triggerDeploy: process.env.MERIDIAN_TRIGGER_DEPLOY === '1' || profile.autopilot?.autoTriggerDeploy === true,
+    });
+    actions.push({ id: 'phase32-advance', ...p32 });
+    mergeFindings(scan, p32);
+    digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p32.message };
+    monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
+    digestsDone = true;
+  } else if (profile.autopilot?.skipPhase31Advance !== true) {
     const p31 = await advancePhase31(profile, {
       outDir,
       scan,
@@ -931,6 +970,7 @@ export async function runAutopilot(profile, opts = {}) {
       actions.find((a) => a.id === 'phase30-advance')?.data?.paths?.html ||
       resolve(outDir, 'phase30-ops.html'),
     phase31Ops:
+      actions.find((a) => a.id === 'phase32-advance')?.data?.paths?.html ||
       actions.find((a) => a.id === 'phase31-advance')?.data?.paths?.html ||
       resolve(outDir, 'phase31-ops.html'),
     presenceSentinel: resolve(outDir, 'presence-sentinel.json'),

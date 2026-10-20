@@ -87,10 +87,42 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
     { name: item.title, path },
   ]);
 
+  const specs = item.specs_json || {};
+  const sku =
+    specs.SKU || specs.sku || specs.Model || specs.model || specs['Part number'] || specs['Part Number'] || undefined;
+  const gtin = specs.GTIN || specs.gtin || specs.EAN || specs.ean || undefined;
+  const mpn = specs.MPN || specs.mpn || undefined;
+  const videoUrl = item.case_study_json?.video_url?.trim();
+  const videoTitle = item.case_study_json?.video_title?.trim() || item.title;
+  const videoAbs = videoUrl
+    ? /^https?:\/\//i.test(videoUrl)
+      ? videoUrl
+      : absoluteUrl(videoUrl.startsWith('/') ? videoUrl : `/${videoUrl}`)
+    : null;
+  const videoLd = videoAbs
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: videoTitle,
+        description,
+        thumbnailUrl: image,
+        contentUrl: videoAbs,
+        embedUrl: videoAbs,
+        uploadDate: toIsoDate(item.updated_at || item.created_at) || undefined,
+      }
+    : null;
+
   if (itemType === 'product') {
     const price = parsePriceInr(item.price_label);
     // Google rejects Product markup without offers / review / aggregateRating, so "On request" items get none.
-    if (!price) return [breadcrumb];
+    if (!price) return videoLd ? [breadcrumb, videoLd] : [breadcrumb];
+    const availLabel = String(item.availability_label || '').toLowerCase();
+    const availability =
+      /out of stock|unavailable|discontinued/i.test(availLabel)
+        ? 'https://schema.org/OutOfStock'
+        : /pre-?order|made to order/i.test(availLabel)
+          ? 'https://schema.org/PreOrder'
+          : 'https://schema.org/InStock';
     return [
       breadcrumb,
       {
@@ -102,15 +134,19 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
         url,
         brand: { '@type': 'Brand', name: item.tags_json?.[0] || 'Zigma Technologies' },
         ...(item.category_name ? { category: item.category_name } : {}),
+        ...(sku ? { sku: String(sku) } : {}),
+        ...(mpn ? { mpn: String(mpn) } : {}),
+        ...(gtin ? { gtin: String(gtin) } : {}),
         offers: {
           '@type': 'Offer',
           price,
           priceCurrency: 'INR',
-          availability: 'https://schema.org/InStock',
+          availability,
           url,
           seller: organization,
         },
       },
+      ...(videoLd ? [videoLd] : []),
     ];
   }
 
@@ -128,6 +164,7 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
         provider: organization,
         areaServed: { '@type': 'Country', name: 'India' },
       },
+      ...(videoLd ? [videoLd] : []),
     ];
   }
 
@@ -146,6 +183,7 @@ export function catalogCaseStudyJsonLd(itemType: CatalogItemType, item: NonNulla
       author: organization,
       publisher: organization,
     },
+    ...(videoLd ? [videoLd] : []),
   ];
 }
 

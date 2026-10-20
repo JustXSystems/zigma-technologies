@@ -85,9 +85,20 @@ for (const d of drafts) {
         );
         params.push(fields.meta_description);
       }
+      // Mark Meridian ownership so Catalog Continuum can refresh on content drift
+      const setsWithSource = [
+        ...sets,
+        `seo_meta_source = IF(seo_meta_source = 'manual', 'manual', 'meridian')`,
+        'seo_dirty = 0',
+      ];
       params.push(d.id);
-      const [r] = await pool.query(`UPDATE catalog_items SET ${sets.join(', ')} WHERE id = ?`, params);
-      updated += r.affectedRows || 0;
+      try {
+        const [r] = await pool.query(`UPDATE catalog_items SET ${setsWithSource.join(', ')} WHERE id = ?`, params);
+        updated += r.affectedRows || 0;
+      } catch {
+        const [r] = await pool.query(`UPDATE catalog_items SET ${sets.join(', ')} WHERE id = ?`, params);
+        updated += r.affectedRows || 0;
+      }
       results.push({ id: d.id, source: d.source, ok: true });
     } else if (d.source === 'pages') {
       const sets = [];

@@ -38,6 +38,9 @@ import { normalizeCatalogHeroCard } from '@/lib/catalog-hero-card';
 import { normalizeLifeHighlight } from '@/lib/life-sections';
 import { normalizeCatalogSections } from '@/lib/catalog-sections';
 import { ensureCatalogBackgroundColumn, ensureCatalogDiscoveryColumns, ensureCatalogMediaFitColumns } from '@/lib/schema-ensure';
+import { markCatalogSeoDirty, stewardCatalogItemSeoSafe } from '@/lib/catalog-seo-steward';
+import { catalogPublicPath, catalogListingPath } from '@/lib/catalog-case-study';
+import { enqueueSeoUrlRemovalSafe, leftIndexableSet } from '@/lib/seo-url-queue';
 
 export function normalizeBackgroundShading(value: unknown): CatalogShadowStyle {
   return normalizeShadowStyleValue(value);
@@ -134,6 +137,13 @@ function mapItem(row: RowDataPacket): CatalogItem {
     meta_description: row.meta_description ?? null,
     og_image_url: row.og_image_url ? toStorageMediaPath(String(row.og_image_url)) : null,
     seo_noindex: !!Number(row.seo_noindex ?? 0),
+    seo_meta_source:
+      row.seo_meta_source === 'manual' || row.seo_meta_source === 'meridian'
+        ? row.seo_meta_source
+        : null,
+    seo_content_hash: row.seo_content_hash ?? null,
+    seo_dirty: !!Number(row.seo_dirty ?? 0),
+    seo_steward_at: row.seo_steward_at ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     primary_image: row.primary_image ?? null,
@@ -442,10 +452,14 @@ export async function createCatalogItem(input: {
     ]
   );
   const { meta_title, meta_description, og_image_url, seo_noindex } = input;
+  const id = result.insertId;
   if (meta_title || meta_description || og_image_url || seo_noindex) {
-    return updateCatalogItem(result.insertId, { meta_title, meta_description, og_image_url, seo_noindex });
+    const item = await updateCatalogItem(id, { meta_title, meta_description, og_image_url, seo_noindex });
+    return item;
   }
-  return getCatalogItemById(result.insertId);
+  await markCatalogSeoDirty(id);
+  await stewardCatalogItemSeoSafe(id);
+  return getCatalogItemById(id);
 }
 
 export async function updateCatalogItem(
@@ -545,13 +559,61 @@ export async function updateCatalogItem(
 
   if (!fields.length) return getCatalogItemById(id);
 
+  const contentTouched = [
+    'title',
+    'slug',
+    'summary',
+    'description',
+    'price_label',
+    'status',
+    'enabled',
+  ].some((k) => map[k] !== undefined);
+  const metaTouched =
+    input.meta_title !== undefined ||
+    input.meta_description !== undefined ||
+    input.og_image_url !== undefined;
+
+  if (metaTouched && (input.meta_title !== undefined || input.meta_description !== undefined)) {
+    // Admin SEO tab writes are sacred — steward will not overwrite.
+    fields.push('seo_meta_source = ?');
+    params.push('manual');
+  } else if (contentTouched) {
+    fields.push('seo_dirty = ?');
+    params.push(1);
+  }
+
+  const before = contentTouched || metaTouched || input.status !== undefined || input.enabled !== undefined || input.seo_noindex !== undefined
+    ? await getCatalogItemById(id)
+    : null;
+
   params.push(id);
   await pool.query(`UPDATE catalog_items SET ${fields.join(', ')} WHERE id = ?`, params);
-  return getCatalogItemById(id);
+  await stewardCatalogItemSeoSafe(id);
+  const after = await getCatalogItemById(id);
+
+  if (before && after && leftIndexableSet(before, after)) {
+    await enqueueSeoUrlRemovalSafe({
+      path: catalogPublicPath(before.item_type, before.slug),
+      event: 'unpublish',
+      hubPath: catalogListingPath(before.item_type),
+      redirectToHub: true,
+    });
+  }
+
+  return after;
 }
 
 export async function deleteCatalogItem(id: number) {
+  const before = await getCatalogItemById(id);
   await pool.query('DELETE FROM catalog_items WHERE id = ?', [id]);
+  if (before && before.status === 'published' && Number(before.enabled) && !before.seo_noindex) {
+    await enqueueSeoUrlRemovalSafe({
+      path: catalogPublicPath(before.item_type, before.slug),
+      event: 'delete',
+      hubPath: catalogListingPath(before.item_type),
+      redirectToHub: true,
+    });
+  }
 }
 
 export async function deleteCatalogItemsByType(itemType: CatalogItemType) {
@@ -926,6 +988,8 @@ export async function addItemMedia(input: {
     ]
   );
 
+  await markCatalogSeoDirty(input.item_id);
+  await stewardCatalogItemSeoSafe(input.item_id);
   return result.insertId;
 }
 
@@ -970,6 +1034,8 @@ export async function setItemMediaPrimary(itemId: number, mediaId: number) {
 
   await pool.query('UPDATE catalog_media SET is_primary = 0 WHERE item_id = ?', [itemId]);
   await pool.query('UPDATE catalog_media SET is_primary = 1 WHERE id = ?', [mediaId]);
+  await markCatalogSeoDirty(itemId);
+  await stewardCatalogItemSeoSafe(itemId);
 }
 
 export async function reorderItemMedia(itemId: number, orderedIds: number[]) {
