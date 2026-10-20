@@ -85,7 +85,26 @@
       { "path": "/services", "expect": ["BreadcrumbList"] },
       { "path": "/contact", "expect": ["BreadcrumbList"] }
     ],
-    "closedLoopHealthLimit": 40
+    "closedLoopHealthLimit": 40,
+    "commandBrief": {
+      "windowDays": 28,
+      "topN": 15,
+      "theme": "aurora",
+      "comparePrevious": true,
+      "title": "SEO Command Brief",
+      "sections": [
+        "overview",
+        "verify",
+        "insights",
+        "gsc",
+        "bing",
+        "ga4",
+        "technical",
+        "catalog",
+        "conversion",
+        "actions"
+      ]
+    }
   },
   "outputDir": "../../storage/meridian/zigma-prod"
 }

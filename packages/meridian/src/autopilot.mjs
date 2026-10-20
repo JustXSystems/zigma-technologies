@@ -68,6 +68,7 @@ import { advancePhase29 } from './connectors/phase29-advance.mjs';
 import { advancePhase30 } from './connectors/phase30-advance.mjs';
 import { advancePhase31 } from './connectors/phase31-advance.mjs';
 import { advancePhase32 } from './connectors/phase32-advance.mjs';
+import { writeCommandBrief } from './connectors/command-brief.mjs';
 import { runCatalogSteward } from './connectors/catalog-steward.mjs';
 import { hydrateMeridianSecrets } from './lib/hydrate-secrets.mjs';
 
@@ -523,6 +524,15 @@ export async function runAutopilot(profile, opts = {}) {
     });
     actions.push({ id: 'phase32-advance', ...p32 });
     mergeFindings(scan, p32);
+    if (profile.autopilot?.skipCommandBrief !== true) {
+      const brief = await writeCommandBrief(profile, {
+        outDir,
+        report: scan?.report,
+        catalog: p32.data?.catalog,
+      });
+      actions.push({ id: 'command-brief', ...brief });
+      mergeFindings(scan, brief);
+    }
     digest = { data: { paths: { mdPath: resolve(outDir, 'weekly-digest.md') } }, message: p32.message };
     monthly = { data: { paths: { mdPath: resolve(outDir, 'monthly-digest.md') } } };
     digestsDone = true;
@@ -995,6 +1005,10 @@ export async function runAutopilot(profile, opts = {}) {
     silentSteward: resolve(outDir, 'silent-steward.md'),
     stewardShip: resolve(outDir, 'steward-ship.json'),
     executiveBrief: resolve(outDir, 'executive-brief.md'),
+    commandBrief:
+      actions.find((a) => a.id === 'command-brief')?.data?.paths?.html ||
+      resolve(outDir, 'command-brief.html'),
+    phase33Ops: resolve(outDir, 'phase33-ops.html'),
     humanDebt: resolve(outDir, 'human-debt.json'),
     unlockReadiness: actions.find((a) => a.id === 'unlock-readiness')?.data?.paths?.md,
   };

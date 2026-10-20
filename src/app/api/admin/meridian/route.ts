@@ -60,6 +60,20 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'No ops cockpit yet — run autopilot first.' }, { status: 404 });
       }
     }
+    if (format === 'brief' || format === 'command-brief') {
+      const { commandBrief } = meridianLatestPaths(env);
+      try {
+        const body = await readFile(commandBrief, 'utf8');
+        return new NextResponse(body, {
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      } catch {
+        return NextResponse.json(
+          { error: 'No Command Brief yet — run npm run meridian:brief or observe first.' },
+          { status: 404 }
+        );
+      }
+    }
     if (format === 'phase0') {
       const { phase0Wizard } = meridianLatestPaths(env);
       try {
@@ -136,7 +150,14 @@ export async function POST(request: Request) {
       ack?: boolean;
       parkGbp?: boolean;
       skipPhase31?: boolean;
+      skipPhase32?: boolean;
       forceCatalog?: boolean;
+      windowDays?: number;
+      topN?: number;
+      theme?: string;
+      skipScan?: boolean;
+      skipLiveVerify?: boolean;
+      skipPsi?: boolean;
     };
     const env = parseEnv(body.env);
     const action = body.action || 'scan';
@@ -237,7 +258,10 @@ export async function POST(request: Request) {
       action === 'phase29-advance' ||
       action === 'phase30-advance' ||
       action === 'phase31-advance' ||
-      action === 'phase32-advance'
+      action === 'phase32-advance' ||
+      action === 'phase33-advance' ||
+      action === 'command-brief' ||
+      action === 'seo-report'
     ) {
       let act: MeridianAct;
       if (action === 'draft-meta') act = { action: 'draft-meta' };
@@ -644,6 +668,58 @@ export async function POST(request: Request) {
           ack: !!body.ack,
           parkGbp: body.parkGbp !== false,
           gscProxy: body.gscProxy !== false,
+        };
+      } else if (action === 'phase33-advance') {
+        act = {
+          action: 'phase33-advance',
+          apply: body.apply !== false,
+          syncGh: !!body.syncGh,
+          skipHeal: !!body.skipHeal,
+          skipLatticeHeal: !!body.skipLatticeHeal,
+          skipLattice: !!body.skipLattice,
+          skipContinuity: !!body.skipContinuity,
+          skipChronos: !!body.skipChronos,
+          skipDominion: !!body.skipDominion,
+          skipObserve: !!body.skipObserve,
+          skipDesk: !!body.skipDesk,
+          skipPresence: !!body.skipPresence,
+          skipThrone: !!body.skipThrone,
+          skipHorizon: !!body.skipHorizon,
+          skipCourier: !!body.skipCourier,
+          skipForge: !!body.skipForge,
+          skipHotpatch: !!body.skipHotpatch,
+          skipCloser: !!body.skipCloser,
+          skipIndex: !!body.skipIndex,
+          skipPhase31: !!body.skipPhase31,
+          skipPhase32: !!body.skipPhase32,
+          forceCatalog: !!body.forceCatalog,
+          skipYield: !!body.skipYield,
+          skipSitemap: !!body.skipSitemap,
+          skipDeploy: !!body.skipDeploy,
+          triggerDeploy: !!body.triggerDeploy,
+          ack: !!body.ack,
+          parkGbp: body.parkGbp !== false,
+          gscProxy: body.gscProxy !== false,
+          windowDays: typeof body.windowDays === 'number' ? body.windowDays : undefined,
+          topN: typeof body.topN === 'number' ? body.topN : undefined,
+          theme: typeof body.theme === 'string' ? body.theme : undefined,
+        };
+      } else if (action === 'command-brief') {
+        act = {
+          action: 'command-brief',
+          windowDays: typeof body.windowDays === 'number' ? body.windowDays : undefined,
+          topN: typeof body.topN === 'number' ? body.topN : undefined,
+          theme: typeof body.theme === 'string' ? body.theme : undefined,
+        };
+      } else if (action === 'seo-report') {
+        act = {
+          action: 'seo-report',
+          windowDays: typeof body.windowDays === 'number' ? body.windowDays : undefined,
+          topN: typeof body.topN === 'number' ? body.topN : undefined,
+          theme: typeof body.theme === 'string' ? body.theme : undefined,
+          skipScan: !!body.skipScan,
+          skipLiveVerify: !!body.skipLiveVerify,
+          skipPsi: !!body.skipPsi,
         };
       } else act = { action: 'sitemap-health', limit: body.limit ?? 120 };
       const result = await runMeridianAct(env, act);

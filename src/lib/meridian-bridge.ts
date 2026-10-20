@@ -365,6 +365,55 @@ export type MeridianAct =
       parkGbp?: boolean;
       gscProxy?: boolean;
     }
+  | {
+      action: 'phase33-advance';
+      apply?: boolean;
+      syncGh?: boolean;
+      skipHeal?: boolean;
+      skipLatticeHeal?: boolean;
+      skipLattice?: boolean;
+      skipContinuity?: boolean;
+      skipChronos?: boolean;
+      skipDominion?: boolean;
+      skipObserve?: boolean;
+      skipDesk?: boolean;
+      skipPresence?: boolean;
+      skipThrone?: boolean;
+      skipHorizon?: boolean;
+      skipCourier?: boolean;
+      skipForge?: boolean;
+      skipHotpatch?: boolean;
+      skipCloser?: boolean;
+      skipIndex?: boolean;
+      skipPhase31?: boolean;
+      skipPhase32?: boolean;
+      forceCatalog?: boolean;
+      skipYield?: boolean;
+      skipSitemap?: boolean;
+      skipDeploy?: boolean;
+      triggerDeploy?: boolean;
+      ack?: boolean;
+      parkGbp?: boolean;
+      gscProxy?: boolean;
+      windowDays?: number;
+      topN?: number;
+      theme?: string;
+    }
+  | {
+      action: 'command-brief';
+      windowDays?: number;
+      topN?: number;
+      theme?: string;
+    }
+  | {
+      action: 'seo-report';
+      windowDays?: number;
+      topN?: number;
+      theme?: string;
+      skipScan?: boolean;
+      skipLiveVerify?: boolean;
+      skipPsi?: boolean;
+    }
   | { action: 'draft-meta' }
   | { action: 'apply-meta'; dryRun?: boolean; force?: boolean }
   | { action: 'draft-alt' }
@@ -418,6 +467,12 @@ export function meridianLatestPaths(env: MeridianEnv) {
     phase30Ops: path.join(dir, 'phase30-ops.html'),
     phase31Ops: path.join(dir, 'phase31-ops.html'),
     phase32Ops: path.join(dir, 'phase32-ops.html'),
+    phase33Ops: path.join(dir, 'phase33-ops.html'),
+    commandBrief: path.join(dir, 'command-brief.html'),
+    commandBriefJson: path.join(dir, 'command-brief.json'),
+    commandBriefMd: path.join(dir, 'command-brief.md'),
+    seoReport: path.join(dir, 'seo-report-latest.html'),
+    seoReportJson: path.join(dir, 'seo-report.json'),
     catalogContinuum: path.join(dir, 'catalog-continuum.json'),
     catalogContinuumMd: path.join(dir, 'catalog-continuum.md'),
     fleetAssurance: path.join(dir, 'fleet-assurance.json'),
@@ -1271,6 +1326,58 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
     if (act.ack) args.push('--ack-gbp');
     if (act.parkGbp === false) args.push('--no-park-gbp');
     if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    return spawnMeridian(args);
+  }
+  if (act.action === 'phase33-advance') {
+    const args = ['act', 'phase33-advance', '--profile', profile];
+    if (act.apply === false) args.push('--no-apply');
+    if (act.syncGh) args.push('--sync-gh');
+    if (act.skipHeal) args.push('--skip-heal');
+    if (act.skipLatticeHeal) args.push('--skip-lattice-heal');
+    if (act.skipLattice) args.push('--skip-lattice');
+    if (act.skipContinuity) args.push('--skip-continuity');
+    if (act.skipChronos) args.push('--skip-chronos');
+    if (act.skipDominion) args.push('--skip-dominion');
+    if (act.skipObserve) args.push('--skip-observe');
+    if (act.skipDesk) args.push('--skip-desk');
+    if (act.skipPresence) args.push('--skip-presence');
+    if (act.skipThrone) args.push('--skip-throne');
+    if (act.skipHorizon) args.push('--skip-horizon');
+    if (act.skipCourier) args.push('--skip-courier');
+    if (act.skipForge) args.push('--skip-forge');
+    if (act.skipHotpatch) args.push('--skip-hotpatch');
+    if (act.skipCloser) args.push('--skip-closer');
+    if (act.skipIndex) args.push('--skip-index');
+    if (act.skipPhase31) args.push('--skip-phase31');
+    if (act.skipPhase32) args.push('--skip-phase32');
+    if (act.forceCatalog) args.push('--force-catalog');
+    if (act.skipYield) args.push('--skip-yield');
+    if (act.skipSitemap) args.push('--skip-sitemap');
+    if (act.skipDeploy) args.push('--skip-deploy');
+    if (act.triggerDeploy) args.push('--trigger-deploy');
+    if (act.ack) args.push('--ack-gbp');
+    if (act.parkGbp === false) args.push('--no-park-gbp');
+    if (act.gscProxy === false) args.push('--no-gsc-proxy');
+    if (act.windowDays) args.push('--window', String(act.windowDays));
+    if (act.topN) args.push('--top', String(act.topN));
+    if (act.theme) args.push('--theme', act.theme);
+    return spawnMeridian(args);
+  }
+  if (act.action === 'command-brief') {
+    const args = ['act', 'command-brief', '--profile', profile];
+    if (act.windowDays) args.push('--window', String(act.windowDays));
+    if (act.topN) args.push('--top', String(act.topN));
+    if (act.theme) args.push('--theme', act.theme);
+    return spawnMeridian(args);
+  }
+  if (act.action === 'seo-report') {
+    const args = ['act', 'seo-report', '--profile', profile];
+    if (act.windowDays) args.push('--window', String(act.windowDays));
+    if (act.topN) args.push('--top', String(act.topN));
+    if (act.theme) args.push('--theme', act.theme);
+    if (act.skipScan) args.push('--skip-scan');
+    if (act.skipLiveVerify) args.push('--skip-verify');
+    if (act.skipPsi) args.push('--skip-psi');
     return spawnMeridian(args);
   }
   if (act.action === 'draft-meta') {

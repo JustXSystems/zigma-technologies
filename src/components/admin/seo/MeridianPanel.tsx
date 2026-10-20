@@ -440,8 +440,9 @@ export default function MeridianPanel() {
           <div className="mark">Meridian · SEO Command</div>
           <h2>Command desk</h2>
           <p className="sub">
-            Day-to-day: use <strong>Run autopilot</strong> (covers packs + unlock + cockpit). Extra buttons are
-            optional one-offs — still valid, not required weekly.
+            Need a fresh SEO check? Use <strong>Generate SEO report</strong> — it logs into Google/Bing via
+            official APIs, verifies the live site, and builds one Command Brief. Day-to-day healing:{' '}
+            <strong>Run autopilot</strong>.
           </p>
           {jobRunning ? (
             <p className="sub" style={{ color: 'var(--accent, #0b6e4f)', marginTop: '0.35rem' }}>
@@ -462,6 +463,19 @@ export default function MeridianPanel() {
           <button
             type="button"
             className="primary"
+            disabled={pending || jobRunning || env !== 'prod'}
+            onClick={() =>
+              postAction(
+                { action: 'seo-report', skipScan: true },
+                'Generating live SEO report (login APIs → verify site → GSC/Bing → brief)'
+              )
+            }
+            title="Logs into GSC/Bing via OAuth/API key, verifies live SEO, writes one Command Brief. Full crawl: npm run seo:report"
+          >
+            {pending ? 'Working…' : 'Generate SEO report'}
+          </button>
+          <button
+            type="button"
             disabled={pending || jobRunning}
             onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot')}
           >
@@ -509,12 +523,28 @@ export default function MeridianPanel() {
           </a>
           <a
             className="link"
+            href={withBasePath(`/api/admin/meridian?env=${env}&format=brief`)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Command Brief
+          </a>
+          <a
+            className="link"
             href={withBasePath(`/api/admin/meridian?env=${env}&format=cockpit`)}
             target="_blank"
             rel="noreferrer"
           >
             Ops cockpit
           </a>
+          <button
+            type="button"
+            disabled={pending || jobRunning || env !== 'prod'}
+            onClick={() => postAction({ action: 'seo-report' }, 'Full SEO report + Meridian crawl (may take ~2 min)')}
+            title="Same as Generate, plus full Meridian technical crawl"
+          >
+            Full report + crawl
+          </button>
         </div>
       </div>
 
@@ -783,6 +813,13 @@ export default function MeridianPanel() {
               onClick={() => postAction({ action: 'phase30-advance' }, 'Phase 30 dominion apex')}
             >
               Phase 30 / Dominion
+            </button>
+            <button
+              type="button"
+              disabled={pending || jobRunning}
+              onClick={() => postAction({ action: 'phase33-advance' }, 'Phase 33 Command Brief (GSC + Bing)')}
+            >
+              Phase 33 / Command Brief
             </button>
             <button
               type="button"

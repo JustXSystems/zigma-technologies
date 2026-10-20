@@ -68,6 +68,9 @@ import { advancePhase29 } from './connectors/phase29-advance.mjs';
 import { advancePhase30 } from './connectors/phase30-advance.mjs';
 import { advancePhase31 } from './connectors/phase31-advance.mjs';
 import { advancePhase32 } from './connectors/phase32-advance.mjs';
+import { advancePhase33 } from './connectors/phase33-advance.mjs';
+import { writeCommandBrief } from './connectors/command-brief.mjs';
+import { runSeoReport } from './connectors/seo-report.mjs';
 import { runCatalogSteward } from './connectors/catalog-steward.mjs';
 import { syncSeoGuideCanon } from './connectors/canon-sync.mjs';
 import { readFile } from 'node:fs/promises';
@@ -901,14 +904,86 @@ export async function runCli(argv) {
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }
+    if (action === 'seo-report' || action === 'report') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const sectionsRaw = argValue(argv, '--sections');
+      const result = await runSeoReport(profile, {
+        outDir: resolve(outDir),
+        windowDays: Number(argValue(argv, '--window') || 0) || undefined,
+        topN: Number(argValue(argv, '--top') || 0) || undefined,
+        theme: argValue(argv, '--theme') || undefined,
+        sections: sectionsRaw ? sectionsRaw.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        title: argValue(argv, '--title') || undefined,
+        skipScan: argv.includes('--skip-scan'),
+        skipLiveVerify: argv.includes('--skip-verify'),
+        skipPsi: argv.includes('--skip-psi'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'command-brief' || action === 'brief') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const sectionsRaw = argValue(argv, '--sections');
+      const result = await writeCommandBrief(profile, {
+        outDir: resolve(outDir),
+        windowDays: Number(argValue(argv, '--window') || 0) || undefined,
+        topN: Number(argValue(argv, '--top') || 0) || undefined,
+        theme: argValue(argv, '--theme') || undefined,
+        sections: sectionsRaw ? sectionsRaw.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        title: argValue(argv, '--title') || undefined,
+        comparePrevious: !argv.includes('--no-compare'),
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
     if (
-      action === 'phase32-advance' ||
+      action === 'phase33-advance' ||
       action === 'observe' ||
       action === 'steward' ||
-      action === 'guard' ||
-      action === 'catalog' ||
-      action === 'continuum'
+      action === 'guard'
     ) {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const sectionsRaw = argValue(argv, '--sections');
+      const result = await advancePhase33(profile, {
+        outDir: resolve(outDir),
+        apply: !argv.includes('--no-apply'),
+        syncGh: argv.includes('--sync-gh'),
+        skipHeal: argv.includes('--skip-heal'),
+        skipLatticeHeal: argv.includes('--skip-lattice-heal'),
+        skipLattice: argv.includes('--skip-lattice'),
+        skipContinuity: argv.includes('--skip-continuity'),
+        skipChronos: argv.includes('--skip-chronos'),
+        skipDominion: argv.includes('--skip-dominion'),
+        skipObserve: argv.includes('--skip-observe'),
+        skipDesk: argv.includes('--skip-desk'),
+        skipPresence: argv.includes('--skip-presence'),
+        skipThrone: argv.includes('--skip-throne'),
+        skipHorizon: argv.includes('--skip-horizon'),
+        skipCourier: argv.includes('--skip-courier'),
+        skipForge: argv.includes('--skip-forge'),
+        skipHotpatch: argv.includes('--skip-hotpatch'),
+        skipCloser: argv.includes('--skip-closer'),
+        skipIndex: argv.includes('--skip-index'),
+        skipYield: argv.includes('--skip-yield'),
+        skipSitemap: argv.includes('--skip-sitemap'),
+        skipDeploy: argv.includes('--skip-deploy'),
+        triggerDeploy: argv.includes('--trigger-deploy'),
+        ack: argv.includes('--ack-gbp'),
+        parkGbp: !argv.includes('--no-park-gbp'),
+        gscProxy: !argv.includes('--no-gsc-proxy'),
+        forceCatalog: argv.includes('--force-catalog'),
+        skipPhase31: argv.includes('--skip-phase31'),
+        skipPhase32: argv.includes('--skip-phase32'),
+        windowDays: Number(argValue(argv, '--window') || 0) || undefined,
+        topN: Number(argValue(argv, '--top') || 0) || undefined,
+        theme: argValue(argv, '--theme') || undefined,
+        sections: sectionsRaw ? sectionsRaw.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        title: argValue(argv, '--title') || undefined,
+      });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'phase32-advance' || action === 'catalog' || action === 'continuum') {
       const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
       if (action === 'catalog' && argv.includes('--fleet-only')) {
         const result = await runCatalogSteward(profile, {
@@ -1101,7 +1176,10 @@ Usage:
   meridian act phase29-advance|chronos [--skip-continuity] [--skip-yield] --profile ./profiles/site.json
   meridian act phase30-advance|dominion [--skip-chronos] [--skip-yield] --profile ./profiles/site.json
   meridian act phase31-advance [--skip-dominion] [--skip-yield] --profile ./profiles/site.json
-  meridian act phase32-advance|observe|steward|guard|catalog|continuum [--skip-phase31] [--force-catalog] --profile ./profiles/site.json
+  meridian act phase32-advance|catalog|continuum [--skip-phase31] [--force-catalog] --profile ./profiles/site.json
+  meridian act phase33-advance|observe|steward|guard [--skip-phase32] [--theme aurora|forge|glass] [--window 28] [--top 15] --profile ./profiles/site.json
+  meridian act seo-report|report [--theme aurora] [--window 28] [--skip-scan] [--skip-verify] --profile ./profiles/site.json
+  meridian act command-brief|brief [--theme aurora] [--window 28] [--top 15] [--sections overview,gsc,bing] --profile ./profiles/site.json
   meridian act ack-gbp --profile ./profiles/site.json
   meridian act canon --profile ./profiles/site.json
   meridian act draft-meta | apply-meta | draft-alt | apply-alt --profile ./profiles/site.json
@@ -1111,8 +1189,11 @@ Usage:
   meridian init-profile --out ./my-site.json
   meridian help
 
-Autopilot = full remediation + Phase 0–27 packs + integrity lattice + digests.
-Forever ops: npm run meridian:observe  (catalog continuum · steward · dominion · chronos · re-seal: meridian:guard)
+Autopilot = full remediation + Phase 0–33 packs + Command Brief + digests.
+Forever ops: npm run meridian:observe  (catalog · GSC/Bing Command Brief · steward · re-seal: meridian:guard)
+On-demand live SEO report: npm run seo:report  → authenticates GSC/Bing APIs · verifies site · command-brief.html
+Quick brief only: npm run meridian:brief
+One-time Google login: npm run meridian:oauth
 
 Env:
   MERIDIAN_GOOGLE_* / MERIDIAN_GA4_PROPERTY_ID / MERIDIAN_BING_API_KEY / MERIDIAN_PSI_API_KEY

@@ -66,9 +66,12 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 46. **Phase 29 autonomic chronos** (temporal nexus · regression detect)  
 47. **Phase 30 dominion apex** (eternal crown · automation complete)  
 48. **Phase 31 silent steward** (meta · city draft staged · review link auto · growth)  
-49. **Phase 32 content continuum** (Inventory / Media / Products / Services / Projects / Pages / Blog / Press — **primary forever ops**)  
+49. **Phase 32 content continuum** (Inventory / Media / Products / Services / Projects / Pages / Blog / Press)  
+50. **Phase 33 SEO Command Brief** (GSC + Bing + GA4 + Meridian → one customizable HTML report — **primary forever ops surface**)  
 
 Admin saves auto-heal SEO (`catalog-seo-steward` + fleet). Manual SEO = `seo_meta_source=manual` (never overwritten). Meridian-owned duplicate titles auto-uniquified. Unpublish/delete → `seo_url_queue` + hub 301 + GSC inspect. Sitemap image entries for catalog/blog/press. Product JSON-LD SKU/MPN/GTIN + availability; case-study VideoObject when present.
+
+**On-demand SEO report (each request):** **`npm run seo:report`** → authenticates Google OAuth + Bing API key → pulls GSC/Bing/GA4/PageSpeed → runs live `seo:verify` + Meridian crawl → writes `command-brief.html` / `seo-report-latest.html`. One-time Google login: **`npm run meridian:oauth`**. Admin → SEO → Meridian → **Generate SEO report**. Customize via `autopilot.commandBrief` (`theme`, `windowDays`, `topN`, `sections`).
 
 ## Highest-leverage human step
 
@@ -175,7 +178,9 @@ npm run meridian:act:cockpit
 
 | File | Use |
 | --- | --- |
-| `phase32-ops.html` | **Primary** content continuum / Inventory + CMS SEO |
+| `command-brief.html` | **Primary** one-spot GSC + Bing + Meridian SEO report |
+| `phase33-ops.html` | Phase 33 Command Brief seal |
+| `phase32-ops.html` | Content continuum / Inventory + CMS SEO |
 | `phase31-ops.html` | Silent steward / zero-checklist |
 | `catalog-continuum.md` · `catalog-steward.md` | Inventory heal briefs |
 | `phase30-ops.html` | Dominion crown |
@@ -185,5 +190,5 @@ npm run meridian:act:cockpit
 | `report-latest.html` · `executive-brief.md` | Board scan / one-pager |
 | Root [`SEO-GUIDE.md`](../../SEO-GUIDE.md) | Canon status + Appendix F ledger (auto) |
 
-Older `phase0`–`phase29` HTML packs remain on disk for forensics; day-to-day use observe + Phase 31 only.
+Older `phase0`–`phase29` HTML packs remain on disk for forensics; day-to-day use **Command Brief** + observe.
 

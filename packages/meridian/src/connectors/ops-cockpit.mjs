@@ -101,6 +101,7 @@ export async function writeOpsCockpit(profile, opts = {}) {
     { name: 'Perpetual seal', file: 'perpetual-seal.json' },
     { name: 'Presence sentinel', file: 'presence-sentinel.md' },
     { name: 'Automation ledger', file: 'automation-ledger.md' },
+    { name: 'SEO Command Brief', file: 'command-brief.html' },
     { name: 'Executive brief', file: 'executive-brief.md' },
     { name: 'Human debt', file: 'human-debt.md' },
     { name: 'PreProd removals', file: 'preprod-removals.md' },
