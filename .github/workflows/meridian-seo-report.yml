@@ -1,5 +1,6 @@
 # Control-plane SEO report — does NOT deploy or restart the live website.
-# Authenticates to GSC/Bing APIs, verifies production HTML, writes Command Brief artefacts.
+# Also runs automatically at the end of Deploy Production (run_seo_report=true).
+# Use this workflow for ad-hoc / scheduled reports without a site ship.
 name: Meridian SEO report
 
 on:

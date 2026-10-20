@@ -1,17 +1,13 @@
-# Deploy PreProd — build release in GitHub Actions, ship tarball to JustXSystems VPS.
+# Deploy PreProd — one button (and push-to-master) for the full preprod stack.
 #
-# Why not "SSH and build on the VPS"?
-#   1) Faster / reproducible builds in CI
-#   2) VPS only applies a verified artifact (basePath checked in package-release)
+# Parallel after gate:
+#   • Build + ship website tarball (product plane, noindex)
+#   • Ship Meridian CLI → /var/www/zigma-meridian on JustXSystems VPS
+# After site is live:
+#   • Pin MERIDIAN_HOME on the site .env (restart only if changed)
+#   • SEO Command Brief against PreProd (verify / noindex desk; GSC/Bing off in profile)
 #
-# Why auto-deploy sometimes never ran before:
-#   appleboy/ssh-action dial tcp :22 i/o timeout = Hostinger/UFW blocks inbound SSH
-#   from GitHub's cloud IPs. Building a tar does NOT fix that by itself — SCP still
-#   needs TCP/22. Fix: open 22 to the world (or install a self-hosted runner on the VPS).
-#
-# Secrets:
-#   PREPROD_HOST, PREPROD_SSH_USER, PREPROD_SSH_KEY
-#
+# Secrets: PREPROD_HOST, PREPROD_SSH_USER, PREPROD_SSH_KEY
 name: Deploy PreProd
 
 on:
@@ -57,33 +53,108 @@ on:
         description: Print apply plan only on VPS
         type: boolean
         default: false
+      ship_meridian:
+        description: Ship Meridian sidecar in parallel with the site build
+        type: boolean
+        default: true
+      meridian_dir:
+        description: Meridian install path on PreProd VPS
+        type: string
+        default: /var/www/zigma-meridian
+      run_seo_report:
+        description: After deploy — live verify + Command Brief (Actions artefacts)
+        type: boolean
+        default: true
+      post_deploy_autopilot:
+        description: Also run Meridian autopilot preprod (slow; off by default)
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-preprod
   cancel-in-progress: false
 
 jobs:
-  build-release:
-    name: Build PreProd release (CI)
+  gate:
+    name: Resolve PreProd options
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 5
     outputs:
-      artifact: ${{ steps.pack.outputs.artifact }}
+      branch: ${{ steps.opts.outputs.branch }}
+      apply: ${{ steps.opts.outputs.apply }}
+      restart: ${{ steps.opts.outputs.restart }}
+      health: ${{ steps.opts.outputs.health }}
+      preserve: ${{ steps.opts.outputs.preserve }}
+      db_backup: ${{ steps.opts.outputs.db_backup }}
+      migrations: ${{ steps.opts.outputs.migrations }}
+      migration_files: ${{ steps.opts.outputs.migration_files }}
+      dry_run: ${{ steps.opts.outputs.dry_run }}
+      ship_meridian: ${{ steps.opts.outputs.ship_meridian }}
+      meridian_dir: ${{ steps.opts.outputs.meridian_dir }}
+      run_seo_report: ${{ steps.opts.outputs.run_seo_report }}
+      post_deploy_autopilot: ${{ steps.opts.outputs.post_deploy_autopilot }}
     steps:
-      - name: Resolve options
+      - name: Resolve options (push defaults vs dispatch)
         id: opts
         shell: bash
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            MIG="${{ inputs.apply_migrations }}"
+            MIG_FILES="$(echo '${{ inputs.migration_files }}' | xargs)"
+            if [[ "$MIG" == "true" && -z "$MIG_FILES" ]]; then
+              echo "::warning::apply_migrations was true but migration_files is empty — skipping SQL migrations."
+              MIG=false
+            fi
             echo "branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+            echo "apply=${{ inputs.apply_release }}" >> "$GITHUB_OUTPUT"
+            echo "restart=${{ inputs.restart_pm2 }}" >> "$GITHUB_OUTPUT"
+            echo "health=${{ inputs.healthcheck }}" >> "$GITHUB_OUTPUT"
+            echo "preserve=${{ inputs.preserve_uploads }}" >> "$GITHUB_OUTPUT"
+            echo "db_backup=${{ inputs.db_backup }}" >> "$GITHUB_OUTPUT"
+            echo "migrations=$MIG" >> "$GITHUB_OUTPUT"
+            echo "migration_files=$MIG_FILES" >> "$GITHUB_OUTPUT"
+            echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+            echo "ship_meridian=${{ inputs.ship_meridian }}" >> "$GITHUB_OUTPUT"
+            echo "meridian_dir=${{ inputs.meridian_dir }}" >> "$GITHUB_OUTPUT"
+            echo "run_seo_report=${{ inputs.run_seo_report }}" >> "$GITHUB_OUTPUT"
+            echo "post_deploy_autopilot=${{ inputs.post_deploy_autopilot }}" >> "$GITHUB_OUTPUT"
           else
             echo "branch=master" >> "$GITHUB_OUTPUT"
+            echo "apply=true" >> "$GITHUB_OUTPUT"
+            echo "restart=true" >> "$GITHUB_OUTPUT"
+            echo "health=true" >> "$GITHUB_OUTPUT"
+            echo "preserve=true" >> "$GITHUB_OUTPUT"
+            echo "db_backup=false" >> "$GITHUB_OUTPUT"
+            echo "migrations=false" >> "$GITHUB_OUTPUT"
+            echo "migration_files=" >> "$GITHUB_OUTPUT"
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+            echo "ship_meridian=true" >> "$GITHUB_OUTPUT"
+            echo "meridian_dir=/var/www/zigma-meridian" >> "$GITHUB_OUTPUT"
+            echo "run_seo_report=true" >> "$GITHUB_OUTPUT"
+            echo "post_deploy_autopilot=false" >> "$GITHUB_OUTPUT"
           fi
+          {
+            echo "## Deploy PreProd (unified)"
+            echo ""
+            echo "| Track | Value |"
+            echo "| --- | --- |"
+            echo "| Event | \`${{ github.event_name }}\` |"
+            echo "| Meridian sidecar (parallel) | yes (default) → \`/var/www/zigma-meridian\` |"
+            echo "| SEO Command Brief after live | yes (default) |"
+            echo "| Full autopilot | off unless checked |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
+  # ── Product plane ──────────────────────────────────────────────────────────
+  build-release:
+    name: Build PreProd release (CI)
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.opts.outputs.branch }}
+          ref: ${{ needs.gate.outputs.branch }}
 
       - uses: actions/setup-node@v4
         with:
@@ -95,7 +166,6 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /zigma-technologies
           NEXT_PUBLIC_SITE_URL: https://justxsystems.com/zigma-technologies
           MEDIA_BASE_URL: /assets
-          # Never index PreProd. Unset explicitly so a runner/org secret cannot leak through.
           NEXT_PUBLIC_SEO_INDEXABLE: ''
         run: |
           set -euo pipefail
@@ -105,13 +175,11 @@ jobs:
           node scripts/verify-seo-build.mjs --env preprod
 
       - name: Package release tarball
-        id: pack
         run: |
           set -euo pipefail
           chmod +x scripts/package-release.sh
           ./scripts/package-release.sh --env preprod --out dist/zigma-preprod.tgz
           ls -lh dist/zigma-preprod.tgz
-          echo "artifact=zigma-preprod.tgz" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -120,44 +188,24 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  # ── Control plane (parallel with Next build) ───────────────────────────────
+  ship-meridian:
+    name: Meridian sidecar (parallel)
+    needs: gate
+    if: ${{ needs.gate.outputs.ship_meridian == 'true' }}
+    uses: ./.github/workflows/deploy-meridian.yml
+    with:
+      plane: preprod
+      branch: ${{ needs.gate.outputs.branch }}
+      target_dir: ${{ needs.gate.outputs.meridian_dir }}
+    secrets: inherit
+
   deploy-release:
     name: Ship tarball → JustXSystems VPS
-    needs: build-release
+    needs: [gate, build-release]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Resolve apply flags
-        id: opts
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            MIG="${{ inputs.apply_migrations }}"
-            MIG_FILES="$(echo '${{ inputs.migration_files }}' | xargs)"
-            if [[ "$MIG" == "true" && -z "$MIG_FILES" ]]; then
-              echo "::warning::apply_migrations was true but migration_files is empty — skipping SQL migrations (listing cards still self-heal via schema-ensure)."
-              echo "To apply SQL, re-run with migration_files e.g. migrate-catalog-discovery.sql,migrate-catalog-background.sql"
-              MIG=false
-            fi
-            echo "apply=${{ inputs.apply_release }}" >> "$GITHUB_OUTPUT"
-            echo "restart=${{ inputs.restart_pm2 }}" >> "$GITHUB_OUTPUT"
-            echo "health=${{ inputs.healthcheck }}" >> "$GITHUB_OUTPUT"
-            echo "preserve=${{ inputs.preserve_uploads }}" >> "$GITHUB_OUTPUT"
-            echo "db_backup=${{ inputs.db_backup }}" >> "$GITHUB_OUTPUT"
-            echo "migrations=$MIG" >> "$GITHUB_OUTPUT"
-            echo "migration_files=$MIG_FILES" >> "$GITHUB_OUTPUT"
-            echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "apply=true" >> "$GITHUB_OUTPUT"
-            echo "restart=true" >> "$GITHUB_OUTPUT"
-            echo "health=true" >> "$GITHUB_OUTPUT"
-            echo "preserve=true" >> "$GITHUB_OUTPUT"
-            echo "db_backup=false" >> "$GITHUB_OUTPUT"
-            echo "migrations=false" >> "$GITHUB_OUTPUT"
-            echo "migration_files=" >> "$GITHUB_OUTPUT"
-            echo "dry_run=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Require PreProd SSH secrets
         id: ssh
         shell: bash
@@ -192,15 +240,10 @@ jobs:
             cat <<'MSG' >&2
           ============================================================
           GitHub Actions cannot open TCP port 22 to the PreProd VPS.
-          This is why auto-deploy "never ran" / timed out before.
-
           Fix ONE of:
             A) Hostinger hPanel → VPS Firewall + UFW: allow TCP 22 from Anywhere
             B) Install a self-hosted GitHub runner ON the VPS (outbound only)
                then use workflow deploy-preprod-self-hosted.yml
-
-          Building a tarball in CI does not bypass a closed SSH port —
-          SCP still needs :22 reachable from GitHub's IPs.
           ============================================================
           MSG
             exit 1
@@ -209,7 +252,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || 'master' }}
+          ref: ${{ needs.gate.outputs.branch }}
           sparse-checkout: |
             scripts/apply-release.sh
           sparse-checkout-cone-mode: false
@@ -223,8 +266,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # appleboy/scp-action preserves source dirs → dist/foo.tgz becomes /tmp/dist/foo.tgz
-          # Flatten so the remote path is always /tmp/zigma-preprod.tgz
           test -f dist/zigma-preprod.tgz
           cp -f dist/zigma-preprod.tgz ./zigma-preprod.tgz
           test -f scripts/apply-release.sh
@@ -254,20 +295,19 @@ jobs:
       - name: Apply release on VPS
         uses: appleboy/ssh-action@v1.2.0
         env:
-          IN_APPLY: ${{ steps.opts.outputs.apply }}
-          IN_RESTART: ${{ steps.opts.outputs.restart }}
-          IN_HEALTH: ${{ steps.opts.outputs.health }}
-          IN_PRESERVE: ${{ steps.opts.outputs.preserve }}
-          IN_DB_BACKUP: ${{ steps.opts.outputs.db_backup }}
-          IN_MIGRATIONS: ${{ steps.opts.outputs.migrations }}
-          IN_MIG_FILES: ${{ steps.opts.outputs.migration_files }}
-          IN_DRY: ${{ steps.opts.outputs.dry_run }}
+          IN_APPLY: ${{ needs.gate.outputs.apply }}
+          IN_RESTART: ${{ needs.gate.outputs.restart }}
+          IN_HEALTH: ${{ needs.gate.outputs.health }}
+          IN_PRESERVE: ${{ needs.gate.outputs.preserve }}
+          IN_DB_BACKUP: ${{ needs.gate.outputs.db_backup }}
+          IN_MIGRATIONS: ${{ needs.gate.outputs.migrations }}
+          IN_MIG_FILES: ${{ needs.gate.outputs.migration_files }}
+          IN_DRY: ${{ needs.gate.outputs.dry_run }}
         with:
           host: ${{ steps.ssh.outputs.host }}
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          # Do NOT use script_stop — it breaks if/[[ and hides real stderr (appleboy/ssh-action#130/#139).
           command_timeout: 20m
           envs: IN_APPLY,IN_RESTART,IN_HEALTH,IN_PRESERVE,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_DRY
           script: |
@@ -328,3 +368,141 @@ jobs:
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
             rm -f /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh
+
+  pin-meridian-home:
+    name: Pin MERIDIAN_HOME on PreProd
+    needs: [gate, deploy-release, ship-meridian]
+    if: |
+      always() &&
+      needs.gate.outputs.dry_run != 'true' &&
+      needs.gate.outputs.ship_meridian == 'true' &&
+      needs.deploy-release.result == 'success' &&
+      needs.ship-meridian.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ensure MERIDIAN_HOME in PreProd .env
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          TARGET: ${{ needs.gate.outputs.meridian_dir }}
+          DO_RESTART: ${{ needs.gate.outputs.restart }}
+        with:
+          host: ${{ secrets.PREPROD_HOST }}
+          username: ${{ secrets.PREPROD_SSH_USER }}
+          key: ${{ secrets.PREPROD_SSH_KEY }}
+          port: 22
+          command_timeout: 5m
+          envs: TARGET,DO_RESTART
+          script: |
+            set -euo pipefail
+            ENV_FILE=/var/www/zigma-technologies/.env
+            test -f "$TARGET/bin/meridian.mjs"
+            test -f "$ENV_FILE"
+            WANT="MERIDIAN_HOME=$TARGET"
+            CUR="$(grep -E '^MERIDIAN_HOME=' "$ENV_FILE" 2>/dev/null | tail -n1 || true)"
+            if [ "$CUR" = "$WANT" ]; then
+              echo "MERIDIAN_HOME already correct ($TARGET) — no PM2 restart"
+              exit 0
+            fi
+            if grep -qE '^MERIDIAN_HOME=' "$ENV_FILE"; then
+              sed -i "s|^MERIDIAN_HOME=.*|$WANT|" "$ENV_FILE"
+            else
+              printf '\n%s\n' "$WANT" >> "$ENV_FILE"
+            fi
+            echo "Updated .env → $WANT"
+            if [ "${DO_RESTART}" = "true" ]; then
+              cd /var/www/zigma-technologies
+              pm2 restart zigma-preprod --update-env
+              echo "pm2 restarted zigma-preprod with --update-env"
+            else
+              echo "restart_pm2=false — set MERIDIAN_HOME; restart PM2 manually when ready"
+            fi
+
+  seo-report:
+    name: SEO Command Brief (post-deploy)
+    needs: [gate, deploy-release, ship-meridian]
+    if: |
+      always() &&
+      needs.gate.outputs.dry_run != 'true' &&
+      needs.gate.outputs.apply == 'true' &&
+      needs.gate.outputs.run_seo_report == 'true' &&
+      needs.deploy-release.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Wait for PreProd settle
+        run: sleep 8
+
+      - name: Generate SEO report (PreProd profile — GSC/Bing off)
+        env:
+          MERIDIAN_CI_SOFT_AUTH: '1'
+        run: |
+          set -euo pipefail
+          ARGS=(act seo-report --profile packages/meridian/profiles/zigma.preprod.json --window 28 --theme aurora --skip-psi --skip-scan)
+          set +e
+          node packages/meridian/bin/meridian.mjs "${ARGS[@]}"
+          CODE=$?
+          set -e
+          test -f storage/meridian/zigma-preprod/command-brief.html || test -f storage/meridian/zigma-preprod/seo-report.json
+          VERIFY="$(node -e "const j=require('./storage/meridian/zigma-preprod/seo-report.json'); console.log(j.data?.liveVerify?.ok===false?'fail':'ok')" 2>/dev/null || echo ok)"
+          echo "exit=$CODE verify=$VERIFY"
+          if [ "$VERIFY" = "fail" ]; then
+            echo "::error::Live SEO verify failed on PreProd"
+            exit 1
+          fi
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seo-command-brief-preprod-deploy
+          path: |
+            storage/meridian/zigma-preprod/command-brief.html
+            storage/meridian/zigma-preprod/command-brief.md
+            storage/meridian/zigma-preprod/command-brief.json
+            storage/meridian/zigma-preprod/seo-report.json
+            storage/meridian/zigma-preprod/seo-report.md
+            storage/meridian/zigma-preprod/seo-live-verify.json
+            storage/meridian/zigma-preprod/seo-report-sources.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  meridian-autopilot:
+    name: Meridian autopilot PreProd (optional)
+    needs: [gate, deploy-release, ship-meridian]
+    if: |
+      always() &&
+      needs.gate.outputs.dry_run != 'true' &&
+      needs.gate.outputs.apply == 'true' &&
+      needs.gate.outputs.health == 'true' &&
+      needs.gate.outputs.post_deploy_autopilot == 'true' &&
+      needs.deploy-release.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Meridian autopilot against PreProd
+        run: |
+          set -euo pipefail
+          sleep 8
+          npm run meridian:autopilot:preprod
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meridian-report-preprod
+          path: storage/meridian/
+          if-no-files-found: ignore
+          retention-days: 14

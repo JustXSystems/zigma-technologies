@@ -1,15 +1,20 @@
-# Independent Meridian SEO ops deploy — does NOT rebuild or restart the live website.
-# Ships ~1 MiB of Node CLI to /opt/zigma-meridian on the VPS.
+# Meridian control-plane sidecar — does NOT rebuild or restart the live website.
+# Ships ~1 MiB of Node CLI outside the site tree.
 #
-# Website deploys (deploy-prod.yml) no longer bundle packages/meridian.
-# After first Meridian deploy, set on the site PM2 process:
-#   MERIDIAN_HOME=/opt/zigma-meridian
-# so Admin → SEO → Meridian can call the toolkit without it living inside the site tarball.
+# Callable from Deploy Production / Deploy PreProd (parallel with the Next build)
+# or standalone via workflow_dispatch.
 name: Deploy Meridian
 
 on:
   workflow_dispatch:
     inputs:
+      plane:
+        description: Target VPS (prod = Zigma Production, preprod = JustXSystems)
+        type: choice
+        options:
+          - prod
+          - preprod
+        default: prod
       branch:
         description: Git branch
         type: string
@@ -17,6 +22,23 @@ on:
       target_dir:
         description: Absolute path on VPS (outside website tree)
         type: string
+        default: /var/www/zigma-meridian
+  workflow_call:
+    inputs:
+      plane:
+        description: Target VPS (prod | preprod)
+        type: string
+        required: false
+        default: prod
+      branch:
+        description: Git branch
+        type: string
+        required: false
+        default: master
+      target_dir:
+        description: Absolute path on VPS (outside website tree)
+        type: string
+        required: false
         default: /var/www/zigma-meridian
 
 jobs:
@@ -32,18 +54,47 @@ jobs:
             packages/meridian
           sparse-checkout-cone-mode: false
 
-      - name: Require Production SSH secrets
+      - name: Resolve SSH secrets for plane
         id: ssh
         shell: bash
+        env:
+          PLANE: ${{ inputs.plane }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PREPROD_HOST: ${{ secrets.PREPROD_HOST }}
+          PREPROD_SSH_USER: ${{ secrets.PREPROD_SSH_USER }}
+          PREPROD_SSH_KEY: ${{ secrets.PREPROD_SSH_KEY }}
         run: |
           set -euo pipefail
-          HOST="${{ secrets.PROD_HOST }}"
-          USER="${{ secrets.PROD_SSH_USER }}"
-          KEY="${{ secrets.PROD_SSH_KEY }}"
-          if [[ -z "$HOST" || -z "$USER" || -z "$KEY" ]]; then
-            echo "Missing PROD_HOST / PROD_SSH_USER / PROD_SSH_KEY" >&2
+          PLANE="$(echo "${PLANE:-prod}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "$PLANE" == "preprod" ]]; then
+            HOST="$PREPROD_HOST"
+            USER="$PREPROD_SSH_USER"
+            KEY="$PREPROD_SSH_KEY"
+            LABEL="PREPROD"
+            if [[ "$HOST" == "200.234.45.106" ]]; then
+              echo "PREPROD_HOST must not be Production IP" >&2
+              exit 1
+            fi
+          elif [[ "$PLANE" == "prod" ]]; then
+            HOST="$PROD_HOST"
+            USER="$PROD_SSH_USER"
+            KEY="$PROD_SSH_KEY"
+            LABEL="PROD"
+            if [[ "$HOST" == "193.203.161.219" ]]; then
+              echo "PROD_HOST must not be PreProd IP" >&2
+              exit 1
+            fi
+          else
+            echo "plane must be prod or preprod (got: $PLANE)" >&2
             exit 1
           fi
+          if [[ -z "$HOST" || -z "$USER" || -z "$KEY" ]]; then
+            echo "Missing ${LABEL}_HOST / ${LABEL}_SSH_USER / ${LABEL}_SSH_KEY" >&2
+            exit 1
+          fi
+          echo "plane=$PLANE" >> "$GITHUB_OUTPUT"
           echo "host=$HOST" >> "$GITHUB_OUTPUT"
           echo "user=$USER" >> "$GITHUB_OUTPUT"
           {
@@ -87,7 +138,7 @@ jobs:
             mkdir -p \"\$TARGET\"
             tar -xzf /tmp/meridian.tgz -C \"\$TARGET\"
             test -f \"\$TARGET/bin/meridian.mjs\"
-            echo \"Meridian ready at \$TARGET\"
-            echo \"Set MERIDIAN_HOME=\$TARGET on the website PM2 env (pm2 restart) — never unpacks into the live site tree.\"
+            rm -f /tmp/meridian.tgz
+            echo \"Meridian ready at \$TARGET (plane=${{ steps.ssh.outputs.plane }})\"
             ls -la \"\$TARGET/bin\" \"\$TARGET/profiles\" | head -40
           "

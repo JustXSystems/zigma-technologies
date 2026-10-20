@@ -1,10 +1,14 @@
-# Deploy Production — build release in GitHub Actions, ship tarball to Zigma VPS.
-# Manual only (workflow_dispatch). confirm_production=DEPLOY_PROD required.
+# Deploy Production — one button for the full prod stack.
+#
+# Parallel after confirm:
+#   • Build + ship website tarball (product plane)
+#   • Ship Meridian CLI → /var/www/zigma-meridian (control plane, ~1 MiB)
+# After site is live:
+#   • Pin MERIDIAN_HOME on the site .env (restart only if changed)
+#   • SEO Command Brief (GSC/Bing when secrets exist) — replaces slow full autopilot
 #
 # Secrets: PROD_HOST, PROD_SSH_USER, PROD_SSH_KEY
-#
-# Same SSH firewall note as PreProd: TCP/22 must be reachable from GitHub runners
-# or use a self-hosted runner on the Production VPS.
+# Optional SEO: MERIDIAN_GOOGLE_*, MERIDIAN_BING_API_KEY, MERIDIAN_GA4_PROPERTY_ID, MERIDIAN_PSI_API_KEY
 name: Deploy Production
 
 on:
@@ -52,16 +56,32 @@ on:
         description: Print apply plan only
         type: boolean
         default: false
+      ship_meridian:
+        description: Ship Meridian sidecar in parallel with the site build
+        type: boolean
+        default: true
+      meridian_dir:
+        description: Meridian install path on VPS
+        type: string
+        default: /var/www/zigma-meridian
+      run_seo_report:
+        description: After deploy — live verify + Command Brief (Actions artefacts)
+        type: boolean
+        default: true
+      post_deploy_autopilot:
+        description: Also run full Meridian autopilot (slow; off by default)
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-production
   cancel-in-progress: false
 
 jobs:
-  build-release:
-    name: Build Production release (CI)
+  gate:
+    name: Confirm production
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 5
     steps:
       - name: Confirm production phrase
         shell: bash
@@ -77,7 +97,24 @@ jobs:
             echo "Re-run with migration_files (e.g. migrate-wave3.sql) only when you intentionally apply schema changes."
             echo "Logo/site-settings typography releases do not need SQL migrations."
           fi
+          {
+            echo "## Deploy Production (unified)"
+            echo ""
+            echo "| Track | Enabled |"
+            echo "| --- | --- |"
+            echo "| Website build + apply | yes |"
+            echo "| Meridian sidecar (parallel) | \`${{ inputs.ship_meridian }}\` → \`${{ inputs.meridian_dir }}\` |"
+            echo "| SEO Command Brief after live | \`${{ inputs.run_seo_report }}\` |"
+            echo "| Full autopilot (optional) | \`${{ inputs.post_deploy_autopilot }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
+  # ── Product plane ──────────────────────────────────────────────────────────
+  build-release:
+    name: Build Production release (CI)
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
@@ -90,15 +127,12 @@ jobs:
       - name: Install + build (Production — no BASE_PATH)
         env:
           NEXT_PUBLIC_SITE_URL: https://zigma-technologies.com
-          # Only the production build may be indexed (robots meta, X-Robots-Tag, sitemap).
           NEXT_PUBLIC_SEO_INDEXABLE: 'true'
-          # Optional — set as GitHub repository variables once Search Console / Bing issue tokens.
           NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
           NEXT_PUBLIC_BING_SITE_VERIFICATION: ${{ vars.BING_SITE_VERIFICATION }}
           MEDIA_BASE_URL: /assets
         run: |
           set -euo pipefail
-          # Ensure BASE_PATH is unset for domain-root prod
           unset NEXT_PUBLIC_BASE_PATH || true
           npm ci
           npm run build
@@ -117,6 +151,18 @@ jobs:
           path: dist/zigma-prod.tgz
           if-no-files-found: error
           retention-days: 14
+
+  # ── Control plane (parallel with Next build — does not wait for site tarball) ─
+  ship-meridian:
+    name: Meridian sidecar (parallel)
+    needs: gate
+    if: ${{ inputs.ship_meridian }}
+    uses: ./.github/workflows/deploy-meridian.yml
+    with:
+      plane: prod
+      branch: ${{ inputs.branch }}
+      target_dir: ${{ inputs.meridian_dir }}
+    secrets: inherit
 
   deploy-release:
     name: Ship tarball → Zigma Technologies VPS
@@ -180,7 +226,6 @@ jobs:
           cp -f scripts/apply-release.sh ./apply-release.sh
           ls -lh ./zigma-prod.tgz ./apply-release.sh
 
-      # Direct rsync/scp (no appleboy double-tar). Already-gzipped .tgz → Compression=no.
       - name: Upload tarball + apply script to VPS
         shell: bash
         run: |
@@ -217,7 +262,6 @@ jobs:
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
-          # Do NOT use script_stop — it breaks if/[[ and hides real stderr (appleboy/ssh-action#130/#139).
           command_timeout: 40m
           envs: IN_APPLY,IN_RESTART,IN_HEALTH,IN_PRESERVE,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_DRY
           script: |
@@ -279,12 +323,159 @@ jobs:
             bash "$APPLY" "${ARGS[@]}"
             rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh
 
-  meridian-live-verify:
-    name: Meridian live verify (Production)
-    needs: deploy-release
-    if: ${{ !inputs.dry_run && inputs.apply_release && inputs.healthcheck }}
+  # Pin MERIDIAN_HOME after both planes landed (restart only when .env changes)
+  pin-meridian-home:
+    name: Pin MERIDIAN_HOME on site
+    needs: [deploy-release, ship-meridian]
+    if: |
+      always() &&
+      !inputs.dry_run &&
+      inputs.ship_meridian &&
+      needs.deploy-release.result == 'success' &&
+      needs.ship-meridian.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    steps:
+      - name: Ensure MERIDIAN_HOME in Production .env
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          TARGET: ${{ inputs.meridian_dir }}
+          DO_RESTART: ${{ inputs.restart_pm2 }}
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          command_timeout: 5m
+          envs: TARGET,DO_RESTART
+          script: |
+            set -euo pipefail
+            ENV_FILE=/var/www/zigma-technologies/.env
+            test -f "$TARGET/bin/meridian.mjs"
+            test -f "$ENV_FILE"
+            WANT="MERIDIAN_HOME=$TARGET"
+            CUR="$(grep -E '^MERIDIAN_HOME=' "$ENV_FILE" 2>/dev/null | tail -n1 || true)"
+            if [ "$CUR" = "$WANT" ]; then
+              echo "MERIDIAN_HOME already correct ($TARGET) — no PM2 restart"
+              exit 0
+            fi
+            if grep -qE '^MERIDIAN_HOME=' "$ENV_FILE"; then
+              sed -i "s|^MERIDIAN_HOME=.*|$WANT|" "$ENV_FILE"
+            else
+              printf '\n%s\n' "$WANT" >> "$ENV_FILE"
+            fi
+            echo "Updated .env → $WANT"
+            if [ "${DO_RESTART}" = "true" ]; then
+              cd /var/www/zigma-technologies
+              pm2 restart zigma --update-env
+              echo "pm2 restarted with --update-env"
+            else
+              echo "restart_pm2=false — set MERIDIAN_HOME; restart PM2 manually when ready"
+            fi
+
+  # Control-plane desk (CI artefacts) — waits for Meridian job to finish/skip, never blocked by its failure
+  seo-report:
+    name: SEO Command Brief (post-deploy)
+    needs: [deploy-release, ship-meridian]
+    if: |
+      always() &&
+      !inputs.dry_run &&
+      inputs.apply_release &&
+      inputs.run_seo_report &&
+      needs.deploy-release.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check connector secrets
+        id: secrets
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+        run: |
+          set -euo pipefail
+          MISSING=()
+          [[ -n "${MERIDIAN_GOOGLE_CLIENT_ID:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_CLIENT_ID")
+          [[ -n "${MERIDIAN_GOOGLE_CLIENT_SECRET:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_CLIENT_SECRET")
+          [[ -n "${MERIDIAN_GOOGLE_REFRESH_TOKEN:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_REFRESH_TOKEN")
+          [[ -n "${MERIDIAN_BING_API_KEY:-}" ]] || MISSING+=("MERIDIAN_BING_API_KEY")
+          if ((${#MISSING[@]} > 0)); then
+            echo "has_auth=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Missing Actions secrets: ${MISSING[*]} — report will be verify-only until set"
+          else
+            echo "has_auth=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait for apex settle
+        run: sleep 8
+
+      - name: Generate SEO report (control plane)
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+          MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+          MERIDIAN_CI_SOFT_AUTH: '1'
+        run: |
+          set -euo pipefail
+          ARGS=(act seo-report --profile packages/meridian/profiles/zigma.prod.json --window 28 --theme aurora --skip-psi --skip-scan)
+          set +e
+          node packages/meridian/bin/meridian.mjs "${ARGS[@]}"
+          CODE=$?
+          set -e
+          test -f storage/meridian/zigma-prod/command-brief.html
+          STATUS="$(node -e "const j=require('./storage/meridian/zigma-prod/seo-report.json'); console.log(j.status||'')" 2>/dev/null || true)"
+          VERIFY="$(node -e "const j=require('./storage/meridian/zigma-prod/seo-report.json'); console.log(j.data?.liveVerify?.ok===false?'fail':'ok')" 2>/dev/null || echo ok)"
+          echo "exit=$CODE status=$STATUS verify=$VERIFY"
+          if [ "$VERIFY" = "fail" ]; then
+            echo "::error::Live SEO verify failed on production"
+            exit 1
+          fi
+          if [ "$STATUS" = "auth_required" ] || [ "${{ steps.secrets.outputs.has_auth }}" != "true" ]; then
+            echo "::warning::Live verify OK — GSC/Bing skipped until Actions secrets are set"
+            exit 0
+          fi
+          exit "$CODE"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seo-command-brief-prod-deploy
+          path: |
+            storage/meridian/zigma-prod/command-brief.html
+            storage/meridian/zigma-prod/command-brief.md
+            storage/meridian/zigma-prod/command-brief.json
+            storage/meridian/zigma-prod/seo-report.json
+            storage/meridian/zigma-prod/seo-report.md
+            storage/meridian/zigma-prod/seo-live-verify.json
+            storage/meridian/zigma-prod/seo-report-sources.json
+          if-no-files-found: warn
+          retention-days: 60
+
+  # Optional heavy path — off by default (was the old post-deploy job)
+  meridian-autopilot:
+    name: Meridian autopilot (optional)
+    needs: [deploy-release, ship-meridian]
+    if: |
+      always() &&
+      !inputs.dry_run &&
+      inputs.apply_release &&
+      inputs.healthcheck &&
+      inputs.post_deploy_autopilot &&
+      needs.deploy-release.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -303,7 +494,6 @@ jobs:
           MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
         run: |
           set -euo pipefail
-          # Give PM2 a moment after healthcheck before external crawl
           sleep 8
           npm run meridian:autopilot
       - uses: actions/upload-artifact@v4

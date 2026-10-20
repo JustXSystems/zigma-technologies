@@ -89,10 +89,41 @@ Also: `seo-report.json`, `seo-live-verify.json`, `report-latest.json`
 
 ### Deploy rules
 
-1. **Deploy Production** — product plane only (`SHIP_MERIDIAN` default off).
-2. **Deploy Meridian** — control plane sidecar to `/var/www/zigma-meridian`.
-3. **Meridian SEO report** (Actions) — control plane without touching the VPS app tree.
-4. Never unpack Meridian into `/var/www/zigma-technologies` as part of site apply.
+1. **Deploy Production** / **Deploy PreProd** (one button each) — product plane + **parallel** Meridian sidecar + post-deploy Command Brief.
+2. **Deploy Meridian** — standalone control-plane ship (`plane: prod|preprod`; also `workflow_call` from both deploys).
+3. **Meridian SEO report** — ad-hoc / weekly schedule without a site deploy (Production desk).
+4. Never unpack Meridian into `/var/www/zigma-technologies` as part of the website tarball.
+
+### One-button deploy (parallel tracks)
+
+Same shape for **Production** (`DEPLOY_PROD`) and **PreProd** (manual or push to `master`):
+
+```
+Gate / confirm
+        │
+        ├──────────────┬────────────────────────────┐
+        ▼              ▼                            │
+  Build Next     Ship Meridian (~1 MiB)             │
+  + package      → /var/www/zigma-meridian          │
+        │            (prod or preprod VPS)          │
+        ▼              │                            │
+  SCP + apply-release  │                            │
+  (site only)          │                            │
+        └──────┬───────┘                            │
+               ▼                                    │
+     Pin MERIDIAN_HOME (if .env changed)            │
+               ▼                                    │
+     SEO Command Brief (Actions artefact)  ◄────────┘
+```
+
+| | Production | PreProd |
+| --- | --- | --- |
+| SSH secrets | `PROD_*` | `PREPROD_*` |
+| PM2 | `zigma` | `zigma-preprod` |
+| Profile | `zigma.prod.json` | `zigma.preprod.json` (GSC/Bing off) |
+| Trigger | Manual + `DEPLOY_PROD` | Push `master` or manual |
+
+Defaults: `ship_meridian=true`, `run_seo_report=true`, `post_deploy_autopilot=false`.
 
 ### VPS: do not run Meridian from the website tree
 

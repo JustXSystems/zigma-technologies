@@ -6,13 +6,22 @@ Canonical design: **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** (product plane vs c
 
 | Goal | Do this |
 | --- | --- |
-| Keep site safe | **Deploy Production** never ships Meridian (default) |
-| Weekly / on-demand report | GitHub → **Meridian SEO report** (artifact = Command Brief) |
-| Optional Admin buttons on VPS | **Deploy Meridian** → `/var/www/zigma-meridian` + PM2 `MERIDIAN_HOME` |
+| Ship Production (site + Meridian + Command Brief) | GitHub → **Deploy Production** once (`DEPLOY_PROD`) |
+| Ship PreProd (same parallel tracks) | Push `master` or GitHub → **Deploy PreProd** |
+| Report without deploying the site | GitHub → **Meridian SEO report** (also Sunday cron) |
+| Meridian CLI only (no site rebuild) | GitHub → **Deploy Meridian** (`plane`: prod or preprod) |
 | Local | `npm run seo:report` |
+
+**Deploy Production / Deploy PreProd** (defaults):
+
+- Build the website and ship Meridian **in parallel** (correct VPS via `plane`)
+- Pin `MERIDIAN_HOME=/var/www/zigma-meridian` on that site’s `.env` when needed
+- Run live SEO verify + Command Brief (artifact) after the site is up
+- Full autopilot is **off** unless you check `post_deploy_autopilot`
 
 ## Do not
 
 - Bundle Meridian into `zigma-prod.tgz` (`SHIP_MERIDIAN=1` only for emergencies)
 - Put SEO ops on the public apex as a second Next app
+- Trigger Deploy Meridian + Meridian SEO report separately for a normal prod/preprod release
 - Re-run Phase 0–33 human checklists — use Command Brief insights
