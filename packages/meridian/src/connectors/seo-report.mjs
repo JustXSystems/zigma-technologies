@@ -288,16 +288,22 @@ export async function runSeoReport(profile, opts = {}) {
     'utf8'
   );
 
-  const ok =
-    !allAuthMissing &&
-    (liveVerify == null || liveVerify.ok !== false) &&
-    (gsc.status === 'ok' || bing.status === 'ok' || report?.scorecard != null);
+  const verifyOk = liveVerify == null || liveVerify.ok !== false;
+  const softAuth =
+    process.env.MERIDIAN_CI_SOFT_AUTH === '1' || process.env.MERIDIAN_CI_SOFT_HARD === '1';
+  // Full success needs at least one search connector; CI soft-auth allows verify-only green.
+  const signalsOk = gsc.status === 'ok' || bing.status === 'ok';
+  const ok = allAuthMissing
+    ? softAuth && verifyOk
+    : verifyOk && (signalsOk || report?.scorecard != null);
 
   return {
     ok,
     status: allAuthMissing ? 'auth_required' : ok ? 'ok' : 'degraded',
     message: allAuthMissing
-      ? 'SEO report needs Google OAuth and/or Bing API key — run npm run meridian:oauth / set MERIDIAN_BING_API_KEY'
+      ? softAuth && verifyOk
+        ? 'Live verify OK · GSC/Bing auth_required (set MERIDIAN_GOOGLE_* + MERIDIAN_BING_API_KEY in GitHub Actions secrets or run npm run meridian:oauth)'
+        : 'SEO report needs Google OAuth and/or Bing API key — run npm run meridian:oauth / set MERIDIAN_BING_API_KEY'
       : `SEO report ready · GSC ${gsc.status} · Bing ${bing.status} · verify ${liveVerify?.ok === false ? 'FAIL' : 'OK'} · ${durationMs}ms`,
     data: payload,
     findings: [

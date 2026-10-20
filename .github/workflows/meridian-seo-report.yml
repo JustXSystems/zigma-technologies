@@ -41,6 +41,39 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Check connector secrets
+        id: secrets
+        env:
+          MERIDIAN_GOOGLE_CLIENT_ID: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_ID }}
+          MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
+          MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
+          MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+        run: |
+          set -euo pipefail
+          MISSING=()
+          [[ -n "${MERIDIAN_GOOGLE_CLIENT_ID:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_CLIENT_ID")
+          [[ -n "${MERIDIAN_GOOGLE_CLIENT_SECRET:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_CLIENT_SECRET")
+          [[ -n "${MERIDIAN_GOOGLE_REFRESH_TOKEN:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_REFRESH_TOKEN")
+          [[ -n "${MERIDIAN_BING_API_KEY:-}" ]] || MISSING+=("MERIDIAN_BING_API_KEY")
+          if ((${#MISSING[@]} > 0)); then
+            echo "has_auth=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Meridian secrets missing in this GitHub repo"
+              echo ""
+              echo "Live site verify still runs. GSC/Bing/GA4 pulls need repo **Secrets**:"
+              echo ""
+              for s in "${MISSING[@]}"; do echo "- \`$s\`"; done
+              echo ""
+              echo "Add under **Settings → Secrets and variables → Actions** (same values as local \`unlock-secrets.json\` / VPS env)."
+              echo "One-time Google OAuth locally: \`npm run meridian:oauth\` then paste the three \`MERIDIAN_GOOGLE_*\` values into Actions secrets."
+              echo "Bing: Webmaster → Settings → API Access → copy key → \`MERIDIAN_BING_API_KEY\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Missing Actions secrets: ${MISSING[*]} — report will be verify-only until set"
+          else
+            echo "has_auth=true" >> "$GITHUB_OUTPUT"
+            echo "Connector secrets present." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       # Meridian CLI is dependency-free Node — no npm ci / no Next build (keeps site blast radius zero).
       - name: Generate SEO report (control plane)
         env:
@@ -50,6 +83,8 @@ jobs:
           MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
           MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
           MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+          # Auth missing → still succeed if live verify passed (site health ≠ connector secrets)
+          MERIDIAN_CI_SOFT_AUTH: '1'
         run: |
           set -euo pipefail
           WINDOW="${{ github.event.inputs.window_days || '28' }}"
@@ -59,9 +94,23 @@ jobs:
           if [ "$SKIP" = "true" ]; then
             ARGS+=(--skip-scan)
           fi
+          set +e
           node packages/meridian/bin/meridian.mjs "${ARGS[@]}"
+          CODE=$?
+          set -e
           test -f storage/meridian/zigma-prod/command-brief.html
-          ls -lh storage/meridian/zigma-prod/command-brief.html storage/meridian/zigma-prod/seo-report.json || true
+          STATUS="$(node -e "const j=require('./storage/meridian/zigma-prod/seo-report.json'); console.log(j.status||'')" 2>/dev/null || true)"
+          VERIFY="$(node -e "const j=require('./storage/meridian/zigma-prod/seo-report.json'); console.log(j.data?.liveVerify?.ok===false?'fail':'ok')" 2>/dev/null || echo ok)"
+          echo "exit=$CODE status=$STATUS verify=$VERIFY"
+          if [ "$VERIFY" = "fail" ]; then
+            echo "::error::Live SEO verify failed on production"
+            exit 1
+          fi
+          if [ "$STATUS" = "auth_required" ] || [ "${{ steps.secrets.outputs.has_auth }}" != "true" ]; then
+            echo "::warning::Live verify OK — GSC/Bing skipped until Actions secrets are set (see job summary)"
+            exit 0
+          fi
+          exit "$CODE"
 
       - uses: actions/upload-artifact@v4
         if: always()

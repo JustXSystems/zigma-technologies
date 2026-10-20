@@ -69,6 +69,19 @@ Meridian is isolated for **risk**, not because it bloated the upload. Standalone
 | `MERIDIAN_PSI_API_KEY` | Control | PageSpeed (optional) |
 | Site `.env` DB_* | Product | CMS / catalog steward |
 
+**GitHub Actions secrets** (repo → Settings → Secrets → Actions) for **Meridian SEO report**:
+
+| Secret | Required for |
+| --- | --- |
+| `MERIDIAN_GOOGLE_CLIENT_ID` | GSC + GA4 |
+| `MERIDIAN_GOOGLE_CLIENT_SECRET` | GSC + GA4 |
+| `MERIDIAN_GOOGLE_REFRESH_TOKEN` | GSC + GA4 (`npm run meridian:oauth` once) |
+| `MERIDIAN_GA4_PROPERTY_ID` | GA4 (numeric property id) |
+| `MERIDIAN_BING_API_KEY` | Bing |
+| `MERIDIAN_PSI_API_KEY` | PageSpeed (optional) |
+
+Without these, Actions still runs **live verify** (51 checks) and writes Command Brief; GSC/Bing sections stay `auth_required`. That is not a Production site failure.
+
 ### Artefacts (observability)
 
 Primary desk file: `storage/meridian/zigma-prod/command-brief.html`  
