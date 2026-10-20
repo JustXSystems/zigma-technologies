@@ -49,11 +49,11 @@
 
 | Component | Size | Cause of slow SCP? |
 | --- | --- | --- |
-| Next `.next/standalone` | ~90–100 MiB | **Yes** — required for the site |
+| Next `.next/standalone` | ~90–100 MiB | Cold deploy yes; **warm** deploys use delta rsync |
 | `public/` + `.next/static` | ~10–20 MiB | Minor |
-| `packages/meridian` | **~1 MiB** | **No** |
+| `packages/meridian` | **~1 MiB** | **No** (separate sidecar) |
 
-Meridian is isolated for **risk**, not because it bloated the upload. Standalone size is a separate Next deploy topic (rsync delta, self-hosted runner).
+Meridian is isolated for **risk**, not size. Website hot path = **delta rsync** of the release stage (not full `.tgz` every time). Self-hosted runner is the next step if cold uploads are still painful.
 
 ---
 
@@ -107,14 +107,16 @@ Gate / confirm
   + package      → /var/www/zigma-meridian          │
         │            (prod or preprod VPS)          │
         ▼              │                            │
-  SCP + apply-release  │                            │
-  (site only)          │                            │
+  Delta-rsync stage    │                            │
+  → /tmp/zigma-release-stage → apply-release        │
         └──────┬───────┘                            │
                ▼                                    │
      Pin MERIDIAN_HOME (if .env changed)            │
                ▼                                    │
      SEO Command Brief (Actions artefact)  ◄────────┘
 ```
+
+**Website upload:** rsync the release **folder** (only changed files). Do **not** SCP a full `.tgz` on every deploy. Optional `.tgz` stays as a GitHub Actions artifact for rollback.
 
 | | Production | PreProd |
 | --- | --- | --- |

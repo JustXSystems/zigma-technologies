@@ -73,7 +73,7 @@ Admin saves auto-heal SEO (`catalog-seo-steward` + fleet). Manual SEO = `seo_met
 
 **On-demand SEO report (each request):** **`npm run seo:report`** → authenticates Google OAuth + Bing API key → pulls GSC/Bing/GA4/PageSpeed → runs live `seo:verify` + Meridian crawl → writes `command-brief.html` / `seo-report-latest.html`. One-time Google login: **`npm run meridian:oauth`**. Admin → SEO → Meridian → **Generate SEO report**. Customize via `autopilot.commandBrief` (`theme`, `windowDays`, `topN`, `sections`).
 
-**Architecture:** Product plane (Next SEO) vs control plane (Meridian) — see [`ARCHITECTURE.md`](./ARCHITECTURE.md). Website tarball excludes Meridian. **Deploy Production** and **Deploy PreProd** each ship the site and Meridian in parallel, then write a Command Brief. Ad-hoc: **Meridian SEO report**. Meridian-only: **Deploy Meridian** (`plane` prod|preprod).
+**Architecture:** Product plane (Next SEO) vs control plane (Meridian) — see [`ARCHITECTURE.md`](./ARCHITECTURE.md). Website package excludes Meridian. **Deploy Production** / **Deploy PreProd** delta-rsync the site stage and ship Meridian in parallel, then write a Command Brief. Ad-hoc: **Meridian SEO report**. Meridian-only: **Deploy Meridian** (`plane` prod|preprod).
 
 ## Highest-leverage human step
 

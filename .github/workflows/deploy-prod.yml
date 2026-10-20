@@ -1,11 +1,11 @@
 # Deploy Production — one button for the full prod stack.
 #
 # Parallel after confirm:
-#   • Build + ship website tarball (product plane)
+#   • Build + delta-rsync website stage (product plane — warm deploys skip unchanged files)
 #   • Ship Meridian CLI → /var/www/zigma-meridian (control plane, ~1 MiB)
 # After site is live:
 #   • Pin MERIDIAN_HOME on the site .env (restart only if changed)
-#   • SEO Command Brief (GSC/Bing when secrets exist) — replaces slow full autopilot
+#   • SEO Command Brief (GSC/Bing when secrets exist)
 #
 # Secrets: PROD_HOST, PROD_SSH_USER, PROD_SSH_KEY
 # Optional SEO: MERIDIAN_GOOGLE_*, MERIDIAN_BING_API_KEY, MERIDIAN_GA4_PROPERTY_ID, MERIDIAN_PSI_API_KEY
@@ -138,16 +138,27 @@ jobs:
           npm run build
           node scripts/verify-seo-build.mjs --env prod
 
-      - name: Package release tarball
+      - name: Package release stage (+ optional .tgz artifact)
         run: |
           set -euo pipefail
           chmod +x scripts/package-release.sh
-          ./scripts/package-release.sh --env prod --out dist/zigma-prod.tgz
+          ./scripts/package-release.sh --env prod \
+            --stage-dir dist/zigma-prod-stage \
+            --out dist/zigma-prod.tgz
+          test -f dist/zigma-prod-stage/server.js
           ls -lh dist/zigma-prod.tgz
+          du -sh dist/zigma-prod-stage
 
       - uses: actions/upload-artifact@v4
         with:
-          name: zigma-prod-release
+          name: zigma-prod-release-stage
+          path: dist/zigma-prod-stage/
+          if-no-files-found: error
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zigma-prod-release-tgz
           path: dist/zigma-prod.tgz
           if-no-files-found: error
           retention-days: 14
@@ -165,10 +176,10 @@ jobs:
     secrets: inherit
 
   deploy-release:
-    name: Ship tarball → Zigma Technologies VPS
+    name: Delta-rsync stage → Zigma Technologies VPS
     needs: build-release
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Require Production SSH secrets
         id: ssh
@@ -213,38 +224,30 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: zigma-prod-release
-          path: dist
+          name: zigma-prod-release-stage
+          path: release-stage
 
-      - name: Flatten tarball path for SCP
+      - name: Delta-rsync release stage + apply script to VPS
         shell: bash
         run: |
           set -euo pipefail
-          test -f dist/zigma-prod.tgz
-          cp -f dist/zigma-prod.tgz ./zigma-prod.tgz
+          test -f release-stage/server.js
           test -f scripts/apply-release.sh
-          cp -f scripts/apply-release.sh ./apply-release.sh
-          ls -lh ./zigma-prod.tgz ./apply-release.sh
-
-      - name: Upload tarball + apply script to VPS
-        shell: bash
-        run: |
-          set -euo pipefail
           KEYFILE="$(mktemp)"
           trap 'rm -f "$KEYFILE"' EXIT
           printf '%s\n' "${{ steps.ssh.outputs.key }}" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          BYTES="$(wc -c < ./zigma-prod.tgz | tr -d ' ')"
-          echo "Upload size: $(numfmt --to=iec-i --suffix=B "$BYTES" 2>/dev/null || echo "${BYTES} bytes")"
-          DEST="${{ steps.ssh.outputs.user }}@${{ steps.ssh.outputs.host }}:/tmp/"
+          DEST_HOST="${{ steps.ssh.outputs.user }}@${{ steps.ssh.outputs.host }}"
+          REMOTE_STAGE=/tmp/zigma-release-stage
           SSH_BASE=( -i "$KEYFILE" -p 22 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o Compression=no )
-          if command -v rsync >/dev/null 2>&1; then
-            export RSYNC_RSH="ssh ${SSH_BASE[*]}"
-            rsync -a --partial --info=progress2 ./zigma-prod.tgz ./apply-release.sh "$DEST"
-          else
-            scp "${SSH_BASE[@]}" ./zigma-prod.tgz ./apply-release.sh "$DEST"
-          fi
-          echo "Upload complete."
+          export RSYNC_RSH="ssh ${SSH_BASE[*]}"
+          ssh "${SSH_BASE[@]}" "$DEST_HOST" "mkdir -p '$REMOTE_STAGE'"
+          echo "Delta-rsync release-stage/ → ${DEST_HOST}:${REMOTE_STAGE}/"
+          # Persistent remote stage = warm deploys only send changed files.
+          rsync -a --delete --partial --info=stats2,progress2 \
+            release-stage/ "$DEST_HOST:$REMOTE_STAGE/"
+          rsync -a --partial scripts/apply-release.sh "$DEST_HOST:/tmp/apply-release.sh"
+          echo "Upload complete (delta rsync)."
 
       - name: Apply release on VPS
         uses: appleboy/ssh-action@v1.2.0
@@ -268,39 +271,15 @@ jobs:
             set -euxo pipefail
             cd /var/www/zigma-technologies
 
-            TGZ=""
-            for candidate in /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz; do
-              if [ -f "$candidate" ]; then
-                TGZ="$candidate"
-                break
-              fi
-            done
-            if [ -z "$TGZ" ]; then
-              echo "ERROR: release tarball not found under /tmp after SCP" >&2
-              ls -la /tmp | head -50 >&2
-              exit 1
-            fi
-            if [ "$TGZ" != /tmp/zigma-prod.tgz ]; then
-              cp -f "$TGZ" /tmp/zigma-prod.tgz
-              TGZ=/tmp/zigma-prod.tgz
-            fi
-            ls -lh "$TGZ"
+            STAGE=/tmp/zigma-release-stage
+            test -f "$STAGE/server.js"
+            test -f "$STAGE/release-manifest.json"
 
-            APPLY=""
-            for candidate in /tmp/apply-release.sh /tmp/scripts/apply-release.sh; do
-              if [ -f "$candidate" ]; then
-                APPLY="$candidate"
-                break
-              fi
-            done
-            if [ -z "$APPLY" ]; then
-              echo "ERROR: apply-release.sh not found under /tmp after SCP" >&2
-              ls -la /tmp | head -50 >&2
-              exit 1
-            fi
+            APPLY=/tmp/apply-release.sh
+            test -f "$APPLY"
             chmod +x "$APPLY"
 
-            ARGS=(--env prod --confirm-prod DEPLOY_PROD --tarball "$TGZ")
+            ARGS=(--env prod --confirm-prod DEPLOY_PROD --stage "$STAGE")
             if [ "${IN_APPLY}" = "true" ]; then ARGS+=(--extract); else ARGS+=(--no-extract); fi
             if [ "${IN_RESTART}" = "true" ]; then ARGS+=(--restart); else ARGS+=(--no-restart); fi
             if [ "${IN_HEALTH}" = "true" ]; then ARGS+=(--healthcheck); else ARGS+=(--no-healthcheck); fi
@@ -321,7 +300,8 @@ jobs:
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
-            rm -f /tmp/zigma-prod.tgz /tmp/dist/zigma-prod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh
+            rm -f /tmp/apply-release.sh
+            # Keep $STAGE as delta cache for the next deploy.
 
   # Pin MERIDIAN_HOME after both planes landed (restart only when .env changes)
   pin-meridian-home:

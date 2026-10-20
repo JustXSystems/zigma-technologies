@@ -2,10 +2,13 @@
 # Build a deployable release tarball from a completed `next build` (output: 'standalone').
 #
 # Usage (after npm ci && npm run build with the correct NEXT_PUBLIC_* for the target env):
-#   ./scripts/package-release.sh --env preprod
-#   ./scripts/package-release.sh --env prod --out dist/zigma-prod.tgz
+#   ./scripts/package-release.sh --env preprod --stage-dir dist/zigma-preprod-stage
+#   ./scripts/package-release.sh --env prod --stage-dir dist/zigma-prod-stage --out dist/zigma-prod.tgz
 #
-# The tarball includes:
+# Hot path for GitHub→VPS: rsync --stage-dir (delta). Optional --out .tgz is for Actions
+# artifacts / rollback only — do not SCP the full tarball every deploy.
+#
+# Stage / tarball includes:
 #   - Next standalone server + traced node_modules
 #   - .next/static
 #   - public/ (seed assets; excludes private uploads bodies)
@@ -23,13 +26,16 @@ die() { echo "ERROR: $*" >&2; exit 1; }
 
 ENV_NAME=""
 OUT=""
+STAGE_DIR=""
 INCLUDE_UPLOADS_GITKEEP=1
 
 usage() {
   cat <<'EOF'
-Usage: package-release.sh --env preprod|prod [--out path.tgz]
+Usage: package-release.sh --env preprod|prod [--stage-dir DIR] [--out path.tgz]
 
 Run from repo root after a successful next build with env-specific NEXT_PUBLIC_*.
+Prefer --stage-dir for delta rsync deploys; --out is optional (rollback artifact).
+At least one of --stage-dir or --out is required.
 EOF
 }
 
@@ -37,6 +43,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --env) ENV_NAME="${2:-}"; shift 2 ;;
     --out) OUT="${2:-}"; shift 2 ;;
+    --stage-dir) STAGE_DIR="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; usage; exit 1 ;;
   esac
@@ -47,6 +54,7 @@ case "$ENV_NAME" in
   preprod|prod) ;;
   *) echo "ERROR: --env must be preprod or prod" >&2; exit 1 ;;
 esac
+[[ -n "$STAGE_DIR" || -n "$OUT" ]] || { usage; die "need --stage-dir and/or --out"; }
 
 [[ -f .next/BUILD_ID ]] || { echo "ERROR: .next missing — run npm run build first" >&2; exit 1; }
 [[ -d .next/standalone ]] || {
@@ -56,10 +64,15 @@ esac
 
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 SHA="$(git rev-parse --short HEAD 2>/dev/null || echo nogit)"
-OUT="${OUT:-$ROOT/dist/zigma-${ENV_NAME}-${SHA}-${STAMP}.tgz}"
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/zigma-release.XXXXXX")"
 cleanup() { rm -rf "$STAGE"; }
 trap cleanup EXIT
+if [[ -n "$STAGE_DIR" && "$STAGE_DIR" != /* && "$STAGE_DIR" != [A-Za-z]:* ]]; then
+  STAGE_DIR="$ROOT/$STAGE_DIR"
+fi
+if [[ -n "$OUT" && "$OUT" != /* && "$OUT" != [A-Za-z]:* ]]; then
+  OUT="$ROOT/$OUT"
+fi
 
 echo "==> Staging release ($ENV_NAME) → $STAGE"
 mkdir -p "$STAGE"
@@ -198,33 +211,36 @@ if [[ "$ENV_NAME" == "prod" && -n "$BASE_PATH_VAL" ]]; then
   exit 1
 fi
 
-mkdir -p "$(dirname "$OUT")"
-# Higher gzip level → smaller upload (SCP/rsync is the slow hop to Hostinger).
-GZIP=-9 tar -C "$STAGE" -czf "$OUT" .
-BYTES="$(wc -c < "$OUT" | tr -d ' ')"
-echo "==> Wrote $OUT ($BYTES bytes / $(numfmt --to=iec-i --suffix=B "$BYTES" 2>/dev/null || true))"
-if (( BYTES > 120000000 )); then
-  echo "==> WARNING: release tarball > 120 MiB — expect slow GitHub→VPS upload. Slim public/ or standalone deps." >&2
-fi
-echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
-
-# Hard guarantee for the VPS apply step.
-# Do not use `tar | grep -q` under pipefail: grep -q closes the pipe early →
-# tar "stdout: write error" → false failure even when the file is present.
-VERIFY_LIST="$(tar -tzf "$OUT")"
-require_in_tar() {
-  local pat="$1"
-  if ! grep -Exq "$pat" <<<"$VERIFY_LIST"; then
-    echo "ERROR: tarball is missing required path matching: $pat" >&2
-    grep -E 'scripts/' <<<"$VERIFY_LIST" | head -80 >&2 || true
-    exit 1
-  fi
+require_in_tree() {
+  local root="$1" rel="$2"
+  [[ -e "$root/$rel" ]] || die "release missing required path: $rel (under $root)"
 }
-require_in_tar '(\./)?scripts/apply-release\.sh'
-require_in_tar '(\./)?scripts/migrate-catalog-background\.sql'
-require_in_tar '(\./)?scripts/schema\.sql'
-require_in_tar '(\./)?server\.js'
+require_in_tree "$STAGE" "scripts/apply-release.sh"
+require_in_tree "$STAGE" "scripts/migrate-catalog-background.sql"
+require_in_tree "$STAGE" "scripts/schema.sql"
+require_in_tree "$STAGE" "server.js"
 if [[ "${SHIP_MERIDIAN:-0}" == "1" ]]; then
-  require_in_tar '(\./)?packages/meridian/bin/meridian\.mjs'
+  require_in_tree "$STAGE" "packages/meridian/bin/meridian.mjs"
 fi
-echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js in tarball"
+
+if [[ -n "$STAGE_DIR" ]]; then
+  mkdir -p "$STAGE_DIR"
+  # Mirror into a durable stage dir for delta rsync (GitHub → VPS).
+  rsync -a --delete "$STAGE"/ "$STAGE_DIR"/
+  STAGE_BYTES="$(du -sb "$STAGE_DIR" 2>/dev/null | awk '{print $1}' || echo 0)"
+  echo "==> Wrote stage dir $STAGE_DIR ($(numfmt --to=iec-i --suffix=B "$STAGE_BYTES" 2>/dev/null || echo "${STAGE_BYTES} bytes"))"
+fi
+
+if [[ -n "$OUT" ]]; then
+  mkdir -p "$(dirname "$OUT")"
+  # Optional rollback / Actions artifact — not the live deploy hot path.
+  GZIP=-9 tar -C "$STAGE" -czf "$OUT" .
+  BYTES="$(wc -c < "$OUT" | tr -d ' ')"
+  echo "==> Wrote $OUT ($BYTES bytes / $(numfmt --to=iec-i --suffix=B "$BYTES" 2>/dev/null || true)) [artifact only]"
+  if (( BYTES > 120000000 )); then
+    echo "==> NOTE: tarball > 120 MiB — prefer rsync --stage-dir for live deploys." >&2
+  fi
+fi
+
+echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
+echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js in release"

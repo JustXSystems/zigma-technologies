@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
-# Apply a CI release tarball on the VPS (fool-proof, parameterized).
+# Apply a CI release on the VPS (fool-proof, parameterized).
+#
+# Prefer --stage DIR from a delta-rsync of package-release --stage-dir (warm deploys).
+# --tarball remains for rollback / manual one-shots.
 #
 # Preserves: .env, runtime CMS uploads under public/assets/{images,svg,video,uploads}
 #   (merge without --delete so server-only uploads survive).
 #
 # Usage:
-#   ./scripts/apply-release.sh --env preprod --tarball /tmp/zigma-preprod.tgz
-#   ./scripts/apply-release.sh --env prod --tarball ./release.tgz --confirm-prod DEPLOY_PROD \
-#       --restart --healthcheck --no-db-backup
+#   ./scripts/apply-release.sh --env preprod --stage /tmp/zigma-release-stage
+#   ./scripts/apply-release.sh --env prod --stage /tmp/zigma-release-stage --confirm-prod DEPLOY_PROD
+#   ./scripts/apply-release.sh --env prod --tarball ./release.tgz --confirm-prod DEPLOY_PROD
 #
 set -euo pipefail
 
 ENV_NAME=""
 TARBALL=""
+STAGE_SRC=""
 APP_DIR="${APP_DIR:-/var/www/zigma-technologies}"
 DO_EXTRACT=1
 DO_RESTART=1
@@ -26,18 +30,19 @@ PRESERVE_UPLOADS=1
 
 usage() {
   cat <<'EOF'
-Usage: apply-release.sh --env preprod|prod --tarball FILE [options]
+Usage: apply-release.sh --env preprod|prod (--stage DIR | --tarball FILE) [options]
 
 Required:
   --env preprod|prod
-  --tarball PATH          release .tgz from package-release.sh / GitHub Actions
+  --stage DIR             release folder (from package-release --stage-dir / rsync)
+  OR --tarball PATH       release .tgz (rollback / legacy)
 
 Components (defaults: extract+restart+healthcheck ON; db ops OFF):
   --extract / --no-extract
   --restart / --no-restart
   --healthcheck / --no-healthcheck
   --preserve-uploads / --no-preserve-uploads
-      Keep existing public/assets uploads + CMS files not in the tarball (default ON)
+      Keep existing public/assets uploads + CMS files not in the release (default ON)
   --db-backup / --no-db-backup
   --migrations / --no-migrations
   --migration-files LIST  scripts/*.sql names (required with --migrations)
@@ -54,6 +59,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --env) ENV_NAME="${2:-}"; shift 2 ;;
     --tarball) TARBALL="${2:-}"; shift 2 ;;
+    --stage) STAGE_SRC="${2:-}"; shift 2 ;;
     --app-dir) APP_DIR="${2:-}"; shift 2 ;;
     --extract) DO_EXTRACT=1; shift ;;
     --no-extract) DO_EXTRACT=0; shift ;;
@@ -76,8 +82,21 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$ENV_NAME" ]] || { usage; die "--env required"; }
-[[ -n "$TARBALL" ]] || { usage; die "--tarball required"; }
-[[ -f "$TARBALL" ]] || die "Tarball not found: $TARBALL"
+if [[ -n "$STAGE_SRC" && -n "$TARBALL" ]]; then
+  die "Pass only one of --stage or --tarball"
+fi
+if [[ -z "$STAGE_SRC" && -z "$TARBALL" ]]; then
+  usage
+  die "need --stage DIR or --tarball FILE"
+fi
+if [[ -n "$TARBALL" ]]; then
+  [[ -f "$TARBALL" ]] || die "Tarball not found: $TARBALL"
+fi
+if [[ -n "$STAGE_SRC" ]]; then
+  [[ -d "$STAGE_SRC" ]] || die "Stage dir not found: $STAGE_SRC"
+  [[ -f "$STAGE_SRC/server.js" ]] || die "Invalid stage: missing server.js in $STAGE_SRC"
+  [[ -f "$STAGE_SRC/release-manifest.json" ]] || die "Invalid stage: missing release-manifest.json in $STAGE_SRC"
+fi
 
 case "$ENV_NAME" in
   preprod)
@@ -103,7 +122,12 @@ if [[ "$DO_MIGRATIONS" -eq 1 && -z "$MIGRATION_FILES" ]]; then
 fi
 
 log "Apply release plan"
-log "  env=$ENV_NAME dir=$APP_DIR tarball=$TARBALL"
+log "  env=$ENV_NAME dir=$APP_DIR"
+if [[ -n "$STAGE_SRC" ]]; then
+  log "  stage=$STAGE_SRC"
+else
+  log "  tarball=$TARBALL"
+fi
 log "  extract=$DO_EXTRACT preserve_uploads=$PRESERVE_UPLOADS restart=$DO_RESTART health=$DO_HEALTHCHECK"
 log "  db_backup=$DO_DB_BACKUP migrations=$DO_MIGRATIONS"
 [[ "$DRY_RUN" -eq 1 ]] && { log "Dry-run only — exiting."; exit 0; }
@@ -174,7 +198,7 @@ if [[ "$DO_MIGRATIONS" -eq 1 ]]; then
   DB_NAME="$(env_get DB_NAME)"
   DB_USER="$(env_get DB_USER)"
   DB_PASSWORD="$(env_get DB_PASSWORD)"
-  # Migrations run before extract, so SQL shipped in this release only exists inside the tarball.
+  # Migrations run before install; SQL ships in --stage or inside --tarball.
   MIG_STAGE="$(mktemp -d /tmp/zigma-migrations.XXXXXX)"
   export MYSQL_PWD="${DB_PASSWORD}"
   IFS=',' read -r -a MIGS <<<"$MIGRATION_FILES"
@@ -182,7 +206,9 @@ if [[ "$DO_MIGRATIONS" -eq 1 ]]; then
     name="$(echo "$raw" | xargs)"
     [[ -n "$name" ]] || continue
     file=""
-    if [[ -f "$TARBALL" ]]; then
+    if [[ -n "$STAGE_SRC" && -f "$STAGE_SRC/scripts/$name" ]]; then
+      file="$STAGE_SRC/scripts/$name"
+    elif [[ -n "$TARBALL" && -f "$TARBALL" ]]; then
       tar -xzf "$TARBALL" -C "$MIG_STAGE" --wildcards --no-anchored "scripts/$name" 2>/dev/null || true
       for candidate in "$MIG_STAGE/scripts/$name" "$MIG_STAGE/./scripts/$name"; do
         [[ -f "$candidate" ]] && { file="$candidate"; break; }
@@ -191,8 +217,8 @@ if [[ "$DO_MIGRATIONS" -eq 1 ]]; then
     if [[ -z "$file" && -f "scripts/$name" ]]; then
       file="scripts/$name"
     fi
-    [[ -n "$file" && -f "$file" ]] || { rm -rf "$MIG_STAGE"; die "Migration not found in tarball or $APP_DIR/scripts: $name"; }
-    log "  mysql < $name (from ${file#"$MIG_STAGE"/})"
+    [[ -n "$file" && -f "$file" ]] || { rm -rf "$MIG_STAGE"; die "Migration not found in stage/tarball or $APP_DIR/scripts: $name"; }
+    log "  mysql < $name (from $file)"
     mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" <"$file"
   done
   unset MYSQL_PWD
@@ -200,16 +226,23 @@ if [[ "$DO_MIGRATIONS" -eq 1 ]]; then
 fi
 
 if [[ "$DO_EXTRACT" -eq 1 ]]; then
-  STAGE="$(mktemp -d /tmp/zigma-apply.XXXXXX)"
-  log "Extract tarball → $STAGE"
-  tar -xzf "$TARBALL" -C "$STAGE"
+  STAGE_OWNED=0
+  if [[ -n "$STAGE_SRC" ]]; then
+    STAGE="$STAGE_SRC"
+    log "Install from stage dir $STAGE (no tar extract)"
+  else
+    STAGE="$(mktemp -d /tmp/zigma-apply.XXXXXX)"
+    STAGE_OWNED=1
+    log "Extract tarball → $STAGE"
+    tar -xzf "$TARBALL" -C "$STAGE"
+  fi
 
   [[ -f "$STAGE/release-manifest.json" ]] || die "Invalid release: missing release-manifest.json"
   [[ -f "$STAGE/server.js" ]] || die "Invalid release: missing server.js (standalone)"
 
   REL_ENV="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$STAGE/release-manifest.json','utf8')).env||'')")"
   REL_BASE="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$STAGE/release-manifest.json','utf8')).basePath||'')")"
-  [[ "$REL_ENV" == "$ENV_NAME" ]] || die "Release env mismatch: tarball=$REL_ENV apply=$ENV_NAME"
+  [[ "$REL_ENV" == "$ENV_NAME" ]] || die "Release env mismatch: release=$REL_ENV apply=$ENV_NAME"
   [[ "$REL_BASE" == "$EXPECT_BASE_PATH" ]] || die "Release basePath mismatch: expected '${EXPECT_BASE_PATH}' got '${REL_BASE}'"
 
   # Backup .env always
@@ -228,7 +261,7 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     log "Preserved runtime media under $MEDIA_BAK"
   fi
 
-  # Meridian is control-plane — not in website tarball by default.
+  # Meridian is control-plane — not in website release by default.
   # Remember before rsync so we can wipe stale packages/meridian from older deploys.
   SHIPPED_MERIDIAN=0
   if [[ -f "$STAGE/packages/meridian/bin/meridian.mjs" ]]; then
@@ -316,8 +349,11 @@ process.exit(2);
 EOF
   fi
 
-  rm -rf "$STAGE"
-  log "Extract complete. release=$(cat release-manifest.json)"
+  # Keep --stage dirs (delta cache for next rsync). Only delete temp extract dirs.
+  if [[ "$STAGE_OWNED" -eq 1 ]]; then
+    rm -rf "$STAGE"
+  fi
+  log "Install complete. release=$(cat release-manifest.json)"
 else
   log "Skip extract"
 fi

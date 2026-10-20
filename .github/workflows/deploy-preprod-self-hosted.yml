@@ -49,7 +49,7 @@ jobs:
           npm run build
           node scripts/verify-seo-build.mjs --env preprod
           chmod +x scripts/package-release.sh scripts/apply-release.sh
-          ./scripts/package-release.sh --env preprod --out /tmp/zigma-preprod.tgz
+          ./scripts/package-release.sh --env preprod --stage-dir /tmp/zigma-release-stage
 
       - name: Apply release
         run: |
@@ -57,5 +57,5 @@ jobs:
           chmod +x scripts/apply-release.sh
           ./scripts/apply-release.sh \
             --env preprod \
-            --tarball /tmp/zigma-preprod.tgz \
+            --stage /tmp/zigma-release-stage \
             --extract --restart --healthcheck --preserve-uploads

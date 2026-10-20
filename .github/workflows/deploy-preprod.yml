@@ -1,7 +1,7 @@
 # Deploy PreProd — one button (and push-to-master) for the full preprod stack.
 #
 # Parallel after gate:
-#   • Build + ship website tarball (product plane, noindex)
+#   • Build + delta-rsync website stage (product plane, noindex — warm deploys skip unchanged files)
 #   • Ship Meridian CLI → /var/www/zigma-meridian on JustXSystems VPS
 # After site is live:
 #   • Pin MERIDIAN_HOME on the site .env (restart only if changed)
@@ -174,16 +174,27 @@ jobs:
           npm run build
           node scripts/verify-seo-build.mjs --env preprod
 
-      - name: Package release tarball
+      - name: Package release stage (+ optional .tgz artifact)
         run: |
           set -euo pipefail
           chmod +x scripts/package-release.sh
-          ./scripts/package-release.sh --env preprod --out dist/zigma-preprod.tgz
+          ./scripts/package-release.sh --env preprod \
+            --stage-dir dist/zigma-preprod-stage \
+            --out dist/zigma-preprod.tgz
+          test -f dist/zigma-preprod-stage/server.js
           ls -lh dist/zigma-preprod.tgz
+          du -sh dist/zigma-preprod-stage
 
       - uses: actions/upload-artifact@v4
         with:
-          name: zigma-preprod-release
+          name: zigma-preprod-release-stage
+          path: dist/zigma-preprod-stage/
+          if-no-files-found: error
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zigma-preprod-release-tgz
           path: dist/zigma-preprod.tgz
           if-no-files-found: error
           retention-days: 14
@@ -201,10 +212,10 @@ jobs:
     secrets: inherit
 
   deploy-release:
-    name: Ship tarball → JustXSystems VPS
+    name: Delta-rsync stage → JustXSystems VPS
     needs: [gate, build-release]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - name: Require PreProd SSH secrets
         id: ssh
@@ -259,38 +270,29 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: zigma-preprod-release
-          path: dist
+          name: zigma-preprod-release-stage
+          path: release-stage
 
-      - name: Flatten tarball path for SCP
+      - name: Delta-rsync release stage + apply script to VPS
         shell: bash
         run: |
           set -euo pipefail
-          test -f dist/zigma-preprod.tgz
-          cp -f dist/zigma-preprod.tgz ./zigma-preprod.tgz
+          test -f release-stage/server.js
           test -f scripts/apply-release.sh
-          cp -f scripts/apply-release.sh ./apply-release.sh
-          ls -lh ./zigma-preprod.tgz ./apply-release.sh
-
-      - name: Upload tarball + apply script to VPS
-        shell: bash
-        run: |
-          set -euo pipefail
           KEYFILE="$(mktemp)"
           trap 'rm -f "$KEYFILE"' EXIT
           printf '%s\n' "${{ steps.ssh.outputs.key }}" > "$KEYFILE"
           chmod 600 "$KEYFILE"
-          BYTES="$(wc -c < ./zigma-preprod.tgz | tr -d ' ')"
-          echo "Upload size: $(numfmt --to=iec-i --suffix=B "$BYTES" 2>/dev/null || echo "${BYTES} bytes")"
-          DEST="${{ steps.ssh.outputs.user }}@${{ steps.ssh.outputs.host }}:/tmp/"
+          DEST_HOST="${{ steps.ssh.outputs.user }}@${{ steps.ssh.outputs.host }}"
+          REMOTE_STAGE=/tmp/zigma-release-stage
           SSH_BASE=( -i "$KEYFILE" -p 22 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o Compression=no )
-          if command -v rsync >/dev/null 2>&1; then
-            export RSYNC_RSH="ssh ${SSH_BASE[*]}"
-            rsync -a --partial --info=progress2 ./zigma-preprod.tgz ./apply-release.sh "$DEST"
-          else
-            scp "${SSH_BASE[@]}" ./zigma-preprod.tgz ./apply-release.sh "$DEST"
-          fi
-          echo "Upload complete."
+          export RSYNC_RSH="ssh ${SSH_BASE[*]}"
+          ssh "${SSH_BASE[@]}" "$DEST_HOST" "mkdir -p '$REMOTE_STAGE'"
+          echo "Delta-rsync release-stage/ → ${DEST_HOST}:${REMOTE_STAGE}/"
+          rsync -a --delete --partial --info=stats2,progress2 \
+            release-stage/ "$DEST_HOST:$REMOTE_STAGE/"
+          rsync -a --partial scripts/apply-release.sh "$DEST_HOST:/tmp/apply-release.sh"
+          echo "Upload complete (delta rsync)."
 
       - name: Apply release on VPS
         uses: appleboy/ssh-action@v1.2.0
@@ -314,39 +316,15 @@ jobs:
             set -euxo pipefail
             cd /var/www/zigma-technologies
 
-            TGZ=""
-            for candidate in /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz; do
-              if [ -f "$candidate" ]; then
-                TGZ="$candidate"
-                break
-              fi
-            done
-            if [ -z "$TGZ" ]; then
-              echo "ERROR: release tarball not found under /tmp after SCP" >&2
-              ls -la /tmp | head -50 >&2
-              exit 1
-            fi
-            if [ "$TGZ" != /tmp/zigma-preprod.tgz ]; then
-              cp -f "$TGZ" /tmp/zigma-preprod.tgz
-              TGZ=/tmp/zigma-preprod.tgz
-            fi
-            ls -lh "$TGZ"
+            STAGE=/tmp/zigma-release-stage
+            test -f "$STAGE/server.js"
+            test -f "$STAGE/release-manifest.json"
 
-            APPLY=""
-            for candidate in /tmp/apply-release.sh /tmp/scripts/apply-release.sh; do
-              if [ -f "$candidate" ]; then
-                APPLY="$candidate"
-                break
-              fi
-            done
-            if [ -z "$APPLY" ]; then
-              echo "ERROR: apply-release.sh not found under /tmp after SCP" >&2
-              ls -la /tmp | head -50 >&2
-              exit 1
-            fi
+            APPLY=/tmp/apply-release.sh
+            test -f "$APPLY"
             chmod +x "$APPLY"
 
-            ARGS=(--env preprod --tarball "$TGZ")
+            ARGS=(--env preprod --stage "$STAGE")
             if [ "${IN_APPLY}" = "true" ]; then ARGS+=(--extract); else ARGS+=(--no-extract); fi
             if [ "${IN_RESTART}" = "true" ]; then ARGS+=(--restart); else ARGS+=(--no-restart); fi
             if [ "${IN_HEALTH}" = "true" ]; then ARGS+=(--healthcheck); else ARGS+=(--no-healthcheck); fi
@@ -367,7 +345,8 @@ jobs:
 
             echo "Running: $APPLY ${ARGS[*]}"
             bash "$APPLY" "${ARGS[@]}"
-            rm -f /tmp/zigma-preprod.tgz /tmp/dist/zigma-preprod.tgz /tmp/apply-release.sh /tmp/scripts/apply-release.sh
+            rm -f /tmp/apply-release.sh
+            # Keep $STAGE as delta cache for the next deploy.
 
   pin-meridian-home:
     name: Pin MERIDIAN_HOME on PreProd
