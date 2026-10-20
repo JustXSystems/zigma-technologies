@@ -96,6 +96,8 @@ if [[ -n "$STAGE_SRC" ]]; then
   [[ -d "$STAGE_SRC" ]] || die "Stage dir not found: $STAGE_SRC"
   [[ -f "$STAGE_SRC/server.js" ]] || die "Invalid stage: missing server.js in $STAGE_SRC"
   [[ -f "$STAGE_SRC/release-manifest.json" ]] || die "Invalid stage: missing release-manifest.json in $STAGE_SRC"
+  [[ -f "$STAGE_SRC/.next/BUILD_ID" ]] || die "Invalid stage: missing .next/BUILD_ID (Actions artifact must include hidden files)"
+  [[ -d "$STAGE_SRC/.next/static" ]] || die "Invalid stage: missing .next/static"
 fi
 
 case "$ENV_NAME" in
@@ -239,6 +241,8 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
 
   [[ -f "$STAGE/release-manifest.json" ]] || die "Invalid release: missing release-manifest.json"
   [[ -f "$STAGE/server.js" ]] || die "Invalid release: missing server.js (standalone)"
+  [[ -f "$STAGE/.next/BUILD_ID" ]] || die "Invalid release: missing .next/BUILD_ID (no production build)"
+  [[ -d "$STAGE/.next/static" ]] || die "Invalid release: missing .next/static"
 
   REL_ENV="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$STAGE/release-manifest.json','utf8')).env||'')")"
   REL_BASE="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$STAGE/release-manifest.json','utf8')).basePath||'')")"
@@ -307,6 +311,8 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
   fi
   [[ -f "$APP_DIR/server.js" && -f "$APP_DIR/release-manifest.json" ]] \
     || die "rsync finished (rc=$RSYNC_RC) but server.js / release-manifest.json missing"
+  [[ -f "$APP_DIR/.next/BUILD_ID" ]] || die "After install: missing $APP_DIR/.next/BUILD_ID — Next cannot start"
+  [[ -d "$APP_DIR/.next/static" ]] || die "After install: missing $APP_DIR/.next/static"
   if [[ "$RSYNC_RC" -eq 23 ]]; then
     log "rsync reported code 23 (attrs / leftover paths) — release files present, continuing"
   fi

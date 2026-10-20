@@ -219,6 +219,8 @@ require_in_tree "$STAGE" "scripts/apply-release.sh"
 require_in_tree "$STAGE" "scripts/migrate-catalog-background.sql"
 require_in_tree "$STAGE" "scripts/schema.sql"
 require_in_tree "$STAGE" "server.js"
+require_in_tree "$STAGE" ".next/BUILD_ID"
+require_in_tree "$STAGE" ".next/static"
 if [[ "${SHIP_MERIDIAN:-0}" == "1" ]]; then
   require_in_tree "$STAGE" "packages/meridian/bin/meridian.mjs"
 fi
@@ -243,4 +245,4 @@ if [[ -n "$OUT" ]]; then
 fi
 
 echo "==> basePath='${BASE_PATH_VAL:-<empty>}' env=$ENV_NAME sha=$SHA"
-echo "==> Verified apply-release.sh, migrate-catalog-background.sql, schema.sql, server.js in release"
+echo "==> Verified server.js, .next/BUILD_ID, .next/static, apply-release + SQL in release"

@@ -146,13 +146,18 @@ jobs:
             --stage-dir dist/zigma-prod-stage \
             --out dist/zigma-prod.tgz
           test -f dist/zigma-prod-stage/server.js
+          test -f dist/zigma-prod-stage/.next/BUILD_ID
+          test -d dist/zigma-prod-stage/.next/static
           ls -lh dist/zigma-prod.tgz
           du -sh dist/zigma-prod-stage
+          echo "BUILD_ID=$(cat dist/zigma-prod-stage/.next/BUILD_ID)"
 
+      # .next is a hidden dir — upload-artifact omits it unless include-hidden-files: true
       - uses: actions/upload-artifact@v4
         with:
           name: zigma-prod-release-stage
           path: dist/zigma-prod-stage/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
 
@@ -232,6 +237,8 @@ jobs:
         run: |
           set -euo pipefail
           test -f release-stage/server.js
+          test -f release-stage/.next/BUILD_ID
+          test -d release-stage/.next/static
           test -f scripts/apply-release.sh
           KEYFILE="$(mktemp)"
           trap 'rm -f "$KEYFILE"' EXIT
@@ -247,6 +254,7 @@ jobs:
           rsync -a --delete --partial --info=stats2,progress2 \
             release-stage/ "$DEST_HOST:$REMOTE_STAGE/"
           rsync -a --partial scripts/apply-release.sh "$DEST_HOST:/tmp/apply-release.sh"
+          ssh "${SSH_BASE[@]}" "$DEST_HOST" "test -f '$REMOTE_STAGE/.next/BUILD_ID' && test -d '$REMOTE_STAGE/.next/static'"
           echo "Upload complete (delta rsync)."
 
       - name: Apply release on VPS
