@@ -109,9 +109,8 @@ Gate / confirm
         ▼              │                            │
   Delta-rsync stage    │                            │
   → /tmp/zigma-release-stage → apply-release        │
+  (+ best-effort MERIDIAN_HOME pin in same SSH)     │
         └──────┬───────┘                            │
-               ▼                                    │
-     Pin MERIDIAN_HOME (if .env changed)            │
                ▼                                    │
      SEO Command Brief (Actions artefact)  ◄────────┘
 ```

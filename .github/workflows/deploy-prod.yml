@@ -268,24 +268,32 @@ jobs:
           IN_MIGRATIONS: ${{ inputs.apply_migrations }}
           IN_MIG_FILES: ${{ inputs.migration_files }}
           IN_DRY: ${{ inputs.dry_run }}
+          MERIDIAN_DIR: ${{ inputs.meridian_dir }}
         with:
           host: ${{ steps.ssh.outputs.host }}
           username: ${{ steps.ssh.outputs.user }}
           key: ${{ steps.ssh.outputs.key }}
           port: 22
           command_timeout: 40m
-          envs: IN_APPLY,IN_RESTART,IN_HEALTH,IN_PRESERVE,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_DRY
+          envs: IN_APPLY,IN_RESTART,IN_HEALTH,IN_PRESERVE,IN_DB_BACKUP,IN_MIGRATIONS,IN_MIG_FILES,IN_DRY,MERIDIAN_DIR
           script: |
             set -euxo pipefail
             cd /var/www/zigma-technologies
 
             STAGE=/tmp/zigma-release-stage
+            echo "Stage listing (top):"
+            ls -la "$STAGE" | head -40
             test -f "$STAGE/server.js"
             test -f "$STAGE/release-manifest.json"
+            test -f "$STAGE/.next/BUILD_ID"
+            test -d "$STAGE/.next/static"
+            echo "BUILD_ID=$(cat "$STAGE/.next/BUILD_ID")"
 
             APPLY=/tmp/apply-release.sh
             test -f "$APPLY"
             chmod +x "$APPLY"
+            # Strip CRLF if checkout ever emits them (silent bash failures)
+            sed -i 's/\r$//' "$APPLY" || true
 
             ARGS=(--env prod --confirm-prod DEPLOY_PROD --stage "$STAGE")
             if [ "${IN_APPLY}" = "true" ]; then ARGS+=(--extract); else ARGS+=(--no-extract); fi
@@ -311,54 +319,27 @@ jobs:
             rm -f /tmp/apply-release.sh
             # Keep $STAGE as delta cache for the next deploy.
 
-  # Pin MERIDIAN_HOME after both planes landed (restart only when .env changes)
-  pin-meridian-home:
-    name: Pin MERIDIAN_HOME on site
-    needs: [deploy-release, ship-meridian]
-    if: |
-      always() &&
-      !inputs.dry_run &&
-      inputs.ship_meridian &&
-      needs.deploy-release.result == 'success' &&
-      needs.ship-meridian.result == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Ensure MERIDIAN_HOME in Production .env
-        uses: appleboy/ssh-action@v1.2.0
-        env:
-          TARGET: ${{ inputs.meridian_dir }}
-          DO_RESTART: ${{ inputs.restart_pm2 }}
-        with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_SSH_USER }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          port: 22
-          command_timeout: 5m
-          envs: TARGET,DO_RESTART
-          script: |
-            set -euo pipefail
+            # Pin MERIDIAN_HOME (best-effort — never fail the website deploy)
+            MDIR="${MERIDIAN_DIR:-/var/www/zigma-meridian}"
             ENV_FILE=/var/www/zigma-technologies/.env
-            test -f "$TARGET/bin/meridian.mjs"
-            test -f "$ENV_FILE"
-            WANT="MERIDIAN_HOME=$TARGET"
-            CUR="$(grep -E '^MERIDIAN_HOME=' "$ENV_FILE" 2>/dev/null | tail -n1 || true)"
-            if [ "$CUR" = "$WANT" ]; then
-              echo "MERIDIAN_HOME already correct ($TARGET) — no PM2 restart"
-              exit 0
-            fi
-            if grep -qE '^MERIDIAN_HOME=' "$ENV_FILE"; then
-              sed -i "s|^MERIDIAN_HOME=.*|$WANT|" "$ENV_FILE"
+            if [ -f "$MDIR/bin/meridian.mjs" ] && [ -f "$ENV_FILE" ]; then
+              WANT="MERIDIAN_HOME=$MDIR"
+              CUR="$(grep -E '^MERIDIAN_HOME=' "$ENV_FILE" 2>/dev/null | tail -n1 || true)"
+              if [ "$CUR" = "$WANT" ]; then
+                echo "MERIDIAN_HOME already correct ($MDIR)"
+              else
+                if grep -qE '^MERIDIAN_HOME=' "$ENV_FILE"; then
+                  sed -i "s|^MERIDIAN_HOME=.*|$WANT|" "$ENV_FILE"
+                else
+                  printf '\n%s\n' "$WANT" >> "$ENV_FILE"
+                fi
+                echo "Updated .env → $WANT"
+                if [ "${IN_RESTART}" = "true" ] && [ "${IN_DRY}" != "true" ]; then
+                  pm2 restart zigma --update-env || echo "WARNING: pm2 --update-env failed (site already restarted by apply)"
+                fi
+              fi
             else
-              printf '\n%s\n' "$WANT" >> "$ENV_FILE"
-            fi
-            echo "Updated .env → $WANT"
-            if [ "${DO_RESTART}" = "true" ]; then
-              cd /var/www/zigma-technologies
-              pm2 restart zigma --update-env
-              echo "pm2 restarted with --update-env"
-            else
-              echo "restart_pm2=false — set MERIDIAN_HOME; restart PM2 manually when ready"
+              echo "Skip MERIDIAN_HOME pin (sidecar missing at $MDIR or no .env) — site deploy OK"
             fi
 
   # Control-plane desk (CI artefacts) — waits for Meridian job to finish/skip, never blocked by its failure
