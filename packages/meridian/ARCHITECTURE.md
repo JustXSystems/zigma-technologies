@@ -94,6 +94,16 @@ Also: `seo-report.json`, `seo-live-verify.json`, `report-latest.json`
 3. **Meridian SEO report** (Actions) — control plane without touching the VPS app tree.
 4. Never unpack Meridian into `/var/www/zigma-technologies` as part of site apply.
 
+### VPS: do not run Meridian from the website tree
+
+`npm run meridian:brief` under `/var/www/zigma-technologies` fails with **Unknown act action: command-brief** when an *old* `packages/meridian` is left on disk after website-only deploys (new `package.json` scripts, stale CLI).
+
+| Do | Don’t |
+| --- | --- |
+| GitHub → **Meridian SEO report** | `cd /var/www/zigma-technologies && npm run meridian:*` against leftover CLI |
+| GitHub → **Deploy Meridian**, then `export MERIDIAN_HOME=/var/www/zigma-meridian` and `npm run seo:report` (uses `scripts/meridian-run.mjs`) | Expect `command-brief` / `seo-report` from a CLI that never shipped those acts |
+| `apply-release` clears stale `packages/meridian` and leaves a stub when Meridian is not in the tarball | Copy Meridian back into the site tree “to make npm work” |
+
 ---
 
 ## 4. Operating model (forever)

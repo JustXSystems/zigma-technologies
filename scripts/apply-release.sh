@@ -228,6 +228,13 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     log "Preserved runtime media under $MEDIA_BAK"
   fi
 
+  # Meridian is control-plane — not in website tarball by default.
+  # Remember before rsync so we can wipe stale packages/meridian from older deploys.
+  SHIPPED_MERIDIAN=0
+  if [[ -f "$STAGE/packages/meridian/bin/meridian.mjs" ]]; then
+    SHIPPED_MERIDIAN=1
+  fi
+
   log "Install release files into $APP_DIR"
   # VPS deploy users often cannot chown/chgrp/utime the app root dir (rsync code 23).
   # Protect leftover git-deploy dirs so --delete does not try to remove them.
@@ -282,6 +289,33 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     public/assets/uploads/documents
 
   chmod +x scripts/*.sh 2>/dev/null || true
+
+  # Remove stale Meridian from previous releases (old CLI + new npm scripts = "Unknown act action")
+  if [[ "$SHIPPED_MERIDIAN" -eq 0 ]]; then
+    log "Control plane: Meridian not in this release — clearing stale packages/meridian"
+    rm -rf "$APP_DIR/packages/meridian"
+    mkdir -p "$APP_DIR/packages/meridian/bin"
+    cat >"$APP_DIR/packages/meridian/README-CONTROL-PLANE.txt" <<'EOF'
+Meridian is NOT shipped with the website (product plane).
+
+Use:
+  GitHub Actions → "Meridian SEO report"
+  or Deploy Meridian → /var/www/zigma-meridian
+  then: export MERIDIAN_HOME=/var/www/zigma-meridian
+        npm run seo:report
+
+See packages/meridian/ARCHITECTURE.md in the git repo.
+EOF
+    cat >"$APP_DIR/packages/meridian/bin/meridian.mjs" <<'EOF'
+#!/usr/bin/env node
+/* CONTROL_PLANE_STUB — not shipped with the website */
+console.error('Meridian control plane is not shipped with the website.');
+console.error('Use GitHub → Meridian SEO report, or Deploy Meridian + MERIDIAN_HOME=/var/www/zigma-meridian');
+console.error('See packages/meridian/ARCHITECTURE.md');
+process.exit(2);
+EOF
+  fi
+
   rm -rf "$STAGE"
   log "Extract complete. release=$(cat release-manifest.json)"
 else
