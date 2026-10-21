@@ -50,9 +50,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-          sparse-checkout: |
-            packages/meridian
+          # Cone mode: directories recurse. SEO-GUIDE.md is a root file — pull via non-cone patterns.
           sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            packages/meridian/**
+            /SEO-GUIDE.md
 
       - name: Resolve SSH secrets for plane
         id: ssh
@@ -107,18 +109,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f packages/meridian/bin/meridian.mjs
-          test -f SEO-GUIDE.md
+          if [[ ! -f packages/meridian/bin/meridian.mjs ]]; then
+            echo "ERROR: packages/meridian/bin/meridian.mjs missing after checkout" >&2
+            ls -la packages/meridian 2>/dev/null || true
+            exit 1
+          fi
+          if [[ ! -f SEO-GUIDE.md ]]; then
+            echo "ERROR: SEO-GUIDE.md missing — sparse-checkout must include /SEO-GUIDE.md" >&2
+            ls -la . | head -40
+            exit 1
+          fi
           mkdir -p dist/meridian-pack
           # Pack CLI + root SEO-GUIDE.md (Admin desk / format=guide; not in website tarball).
           rsync -a --exclude=node_modules --exclude=out --exclude=coverage --exclude=.git \
+            --exclude='*.tgz' --exclude='*.zip' \
             packages/meridian/ dist/meridian-pack/
           cp -f SEO-GUIDE.md dist/meridian-pack/SEO-GUIDE.md
           tar -C dist/meridian-pack -czf dist/meridian.tgz .
           ls -lh dist/meridian.tgz
-          BYTES="$(wc -c < dist/meridian.tgz | tr -d ' ')"
+          BYTES="$(wc -c < dist/meridian.tgz | tr -d '[:space:]')"
+          echo "Meridian pack bytes=$BYTES"
           if (( BYTES > 5000000 )); then
             echo "ERROR: Meridian pack unexpectedly large ($BYTES bytes)" >&2
+            tar -tzf dist/meridian.tgz | head -80
             exit 1
           fi
 
