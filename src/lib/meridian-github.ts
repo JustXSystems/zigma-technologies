@@ -53,20 +53,44 @@ export function meridianGithubDeskStatus(): GhDeskStatus {
   const tok = token();
   const repo = meridianGithubRepo();
   const tokenSet = !!tok;
+  const looksFineGrained = tok.startsWith('github_pat_');
+  const looksClassic = tok.startsWith('ghp_');
   return {
     ready: tokenSet,
     tokenSet,
     repo,
     message: tokenSet
-      ? `GitHub control plane ready · ${repo}`
+      ? `GitHub control plane token set · ${repo}${looksFineGrained ? ' (fine-grained — org 403s are common; prefer classic ghp_ + workflow)' : looksClassic ? ' (classic)' : ''}`
       : 'Set MERIDIAN_GITHUB_TOKEN on this node so Admin can dispatch Meridian SEO report without a local CLI.',
     howTo:
-      'GitHub → Settings → Developer settings → Fine-grained PAT (repo JustXSystems/zigma-technologies) → Permissions: Actions Read and write, Contents Read → paste as MERIDIAN_GITHUB_TOKEN in Production .env → pm2 restart zigma --update-env. Also add the same token as an Actions secret if you sync from unlock-secrets.',
+      'Prefer classic PAT (ghp_…): GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate → scopes: repo + workflow → paste as MERIDIAN_GITHUB_TOKEN → pm2 restart zigma --update-env. Fine-grained (github_pat_…) often returns 403 on org repos until an org admin approves PATs / Actions write.',
     workflows: {
       seoReport: `https://github.com/${repo}/actions/workflows/meridian-seo-report.yml`,
       autopilot: `https://github.com/${repo}/actions/workflows/meridian-autopilot.yml`,
     },
   };
+}
+
+function formatDispatchError(status: number, detail: string, repo: string): string {
+  const base = `GitHub dispatch failed (${status}): ${detail}`;
+  if (status !== 403 && status !== 401 && status !== 404) return base;
+  const hints: string[] = [];
+  if (status === 403 || detail.toLowerCase().includes('personal access token')) {
+    hints.push(
+      'Use a classic PAT (ghp_…) with scopes repo + workflow — fine-grained github_pat_ tokens often get this 403 on org repos.'
+    );
+    hints.push(
+      `Confirm MERIDIAN_GITHUB_REPO=${repo} matches the real owner/name and the token owner can run Actions there.`
+    );
+    hints.push(
+      'Org admins: Settings → Personal access tokens → allow classic / approve fine-grained requests; ensure Actions are enabled.'
+    );
+  } else if (status === 401) {
+    hints.push('Token invalid or revoked — create a new classic PAT and update Production .env, then pm2 restart zigma --update-env.');
+  } else if (status === 404) {
+    hints.push('Workflow or repo not found — check MERIDIAN_GITHUB_REPO and that meridian-seo-report.yml exists on the default branch.');
+  }
+  return `${base} — ${hints.join(' ')}`;
 }
 
 async function ghFetch(path: string, init: RequestInit = {}): Promise<Response> {
@@ -122,7 +146,7 @@ export async function dispatchMeridianWorkflow(
   }
   return {
     ok: false,
-    message: `GitHub dispatch failed (${res.status}): ${detail}`,
+    message: formatDispatchError(res.status, detail, meridianGithubRepo()),
     workflow,
     inputs,
   };

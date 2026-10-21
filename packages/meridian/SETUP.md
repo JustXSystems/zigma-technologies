@@ -258,7 +258,8 @@ MERIDIAN_PSI_API_KEY=AIza.....
 # Optional: Slack/Discord/Teams webhook (verify fail · auth_required · score regression)
 # MERIDIAN_WEBHOOK_URL=https://hooks.slack.com/services/...
 # Admin one-click → GitHub Actions (no Meridian CLI on this node)
-# MERIDIAN_GITHUB_TOKEN=github_pat_...   # fine-grained: Actions Read/write
+# Prefer classic PAT (ghp_…) with scopes: repo + workflow — fine-grained often 403s on orgs
+# MERIDIAN_GITHUB_TOKEN=ghp_...
 # MERIDIAN_GITHUB_REPO=JustXSystems/zigma-technologies
 ```
 
@@ -291,11 +292,29 @@ npm run meridian:secrets:sync
 
 ### F.2 Admin → GitHub (no CLI on Production)
 
-1. GitHub → Settings → Developer settings → **Fine-grained personal access token**.
-2. Resource owner: org/user that owns `zigma-technologies`. Repository access: **Only** that repo.
-3. Permissions: **Actions** Read and write · **Contents** Read.
-4. Paste token as `MERIDIAN_GITHUB_TOKEN` in Production `.env` → `pm2 restart zigma --update-env`.
-5. Admin → SEO → Meridian → **Generate report (GitHub)**. Poll until the run finishes; Command Brief opens from the synced desk folder.
+**Use a classic PAT.** Fine-grained tokens (`github_pat_…`) often return  
+`403 Resource not accessible by personal access token` on org repos when triggering Actions.
+
+1. Open [Tokens (classic)](https://github.com/settings/tokens) → **Generate new token (classic)**.
+2. Note: `zigma-meridian-admin` · Expiration: 90 days (or your policy).
+3. Scopes (tick both):
+   - **`repo`** (full control of private repositories)
+   - **`workflow`** (update GitHub Action workflows — required for `workflow_dispatch`)
+4. Generate → copy `ghp_…` once.
+5. On Production VPS:
+   ```bash
+   # in /var/www/zigma-technologies/.env
+   MERIDIAN_GITHUB_TOKEN=ghp_REPLACE
+   MERIDIAN_GITHUB_REPO=JustXSystems/zigma-technologies
+   pm2 restart zigma --update-env
+   ```
+6. Admin → SEO → Meridian → **Generate report (GitHub)**.
+
+**If still 403:** org policy is blocking classic PATs, or your user cannot run Actions on that repo.  
+Org admin → Settings → Personal access tokens / Third-party access → allow classic PATs for this org.  
+Or run reports from GitHub → Actions → **Meridian SEO report** (no Admin token needed).
+
+**Do not** use fine-grained (`github_pat_…`) unless an org admin has approved fine-grained PATs **and** Actions Write on this repo — classic is the reliable path.
 
 ---
 
