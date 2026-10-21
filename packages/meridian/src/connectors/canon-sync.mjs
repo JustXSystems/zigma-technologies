@@ -430,6 +430,14 @@ export async function syncSeoGuideCanon(profile, opts = {}) {
     await writeFile(guidePath, text, 'utf8');
   }
 
+  // Desk snapshot: Admin can serve this without the monorepo root on the web node.
+  const deskGuide = resolve(outDir, 'seo-guide.md');
+  try {
+    await writeFile(deskGuide, text, 'utf8');
+  } catch {
+    /* non-fatal */
+  }
+
   const artefact = {
     generatedAt: new Date().toISOString(),
     mode,
@@ -455,6 +463,7 @@ export async function syncSeoGuideCanon(profile, opts = {}) {
       ...artefact,
       paths: {
         guide: guidePath,
+        deskGuide,
         json: resolve(outDir, 'canon-sync.json'),
         md: resolve(outDir, 'canon-status.md'),
       },

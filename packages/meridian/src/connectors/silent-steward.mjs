@@ -47,7 +47,7 @@ export async function runSilentSteward(profile, opts = {}) {
 <p>Re-check: <code>npm run seo:verify</code> · Forever: <code>npm run meridian:observe</code></p>
 <p><a href="phase30-ops.html" style="color:#93c5fd">Dominion</a> ·
 <a href="phase31-ops.html" style="color:#93c5fd">Steward</a> ·
-<a href="../../../../SEO-GUIDE.md" style="color:#93c5fd">SEO-GUIDE</a></p>
+<a href="SEO-GUIDE.md" style="color:#93c5fd">SEO-GUIDE</a></p>
 </body></html>`;
   await writeFile(resolve(outDir, 'phase1-ops.html'), phase1Html, 'utf8');
 

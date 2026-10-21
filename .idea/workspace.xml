@@ -8,9 +8,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO Phases report done">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-meridian.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-meridian.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/command-brief.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/command-brief.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/canon-sync.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase19-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase19-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase20-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase20-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase21-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase21-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase22-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase22-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase23-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase23-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase24-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase24-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase25-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase25-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase26-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase26-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase27-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase27-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase28-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase28-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase29-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase29-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase30-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase30-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase31-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase31-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/phase32-advance.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/phase32-advance.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian/src/connectors/silent-steward.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian/src/connectors/silent-steward.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/meridian/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-bridge.ts" afterDir="false" />
     </list>
@@ -70,23 +86,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.711276760207231" />
-      <entry key="MS500" value="3.0724784281139916" />
-      <entry key="S2" value="6.312566034492261" />
-      <entry key="S5" value="10.250733794302079" />
-      <entry key="S10" value="13.32323607521388" />
-      <entry key="S30" value="18.457591589388564" />
-      <entry key="S60" value="23.883309449521253" />
-      <entry key="M2" value="31.425089514111534" />
-      <entry key="M5" value="43.703272643450454" />
-      <entry key="M10" value="53.50442489340018" />
-      <entry key="M15" value="58.3504097206524" />
-      <entry key="M30" value="64.39518532543161" />
-      <entry key="H1" value="68.69793641505932" />
-      <entry key="H2" value="99.62913616831418" />
-      <entry key="H4" value="307.78763399955005" />
-      <entry key="D1" value="2084.6623005409824" />
-      <entry key="W1" value="12137.200633445582" />
+      <entry key="MS100" value="1.2831923874365962" />
+      <entry key="MS500" value="2.7934619346005265" />
+      <entry key="S2" value="5.640752065743489" />
+      <entry key="S5" value="11.178615182603407" />
+      <entry key="S10" value="15.844475101442248" />
+      <entry key="S30" value="20.749230405074265" />
+      <entry key="S60" value="22.5411952278861" />
+      <entry key="M2" value="25.654354636614645" />
+      <entry key="M5" value="33.87555727189025" />
+      <entry key="M10" value="40.129529985633816" />
+      <entry key="M15" value="42.93176386464265" />
+      <entry key="M30" value="46.19899966480915" />
+      <entry key="H1" value="48.495307896821586" />
+      <entry key="H2" value="57.23559335327695" />
+      <entry key="H4" value="138.01834697300427" />
+      <entry key="D1" value="1743.6255048039384" />
+      <entry key="W1" value="11832.375919082786" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -101,30 +117,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="8.603474969057625E-220" />
-      <entry key="H2" value="2.93316807719151E-110" />
-      <entry key="H4" value="1.7126494321046642E-55" />
-      <entry key="D1" value="7.571565637754262E-10" />
-      <entry key="W1" value="0.07718143125575723" />
+      <entry key="H1" value="5.887884158197114E-222" />
+      <entry key="H2" value="2.426496272034134E-111" />
+      <entry key="H4" value="4.925947900774335E-56" />
+      <entry key="D1" value="6.151616429301007E-10" />
+      <entry key="W1" value="0.07492515010418352" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4389153915409134" />
-      <entry key="MS500" value="2.9689390296870575" />
-      <entry key="S2" value="6.2609435142618945" />
-      <entry key="S5" value="10.218860752884739" />
-      <entry key="S10" value="13.30325334310184" />
-      <entry key="S30" value="18.449040869667716" />
-      <entry key="S60" value="23.878293216101984" />
-      <entry key="M2" value="31.422128059233938" />
-      <entry key="M5" value="43.70181521655969" />
-      <entry key="M10" value="53.50359140813971" />
-      <entry key="M15" value="58.34981989032945" />
-      <entry key="M30" value="64.3948691899592" />
-      <entry key="H1" value="68.6977675992617" />
-      <entry key="H2" value="99.62895795116795" />
-      <entry key="H4" value="307.78722258737105" />
-      <entry key="D1" value="2084.661633016399" />
-      <entry key="W1" value="12137.277523114028" />
+      <entry key="MS100" value="1.0946989485753151" />
+      <entry key="MS500" value="2.737177539960125" />
+      <entry key="S2" value="5.606442265840367" />
+      <entry key="S5" value="11.150962391067566" />
+      <entry key="S10" value="15.825416969078194" />
+      <entry key="S30" value="20.741135346999556" />
+      <entry key="S60" value="22.536857931356" />
+      <entry key="M2" value="25.652015353883595" />
+      <entry key="M5" value="33.87446970503136" />
+      <entry key="M10" value="40.12893021381663" />
+      <entry key="M15" value="42.93134739438868" />
+      <entry key="M30" value="46.19878175737273" />
+      <entry key="H1" value="48.49519509360075" />
+      <entry key="H2" value="57.2355220714213" />
+      <entry key="H4" value="138.0182001888875" />
+      <entry key="D1" value="1743.6249576967914" />
+      <entry key="W1" value="11832.450560317506" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -151,37 +167,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/iamsa/IdeaProjects/zigma-technologies",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "ts.external.directory.path": "C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\iamsa\IdeaProjects\zigma-technologies" />

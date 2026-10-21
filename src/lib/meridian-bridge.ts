@@ -553,10 +553,38 @@ export function meridianLatestPaths(env: MeridianEnv) {
     stewardShip: path.join(dir, 'steward-ship.json'),
     automationLedger: path.join(dir, 'automation-ledger.md'),
     executiveBrief: path.join(dir, 'executive-brief.md'),
+    seoGuide: path.join(dir, 'seo-guide.md'),
     gbpPulse: path.join(dir, 'gbp-pulse.json'),
     phaseMatrix: path.join(dir, 'phase-matrix.json'),
     jobStatus: path.join(dir, 'job-status.json'),
   };
+}
+
+/**
+ * Resolve root SEO-GUIDE.md for Admin desk links.
+ * Not shipped in the website tarball — prefer Meridian storage snapshot, then
+ * site/sidecar checkout paths, then GitHub (caller shows fallback UI).
+ */
+export async function readSeoGuideMarkdown(env: MeridianEnv): Promise<{ body: string; source: string } | null> {
+  const { seoGuide } = meridianLatestPaths(env);
+  const home = (process.env.MERIDIAN_HOME || '').trim();
+  const candidates = [
+    seoGuide,
+    path.join(meridianSiteRoot(), 'SEO-GUIDE.md'),
+    path.join(ROOT, 'SEO-GUIDE.md'),
+    home ? path.join(home, 'SEO-GUIDE.md') : '',
+    home ? path.join(home, '..', 'SEO-GUIDE.md') : '',
+  ].filter(Boolean);
+
+  for (const p of candidates) {
+    try {
+      const body = await readFile(/*turbopackIgnore: true*/ p, 'utf8');
+      if (body.trim()) return { body, source: p };
+    } catch {
+      /* try next */
+    }
+  }
+  return null;
 }
 
 /** True when a readable artefact exists at any of the candidate paths. */
@@ -614,21 +642,35 @@ export async function meridianArtefactAvailability(env: MeridianEnv) {
 }
 
 /**
- * When Command Brief HTML is served from `/api/admin/meridian?format=brief`, browsers resolve
- * relative hrefs like `ops-cockpit.html` to `/api/admin/ops-cockpit.html`.
- * Rewrite those hrefs onto the stable Meridian format=file API.
+ * When Command Brief / phase-ops HTML is served from `/api/admin/meridian?format=…`,
+ * browsers resolve relative hrefs against that API path.
+ * - `ops-cockpit.html` → `/api/admin/ops-cockpit.html` (rewrite to format=file)
+ * - `../../../../SEO-GUIDE.md` → `/SEO-GUIDE.md` (404 on product plane — rewrite to format=guide)
  */
 export function withMeridianFileBase(html: string, env: MeridianEnv): string {
   const prefix = withBasePath('/api/admin/meridian');
-  return html.replace(
-    /\bhref=(["'])(?!https?:|\/|#|mailto:)([a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:html|md|json|ics))\1/gi,
-    (_m, q: string, name: string) =>
-      `href=${q}${prefix}?env=${encodeURIComponent(env)}&format=file&name=${encodeURIComponent(name)}${q}`
+  const guideHref = `${prefix}?env=${encodeURIComponent(env)}&format=guide`;
+  let out = html.replace(
+    /\bhref=(["'])(?:https?:\/\/[^"'/]+)?(?:\/|\.\.\/)*SEO-GUIDE\.md\1/gi,
+    (_m, q: string) => `href=${q}${guideHref}${q}`
   );
+  out = out.replace(
+    /\bhref=(["'])(?!https?:|\/|#|mailto:)([a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:html|md|json|ics))\1/gi,
+    (_m, q: string, name: string) => {
+      if (/^SEO-GUIDE\.md$/i.test(name)) {
+        return `href=${q}${guideHref}${q}`;
+      }
+      return `href=${q}${prefix}?env=${encodeURIComponent(env)}&format=file&name=${encodeURIComponent(name)}${q}`;
+    }
+  );
+  return out;
 }
 
 /** Absolute Admin URL for a Meridian desk file (Command Brief / MeridianPanel). */
 export function meridianArtefactAdminHref(env: MeridianEnv, name: string): string {
+  if (/^SEO-GUIDE\.md$/i.test(name)) {
+    return withBasePath(`/api/admin/meridian?env=${encodeURIComponent(env)}&format=guide`);
+  }
   return withBasePath(
     `/api/admin/meridian?env=${encodeURIComponent(env)}&format=file&name=${encodeURIComponent(name)}`
   );

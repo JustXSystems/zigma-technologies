@@ -11,6 +11,7 @@ import {
   readLatestUnlock,
   readMeridianArtefactHtml,
   readMeridianJobStatus,
+  readSeoGuideMarkdown,
   runMeridianAct,
   runMeridianCli,
   startMeridianAutopilotBackground,
@@ -19,6 +20,7 @@ import {
   type MeridianEnv,
 } from '@/lib/meridian-bridge';
 import { readFile } from 'node:fs/promises';
+import { withBasePath } from '@/lib/base-path';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -141,6 +143,25 @@ export async function GET(request: Request) {
     }
     if (format === 'file') {
       return serveMeridianArtefact(env, url.searchParams.get('name') || '');
+    }
+    if (format === 'guide' || format === 'seo-guide') {
+      const guide = await readSeoGuideMarkdown(env);
+      if (guide) {
+        return new NextResponse(guide.body, {
+          headers: {
+            'Content-Type': 'text/markdown; charset=utf-8',
+            'Cache-Control': 'no-store',
+            'X-Meridian-Guide-Source': guide.source,
+          },
+        });
+      }
+      const gh = 'https://github.com/JustXSystems/zigma-technologies/blob/master/SEO-GUIDE.md';
+      const desk = withBasePath(`/api/admin/meridian?env=${encodeURIComponent(env)}&format=brief`);
+      return missingArtefactHtml(
+        'SEO-GUIDE.md not on this node',
+        `Root guide is not in the website tarball. Open <a href="${gh}">GitHub SEO-GUIDE.md</a>, or run Autopilot / canon-sync so a copy is written under storage/meridian. Desk: <a href="${desk}">Command Brief</a>.`,
+        paths.dir
+      );
     }
     const report = await readLatestMeridianReport(env);
     const autopilot = await readLatestAutopilot(env);

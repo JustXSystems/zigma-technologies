@@ -290,7 +290,7 @@ pre.nap{white-space:pre-wrap;background:#081018;border:1px solid var(--line);bor
   </ul>
   <p style="margin:.7rem 0 0">
     <a class="btn" href="executive-brief.md">Executive brief</a>
-    <a class="btn" href="../../../../SEO-GUIDE.md">SEO-GUIDE.md</a>
+    <a class="btn" href="SEO-GUIDE.md">SEO-GUIDE.md</a>
     <a class="btn" href="phase19-ops.html">Phase 19 canon</a>
     <a class="btn" href="phase18-ops.html">Phase 18</a>
     <a class="btn" href="${esc(origin)}/admin" target="_blank" rel="noreferrer">Admin</a>

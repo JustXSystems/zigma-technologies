@@ -144,7 +144,7 @@ ul{margin:.35rem 0 0;padding-left:1.15rem;color:var(--muted);font-size:.86rem}
   <a class="btn" href="phase26-ops.html">Yield</a>
   <a class="btn" href="perpetual-seal.json">Seal JSON</a>
   <a class="btn" href="conversion-continuum.md">Continuum</a>
-  <a class="btn" href="../../../../SEO-GUIDE.md">SEO-GUIDE.md</a>
+  <a class="btn" href="SEO-GUIDE.md">SEO-GUIDE.md</a>
 </div>
 <div class="card">
   <h2 style="margin:0 0 .5rem;font-size:.95rem">Steps</h2>

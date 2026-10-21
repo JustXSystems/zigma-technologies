@@ -82,6 +82,11 @@ const nextConfig: NextConfig = {
         { source: '/assets/images/:path*', destination: '/api/public/assets/images/:path*' },
         { source: '/assets/svg/:path*', destination: '/api/public/assets/svg/:path*' },
         { source: '/assets/video/:path*', destination: '/api/public/assets/video/:path*' },
+        // Phase-ops relative ../../SEO-GUIDE.md resolves to apex /SEO-GUIDE.md (not in product tarball).
+        {
+          source: '/SEO-GUIDE.md',
+          destination: '/api/admin/meridian?env=prod&format=guide',
+        },
         {
           source: '/api/admin/:name([^/]+\\.(?:html|md|json|ics))',
           destination: '/api/admin/meridian?env=prod&format=file&name=:name',

@@ -151,7 +151,7 @@ ul{margin:.35rem 0 0;padding-left:1.15rem;color:var(--muted);font-size:.86rem}
   <a class="btn" href="phase25-ops.html">Forge</a>
   <a class="btn" href="yield-apex.json">Yield JSON</a>
   <a class="btn" href="form-health.json">Form health</a>
-  <a class="btn" href="../../../../SEO-GUIDE.md">SEO-GUIDE.md</a>
+  <a class="btn" href="SEO-GUIDE.md">SEO-GUIDE.md</a>
 </div>
 <div class="card">
   <h2 style="margin:0 0 .5rem;font-size:.95rem">Steps</h2>

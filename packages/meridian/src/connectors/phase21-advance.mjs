@@ -163,7 +163,7 @@ ${
   <p style="margin:.7rem 0 0">
     <a class="btn" href="phase20-ops.html">Phase 20 desk</a>
     <a class="btn" href="executive-brief.md">Executive brief</a>
-    <a class="btn" href="../../../../SEO-GUIDE.md">SEO-GUIDE.md</a>
+    <a class="btn" href="SEO-GUIDE.md">SEO-GUIDE.md</a>
     <a class="btn" href="${esc(origin)}/admin" target="_blank" rel="noreferrer">Admin</a>
   </p>
 </div>

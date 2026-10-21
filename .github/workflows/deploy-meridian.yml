@@ -108,10 +108,13 @@ jobs:
         run: |
           set -euo pipefail
           test -f packages/meridian/bin/meridian.mjs
-          mkdir -p dist
-          tar -C packages/meridian -czf dist/meridian.tgz \
-            --exclude=node_modules --exclude=out --exclude=coverage --exclude=.git \
-            .
+          test -f SEO-GUIDE.md
+          mkdir -p dist/meridian-pack
+          # Pack CLI + root SEO-GUIDE.md (Admin desk / format=guide; not in website tarball).
+          rsync -a --exclude=node_modules --exclude=out --exclude=coverage --exclude=.git \
+            packages/meridian/ dist/meridian-pack/
+          cp -f SEO-GUIDE.md dist/meridian-pack/SEO-GUIDE.md
+          tar -C dist/meridian-pack -czf dist/meridian.tgz .
           ls -lh dist/meridian.tgz
           BYTES="$(wc -c < dist/meridian.tgz | tr -d ' ')"
           if (( BYTES > 5000000 )); then

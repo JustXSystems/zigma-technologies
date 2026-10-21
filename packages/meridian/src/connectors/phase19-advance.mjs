@@ -104,7 +104,7 @@ code{font-size:.78rem;background:#1a2636;padding:.1rem .35rem;border-radius:4px}
   <div class="metric"><span class="sub">Guide sync</span><b class="${canon.ok ? 'ok' : 'warn'}">${esc(canon.data?.mode || '—')}</b></div>
 </div>
 <div class="card">
-  <a class="primary" href="../../../../SEO-GUIDE.md">SEO-GUIDE.md</a>
+  <a class="primary" href="SEO-GUIDE.md">SEO-GUIDE.md</a>
   <a class="primary" href="canon-status.md">Canon status</a>
   <a class="primary" href="phase18-ops.html">Phase 18 observatory</a>
   <a class="primary" href="phase17-ops.html">Phase 17 archive</a>
