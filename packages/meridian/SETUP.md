@@ -272,6 +272,22 @@ pm2 restart zigma --update-env
 **Expect:** Admin → SEO → Meridian → Connectors readiness shows green **set** for each.  
 Primary button: **Generate report (GitHub)** when `MERIDIAN_GITHUB_TOKEN` is set.
 
+### Optional — Meridian SaaS bridge (P5)
+
+Default is **local** (this guide). To also open the JBT desk or dispatch reports there:
+
+```env
+MERIDIAN_MODE=dual   # or saas
+MERIDIAN_SAAS_URL=https://justxsystems.com/jbt/tools/seo-meridian
+MERIDIAN_SAAS_API_KEY=jbt_…
+# MERIDIAN_SAAS_SITE_ID=site_…   # optional
+```
+
+- `dual` — Sunday GitHub forever ops unchanged + Admin **Open Meridian SaaS desk**
+- `saas` — Admin Generate report enqueues SaaS first (GitHub fallback)
+
+See [`SAAS-MASTER-DESIGN.md`](./SAAS-MASTER-DESIGN.md) §6 and `seo-tool-meridian` `docs/P5-SETUP.md`.
+
 Also add the **same** `MERIDIAN_GOOGLE_*` / Bing / GA4 / PSI / webhook names as GitHub Actions secrets:
 
 ```bash

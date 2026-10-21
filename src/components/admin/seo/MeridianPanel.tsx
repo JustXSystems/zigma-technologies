@@ -71,11 +71,24 @@ type JobStatus = {
   startedAt?: string;
   finishedAt?: string;
   error?: string;
-  provider?: 'local' | 'github';
+  provider?: 'local' | 'github' | 'saas';
   workflow?: string;
   runId?: number;
+  saasJobId?: string;
   runUrl?: string;
   fallbackUrl?: string;
+};
+
+type SaasBridge = {
+  mode?: 'local' | 'saas' | 'dual';
+  url?: string;
+  configured?: boolean;
+  deskUrl?: string | null;
+  siteId?: string | null;
+  message?: string;
+  reachable?: boolean;
+  reachError?: string;
+  apiKeySet?: boolean;
 };
 
 type Artefacts = {
@@ -113,6 +126,7 @@ export default function MeridianPanel() {
   const [unlock, setUnlock] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [github, setGithub] = useState<GithubDesk | null>(null);
+  const [saas, setSaas] = useState<SaasBridge | null>(null);
   const [job, setJob] = useState<JobStatus | null>(null);
   const [artefacts, setArtefacts] = useState<Artefacts | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -146,6 +160,7 @@ export default function MeridianPanel() {
     setUnlock((data.unlock as Record<string, unknown>) || null);
     setReadiness((data.readiness as Readiness) || null);
     setGithub((data.github as GithubDesk) || (data.readiness as Readiness)?.github || null);
+    setSaas((data.saas as SaasBridge) || null);
     setJob((data.job as JobStatus) || null);
   }, []);
 
@@ -573,27 +588,60 @@ export default function MeridianPanel() {
             >
               Desk:{' '}
               <strong>
-                {github?.ready
-                  ? 'GitHub Actions'
-                  : readiness?.controlPlane?.binExists
-                    ? 'local CLI'
-                    : 'awaiting MERIDIAN_GITHUB_TOKEN'}
+                {saas?.mode === 'saas' && saas.configured
+                  ? 'Meridian SaaS'
+                  : saas?.mode === 'dual'
+                    ? 'dual (local + SaaS)'
+                    : github?.ready
+                      ? 'GitHub Actions'
+                      : readiness?.controlPlane?.binExists
+                        ? 'local CLI'
+                        : 'awaiting MERIDIAN_GITHUB_TOKEN'}
               </strong>
               {github?.repo ? ` · ${github.repo}` : ''}
               {readiness?.controlPlane?.meridianHome
                 ? ` · MERIDIAN_HOME=${readiness.controlPlane.meridianHome}`
                 : ''}
+              {saas?.mode && saas.mode !== 'local' ? ` · MERIDIAN_MODE=${saas.mode}` : ''}
+            </p>
+          ) : null}
+          {saas && (saas.mode === 'dual' || saas.mode === 'saas') ? (
+            <p className="sub" style={{ marginTop: '0.45rem' }}>
+              {saas.configured ? (
+                <>
+                  SaaS bridge: {saas.message}
+                  {saas.deskUrl ? (
+                    <>
+                      {' '}
+                      ·{' '}
+                      <a className="link" href={saas.deskUrl} target="_blank" rel="noreferrer">
+                        Open Meridian SaaS desk
+                      </a>
+                    </>
+                  ) : null}
+                  {saas.reachError ? (
+                    <span style={{ color: '#b45309' }}> · unreachable: {saas.reachError}</span>
+                  ) : null}
+                </>
+              ) : (
+                <span style={{ color: '#b45309' }}>{saas.message}</span>
+              )}
             </p>
           ) : null}
           {jobRunning ? (
             <p className="sub" style={{ color: 'var(--accent, #0b6e4f)', marginTop: '0.35rem' }}>
-              {job?.provider === 'github' ? 'GitHub Actions' : 'Job'} running since {job?.startedAt || '…'}
+              {job?.provider === 'saas'
+                ? 'Meridian SaaS'
+                : job?.provider === 'github'
+                  ? 'GitHub Actions'
+                  : 'Job'}{' '}
+              running since {job?.startedAt || '…'}
               {job?.runUrl ? (
                 <>
                   {' '}
                   ·{' '}
                   <a className="link" href={job.runUrl} target="_blank" rel="noreferrer">
-                    open run
+                    {job.provider === 'saas' ? 'open SaaS desk' : 'open run'}
                   </a>
                 </>
               ) : null}{' '}
@@ -653,14 +701,42 @@ export default function MeridianPanel() {
             disabled={pending || jobRunning || env !== 'prod'}
             onClick={() =>
               postAction(
-                { action: 'dispatch-seo-report', skipScan: true },
-                'Dispatching Meridian SEO report (App/PAT) or opening Actions'
+                {
+                  action:
+                    saas?.mode === 'saas' && saas.configured
+                      ? 'dispatch-saas-report'
+                      : 'dispatch-seo-report',
+                  skipScan: true,
+                },
+                saas?.mode === 'saas' && saas.configured
+                  ? 'Queueing SEO report on Meridian SaaS'
+                  : 'Dispatching Meridian SEO report (App/PAT) or opening Actions'
               )
             }
-            title="Tries GitHub App / PAT dispatch; on 403 or missing auth opens Actions → Run workflow"
+            title={
+              saas?.mode === 'saas' && saas.configured
+                ? 'Enqueues seo-report on Meridian SaaS worker (falls back to GitHub if SaaS fails)'
+                : 'Tries GitHub App / PAT dispatch; on 403 or missing auth opens Actions → Run workflow'
+            }
           >
-            {pending ? 'Working…' : 'Generate report (GitHub)'}
+            {pending
+              ? 'Working…'
+              : saas?.mode === 'saas' && saas.configured
+                ? 'Generate report (SaaS)'
+                : 'Generate report (GitHub)'}
           </button>
+          {saas?.mode === 'dual' && saas.configured ? (
+            <button
+              type="button"
+              disabled={pending || jobRunning || env !== 'prod'}
+              onClick={() =>
+                postAction({ action: 'dispatch-saas-report' }, 'Queueing SEO report on Meridian SaaS')
+              }
+              title="Also enqueue on Meridian SaaS while local/GitHub forever ops continue"
+            >
+              Generate on SaaS too
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={pending || jobRunning}

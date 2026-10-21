@@ -14,6 +14,12 @@ import {
   type GhDispatchInputs,
   type GhWorkflowId,
 } from '@/lib/meridian-github';
+import {
+  enqueueMeridianSaasJob,
+  mapSaasJobToAdminStatus,
+  meridianSaasConfig,
+  pollMeridianSaasJob,
+} from '@/lib/meridian-saas';
 
 const ROOT = process.cwd();
 
@@ -701,10 +707,12 @@ export type MeridianJobStatus = {
   error?: string;
   applyMeta?: boolean;
   skipAct?: boolean;
-  /** local = CLI on this node; github = Actions workflow_dispatch */
-  provider?: 'local' | 'github';
+  /** local = CLI on this node; github = Actions; saas = Meridian JBT worker */
+  provider?: 'local' | 'github' | 'saas';
   workflow?: string;
   runId?: number;
+  /** SaaS job id when provider=saas */
+  saasJobId?: string;
   runUrl?: string;
   /** Zero-secret: open Actions → Run workflow when API dispatch is blocked */
   fallbackUrl?: string;
@@ -868,6 +876,102 @@ export async function startMeridianGithubDispatch(
       ? `Dispatched · run #${run.id} · ${run.htmlUrl}`
       : `Dispatched ${workflow} — run will appear in Actions shortly. Artefacts sync to this desk when the job finishes.`,
   };
+}
+
+/**
+ * Dispatch SEO report to Meridian SaaS (MERIDIAN_MODE=saas|dual when configured).
+ * Writes job-status.json so Admin can poll.
+ */
+export async function startMeridianSaasDispatch(
+  env: MeridianEnv,
+  type: 'seo-report' | 'observe' | 'verify' = 'seo-report'
+): Promise<{
+  started: boolean;
+  job: MeridianJobStatus;
+  alreadyRunning?: boolean;
+  message: string;
+  deskUrl?: string | null;
+}> {
+  const existing = await readMeridianJobStatus(env);
+  if (existing?.status === 'running') {
+    const ageMs = Date.now() - new Date(existing.startedAt).getTime();
+    if (Number.isFinite(ageMs) && ageMs < 25 * 60 * 1000) {
+      return {
+        started: false,
+        alreadyRunning: true,
+        job: existing,
+        message: 'A Meridian job is already running — wait for it to finish.',
+        deskUrl: existing.runUrl,
+      };
+    }
+  }
+
+  const startedAt = new Date().toISOString();
+  const queued = await enqueueMeridianSaasJob(type);
+  if (!queued.ok || !queued.jobId) {
+    const job: MeridianJobStatus = {
+      action: 'dispatch-saas-report',
+      status: 'error',
+      startedAt,
+      finishedAt: new Date().toISOString(),
+      provider: 'saas',
+      error: queued.error || queued.message,
+      runUrl: queued.deskUrl || undefined,
+      fallbackUrl: queued.deskUrl || undefined,
+    };
+    await writeMeridianJobStatus(env, job);
+    return { started: false, job, message: queued.message, deskUrl: queued.deskUrl };
+  }
+
+  const job: MeridianJobStatus = {
+    action: 'dispatch-saas-report',
+    status: 'running',
+    startedAt,
+    provider: 'saas',
+    saasJobId: queued.jobId,
+    runUrl: queued.deskUrl || undefined,
+    fallbackUrl: queued.deskUrl || undefined,
+  };
+  await writeMeridianJobStatus(env, job);
+  return {
+    started: true,
+    job,
+    message: queued.message,
+    deskUrl: queued.deskUrl,
+  };
+}
+
+/** Refresh a SaaS-backed job-status from Meridian API (Admin poll). */
+export async function refreshMeridianSaasJob(env: MeridianEnv): Promise<MeridianJobStatus | null> {
+  const existing = await readMeridianJobStatus(env);
+  if (!existing || existing.provider !== 'saas' || existing.status !== 'running') {
+    return existing;
+  }
+  if (!existing.saasJobId) return existing;
+  try {
+    const polled = await pollMeridianSaasJob(existing.saasJobId);
+    if (!polled.ok) {
+      const next: MeridianJobStatus = { ...existing, error: polled.error };
+      await writeMeridianJobStatus(env, next);
+      return next;
+    }
+    const status = mapSaasJobToAdminStatus(polled.status);
+    const next: MeridianJobStatus = {
+      ...existing,
+      status,
+      finishedAt: status === 'running' ? undefined : polled.finishedAt || new Date().toISOString(),
+      error: status === 'error' ? polled.error || 'Meridian SaaS job failed' : undefined,
+    };
+    await writeMeridianJobStatus(env, next);
+    return next;
+  } catch (err) {
+    const next: MeridianJobStatus = {
+      ...existing,
+      error: err instanceof Error ? err.message : String(err),
+    };
+    await writeMeridianJobStatus(env, next);
+    return next;
+  }
 }
 
 /** Refresh a GitHub-backed job-status from the Actions API (Admin poll). */
@@ -1146,13 +1250,48 @@ export function meridianConnectorReadiness() {
 
   const controlPlane = meridianControlPlaneStatus();
   const github = meridianGithubDeskStatus();
+  const saas = meridianSaasConfig();
 
   return {
     docsPath: 'packages/meridian/ARCHITECTURE.md',
     setupPath: 'packages/meridian/SETUP.md',
     controlPlane,
     github,
+    saas,
     fields: [
+      {
+        id: 'MERIDIAN_MODE',
+        label: 'Meridian mode (local | dual | saas)',
+        set: envSet('MERIDIAN_MODE') || saas.mode !== 'local',
+        optional: true,
+        requiredFor: ['saas-bridge'],
+        howTo:
+          'Default local (unchanged). dual = local forever + SaaS desk link. saas = Admin Generate report → Meridian SaaS worker. See packages/meridian/SAAS-MASTER-DESIGN.md §6.',
+      },
+      {
+        id: 'MERIDIAN_SAAS_URL',
+        label: 'Meridian SaaS console URL',
+        set: !!saas.url,
+        optional: true,
+        requiredFor: ['saas-bridge'],
+        howTo: 'e.g. https://justxsystems.com/jbt/tools/seo-meridian',
+      },
+      {
+        id: 'MERIDIAN_SAAS_API_KEY',
+        label: 'Meridian SaaS site API key (jbt_…)',
+        set: saas.apiKeySet,
+        optional: true,
+        requiredFor: ['saas-bridge'],
+        howTo: 'Mint in Meridian Connect → Product Agent after registering Zigma as a SaaS site.',
+      },
+      {
+        id: 'MERIDIAN_SAAS_SITE_ID',
+        label: 'Meridian SaaS site id (optional)',
+        set: !!saas.siteId,
+        optional: true,
+        requiredFor: ['saas-bridge'],
+        howTo: 'Optional — desk URL resolves via API /me when omitted.',
+      },
       {
         id: 'MERIDIAN_GITHUB_APP_*',
         label: 'GitHub App (org-safe Admin dispatch)',
@@ -1230,6 +1369,18 @@ export function meridianConnectorReadiness() {
         note: github.ready
           ? github.message
           : 'Optional — Sunday cron + Actions UI cover reports without a token',
+      },
+      saas: {
+        ready: saas.configured || saas.mode === 'local',
+        missing:
+          saas.mode === 'local'
+            ? []
+            : [
+                ...(!saas.url ? ['MERIDIAN_SAAS_URL'] : []),
+                ...(!saas.apiKeySet ? ['MERIDIAN_SAAS_API_KEY'] : []),
+              ],
+        optional: true,
+        note: saas.message,
       },
       gsc: { ready: googleOk, missing: googleOk ? [] : ['MERIDIAN_GOOGLE_CLIENT_ID', 'MERIDIAN_GOOGLE_CLIENT_SECRET', 'MERIDIAN_GOOGLE_REFRESH_TOKEN'].filter((k) => !envSet(k)) },
       ga4: {

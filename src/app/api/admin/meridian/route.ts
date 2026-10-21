@@ -13,15 +13,18 @@ import {
   readMeridianJobStatus,
   readSeoGuideMarkdown,
   refreshMeridianGithubJob,
+  refreshMeridianSaasJob,
   runMeridianAct,
   runMeridianCli,
   startMeridianAutopilotBackground,
   startMeridianGithubDispatch,
+  startMeridianSaasDispatch,
   withMeridianFileBase,
   type MeridianAct,
   type MeridianEnv,
 } from '@/lib/meridian-bridge';
 import { listMeridianWorkflowRuns, meridianGithubDeskStatus } from '@/lib/meridian-github';
+import { meridianSaasConfig, resolveMeridianSaasDesk } from '@/lib/meridian-saas';
 import { readFile } from 'node:fs/promises';
 import { withBasePath } from '@/lib/base-path';
 
@@ -189,6 +192,9 @@ export async function GET(request: Request) {
     if (job?.provider === 'github' && job.status === 'running') {
       job = (await refreshMeridianGithubJob(env)) || job;
     }
+    if (job?.provider === 'saas' && job.status === 'running') {
+      job = (await refreshMeridianSaasJob(env)) || job;
+    }
     let githubRuns: unknown = null;
     if (readiness.github?.ready) {
       try {
@@ -199,6 +205,12 @@ export async function GET(request: Request) {
       } catch {
         githubRuns = null;
       }
+    }
+    const saasCfg = meridianSaasConfig();
+    let saasDesk: { ok: boolean; deskUrl: string | null; siteId: string | null; error?: string } | null =
+      null;
+    if (saasCfg.mode === 'dual' || saasCfg.mode === 'saas') {
+      saasDesk = await resolveMeridianSaasDesk();
     }
     return NextResponse.json({
       env,
@@ -212,6 +224,13 @@ export async function GET(request: Request) {
       artefacts,
       github: meridianGithubDeskStatus(),
       githubRuns,
+      saas: {
+        ...saasCfg,
+        deskUrl: saasDesk?.deskUrl || saasCfg.deskUrl,
+        siteId: saasDesk?.siteId || saasCfg.siteId,
+        reachable: saasDesk?.ok ?? false,
+        reachError: saasDesk?.error,
+      },
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
@@ -296,8 +315,42 @@ export async function POST(request: Request) {
       });
     }
 
+    // P5: MERIDIAN_MODE=saas → enqueue on Meridian SaaS (optional GitHub fallback).
+    if (action === 'dispatch-saas-report' || action === 'saas-seo-report') {
+      const bg = await startMeridianSaasDispatch(env, 'seo-report');
+      return NextResponse.json({
+        env,
+        action: 'dispatch-saas-report',
+        ok: bg.started || !!bg.alreadyRunning,
+        started: bg.started,
+        alreadyRunning: !!bg.alreadyRunning,
+        job: bg.job,
+        message: bg.message,
+        deskUrl: bg.deskUrl,
+        saas: meridianSaasConfig(),
+      });
+    }
+
     // Primary path: dispatch control plane on GitHub (no CLI on the web node).
     if (action === 'dispatch-seo-report' || action === 'github-seo-report') {
+      const saasCfg = meridianSaasConfig();
+      if (saasCfg.mode === 'saas' && saasCfg.configured) {
+        const bg = await startMeridianSaasDispatch(env, 'seo-report');
+        if (bg.started || bg.alreadyRunning) {
+          return NextResponse.json({
+            env,
+            action: 'dispatch-saas-report',
+            ok: true,
+            started: bg.started,
+            alreadyRunning: !!bg.alreadyRunning,
+            job: bg.job,
+            message: bg.message,
+            deskUrl: bg.deskUrl,
+            saas: saasCfg,
+          });
+        }
+        // Fall through to GitHub if SaaS enqueue failed
+      }
       const bg = await startMeridianGithubDispatch(env, 'seo-report', {
         windowDays: typeof body.windowDays === 'number' ? body.windowDays : 28,
         theme: typeof body.theme === 'string' ? body.theme : 'aurora',
@@ -314,7 +367,14 @@ export async function POST(request: Request) {
         job: bg.job,
         message: bg.message,
         github: meridianGithubDeskStatus(),
+        saasFallback:
+          saasCfg.mode === 'saas' ? 'SaaS enqueue failed — used GitHub path' : undefined,
       });
+    }
+
+    if (action === 'saas-job-refresh') {
+      const job = await refreshMeridianSaasJob(env);
+      return NextResponse.json({ env, action, ok: true, job });
     }
 
     if (action === 'dispatch-autopilot' || action === 'github-autopilot') {

@@ -175,7 +175,7 @@ Phases 0–33 are **automation history**, not a weekly human checklist. The desk
 | Ops webhooks (verify fail / auth / regression) | **Shipped** | Optional `MERIDIAN_WEBHOOK_URL` |
 | Actions secret one-shot sync | **Shipped** | `npm run meridian:secrets:sync` |
 | Self-hosted Actions runner | Optional | `scripts/install-github-runner-zigma.sh` · label `zigma-prod` |
-| Extract Meridian → multi-tenant SaaS (JBT) | **P4** | [`SAAS-MASTER-DESIGN.md`](./SAAS-MASTER-DESIGN.md) · repo [`JustXSystems/seo-tool-meridian`](https://github.com/JustXSystems/seo-tool-meridian) · URL `justxsystems.com/jbt/tools/seo-meridian` · Zigma stays local + optional dual bridge |
+| Extract Meridian → multi-tenant SaaS (JBT) | **P5** | [`SAAS-MASTER-DESIGN.md`](./SAAS-MASTER-DESIGN.md) · repo [`JustXSystems/seo-tool-meridian`](https://github.com/JustXSystems/seo-tool-meridian) · URL `justxsystems.com/jbt/tools/seo-meridian` · Zigma default `MERIDIAN_MODE=local`; optional dual/saas bridge |
 
 ### Admin desk env (Production `.env`)
 
