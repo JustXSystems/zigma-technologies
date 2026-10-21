@@ -11,6 +11,7 @@ import {
   mapGhRunToJobStatus,
   meridianGithubDeskStatus,
   waitForDispatchedRun,
+  type GhDispatchInputs,
   type GhWorkflowId,
 } from '@/lib/meridian-github';
 
@@ -777,17 +778,19 @@ export async function startMeridianGithubDispatch(
   const workflow: GhWorkflowId =
     kind === 'seo-report' ? 'meridian-seo-report.yml' : 'meridian-autopilot.yml';
   const startedAt = new Date().toISOString();
-  const inputs =
-    kind === 'seo-report'
-      ? {
-          window_days: String(opts.windowDays ?? 28),
-          theme: opts.theme || 'aurora',
-          skip_scan: opts.skipScan !== false,
-        }
-      : {
-          target: env === 'preprod' ? 'preprod' : 'prod',
-          skip_act: env === 'preprod' || !!opts.skipAct,
-        };
+  let inputs: GhDispatchInputs;
+  if (kind === 'seo-report') {
+    inputs = {
+      window_days: String(opts.windowDays ?? 28),
+      theme: opts.theme || 'aurora',
+      skip_scan: opts.skipScan !== false,
+    };
+  } else {
+    inputs = {
+      target: env === 'preprod' ? 'preprod' : 'prod',
+      skip_act: env === 'preprod' || !!opts.skipAct,
+    };
+  }
 
   const dispatched = await dispatchMeridianWorkflow(workflow, inputs);
   if (!dispatched.ok) {
