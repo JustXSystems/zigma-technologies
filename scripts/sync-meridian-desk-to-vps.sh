@@ -33,6 +33,16 @@ FILES=(
   command-brief.html
   command-brief.md
   command-brief.json
+  growth-desk.html
+  growth-desk.md
+  growth-desk.json
+  growth-radar.md
+  growth-radar.json
+  city-draft.md
+  city-draft.json
+  city-pages-readiness.json
+  review-kit.md
+  review-kit.json
   seo-report.json
   seo-report.md
   seo-report-latest.html

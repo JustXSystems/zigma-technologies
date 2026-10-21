@@ -126,16 +126,16 @@ Primary surfaces under `storage/meridian/zigma-prod/`:
 - Digests (weekly / monthly / quarterly) when connectors are set
 - **Human debt for automation = 0** (optional Google GBP verify stays parked)
 
-### Optional growth (not on the forever checklist)
+### Growth (auto desk — minimal clicks)
 
-| Action | When | Artefact |
+| Action | Automation | Your click |
 | --- | --- | --- |
-| Verify Google Business Profile | If you want Maps panel ownership | `phase21-ops.html` → `npm run meridian:ack-gbp` |
-| Promote a city page | After unique photos / local proof | Edit `city-draft.md`, then add to `INDEXABLE_CITY_SERVICES` |
-| Claim directories / send outreach | Expanding local / authority | Desk launchpad · `phase8-ops.html` mailto packs |
-| Send review requests after jobs | After completed work | `review-kit.md` (link auto from Maps / Place ID) |
+| GSC opportunity briefs | Growth Desk + radar every SEO report / observe | Improve titles/FAQ in Admin when listed |
+| City page drafts | Staged `city-draft.md` (stays noindex) | Unique photos → Admin → SEO → **City promote** (ack proof) |
+| Google review asks | Closing enquiry drafts + opens mailto | Click **Send** in your email app (never auto-sent) |
+| GBP verify | Optional Google gate | `phase21-ops.html` → `npm run meridian:ack-gbp` |
 
-Do **not** auto-index thin city templates — quality gate keeps them `noindex` until promote.
+Surfaces: Admin → SEO → **Growth Desk** · **City promote** · `growth-desk.html`. Do **not** auto-index thin city templates.
 
 ---
 
@@ -293,7 +293,7 @@ Forever: `npm run meridian:observe` · Steward: `phase31-ops.html` · Dominion: 
 Optional growth (never blocks observe):
 
 - [ ] GBP verified when ready → `npm run meridian:ack-gbp`
-- [ ] City draft reviewed + promoted (unique proof only)
+- [ ] City draft reviewed → Admin → SEO → **City promote** (unique proof ack)
 - [ ] Directory claims / partner outreach when pursuing local/authority growth
 
 ---

@@ -7,6 +7,7 @@ import { listResourcePosts } from '@/lib/resources';
 import { INDUSTRY_DEFS } from '@/lib/industries';
 import { translatedCityKeys } from '@/lib/locale-locations';
 import { LOCATION_DEFS } from '@/lib/locations';
+import { hydrateCityIndexAllowlist } from '@/lib/city-index-allowlist';
 import { allCityServicePairs, isCityServiceIndexable } from '@/lib/location-services';
 import { listPressPosts } from '@/lib/press';
 import { absoluteUrl, isIndexable, siteOrigin, toIsoDate } from '@/lib/seo';
@@ -27,6 +28,7 @@ function lastModified(...values: (string | null | undefined)[]) {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!isIndexable()) return [];
 
+  await hydrateCityIndexAllowlist();
   const origin = siteOrigin();
   const copy = await getSiteCopy();
   const locales = copy.features.localesEnabled;

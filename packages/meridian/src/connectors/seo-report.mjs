@@ -9,6 +9,7 @@ import { collectGa4 } from './ga4.mjs';
 import { collectPagespeed } from './pagespeed.mjs';
 import { runMeridian } from '../orchestrator.mjs';
 import { writeCommandBrief } from './command-brief.mjs';
+import { writeGrowthDesk } from './growth-desk.mjs';
 import { alertSeoReport } from '../lib/ops-webhook.mjs';
 
 /**
@@ -214,6 +215,18 @@ export async function runSeoReport(profile, opts = {}) {
     pagespeed,
   });
   steps.push({ id: 'command-brief', ok: brief.ok !== false, message: brief.message });
+
+  // Growth Desk — ranking actions beside Command Brief (never auto-indexes thin cities)
+  try {
+    const desk = await writeGrowthDesk(profile, { outDir });
+    steps.push({ id: 'growth-desk', ok: desk.ok !== false, message: desk.message });
+  } catch (e) {
+    steps.push({
+      id: 'growth-desk',
+      ok: true,
+      message: `growth-desk skipped: ${String(e?.message || e).slice(0, 120)}`,
+    });
+  }
 
   // Stable alias paths for "latest SEO report"
   try {

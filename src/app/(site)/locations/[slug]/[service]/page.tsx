@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import LocationServiceLandingView from '@/components/locations/LocationServiceLandingView';
 import { listCatalogItems } from '@/lib/catalog';
 import { getLocationByKey } from '@/lib/locations';
+import { hydrateCityIndexAllowlist } from '@/lib/city-index-allowlist';
 import { getServiceSeo, isCityServiceIndexable } from '@/lib/location-services';
 import { buildPageMetadata } from '@/lib/seo';
 
@@ -10,6 +11,7 @@ type Props = { params: Promise<{ slug: string; service: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, service: serviceKey } = await params;
+  await hydrateCityIndexAllowlist();
   const location = getLocationByKey(slug);
   const service = getServiceSeo(serviceKey);
   if (!location || !service) notFound();
@@ -23,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LocationServicePage({ params }: Props) {
   const { slug, service: serviceKey } = await params;
+  await hydrateCityIndexAllowlist();
   const location = getLocationByKey(slug);
   const service = getServiceSeo(serviceKey);
   if (!location || !service) notFound();

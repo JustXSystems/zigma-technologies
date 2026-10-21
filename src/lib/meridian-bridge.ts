@@ -82,6 +82,7 @@ export type MeridianAct =
   | { action: 'rich-results-pack' }
   | { action: 'top20-meta-pack' }
   | { action: 'review-kit' }
+  | { action: 'growth-desk' }
   | { action: 'content-calendar' }
   | { action: 'speed-baseline' }
   | { action: 'preprod-removals' }
@@ -545,6 +546,8 @@ export function meridianLatestPaths(env: MeridianEnv) {
     sovereignCertificate: path.join(dir, 'sovereign-certificate.html'),
     liveThrone: path.join(dir, 'live-throne.json'),
     growthRadar: path.join(dir, 'growth-radar.md'),
+    growthDesk: path.join(dir, 'growth-desk.html'),
+    growthDeskJson: path.join(dir, 'growth-desk.json'),
     deployCourier: path.join(dir, 'deploy-courier.json'),
     growthCloser: path.join(dir, 'growth-closer.md'),
     signalForge: path.join(dir, 'signal-forge.json'),
@@ -633,12 +636,13 @@ export async function readMeridianArtefactHtml(...candidates: string[]): Promise
 
 export async function meridianArtefactAvailability(env: MeridianEnv) {
   const p = meridianLatestPaths(env);
-  const [brief, cockpit, html, phase0, seoReport] = await Promise.all([
+  const [brief, cockpit, html, phase0, seoReport, growth] = await Promise.all([
     meridianArtefactExists(p.commandBrief, p.seoReport),
     meridianArtefactExists(p.opsCockpit),
     meridianArtefactExists(p.html, p.seoReport, p.commandBrief),
     meridianArtefactExists(p.phase0Wizard),
     meridianArtefactExists(p.seoReportJson, p.commandBriefJson),
+    meridianArtefactExists(p.growthDesk, p.growthDeskJson),
   ]);
   return {
     dir: p.dir,
@@ -648,6 +652,7 @@ export async function meridianArtefactAvailability(env: MeridianEnv) {
     html,
     phase0,
     seoReport,
+    growth,
   };
 }
 
@@ -701,6 +706,8 @@ export type MeridianJobStatus = {
   workflow?: string;
   runId?: number;
   runUrl?: string;
+  /** Zero-secret: open Actions → Run workflow when API dispatch is blocked */
+  fallbackUrl?: string;
 };
 
 export async function readMeridianJobStatus(env: MeridianEnv): Promise<MeridianJobStatus | null> {
@@ -734,7 +741,14 @@ export async function startMeridianGithubDispatch(
     skipScan?: boolean;
     skipAct?: boolean;
   } = {}
-): Promise<{ started: boolean; job: MeridianJobStatus; alreadyRunning?: boolean; message: string }> {
+): Promise<{
+  started: boolean;
+  job: MeridianJobStatus;
+  alreadyRunning?: boolean;
+  message: string;
+  fallbackUrl?: string;
+  openFallback?: boolean;
+}> {
   const existing = await readMeridianJobStatus(env);
   if (existing?.status === 'running') {
     const ageMs = Date.now() - new Date(existing.startedAt).getTime();
@@ -744,23 +758,16 @@ export async function startMeridianGithubDispatch(
         alreadyRunning: true,
         job: existing,
         message: 'A Meridian job is already running — wait for it to finish or open the Actions run link.',
+        fallbackUrl: existing.runUrl || existing.fallbackUrl,
       };
     }
   }
 
+  const workflow: GhWorkflowId =
+    kind === 'seo-report' ? 'meridian-seo-report.yml' : 'meridian-autopilot.yml';
   const desk = meridianGithubDeskStatus();
-  if (!desk.ready) {
-    const job: MeridianJobStatus = {
-      action: kind === 'seo-report' ? 'dispatch-seo-report' : 'dispatch-autopilot',
-      status: 'error',
-      startedAt: new Date().toISOString(),
-      finishedAt: new Date().toISOString(),
-      provider: 'github',
-      error: desk.message,
-    };
-    await writeMeridianJobStatus(env, job);
-    return { started: false, job, message: desk.message };
-  }
+  const fallbackUrl =
+    kind === 'seo-report' ? desk.workflows.seoReport : desk.workflows.autopilot;
 
   if (kind === 'seo-report' && env !== 'prod') {
     const job: MeridianJobStatus = {
@@ -770,13 +777,36 @@ export async function startMeridianGithubDispatch(
       finishedAt: new Date().toISOString(),
       provider: 'github',
       error: 'Meridian SEO report workflow is Production-only (PreProd stays noindex).',
+      fallbackUrl,
     };
     await writeMeridianJobStatus(env, job);
-    return { started: false, job, message: job.error || 'Production only' };
+    return { started: false, job, message: job.error || 'Production only', fallbackUrl };
   }
 
-  const workflow: GhWorkflowId =
-    kind === 'seo-report' ? 'meridian-seo-report.yml' : 'meridian-autopilot.yml';
+  // No App/PAT: still succeed operationally — Admin opens Actions (zero secrets).
+  if (!desk.ready) {
+    const job: MeridianJobStatus = {
+      action: kind === 'seo-report' ? 'dispatch-seo-report' : 'dispatch-autopilot',
+      status: 'error',
+      startedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
+      provider: 'github',
+      workflow,
+      runUrl: fallbackUrl,
+      fallbackUrl,
+      error:
+        'No GitHub App/PAT on this node. Open Actions → Run workflow (desk syncs after the run). Sunday schedule already covers this automatically.',
+    };
+    await writeMeridianJobStatus(env, job);
+    return {
+      started: false,
+      openFallback: true,
+      job,
+      message: job.error || desk.message,
+      fallbackUrl,
+    };
+  }
+
   const startedAt = new Date().toISOString();
   let inputs: GhDispatchInputs;
   if (kind === 'seo-report') {
@@ -801,10 +831,18 @@ export async function startMeridianGithubDispatch(
       finishedAt: new Date().toISOString(),
       provider: 'github',
       workflow,
+      runUrl: dispatched.fallbackUrl || fallbackUrl,
+      fallbackUrl: dispatched.fallbackUrl || fallbackUrl,
       error: dispatched.message,
     };
     await writeMeridianJobStatus(env, job);
-    return { started: false, job, message: dispatched.message };
+    return {
+      started: false,
+      openFallback: true,
+      job,
+      message: dispatched.message,
+      fallbackUrl: dispatched.fallbackUrl || fallbackUrl,
+    };
   }
 
   const run = await waitForDispatchedRun(workflow, startedAt);
@@ -1104,6 +1142,7 @@ export function meridianConnectorReadiness() {
   const psiApiKey = envSet('MERIDIAN_PSI_API_KEY');
   const webhookUrl = envSet('MERIDIAN_WEBHOOK_URL');
   const githubToken = envSet('MERIDIAN_GITHUB_TOKEN') || envSet('GH_TOKEN');
+  const githubApp = envSet('MERIDIAN_GITHUB_APP_ID') && envSet('MERIDIAN_GITHUB_APP_INSTALLATION_ID') && envSet('MERIDIAN_GITHUB_APP_PRIVATE_KEY');
 
   const controlPlane = meridianControlPlaneStatus();
   const github = meridianGithubDeskStatus();
@@ -1115,9 +1154,19 @@ export function meridianConnectorReadiness() {
     github,
     fields: [
       {
+        id: 'MERIDIAN_GITHUB_APP_*',
+        label: 'GitHub App (org-safe Admin dispatch)',
+        set: githubApp,
+        optional: true,
+        requiredFor: ['github-dispatch'],
+        howTo:
+          'Preferred over PAT for org repos. Create a GitHub App → install on JustXSystems/zigma-technologies → permissions Actions:write, Contents:read → set MERIDIAN_GITHUB_APP_ID, MERIDIAN_GITHUB_APP_INSTALLATION_ID, MERIDIAN_GITHUB_APP_PRIVATE_KEY on Production .env. Or skip — use Actions → Meridian SEO report / Sunday cron.',
+      },
+      {
         id: 'MERIDIAN_GITHUB_TOKEN',
-        label: 'GitHub Actions dispatch token',
+        label: 'GitHub classic PAT (fallback dispatch)',
         set: githubToken,
+        optional: true,
         requiredFor: ['github-dispatch'],
         howTo: github.howTo,
       },
@@ -1160,21 +1209,27 @@ export function meridianConnectorReadiness() {
         id: 'MERIDIAN_PSI_API_KEY',
         label: 'PageSpeed Insights API key',
         set: psiApiKey,
+        optional: true,
         requiredFor: ['pagespeed'],
-        howTo: 'Google Cloud → Credentials → API key; enable PageSpeed Insights API. SETUP.md Part E.',
+        howTo: 'Optional. Google Cloud → Credentials → API key; enable PageSpeed Insights API. SETUP.md Part E.',
       },
       {
         id: 'MERIDIAN_WEBHOOK_URL',
         label: 'Ops alert webhook (Slack/Discord/Teams)',
         set: webhookUrl,
+        optional: true,
         requiredFor: ['alerts'],
-        howTo: 'Incoming webhook URL. Fired on live-verify fail, auth_required, score regression. Optional — SETUP.md Part F.',
+        howTo: 'Optional — leave unset. Only if you want Slack/Discord/Teams pings on verify fail. Not required for SEO.',
       },
     ],
     connectors: {
       github: {
         ready: github.ready,
-        missing: github.ready ? [] : ['MERIDIAN_GITHUB_TOKEN'],
+        missing: github.ready ? [] : [],
+        optional: true,
+        note: github.ready
+          ? github.message
+          : 'Optional — Sunday cron + Actions UI cover reports without a token',
       },
       gsc: { ready: googleOk, missing: googleOk ? [] : ['MERIDIAN_GOOGLE_CLIENT_ID', 'MERIDIAN_GOOGLE_CLIENT_SECRET', 'MERIDIAN_GOOGLE_REFRESH_TOKEN'].filter((k) => !envSet(k)) },
       ga4: {
@@ -1187,9 +1242,19 @@ export function meridianConnectorReadiness() {
         ],
       },
       bing: { ready: bingApiKey, missing: bingApiKey ? [] : ['MERIDIAN_BING_API_KEY'] },
-      pagespeed: { ready: psiApiKey, missing: psiApiKey ? [] : ['MERIDIAN_PSI_API_KEY'] },
+      pagespeed: {
+        ready: psiApiKey,
+        missing: [],
+        optional: true,
+        note: psiApiKey ? 'PageSpeed key set' : 'Optional — PSI skipped without key',
+      },
       act: { ready: googleOk, missing: googleOk ? [] : ['MERIDIAN_GOOGLE_* refresh with webmasters scope'] },
-      alerts: { ready: webhookUrl, missing: webhookUrl ? [] : ['MERIDIAN_WEBHOOK_URL'] },
+      alerts: {
+        ready: webhookUrl,
+        missing: [],
+        optional: true,
+        note: webhookUrl ? 'Webhook set' : 'Optional — leave unset; no chat alerts',
+      },
     },
   };
 }
@@ -1294,6 +1359,9 @@ export function runMeridianAct(env: MeridianEnv, act: MeridianAct) {
   }
   if (act.action === 'review-kit') {
     return spawnMeridian(['act', 'review-kit', '--profile', profile]);
+  }
+  if (act.action === 'growth-desk') {
+    return spawnMeridian(['act', 'growth-desk', '--profile', profile]);
   }
   if (act.action === 'content-calendar') {
     return spawnMeridian(['act', 'content-calendar', '--profile', profile]);

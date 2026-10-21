@@ -7,6 +7,7 @@ import { writeCityDraft } from './city-draft.mjs';
 import { seedThinContent } from './content-seed.mjs';
 import { runGrowthRadar } from './growth-radar.mjs';
 import { runGrowthCloser } from './growth-closer.mjs';
+import { writeGrowthDesk } from './growth-desk.mjs';
 import { buildKeywordMap } from './keyword-map.mjs';
 import { runCatalogSteward } from './catalog-steward.mjs';
 
@@ -117,6 +118,18 @@ export async function runSilentSteward(profile, opts = {}) {
   } else {
     stewards.push({ id: 'growth-closer', ok: true, message: 'No open opportunities', status: 'clear' });
   }
+
+  stewards.push(
+    await safe('growth-desk', () =>
+      writeGrowthDesk(profile, {
+        outDir,
+        skipRadar: true,
+        skipCity: true,
+        skipReviews: true,
+        skipCalendar: false,
+      })
+    )
+  );
 
   const dominion = await readJson(resolve(outDir, 'dominion-apex.json'));
   const chronos = await readJson(resolve(outDir, 'chronos-pulse.json'));

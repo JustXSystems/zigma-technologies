@@ -34,6 +34,7 @@ const DEFAULT_SECTIONS = [
   'technical',
   'catalog',
   'conversion',
+  'growth',
   'insights',
   'actions',
 ];
@@ -102,7 +103,7 @@ function resolveConfig(profile, opts = {}) {
   };
 }
 
-function analyzeInsights({ gsc, bing, ga4, report, catalog, conversion, humanDebt, liveVerify }) {
+function analyzeInsights({ gsc, bing, ga4, report, catalog, conversion, humanDebt, liveVerify, growth }) {
   const insights = [];
   const g = gsc?.status === 'ok' ? gsc.data : null;
   const b = bing?.status === 'ok' ? bing.data : null;
@@ -244,6 +245,27 @@ function analyzeInsights({ gsc, bing, ga4, report, catalog, conversion, humanDeb
       severity: 'medium',
       title: 'Enquiry yield soft',
       detail: `${conversion.yieldPct}% yield — review form UX and CTAs`,
+      owner: 'you',
+    });
+  }
+
+  if (growth?.opportunityCount > 0) {
+    insights.push({
+      severity: 'medium',
+      title: `${growth.opportunityCount} growth opportunity(ies) on Growth Desk`,
+      detail:
+        (growth.nextActions || [])
+          .slice(0, 2)
+          .map((a) => a.title)
+          .join(' · ') || 'Open Growth Desk for CTR / page-2 / review actions',
+      owner: 'you',
+    });
+  }
+  if (growth?.cityDraftPath) {
+    insights.push({
+      severity: 'medium',
+      title: 'City draft staged — promote only with unique proof',
+      detail: `${growth.cityDraftPath} · Admin → SEO → City promote (never auto-index thin templates)`,
       owner: 'you',
     });
   }
@@ -558,6 +580,31 @@ function buildHtml(profile, config, board) {
 </section>`);
   }
 
+  if (sections.has('growth')) {
+    const gr = board.growth || {};
+    const actions = (gr.nextActions || []).slice(0, 5);
+    parts.push(`
+<section class="panel" data-section="growth" id="sec-growth">
+  <div class="panel-head"><h2>Growth Desk</h2><p>Radar · city drafts · review outreach — quality gates on</p></div>
+  <div class="grid-3">
+    <article class="tile"><h3>Opportunities</h3><b>${esc(num(gr.opportunityCount))}</b></article>
+    <article class="tile"><h3>City held</h3><b>${esc(num(gr.cityTemplatesHeld))}</b></article>
+    <article class="tile"><h3>Review link</h3><b class="${gr.reviewLink ? 'ok' : 'warn'}">${gr.reviewLink ? 'LIVE' : 'SET GBP'}</b></article>
+  </div>
+  ${
+    actions.length
+      ? `<ul class="findings">${actions
+          .map(
+            (a) =>
+              `<li><strong>${esc(a.kind)}</strong> ${esc(a.title)} — <span class="muted">${esc(a.detail)}</span></li>`
+          )
+          .join('')}</ul>`
+      : '<p class="empty">Growth desk clear for this cycle.</p>'
+  }
+  <p class="muted">City promote stays human: Admin → SEO → Meridian → City promote after unique proof.</p>
+</section>`);
+  }
+
   if (sections.has('actions')) {
     const fileEnv = String(profile.id || '').includes('preprod') ? 'preprod' : 'prod';
     let urlPrefix = '';
@@ -582,6 +629,7 @@ function buildHtml(profile, config, board) {
   </div>
   <div class="links">
     <a class="btn primary" href="${desk('brief')}">This report</a>
+    <a class="btn" href="${desk('growth')}">Growth Desk</a>
     <a class="btn" href="${arte('phase32-ops.html')}">Catalog</a>
     <a class="btn" href="${arte('phase31-ops.html')}">Steward</a>
     <a class="btn" href="${desk('cockpit')}">Ops cockpit</a>
@@ -768,7 +816,7 @@ export async function writeCommandBrief(profile, opts = {}) {
   await mkdir(outDir, { recursive: true });
   const config = resolveConfig(profile, opts);
 
-  const [gsc, bing, ga4, report, catalog, steward, conversionJson, humanDebt, unlock, digest] =
+  const [gsc, bing, ga4, report, catalog, steward, conversionJson, humanDebt, unlock, digest, growth] =
     await Promise.all([
       opts.gsc ||
         collectGsc(profile, {
@@ -791,6 +839,7 @@ export async function writeCommandBrief(profile, opts = {}) {
       readJson(resolve(outDir, 'human-debt.json')),
       readJson(resolve(outDir, 'unlock-readiness.json')),
       readJson(resolve(outDir, 'weekly-digest.json')),
+      opts.growth || readJson(resolve(outDir, 'growth-desk.json')),
     ]);
   const liveVerify = opts.liveVerify || (await readJson(resolve(outDir, 'seo-live-verify.json')));
   const pagespeed = opts.pagespeed || null;
@@ -814,6 +863,7 @@ export async function writeCommandBrief(profile, opts = {}) {
     conversion,
     humanDebt: humanDebt?.data || humanDebt,
     liveVerify,
+    growth,
   });
 
   const gOk = gsc?.status === 'ok';
@@ -846,6 +896,15 @@ export async function writeCommandBrief(profile, opts = {}) {
     catalog,
     steward,
     conversion,
+    growth: growth
+      ? {
+          opportunityCount: growth.opportunityCount ?? 0,
+          cityTemplatesHeld: growth.cityTemplatesHeld ?? 0,
+          reviewLink: growth.reviewLink || null,
+          cityDraftPath: growth.cityDraftPath || null,
+          nextActions: growth.nextActions || [],
+        }
+      : null,
     humanDebt: humanDebt?.data || humanDebt,
     unlock,
     digest: digest

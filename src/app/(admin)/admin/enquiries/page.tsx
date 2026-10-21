@@ -148,13 +148,65 @@ export default function EnquiriesPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || 'Update failed');
+      setError((data as { error?: string }).error || 'Update failed');
       return;
     }
     await load();
-    if (selected?.id === id) setSelected({ ...selected, status });
+    if (selected?.id === id) {
+      const outreach = (data as { reviewOutreach?: Record<string, unknown> }).reviewOutreach;
+      setSelected({
+        ...selected,
+        status,
+        payload_json: outreach
+          ? { ...selected.payload_json, reviewOutreach: outreach }
+          : selected.payload_json,
+      });
+      if (outreach && status === 'closed') {
+        setMessage(
+          'Review request drafted — email app opens now (nothing is sent until you click Send).'
+        );
+        const mailto = typeof outreach.mailto === 'string' ? outreach.mailto : '';
+        if (mailto.startsWith('mailto:')) {
+          window.setTimeout(() => {
+            window.location.href = mailto;
+          }, 250);
+        }
+      }
+    }
+  }
+
+  async function draftReviewForSelected() {
+    if (!selected) return;
+    setError('');
+    setMessage('');
+    const res = await fetch(`/api/admin/enquiries/${selected.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ draftReview: true }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError((data as { error?: string }).error || 'Draft failed');
+      return;
+    }
+    const outreach = (data as { reviewOutreach?: Record<string, unknown> }).reviewOutreach;
+    if (!outreach) {
+      setError('No review draft (careers leads are skipped, or enquiry is not closed).');
+      return;
+    }
+    setSelected({
+      ...selected,
+      payload_json: { ...selected.payload_json, reviewOutreach: outreach },
+    });
+    setMessage('Review mailto drafted.');
+    const mailto = typeof outreach.mailto === 'string' ? outreach.mailto : '';
+    if (mailto.startsWith('mailto:')) {
+      window.setTimeout(() => {
+        window.location.href = mailto;
+      }, 250);
+    }
   }
 
   async function saveNotes() {
@@ -503,10 +555,38 @@ export default function EnquiriesPage() {
               </div>
             ) : null}
 
+            {selected.status === 'closed' && enquiryKind(selected) !== 'careers' ? (
+              <div className="enq-pipe-panel" style={{ marginBottom: '1rem' }}>
+                <h3>Growth · Google review</h3>
+                <p style={{ margin: '0 0 0.65rem', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                  One-click mailto after a won job — Meridian never sends on your behalf.
+                </p>
+                {selected.payload_json?.reviewOutreach &&
+                typeof selected.payload_json.reviewOutreach === 'object' &&
+                'mailto' in (selected.payload_json.reviewOutreach as object) ? (
+                  <a
+                    className="admin-btn admin-btn-primary az-admin-mini"
+                    href={String((selected.payload_json.reviewOutreach as { mailto: string }).mailto)}
+                  >
+                    Ask for Google review
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-primary az-admin-mini"
+                    onClick={() => void draftReviewForSelected()}
+                  >
+                    Draft review request
+                  </button>
+                )}
+              </div>
+            ) : null}
+
             <div className="admin-form-grid" style={{ marginBottom: '1rem' }}>
               {Object.entries(selected.payload_json || {}).map(([key, value]) => {
                 if (
                   key === 'resume_file' ||
+                  key === 'reviewOutreach' ||
                   key === 'resume_mime' ||
                   key === 'resume_url' ||
                   key === 'hiring_url' ||

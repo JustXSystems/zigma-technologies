@@ -103,6 +103,19 @@ export async function GET(request: Request) {
         paths.dir
       );
     }
+    if (format === 'growth' || format === 'growth-desk') {
+      const body = await readMeridianArtefactHtml(paths.growthDesk);
+      if (body) {
+        return new NextResponse(withMeridianFileBase(body, env), {
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+        });
+      }
+      return missingArtefactHtml(
+        'No Growth Desk yet',
+        'Run <strong>Generate report (GitHub)</strong> or Autopilot — Growth Desk is written beside the Command Brief.',
+        paths.dir
+      );
+    }
     if (format === 'phase0') {
       const body = await readMeridianArtefactHtml(paths.phase0Wizard);
       if (body) {
@@ -293,9 +306,11 @@ export async function POST(request: Request) {
       return NextResponse.json({
         env,
         action: 'dispatch-seo-report',
-        ok: bg.started || !!bg.alreadyRunning,
+        ok: bg.started || !!bg.alreadyRunning || !!bg.openFallback,
         started: bg.started,
         alreadyRunning: !!bg.alreadyRunning,
+        openFallback: !!bg.openFallback,
+        fallbackUrl: bg.fallbackUrl,
         job: bg.job,
         message: bg.message,
         github: meridianGithubDeskStatus(),
@@ -309,9 +324,11 @@ export async function POST(request: Request) {
       return NextResponse.json({
         env,
         action: 'dispatch-autopilot',
-        ok: bg.started || !!bg.alreadyRunning,
+        ok: bg.started || !!bg.alreadyRunning || !!bg.openFallback,
         started: bg.started,
         alreadyRunning: !!bg.alreadyRunning,
+        openFallback: !!bg.openFallback,
+        fallbackUrl: bg.fallbackUrl,
         job: bg.job,
         message: bg.message,
         github: meridianGithubDeskStatus(),
@@ -382,6 +399,7 @@ export async function POST(request: Request) {
       action === 'rich-results-pack' ||
       action === 'top20-meta-pack' ||
       action === 'review-kit' ||
+      action === 'growth-desk' ||
       action === 'content-calendar' ||
       action === 'speed-baseline' ||
       action === 'preprod-removals' ||
@@ -449,6 +467,7 @@ export async function POST(request: Request) {
       else if (action === 'rich-results-pack') act = { action: 'rich-results-pack' };
       else if (action === 'top20-meta-pack') act = { action: 'top20-meta-pack' };
       else if (action === 'review-kit') act = { action: 'review-kit' };
+      else if (action === 'growth-desk') act = { action: 'growth-desk' };
       else if (action === 'content-calendar') act = { action: 'content-calendar' };
       else if (action === 'speed-baseline') act = { action: 'speed-baseline' };
       else if (action === 'preprod-removals') act = { action: 'preprod-removals' };

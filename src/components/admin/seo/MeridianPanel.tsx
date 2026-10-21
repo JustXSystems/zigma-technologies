@@ -9,6 +9,7 @@ type ReadinessField = {
   id: string;
   label: string;
   set: boolean;
+  optional?: boolean;
   requiredFor: string[];
   howTo: string;
 };
@@ -24,9 +25,12 @@ type ControlPlane = {
 type GithubDesk = {
   ready?: boolean;
   tokenSet?: boolean;
+  appConfigured?: boolean;
+  authMode?: string;
   repo?: string;
   message?: string;
   howTo?: string;
+  actionsRunUrl?: string;
   workflows?: { seoReport?: string; autopilot?: string };
 };
 
@@ -71,6 +75,7 @@ type JobStatus = {
   workflow?: string;
   runId?: number;
   runUrl?: string;
+  fallbackUrl?: string;
 };
 
 type Artefacts = {
@@ -81,6 +86,7 @@ type Artefacts = {
   html?: boolean;
   phase0?: boolean;
   seoReport?: boolean;
+  growth?: boolean;
 };
 
 async function readApiJson(res: Response): Promise<Record<string, unknown>> {
@@ -112,6 +118,17 @@ export default function MeridianPanel() {
   const [error, setError] = useState<string | null>(null);
   const [log, setLog] = useState<string>('');
   const [pending, startTransition] = useTransition();
+  const [cityIndex, setCityIndex] = useState<{
+    cities: { key: string; name: string }[];
+    services: { key: string; name: string }[];
+    all: string[];
+    runtime: string[];
+    qualityGate?: string;
+  } | null>(null);
+  const [promoteCity, setPromoteCity] = useState('');
+  const [promoteService, setPromoteService] = useState('');
+  const [promoteAck, setPromoteAck] = useState(false);
+  const [promoteBusy, setPromoteBusy] = useState(false);
 
   const load = useCallback(async (e: Env) => {
     setError(null);
@@ -137,6 +154,61 @@ export default function MeridianPanel() {
       void load(env);
     });
   }, [env, load]);
+
+  const loadCityIndex = useCallback(async () => {
+    try {
+      const res = await fetch(withBasePath('/api/admin/seo/city-index'), { credentials: 'include' });
+      const data = await readApiJson(res);
+      if (!res.ok) return;
+      const cities = (data.cities as { key: string; name: string }[]) || [];
+      const services = (data.services as { key: string; name: string }[]) || [];
+      setCityIndex({
+        cities,
+        services,
+        all: (data.all as string[]) || [],
+        runtime: (data.runtime as string[]) || [],
+        qualityGate: typeof data.qualityGate === 'string' ? data.qualityGate : undefined,
+      });
+      setPromoteCity((prev) => prev || cities[0]?.key || '');
+      setPromoteService((prev) => prev || services[0]?.key || '');
+    } catch {
+      /* optional desk */
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCityIndex();
+  }, [loadCityIndex]);
+
+  async function runCityPromote(action: 'promote' | 'demote') {
+    setPromoteBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(withBasePath('/api/admin/seo/city-index'), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          city: promoteCity,
+          service: promoteService,
+          confirmUniqueProof: action === 'promote' ? promoteAck : true,
+        }),
+      });
+      const data = await readApiJson(res);
+      if (!res.ok) {
+        setError(String(data.error || 'City index update failed'));
+        return;
+      }
+      setLog(String(data.message || `${action} ok`));
+      setPromoteAck(false);
+      await loadCityIndex();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'City index update failed');
+    } finally {
+      setPromoteBusy(false);
+    }
+  }
 
   // Poll while background autopilot is running
   useEffect(() => {
@@ -177,6 +249,12 @@ export default function MeridianPanel() {
           return;
         }
         if (data.job) setJob(data.job as JobStatus);
+        if (data.openFallback && typeof data.fallbackUrl === 'string' && data.fallbackUrl) {
+          setLog(String(data.message || 'Opening GitHub Actions…'));
+          window.open(data.fallbackUrl, '_blank', 'noopener,noreferrer');
+          await load(env);
+          return;
+        }
         if (data.started || data.alreadyRunning) {
           setLog(String(data.message || 'Autopilot running in background…'));
           await load(env);
@@ -466,6 +544,9 @@ export default function MeridianPanel() {
         .badge.off {
           color: #ff9f43;
         }
+        .badge.opt {
+          color: var(--m-muted);
+        }
         .howto {
           color: var(--m-muted);
           font-size: 0.78rem;
@@ -552,65 +633,55 @@ export default function MeridianPanel() {
               Open Command Brief (not generated yet)
             </span>
           )}
+          {artefacts?.growth ? (
+            <a
+              className="link"
+              href={withBasePath(`/api/admin/meridian?env=${env}&format=growth`)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Growth Desk
+            </a>
+          ) : (
+            <span className="link" title="Generate report first" style={{ opacity: 0.55, cursor: 'help' }}>
+              Growth Desk (not generated yet)
+            </span>
+          )}
           <button
             type="button"
             className="primary"
-            disabled={
-              pending ||
-              jobRunning ||
-              env !== 'prod' ||
-              (!(github?.ready || readiness?.github?.ready) && readiness?.controlPlane?.binExists === false)
+            disabled={pending || jobRunning || env !== 'prod'}
+            onClick={() =>
+              postAction(
+                { action: 'dispatch-seo-report', skipScan: true },
+                'Dispatching Meridian SEO report (App/PAT) or opening Actions'
+              )
             }
-            onClick={() => {
-              if (github?.ready || readiness?.github?.ready) {
-                postAction(
-                  { action: 'dispatch-seo-report', skipScan: true },
-                  'Dispatching Meridian SEO report on GitHub Actions'
-                );
-              } else {
-                postAction(
-                  { action: 'seo-report', skipScan: true },
-                  'Generating live SEO report on this node'
-                );
-              }
-            }}
-            title={
-              github?.ready || readiness?.github?.ready
-                ? 'workflow_dispatch → Meridian SEO report · artefacts sync to this desk'
-                : readiness?.controlPlane?.binExists
-                  ? 'Local CLI fallback (set MERIDIAN_GITHUB_TOKEN for Actions-first)'
-                  : 'Set MERIDIAN_GITHUB_TOKEN or Deploy Meridian + MERIDIAN_HOME'
-            }
+            title="Tries GitHub App / PAT dispatch; on 403 or missing auth opens Actions → Run workflow"
           >
-            {pending
-              ? 'Working…'
-              : github?.ready || readiness?.github?.ready
-                ? 'Generate report (GitHub)'
-                : 'Generate report (this node)'}
+            {pending ? 'Working…' : 'Generate report (GitHub)'}
           </button>
           <button
             type="button"
-            disabled={
-              pending ||
-              jobRunning ||
-              (!(github?.ready || readiness?.github?.ready) && readiness?.controlPlane?.binExists === false)
+            disabled={pending || jobRunning}
+            onClick={() =>
+              postAction(
+                { action: 'dispatch-autopilot', skipAct: env === 'preprod' },
+                'Dispatching Meridian autopilot (or opening Actions)'
+              )
             }
-            onClick={() => {
-              if (github?.ready || readiness?.github?.ready) {
-                postAction(
-                  { action: 'dispatch-autopilot', skipAct: env === 'preprod' },
-                  'Dispatching Meridian autopilot on GitHub Actions'
-                );
-              } else {
-                postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot');
-              }
-            }}
           >
-            {jobRunning ? 'Running…' : github?.ready || readiness?.github?.ready ? 'Autopilot (GitHub)' : 'Autopilot (heal)'}
+            {jobRunning ? 'Running…' : 'Autopilot (GitHub)'}
           </button>
-          {github?.workflows?.seoReport ? (
-            <a className="link" href={github.workflows.seoReport} target="_blank" rel="noreferrer">
-              Actions workflows
+          {(github?.actionsRunUrl || github?.workflows?.seoReport) ? (
+            <a
+              className="link"
+              href={github.actionsRunUrl || github.workflows?.seoReport}
+              target="_blank"
+              rel="noreferrer"
+              title="Zero secrets — click Run workflow on GitHub"
+            >
+              Open Actions (no token)
             </a>
           ) : null}
           {artefacts?.cockpit ? (
@@ -629,6 +700,73 @@ export default function MeridianPanel() {
           )}
         </div>
       </div>
+
+      <details className="more-actions" open={false}>
+        <summary>Growth · city promote (human quality gate)</summary>
+        <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.65rem', maxWidth: 520 }}>
+          <p style={{ margin: 0, fontSize: '0.88rem', opacity: 0.85, lineHeight: 1.45 }}>
+            {cityIndex?.qualityGate ||
+              'Promote a city × service URL to the sitemap only after unique local proof. Never auto-index thin templates.'}
+          </p>
+          <div className="actions" style={{ flexWrap: 'wrap' }}>
+            <select
+              value={promoteCity}
+              disabled={promoteBusy}
+              onChange={(e) => setPromoteCity(e.target.value)}
+              aria-label="City"
+            >
+              {(cityIndex?.cities || []).map((c) => (
+                <option key={c.key} value={c.key}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={promoteService}
+              disabled={promoteBusy}
+              onChange={(e) => setPromoteService(e.target.value)}
+              aria-label="Service"
+            >
+              {(cityIndex?.services || []).map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
+              <input
+                type="checkbox"
+                checked={promoteAck}
+                disabled={promoteBusy}
+                onChange={(e) => setPromoteAck(e.target.checked)}
+              />
+              Unique proof ready
+            </label>
+            <button
+              type="button"
+              className="primary"
+              disabled={promoteBusy || !promoteCity || !promoteService || !promoteAck}
+              onClick={() => void runCityPromote('promote')}
+            >
+              {promoteBusy ? 'Working…' : 'Promote to index'}
+            </button>
+            <button
+              type="button"
+              disabled={promoteBusy || !promoteCity || !promoteService}
+              onClick={() => void runCityPromote('demote')}
+            >
+              Demote (noindex)
+            </button>
+          </div>
+          {cityIndex?.all?.length ? (
+            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.75 }}>
+              Indexable now: {cityIndex.all.join(', ')}
+            </p>
+          ) : (
+            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.75 }}>No city × service pairs indexable yet.</p>
+          )}
+        </div>
+      </details>
 
       <details className="more-actions" open={false}>
         <summary>Advanced · this-node CLI, sitemaps, crawl</summary>
@@ -659,6 +797,14 @@ export default function MeridianPanel() {
             onClick={() => postAction({ action: 'seo-report' }, 'Full SEO report + crawl (local CLI)')}
           >
             Local report + crawl
+          </button>
+          <button
+            type="button"
+            disabled={pending || jobRunning || readiness?.controlPlane?.binExists === false}
+            onClick={() => postAction({ action: 'growth-desk' }, 'Refreshing Growth Desk (local CLI)')}
+            title="Writes growth-desk.html beside Command Brief — also runs inside Generate report"
+          >
+            Refresh Growth Desk
           </button>
           <button
             type="button"
@@ -1048,9 +1194,9 @@ export default function MeridianPanel() {
         <>
           <div className="section-title">Connectors readiness</div>
           <p className="sub" style={{ marginBottom: '0.5rem' }}>
-            Secrets are set on the server <code>.env</code> (never shown here). Full click-by-click guide:{' '}
-            <code>{readiness.docsPath || 'packages/meridian/ARCHITECTURE.md'}</code> · secrets:{' '}
-            <code>{readiness.setupPath || 'packages/meridian/SETUP.md'}</code>.
+            Secrets live in server <code>.env</code> / Actions (never shown here). Orange = required connector gap.
+            Grey <em>optional</em> = safe to ignore (webhook, PSI, GitHub App/PAT — Sunday cron already reports).
+            Guide: <code>{readiness.setupPath || 'packages/meridian/SETUP.md'}</code>.
           </p>
           <table className="ready-table">
             <thead>
@@ -1068,7 +1214,11 @@ export default function MeridianPanel() {
                     <div className="howto">{f.label}</div>
                   </td>
                   <td>
-                    <span className={`badge ${f.set ? 'on' : 'off'}`}>{f.set ? 'set' : 'missing'}</span>
+                    <span
+                      className={`badge ${f.set ? 'on' : f.optional ? 'opt' : 'off'}`}
+                    >
+                      {f.set ? 'set' : f.optional ? 'optional' : 'missing'}
+                    </span>
                   </td>
                   <td className="howto">{f.howTo}</td>
                 </tr>

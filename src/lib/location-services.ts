@@ -1,3 +1,4 @@
+import { isInRuntimeCityAllowlist } from '@/lib/city-index-allowlist';
 import { LOCATION_DEFS } from '@/lib/locations';
 
 export type ServiceSeoDef = {
@@ -68,13 +69,17 @@ export function getServiceSeo(key: string) {
 /**
  * City × service pages that carry unique, city-specific content and may be indexed.
  * Everything else is rendered with `noindex, follow` and kept out of the sitemap so
- * templated pages are not treated as doorway / scaled content. Add `city/service`
- * keys here only after writing real local copy (projects, response times, team).
+ * templated pages are not treated as doorway / scaled content.
+ *
+ * Prefer Admin → SEO → Meridian → **City promote** (runtime allowlist under
+ * `storage/seo/indexable-city-services.json`) after unique proof. Keep this Set
+ * for shipped / reviewed pairs that should travel with the repo.
  */
 export const INDEXABLE_CITY_SERVICES = new Set<string>([]);
 
 export function isCityServiceIndexable(city: string, service: string) {
-  return INDEXABLE_CITY_SERVICES.has(`${city}/${service}`);
+  if (INDEXABLE_CITY_SERVICES.has(`${city}/${service}`)) return true;
+  return isInRuntimeCityAllowlist(city, service);
 }
 
 export function cityServicePath(city: string, service: string) {

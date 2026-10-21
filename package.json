@@ -14,6 +14,7 @@
     "seo:verify:build": "node scripts/verify-seo-build.mjs",
     "seo:report": "node scripts/meridian-run.mjs act seo-report --profile packages/meridian/profiles/zigma.prod.json",
     "seo:report:quick": "node scripts/meridian-run.mjs act seo-report --profile packages/meridian/profiles/zigma.prod.json --skip-scan --skip-psi",
+    "meridian:growth": "node scripts/meridian-run.mjs act growth-desk --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:secrets:sync": "node scripts/meridian-sync-gh-secrets.mjs",
     "meridian:secrets:sync:dry": "node scripts/meridian-sync-gh-secrets.mjs --dry-run",
     "meridian": "node scripts/meridian-run.mjs",

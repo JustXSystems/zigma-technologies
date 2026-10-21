@@ -70,6 +70,7 @@ import { advancePhase31 } from './connectors/phase31-advance.mjs';
 import { advancePhase32 } from './connectors/phase32-advance.mjs';
 import { advancePhase33 } from './connectors/phase33-advance.mjs';
 import { writeCommandBrief } from './connectors/command-brief.mjs';
+import { writeGrowthDesk } from './connectors/growth-desk.mjs';
 import { runSeoReport } from './connectors/seo-report.mjs';
 import { runCatalogSteward } from './connectors/catalog-steward.mjs';
 import { syncSeoGuideCanon } from './connectors/canon-sync.mjs';
@@ -933,6 +934,12 @@ export async function runCli(argv) {
         title: argValue(argv, '--title') || undefined,
         comparePrevious: !argv.includes('--no-compare'),
       });
+      console.log(JSON.stringify(result, null, 2));
+      process.exit(result.ok ? 0 : 1);
+    }
+    if (action === 'growth-desk' || action === 'growth') {
+      const outDir = argValue(argv, '--out') || resolve(process.cwd(), 'storage', 'meridian', profile.id || 'site');
+      const result = await writeGrowthDesk(profile, { outDir: resolve(outDir) });
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.ok ? 0 : 1);
     }

@@ -148,7 +148,7 @@ Defaults: `ship_meridian=true`, `run_seo_report=true`, `post_deploy_autopilot=fa
 | On demand | You | Admin → **Generate report (GitHub)** (or Actions → Meridian SEO report) |
 | Weekly / Sunday | Actions | Autopilot (Mon) · SEO report (Sun) · desk sync + webhook alerts |
 | After site deploy | Auto | Product SEO live · Command Brief · desk rsync |
-| Content growth | Marketing | City pages, titles, reviews — not new Meridian phases |
+| Content growth | Auto + one click | **Growth Desk** + enquiry-close review mailto; **City promote** (runtime allowlist + unique-proof ack) |
 
 Phases 0–33 are **automation history**, not a weekly human checklist. The desk is: **verify → pull signals → one report → act on insights**.
 
@@ -169,10 +169,11 @@ Phases 0–33 are **automation history**, not a weekly human checklist. The desk
 
 | Capability | Status | How |
 | --- | --- | --- |
-| Admin → `workflow_dispatch` (no CLI on web node) | **Shipped** | `MERIDIAN_GITHUB_TOKEN` on Production → Admin **Generate report (GitHub)** / **Autopilot (GitHub)** |
-| Command Brief → Admin desk sync | **Shipped** | Meridian SEO report + Deploy Production rsync artefacts via `scripts/sync-meridian-desk-to-vps.sh` |
-| Ops webhooks (verify fail / auth / regression) | **Shipped** | `MERIDIAN_WEBHOOK_URL` (+ `MERIDIAN_WEBHOOK_ALERTS_ONLY=1` in Actions) |
-| Actions secret one-shot sync | **Shipped** | `npm run meridian:secrets:sync` (needs `gh auth login`) |
+| Admin → `workflow_dispatch` (no CLI on web node) | **Shipped** | GitHub App (preferred) or classic PAT · 403 → auto-open Actions |
+| Zero-secret report trigger | **Shipped** | Admin **Open Actions (no token)** · Sunday cron · post-deploy brief |
+| Command Brief → Admin desk sync | **Shipped** | Meridian SEO report + Deploy Production rsync via `scripts/sync-meridian-desk-to-vps.sh` |
+| Ops webhooks (verify fail / auth / regression) | **Shipped** | Optional `MERIDIAN_WEBHOOK_URL` |
+| Actions secret one-shot sync | **Shipped** | `npm run meridian:secrets:sync` |
 | Self-hosted Actions runner | Optional | `scripts/install-github-runner-zigma.sh` · label `zigma-prod` |
 | Extract Meridian → multi-tenant SaaS | Later | `JustXSystems/meridian` — not required for one brand |
 
@@ -180,11 +181,14 @@ Phases 0–33 are **automation history**, not a weekly human checklist. The desk
 
 | Variable | Purpose |
 | --- | --- |
-| `MERIDIAN_GITHUB_TOKEN` | Fine-grained PAT · Actions read/write · Contents read |
-| `MERIDIAN_GITHUB_REPO` | Optional override (`JustXSystems/zigma-technologies`) |
+| `MERIDIAN_GITHUB_APP_ID` | Preferred org-safe dispatch |
+| `MERIDIAN_GITHUB_APP_INSTALLATION_ID` | App install on the repo |
+| `MERIDIAN_GITHUB_APP_PRIVATE_KEY` | PEM (`\n` escaped OK) |
+| `MERIDIAN_GITHUB_TOKEN` | Fallback classic PAT (`ghp_…` · repo+workflow) |
+| `MERIDIAN_GITHUB_REPO` | Optional (`JustXSystems/zigma-technologies`) |
 | `MERIDIAN_HOME` | Optional sidecar CLI only |
 | `MERIDIAN_WEBHOOK_URL` | Optional Slack/Discord/Teams alerts |
 
-Without `MERIDIAN_GITHUB_TOKEN`, Admin still opens last Command Brief artefacts; generate falls back to local CLI if present, else prompts for the token.
+Without App/PAT, Admin still opens last Command Brief; **Generate report** opens Actions → Run workflow. Forever coverage = Sunday + post-deploy.
 
 For a single brand on Hostinger, **same monorepo + two deploy workflows + Actions control plane** is the correct senior design.

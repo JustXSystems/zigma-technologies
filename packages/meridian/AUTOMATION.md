@@ -69,7 +69,8 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 48. **Phase 31 silent steward** (meta · city draft staged · review link auto · growth)  
 49. **Phase 32 content continuum** (Inventory / Media / Products / Services / Projects / Pages / Blog / Press)  
 50. **Phase 33 SEO Command Brief** (GSC + Bing + GA4 + Meridian → one customizable HTML report — **primary forever ops surface**)  
-51. **Control-plane desk** (Admin `workflow_dispatch` · desk rsync · ops webhooks · `meridian:secrets:sync` — not a human checklist)
+51. **Control-plane desk** (Admin `workflow_dispatch` · desk rsync · ops webhooks · `meridian:secrets:sync` — not a human checklist)  
+52. **Growth Desk** (`growth-desk.html` · GSC radar · staged city drafts · review mailto on enquiry close · Admin **City promote** runtime allowlist — quality gates on; never auto-index thin cities)
 
 Admin saves auto-heal SEO (`catalog-seo-steward` + fleet). Manual SEO = `seo_meta_source=manual` (never overwritten). Meridian-owned duplicate titles auto-uniquified. Unpublish/delete → `seo_url_queue` + hub 301 + GSC inspect. Sitemap image entries for catalog/blog/press. Product JSON-LD SKU/MPN/GTIN + availability; case-study VideoObject when present.
 

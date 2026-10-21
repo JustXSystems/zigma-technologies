@@ -292,29 +292,31 @@ npm run meridian:secrets:sync
 
 ### F.2 Admin → GitHub (no CLI on Production)
 
-**Use a classic PAT.** Fine-grained tokens (`github_pat_…`) often return  
-`403 Resource not accessible by personal access token` on org repos when triggering Actions.
+**You can skip this entirely.** Sunday cron + post-deploy already write Command Briefs.  
+Admin → **Open Actions (no token)** opens the workflow page — click **Run workflow**.
 
-1. Open [Tokens (classic)](https://github.com/settings/tokens) → **Generate new token (classic)**.
-2. Note: `zigma-meridian-admin` · Expiration: 90 days (or your policy).
-3. Scopes (tick both):
-   - **`repo`** (full control of private repositories)
-   - **`workflow`** (update GitHub Action workflows — required for `workflow_dispatch`)
-4. Generate → copy `ghp_…` once.
-5. On Production VPS:
+#### Option A — GitHub App (recommended for orgs; avoids PAT 403)
+
+1. GitHub → Settings → Developer settings → **GitHub Apps** → New.
+2. Name e.g. `Zigma Meridian Desk`. Homepage: `https://zigma-technologies.com`.
+3. Permissions → Repository: **Actions** Read and write · **Contents** Read.
+4. Install the App on **JustXSystems/zigma-technologies**.
+5. Copy **App ID**, **Installation ID** (from install URL `…/installations/12345678`), and generate a **private key** (.pem).
+6. Production `.env`:
    ```bash
-   # in /var/www/zigma-technologies/.env
-   MERIDIAN_GITHUB_TOKEN=ghp_REPLACE
+   MERIDIAN_GITHUB_APP_ID=123456
+   MERIDIAN_GITHUB_APP_INSTALLATION_ID=12345678
+   MERIDIAN_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
    MERIDIAN_GITHUB_REPO=JustXSystems/zigma-technologies
    pm2 restart zigma --update-env
    ```
-6. Admin → SEO → Meridian → **Generate report (GitHub)**.
 
-**If still 403:** org policy is blocking classic PATs, or your user cannot run Actions on that repo.  
-Org admin → Settings → Personal access tokens / Third-party access → allow classic PATs for this org.  
-Or run reports from GitHub → Actions → **Meridian SEO report** (no Admin token needed).
+#### Option B — Classic PAT (fallback)
 
-**Do not** use fine-grained (`github_pat_…`) unless an org admin has approved fine-grained PATs **and** Actions Write on this repo — classic is the reliable path.
+1. [Tokens (classic)](https://github.com/settings/tokens) → scopes **`repo`** + **`workflow`**.
+2. `MERIDIAN_GITHUB_TOKEN=ghp_…` → `pm2 restart zigma --update-env`.
+
+Fine-grained `github_pat_…` often returns **403** on org repos — prefer App or classic.
 
 ---
 
