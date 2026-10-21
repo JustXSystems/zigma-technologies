@@ -4,6 +4,15 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { withBasePath } from '@/lib/base-path';
 import { describeControlPlane, type ControlPlaneStatus } from '@/lib/seo/control-plane';
+import {
+  dispatchMeridianWorkflow,
+  getMeridianWorkflowRun,
+  listMeridianWorkflowRuns,
+  mapGhRunToJobStatus,
+  meridianGithubDeskStatus,
+  waitForDispatchedRun,
+  type GhWorkflowId,
+} from '@/lib/meridian-github';
 
 const ROOT = process.cwd();
 
@@ -686,6 +695,11 @@ export type MeridianJobStatus = {
   error?: string;
   applyMeta?: boolean;
   skipAct?: boolean;
+  /** local = CLI on this node; github = Actions workflow_dispatch */
+  provider?: 'local' | 'github';
+  workflow?: string;
+  runId?: number;
+  runUrl?: string;
 };
 
 export async function readMeridianJobStatus(env: MeridianEnv): Promise<MeridianJobStatus | null> {
@@ -700,10 +714,173 @@ export async function readMeridianJobStatus(env: MeridianEnv): Promise<MeridianJ
   }
 }
 
-async function writeMeridianJobStatus(env: MeridianEnv, status: MeridianJobStatus) {
+export async function writeMeridianJobStatus(env: MeridianEnv, status: MeridianJobStatus) {
   const { jobStatus, dir } = meridianLatestPaths(env);
   await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
   await writeFile(/*turbopackIgnore: true*/ jobStatus, JSON.stringify(status, null, 2), 'utf8');
+}
+
+/**
+ * Prefer GitHub Actions for SEO report / autopilot so Production PM2 never hosts the CLI.
+ * Writes job-status.json so Admin can poll until the run completes (and desk artefacts sync).
+ */
+export async function startMeridianGithubDispatch(
+  env: MeridianEnv,
+  kind: 'seo-report' | 'autopilot',
+  opts: {
+    windowDays?: number;
+    theme?: string;
+    skipScan?: boolean;
+    skipAct?: boolean;
+  } = {}
+): Promise<{ started: boolean; job: MeridianJobStatus; alreadyRunning?: boolean; message: string }> {
+  const existing = await readMeridianJobStatus(env);
+  if (existing?.status === 'running') {
+    const ageMs = Date.now() - new Date(existing.startedAt).getTime();
+    if (Number.isFinite(ageMs) && ageMs < 25 * 60 * 1000) {
+      return {
+        started: false,
+        alreadyRunning: true,
+        job: existing,
+        message: 'A Meridian job is already running — wait for it to finish or open the Actions run link.',
+      };
+    }
+  }
+
+  const desk = meridianGithubDeskStatus();
+  if (!desk.ready) {
+    const job: MeridianJobStatus = {
+      action: kind === 'seo-report' ? 'dispatch-seo-report' : 'dispatch-autopilot',
+      status: 'error',
+      startedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
+      provider: 'github',
+      error: desk.message,
+    };
+    await writeMeridianJobStatus(env, job);
+    return { started: false, job, message: desk.message };
+  }
+
+  if (kind === 'seo-report' && env !== 'prod') {
+    const job: MeridianJobStatus = {
+      action: 'dispatch-seo-report',
+      status: 'error',
+      startedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
+      provider: 'github',
+      error: 'Meridian SEO report workflow is Production-only (PreProd stays noindex).',
+    };
+    await writeMeridianJobStatus(env, job);
+    return { started: false, job, message: job.error || 'Production only' };
+  }
+
+  const workflow: GhWorkflowId =
+    kind === 'seo-report' ? 'meridian-seo-report.yml' : 'meridian-autopilot.yml';
+  const startedAt = new Date().toISOString();
+  const inputs =
+    kind === 'seo-report'
+      ? {
+          window_days: String(opts.windowDays ?? 28),
+          theme: opts.theme || 'aurora',
+          skip_scan: opts.skipScan !== false,
+        }
+      : {
+          target: env === 'preprod' ? 'preprod' : 'prod',
+          skip_act: env === 'preprod' || !!opts.skipAct,
+        };
+
+  const dispatched = await dispatchMeridianWorkflow(workflow, inputs);
+  if (!dispatched.ok) {
+    const job: MeridianJobStatus = {
+      action: kind === 'seo-report' ? 'dispatch-seo-report' : 'dispatch-autopilot',
+      status: 'error',
+      startedAt,
+      finishedAt: new Date().toISOString(),
+      provider: 'github',
+      workflow,
+      error: dispatched.message,
+    };
+    await writeMeridianJobStatus(env, job);
+    return { started: false, job, message: dispatched.message };
+  }
+
+  const run = await waitForDispatchedRun(workflow, startedAt);
+  const job: MeridianJobStatus = {
+    action: kind === 'seo-report' ? 'dispatch-seo-report' : 'dispatch-autopilot',
+    status: run ? mapGhRunToJobStatus(run) : 'running',
+    startedAt,
+    provider: 'github',
+    workflow,
+    runId: run?.id,
+    runUrl: run?.htmlUrl || desk.workflows[kind === 'seo-report' ? 'seoReport' : 'autopilot'],
+    finishedAt: run && mapGhRunToJobStatus(run) !== 'running' ? new Date().toISOString() : undefined,
+    error:
+      run && mapGhRunToJobStatus(run) === 'error'
+        ? `GitHub run concluded ${run.conclusion || 'failure'}`
+        : undefined,
+  };
+  await writeMeridianJobStatus(env, job);
+  return {
+    started: true,
+    job,
+    message: run
+      ? `Dispatched · run #${run.id} · ${run.htmlUrl}`
+      : `Dispatched ${workflow} — run will appear in Actions shortly. Artefacts sync to this desk when the job finishes.`,
+  };
+}
+
+/** Refresh a GitHub-backed job-status from the Actions API (Admin poll). */
+export async function refreshMeridianGithubJob(env: MeridianEnv): Promise<MeridianJobStatus | null> {
+  const existing = await readMeridianJobStatus(env);
+  if (!existing || existing.provider !== 'github' || existing.status !== 'running') {
+    return existing;
+  }
+  try {
+    if (existing.runId) {
+      const got = await getMeridianWorkflowRun(existing.runId);
+      if (got.run) {
+        const status = mapGhRunToJobStatus(got.run);
+        const next: MeridianJobStatus = {
+          ...existing,
+          status,
+          runUrl: got.run.htmlUrl,
+          finishedAt: status === 'running' ? undefined : new Date().toISOString(),
+          error:
+            status === 'error'
+              ? `GitHub run concluded ${got.run.conclusion || 'failure'}`
+              : undefined,
+        };
+        await writeMeridianJobStatus(env, next);
+        return next;
+      }
+    } else if (existing.workflow) {
+      const listed = await listMeridianWorkflowRuns(existing.workflow as GhWorkflowId, 3);
+      const run = listed.latest;
+      if (run) {
+        const status = mapGhRunToJobStatus(run);
+        const next: MeridianJobStatus = {
+          ...existing,
+          runId: run.id,
+          runUrl: run.htmlUrl,
+          status,
+          finishedAt: status === 'running' ? undefined : new Date().toISOString(),
+          error:
+            status === 'error' ? `GitHub run concluded ${run.conclusion || 'failure'}` : undefined,
+        };
+        await writeMeridianJobStatus(env, next);
+        return next;
+      }
+    }
+  } catch (err) {
+    /* keep prior status; surface on next poll */
+    const next: MeridianJobStatus = {
+      ...existing,
+      error: err instanceof Error ? err.message : String(err),
+    };
+    await writeMeridianJobStatus(env, next);
+    return next;
+  }
+  return existing;
 }
 
 /**
@@ -922,34 +1099,45 @@ export function meridianConnectorReadiness() {
   const ga4PropertyId = envSet('MERIDIAN_GA4_PROPERTY_ID');
   const bingApiKey = envSet('MERIDIAN_BING_API_KEY');
   const psiApiKey = envSet('MERIDIAN_PSI_API_KEY');
+  const webhookUrl = envSet('MERIDIAN_WEBHOOK_URL');
+  const githubToken = envSet('MERIDIAN_GITHUB_TOKEN') || envSet('GH_TOKEN');
 
   const controlPlane = meridianControlPlaneStatus();
+  const github = meridianGithubDeskStatus();
 
   return {
     docsPath: 'packages/meridian/ARCHITECTURE.md',
     setupPath: 'packages/meridian/SETUP.md',
     controlPlane,
+    github,
     fields: [
+      {
+        id: 'MERIDIAN_GITHUB_TOKEN',
+        label: 'GitHub Actions dispatch token',
+        set: githubToken,
+        requiredFor: ['github-dispatch'],
+        howTo: github.howTo,
+      },
       {
         id: 'MERIDIAN_GOOGLE_CLIENT_ID',
         label: 'Google OAuth Client ID',
         set: googleClientId,
         requiredFor: ['gsc', 'ga4', 'act'],
-        howTo: 'Google Cloud → APIs & Services → Credentials → OAuth client (Desktop) → Client ID. SETUP.md Part A.5.',
+        howTo: 'Google Cloud → APIs & Services → Credentials → OAuth client (Desktop) → Client ID. SETUP.md Part A.5. Also set as GitHub Actions secret.',
       },
       {
         id: 'MERIDIAN_GOOGLE_CLIENT_SECRET',
         label: 'Google OAuth Client Secret',
         set: googleClientSecret,
         requiredFor: ['gsc', 'ga4', 'act'],
-        howTo: 'Same OAuth client → Client secret. SETUP.md Part A.5.',
+        howTo: 'Same OAuth client → Client secret. SETUP.md Part A.5. Sync to Actions: npm run meridian:secrets:sync',
       },
       {
         id: 'MERIDIAN_GOOGLE_REFRESH_TOKEN',
         label: 'Google OAuth Refresh Token',
         set: googleRefreshToken,
         requiredFor: ['gsc', 'ga4', 'act'],
-        howTo: 'Run: node packages/meridian/scripts/google-oauth-setup.mjs after Client ID/Secret are set. SETUP.md Part A.6.',
+        howTo: 'Run: npm run meridian:oauth after Client ID/Secret are set. SETUP.md Part A.6.',
       },
       {
         id: 'MERIDIAN_GA4_PROPERTY_ID',
@@ -972,8 +1160,19 @@ export function meridianConnectorReadiness() {
         requiredFor: ['pagespeed'],
         howTo: 'Google Cloud → Credentials → API key; enable PageSpeed Insights API. SETUP.md Part E.',
       },
+      {
+        id: 'MERIDIAN_WEBHOOK_URL',
+        label: 'Ops alert webhook (Slack/Discord/Teams)',
+        set: webhookUrl,
+        requiredFor: ['alerts'],
+        howTo: 'Incoming webhook URL. Fired on live-verify fail, auth_required, score regression. Optional — SETUP.md Part F.',
+      },
     ],
     connectors: {
+      github: {
+        ready: github.ready,
+        missing: github.ready ? [] : ['MERIDIAN_GITHUB_TOKEN'],
+      },
       gsc: { ready: googleOk, missing: googleOk ? [] : ['MERIDIAN_GOOGLE_CLIENT_ID', 'MERIDIAN_GOOGLE_CLIENT_SECRET', 'MERIDIAN_GOOGLE_REFRESH_TOKEN'].filter((k) => !envSet(k)) },
       ga4: {
         ready: googleOk && ga4PropertyId,
@@ -987,6 +1186,7 @@ export function meridianConnectorReadiness() {
       bing: { ready: bingApiKey, missing: bingApiKey ? [] : ['MERIDIAN_BING_API_KEY'] },
       pagespeed: { ready: psiApiKey, missing: psiApiKey ? [] : ['MERIDIAN_PSI_API_KEY'] },
       act: { ready: googleOk, missing: googleOk ? [] : ['MERIDIAN_GOOGLE_* refresh with webmasters scope'] },
+      alerts: { ready: webhookUrl, missing: webhookUrl ? [] : ['MERIDIAN_WEBHOOK_URL'] },
     },
   };
 }

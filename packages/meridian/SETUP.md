@@ -255,8 +255,11 @@ MERIDIAN_PSI_API_KEY=AIza.....
 # Optional: autopilot writes drafted meta (+ alt) into empty CMS fields
 # MERIDIAN_AUTO_APPLY_META=1
 # MERIDIAN_AUTO_APPLY_ALT=1
-# Optional: Slack/Discord webhook after autopilot (includes Phase 9 human checklist)
+# Optional: Slack/Discord/Teams webhook (verify fail · auth_required · score regression)
 # MERIDIAN_WEBHOOK_URL=https://hooks.slack.com/services/...
+# Admin one-click → GitHub Actions (no Meridian CLI on this node)
+# MERIDIAN_GITHUB_TOKEN=github_pat_...   # fine-grained: Actions Read/write
+# MERIDIAN_GITHUB_REPO=JustXSystems/zigma-technologies
 ```
 
 Save, then:
@@ -266,9 +269,33 @@ pm2 restart zigma --update-env
 ```
 
 **Expect:** Admin → SEO → Meridian → Connectors readiness shows green **set** for each.  
-Run scan → GSC / GA4 cards move from `auth_required` toward `ok`.
+Primary button: **Generate report (GitHub)** when `MERIDIAN_GITHUB_TOKEN` is set.
 
-Also add the **same** names as GitHub Actions secrets so **Meridian live verify** and post-deploy verify can use them.
+Also add the **same** `MERIDIAN_GOOGLE_*` / Bing / GA4 / PSI / webhook names as GitHub Actions secrets:
+
+```bash
+# From a laptop with gh auth login + unlock-secrets.json or env already set:
+npm run meridian:secrets:sync
+```
+
+---
+
+## Part F — Ops webhook + Admin GitHub dispatch (recommended)
+
+### F.1 Webhook alerts
+
+1. Create an incoming webhook in Slack, Discord, or Microsoft Teams.
+2. Set `MERIDIAN_WEBHOOK_URL` in Production `.env` **and** as a GitHub Actions secret (same value).
+3. Actions sets `MERIDIAN_WEBHOOK_ALERTS_ONLY=1` so you only get pings on live-verify fail, `auth_required`, or score regression — not every green run.
+4. For verbose digests: unset alerts-only or set `MERIDIAN_WEBHOOK_ALWAYS=1`.
+
+### F.2 Admin → GitHub (no CLI on Production)
+
+1. GitHub → Settings → Developer settings → **Fine-grained personal access token**.
+2. Resource owner: org/user that owns `zigma-technologies`. Repository access: **Only** that repo.
+3. Permissions: **Actions** Read and write · **Contents** Read.
+4. Paste token as `MERIDIAN_GITHUB_TOKEN` in Production `.env` → `pm2 restart zigma --update-env`.
+5. Admin → SEO → Meridian → **Generate report (GitHub)**. Poll until the run finishes; Command Brief opens from the synced desk folder.
 
 ---
 

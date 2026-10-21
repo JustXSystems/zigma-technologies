@@ -21,10 +21,20 @@ type ControlPlane = {
   architectureDoc?: string;
 };
 
+type GithubDesk = {
+  ready?: boolean;
+  tokenSet?: boolean;
+  repo?: string;
+  message?: string;
+  howTo?: string;
+  workflows?: { seoReport?: string; autopilot?: string };
+};
+
 type Readiness = {
   docsPath?: string;
   setupPath?: string;
   controlPlane?: ControlPlane;
+  github?: GithubDesk;
   fields?: ReadinessField[];
   connectors?: Record<string, { ready: boolean; missing: string[] }>;
 };
@@ -57,6 +67,10 @@ type JobStatus = {
   startedAt?: string;
   finishedAt?: string;
   error?: string;
+  provider?: 'local' | 'github';
+  workflow?: string;
+  runId?: number;
+  runUrl?: string;
 };
 
 type Artefacts = {
@@ -92,6 +106,7 @@ export default function MeridianPanel() {
   const [digest, setDigest] = useState<Record<string, unknown> | null>(null);
   const [unlock, setUnlock] = useState<Record<string, unknown> | null>(null);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [github, setGithub] = useState<GithubDesk | null>(null);
   const [job, setJob] = useState<JobStatus | null>(null);
   const [artefacts, setArtefacts] = useState<Artefacts | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +128,7 @@ export default function MeridianPanel() {
     setDigest((data.digest as Record<string, unknown>) || null);
     setUnlock((data.unlock as Record<string, unknown>) || null);
     setReadiness((data.readiness as Readiness) || null);
+    setGithub((data.github as GithubDesk) || (data.readiness as Readiness)?.github || null);
     setJob((data.job as JobStatus) || null);
   }, []);
 
@@ -463,29 +479,52 @@ export default function MeridianPanel() {
           <h2>Command Brief desk</h2>
           <p className="sub">
             <strong>Product SEO</strong> (titles, sitemap, schema) ships with the website. <strong>Meridian</strong>{' '}
-            is the control plane: GSC/Bing login via APIs, live verify, one report — never inside the site tarball.
-            Prefer GitHub → <strong>Meridian SEO report</strong> so Production PM2 is untouched.
+            is the control plane — one-click from this desk dispatches GitHub Actions (no CLI on Production PM2).
+            Artefacts sync back here when the run finishes.
           </p>
-          {readiness?.controlPlane ? (
+          {github || readiness?.controlPlane ? (
             <p
               className="sub"
               style={{
                 marginTop: '0.45rem',
-                color: readiness.controlPlane.binExists ? 'var(--accent, #0b6e4f)' : 'var(--m-muted)',
+                color: github?.ready || readiness?.controlPlane?.binExists ? 'var(--accent, #0b6e4f)' : 'var(--m-muted)',
               }}
             >
-              Control plane: <strong>{readiness.controlPlane.mode || '—'}</strong>
-              {readiness.controlPlane.meridianHome
+              Desk:{' '}
+              <strong>
+                {github?.ready
+                  ? 'GitHub Actions'
+                  : readiness?.controlPlane?.binExists
+                    ? 'local CLI'
+                    : 'awaiting MERIDIAN_GITHUB_TOKEN'}
+              </strong>
+              {github?.repo ? ` · ${github.repo}` : ''}
+              {readiness?.controlPlane?.meridianHome
                 ? ` · MERIDIAN_HOME=${readiness.controlPlane.meridianHome}`
-                : ''}
-              {!readiness.controlPlane.binExists
-                ? ' · CLI not on this web node (open last brief below, or run Actions / Deploy Meridian)'
                 : ''}
             </p>
           ) : null}
           {jobRunning ? (
             <p className="sub" style={{ color: 'var(--accent, #0b6e4f)', marginTop: '0.35rem' }}>
-              Job running since {job?.startedAt || '…'} — this page refreshes every few seconds.
+              {job?.provider === 'github' ? 'GitHub Actions' : 'Job'} running since {job?.startedAt || '…'}
+              {job?.runUrl ? (
+                <>
+                  {' '}
+                  ·{' '}
+                  <a className="link" href={job.runUrl} target="_blank" rel="noreferrer">
+                    open run
+                  </a>
+                </>
+              ) : null}{' '}
+              — this page refreshes every few seconds.
+            </p>
+          ) : null}
+          {job?.status === 'ok' && job?.provider === 'github' && job.runUrl ? (
+            <p className="sub" style={{ marginTop: '0.35rem' }}>
+              Last GitHub run finished ·{' '}
+              <a className="link" href={job.runUrl} target="_blank" rel="noreferrer">
+                view Actions
+              </a>
             </p>
           ) : null}
         </div>
@@ -509,35 +548,71 @@ export default function MeridianPanel() {
               Open Command Brief
             </a>
           ) : (
-            <span className="link" title="Run Generate report first" style={{ opacity: 0.55, cursor: 'help' }}>
+            <span className="link" title="Generate report first" style={{ opacity: 0.55, cursor: 'help' }}>
               Open Command Brief (not generated yet)
             </span>
           )}
           <button
             type="button"
             className="primary"
-            disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
-            onClick={() =>
-              postAction(
-                { action: 'seo-report', skipScan: true },
-                'Generating live SEO report (login APIs → verify site → GSC/Bing → brief)'
-              )
+            disabled={
+              pending ||
+              jobRunning ||
+              env !== 'prod' ||
+              (!(github?.ready || readiness?.github?.ready) && readiness?.controlPlane?.binExists === false)
             }
+            onClick={() => {
+              if (github?.ready || readiness?.github?.ready) {
+                postAction(
+                  { action: 'dispatch-seo-report', skipScan: true },
+                  'Dispatching Meridian SEO report on GitHub Actions'
+                );
+              } else {
+                postAction(
+                  { action: 'seo-report', skipScan: true },
+                  'Generating live SEO report on this node'
+                );
+              }
+            }}
             title={
-              readiness?.controlPlane?.binExists === false
-                ? 'CLI missing on this node — use GitHub Actions → Meridian SEO report'
-                : 'GSC/Bing APIs + live verify → Command Brief'
+              github?.ready || readiness?.github?.ready
+                ? 'workflow_dispatch → Meridian SEO report · artefacts sync to this desk'
+                : readiness?.controlPlane?.binExists
+                  ? 'Local CLI fallback (set MERIDIAN_GITHUB_TOKEN for Actions-first)'
+                  : 'Set MERIDIAN_GITHUB_TOKEN or Deploy Meridian + MERIDIAN_HOME'
             }
           >
-            {pending ? 'Working…' : 'Generate report (this node)'}
+            {pending
+              ? 'Working…'
+              : github?.ready || readiness?.github?.ready
+                ? 'Generate report (GitHub)'
+                : 'Generate report (this node)'}
           </button>
           <button
             type="button"
-            disabled={pending || jobRunning || readiness?.controlPlane?.binExists === false}
-            onClick={() => postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot')}
+            disabled={
+              pending ||
+              jobRunning ||
+              (!(github?.ready || readiness?.github?.ready) && readiness?.controlPlane?.binExists === false)
+            }
+            onClick={() => {
+              if (github?.ready || readiness?.github?.ready) {
+                postAction(
+                  { action: 'dispatch-autopilot', skipAct: env === 'preprod' },
+                  'Dispatching Meridian autopilot on GitHub Actions'
+                );
+              } else {
+                postAction({ action: 'autopilot', skipAct: env === 'preprod' }, 'Starting autopilot');
+              }
+            }}
           >
-            {jobRunning ? 'Autopilot running…' : 'Autopilot (heal)'}
+            {jobRunning ? 'Running…' : github?.ready || readiness?.github?.ready ? 'Autopilot (GitHub)' : 'Autopilot (heal)'}
           </button>
+          {github?.workflows?.seoReport ? (
+            <a className="link" href={github.workflows.seoReport} target="_blank" rel="noreferrer">
+              Actions workflows
+            </a>
+          ) : null}
           {artefacts?.cockpit ? (
             <a
               className="link"
@@ -556,7 +631,7 @@ export default function MeridianPanel() {
       </div>
 
       <details className="more-actions" open={false}>
-        <summary>Advanced · sitemaps, crawl, legacy packs</summary>
+        <summary>Advanced · this-node CLI, sitemaps, crawl</summary>
         <div className="actions" style={{ marginTop: '0.65rem' }}>
           <button
             type="button"
@@ -564,25 +639,26 @@ export default function MeridianPanel() {
             onClick={() =>
               postAction(
                 { action: 'autopilot', skipAct: env === 'preprod', applyMeta: true },
-                'Starting autopilot + apply'
+                'Starting local autopilot + apply'
               )
             }
+            title="Requires MERIDIAN_HOME / packages/meridian on this node"
           >
-            Autopilot + apply meta
+            Local autopilot + apply
           </button>
           <button
             type="button"
             disabled={pending || jobRunning || readiness?.controlPlane?.binExists === false}
             onClick={runScan}
           >
-            Scan only
+            Scan only (local)
           </button>
           <button
             type="button"
             disabled={pending || jobRunning || env !== 'prod' || readiness?.controlPlane?.binExists === false}
-            onClick={() => postAction({ action: 'seo-report' }, 'Full SEO report + crawl')}
+            onClick={() => postAction({ action: 'seo-report' }, 'Full SEO report + crawl (local CLI)')}
           >
-            Full report + crawl
+            Local report + crawl
           </button>
           <button
             type="button"

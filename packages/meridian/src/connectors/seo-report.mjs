@@ -9,6 +9,7 @@ import { collectGa4 } from './ga4.mjs';
 import { collectPagespeed } from './pagespeed.mjs';
 import { runMeridian } from '../orchestrator.mjs';
 import { writeCommandBrief } from './command-brief.mjs';
+import { alertSeoReport } from '../lib/ops-webhook.mjs';
 
 /**
  * On-demand SEO report automation.
@@ -297,7 +298,7 @@ export async function runSeoReport(profile, opts = {}) {
     ? softAuth && verifyOk
     : verifyOk && (signalsOk || report?.scorecard != null);
 
-  return {
+  const result = {
     ok,
     status: allAuthMissing ? 'auth_required' : ok ? 'ok' : 'degraded',
     message: allAuthMissing
@@ -322,4 +323,13 @@ export async function runSeoReport(profile, opts = {}) {
         : []),
     ],
   };
+
+  // Slack/Discord/Teams — alert on verify fail, auth_required, high insights (best-effort)
+  try {
+    await alertSeoReport(result);
+  } catch {
+    /* never block report */
+  }
+
+  return result;
 }

@@ -39,7 +39,7 @@ export function describeControlPlane(input: {
     binExists: input.binExists,
     architectureDoc: 'packages/meridian/ARCHITECTURE.md',
     message: input.binExists
-      ? 'Control plane CLI available on this node (MERIDIAN_HOME or packages/meridian).'
-      : 'Control plane CLI not on this web node — run SEO reports via GitHub Actions (Meridian SEO report) or Deploy Meridian + MERIDIAN_HOME. Product SEO (sitemap/schema/meta) is unaffected.',
+      ? 'Control plane CLI available on this node (MERIDIAN_HOME or packages/meridian). Prefer Admin → Generate report (GitHub) when MERIDIAN_GITHUB_TOKEN is set.'
+      : 'Control plane CLI not on this web node — Admin → Generate report (GitHub) with MERIDIAN_GITHUB_TOKEN, or GitHub → Meridian SEO report. Product SEO (sitemap/schema/meta) is unaffected.',
   };
 }

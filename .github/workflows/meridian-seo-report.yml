@@ -1,6 +1,7 @@
 # Control-plane SEO report — does NOT deploy or restart the live website.
 # Also runs automatically at the end of Deploy Production (run_seo_report=true).
 # Use this workflow for ad-hoc / scheduled reports without a site ship.
+# Admin → SEO → Meridian → Generate report (GitHub) dispatches this workflow.
 name: Meridian SEO report
 
 on:
@@ -26,6 +27,10 @@ on:
           - forge
           - glass
         default: aurora
+      sync_desk:
+        description: Sync Command Brief to Production VPS Admin desk
+        type: boolean
+        default: true
   schedule:
     # Sundays 04:00 UTC ≈ 09:30 IST
     - cron: '0 4 * * 0'
@@ -49,13 +54,18 @@ jobs:
           MERIDIAN_GOOGLE_CLIENT_SECRET: ${{ secrets.MERIDIAN_GOOGLE_CLIENT_SECRET }}
           MERIDIAN_GOOGLE_REFRESH_TOKEN: ${{ secrets.MERIDIAN_GOOGLE_REFRESH_TOKEN }}
           MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
+          MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
+          MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
         run: |
           set -euo pipefail
           MISSING=()
+          OPTIONAL_MISS=()
           [[ -n "${MERIDIAN_GOOGLE_CLIENT_ID:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_CLIENT_ID")
           [[ -n "${MERIDIAN_GOOGLE_CLIENT_SECRET:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_CLIENT_SECRET")
           [[ -n "${MERIDIAN_GOOGLE_REFRESH_TOKEN:-}" ]] || MISSING+=("MERIDIAN_GOOGLE_REFRESH_TOKEN")
           [[ -n "${MERIDIAN_BING_API_KEY:-}" ]] || MISSING+=("MERIDIAN_BING_API_KEY")
+          [[ -n "${MERIDIAN_GA4_PROPERTY_ID:-}" ]] || OPTIONAL_MISS+=("MERIDIAN_GA4_PROPERTY_ID")
+          [[ -n "${MERIDIAN_WEBHOOK_URL:-}" ]] || OPTIONAL_MISS+=("MERIDIAN_WEBHOOK_URL")
           if ((${#MISSING[@]} > 0)); then
             echo "has_auth=false" >> "$GITHUB_OUTPUT"
             {
@@ -65,14 +75,17 @@ jobs:
               echo ""
               for s in "${MISSING[@]}"; do echo "- \`$s\`"; done
               echo ""
-              echo "Add under **Settings → Secrets and variables → Actions** (same values as local \`unlock-secrets.json\` / VPS env)."
-              echo "One-time Google OAuth locally: \`npm run meridian:oauth\` then paste the three \`MERIDIAN_GOOGLE_*\` values into Actions secrets."
-              echo "Bing: Webmaster → Settings → API Access → copy key → \`MERIDIAN_BING_API_KEY\`."
+              echo "Add under **Settings → Secrets and variables → Actions**."
+              echo "One-shot sync from laptop: \`npm run meridian:secrets:sync\` (needs \`gh auth login\` + unlock-secrets.json or env)."
+              echo "One-time Google OAuth: \`npm run meridian:oauth\`."
             } >> "$GITHUB_STEP_SUMMARY"
             echo "::warning::Missing Actions secrets: ${MISSING[*]} — report will be verify-only until set"
           else
             echo "has_auth=true" >> "$GITHUB_OUTPUT"
             echo "Connector secrets present." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if ((${#OPTIONAL_MISS[@]} > 0)); then
+            echo "Optional not set: ${OPTIONAL_MISS[*]}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       # Meridian CLI is dependency-free Node — no npm ci / no Next build (keeps site blast radius zero).
@@ -84,6 +97,8 @@ jobs:
           MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
           MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
           MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+          MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
+          MERIDIAN_WEBHOOK_ALERTS_ONLY: '1'
           # Auth missing → still succeed if live verify passed (site health ≠ connector secrets)
           MERIDIAN_CI_SOFT_AUTH: '1'
         run: |
@@ -112,6 +127,26 @@ jobs:
             exit 0
           fi
           exit "$CODE"
+
+      - name: Sync Command Brief to Production Admin desk
+        if: always() && (github.event.inputs.sync_desk != 'false')
+        env:
+          DEST_HOST: ${{ secrets.PROD_HOST }}
+          DEST_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${DEST_HOST:-}" || -z "${DEST_USER:-}" || -z "${PROD_SSH_KEY:-}" ]]; then
+            echo "::warning::PROD_* SSH secrets missing — desk sync skipped (artifact still uploaded)"
+            exit 0
+          fi
+          KEY="$(mktemp)"
+          printf '%s\n' "$PROD_SSH_KEY" > "$KEY"
+          chmod 600 "$KEY"
+          chmod +x scripts/sync-meridian-desk-to-vps.sh
+          SSH_KEY_PATH="$KEY" DEST_HOST="$DEST_HOST" DEST_USER="$DEST_USER" \
+            ./scripts/sync-meridian-desk-to-vps.sh
+          rm -f "$KEY"
 
       - uses: actions/upload-artifact@v4
         if: always()

@@ -41,6 +41,7 @@ jobs:
           MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
           MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
           MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
+          MERIDIAN_WEBHOOK_ALERTS_ONLY: '1'
           MERIDIAN_FAIL_ON_REGRESSION: '1'
           # Soften hard-fail noise on Actions when live crawl flakes; still fail on score regression
           MERIDIAN_CI_SOFT_HARD: '1'

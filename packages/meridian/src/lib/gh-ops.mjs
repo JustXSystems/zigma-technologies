@@ -50,6 +50,7 @@ export async function syncGhSecretsFromMap(secretsMap) {
     'MERIDIAN_BING_API_KEY',
     'MERIDIAN_PSI_API_KEY',
     'MERIDIAN_WEBHOOK_URL',
+    'MERIDIAN_GITHUB_TOKEN',
   ].filter((k) => secretsMap[k]);
 
   if (!keys.length) return { ok: true, status: 'skipped', message: 'No keys to sync', synced: [] };
@@ -145,22 +146,71 @@ export async function listWorkflowRuns(workflow = 'meridian-autopilot.yml', limi
 }
 
 export async function dispatchWorkflow(workflow = 'meridian-autopilot.yml', fields = {}) {
-  if (!(await ghAuthOk())) {
+  if (await ghAuthOk()) {
+    const args = ['workflow', 'run', workflow];
+    for (const [k, v] of Object.entries(fields)) {
+      args.push('-f', `${k}=${v}`);
+    }
+    const r = await runGh(args);
+    if (r.code !== 0) {
+      return {
+        ok: false,
+        status: 'error',
+        message: (r.stderr || r.stdout || 'dispatch failed').slice(0, 200),
+      };
+    }
+    return { ok: true, status: 'ok', message: `Dispatched ${workflow}` };
+  }
+
+  // REST fallback when gh CLI is missing (same token Admin uses)
+  const tok = (
+    process.env.MERIDIAN_GITHUB_TOKEN ||
+    process.env.GH_TOKEN ||
+    process.env.GITHUB_TOKEN ||
+    ''
+  ).trim();
+  const repo = (
+    process.env.MERIDIAN_GITHUB_REPO ||
+    process.env.GITHUB_REPOSITORY ||
+    'JustXSystems/zigma-technologies'
+  )
+    .trim()
+    .replace(/^https?:\/\/github\.com\//i, '')
+    .replace(/\.git$/i, '');
+  if (!tok) {
     return { ok: false, status: 'skipped', message: 'gh not authenticated — cannot dispatch' };
   }
-  const args = ['workflow', 'run', workflow];
-  for (const [k, v] of Object.entries(fields)) {
-    args.push('-f', `${k}=${v}`);
-  }
-  const r = await runGh(args);
-  if (r.code !== 0) {
+  const ref = (process.env.MERIDIAN_GITHUB_REF || 'master').trim();
+  const inputs = Object.fromEntries(
+    Object.entries(fields).map(([k, v]) => [k, typeof v === 'boolean' ? String(v) : String(v)])
+  );
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/${workflow}/dispatches`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${tok}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref, inputs }),
+    });
+    if (res.status === 204) {
+      return { ok: true, status: 'ok', message: `Dispatched ${workflow} (REST)` };
+    }
+    const text = await res.text().catch(() => '');
     return {
       ok: false,
       status: 'error',
-      message: (r.stderr || r.stdout || 'dispatch failed').slice(0, 200),
+      message: `REST dispatch ${res.status}: ${text.slice(0, 160)}`,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      status: 'error',
+      message: e instanceof Error ? e.message : String(e),
     };
   }
-  return { ok: true, status: 'ok', message: `Dispatched ${workflow}` };
 }
 
 /** Static audit of local workflow YAML (no network). */

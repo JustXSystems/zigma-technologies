@@ -13,7 +13,8 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Design |
 | [`docs/archive/SEO-GUIDE-phases-walkthrough.md`](../../docs/archive/SEO-GUIDE-phases-walkthrough.md) | Historical Day-1 phase walkthrough (do not re-run) |
 
-**Primary forever command:** `npm run meridian:observe` (alias: `meridian:steward`, `meridian:guard`, Phase **32** Catalog Continuum).
+**Primary forever desk:** Admin → SEO → Meridian → **Generate report (GitHub)** · or GitHub → **Meridian SEO report**.  
+**Primary forever heal (optional):** `npm run meridian:observe` (alias: `meridian:steward`, `meridian:guard`, Phase **32** Catalog Continuum).
 
 ## Autopilot pipeline
 
@@ -68,12 +69,13 @@ Production profile runs the full loop on **deploy**, **weekly cron**, and **Admi
 48. **Phase 31 silent steward** (meta · city draft staged · review link auto · growth)  
 49. **Phase 32 content continuum** (Inventory / Media / Products / Services / Projects / Pages / Blog / Press)  
 50. **Phase 33 SEO Command Brief** (GSC + Bing + GA4 + Meridian → one customizable HTML report — **primary forever ops surface**)  
+51. **Control-plane desk** (Admin `workflow_dispatch` · desk rsync · ops webhooks · `meridian:secrets:sync` — not a human checklist)
 
 Admin saves auto-heal SEO (`catalog-seo-steward` + fleet). Manual SEO = `seo_meta_source=manual` (never overwritten). Meridian-owned duplicate titles auto-uniquified. Unpublish/delete → `seo_url_queue` + hub 301 + GSC inspect. Sitemap image entries for catalog/blog/press. Product JSON-LD SKU/MPN/GTIN + availability; case-study VideoObject when present.
 
-**On-demand SEO report (each request):** **`npm run seo:report`** → authenticates Google OAuth + Bing API key → pulls GSC/Bing/GA4/PageSpeed → runs live `seo:verify` + Meridian crawl → writes `command-brief.html` / `seo-report-latest.html`. One-time Google login: **`npm run meridian:oauth`**. Admin → SEO → Meridian → **Generate SEO report**. Customize via `autopilot.commandBrief` (`theme`, `windowDays`, `topN`, `sections`).
+**On-demand SEO report (zero-touch):** Admin → **Generate report (GitHub)** → Actions `meridian-seo-report.yml` → live verify + GSC/Bing/GA4 → Command Brief → **rsync to Production desk**. Local: **`npm run seo:report`**. One-time Google login: **`npm run meridian:oauth`**. Sync Actions secrets: **`npm run meridian:secrets:sync`**. Alerts: `MERIDIAN_WEBHOOK_URL`. Customize via `autopilot.commandBrief` (`theme`, `windowDays`, `topN`, `sections`).
 
-**Architecture:** Product plane (Next SEO) vs control plane (Meridian) — see [`ARCHITECTURE.md`](./ARCHITECTURE.md). Website package excludes Meridian. **Deploy Production** / **Deploy PreProd** delta-rsync the site stage and ship Meridian in parallel, then write a Command Brief. Ad-hoc: **Meridian SEO report**. Meridian-only: **Deploy Meridian** (`plane` prod|preprod).
+**Architecture:** Product plane (Next SEO) vs control plane (Meridian) — see [`ARCHITECTURE.md`](./ARCHITECTURE.md). Website package excludes Meridian. **Deploy Production** / **Deploy PreProd** delta-rsync the site stage and ship Meridian in parallel, then write a Command Brief (+ desk sync). Ad-hoc: **Meridian SEO report**. Meridian-only: **Deploy Meridian** (`plane` prod|preprod).
 
 ## Highest-leverage human step
 

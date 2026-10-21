@@ -105,12 +105,14 @@ Phases **0–30 are complete** for automation. You are on **silent steward** (ze
 
 | When | What | Who |
 | --- | --- | --- |
-| After deploys / weekly | `npm run meridian:observe` | Auto (Monday GitHub Action) / Dev |
-| Admin UI | **SEO → Meridian** → Phase 31 / Steward | You or Dev |
+| On demand | Admin → **Generate report (GitHub)** | You (zero CLI) |
+| After deploys / Sunday | Meridian SEO report (+ desk sync) | Auto |
+| Monday | Meridian autopilot | GitHub Action |
 | Drift (hasMap / schema) | Auto-heal, or `npm run meridian:prod:hasmap` | Dev |
 
 Primary surfaces under `storage/meridian/zigma-prod/`:
 
+- `command-brief.html` — **one-spot** GSC + Bing + verify
 - `phase31-ops.html` — silent steward
 - `silent-steward.md` · `human-debt.md` · `city-draft.md` · `review-kit.md`
 - `phase20-ops.html` — NAP / calendar / citations desk

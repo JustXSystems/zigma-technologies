@@ -12,13 +12,16 @@ import {
   readMeridianArtefactHtml,
   readMeridianJobStatus,
   readSeoGuideMarkdown,
+  refreshMeridianGithubJob,
   runMeridianAct,
   runMeridianCli,
   startMeridianAutopilotBackground,
+  startMeridianGithubDispatch,
   withMeridianFileBase,
   type MeridianAct,
   type MeridianEnv,
 } from '@/lib/meridian-bridge';
+import { listMeridianWorkflowRuns, meridianGithubDeskStatus } from '@/lib/meridian-github';
 import { readFile } from 'node:fs/promises';
 import { withBasePath } from '@/lib/base-path';
 
@@ -96,7 +99,7 @@ export async function GET(request: Request) {
       }
       return missingArtefactHtml(
         'No Command Brief yet',
-        'Use <strong>Generate report (this node)</strong> or GitHub → Meridian SEO report, then reopen.',
+        'Use <strong>Generate report (GitHub)</strong> (or local CLI), then reopen after the desk sync finishes.',
         paths.dir
       );
     }
@@ -167,9 +170,23 @@ export async function GET(request: Request) {
     const autopilot = await readLatestAutopilot(env);
     const digest = await readLatestDigest(env);
     const unlock = await readLatestUnlock(env);
-    const job = await readMeridianJobStatus(env);
     const readiness = meridianConnectorReadiness();
     const artefacts = await meridianArtefactAvailability(env);
+    let job = await readMeridianJobStatus(env);
+    if (job?.provider === 'github' && job.status === 'running') {
+      job = (await refreshMeridianGithubJob(env)) || job;
+    }
+    let githubRuns: unknown = null;
+    if (readiness.github?.ready) {
+      try {
+        githubRuns = {
+          seoReport: await listMeridianWorkflowRuns('meridian-seo-report.yml', 3),
+          autopilot: await listMeridianWorkflowRuns('meridian-autopilot.yml', 3),
+        };
+      } catch {
+        githubRuns = null;
+      }
+    }
     return NextResponse.json({
       env,
       report,
@@ -180,6 +197,8 @@ export async function GET(request: Request) {
       hasReport: !!report,
       readiness,
       artefacts,
+      github: meridianGithubDeskStatus(),
+      githubRuns,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error';
@@ -264,7 +283,63 @@ export async function POST(request: Request) {
       });
     }
 
+    // Primary path: dispatch control plane on GitHub (no CLI on the web node).
+    if (action === 'dispatch-seo-report' || action === 'github-seo-report') {
+      const bg = await startMeridianGithubDispatch(env, 'seo-report', {
+        windowDays: typeof body.windowDays === 'number' ? body.windowDays : 28,
+        theme: typeof body.theme === 'string' ? body.theme : 'aurora',
+        skipScan: body.skipScan !== false,
+      });
+      return NextResponse.json({
+        env,
+        action: 'dispatch-seo-report',
+        ok: bg.started || !!bg.alreadyRunning,
+        started: bg.started,
+        alreadyRunning: !!bg.alreadyRunning,
+        job: bg.job,
+        message: bg.message,
+        github: meridianGithubDeskStatus(),
+      });
+    }
+
+    if (action === 'dispatch-autopilot' || action === 'github-autopilot') {
+      const bg = await startMeridianGithubDispatch(env, 'autopilot', {
+        skipAct: env === 'preprod' || !!body.skipAct,
+      });
+      return NextResponse.json({
+        env,
+        action: 'dispatch-autopilot',
+        ok: bg.started || !!bg.alreadyRunning,
+        started: bg.started,
+        alreadyRunning: !!bg.alreadyRunning,
+        job: bg.job,
+        message: bg.message,
+        github: meridianGithubDeskStatus(),
+      });
+    }
+
+    if (action === 'github-job-refresh') {
+      const job = await refreshMeridianGithubJob(env);
+      return NextResponse.json({ env, action, ok: true, job });
+    }
+
     if (action === 'autopilot') {
+      // Prefer GitHub when token is set and no local CLI — keeps site blast radius zero.
+      const readiness = meridianConnectorReadiness();
+      if (readiness.github?.ready && readiness.controlPlane?.binExists === false) {
+        const bg = await startMeridianGithubDispatch(env, 'autopilot', {
+          skipAct: env === 'preprod' || !!body.skipAct,
+        });
+        return NextResponse.json({
+          env,
+          action: 'dispatch-autopilot',
+          ok: bg.started || !!bg.alreadyRunning,
+          started: bg.started,
+          alreadyRunning: !!bg.alreadyRunning,
+          job: bg.job,
+          message: bg.message,
+        });
+      }
       // Background: full autopilot is ~3 min; waiting inline returns nginx HTML (not JSON) to the browser.
       const bg = await startMeridianAutopilotBackground(env, {
         skipAct: env === 'preprod' || !!body.skipAct,

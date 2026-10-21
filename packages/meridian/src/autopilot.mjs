@@ -1028,25 +1028,9 @@ export async function runAutopilot(profile, opts = {}) {
 }
 
 async function maybeWebhook(autopilot, digest) {
-  const url = (process.env.MERIDIAN_WEBHOOK_URL || '').trim();
-  if (!url) return;
   try {
-    const humanLeft = digest?.data?.humanChecklist?.length ?? 0;
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: `Meridian autopilot ${autopilot.profile?.displayName || autopilot.profile?.id}: score ${autopilot.scorecard?.overall} (${autopilot.scorecard?.grade}) · ${autopilot.trend?.message || ''} · human tasks ${humanLeft} · ${autopilot.actions.map((a) => a.id + ':' + (a.ok ? 'ok' : a.status || 'fail')).join(', ')}`,
-        meridian: {
-          score: autopilot.scorecard?.overall,
-          grade: autopilot.scorecard?.grade,
-          trend: autopilot.trend?.status,
-          hardFails: autopilot.hardFailCount,
-          actions: autopilot.actions,
-          humanChecklist: digest?.data?.humanChecklist,
-        },
-      }),
-    });
+    const { alertAutopilot } = await import('./lib/ops-webhook.mjs');
+    await alertAutopilot(autopilot, digest);
   } catch {
     /* webhook best-effort */
   }

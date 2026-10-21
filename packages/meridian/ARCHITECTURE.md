@@ -30,8 +30,8 @@
                               │ read artefacts / trigger jobs
 ┌──────────────────────────────────────────────────────────────────┐
 │  OBSERVABILITY SURFACE — Admin → SEO → Command                    │
-│  Thin UI: open last Command Brief · generate report · readiness   │
-│  Prefer reading artefacts; spawn CLI only if MERIDIAN_HOME / tree │
+│  Thin UI: open last Command Brief · Generate report (GitHub)      │
+│  Prefer artefacts + workflow_dispatch; spawn CLI only if needed   │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -68,6 +68,8 @@ Meridian is isolated for **risk**, not size. Website hot path = **delta rsync** 
 | `MERIDIAN_GOOGLE_*` | Control | GSC/GA4 OAuth |
 | `MERIDIAN_BING_API_KEY` | Control | Bing Webmaster |
 | `MERIDIAN_PSI_API_KEY` | Control | PageSpeed (optional) |
+| `MERIDIAN_WEBHOOK_URL` | Control | Slack/Discord/Teams alerts (optional) |
+| `MERIDIAN_GITHUB_TOKEN` | Observability (site `.env`) | Admin → Actions `workflow_dispatch` |
 | Site `.env` DB_* | Product | CMS / catalog steward |
 
 **GitHub Actions secrets** (repo → Settings → Secrets → Actions) for **Meridian SEO report**:
@@ -143,9 +145,9 @@ Defaults: `ship_meridian=true`, `run_seo_report=true`, `post_deploy_autopilot=fa
 
 | Cadence | Who | Command |
 | --- | --- | --- |
-| On demand | You / Dev | Actions → **Meridian SEO report** or `npm run seo:report` |
-| Weekly | Actions | Meridian autopilot (schedule) |
-| After site deploy | Auto | Product SEO already live; optional observe from CI |
+| On demand | You | Admin → **Generate report (GitHub)** (or Actions → Meridian SEO report) |
+| Weekly / Sunday | Actions | Autopilot (Mon) · SEO report (Sun) · desk sync + webhook alerts |
+| After site deploy | Auto | Product SEO live · Command Brief · desk rsync |
 | Content growth | Marketing | City pages, titles, reviews — not new Meridian phases |
 
 Phases 0–33 are **automation history**, not a weekly human checklist. The desk is: **verify → pull signals → one report → act on insights**.
@@ -163,10 +165,26 @@ Phases 0–33 are **automation history**, not a weekly human checklist. The desk
 
 ---
 
-## 6. Future (optional, not required for Zigma)
+## 6. Control-plane desk (shipped) + optional infra
 
-- Extract `packages/meridian` → `JustXSystems/meridian` multi-tenant SaaS later.
-- Self-hosted Actions runner on VPS = near-instant site uploads (standalone size remains).
-- Admin triggers `workflow_dispatch` via GitHub API instead of spawning CLI on the web node.
+| Capability | Status | How |
+| --- | --- | --- |
+| Admin → `workflow_dispatch` (no CLI on web node) | **Shipped** | `MERIDIAN_GITHUB_TOKEN` on Production → Admin **Generate report (GitHub)** / **Autopilot (GitHub)** |
+| Command Brief → Admin desk sync | **Shipped** | Meridian SEO report + Deploy Production rsync artefacts via `scripts/sync-meridian-desk-to-vps.sh` |
+| Ops webhooks (verify fail / auth / regression) | **Shipped** | `MERIDIAN_WEBHOOK_URL` (+ `MERIDIAN_WEBHOOK_ALERTS_ONLY=1` in Actions) |
+| Actions secret one-shot sync | **Shipped** | `npm run meridian:secrets:sync` (needs `gh auth login`) |
+| Self-hosted Actions runner | Optional | `scripts/install-github-runner-zigma.sh` · label `zigma-prod` |
+| Extract Meridian → multi-tenant SaaS | Later | `JustXSystems/meridian` — not required for one brand |
+
+### Admin desk env (Production `.env`)
+
+| Variable | Purpose |
+| --- | --- |
+| `MERIDIAN_GITHUB_TOKEN` | Fine-grained PAT · Actions read/write · Contents read |
+| `MERIDIAN_GITHUB_REPO` | Optional override (`JustXSystems/zigma-technologies`) |
+| `MERIDIAN_HOME` | Optional sidecar CLI only |
+| `MERIDIAN_WEBHOOK_URL` | Optional Slack/Discord/Teams alerts |
+
+Without `MERIDIAN_GITHUB_TOKEN`, Admin still opens last Command Brief artefacts; generate falls back to local CLI if present, else prompts for the token.
 
 For a single brand on Hostinger, **same monorepo + two deploy workflows + Actions control plane** is the correct senior design.

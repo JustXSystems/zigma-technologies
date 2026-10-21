@@ -406,6 +406,8 @@ jobs:
           MERIDIAN_GA4_PROPERTY_ID: ${{ secrets.MERIDIAN_GA4_PROPERTY_ID }}
           MERIDIAN_BING_API_KEY: ${{ secrets.MERIDIAN_BING_API_KEY }}
           MERIDIAN_PSI_API_KEY: ${{ secrets.MERIDIAN_PSI_API_KEY }}
+          MERIDIAN_WEBHOOK_URL: ${{ secrets.MERIDIAN_WEBHOOK_URL }}
+          MERIDIAN_WEBHOOK_ALERTS_ONLY: '1'
           MERIDIAN_CI_SOFT_AUTH: '1'
         run: |
           set -euo pipefail
@@ -427,6 +429,26 @@ jobs:
             exit 0
           fi
           exit "$CODE"
+
+      - name: Sync Command Brief to Production Admin desk
+        if: always()
+        env:
+          DEST_HOST: ${{ secrets.PROD_HOST }}
+          DEST_USER: ${{ secrets.PROD_SSH_USER }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${DEST_HOST:-}" || -z "${DEST_USER:-}" || -z "${PROD_SSH_KEY:-}" ]]; then
+            echo "::warning::PROD_* SSH secrets missing — desk sync skipped"
+            exit 0
+          fi
+          KEY="$(mktemp)"
+          printf '%s\n' "$PROD_SSH_KEY" > "$KEY"
+          chmod 600 "$KEY"
+          chmod +x scripts/sync-meridian-desk-to-vps.sh
+          SSH_KEY_PATH="$KEY" DEST_HOST="$DEST_HOST" DEST_USER="$DEST_USER" \
+            ./scripts/sync-meridian-desk-to-vps.sh
+          rm -f "$KEY"
 
       - uses: actions/upload-artifact@v4
         if: always()

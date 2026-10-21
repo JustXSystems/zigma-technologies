@@ -8,9 +8,11 @@ Canonical design: **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** (product plane vs c
 | --- | --- |
 | Ship Production (site + Meridian + Command Brief) | GitHub → **Deploy Production** once (`DEPLOY_PROD`) |
 | Ship PreProd (same parallel tracks) | Push `master` or GitHub → **Deploy PreProd** |
-| Report without deploying the site | GitHub → **Meridian SEO report** (also Sunday cron) |
+| Report without deploying the site | Admin → **Generate report (GitHub)** · or Actions → **Meridian SEO report** (Sunday cron) |
 | Meridian CLI only (no site rebuild) | GitHub → **Deploy Meridian** (`plane`: prod or preprod) |
+| Sync connector secrets to Actions | `npm run meridian:secrets:sync` (after `gh auth login`) |
 | Local | `npm run seo:report` |
+| Optional self-hosted runner | `scripts/install-github-runner-zigma.sh` (label `zigma-prod`) |
 
 **Deploy Production / Deploy PreProd** (defaults):
 
@@ -28,3 +30,14 @@ Canonical design: **[`ARCHITECTURE.md`](./ARCHITECTURE.md)** (product plane vs c
 - Put SEO ops on the public apex as a second Next app
 - Trigger Deploy Meridian + Meridian SEO report separately for a normal prod/preprod release
 - Re-run Phase 0–33 human checklists — use Command Brief insights
+- Spawn Meridian CLI on Production PM2 when `MERIDIAN_GITHUB_TOKEN` can dispatch Actions instead
+
+## Admin desk (zero CLI on web node)
+
+1. Create a fine-grained PAT (Actions: Read and write) → `MERIDIAN_GITHUB_TOKEN` in Production `.env`
+2. `pm2 restart zigma --update-env`
+3. Admin → SEO → Meridian → **Generate report (GitHub)**
+4. Workflow writes Command Brief, then `sync-meridian-desk-to-vps.sh` copies it under `storage/meridian/zigma-prod/`
+5. **Open Command Brief** on the same Admin page
+
+Optional alerts: set `MERIDIAN_WEBHOOK_URL` as an Actions secret (and/or VPS env).
