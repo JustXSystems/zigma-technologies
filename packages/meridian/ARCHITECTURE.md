@@ -175,7 +175,7 @@ Phases 0–33 are **automation history**, not a weekly human checklist. The desk
 | Ops webhooks (verify fail / auth / regression) | **Shipped** | Optional `MERIDIAN_WEBHOOK_URL` |
 | Actions secret one-shot sync | **Shipped** | `npm run meridian:secrets:sync` |
 | Self-hosted Actions runner | Optional | `scripts/install-github-runner-zigma.sh` · label `zigma-prod` |
-| Extract Meridian → multi-tenant SaaS | Later | `JustXSystems/meridian` — not required for one brand |
+| Extract Meridian → multi-tenant SaaS (JBT) | **P3** | [`SAAS-MASTER-DESIGN.md`](./SAAS-MASTER-DESIGN.md) · repo [`JustXSystems/seo-tool-meridian`](https://github.com/JustXSystems/seo-tool-meridian) · URL `justxsystems.com/jbt/tools/seo-meridian` · Zigma stays local + optional dual bridge |
 
 ### Admin desk env (Production `.env`)
 
@@ -192,3 +192,5 @@ Phases 0–33 are **automation history**, not a weekly human checklist. The desk
 Without App/PAT, Admin still opens last Command Brief; **Generate report** opens Actions → Run workflow. Forever coverage = Sunday + post-deploy.
 
 For a single brand on Hostinger, **same monorepo + two deploy workflows + Actions control plane** is the correct senior design.
+
+For a **sellable multi-tenant SEO product** (any customer website), do **not** fold SaaS into this blast radius — see **[SAAS-MASTER-DESIGN.md](./SAAS-MASTER-DESIGN.md)** (JBT tool at `/jbt/tools/seo-meridian`).
