@@ -4,7 +4,7 @@
 > **Repo:** [`JustXSystems/seo-tool-meridian`](https://github.com/JustXSystems/seo-tool-meridian)  
 > **Local checkout:** `../seo-tool-meridian` (sibling of this monorepo)  
 > **Zigma:** stays on in-repo control plane; optional dual provision to SaaS  
-> **Status:** **P5 complete** — full JBT path P0–P5 (Zigma dual bridge optional; default remains local)
+> **Status:** **Go-live ready** — Search Act + self-serve + deploy automation; Zigma default remains local until dual env set
 
 ---
 
