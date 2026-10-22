@@ -4,7 +4,7 @@
 > **Repo:** [`JustXSystems/seo-tool-meridian`](https://github.com/JustXSystems/seo-tool-meridian)  
 > **Local checkout:** `../seo-tool-meridian` (sibling of this monorepo)  
 > **Zigma:** stays on in-repo control plane; optional dual provision to SaaS  
-> **Status:** **Live on JustX VPS** — `jbt-meridian-web` + worker + nginx path; Zigma default remains local until dual env set
+> **Status:** **Live + dogfood** — first Command Brief OK; Zigma Production `MERIDIAN_MODE=dual`
 
 ---
 
