@@ -29,7 +29,11 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+  const { readAgentGoogleVerification } = await import('@/lib/meridian-agent-apply');
+  const googleVerification =
+    process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() ||
+    (await readAgentGoogleVerification()) ||
+    undefined;
   const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION?.trim();
   // No `alternates.canonical` here: metadata merges shallowly, so a root canonical
   // would mark every page without its own as a duplicate of the homepage.

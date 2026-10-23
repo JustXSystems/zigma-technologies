@@ -1,0 +1,15 @@
+{
+  "name": "@justx/meridian-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Meridian Product Agent SDK — poll/apply safe on-site SEO patches",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./next": "./src/next.mjs",
+    "./quality": "./src/quality.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

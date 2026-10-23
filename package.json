@@ -95,6 +95,8 @@
     "meridian:act:phase33": "node scripts/meridian-run.mjs act phase33-advance --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:brief": "node scripts/meridian-run.mjs act command-brief --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:catalog": "node scripts/meridian-run.mjs act catalog --fleet-only --profile packages/meridian/profiles/zigma.prod.json",
+    "meridian:agent:smoke": "node scripts/meridian-agent-smoke.mjs",
+    "meridian:agent:peek": "node scripts/meridian-agent-peek.mjs",
     "meridian:observe": "node scripts/meridian-run.mjs act observe --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:desk": "node scripts/meridian-run.mjs act desk --profile packages/meridian/profiles/zigma.prod.json",
     "meridian:presence": "node scripts/meridian-run.mjs act presence --profile packages/meridian/profiles/zigma.prod.json",
@@ -149,6 +151,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.8.0",
+    "@justx/meridian-sdk": "file:packages/meridian-sdk",
     "@tiptap/core": "^3.32.0",
     "@tiptap/extension-heading": "^3.32.0",
     "@tiptap/extension-table": "^3.32.0",
