@@ -3,7 +3,7 @@
  * Quality-gated kinds only (SDK rejects doorway / review spam / forceIndex).
  */
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import pool from '@/lib/db';
 import { getPageBySlug } from '@/lib/cms';
 import { getCatalogItemBySlug } from '@/lib/catalog';
@@ -17,8 +17,10 @@ export type MeridianAgentPatch = {
   payload?: Record<string, unknown>;
 };
 
-const VERIFY_META_PATH = resolve(process.cwd(), 'storage/meridian/agent/verify-meta.json');
-const HINTS_DIR = resolve(process.cwd(), 'storage/meridian/agent/hints');
+export { readAgentGoogleVerification } from '@/lib/meridian-agent-verify';
+
+const VERIFY_META_PATH = join(process.cwd(), 'storage', 'meridian', 'agent', 'verify-meta.json');
+const HINTS_DIR = join(process.cwd(), 'storage', 'meridian', 'agent', 'hints');
 
 type CatalogSeg = 'products' | 'projects' | 'services';
 const CATALOG_SEG_TO_TYPE: Record<CatalogSeg, CatalogItemType> = {
@@ -41,20 +43,8 @@ function pathSlug(path: string) {
 }
 
 async function writeJson(filePath: string, data: unknown) {
-  await mkdir(dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
-}
-
-/** Google site-verification token applied by Product Agent (or null). */
-export async function readAgentGoogleVerification(): Promise<string | null> {
-  try {
-    const raw = await readFile(VERIFY_META_PATH, 'utf8');
-    const data = JSON.parse(raw) as { googleSiteVerification?: string };
-    const token = String(data.googleSiteVerification || '').trim();
-    return token || null;
-  } catch {
-    return null;
-  }
+  await mkdir(/*turbopackIgnore: true*/ dirname(filePath), { recursive: true });
+  await writeFile(/*turbopackIgnore: true*/ filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 }
 
 async function applyMeta(path: string, payload: Record<string, unknown>) {
@@ -88,7 +78,6 @@ async function applyMeta(path: string, payload: Record<string, unknown>) {
     try {
       await pool.query(`UPDATE catalog_items SET ${sets.join(', ')} WHERE id = ?`, params);
     } catch {
-      // Columns optional on older DBs
       const fallback: string[] = [];
       const fp: unknown[] = [];
       if (title) {
@@ -166,10 +155,10 @@ async function applyVerifyMeta(payload: Record<string, unknown>) {
 
 async function storeHint(kind: string, path: string, payload: Record<string, unknown>) {
   const safe = kind.replace(/[^a-z0-9-]/gi, '_');
-  const file = resolve(HINTS_DIR, `${safe}.json`);
+  const file = join(HINTS_DIR, `${safe}.json`);
   let existing: Record<string, unknown> = {};
   try {
-    existing = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
+    existing = JSON.parse(await readFile(/*turbopackIgnore: true*/ file, 'utf8')) as Record<string, unknown>;
   } catch {
     /* new */
   }

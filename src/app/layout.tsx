@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { readAgentGoogleVerification } = await import('@/lib/meridian-agent-apply');
+  const { readAgentGoogleVerification } = await import('@/lib/meridian-agent-verify');
   const googleVerification =
     process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() ||
     (await readAgentGoogleVerification()) ||
