@@ -15,16 +15,28 @@ export async function buildCmsMetadata(slug: string): Promise<Metadata> {
   const companyName = site.companyName || DEFAULT_SITE_SETTINGS.companyName;
 
   const rawTitle = page?.meta_title || page?.title || (isHome ? companyName : slug);
-  // Home with no meta title, or a brand-only one, gets a descriptive default title.
+  // Home with no meta title, brand-only, or doubled brand ("…zigma… | Zigma Technologies") → default.
   const homeMetaTitle = (page?.meta_title || '').trim();
-  const homeNeedsDefault = !homeMetaTitle || homeMetaTitle.toLowerCase() === companyName.toLowerCase();
+  const brandLc = companyName.toLowerCase();
+  const titleBrandHits = homeMetaTitle ? (homeMetaTitle.toLowerCase().match(new RegExp(brandLc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length : 0;
+  const homeNeedsDefault =
+    !homeMetaTitle || homeMetaTitle.toLowerCase() === brandLc || titleBrandHits > 1;
   const title =
-    isHome && homeNeedsDefault ? `${companyName} | Solar EPC, UPS, BESS & EV Charging in India` : rawTitle;
+    isHome && homeNeedsDefault
+      ? `Solar EPC, UPS, BESS & EV Charging in Bangalore`
+      : rawTitle;
+
+  const rawDesc = (page?.meta_description || '').trim();
+  const descLooksLikeExperiment =
+    /defend winner|freshness\s*\+|variant\s*[ab]|ab[\s_-]?test/i.test(rawDesc);
+  const description =
+    (isHome && (!rawDesc || descLooksLikeExperiment)
+      ? site.defaultMetaDescription || DEFAULT_SITE_SETTINGS.defaultMetaDescription
+      : page?.meta_description || site.defaultMetaDescription || DEFAULT_SITE_SETTINGS.defaultMetaDescription);
 
   return buildPageMetadata({
     title,
-    description:
-      page?.meta_description || site.defaultMetaDescription || DEFAULT_SITE_SETTINGS.defaultMetaDescription,
+    description,
     path: isHome ? '/' : `/${slug}`,
     image: siteOgImage(site.ogImage),
     ...(isHome && copy?.features.localesEnabled

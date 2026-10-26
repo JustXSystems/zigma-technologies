@@ -49,9 +49,26 @@ export function clampDescription(text: string | null | undefined, max = 160): st
   return `${lastSpace > 80 ? cut.slice(0, lastSpace) : cut}…`;
 }
 
-/** Titles that already contain the brand bypass the root "%s | Zigma Technologies" template. */
+/**
+ * Titles that already contain the brand bypass the root "%s | Zigma Technologies" template.
+ * Also strips a redundant trailing `| Brand` when the left side already names the brand
+ * (fixes live-verify "brand appears 2×" on home).
+ */
 export function pageTitle(raw: string): NonNullable<Metadata['title']> {
-  const t = raw.trim();
+  let t = raw.trim().replace(/\s+/g, ' ');
+  if (!t) return t;
+
+  const brandRe = SITE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const trailingBrand = new RegExp(`\\s*[|\\u2013\\u2014\\-]\\s*${brandRe}\\s*$`, 'i');
+  const withoutSuffix = t.replace(trailingBrand, '').trim();
+  if (
+    withoutSuffix &&
+    withoutSuffix.toLowerCase().includes(SITE_NAME.toLowerCase()) &&
+    trailingBrand.test(t)
+  ) {
+    t = withoutSuffix;
+  }
+
   return t.toLowerCase().includes(SITE_NAME.toLowerCase()) ? { absolute: t } : t;
 }
 
