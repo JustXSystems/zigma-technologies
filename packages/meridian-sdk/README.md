@@ -27,13 +27,16 @@ import { createAgentHandlers } from '@justx/meridian-sdk/next';
 export const { GET, POST } = createAgentHandlers({
   baseUrl: process.env.MERIDIAN_SAAS_URL!, // e.g. https://justxsystems.com/jbt/tools/seo-meridian
   apiKey: process.env.MERIDIAN_SITE_API_KEY!, // jbt_…
+  // Optional: upload bounded CMS inventory so SaaS can draft empty-field heals
+  collectInventory: async () => ({ pages: [], media: [] }),
   apply: async (patch) => {
     // Persist patch.path + patch.payload into your CMS / metadata store
+    // Honor payload.onlyIfEmpty — refuse overwrite of filled fields
   },
 });
 ```
 
-Cron or Vercel cron → `GET /api/meridian-agent` to poll.  
+Cron or Vercel cron → `GET /api/meridian-agent` to poll (heartbeat + inventory + apply).  
 Optional: register that URL as the agent push endpoint in Meridian Connect.
 
 ## Generic poller

@@ -2,6 +2,7 @@ import { isPatchAllowed } from './quality.mjs';
 
 /**
  * Meridian Product Agent HTTP client.
+ * Sensor + actuator only — SEO intelligence stays on SaaS.
  *
  * @param {{ baseUrl: string, apiKey: string, fetchImpl?: typeof fetch }} opts
  */
@@ -27,10 +28,27 @@ export function createMeridianAgent(opts) {
   }
 
   return {
-    async heartbeat({ kind = 'custom', version = '0.1.0', endpointUrl = null, meta = null } = {}) {
+    /**
+     * @param {{
+     *   kind?: string,
+     *   version?: string,
+     *   endpointUrl?: string|null,
+     *   meta?: object|null,
+     *   capabilities?: object|null,
+     *   inventory?: object|null,
+     * }} [opts]
+     */
+    async heartbeat({
+      kind = 'custom',
+      version = '0.1.0',
+      endpointUrl = null,
+      meta = null,
+      capabilities = null,
+      inventory = null,
+    } = {}) {
       return request('/api/v1/agent/heartbeat', {
         method: 'POST',
-        body: JSON.stringify({ kind, version, endpointUrl, meta }),
+        body: JSON.stringify({ kind, version, endpointUrl, meta, capabilities, inventory }),
       });
     },
 
@@ -47,6 +65,7 @@ export function createMeridianAgent(opts) {
 
     /**
      * Poll pending patches and run `applyFn(patch)` for each allowed patch.
+     * Honors payload.onlyIfEmpty when applyFn throws / returns skip via reject.
      * @param {(patch: object) => Promise<void>|void} applyFn
      */
     async sync(applyFn, { limit = 20 } = {}) {
@@ -73,3 +92,20 @@ export function createMeridianAgent(opts) {
     },
   };
 }
+
+/** Default capabilities advertised by thin agents. */
+export const DEFAULT_AGENT_CAPABILITIES = {
+  apply: [
+    'meta',
+    'schema',
+    'canonical',
+    'sitemap-hint',
+    'alt',
+    'robots-hint',
+    'verify-meta',
+    'bing-verify',
+    'redirect-hint',
+    'indexnow-key',
+  ],
+  inventory: ['pages', 'media'],
+};

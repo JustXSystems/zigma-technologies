@@ -1,6 +1,7 @@
 /**
  * Persist Meridian Product Agent patches into Zigma CMS / head store.
  * Quality-gated kinds only (SDK rejects doorway / review spam / forceIndex).
+ * Empty-field auto-heal: honor payload.onlyIfEmpty.
  */
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -21,6 +22,7 @@ export { readAgentGoogleVerification } from '@/lib/meridian-agent-verify';
 
 const VERIFY_META_PATH = join(process.cwd(), 'storage', 'meridian', 'agent', 'verify-meta.json');
 const HINTS_DIR = join(process.cwd(), 'storage', 'meridian', 'agent', 'hints');
+const SCHEMA_PATH = join(process.cwd(), 'storage', 'meridian', 'agent', 'org-schema.json');
 
 type CatalogSeg = 'products' | 'projects' | 'services';
 const CATALOG_SEG_TO_TYPE: Record<CatalogSeg, CatalogItemType> = {
@@ -42,18 +44,27 @@ function pathSlug(path: string) {
   return p.replace(/^\//, '').split('/')[0] || 'home';
 }
 
+function onlyIfEmpty(payload: Record<string, unknown>) {
+  return payload.onlyIfEmpty === true;
+}
+
+function filled(v: unknown) {
+  return typeof v === 'string' && v.trim().length > 0;
+}
+
 async function writeJson(filePath: string, data: unknown) {
   await mkdir(/*turbopackIgnore: true*/ dirname(filePath), { recursive: true });
   await writeFile(/*turbopackIgnore: true*/ filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 }
 
 async function applyMeta(path: string, payload: Record<string, unknown>) {
-  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
-  const description = typeof payload.description === 'string' ? payload.description.trim() : '';
+  let title = typeof payload.title === 'string' ? payload.title.trim() : '';
+  let description = typeof payload.description === 'string' ? payload.description.trim() : '';
   if (!title && !description) throw new Error('meta patch needs title and/or description');
 
   const p = normalizePath(path);
   const segments = p === '/' ? [] : p.replace(/^\//, '').split('/');
+  const emptyOnly = onlyIfEmpty(payload);
 
   // Catalog detail: /products|projects|services/:slug
   if (segments.length >= 2 && (segments[0] === 'products' || segments[0] === 'projects' || segments[0] === 'services')) {
@@ -61,6 +72,14 @@ async function applyMeta(path: string, payload: Record<string, unknown>) {
     const slug = segments[1];
     const item = await getCatalogItemBySlug(itemType, slug, true);
     if (!item) throw new Error(`catalog item not found: ${p}`);
+
+    if (emptyOnly) {
+      if (title && filled(item.meta_title)) title = '';
+      if (description && filled(item.meta_description)) description = '';
+      if (!title && !description) {
+        throw new Error('onlyIfEmpty: catalog meta already set');
+      }
+    }
 
     const sets: string[] = [];
     const params: unknown[] = [];
@@ -98,6 +117,11 @@ async function applyMeta(path: string, payload: Record<string, unknown>) {
   if (segments.length >= 2 && segments[0] === 'blog') {
     const post = await getResourcePostBySlug(segments[1], { admin: true });
     if (!post) throw new Error(`blog post not found: ${p}`);
+    if (emptyOnly) {
+      if (title && filled(post.meta_title)) title = '';
+      if (description && filled(post.meta_description)) description = '';
+      if (!title && !description) throw new Error('onlyIfEmpty: blog meta already set');
+    }
     const sets: string[] = [];
     const params: unknown[] = [];
     if (title) {
@@ -117,6 +141,12 @@ async function applyMeta(path: string, payload: Record<string, unknown>) {
   const slug = pathSlug(p);
   const page = await getPageBySlug(slug, true);
   if (!page) throw new Error(`page not found for path: ${p}`);
+
+  if (emptyOnly) {
+    if (title && filled(page.meta_title)) title = '';
+    if (description && filled(page.meta_description)) description = '';
+    if (!title && !description) throw new Error('onlyIfEmpty: page meta already set');
+  }
 
   const sets: string[] = [];
   const params: unknown[] = [];
@@ -140,6 +170,71 @@ async function applyMeta(path: string, payload: Record<string, unknown>) {
     await pool.query(`UPDATE pages SET ${sets.join(', ')} WHERE id = ?`, params);
   }
   return { target: 'page', id: page.id, path: p };
+}
+
+async function applyAlt(path: string, payload: Record<string, unknown>) {
+  const alt = typeof payload.alt === 'string' ? payload.alt.trim() : '';
+  if (!alt) throw new Error('alt patch needs alt text');
+  const imageSrc = typeof payload.imageSrc === 'string' ? payload.imageSrc.trim() : '';
+  const imageId = payload.imageId != null ? String(payload.imageId).trim() : '';
+  if (!imageSrc && !imageId) throw new Error('alt patch needs imageSrc or imageId');
+
+  const emptyOnly = onlyIfEmpty(payload);
+
+  if (imageId && /^\d+$/.test(imageId)) {
+    const [rows] = await pool.query(`SELECT id, alt, url FROM catalog_media WHERE id = ? LIMIT 1`, [
+      Number(imageId),
+    ]);
+    const row = Array.isArray(rows) ? (rows as { id: number; alt: string | null; url: string }[])[0] : null;
+    if (!row) throw new Error(`catalog_media id not found: ${imageId}`);
+    if (emptyOnly && filled(row.alt)) throw new Error('onlyIfEmpty: alt already set');
+    await pool.query(`UPDATE catalog_media SET alt = ? WHERE id = ?`, [alt.slice(0, 255), row.id]);
+    return { target: 'catalog_media', id: row.id, path: normalizePath(path) };
+  }
+
+  if (imageSrc) {
+    const base = imageSrc.split('?')[0];
+    const [rows] = await pool.query(
+      `SELECT id, alt, url FROM catalog_media
+       WHERE url = ? OR url = ? OR url LIKE ?
+       ORDER BY id DESC LIMIT 1`,
+      [imageSrc, base, `%${base.split('/').pop() || '___never___'}%`]
+    );
+    const row = Array.isArray(rows) ? (rows as { id: number; alt: string | null; url: string }[])[0] : null;
+    if (row) {
+      if (emptyOnly && filled(row.alt)) throw new Error('onlyIfEmpty: alt already set');
+      await pool.query(`UPDATE catalog_media SET alt = ? WHERE id = ?`, [alt.slice(0, 255), row.id]);
+      return { target: 'catalog_media', id: row.id, path: normalizePath(path), url: row.url };
+    }
+  }
+
+  // Fallback: persist hint so theme/head can still consume
+  await storeHint('alt', path, { ...payload, alt });
+  return { target: 'hint', kind: 'alt', path: normalizePath(path), note: 'no catalog_media row matched' };
+}
+
+async function applySchema(path: string, payload: Record<string, unknown>) {
+  const schema = payload.schemaJsonLd;
+  if (!schema || typeof schema !== 'object') throw new Error('schema patch needs schemaJsonLd');
+  const emptyOnly = onlyIfEmpty(payload);
+  if (emptyOnly) {
+    try {
+      const existing = JSON.parse(await readFile(/*turbopackIgnore: true*/ SCHEMA_PATH, 'utf8')) as {
+        schemaJsonLd?: unknown;
+      };
+      if (existing?.schemaJsonLd) throw new Error('onlyIfEmpty: org schema already set');
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith('onlyIfEmpty')) throw e;
+    }
+  }
+  await writeJson(SCHEMA_PATH, {
+    path: normalizePath(path),
+    schemaJsonLd: schema,
+    updatedAt: new Date().toISOString(),
+    source: 'meridian-agent',
+  });
+  await storeHint('schema', path, payload);
+  return { target: 'schema', path: normalizePath(path) };
 }
 
 async function applyVerifyMeta(payload: Record<string, unknown>) {
@@ -177,15 +272,16 @@ export async function applyMeridianAgentPatch(patch: MeridianAgentPatch) {
   const payload = patch.payload && typeof patch.payload === 'object' ? patch.payload : {};
 
   if (kind === 'meta') return applyMeta(path, payload);
+  if (kind === 'alt') return applyAlt(path, payload);
+  if (kind === 'schema') return applySchema(path, payload);
   if (kind === 'verify-meta') return applyVerifyMeta(payload);
   if (
     kind === 'canonical' ||
-    kind === 'schema' ||
     kind === 'sitemap-hint' ||
-    kind === 'alt' ||
     kind === 'robots-hint' ||
     kind === 'redirect-hint' ||
-    kind === 'indexnow-key'
+    kind === 'indexnow-key' ||
+    kind === 'bing-verify'
   ) {
     return storeHint(kind, path, payload);
   }

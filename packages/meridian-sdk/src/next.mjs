@@ -1,12 +1,12 @@
-import { createMeridianAgent } from './client.mjs';
+import { createMeridianAgent, DEFAULT_AGENT_CAPABILITIES } from './client.mjs';
 import { isPatchAllowed } from './quality.mjs';
 
 /**
- * Default in-memory / file-less apply for Next App Router demos.
- * Real sites should persist title/description into CMS or metadata store.
+ * Default apply for Next App Router.
+ * Persists meta/schema/etc in-memory; writes IndexNow key to public/{key}.txt when fs is available.
  *
  * @param {object} patch
- * @param {{ store?: Map<string, object> }} [ctx]
+ * @param {{ store?: Map<string, object>, publicDir?: string }} [ctx]
  */
 export async function defaultNextApply(patch, ctx = {}) {
   const store = ctx.store || globalThis.__meridianAgentStore || (globalThis.__meridianAgentStore = new Map());
@@ -24,6 +24,45 @@ export async function defaultNextApply(patch, ctx = {}) {
     next.sitemapInclude = patch.payload?.include;
   } else if (patch.kind === 'alt') {
     next.alt = { ...(next.alt || {}), [patch.payload?.imageSrc || patch.payload?.imageId]: patch.payload?.alt };
+  } else if (patch.kind === 'verify-meta') {
+    next.googleSiteVerification =
+      patch.payload?.googleSiteVerification || patch.payload?.content || null;
+  } else if (patch.kind === 'bing-verify') {
+    const code =
+      patch.payload?.msvalidate ||
+      patch.payload?.authenticationCode ||
+      patch.payload?.content ||
+      null;
+    next.msvalidate = code;
+    // XML file verify works without editing root layout <head>
+    if (code) {
+      try {
+        const { writeFileSync, mkdirSync } = await import('node:fs');
+        const { resolve } = await import('node:path');
+        const publicDir = ctx.publicDir || resolve(process.cwd(), 'public');
+        mkdirSync(publicDir, { recursive: true });
+        const xml = `<?xml version="1.0"?>\n<users>\n\t<user>${String(code).trim()}</user>\n</users>\n`;
+        writeFileSync(resolve(publicDir, 'BingSiteAuth.xml'), xml, 'utf8');
+        next.bingAuthFile = '/BingSiteAuth.xml';
+      } catch (e) {
+        next.bingAuthWriteError = e instanceof Error ? e.message : String(e);
+      }
+    }
+  } else if (patch.kind === 'indexnow-key') {
+    const hex = String(patch.payload?.key || '').trim();
+    next.indexNowKey = hex;
+    if (hex && /^[a-f0-9]{8,64}$/i.test(hex)) {
+      try {
+        const { writeFileSync, mkdirSync } = await import('node:fs');
+        const { resolve } = await import('node:path');
+        const publicDir = ctx.publicDir || resolve(process.cwd(), 'public');
+        mkdirSync(publicDir, { recursive: true });
+        writeFileSync(resolve(publicDir, `${hex}.txt`), hex, 'utf8');
+        next.indexNowKeyFile = `/${hex}.txt`;
+      } catch (e) {
+        next.indexNowWriteError = e instanceof Error ? e.message : String(e);
+      }
+    }
   }
   store.set(key, next);
   return next;
@@ -48,10 +87,32 @@ export function createAgentHandlers(opts) {
   });
   const apply = opts.apply || defaultNextApply;
   const kind = opts.kind || 'next';
+  const capabilities = opts.capabilities || {
+    ...DEFAULT_AGENT_CAPABILITIES,
+    cms: kind === 'next' ? 'next' : kind,
+  };
+
+  async function heartbeatAndSync() {
+    let inventory = null;
+    if (typeof opts.collectInventory === 'function') {
+      try {
+        inventory = await opts.collectInventory();
+      } catch {
+        inventory = null;
+      }
+    }
+    await agent.heartbeat({
+      kind,
+      version: opts.version || '0.2.0',
+      endpointUrl: opts.endpointUrl || null,
+      capabilities,
+      inventory,
+    });
+    return agent.sync(apply);
+  }
 
   async function GET() {
-    await agent.heartbeat({ kind, version: opts.version || '0.1.0', endpointUrl: opts.endpointUrl || null });
-    const result = await agent.sync(apply);
+    const result = await heartbeatAndSync();
     return Response.json({ ok: true, ...result });
   }
 
@@ -73,9 +134,7 @@ export function createAgentHandlers(opts) {
         return Response.json({ ok: false, error: msg }, { status: 500 });
       }
     }
-    // Manual sync trigger
-    await agent.heartbeat({ kind, version: opts.version || '0.1.0', endpointUrl: opts.endpointUrl || null });
-    const result = await agent.sync(apply);
+    const result = await heartbeatAndSync();
     return Response.json({ ok: true, ...result });
   }
 

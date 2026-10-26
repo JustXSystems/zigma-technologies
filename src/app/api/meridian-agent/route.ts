@@ -10,6 +10,10 @@
  */
 import { createAgentHandlers } from '@justx/meridian-sdk/next';
 import { applyMeridianAgentPatch } from '@/lib/meridian-agent-apply';
+import {
+  collectMeridianAgentInventory,
+  ZIGMA_AGENT_CAPABILITIES,
+} from '@/lib/meridian-agent-inventory';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -39,7 +43,9 @@ function getHandlers(): AgentHandlers | null {
     baseUrl: saasUrl,
     apiKey,
     kind: 'next',
-    version: 'zigma-0.1.0',
+    version: 'zigma-0.2.0',
+    capabilities: ZIGMA_AGENT_CAPABILITIES,
+    collectInventory: collectMeridianAgentInventory,
     apply: async (patch: Patch) => {
       const result = await applyMeridianAgentPatch(patch);
       console.info('[meridian-agent]', patch.kind, patch.path, result);
