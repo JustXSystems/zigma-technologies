@@ -8,6 +8,7 @@ export const ALLOWED_PATCH_KINDS = new Set([
   'alt',
   'robots-hint',
   'verify-meta',
+  'bing-verify',
   'redirect-hint',
   'indexnow-key',
 ]);

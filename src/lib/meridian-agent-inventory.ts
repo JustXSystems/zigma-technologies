@@ -1,6 +1,7 @@
 /**
  * Bounded CMS inventory for Meridian SaaS Heal Factory.
  * Sensor-only — no SEO scoring on the client.
+ * Wired from storage/ops/zigma-agent helpers (MySQL pages / catalog / media_assets).
  */
 import pool from '@/lib/db';
 
@@ -31,7 +32,10 @@ function clip(s: unknown, max: number) {
   return t.length <= max ? t : `${t.slice(0, max - 1)}…`;
 }
 
-export async function collectMeridianAgentInventory() {
+/**
+ * Collect pages + empty-alt media from MySQL for Product Agent heartbeat.
+ */
+export async function collectZigmaAgentInventory() {
   const pages: PageRow[] = [];
   const media: MediaRow[] = [];
 
@@ -110,46 +114,143 @@ export async function collectMeridianAgentInventory() {
     /* ignore */
   }
 
+  let mediaStats: {
+    total: number;
+    withAlt: number;
+    emptyAlt: number;
+    videosSkipped: number;
+  } | null = null;
+
   try {
-    const [mediaRows] = await pool.query(
-      `SELECT m.id, m.url, m.alt, m.kind, c.item_type, c.slug, c.title
-       FROM catalog_media m
-       JOIN catalog_items c ON c.id = m.item_id
-       WHERE c.enabled = 1 AND (m.alt IS NULL OR TRIM(m.alt) = '')
-       ORDER BY m.id DESC
-       LIMIT 80`
+    const [statsRows] = await pool.query(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(CASE WHEN alt IS NOT NULL AND TRIM(alt) <> '' THEN 1 ELSE 0 END) AS with_alt,
+         SUM(CASE WHEN alt IS NULL OR TRIM(alt) = '' THEN 1 ELSE 0 END) AS empty_alt,
+         SUM(CASE WHEN path REGEXP '\\\\.(mp4|webm|mov|avi|mkv|m4v)(\\\\?|$)' THEN 1 ELSE 0 END) AS videos
+       FROM media_assets`
     );
-    for (const r of (mediaRows as {
+    const s = ((statsRows as { total?: number; with_alt?: number; empty_alt?: number; videos?: number }[]) ||
+      [])[0] || {};
+    mediaStats = {
+      total: Number(s.total || 0),
+      withAlt: Number(s.with_alt || 0),
+      emptyAlt: Number(s.empty_alt || 0),
+      videosSkipped: Number(s.videos || 0),
+    };
+  } catch {
+    mediaStats = null;
+  }
+
+  try {
+    const [atts] = await pool.query(
+      `SELECT id, path, original_name, alt
+       FROM media_assets
+       WHERE (alt IS NULL OR TRIM(alt) = '')
+         AND path NOT REGEXP '\\\\.(mp4|webm|mov|avi|mkv|m4v)(\\\\?|$)'
+       ORDER BY
+         (CASE
+            WHEN original_name REGEXP '[A-Za-z]{3,}[-_ ][A-Za-z]{3,}' THEN 0
+            WHEN path REGEXP '[A-Za-z]{3,}[-_][A-Za-z]{3,}' THEN 1
+            ELSE 2
+          END),
+         id DESC
+       LIMIT 120`
+    );
+    for (const r of (atts as {
       id: number;
-      url: string;
+      path: string;
+      original_name: string | null;
       alt: string | null;
-      kind: string;
-      item_type: string;
-      slug: string;
-      title: string;
     }[]) || []) {
-      const seg =
-        r.item_type === 'product' ? 'products' : r.item_type === 'project' ? 'projects' : 'services';
-      const filename = (r.url || '').split('/').pop() || null;
       media.push({
         id: String(r.id),
-        src: r.url || null,
+        src: r.path || null,
         alt: null,
-        filename,
-        contextTitle: clip(r.title, 200) || null,
-        onPaths: [`/${seg}/${r.slug}`],
+        filename: r.original_name || null,
+        contextTitle: null,
+        onPaths: r.path ? [String(r.path).split('?')[0]] : [],
       });
     }
   } catch {
-    /* ignore */
+    try {
+      const [atts] = await pool.query(
+        `SELECT id, path, original_name, alt FROM media_assets
+         WHERE alt IS NULL OR TRIM(alt) = ''
+         ORDER BY id DESC LIMIT 80`
+      );
+      for (const r of (atts as {
+        id: number;
+        path: string;
+        original_name: string | null;
+      }[]) || []) {
+        if (/\.(mp4|webm|mov|avi|mkv|m4v)(\?|$)/i.test(String(r.path || ''))) continue;
+        media.push({
+          id: String(r.id),
+          src: r.path || null,
+          alt: null,
+          filename: r.original_name || null,
+          contextTitle: null,
+          onPaths: r.path ? [String(r.path).split('?')[0]] : [],
+        });
+      }
+    } catch {
+      /* media_assets optional */
+    }
+  }
+
+  // Catalog-linked empty alts (product/project/service galleries)
+  if (media.length < 100) {
+    try {
+      const [mediaRows] = await pool.query(
+        `SELECT m.id, m.url, m.alt, m.kind, c.item_type, c.slug, c.title
+         FROM catalog_media m
+         JOIN catalog_items c ON c.id = m.item_id
+         WHERE c.enabled = 1 AND (m.alt IS NULL OR TRIM(m.alt) = '')
+         ORDER BY m.id DESC
+         LIMIT 80`
+      );
+      for (const r of (mediaRows as {
+        id: number;
+        url: string;
+        alt: string | null;
+        kind: string;
+        item_type: string;
+        slug: string;
+        title: string;
+      }[]) || []) {
+        if (media.length >= 100) break;
+        const seg =
+          r.item_type === 'product' ? 'products' : r.item_type === 'project' ? 'projects' : 'services';
+        const filename = (r.url || '').split('/').pop() || null;
+        media.push({
+          id: `catalog:${r.id}`,
+          src: r.url || null,
+          alt: null,
+          filename,
+          contextTitle: clip(r.title, 200) || null,
+          onPaths: [`/${seg}/${r.slug}`],
+        });
+      }
+    } catch {
+      /* ignore */
+    }
   }
 
   return {
     cursor: new Date().toISOString(),
     pages: pages.slice(0, 50),
     media: media.slice(0, 100),
+    meta: {
+      cms: 'next',
+      mediaStats,
+      mediaFeed: 'empty-alt-only',
+    },
   };
 }
+
+/** @deprecated Prefer collectZigmaAgentInventory */
+export const collectMeridianAgentInventory = collectZigmaAgentInventory;
 
 export const ZIGMA_AGENT_CAPABILITIES = {
   apply: [

@@ -2,9 +2,11 @@
  * Persist Meridian Product Agent patches into Zigma CMS / head store.
  * Quality-gated kinds only (SDK rejects doorway / review spam / forceIndex).
  * Empty-field auto-heal: honor payload.onlyIfEmpty.
+ * Bing / IndexNow proof files land in public/ for meridian-seo-file rewrites.
  */
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import pool from '@/lib/db';
 import { getPageBySlug } from '@/lib/cms';
 import { getCatalogItemBySlug } from '@/lib/catalog';
@@ -172,21 +174,49 @@ async function applyMeta(path: string, payload: Record<string, unknown>) {
   return { target: 'page', id: page.id, path: p };
 }
 
+function writePublicSeoFile(name: string, body: string) {
+  const publicDir = resolve(process.cwd(), 'public');
+  mkdirSync(publicDir, { recursive: true });
+  writeFileSync(resolve(publicDir, name), body, 'utf8');
+  return `/${name}`;
+}
+
 async function applyAlt(path: string, payload: Record<string, unknown>) {
   const alt = typeof payload.alt === 'string' ? payload.alt.trim() : '';
   if (!alt) throw new Error('alt patch needs alt text');
   const imageSrc = typeof payload.imageSrc === 'string' ? payload.imageSrc.trim() : '';
-  const imageId = payload.imageId != null ? String(payload.imageId).trim() : '';
+  const imageIdRaw = payload.imageId != null ? String(payload.imageId).trim() : '';
+  // Inventory may tag catalog rows as catalog:123
+  const imageId = imageIdRaw.replace(/^catalog:/i, '');
   if (!imageSrc && !imageId) throw new Error('alt patch needs imageSrc or imageId');
 
   const emptyOnly = onlyIfEmpty(payload);
+  const isCatalogId = /^catalog:/i.test(imageIdRaw);
+
+  if (imageId && /^\d+$/.test(imageId) && !isCatalogId) {
+    try {
+      const [rows] = await pool.query(`SELECT id, alt, path FROM media_assets WHERE id = ? LIMIT 1`, [
+        Number(imageId),
+      ]);
+      const row = Array.isArray(rows)
+        ? (rows as { id: number; alt: string | null; path: string }[])[0]
+        : null;
+      if (row) {
+        if (emptyOnly && filled(row.alt)) throw new Error('onlyIfEmpty: alt already set');
+        await pool.query(`UPDATE media_assets SET alt = ? WHERE id = ?`, [alt.slice(0, 255), row.id]);
+        return { target: 'media_assets', id: row.id, path: normalizePath(path) };
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith('onlyIfEmpty')) throw e;
+    }
+  }
 
   if (imageId && /^\d+$/.test(imageId)) {
     const [rows] = await pool.query(`SELECT id, alt, url FROM catalog_media WHERE id = ? LIMIT 1`, [
       Number(imageId),
     ]);
     const row = Array.isArray(rows) ? (rows as { id: number; alt: string | null; url: string }[])[0] : null;
-    if (!row) throw new Error(`catalog_media id not found: ${imageId}`);
+    if (!row) throw new Error(`media id not found: ${imageIdRaw}`);
     if (emptyOnly && filled(row.alt)) throw new Error('onlyIfEmpty: alt already set');
     await pool.query(`UPDATE catalog_media SET alt = ? WHERE id = ?`, [alt.slice(0, 255), row.id]);
     return { target: 'catalog_media', id: row.id, path: normalizePath(path) };
@@ -194,6 +224,26 @@ async function applyAlt(path: string, payload: Record<string, unknown>) {
 
   if (imageSrc) {
     const base = imageSrc.split('?')[0];
+    const srcPath = base.startsWith('/') ? base : `/${base}`;
+    try {
+      const [rows] = await pool.query(
+        `SELECT id, alt, path FROM media_assets
+         WHERE path = ? OR path = ? OR path LIKE ? OR original_name = ?
+         ORDER BY id DESC LIMIT 1`,
+        [imageSrc, srcPath, `%${base.split('/').pop() || '___never___'}%`, base.split('/').pop() || '']
+      );
+      const row = Array.isArray(rows)
+        ? (rows as { id: number; alt: string | null; path: string }[])[0]
+        : null;
+      if (row) {
+        if (emptyOnly && filled(row.alt)) throw new Error('onlyIfEmpty: alt already set');
+        await pool.query(`UPDATE media_assets SET alt = ? WHERE id = ?`, [alt.slice(0, 255), row.id]);
+        return { target: 'media_assets', id: row.id, path: normalizePath(path), url: row.path };
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.startsWith('onlyIfEmpty')) throw e;
+    }
+
     const [rows] = await pool.query(
       `SELECT id, alt, url FROM catalog_media
        WHERE url = ? OR url = ? OR url LIKE ?
@@ -210,7 +260,28 @@ async function applyAlt(path: string, payload: Record<string, unknown>) {
 
   // Fallback: persist hint so theme/head can still consume
   await storeHint('alt', path, { ...payload, alt });
-  return { target: 'hint', kind: 'alt', path: normalizePath(path), note: 'no catalog_media row matched' };
+  return { target: 'hint', kind: 'alt', path: normalizePath(path), note: 'no media_assets/catalog_media row matched' };
+}
+
+async function applyBingVerify(payload: Record<string, unknown>) {
+  const code = String(
+    payload.msvalidate || payload.authenticationCode || payload.content || ''
+  ).trim();
+  if (!code) throw new Error('bing-verify missing code');
+  const file = writePublicSeoFile(
+    'BingSiteAuth.xml',
+    `<?xml version="1.0"?>\n<users>\n\t<user>${code}</user>\n</users>\n`
+  );
+  await storeHint('bing-verify', '/', { ...payload, msvalidate: code, file });
+  return { target: 'public', file, code };
+}
+
+async function applyIndexNowKey(payload: Record<string, unknown>) {
+  const hex = String(payload.key || '').trim();
+  if (!/^[a-f0-9]{8,64}$/i.test(hex)) throw new Error('invalid indexnow key');
+  const file = writePublicSeoFile(`${hex}.txt`, hex);
+  await storeHint('indexnow-key', '/', { ...payload, key: hex, file });
+  return { target: 'public', file };
 }
 
 async function applySchema(path: string, payload: Record<string, unknown>) {
@@ -275,16 +346,19 @@ export async function applyMeridianAgentPatch(patch: MeridianAgentPatch) {
   if (kind === 'alt') return applyAlt(path, payload);
   if (kind === 'schema') return applySchema(path, payload);
   if (kind === 'verify-meta') return applyVerifyMeta(payload);
+  if (kind === 'bing-verify') return applyBingVerify(payload);
+  if (kind === 'indexnow-key') return applyIndexNowKey(payload);
   if (
     kind === 'canonical' ||
     kind === 'sitemap-hint' ||
     kind === 'robots-hint' ||
-    kind === 'redirect-hint' ||
-    kind === 'indexnow-key' ||
-    kind === 'bing-verify'
+    kind === 'redirect-hint'
   ) {
     return storeHint(kind, path, payload);
   }
 
   throw new Error(`unsupported patch kind: ${kind}`);
 }
+
+/** Alias used by ops dogfood scripts */
+export const applyZigmaAgentPatch = applyMeridianAgentPatch;

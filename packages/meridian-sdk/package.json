@@ -7,7 +7,10 @@
   "exports": {
     ".": "./src/index.mjs",
     "./next": "./src/next.mjs",
-    "./quality": "./src/quality.mjs"
+    "./quality": "./src/quality.mjs",
+    "./inventory": "./src/inventory.mjs",
+    "./seo-files": "./src/seo-files.mjs",
+    "./static-public": "./src/static-public.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -11,7 +11,7 @@
 import { createAgentHandlers } from '@justx/meridian-sdk/next';
 import { applyMeridianAgentPatch } from '@/lib/meridian-agent-apply';
 import {
-  collectMeridianAgentInventory,
+  collectZigmaAgentInventory,
   ZIGMA_AGENT_CAPABILITIES,
 } from '@/lib/meridian-agent-inventory';
 
@@ -43,9 +43,10 @@ function getHandlers(): AgentHandlers | null {
     baseUrl: saasUrl,
     apiKey,
     kind: 'next',
-    version: 'zigma-0.2.0',
+    version: 'zigma-0.3.0',
+    endpointUrl: 'https://zigma-technologies.com/api/meridian-agent',
     capabilities: ZIGMA_AGENT_CAPABILITIES,
-    collectInventory: collectMeridianAgentInventory,
+    collectInventory: collectZigmaAgentInventory,
     apply: async (patch: Patch) => {
       const result = await applyMeridianAgentPatch(patch);
       console.info('[meridian-agent]', patch.kind, patch.path, result);

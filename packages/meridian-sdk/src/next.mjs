@@ -16,6 +16,9 @@ export async function defaultNextApply(patch, ctx = {}) {
   if (patch.kind === 'meta') {
     if (patch.payload?.title) next.title = patch.payload.title;
     if (patch.payload?.description) next.description = patch.payload.description;
+    if (patch.payload?.ogTitle) next.ogTitle = patch.payload.ogTitle;
+    if (patch.payload?.ogDescription) next.ogDescription = patch.payload.ogDescription;
+    if (patch.payload?.ogImage) next.ogImage = patch.payload.ogImage;
   } else if (patch.kind === 'canonical') {
     next.canonical = patch.payload?.canonical;
   } else if (patch.kind === 'schema') {

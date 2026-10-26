@@ -82,6 +82,16 @@ const nextConfig: NextConfig = {
         { source: '/assets/images/:path*', destination: '/api/public/assets/images/:path*' },
         { source: '/assets/svg/:path*', destination: '/api/public/assets/svg/:path*' },
         { source: '/assets/video/:path*', destination: '/api/public/assets/video/:path*' },
+        // Meridian Product Agent — Bing verify + IndexNow keys (runtime public/ reads).
+        // Prefer path destinations — Next may drop ?name= on beforeFiles rewrites.
+        {
+          source: '/BingSiteAuth.xml',
+          destination: '/api/meridian-seo-file/BingSiteAuth.xml',
+        },
+        {
+          source: '/:key([a-fA-F0-9]{8,64}).txt',
+          destination: '/api/meridian-seo-file/:key.txt',
+        },
         // Phase-ops relative ../../SEO-GUIDE.md resolves to apex /SEO-GUIDE.md (not in product tarball).
         {
           source: '/SEO-GUIDE.md',
