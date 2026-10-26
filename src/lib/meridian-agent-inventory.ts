@@ -36,19 +36,24 @@ export async function collectMeridianAgentInventory() {
   const media: MediaRow[] = [];
 
   try {
-    const [pageRows] = await pool.query(
-      `SELECT slug, title, meta_title, meta_description, seo_meta_source
-       FROM pages
-       WHERE enabled = 1
-       ORDER BY updated_at DESC
-       LIMIT 40`
-    );
+    let pageRows: unknown;
+    try {
+      [pageRows] = await pool.query(
+        `SELECT slug, title, meta_title, meta_description, seo_meta_source
+         FROM pages WHERE enabled = 1 ORDER BY updated_at DESC LIMIT 40`
+      );
+    } catch {
+      [pageRows] = await pool.query(
+        `SELECT slug, title, meta_title, meta_description
+         FROM pages WHERE enabled = 1 ORDER BY updated_at DESC LIMIT 40`
+      );
+    }
     for (const r of (pageRows as {
       slug: string;
       title: string;
       meta_title: string | null;
       meta_description: string | null;
-      seo_meta_source: string | null;
+      seo_meta_source?: string | null;
     }[]) || []) {
       const slug = String(r.slug || '').trim();
       if (!slug) continue;
@@ -68,13 +73,18 @@ export async function collectMeridianAgentInventory() {
   }
 
   try {
-    const [catRows] = await pool.query(
-      `SELECT item_type, slug, title, meta_title, meta_description, summary, seo_meta_source
-       FROM catalog_items
-       WHERE enabled = 1
-       ORDER BY updated_at DESC
-       LIMIT 30`
-    );
+    let catRows: unknown;
+    try {
+      [catRows] = await pool.query(
+        `SELECT item_type, slug, title, meta_title, meta_description, summary, seo_meta_source
+         FROM catalog_items WHERE enabled = 1 ORDER BY updated_at DESC LIMIT 30`
+      );
+    } catch {
+      [catRows] = await pool.query(
+        `SELECT item_type, slug, title, meta_title, meta_description, summary
+         FROM catalog_items WHERE enabled = 1 ORDER BY updated_at DESC LIMIT 30`
+      );
+    }
     for (const r of (catRows as {
       item_type: string;
       slug: string;
@@ -82,7 +92,7 @@ export async function collectMeridianAgentInventory() {
       meta_title: string | null;
       meta_description: string | null;
       summary: string | null;
-      seo_meta_source: string | null;
+      seo_meta_source?: string | null;
     }[]) || []) {
       const seg =
         r.item_type === 'product' ? 'products' : r.item_type === 'project' ? 'projects' : 'services';

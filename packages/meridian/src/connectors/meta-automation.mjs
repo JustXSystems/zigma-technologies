@@ -5,7 +5,12 @@ import { dbReady, dbSkipReason } from '../lib/db-ready.mjs';
 
 /**
  * Host-side meta draft/apply via scripts/meridian-meta-*.mjs (portable: scripts optional).
+ * When MERIDIAN_MODE=saas, skip — Heal Factory + Product Agent own empty-field drafts.
  */
+
+function saasOwnsHeals() {
+  return String(process.env.MERIDIAN_MODE || 'local').toLowerCase() === 'saas';
+}
 
 function skipDb(label) {
   const reason = dbSkipReason();
@@ -14,6 +19,15 @@ function skipDb(label) {
     status: 'skipped',
     message: `${label} skipped — ${reason}`,
     data: { count: 0, skippedDb: true },
+  };
+}
+
+function skipSaas(label) {
+  return {
+    ok: true,
+    status: 'skipped',
+    message: `${label} skipped — MERIDIAN_MODE=saas (SaaS Heal Factory + Agent)`,
+    data: { count: 0, skippedSaas: true },
   };
 }
 
@@ -58,6 +72,7 @@ async function resolveScript(cfgKey, envKey, defaultRel) {
  * Generate meta drafts for CMS gaps (Appendix B formulas). Always safe (writes JSON only).
  */
 export async function draftMeta(profile, opts = {}) {
+  if (saasOwnsHeals()) return skipSaas('Meta draft');
   const cfg = profile.connectors?.metaDraft || {};
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Meta draft disabled in profile', data: { count: 0 } };
@@ -104,6 +119,7 @@ export async function draftMeta(profile, opts = {}) {
  * Generate alt-text drafts for catalog_media missing alt.
  */
 export async function draftAlt(profile, opts = {}) {
+  if (saasOwnsHeals()) return skipSaas('Alt draft');
   const cfg = profile.connectors?.altDraft || {};
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Alt draft disabled in profile', data: { count: 0 } };
@@ -143,6 +159,7 @@ export async function draftAlt(profile, opts = {}) {
  * Apply alt drafts to catalog_media.
  */
 export async function applyAlt(profile, opts = {}) {
+  if (saasOwnsHeals()) return { ...skipSaas('Alt apply'), data: {} };
   const cfg = profile.connectors?.altApply || {};
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Alt apply disabled in profile', data: {} };
@@ -187,6 +204,7 @@ export async function applyAlt(profile, opts = {}) {
  * @param {{ apply?: boolean, force?: boolean, file?: string }} opts
  */
 export async function applyMeta(profile, opts = {}) {
+  if (saasOwnsHeals()) return { ...skipSaas('Meta apply'), data: {} };
   const cfg = profile.connectors?.metaApply || {};
   if (cfg.enabled === false) {
     return { ok: true, status: 'skipped', message: 'Meta apply disabled in profile', data: {} };
