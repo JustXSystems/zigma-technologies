@@ -12,11 +12,12 @@ export type PublicUploadCategory = 'resumes' | 'documents';
 const ADMIN_CATEGORIES: AdminMediaCategory[] = ['images', 'svg', 'video'];
 const PUBLIC_UPLOAD_CATEGORIES: PublicUploadCategory[] = ['resumes', 'documents'];
 
-/** Paths under /assets/uploads that must never be served as static files (root-relative). */
-export const PRIVATE_UPLOAD_PREFIXES = [
-  '/assets/uploads/resumes',
-  '/assets/uploads/documents',
-] as const;
+/**
+ * Paths under /assets/uploads that must never be served as static files
+ * (root-relative). Whole tree is private: resumes, documents, and legacy
+ * archive HTML under uploads/.
+ */
+export const PRIVATE_UPLOAD_PREFIXES = ['/assets/uploads'] as const;
 
 export function adminCategoryFromMime(mime: string): AdminMediaCategory {
   if (mime === 'image/svg+xml') return 'svg';

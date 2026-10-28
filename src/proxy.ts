@@ -56,11 +56,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Block direct access to visitor uploads (resumes, documents) — admin API only
+  // Block direct access to anything under /assets/uploads (resumes, documents,
+  // legacy archive HTML) — admin / authenticated download APIs only.
+  // Matches production nginx `location ^~ /assets/uploads/ { return 404; }`.
   if (
-    pathname.startsWith('/assets/uploads/resumes') ||
-    pathname.startsWith('/assets/uploads/documents') ||
-    pathname.startsWith('/uploads/resumes')
+    pathname.startsWith('/assets/uploads') ||
+    pathname.startsWith('/uploads/resumes') ||
+    pathname.startsWith('/uploads/documents')
   ) {
     return new NextResponse('Not Found', { status: 404 });
   }

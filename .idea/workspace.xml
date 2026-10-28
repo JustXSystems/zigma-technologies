@@ -7,19 +7,14 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 SEO SaaS integration done">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/client.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/client.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/next.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/next.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/static-public.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/static-public.mjs" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 prod502 issue slow loading">
       <change beforePath="$PROJECT_DIR$/scripts/apply-nginx-apex-redirect.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-nginx-apex-redirect.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/nginx-zigma-apex.conf" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/nginx-zigma-apex.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/meridian-agent/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/meridian-agent/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/media-paths.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-paths.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -285,7 +280,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#48 user management issue fixed" />
     <MESSAGE value="#49 Stats section Number font" />
     <MESSAGE value="#50 Blog page creations" />
     <MESSAGE value="#51 Caalog products/services/project import / export for setup" />
@@ -310,7 +304,8 @@
     <MESSAGE value="#52 SEO Phases 32 done" />
     <MESSAGE value="#52 SEO Phases report done" />
     <MESSAGE value="#52 SEO SaaS integration done" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 SEO SaaS integration done" />
+    <MESSAGE value="#52 prod502 issue slow loading" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52 prod502 issue slow loading" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

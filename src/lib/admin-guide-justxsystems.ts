@@ -733,12 +733,14 @@ sudo grep -R "justxsystems.com" /etc/nginx/sites-available/ /etc/nginx/sites-ena
 # sudo nano /etc/nginx/sites-available/justxsystems.com
 
 # Paste INSIDE server { ... } for justxsystems.com :443 — exact block also in "Nginx location" section:
-#     # Serve CMS media from disk (runtime uploads). MUST be above the proxy location.
+#     # Serve CMS media from disk. MUST be above the proxy location.
+#     # Block uploads first or resumes become world-readable.
+#     location ^~ /zigma-technologies/assets/uploads/ { return 404; }
 #     location ^~ /zigma-technologies/assets/ {
 #         alias /var/www/zigma-technologies/public/assets/;
 #         access_log off;
 #         expires 7d;
-#         add_header Cache-Control "public";
+#         add_header Cache-Control "public, max-age=604800";
 #     }
 #     location /zigma-technologies {
 #         proxy_pass http://127.0.0.1:3001;
@@ -959,12 +961,16 @@ export const JX_NGINX = `# Insert inside the existing HTTPS server { ... } for j
 # BAD:  proxy_pass http://127.0.0.1:${PREPROD.appPort}/zigma-technologies;
 
     # --- Zigma PreProd on JustXSystems VPS ---
-    # Runtime CMS uploads: serve public/assets from disk (Next production may 404 new files).
+    # Serve public/assets from disk (Next may 404 files added after process start).
+    # NEVER alias the whole tree without blocking uploads — resumes would be public.
+    location ^~ /zigma-technologies/assets/uploads/ {
+        return 404;
+    }
     location ^~ /zigma-technologies/assets/ {
         alias /var/www/zigma-technologies/public/assets/;
         access_log off;
         expires 7d;
-        add_header Cache-Control "public";
+        add_header Cache-Control "public, max-age=604800, stale-while-revalidate=604800";
     }
 
     location /zigma-technologies {

@@ -23,13 +23,16 @@ const MIME: Record<string, string> = {
 const CACHE_CONTROL = 'public, max-age=86400, stale-while-revalidate=604800';
 
 /**
- * Disk-backed CMS media fallback. Production nginx should serve
- * /assets/{images,svg,video}/* directly from public/assets (see
- * scripts/nginx-zigma-apex.conf). This route remains for local/dev/PreProd
- * and as a safety net when the static location is not yet applied.
+ * Disk-backed CMS media fallback for the library folders that receive runtime
+ * uploads (images / svg / video). Production nginx should serve the whole
+ * public /assets/* tree from disk and 404 /assets/uploads/* (see
+ * scripts/nginx-zigma-apex.conf). This route remains for local/dev and as a
+ * safety net when the static location is not yet applied.
  *
  * Faststart is done at upload time only — never rewrite whole MP4s on GET
  * (that OOM'd the prod Node heap under concurrent video traffic).
+ *
+ * Not served here (nginx/static or blocked): css/, js/, uploads/.
  */
 function resolveAssetsRoot(): string {
   const candidates = [

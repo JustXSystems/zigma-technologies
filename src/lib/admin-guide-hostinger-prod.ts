@@ -1336,9 +1336,9 @@ export const PROD_NGINX = `# HTTP-only vhost for first bring-up (Step 10).
 # Certbot will add listen 443 ssl and usually redirect HTTP → HTTPS.
 #
 # After TLS is live, replace the site with scripts/nginx-zigma-apex.conf
-# (sudo bash scripts/apply-nginx-apex-redirect.sh). That config serves
-# /assets/{images,svg,video} from disk and blocks /assets/uploads — required
-# so hero videos do not stream through Node (OOM / 502).
+# (sudo bash scripts/apply-nginx-apex-redirect.sh). That config serves all
+# public /assets/* from disk (images, svg, video, css, js) and 404s
+# /assets/uploads/* — required so hero videos do not stream through Node (OOM / 502).
 
 server {
     listen 80;
