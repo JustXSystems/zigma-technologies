@@ -466,7 +466,7 @@ export function createStaticPublicAgent(opts) {
           inventory,
         },
       });
-      const pending = await api('/api/v1/agent/pending?limit=20');
+      const pending = await api('/api/v1/agent/pending?limit=5');
       const results = [];
       for (const patch of pending.patches || []) {
         try {

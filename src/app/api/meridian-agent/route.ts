@@ -39,6 +39,9 @@ function getHandlers(): AgentHandlers | null {
   const saasUrl =
     process.env.MERIDIAN_SAAS_URL?.trim() || 'https://justxsystems.com/jbt/tools/seo-meridian';
 
+  const applyLimit = Number(process.env.MERIDIAN_AGENT_APPLY_LIMIT || 5);
+  const cooldownMs = Number(process.env.MERIDIAN_AGENT_SYNC_COOLDOWN_MS || 60_000);
+
   handlers = createAgentHandlers({
     baseUrl: saasUrl,
     apiKey,
@@ -47,6 +50,9 @@ function getHandlers(): AgentHandlers | null {
     endpointUrl: 'https://zigma-technologies.com/api/meridian-agent',
     capabilities: ZIGMA_AGENT_CAPABILITIES,
     collectInventory: collectZigmaAgentInventory,
+    // Keep apply bursts tiny — bulk alt sync previously OOM'd the prod Next heap (~2GB).
+    maxApplyPerSync: Number.isFinite(applyLimit) && applyLimit > 0 ? applyLimit : 5,
+    syncCooldownMs: Number.isFinite(cooldownMs) && cooldownMs >= 0 ? cooldownMs : 60_000,
     apply: async (patch: Patch) => {
       const result = await applyMeridianAgentPatch(patch);
       console.info('[meridian-agent]', patch.kind, patch.path, result);

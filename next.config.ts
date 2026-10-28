@@ -70,10 +70,12 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    // beforeFiles: always serve CMS media from disk via API (PreProd + Prod).
+    // beforeFiles: CMS media fallback via API (local / PreProd / before nginx static).
+    // Production nginx should serve /assets/{images,svg,video} from public/ directly
+    // (scripts/nginx-zigma-apex.conf) so large videos never hit Node.
     // Next production does not reliably expose files added to public/ after start;
-    // admin MediaPicker + catalog backgrounds depend on this.
-    // With basePath, Next prefixes source/destination automatically.
+    // admin MediaPicker + catalog backgrounds still need this rewrite when nginx
+    // does not own those locations. With basePath, Next prefixes automatically.
     //
     // Command Brief relative hrefs (ops-cockpit.html) → /api/admin/ops-cockpit.html.
     // Catch-all rewrite onto the Meridian format=file API (no dotted dynamic segments).

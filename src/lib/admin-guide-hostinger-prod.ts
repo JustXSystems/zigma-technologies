@@ -1334,6 +1334,11 @@ export const PROD_NGINX = `# HTTP-only vhost for first bring-up (Step 10).
 # Install as /etc/nginx/sites-available/zigma then symlink into sites-enabled.
 # Run Certbot ONLY after BigRock A @ and www → 200.234.45.106 (Step 13).
 # Certbot will add listen 443 ssl and usually redirect HTTP → HTTPS.
+#
+# After TLS is live, replace the site with scripts/nginx-zigma-apex.conf
+# (sudo bash scripts/apply-nginx-apex-redirect.sh). That config serves
+# /assets/{images,svg,video} from disk and blocks /assets/uploads — required
+# so hero videos do not stream through Node (OOM / 502).
 
 server {
     listen 80;
@@ -1343,6 +1348,7 @@ server {
     # CMS / resume uploads
     client_max_body_size 100M;
 
+    # Prefer the apex conf's static /assets/* blocks once HTTPS is on.
     location / {
         # PM2 process name "zigma" listens on localhost:3000
         proxy_pass http://127.0.0.1:3000;

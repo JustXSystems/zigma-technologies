@@ -80,6 +80,8 @@ export async function defaultNextApply(patch, ctx = {}) {
  *     baseUrl: process.env.MERIDIAN_SAAS_URL!,
  *     apiKey: process.env.MERIDIAN_SITE_API_KEY!,
  *     apply: async (patch) => { ... persist to CMS ... },
+ *     maxApplyPerSync: 5,      // default 5 — keep web heap small
+ *     syncCooldownMs: 60_000, // skip apply bursts while still heartbeating
  *   });
  */
 export function createAgentHandlers(opts) {
@@ -94,24 +96,61 @@ export function createAgentHandlers(opts) {
     ...DEFAULT_AGENT_CAPABILITIES,
     cms: kind === 'next' ? 'next' : kind,
   };
+  const maxApplyRaw = Number(opts.maxApplyPerSync);
+  const maxApplyPerSync =
+    Number.isFinite(maxApplyRaw) && maxApplyRaw > 0 ? Math.min(Math.floor(maxApplyRaw), 20) : 5;
+  const cooldownRaw = Number(opts.syncCooldownMs);
+  const syncCooldownMs =
+    Number.isFinite(cooldownRaw) && cooldownRaw >= 0 ? Math.floor(cooldownRaw) : 60_000;
+
+  /** Overlapping cron/push must not stack inventory+apply in the same Node process. */
+  let syncInFlight = null;
+  let lastApplyAt = 0;
 
   async function heartbeatAndSync() {
-    let inventory = null;
-    if (typeof opts.collectInventory === 'function') {
-      try {
-        inventory = await opts.collectInventory();
-      } catch {
-        inventory = null;
-      }
+    if (syncInFlight) {
+      const shared = await syncInFlight;
+      return { ...shared, deduped: true };
     }
-    await agent.heartbeat({
-      kind,
-      version: opts.version || '0.2.0',
-      endpointUrl: opts.endpointUrl || null,
-      capabilities,
-      inventory,
-    });
-    return agent.sync(apply);
+
+    syncInFlight = (async () => {
+      let inventory = null;
+      if (typeof opts.collectInventory === 'function') {
+        try {
+          inventory = await opts.collectInventory();
+        } catch {
+          inventory = null;
+        }
+      }
+      await agent.heartbeat({
+        kind,
+        version: opts.version || '0.2.0',
+        endpointUrl: opts.endpointUrl || null,
+        capabilities,
+        inventory,
+      });
+
+      const now = Date.now();
+      if (syncCooldownMs > 0 && lastApplyAt && now - lastApplyAt < syncCooldownMs) {
+        return {
+          origin: null,
+          results: [],
+          skipped: 'cooldown',
+          retryAfterMs: syncCooldownMs - (now - lastApplyAt),
+          maxApplyPerSync,
+        };
+      }
+
+      const result = await agent.sync(apply, { limit: maxApplyPerSync });
+      lastApplyAt = Date.now();
+      return { ...result, maxApplyPerSync };
+    })();
+
+    try {
+      return await syncInFlight;
+    } finally {
+      syncInFlight = null;
+    }
   }
 
   async function GET() {

@@ -52,7 +52,7 @@ export function createMeridianAgent(opts) {
       });
     },
 
-    async pending({ limit = 20 } = {}) {
+    async pending({ limit = 5 } = {}) {
       return request(`/api/v1/agent/pending?limit=${limit}`);
     },
 
@@ -65,10 +65,11 @@ export function createMeridianAgent(opts) {
 
     /**
      * Poll pending patches and run `applyFn(patch)` for each allowed patch.
+     * Default limit is 5 so Next web processes do not apply huge alt batches in one tick.
      * Honors payload.onlyIfEmpty when applyFn throws / returns skip via reject.
      * @param {(patch: object) => Promise<void>|void} applyFn
      */
-    async sync(applyFn, { limit = 20 } = {}) {
+    async sync(applyFn, { limit = 5 } = {}) {
       const { patches = [], origin } = await this.pending({ limit });
       const results = [];
       for (const patch of patches) {

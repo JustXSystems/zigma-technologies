@@ -36,7 +36,8 @@ export const { GET, POST } = createAgentHandlers({
 });
 ```
 
-Cron or Vercel cron → `GET /api/meridian-agent` to poll (heartbeat + inventory + apply).  
+Cron or Vercel cron → `GET /api/meridian-agent` to poll (heartbeat + inventory + apply).
+Apply is capped (default **5** patches / sync, **60s** cooldown, single-flight) so Next web heaps stay healthy — override with `maxApplyPerSync` / `syncCooldownMs`.  
 Optional: register that URL as the agent push endpoint in Meridian Connect.
 
 ## Generic poller

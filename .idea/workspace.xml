@@ -11,13 +11,15 @@
       <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/index.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/index.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/client.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/client.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/next.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/next.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/quality.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/quality.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/meridian-sdk/src/static-public.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/packages/meridian-sdk/src/static-public.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/apply-nginx-apex-redirect.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-nginx-apex-redirect.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/nginx-zigma-apex.conf" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/nginx-zigma-apex.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/api/meridian-agent/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/meridian-agent/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/meridian-agent-apply.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-agent-apply.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/meridian-agent-inventory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/meridian-agent-inventory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
