@@ -8,12 +8,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 prod502 issue slow loading">
-      <change beforePath="$PROJECT_DIR$/scripts/apply-nginx-apex-redirect.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-nginx-apex-redirect.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/nginx-zigma-apex.conf" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/nginx-zigma-apex.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/public/assets/[...path]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-hostinger-prod.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-justxsystems.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/media-paths.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-paths.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tmp-solar/scope-css.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/HeroBackgroundMedia.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/HeroBackgroundMedia.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/section-families.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/section-families.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogHeroCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-public-page.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-public-page.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-section-defaults.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-section-defaults.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/nav-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-seed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/page-seed-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/page-seed-registry.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/seo.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/seo.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -73,23 +85,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000839564097985" />
-      <entry key="MS500" value="1.1530420490500255" />
-      <entry key="S2" value="1.6254645401225072" />
-      <entry key="S5" value="1.828968456525303" />
-      <entry key="S10" value="1.9245993454811132" />
-      <entry key="S30" value="2.361876066565933" />
-      <entry key="S60" value="3.0455802605348534" />
-      <entry key="M2" value="4.066123245467912" />
-      <entry key="M5" value="5.460001471264696" />
-      <entry key="M10" value="9.559351707074143" />
-      <entry key="M15" value="23.887035827656852" />
-      <entry key="M30" value="112.47336330734323" />
-      <entry key="H1" value="290.3548680478814" />
-      <entry key="H2" value="499.8990290572149" />
-      <entry key="H4" value="749.2050777413733" />
-      <entry key="D1" value="2440.4228696276864" />
-      <entry key="W1" value="12800.276407470055" />
+      <entry key="MS100" value="1.2952989625291973" />
+      <entry key="MS500" value="1.9966593190420074" />
+      <entry key="S2" value="4.395912158479496" />
+      <entry key="S5" value="7.76936267026069" />
+      <entry key="S10" value="10.186859799723601" />
+      <entry key="S30" value="12.525562535727257" />
+      <entry key="S60" value="13.233519258651034" />
+      <entry key="M2" value="13.614392689906463" />
+      <entry key="M5" value="16.513085176908923" />
+      <entry key="M10" value="35.912359006530565" />
+      <entry key="M15" value="59.95516513336047" />
+      <entry key="M30" value="134.86541821347518" />
+      <entry key="H1" value="294.85153392704365" />
+      <entry key="H2" value="530.5681464938964" />
+      <entry key="H4" value="821.6173446021288" />
+      <entry key="D1" value="2574.3955280140094" />
+      <entry key="W1" value="12952.728272160764" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -104,30 +116,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="1.097106310600669E-233" />
-      <entry key="H2" value="3.3122595167051094E-117" />
-      <entry key="H4" value="5.755223294377321E-59" />
-      <entry key="D1" value="1.9964172274941842E-10" />
-      <entry key="W1" value="0.06379812512999969" />
+      <entry key="H1" value="5.674744015666108E-234" />
+      <entry key="H2" value="2.3821721213347456E-117" />
+      <entry key="H4" value="4.880750066755403E-59" />
+      <entry key="D1" value="1.9423256284197115E-10" />
+      <entry key="W1" value="0.06354827041078415" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.001359661124608897" />
-      <entry key="MS500" value="0.4154525317922088" />
-      <entry key="S2" value="1.3406781743475507" />
-      <entry key="S5" value="1.7034326366670989" />
-      <entry key="S10" value="1.8595964037614887" />
-      <entry key="S30" value="2.3386719726940086" />
-      <entry key="S60" value="3.0330382892680543" />
-      <entry key="M2" value="4.05921335141212" />
-      <entry key="M5" value="5.456913152633914" />
-      <entry key="M10" value="9.557688052435594" />
-      <entry key="M15" value="23.88581861514849" />
-      <entry key="M30" value="112.47250565286818" />
-      <entry key="H1" value="290.35421511495707" />
-      <entry key="H2" value="499.89857306895897" />
-      <entry key="H4" value="749.2047686620682" />
-      <entry key="D1" value="2440.42256597788" />
-      <entry key="W1" value="12800.339936850229" />
+      <entry key="MS100" value="1.2425338115648497" />
+      <entry key="MS500" value="1.9799016587705778" />
+      <entry key="S2" value="4.385750955938575" />
+      <entry key="S5" value="7.761990581763212" />
+      <entry key="S10" value="10.18199530549848" />
+      <entry key="S30" value="12.523561071938353" />
+      <entry key="S60" value="13.232460987468693" />
+      <entry key="M2" value="13.613848086811025" />
+      <entry key="M5" value="16.512820632071772" />
+      <entry key="M10" value="35.912039414847534" />
+      <entry key="M15" value="59.95475933213039" />
+      <entry key="M30" value="134.8648917107801" />
+      <entry key="H1" value="294.8509856339415" />
+      <entry key="H2" value="530.5676920839473" />
+      <entry key="H4" value="821.6170130348726" />
+      <entry key="D1" value="2574.3952200613735" />
+      <entry key="W1" value="12952.791550924054" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -138,6 +150,7 @@
   <component name="ProjectSessionTemplates">
     <option name="panelTemplate">
       <template>
+        <option name="ensembleEnabled" value="false" />
         <option name="modeId" value="Agent" />
         <option name="model">
           <model>
@@ -149,6 +162,7 @@
         <option name="worktreeMode" value="WORKSPACE" />
       </template>
     </option>
+    <option name="version" value="1" />
   </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -210,6 +224,11 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="zigma-technologies" />
+      <option name="filePath" />
+      <method v="2" />
     </configuration>
     <configuration name="Next.js: server-side" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/package.json" />

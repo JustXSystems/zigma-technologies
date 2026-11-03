@@ -16,6 +16,7 @@ import { LEGACY_20YRS_SEED_SECTIONS, LEGACY_20YRS_SLUG } from '@/lib/legacy-sect
 import { LIFE_AT_ZIGMA_SEED_SECTIONS, LIFE_AT_ZIGMA_SLUG } from '@/lib/life-sections';
 import { PRIVACY_SEED_SECTIONS_V2, PRIVACY_SLUG, isPrivacySectionType, upgradePrivacySection } from '@/lib/privacy-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
+import { SOLAR_PAGE_META, SOLAR_SEED_SECTIONS, SOLAR_SLUG } from '@/lib/solar-sections';
 import { BLOG_BASE_PATH, BLOG_SEED_SECTIONS, BLOG_SLUG } from '@/lib/blog-sections';
 import { PROJECTS101_SEED_SECTIONS, PROJECTS101_SLUG } from '@/lib/projects101-sections';
 import { TERMS_SEED_SECTIONS_V2, TERMS_SLUG, isTermsSectionType, upgradeTermsSection } from '@/lib/terms-sections';
@@ -126,6 +127,18 @@ const CORE_AND_COMPANY: PageSeedDef[] = [
         'How Zigma Technologies builds quality and safety into every UPS, solar and battery project: a four-stage quality process, six site safety habits, and certificates you can verify.',
     },
     sections: () => QS_SEED_SECTIONS,
+  },
+  {
+    slug: SOLAR_SLUG,
+    label: 'Solar Solutions',
+    group: 'Company',
+    path: `/${SOLAR_SLUG}`,
+    page: {
+      title: SOLAR_PAGE_META.title,
+      meta_title: SOLAR_PAGE_META.meta_title,
+      meta_description: SOLAR_PAGE_META.meta_description,
+    },
+    sections: () => SOLAR_SEED_SECTIONS,
   },
   {
     slug: BLOG_SLUG,

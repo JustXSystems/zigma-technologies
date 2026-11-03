@@ -43,7 +43,7 @@ function SlideStack({
               <>
                 {ambient && fill ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img className="chb-ambient" src={fill} alt="" decoding="async" />
+                  <img className="chb-ambient" src={fill} alt="" aria-hidden="true" decoding="async" />
                 ) : null}
                 <div className="chb-frame">
                   {s.kind === 'video' ? (
@@ -58,7 +58,7 @@ function SlideStack({
                     />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img className="chb-media" src={src} alt="" decoding="async" />
+                    <img className="chb-media" src={src} alt="" aria-hidden="true" decoding="async" />
                   )}
                 </div>
               </>

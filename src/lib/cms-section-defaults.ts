@@ -18,6 +18,7 @@ import {
   defaultProjects101SectionContent,
 } from '@/lib/projects101-sections';
 import { defaultQsSectionContent } from '@/lib/qualitysafety-sections';
+import { defaultSolarSectionContent } from '@/lib/solar-sections';
 import { defaultHomeSectionContent } from '@/lib/home-sections';
 import { defaultBlogSectionContent } from '@/lib/blog-sections';
 
@@ -43,6 +44,7 @@ export function defaultCmsSectionContent(type: string, pageSlug?: string): Recor
     defaultIndustries101SectionContent(type) ||
     defaultProjects101SectionContent(type) ||
     defaultQsSectionContent(type) ||
+    defaultSolarSectionContent(type) ||
     defaultHomeSectionContent(type) ||
     defaultBlogSectionContent(type) ||
     {}

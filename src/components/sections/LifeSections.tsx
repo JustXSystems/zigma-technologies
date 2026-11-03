@@ -150,6 +150,7 @@ function LzImg({
       key={src}
       src={src}
       alt={alt}
+      {...(alt.trim() ? {} : { 'aria-hidden': true as const })}
       className={className}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"

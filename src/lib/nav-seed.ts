@@ -62,9 +62,9 @@ export const HEADER_NAV_SEED: NavSeedNode[] = [
         href: '/#generate',
         meta_json: { kind: 'column' },
         children: [
-          { label: 'Solar EPC Solutions', href: '/projects?category=solar-epc' },
-          { label: 'Solar AMC - O&M', href: '/services?category=solar-om' },
-          { label: 'Solar Inverters', href: '/products?category=solar-solutions' },
+          { label: 'Solar EPC Solutions', href: '/solar#epc' },
+          { label: 'Solar AMC - O&M', href: '/solar#amc-om' },
+          { label: 'Solar Inverters', href: '/solar#inverters' },
         ],
       },
       {
@@ -150,7 +150,7 @@ export const FOOTER_NAV_SEED: NavSeedNode[] = [
     label: 'Capabilities',
     meta_json: { kind: 'column' },
     children: [
-      { label: 'Solar Solutions', href: '/products?category=solar-solutions' },
+      { label: 'Solar Solutions', href: '/solar' },
       { label: 'UPS Solutions', href: '/products?category=ups-systems' },
       { label: 'BESS Systems', href: '/products?category=bess' },
       { label: 'EV Charging', href: '/products?category=ev-charging' },

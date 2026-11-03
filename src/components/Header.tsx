@@ -60,9 +60,9 @@ const DEFAULT_NAV: NavItem[] = [
         heading: 'Generate',
         headingHref: '/#generate',
         links: [
-          { label: 'Solar EPC Solutions', href: '/projects?category=solar-epc' },
-          { label: 'Solar AMC - O&M', href: '/services?category=solar-om' },
-          { label: 'Solar Inverters', href: '/products?category=solar-solutions' },
+          { label: 'Solar EPC Solutions', href: '/solar#epc' },
+          { label: 'Solar AMC - O&M', href: '/solar#amc-om' },
+          { label: 'Solar Inverters', href: '/solar#inverters' },
         ],
       },
       {

@@ -19,6 +19,7 @@ import { renderIndustryPageSection } from '@/components/sections/IndustryPageSec
 import { renderIndustries101Section } from '@/components/sections/Industries101Sections';
 import { renderProjects101Section } from '@/components/sections/Projects101Sections';
 import { renderQualitySafetySection } from '@/components/sections/QualitySafetySections';
+import { renderSolarSection } from '@/components/sections/SolarSections';
 import { renderBlogSection } from '@/components/sections/BlogSections';
 import { renderHomeSection } from '@/components/sections/HomeSections';
 import { highlightText } from '@/components/sections/highlight-text';
@@ -2310,6 +2311,19 @@ export function renderCmsSection(section: CmsSection) {
     case 'qs_commit':
     case 'qs_cta':
       return wrap(renderQualitySafetySection(section.type, { key, content, sectionKey: section.section_key }));
+    case 'solar_hero':
+    case 'solar_delivery':
+    case 'solar_banner':
+    case 'solar_e2e':
+    case 'solar_types':
+    case 'solar_process':
+    case 'solar_performance':
+    case 'solar_expertise':
+    case 'solar_inverters':
+    case 'solar_industries':
+    case 'solar_projects':
+    case 'solar_cta':
+      return wrap(renderSolarSection(section.type, { key, content, sectionKey: section.section_key }));
     case 'blog_hero':
     case 'blog_featured':
     case 'blog_topics':

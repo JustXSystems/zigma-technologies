@@ -15,6 +15,7 @@ import "./industries-sections.css";
 import "./industries101-sections.css";
 import "./projects101-sections.css";
 import "./qualitysafety-sections.css";
+import "./solar-sections.css";
 import "./blog-sections.css";
 import "./blog-article.css";
 

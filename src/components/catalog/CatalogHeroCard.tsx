@@ -122,7 +122,7 @@ export default function CatalogHeroCard({
                           <>
                             {bg ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img className="chc-slide-bg" src={bg} alt="" decoding="async" />
+                              <img className="chc-slide-bg" src={bg} alt="" aria-hidden="true" decoding="async" />
                             ) : null}
                             <div className="chc-img-wrap">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -130,6 +130,7 @@ export default function CatalogHeroCard({
                                 className="chc-img"
                                 src={publicMediaUrl(item.primary_image || FALLBACK_SRC)}
                                 alt={i === shown.cur ? item.title : ''}
+                                {...(i === shown.cur ? {} : { 'aria-hidden': true as const })}
                                 decoding="async"
                                 loading={i === 0 ? 'eager' : 'lazy'}
                               />

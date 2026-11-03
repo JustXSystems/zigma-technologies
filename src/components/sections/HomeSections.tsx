@@ -1675,7 +1675,13 @@ export function HomeTestimonialsSection({ content, sectionKey }: SectionProps) {
 function LogoCard({ logo, clone }: { logo: HomeLogo; clone?: boolean }) {
   const img = (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={mediaSrc(logo.src)} alt={clone ? '' : logo.alt || ''} loading="lazy" decoding="async" />
+    <img
+      src={mediaSrc(logo.src)}
+      alt={clone ? '' : logo.alt || ''}
+      {...(clone || !(logo.alt || '').trim() ? { 'aria-hidden': true as const } : {})}
+      loading="lazy"
+      decoding="async"
+    />
   );
   const cloneProps = clone ? ({ 'aria-hidden': true, tabIndex: -1 } as const) : {};
   return logo.href?.trim() ? (

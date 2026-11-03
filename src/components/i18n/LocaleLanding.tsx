@@ -16,7 +16,11 @@ export default function LocaleLanding({ locale, copy, toolsEnabled, heroHeight }
       <section className={`page-hero ${heroHeightClass(heroHeight)}`} style={{ padding: '10rem 0 4rem' }}>
         <div className="hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/images/solar-farm-with-wind-turbines-at-sunset-.jpg" alt="" />
+          <img
+            src="/assets/images/solar-farm-with-wind-turbines-at-sunset-.jpg"
+            alt=""
+            aria-hidden="true"
+          />
           <div className="hero-overlay"></div>
           <div className="grid-overlay"></div>
         </div>

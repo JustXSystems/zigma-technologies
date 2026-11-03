@@ -14,6 +14,7 @@ import LifeSectionEditor from '@/components/admin/life/LifeSectionEditor';
 import PrivacySectionEditor from '@/components/admin/privacy/PrivacySectionEditor';
 import Projects101SectionEditor from '@/components/admin/projects101/Projects101SectionEditor';
 import QualitySafetySectionEditor from '@/components/admin/qualitysafety/QualitySafetySectionEditor';
+import SolarSectionEditor from '@/components/admin/solar/SolarSectionEditor';
 import TermsSectionEditor from '@/components/admin/terms/TermsSectionEditor';
 import { isAboutSectionType, withAboutDefaults } from '@/lib/about-sections';
 import { isBlogSectionType, withBlogDefaults } from '@/lib/blog-sections';
@@ -29,6 +30,7 @@ import { isLifeSectionType, withLifeDefaults } from '@/lib/life-sections';
 import { isPrivacySectionType, withPrivacyDefaults } from '@/lib/privacy-sections';
 import { isProjects101SectionType, withProjects101Defaults } from '@/lib/projects101-sections';
 import { isQsSectionType, withQsDefaults } from '@/lib/qualitysafety-sections';
+import { isSolarSectionType, withSolarDefaults } from '@/lib/solar-sections';
 import { isTermsSectionType, withTermsDefaults } from '@/lib/terms-sections';
 
 /** A page's set of configurable section types and the editor that owns them. */
@@ -66,6 +68,7 @@ export const SECTION_FAMILIES: readonly SectionFamily[] = [
   family(isIndustries101SectionType, withIndustries101Defaults, Industries101SectionEditor),
   family(isProjects101SectionType, withProjects101Defaults, Projects101SectionEditor),
   family(isQsSectionType, withQsDefaults, QualitySafetySectionEditor),
+  family(isSolarSectionType, withSolarDefaults, SolarSectionEditor),
   family(isBlogSectionType, withBlogDefaults, BlogSectionEditor),
 ];
 

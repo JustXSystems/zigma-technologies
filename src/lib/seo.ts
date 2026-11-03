@@ -53,12 +53,16 @@ export function clampDescription(text: string | null | undefined, max = 160): st
  * Titles that already contain the brand bypass the root "%s | Zigma Technologies" template.
  * Also strips a redundant trailing `| Brand` when the left side already names the brand
  * (fixes live-verify "brand appears 2×" on home).
+ * Truncated brand remnants ("Zigma…") must stay absolute — otherwise the layout appends
+ * `| Zigma Technologies` again and Meridian keeps flagging TITLE_TOO_LONG.
  */
 export function pageTitle(raw: string): NonNullable<Metadata['title']> {
   let t = raw.trim().replace(/\s+/g, ' ');
   if (!t) return t;
 
   const brandRe = SITE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const brandFirst = SITE_NAME.split(/\s+/)[0] || SITE_NAME;
+  const brandFirstRe = brandFirst.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const trailingBrand = new RegExp(`\\s*[|\\u2013\\u2014\\-]\\s*${brandRe}\\s*$`, 'i');
   const withoutSuffix = t.replace(trailingBrand, '').trim();
   if (
@@ -69,7 +73,13 @@ export function pageTitle(raw: string): NonNullable<Metadata['title']> {
     t = withoutSuffix;
   }
 
-  return t.toLowerCase().includes(SITE_NAME.toLowerCase()) ? { absolute: t } : t;
+  const lc = t.toLowerCase();
+  if (lc.includes(SITE_NAME.toLowerCase())) return { absolute: t };
+  // Half-applied polish left "… | Zigma…" — do not let the template double the brand.
+  if (new RegExp(`${brandFirstRe}[\\w…\\.]*\\s*$`, 'i').test(t) || lc.includes(`${brandFirst.toLowerCase()}…`)) {
+    return { absolute: t };
+  }
+  return t;
 }
 
 export type PageSeoInput = {

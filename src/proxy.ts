@@ -129,6 +129,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Friendly aliases for the Solar Solutions CMS page (slug solar)
+  const SOLAR_ALIASES = new Set(['/solar.html', '/solar-solutions', '/solar-solutions.html']);
+  if (SOLAR_ALIASES.has(pathname.toLowerCase().replace(/\/+$/, ''))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/solar';
+    return NextResponse.redirect(url, 308);
+  }
+
   try {
     const hit = await findRedirect(pathname);
     if (hit) {

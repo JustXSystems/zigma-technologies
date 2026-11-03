@@ -12,6 +12,7 @@ import { INDUSTRIES_SEED_SECTIONS_V2 } from '@/lib/industries-sections';
 import { PRIVACY_SEED_SECTIONS_V2 } from '@/lib/privacy-sections';
 import { TERMS_SEED_SECTIONS_V2 } from '@/lib/terms-sections';
 import { QS_SEED_SECTIONS, QS_SLUG } from '@/lib/qualitysafety-sections';
+import { SOLAR_SEED_SECTIONS, SOLAR_SLUG } from '@/lib/solar-sections';
 import { BLOG_SEED_SECTIONS, BLOG_SLUG } from '@/lib/blog-sections';
 import { PROJECTS101_SEED_SECTIONS, PROJECTS101_SLUG } from '@/lib/projects101-sections';
 import { bootstrapHiringFromCareersCms, careerJobToPublicCard, listOpenCareerJobs } from '@/lib/career-hiring';
@@ -26,6 +27,7 @@ function seedForSlug(slug: string) {
   if (slug === 'terms') return TERMS_SEED_SECTIONS_V2;
   if (slug === 'industries') return INDUSTRIES_SEED_SECTIONS_V2;
   if (slug === QS_SLUG) return QS_SEED_SECTIONS;
+  if (slug === SOLAR_SLUG) return SOLAR_SEED_SECTIONS;
   return null;
 }
 
@@ -35,6 +37,7 @@ function seedPage(slug: string, sections: ReturnType<typeof seedForSlug>): CmsPa
     industries: 'Industries',
     certifications: 'Certifications',
     [QS_SLUG]: 'Quality & Safety',
+    [SOLAR_SLUG]: 'Solar Solutions',
     [BLOG_SLUG]: 'Blog',
     [PROJECTS101_SLUG]: 'Projects',
   };

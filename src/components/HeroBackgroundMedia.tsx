@@ -73,6 +73,7 @@ export default function HeroBackgroundMedia({
           className={className}
           src={desktop}
           alt={alt}
+          {...(alt.trim() ? {} : { 'aria-hidden': true as const })}
           loading={eager ? 'eager' : 'lazy'}
           fetchPriority={eager ? 'high' : undefined}
           decoding="async"
@@ -87,6 +88,7 @@ export default function HeroBackgroundMedia({
       className={className}
       src={chosen}
       alt={alt}
+      {...(alt.trim() ? {} : { 'aria-hidden': true as const })}
       loading={eager ? 'eager' : 'lazy'}
       fetchPriority={eager ? 'high' : undefined}
       decoding="async"
