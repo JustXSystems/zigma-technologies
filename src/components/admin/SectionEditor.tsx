@@ -34,6 +34,7 @@ import { HighlightEditor } from '@/components/admin/section-kit';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields, { type HeroScrollBar } from '@/components/admin/HeroMotionFields';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import { HERO_VALIGN_CHOICES, isHeroVAlign } from '@/lib/hero-height';
 
 export type SectionEditorPatch = Pick<CmsSection, 'title' | 'section_key' | 'content_json' | 'style_json'>;
@@ -591,6 +592,10 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                     <input className="admin-input" value={String(content.breadcrumb || '')} onChange={(e) => setField('breadcrumb', e.target.value)} />
                   </Field>
                   <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                  <HeroScrimStrengthPicker
+                    value={content.scrimStrength}
+                    onChange={(scrimStrength) => setField('scrimStrength', scrimStrength)}
+                  />
                   <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
                   <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="left" />
                   <div className="full">
@@ -654,6 +659,10 @@ export default function SectionEditor({ section, onClose, onSaved, onApply }: Pr
                     <input className="admin-input" value={String(content.tagline || '')} onChange={(e) => setField('tagline', e.target.value)} />
                   </Field>
                   <HeroHeightPicker value={content.heroHeight} onChange={(v) => setField('heroHeight', v)} />
+                  <HeroScrimStrengthPicker
+                    value={content.scrimStrength}
+                    onChange={(scrimStrength) => setField('scrimStrength', scrimStrength)}
+                  />
                   <HeroPlacementEditor value={content.placement} onChange={(v) => setField('placement', v)} />
                   <ClassicHeroLayoutFields content={content} setField={setField} defaultAlign="center" />
                   <div className="full">

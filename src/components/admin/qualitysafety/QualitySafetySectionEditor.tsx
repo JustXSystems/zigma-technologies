@@ -32,6 +32,7 @@ import {
 } from '@/components/admin/section-kit';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import { HERO_VALIGN_CHOICES } from '@/lib/hero-height';
 import {
@@ -101,6 +102,7 @@ function QsHeroEditor({ content: c, onChange }: EditorProps<QsHeroContent>) {
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} fallback="auto" onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
           <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <AlignButtons label="Text align" value={layout.hAlign} onChange={(v) => setLayout({ hAlign: (v || undefined) as QsHeroContent['layout']['hAlign'] })} />
           <SelectInput

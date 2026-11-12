@@ -51,6 +51,7 @@ import {
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields from '@/components/admin/HeroMotionFields';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 
 /* ------------------------------------------------------------------ */
 
@@ -71,6 +72,7 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
       <Group title="Layout, height & motion" description="Hero height, container position, image side, columns, entrance and scroll bar">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(v) => set('heroHeight', v)} />
+          <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(v) => set('scrimStrength', v)} />
           <HeroPlacementEditor
             value={c.placement}
             onChange={(v) => set('placement', v)}

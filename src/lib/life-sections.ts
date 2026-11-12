@@ -109,6 +109,8 @@ export type LifeHeroContent = {
   layout: SplitLayout;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   /** Background image / video slideshow behind the hero (same engine as the Legacy hero) */
   background?: LegacyBgMedia;
   /** Fade-up entrance for breadcrumb, heading, lead, pills and buttons (off unless enabled) */

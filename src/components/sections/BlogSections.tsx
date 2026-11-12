@@ -11,6 +11,7 @@ import { appHref } from '@/lib/base-path';
 import { elementCss, normalizeLinkItems } from '@/lib/about-sections';
 import { resolveHubVariant, type BlogHubTemplate } from '@/lib/blog-design';
 import { heroHeightClass, heroScrollBarOn, heroVAlignClass } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement } from '@/lib/hero-placement';
 import {
   BLOG_BASE_PATH,
@@ -265,6 +266,7 @@ export function BlogHeroSection({ content, sectionKey }: SectionProps) {
       )} ${heroVAlignClass(c.vAlign)} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
       layers={v === 'bento' ? <div aria-hidden="true" className="blg-aurora" /> : null}
+      style={heroScrimStyle(c.scrimStrength)}
     >
       {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <HeroSlot place={place} name="text">

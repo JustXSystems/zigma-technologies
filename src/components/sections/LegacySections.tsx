@@ -13,6 +13,7 @@ import {
 } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzImage, AzPills, AzText, AzVideo, hasText, vars } from '@/components/sections/AboutSections';
@@ -227,6 +228,7 @@ export function LgShell({
   children,
   noContainer,
   layers,
+  style,
 }: {
   box?: SectionBox;
   bg?: LegacyBgMedia;
@@ -236,12 +238,14 @@ export function LgShell({
   noContainer?: boolean;
   /** Extra absolutely-positioned layers anchored to the section (outside the content container) */
   layers?: ReactNode;
+  /** Merged onto the section (e.g. per-hero `--hero-scrim-local`). */
+  style?: CSSProperties;
 }) {
   const tone = box?.tone === 'dark' ? 'dark' : 'light';
   const pattern = box?.pattern && box.pattern !== 'none' ? box.pattern : null;
   const video = mediaSrc(box?.bgVideo);
   return (
-    <section id={id || undefined} className={`az-block az-tone-${tone} ${className}`} style={sectionBoxCss(box)}>
+    <section id={id || undefined} className={`az-block az-tone-${tone} ${className}`} style={{ ...sectionBoxCss(box), ...style }}>
       {video ? (
         <div aria-hidden="true" className="az-bg-video">
           <AzVideo src={video} poster={mediaSrc(box?.bgImage)} />
@@ -501,6 +505,7 @@ export function LegacyHeroSection({ content, sectionKey }: SectionProps) {
       className={`az-hero lgy-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
       layers={pinned}
+      style={heroScrimStyle(c.scrimStrength)}
     >
       {!scroll.hidden ? <LgScrollBar gradient={scroll.gradient} /> : null}
       <div

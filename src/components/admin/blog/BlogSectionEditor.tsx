@@ -27,6 +27,7 @@ import {
   type EditorProps,
 } from '@/components/admin/section-kit';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import { normalizeLinkItems } from '@/lib/about-sections';
 import { BLOG_HUB_TEMPLATES, type BlogHubVariant } from '@/lib/blog-design';
@@ -109,6 +110,7 @@ function BlogHeroEditor({ content: c, onChange }: EditorProps<BlogHeroContent>) 
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} fallback="auto" onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
           <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <AlignButtons label="Text align" value={c.align} options={['left', 'center']} onChange={(v) => set({ align: (v || undefined) as BlogHeroContent['align'] })} />
           <SelectInput label="Vertical position (full / custom height)" value={c.vAlign || ''} options={HERO_VALIGN_CHOICES} onChange={(v) => set({ vAlign: v || undefined })} />

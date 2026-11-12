@@ -139,6 +139,8 @@ export type LegacyHeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   background: LegacyBgMedia;
   layout: {
     badgeSide: 'left' | 'right';

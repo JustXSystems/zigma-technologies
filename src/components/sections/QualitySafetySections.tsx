@@ -3,6 +3,7 @@
 import { Fragment, useRef, useState } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass, heroVAlignClass } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzPills, AzText, hasText, vars } from '@/components/sections/AboutSections';
@@ -77,6 +78,7 @@ export function QsHeroSection({ content, sectionKey }: SectionProps) {
       }${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
       layers={credit}
+      style={heroScrimStyle(c.scrimStrength)}
     >
       {!scroll.hidden ? <LgScrollBar gradient={scroll.gradient} /> : null}
       <HeroSlot place={place} name="text">

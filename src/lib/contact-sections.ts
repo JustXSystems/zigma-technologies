@@ -81,6 +81,8 @@ export type ContactHeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   background: LegacyBgMedia;
   /** Fade-up entrance for breadcrumb, heading, leads, pills and buttons */
   entrance?: boolean;

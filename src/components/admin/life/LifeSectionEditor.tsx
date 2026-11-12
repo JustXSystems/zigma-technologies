@@ -50,6 +50,7 @@ import {
   type LifeStatsContent,
 } from '@/lib/life-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields from '@/components/admin/HeroMotionFields';
 
@@ -79,6 +80,7 @@ function LifeHeroEditor({ content: c, onChange }: EditorProps<LifeHeroContent>) 
       <Group title="Layout, height & motion" description="Hero height, container position, media side, columns, entrance and scroll bar">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
           <HeroPlacementEditor
             value={c.placement}
             onChange={(placement) => set({ placement })}

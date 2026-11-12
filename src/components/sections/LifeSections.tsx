@@ -13,6 +13,7 @@ import {
 import { createPortal } from 'react-dom';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass, heroScrollBarOn } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement } from '@/lib/hero-placement';
 import type { BgVideoProps } from '@/components/BgVideo';
 import HeroSlot from '@/components/HeroSlot';
@@ -448,6 +449,7 @@ export function LifeHeroSection({ content, sectionKey }: SectionProps) {
       bg={c.background}
       className={`az-hero lz-hero ${heroHeightClass(c.heroHeight)} ${place.rootClass}${c.entrance ? ' lgy-enter' : ''}`}
       id={sectionKey || 'top'}
+      style={heroScrimStyle(c.scrimStrength)}
     >
       {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <div

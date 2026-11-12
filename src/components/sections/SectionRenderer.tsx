@@ -30,6 +30,7 @@ import HeroBackgroundMedia from '@/components/HeroBackgroundMedia';
 import VisitTailorBar from '@/components/VisitTailorBar';
 import { HERO_SLIDE_ICONS } from '@/lib/hero-icons';
 import { heroHeightClass, heroScrollBarOn, heroVAlignClass, normalizeHeroHeight } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement, type HeroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { featIconFor } from '@/lib/feat-icons';
@@ -981,7 +982,10 @@ function classicHeroLayout(content: Record<string, unknown>) {
     className: [align && `hero-text-${align}`, heroVAlignClass(content.vAlign), maxWidth && 'hero-copy-max', content.entrance ? 'hero-enter' : '']
       .filter(Boolean)
       .join(' '),
-    style: maxWidth ? ({ '--hero-copy-max': maxWidth } as CSSProperties) : undefined,
+    style: {
+      ...(maxWidth ? ({ '--hero-copy-max': maxWidth } as CSSProperties) : null),
+      ...heroScrimStyle(content.scrimStrength),
+    },
     scrollBar: heroScrollBarOn(scroll) ? <LgScrollBar gradient={scroll?.gradient} /> : null,
   };
 }

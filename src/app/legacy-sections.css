@@ -47,7 +47,7 @@
 @keyframes lgy-pan{from{transform:scale(1.04) translate(-1.5%,0);}to{transform:scale(1.16) translate(1.5%,-1.5%);}}
 @keyframes lgy-drift{from{transform:scale(1.15) translate(-4%,-2%);}to{transform:scale(1.15) translate(4%,2%);}}
 .lgy-bg-overlay{position:absolute;inset:0;}
-.az-hero .lgy-bg-overlay,.lgy-hero .lgy-bg-overlay,.blg-hero .lgy-bg-overlay,.ctc-hero .lgy-bg-overlay,.i101-hero .lgy-bg-overlay,.qs-hero .lgy-bg-overlay{opacity:var(--hero-scrim-strength,1);}
+.az-hero .lgy-bg-overlay,.lgy-hero .lgy-bg-overlay,.blg-hero .lgy-bg-overlay,.ctc-hero .lgy-bg-overlay,.i101-hero .lgy-bg-overlay,.qs-hero .lgy-bg-overlay{opacity:var(--hero-scrim-local,var(--hero-scrim-strength,1));}
 
 .lgy-bg-ui{position:absolute;left:0;right:0;bottom:1.2rem;z-index:3;pointer-events:none;}
 .lgy-bg-ui-inner{display:flex;align-items:center;gap:1rem;}

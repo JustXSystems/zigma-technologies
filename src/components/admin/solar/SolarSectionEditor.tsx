@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import {
   ColorInput,
   createSectionFamilyEditor,
@@ -304,6 +305,7 @@ function SolarHeroEditor({ content: c, onChange }: EditorProps<SolarHeroContent>
           </Field>
           <TextInput label="Dark overlay (CSS gradient)" value={c.shade} onChange={(shade) => set({ shade })} placeholder="Empty = design default" full />
         </div>
+        <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
       </Group>
       <Group title="Service cards on the arc" description="Glass cards connected to the glowing arc on the right">
         <div className="admin-form-grid">

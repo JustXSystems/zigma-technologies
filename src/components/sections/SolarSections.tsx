@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { appHref } from '@/lib/base-path';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { AzText, hasText, vars, withLines } from '@/components/sections/AboutSections';
 import { elementCss, mediaSrc, sanitizeSvg, sectionBoxCss, svgMarkup, type CtaButton } from '@/lib/about-sections';
 import {
@@ -232,7 +233,7 @@ export function SolarHeroSection({ content, sectionKey }: SectionProps) {
   const seconds = num(c.intervalSeconds, 6.5);
   return (
     <SolPage>
-      <section className="solar-hero" id={sectionKey || 'top'} style={boxStyle(c.section)}>
+      <section className="solar-hero" id={sectionKey || 'top'} style={{ ...boxStyle(c.section), ...heroScrimStyle(c.scrimStrength) }}>
         <div className="hero-bgs">
           {slides.map((s, i) => (
             <div key={i} className={`hero-bg${i === cur ? ' on' : ''}`} style={{ backgroundImage: cssUrl(s.image) }} />

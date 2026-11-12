@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/analytics';
 import { isTurnstileClientEnabled } from '@/lib/turnstile';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass, heroScrollBarOn, heroVAlignClass } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { CONTACT_SUBJECT_EVENT, focusContactSubject } from '@/lib/contact-subject';
@@ -164,6 +165,7 @@ export function ContactHeroSection({ content, sectionKey, defaultId = 'contact-h
         c.vAlign
       )} ${place.rootClass}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || defaultId}
+      style={heroScrimStyle(c.scrimStrength)}
     >
       {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <HeroSlot place={place} name="text">

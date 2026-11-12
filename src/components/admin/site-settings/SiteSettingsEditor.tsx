@@ -235,7 +235,7 @@ const SECTIONS: SectionDef[] = [
     id: 'hero-overlays',
     title: 'Hero overlays',
     description:
-      'One control for the dark gradient / scrim on page heroes sitewide (home slider, inner pages, solar, catalog, About / Legacy / Blog heroes). Lower = more of the background video or photo shows through. Per-section scrim overrides still apply on top.',
+      'Default dark gradient strength for all page heroes. Each hero section can override this in its own editor (Dark gradient strength). Lower = more of the background video or photo shows through.',
     fields: [],
   },
   {
@@ -618,7 +618,7 @@ export default function SiteSettingsEditor({ group, intro }: Props) {
               onChange={(next) => patchSettings({ heroScrimStrength: String(next) })}
             />
             <p className="az-admin-hint" style={{ marginTop: 0 }}>
-              Applies on the next page load after Save. Custom scrim / overlay gradients set on a section still use this strength as an overall opacity.
+              Applies on the next page load after Save. Open any page hero section to override this value for that page only.
             </p>
           </div>
         );

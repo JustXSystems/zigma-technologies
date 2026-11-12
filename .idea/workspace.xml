@@ -7,18 +7,42 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle.">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="Home Page media control">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/home-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/home-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/industries101-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/industries101-sections.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/legacy-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/solar-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/solar-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/blog/BlogSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/contact/ContactSectionEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/industries101/Industries101SectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/legacy/LegacySectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/life/LifeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/qualitysafety/QualitySafetySectionEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/admin/site-settings/SiteSettingsEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/site-settings/SiteSettingsEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/solar/SolarSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/solar/SolarSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/BlogSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/ContactSections.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/Industries101Sections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LegacySections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/QualitySafetySections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/QualitySafetySections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/SolarSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SolarSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/blog-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/blog-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/contact-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/contact-sections.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/home-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/home-sections.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/industries101-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/industries101-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/legacy-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/legacy-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/life-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/life-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/qualitysafety-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/qualitysafety-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/solar-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/solar-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,7 +316,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
     <MESSAGE value="#52 Products page, hero section, need to enhance to display Product Image on a card style" />
     <MESSAGE value="#52  careers_jobs edit with html" />
     <MESSAGE value="#52  careers_jobs edit with Education and add show pills" />
@@ -317,7 +340,8 @@
     <MESSAGE value="media compression featureadded in Media library" />
     <MESSAGE value="media preview featureadded in Media library" />
     <MESSAGE value="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle." />
-    <option name="LAST_COMMIT_MESSAGE" value="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle." />
+    <MESSAGE value="Home Page media control" />
+    <option name="LAST_COMMIT_MESSAGE" value="Home Page media control" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

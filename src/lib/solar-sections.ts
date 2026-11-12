@@ -113,6 +113,8 @@ export type SolarHeroContent = {
   intervalSeconds?: number;
   showDots?: boolean;
   wordSeparator?: string;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   /** Dark gradient over the slides; empty = design default */
   shade?: string;
   nodes: { hidden?: boolean; ariaLabel: string; arc: string; items: SolarHeroNode[] };

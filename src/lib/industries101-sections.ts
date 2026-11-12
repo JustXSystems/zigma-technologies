@@ -44,6 +44,8 @@ export type Ind101HeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   /** Slides, motion (zoom / Ken Burns…), overlay, dots toggle + active dot color */
   background: LegacyBgMedia;
   slider: {

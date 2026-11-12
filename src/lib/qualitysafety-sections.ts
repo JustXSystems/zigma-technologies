@@ -41,6 +41,8 @@ export type QsHeroContent = {
   section: SectionBox;
   heroHeight?: HeroHeight;
   placement?: HeroPlacement;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   /** Slides, Ken Burns motion, overlay, progress dots + counter */
   background: LegacyBgMedia;
   /** vAlign: vertical position of the copy in a full-screen / custom-height hero; empty = centre */

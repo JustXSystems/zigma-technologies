@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode, type TouchEvent } from 'react';
 import { appHref } from '@/lib/base-path';
 import { fitHeroViewportUnits } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import type { BgVideoProps } from '@/components/BgVideo';
 import { useSiteShell } from '@/components/SiteProviders';
 import { useSiteCopy } from '@/lib/use-site-copy';
@@ -555,6 +556,7 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
       )}
       style={{
         ...sectionBoxCss(c.section),
+        ...heroScrimStyle(c.scrimStrength),
         ...vars({
           '--hm-hero-h': fitHeroViewportUnits(c.height?.desktop),
           '--hm-hero-min': fitHeroViewportUnits(c.height?.minHeight),

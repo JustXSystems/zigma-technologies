@@ -59,6 +59,7 @@ import {
   type LegacyValuesContent,
 } from '@/lib/legacy-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import HeroPlacementEditor, { AnchorPad } from '@/components/admin/HeroPlacementEditor';
 import type { HeroAnchor } from '@/lib/hero-placement';
 
@@ -158,6 +159,7 @@ function LegacyHeroEditor({ content: c, onChange }: EditorProps<LegacyHeroConten
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
           <HeroPlacementEditor
             value={c.placement}
             onChange={(placement) => set({ placement })}

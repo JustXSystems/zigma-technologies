@@ -33,6 +33,7 @@ import { normalizeLinkItems } from '@/lib/about-sections';
 import HeroHeightPicker from '@/components/admin/HeroHeightPicker';
 import HeroPlacementEditor from '@/components/admin/HeroPlacementEditor';
 import HeroMotionFields from '@/components/admin/HeroMotionFields';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import { HERO_VALIGN_CHOICES } from '@/lib/hero-height';
 import {
   CONTACT_ALL_ICON_PRESETS,
@@ -143,6 +144,7 @@ export function ContactHeroEditor({ content: c, onChange }: EditorProps<ContactH
       <Group title="Layout, height & motion">
         <div className="admin-form-grid">
           <HeroHeightPicker value={c.heroHeight} onChange={(heroHeight) => set({ heroHeight })} />
+          <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
           <HeroPlacementEditor value={c.placement} onChange={(placement) => set({ placement })} />
           <AlignButtons
             label="Content align"

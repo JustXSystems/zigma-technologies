@@ -1,8 +1,9 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { appHref } from '@/lib/base-path';
 import { heroHeightClass, heroScrollBarOn } from '@/lib/hero-height';
+import { heroScrimStyle } from '@/lib/hero-scrim';
 import { heroPlacement } from '@/lib/hero-placement';
 import HeroSlot from '@/components/HeroSlot';
 import { AzCtas, AzEyebrow, AzIcon, AzPills, AzText, AzVideo, hasText, vars } from '@/components/sections/AboutSections';
@@ -50,12 +51,26 @@ function useTick(enabled: boolean, intervalMs: number) {
 /* ------------------------------------------------------------------ */
 
 /** Section shell whose background layers sit outside the content container (full-bleed slideshow). */
-function I101HeroShell({ box, className, id, layers, children }: { box?: SectionBox; className: string; id?: string | null; layers: ReactNode; children: ReactNode }) {
+function I101HeroShell({
+  box,
+  className,
+  id,
+  layers,
+  children,
+  style,
+}: {
+  box?: SectionBox;
+  className: string;
+  id?: string | null;
+  layers: ReactNode;
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
   const tone = box?.tone === 'light' ? 'light' : 'dark';
   const pattern = box?.pattern && box.pattern !== 'none' ? box.pattern : null;
   const video = mediaSrc(box?.bgVideo);
   return (
-    <section id={id || undefined} className={`az-block az-tone-${tone} ${className}`} style={sectionBoxCss(box)}>
+    <section id={id || undefined} className={`az-block az-tone-${tone} ${className}`} style={{ ...sectionBoxCss(box), ...style }}>
       {video ? (
         <div aria-hidden="true" className="az-bg-video">
           <AzVideo src={video} poster={mediaSrc(box?.bgImage)} />
@@ -201,6 +216,7 @@ export function Ind101HeroSection({ content, sectionKey }: SectionProps) {
       } i101-hero--h-${layout.hAlign || 'left'}${c.entrance === false ? '' : ' lgy-enter'}`}
       id={sectionKey || 'top'}
       layers={<I101HeroBg bg={c.background} slider={c.slider} dots={c.dots} />}
+      style={heroScrimStyle(c.scrimStrength)}
     >
       {heroScrollBarOn(c.scrollBar) ? <LgScrollBar gradient={c.scrollBar?.gradient} /> : null}
       <HeroSlot place={place} name="text">

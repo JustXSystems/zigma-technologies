@@ -146,6 +146,8 @@ export type HomeHeroContent = {
    * empty slides inherit it when some slides do.
    */
   background?: LegacyBgMedia;
+  /** 0–100 dark gradient strength; empty = Site Settings → Hero overlays */
+  scrimStrength?: number;
   overlay: {
     scrim?: string;
     grid?: boolean;

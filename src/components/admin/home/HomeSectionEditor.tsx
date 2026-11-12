@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import MediaPicker from '@/components/admin/MediaPicker';
+import HeroScrimStrengthPicker from '@/components/admin/HeroScrimStrengthPicker';
 import {
   AlignButtons,
   BG_MOTION_OPTIONS,
@@ -535,6 +536,7 @@ function HomeHeroEditor({ content: c, onChange }: EditorProps<HomeHeroContent>) 
         </div>
       </Group>
       <Group title="Overlay & glow">
+        <HeroScrimStrengthPicker value={c.scrimStrength} onChange={(scrimStrength) => set({ scrimStrength })} />
         <div className="admin-form-grid">
           <TextArea
             label="Scrim gradient (all slides)"
