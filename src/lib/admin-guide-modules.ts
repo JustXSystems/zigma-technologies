@@ -185,6 +185,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Edit company profile, logo URL, logo alt',
       'Header & Footer → Header: logo chip & word type, navigation menu style & fonts, header CTA, Talk to us, sticky mobile & floating CTAs',
       'Header & Footer → Footer: footer brand (.foot-brand), office block layout, blurb, copyright, Powered by credit, legal links',
+      'Hero overlays — dark gradient strength (0–100%) for all page heroes sitewide',
       'Address & office — postal address, office hours / SLA values; used by the footer, JSON-LD, contact/thank-you/SLA',
       'Social links (Facebook, Instagram, LinkedIn, X, YouTube) — blank hides; footer icons + JSON-LD sameAs',
       'Analytics & cookies — GA4 / Plausible IDs, consent switches, cookie banner and /cookies text (text needs Site Copy access)',

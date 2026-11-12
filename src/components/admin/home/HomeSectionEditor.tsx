@@ -34,6 +34,8 @@ import {
   type EditorProps,
 } from '@/components/admin/section-kit';
 import { normalizeLinkItems, type ImageEl } from '@/lib/about-sections';
+import { visibleMedia } from '@/lib/life-sections';
+import type { LegacyBgMedia } from '@/lib/legacy-sections';
 import { publicMediaUrl } from '@/lib/media-url';
 import {
   HOME_ECO_GLYPHS,
@@ -71,6 +73,24 @@ import {
   type HomeWhyCard,
   type HomeWhyContent,
 } from '@/lib/home-sections';
+
+function slideHasOwnMedia(slide: HomeHeroSlide) {
+  return visibleMedia(slide.media).length > 0 || visibleMedia(slide.mobileMedia).length > 0;
+}
+
+function sharedHeroBgStatus(c: HomeHeroContent): string {
+  const bg = c.background;
+  const items = bg && !bg.hidden ? visibleMedia(bg.items) : [];
+  if (!items.length) {
+    return 'Off — add a looping video (or still) below. Clear slide backgrounds to use it continuously behind every slide.';
+  }
+  const visible = (c.slides || []).filter((s) => s && !s.hidden);
+  const withOwn = visible.filter(slideHasOwnMedia).length;
+  if (withOwn === 0) {
+    return 'Active — continuous behind all slides while copy and theme cross-fade.';
+  }
+  return `Standby — ${withOwn} slide${withOwn === 1 ? '' : 's'} have their own media (empty slides still inherit this background).`;
+}
 
 
 const ICON_PREVIEW = 'lz-icon-preview';
@@ -372,7 +392,7 @@ function HeroSlideEditor({ s, patch }: { s: HomeHeroSlide; patch: (next: HomeHer
           onChange={(media) => patch({ ...s, media })}
           showLabel={false}
           showColor={false}
-          hint="One item = still background; several = cross-fading slideshow inside the slide. Videos play muted and looped."
+          hint="Leave empty to use the shared background. One item = still; several = cross-fade inside this slide. Videos play muted and looped."
         />
         <MediaItemsEditor
           label="Phone background (optional, ≤760px)"
@@ -380,7 +400,7 @@ function HeroSlideEditor({ s, patch }: { s: HomeHeroSlide; patch: (next: HomeHer
           onChange={(mobileMedia) => patch({ ...s, mobileMedia })}
           showLabel={false}
           showColor={false}
-          hint="Leave empty to reuse the media above on phones."
+          hint="Leave empty to reuse the media above on phones (or the shared background)."
         />
         <div className="admin-form-grid">
           <TextInput label="Focus position" value={s.position} onChange={(position) => patch({ ...s, position })} placeholder="center, 50% 30%" />
@@ -424,6 +444,8 @@ function HomeHeroEditor({ content: c, onChange }: EditorProps<HomeHeroContent>) 
   const set = (patch: Partial<HomeHeroContent>) => onChange({ ...c, ...patch });
   const height = c.height || {};
   const media = c.media || {};
+  const bg: LegacyBgMedia = c.background || { items: [], mobileItems: [] };
+  const setBg = (patch: Partial<LegacyBgMedia>) => set({ background: { ...bg, ...patch } });
   const ov = c.overlay || {};
   const dots = c.dots || {};
   const tags = c.tags || {};
@@ -440,6 +462,41 @@ function HomeHeroEditor({ content: c, onChange }: EditorProps<HomeHeroContent>) 
           itemTitle={(s, i) => `${s.hidden ? '[hidden] ' : ''}${i + 1}. ${s.title?.text || 'Untitled slide'}`}
           renderItem={(s, patch) => <HeroSlideEditor s={s} patch={patch} />}
         />
+      </Group>
+      <Group
+        title="Shared background (all slides)"
+        description="Typically one muted looping video. Plays continuously when no slide has its own media; empty slides inherit it when some do."
+        open
+      >
+        <p className="az-admin-hint" style={{ marginTop: 0 }}>
+          {sharedHeroBgStatus(c)}
+        </p>
+        <Toggle label="Show shared background" checked={!bg.hidden} onChange={(v) => setBg({ hidden: !v })} />
+        <MediaItemsEditor
+          label="Shared media"
+          items={bg.items || []}
+          onChange={(items) => setBg({ items })}
+          showLabel={false}
+          showColor={false}
+          hint="One video is enough for the whole slider. Several items cross-fade using the timing below."
+        />
+        <MediaItemsEditor
+          label="Phone media (optional, ≤760px)"
+          items={bg.mobileItems || []}
+          onChange={(mobileItems) => setBg({ mobileItems })}
+          showLabel={false}
+          showColor={false}
+          hint="Leave empty to reuse the media above on phones."
+        />
+        <div className="admin-form-grid">
+          <TextInput label="Focus position" value={bg.position} onChange={(position) => setBg({ position })} placeholder="center, 50% 30%" />
+          <TextInput
+            label="Focus position (phone)"
+            value={bg.positionMobile}
+            onChange={(positionMobile) => setBg({ positionMobile })}
+            placeholder="Empty = same as desktop"
+          />
+        </div>
       </Group>
       <Group title="Height, timing & swipe">
         <div className="admin-form-grid">
@@ -463,7 +520,7 @@ function HomeHeroEditor({ content: c, onChange }: EditorProps<HomeHeroContent>) 
             min={1}
             step={0.5}
             placeholder="5"
-            hint="When a slide has several background images / videos."
+            hint="When shared or slide background has several images / videos."
             onChange={(intervalSeconds) => set({ media: { ...media, intervalSeconds } })}
           />
           <SelectInput label="Background motion" value={media.motion || 'none'} options={BG_MOTION_OPTIONS} onChange={(motion) => set({ media: { ...media, motion } })} />

@@ -140,6 +140,12 @@ export type HomeHeroContent = {
   swipe: boolean;
   fadeMs?: number;
   media: { intervalSeconds?: number; motion?: LegacyBgMotion; motionSeconds?: number };
+  /**
+   * Shared fallback background (typically one looping video).
+   * Plays continuously behind all slides when no slide has its own media;
+   * empty slides inherit it when some slides do.
+   */
+  background?: LegacyBgMedia;
   overlay: {
     scrim?: string;
     grid?: boolean;
@@ -654,6 +660,7 @@ function upgradeHero(c: Raw): HomeHeroContent {
     pauseOnHover: false,
     swipe: true,
     media: { motion: 'none' },
+    background: { items: [], mobileItems: [] },
     overlay: { grid: true, tint: true },
     dots: { position: 'right' },
     tags: { singleLine: Boolean(c.tagsSingleLine) },

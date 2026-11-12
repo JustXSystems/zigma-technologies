@@ -852,7 +852,7 @@
   .sol-page .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transform:scale(1.02);transition:opacity 1.3s ease;}
   .sol-page .hero-bg.on{opacity:1;animation:solHeroZoom 14s ease-out forwards;}
   @keyframes solHeroZoom{from{transform:scale(1.02);}to{transform:scale(1.09);}}
-  .sol-page .hero-shade{z-index:1;background:radial-gradient(700px 360px at 92% 72%,rgba(255,150,60,0.32),transparent 70%),linear-gradient(90deg,rgba(6,16,40,0.9) 0%,rgba(8,26,64,0.6) 46%,rgba(8,26,64,0.12) 100%),linear-gradient(180deg,rgba(6,16,40,0.7) 0%,rgba(8,26,64,0.2) 40%,rgba(6,16,40,0.85) 100%);}
+  .sol-page .hero-shade{z-index:1;opacity:var(--hero-scrim-strength,1);background:radial-gradient(700px 360px at 92% 72%,rgba(255,150,60,0.32),transparent 70%),linear-gradient(90deg,rgba(6,16,40,0.9) 0%,rgba(8,26,64,0.6) 46%,rgba(8,26,64,0.12) 100%),linear-gradient(180deg,rgba(6,16,40,0.7) 0%,rgba(8,26,64,0.2) 40%,rgba(6,16,40,0.85) 100%);}
   .sol-page .hero-main{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:minmax(0,1fr) clamp(440px,38vw,620px);gap:2rem;align-items:start;}
   .sol-page .hero-copy-stack{position:relative;min-height:540px;}
   .sol-page .hero-copy{position:absolute;left:0;top:0;width:100%;opacity:0;visibility:hidden;transform:translateY(22px);transition:opacity .8s ease,transform .8s ease,visibility .8s;}

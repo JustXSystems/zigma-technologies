@@ -70,6 +70,8 @@ img.hm-glyph{object-fit:contain;}
     padding-bottom:var(--hm-hero-pb,4.5rem);
   }
 }
+.hm-hero-shared-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.hm-hero-shared-bg .lgy-bg{z-index:0;}
 .hm-hero .slide{transition-duration:var(--hm-fade,1.1s);}
 .hm-hero .tag-pill{
   color:var(--hm-tag-color,#E4E9F2);

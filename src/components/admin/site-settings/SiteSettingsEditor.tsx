@@ -1,7 +1,14 @@
 'use client';
 
 import { FormEvent, MouseEvent, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { DEFAULT_SITE_SETTINGS, isSettingEnabled, mergeSiteSettings, type SiteSettings } from '@/lib/site-settings';
+import {
+  DEFAULT_SITE_SETTINGS,
+  isSettingEnabled,
+  mergeSiteSettings,
+  sanitizeHeroScrimStrength,
+  type SiteSettings,
+} from '@/lib/site-settings';
+import { Range } from '@/components/admin/CatalogHeroBgEditor';
 import AdminCollapsible from '@/components/admin/AdminCollapsible';
 import MediaPicker from '@/components/admin/MediaPicker';
 import { Field, ToggleCard } from '@/components/admin/form/controls';
@@ -222,6 +229,13 @@ const SECTIONS: SectionDef[] = [
     title: 'Navigation menu style & fonts',
     description:
       'Public header mega-menu look (Classic, Corporate, Elegant, Rail, Lumen, Mosaic, Ribbon) plus font family, size, weight, style, case and spacing for top menu items, submenu headings and submenu links.',
+    fields: [],
+  },
+  {
+    id: 'hero-overlays',
+    title: 'Hero overlays',
+    description:
+      'One control for the dark gradient / scrim on page heroes sitewide (home slider, inner pages, solar, catalog, About / Legacy / Blog heroes). Lower = more of the background video or photo shows through. Per-section scrim overrides still apply on top.',
     fields: [],
   },
   {
@@ -590,6 +604,25 @@ export default function SiteSettingsEditor({ group, intro }: Props) {
             </div>
           </div>
         );
+      case 'hero-overlays': {
+        const strength = sanitizeHeroScrimStrength(settings.heroScrimStrength, 100);
+        return (
+          <div className="admin-page-stack" style={{ maxWidth: 420 }}>
+            <Range
+              label="Dark gradient strength"
+              value={strength}
+              min={0}
+              max={100}
+              unit="%"
+              hint="100% = design default. Try 60–75% when a shared hero video should stay more visible behind the copy."
+              onChange={(next) => patchSettings({ heroScrimStrength: String(next) })}
+            />
+            <p className="az-admin-hint" style={{ marginTop: 0 }}>
+              Applies on the next page load after Save. Custom scrim / overlay gradients set on a section still use this strength as an overall opacity.
+            </p>
+          </div>
+        );
+      }
       case 'contact':
         return (
           <>

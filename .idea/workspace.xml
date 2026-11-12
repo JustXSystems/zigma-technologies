@@ -9,9 +9,16 @@
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/home-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/home-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/legacy-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/legacy-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/solar-sections.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/solar-sections.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/home/HomeSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/site-settings/SiteSettingsEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/site-settings/SiteSettingsEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/home-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/home-sections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/site-settings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/site-settings.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

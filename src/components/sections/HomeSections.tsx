@@ -466,6 +466,10 @@ function clampDuration(value: unknown, fallback = 6000) {
   return Math.min(30000, Math.max(2500, Math.round(n)));
 }
 
+function slideHasOwnMedia(slide: HomeHeroSlide) {
+  return visibleMedia(slide.media).length > 0 || visibleMedia(slide.mobileMedia).length > 0;
+}
+
 function HeroSlideIcon({ slide }: { slide: HomeHeroSlide }) {
   const icon = slide.icon || {};
   const svg = icon.hidden ? '' : String(icon.svg || '').trim();
@@ -524,6 +528,16 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
   const tags = c.tags || {};
   const layout = c.layout || {};
   const mediaInterval = (Number(c.media?.intervalSeconds) || 5) * 1000;
+  const sharedBg = c.background;
+  const sharedItems = sharedBg && !sharedBg.hidden ? visibleMedia(sharedBg.items) : [];
+  const sharedMobile = sharedBg && !sharedBg.hidden ? visibleMedia(sharedBg.mobileItems) : [];
+  const anySlideMedia = slides.some(slideHasOwnMedia);
+  const continuousShared = sharedItems.length > 0 && !anySlideMedia;
+  const layerMotion = {
+    intervalMs: mediaInterval,
+    motion: c.media?.motion,
+    motionSeconds: c.media?.motionSeconds,
+  };
   const { color: tagColor, background: tagBg, border: tagBorder, ...tagRest } = tags.style || {};
   const tagStyle = elementCss(tagRest);
 
@@ -532,6 +546,7 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
       id={sectionKey || 'home'}
       className={cx(
         'hero-slider hm-block hm-hero',
+        continuousShared && 'hm-hero--shared-bg',
         tags.singleLine && 'hero-slider--tags-single-line',
         dots.position === 'bottom' && 'hm-hero--dots-bottom',
         dots.showOnMobile && 'hm-hero--dots-m',
@@ -562,9 +577,57 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
       }
       {...swipe}
     >
+      {continuousShared ? (
+        <div className="hm-hero-shared-bg" aria-hidden="true">
+          {sharedMobile.length ? (
+            <>
+              <HmMediaLayer
+                items={sharedItems}
+                scope="desk"
+                {...layerMotion}
+                position={sharedBg?.position}
+                positionMobile={sharedBg?.positionMobile}
+                priority
+                active
+                warm={false}
+              />
+              <HmMediaLayer
+                items={sharedMobile}
+                scope="mob"
+                {...layerMotion}
+                position={sharedBg?.position}
+                positionMobile={sharedBg?.positionMobile}
+                priority
+                active
+                warm={false}
+              />
+            </>
+          ) : (
+            <HmMediaLayer
+              items={sharedItems}
+              {...layerMotion}
+              position={sharedBg?.position}
+              positionMobile={sharedBg?.positionMobile}
+              priority
+              active
+              warm={false}
+            />
+          )}
+        </div>
+      ) : null}
       {slides.map((slide, i) => {
         const custom = !slide.theme;
         const layerState = { active: i === idx, warm: count > 1 && i === (idx + 1) % count };
+        const ownMedia = slideHasOwnMedia(slide);
+        const deskItems = ownMedia ? slide.media : sharedItems;
+        const mobItems = ownMedia
+          ? visibleMedia(slide.mobileMedia).length
+            ? slide.mobileMedia
+            : []
+          : sharedMobile;
+        const pos = ownMedia
+          ? { position: slide.position, positionMobile: slide.positionMobile }
+          : { position: sharedBg?.position || slide.position, positionMobile: sharedBg?.positionMobile || slide.positionMobile };
         return (
           <div
             key={i}
@@ -577,43 +640,30 @@ export function HomeHeroSection({ content, sectionKey }: SectionProps) {
             })}
           >
             <div className="slide-bg">
-              {visibleMedia(slide.mobileMedia).length ? (
-                <>
-                  <HmMediaLayer
-                    items={slide.media}
-                    scope="desk"
-                    intervalMs={mediaInterval}
-                    motion={c.media?.motion}
-                    motionSeconds={c.media?.motionSeconds}
-                    position={slide.position}
-                    positionMobile={slide.positionMobile}
-                    priority={i === 0}
-                    {...layerState}
-                  />
-                  <HmMediaLayer
-                    items={slide.mobileMedia}
-                    scope="mob"
-                    intervalMs={mediaInterval}
-                    motion={c.media?.motion}
-                    motionSeconds={c.media?.motionSeconds}
-                    position={slide.position}
-                    positionMobile={slide.positionMobile}
-                    priority={i === 0}
-                    {...layerState}
-                  />
-                </>
-              ) : (
-                <HmMediaLayer
-                  items={slide.media}
-                  intervalMs={mediaInterval}
-                  motion={c.media?.motion}
-                  motionSeconds={c.media?.motionSeconds}
-                  position={slide.position}
-                  positionMobile={slide.positionMobile}
-                  priority={i === 0}
-                  {...layerState}
-                />
-              )}
+              {!continuousShared && deskItems.length ? (
+                mobItems.length ? (
+                  <>
+                    <HmMediaLayer
+                      items={deskItems}
+                      scope="desk"
+                      {...layerMotion}
+                      {...pos}
+                      priority={i === 0}
+                      {...layerState}
+                    />
+                    <HmMediaLayer
+                      items={mobItems}
+                      scope="mob"
+                      {...layerMotion}
+                      {...pos}
+                      priority={i === 0}
+                      {...layerState}
+                    />
+                  </>
+                ) : (
+                  <HmMediaLayer items={deskItems} {...layerMotion} {...pos} priority={i === 0} {...layerState} />
+                )
+              ) : null}
               <div className="slide-scrim" style={vars({ background: slide.scrim || ov.scrim })} />
               {ov.grid !== false ? <div className="grid-overlay" style={gridOverlayStyle(ov.gridColor)} /> : null}
               {ov.tint !== false ? <div className="tint" style={vars({ opacity: ov.tintOpacity })} /> : null}
