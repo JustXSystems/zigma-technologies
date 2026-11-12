@@ -7,10 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="media compression featureadded in Media library">
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/about/AboutSectionEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/AboutSections.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/about-sections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/about-sections.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -284,8 +285,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#51 Caalog products/services/project video shrinking to loading issue" />
-    <MESSAGE value="#52 Need to create this new page /projects101, this is the replacement for existing /projects." />
     <MESSAGE value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
     <MESSAGE value="#52 Products page, hero section, need to enhance to display Product Image on a card style" />
     <MESSAGE value="#52  careers_jobs edit with html" />
@@ -309,7 +308,9 @@
     <MESSAGE value="#52 /solar page added" />
     <MESSAGE value="fin unused mediaa in Media library" />
     <MESSAGE value="media compression featureadded in Media library" />
-    <option name="LAST_COMMIT_MESSAGE" value="media compression featureadded in Media library" />
+    <MESSAGE value="media preview featureadded in Media library" />
+    <MESSAGE value="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle." />
+    <option name="LAST_COMMIT_MESSAGE" value="In Admin → Pages → About → Page hero, use Hero visual → Show hero visual to show or hide the media column. Image and floating card settings stay underneath that toggle." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

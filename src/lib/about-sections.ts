@@ -242,6 +242,8 @@ export type AboutHeroContent = {
   lead: TextEl;
   pills: PillsEl;
   ctas: CtaButton[];
+  /** Master switch for the media column (image + float card). */
+  visual?: { hidden?: boolean };
   image: ImageEl;
   floatCard: {
     hidden?: boolean;
@@ -699,6 +701,7 @@ export function defaultAboutHeroContent(): AboutHeroContent {
       ],
     },
     ctas: [],
+    visual: { hidden: true },
     image: {
       src: ABOUT_HERO_IMAGE,
       alt: 'Zigma Technologies office building in Bengaluru',

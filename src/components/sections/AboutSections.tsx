@@ -368,7 +368,7 @@ export function AboutHeroSection({ content, sectionKey }: SectionProps) {
   const { color: crumbColor, ...crumbRest } = c.breadcrumb?.style || {};
   const float = c.floatCard;
   const showFloat = float && !float.hidden && (hasText(float.number) || hasText(float.label));
-  const showVisual = !c.image?.hidden || showFloat;
+  const showVisual = !c.visual?.hidden && (!c.image?.hidden || showFloat);
   const place = heroPlacement(c.placement);
 
   const copy = (

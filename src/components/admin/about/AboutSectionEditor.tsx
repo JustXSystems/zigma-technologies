@@ -115,31 +115,38 @@ function AboutHeroEditor({ content: c, onChange }: EditorProps<AboutHeroContent>
       <Group title="Buttons" description="Optional call-to-action buttons">
         <CtaListEditor value={c.ctas} onChange={(v) => set('ctas', v)} />
       </Group>
-      <Group title="Image">
-        <ImageEditor value={c.image} onChange={(v) => set('image', v)} />
-      </Group>
-      <Group title="Floating stat card" description="The 20+ badge over the image">
-        <div style={{ marginBottom: '0.6rem' }}>
-          <Toggle label="Show floating card" checked={!fc.hidden} onChange={(v) => set('floatCard', { ...fc, hidden: !v })} />
-        </div>
-        <div className="admin-form-grid">
-          <SelectInput
-            label="Position"
-            value={fc.position}
-            options={[
-              { value: 'bottom-left', label: 'Bottom left' },
-              { value: 'bottom-right', label: 'Bottom right' },
-              { value: 'top-left', label: 'Top left' },
-              { value: 'top-right', label: 'Top right' },
-            ]}
-            onChange={(position) => set('floatCard', { ...fc, position: position as FloatCardPosition })}
+      <Group title="Hero visual" description="Media column on the page hero (image + floating stat card)">
+        <div style={{ marginBottom: '0.8rem' }}>
+          <Toggle
+            label="Show hero visual"
+            checked={!c.visual?.hidden}
+            onChange={(on) => set('visual', { ...c.visual, hidden: !on })}
           />
-          <ColorInput label="Card background" value={fc.background} onChange={(background) => set('floatCard', { ...fc, background })} fallback="" />
-          <TextInput label="Card border" value={fc.border} onChange={(border) => set('floatCard', { ...fc, border })} placeholder="1px solid rgba(255,255,255,0.14)" />
-          <TextInput label="Card radius" value={fc.radius} onChange={(radius) => set('floatCard', { ...fc, radius })} placeholder="14px" />
         </div>
-        <TextElementEditor label="Number" value={fc.number} onChange={(number) => set('floatCard', { ...fc, number })} />
-        <TextElementEditor label="Label" multiline value={fc.label} onChange={(label) => set('floatCard', { ...fc, label })} />
+        <ImageEditor value={c.image} onChange={(v) => set('image', v)} />
+        <div style={{ marginTop: '1rem', paddingTop: '0.9rem', borderTop: '1px solid rgba(15,23,42,0.08)' }}>
+          <div style={{ marginBottom: '0.6rem' }}>
+            <Toggle label="Show floating card" checked={!fc.hidden} onChange={(v) => set('floatCard', { ...fc, hidden: !v })} />
+          </div>
+          <div className="admin-form-grid">
+            <SelectInput
+              label="Position"
+              value={fc.position}
+              options={[
+                { value: 'bottom-left', label: 'Bottom left' },
+                { value: 'bottom-right', label: 'Bottom right' },
+                { value: 'top-left', label: 'Top left' },
+                { value: 'top-right', label: 'Top right' },
+              ]}
+              onChange={(position) => set('floatCard', { ...fc, position: position as FloatCardPosition })}
+            />
+            <ColorInput label="Card background" value={fc.background} onChange={(background) => set('floatCard', { ...fc, background })} fallback="" />
+            <TextInput label="Card border" value={fc.border} onChange={(border) => set('floatCard', { ...fc, border })} placeholder="1px solid rgba(255,255,255,0.14)" />
+            <TextInput label="Card radius" value={fc.radius} onChange={(radius) => set('floatCard', { ...fc, radius })} placeholder="14px" />
+          </div>
+          <TextElementEditor label="Number" value={fc.number} onChange={(number) => set('floatCard', { ...fc, number })} />
+          <TextElementEditor label="Label" multiline value={fc.label} onChange={(label) => set('floatCard', { ...fc, label })} />
+        </div>
       </Group>
     </>
   );
