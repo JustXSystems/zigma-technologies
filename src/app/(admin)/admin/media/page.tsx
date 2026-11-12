@@ -9,6 +9,12 @@ import {
   formatMediaBytes,
   validateMediaUploadFile,
 } from '@/lib/media-upload-rules';
+import {
+  MEDIA_COMPRESS_MAX_IMAGES,
+  MEDIA_COMPRESS_MAX_VIDEOS,
+  isCompressibleMedia,
+  mediaCompressUiKind,
+} from '@/lib/media-compress-shared';
 
 type Asset = {
   id: number | null;
@@ -82,6 +88,22 @@ function formatApiError(data: ApiErrorBody, fallback: string, status?: number): 
   return parts.filter(Boolean).join(' ');
 }
 
+type CompressApiResult = ApiErrorBody & {
+  message?: string;
+  created?: number;
+  skipped?: number;
+  failed?: number;
+  savedBytes?: number;
+  results?: Array<{
+    sourcePath: string;
+    kind?: string;
+    ok: boolean;
+    skipped?: boolean;
+    reason?: string;
+    path?: string;
+  }>;
+};
+
 export default function MediaPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [usage, setUsage] = useState<UsageSummary | null>(null);
@@ -89,8 +111,12 @@ export default function MediaPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
+  const [compressProgress, setCompressProgress] = useState('');
+  const [stripAudio, setStripAudio] = useState(false);
   const [query, setQuery] = useState('');
   const [unusedOnly, setUnusedOnly] = useState(false);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<Asset | null>(null);
   const [editAlt, setEditAlt] = useState('');
   const [editTags, setEditTags] = useState('');
@@ -127,6 +153,147 @@ export default function MediaPage() {
     () => (unusedOnly ? assets.filter((a) => a.unused) : assets),
     [assets, unusedOnly]
   );
+
+  const selectableAssets = useMemo(
+    () => visibleAssets.filter((a) => isCompressibleMedia(a.mime, a.path)),
+    [visibleAssets]
+  );
+
+  const selectedAssets = useMemo(
+    () => selectableAssets.filter((a) => selected[a.path]),
+    [selectableAssets, selected]
+  );
+
+  const selectedImages = useMemo(
+    () => selectedAssets.filter((a) => mediaCompressUiKind(a.mime, a.path) === 'image'),
+    [selectedAssets]
+  );
+  const selectedVideos = useMemo(
+    () => selectedAssets.filter((a) => mediaCompressUiKind(a.mime, a.path) === 'video'),
+    [selectedAssets]
+  );
+
+  function toggleSelected(path: string, next?: boolean) {
+    setSelected((prev) => {
+      const on = next ?? !prev[path];
+      if (!on) {
+        const { [path]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [path]: true };
+    });
+  }
+
+  function selectAllCompressible() {
+    const next: Record<string, boolean> = {};
+    for (const asset of selectableAssets) next[asset.path] = true;
+    setSelected(next);
+  }
+
+  function clearSelection() {
+    setSelected({});
+  }
+
+  async function postCompress(items: Asset[], label: string): Promise<CompressApiResult> {
+    setCompressProgress(label);
+    const res = await fetch('/api/admin/media/compress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: items.map((asset) => ({ id: asset.id, path: asset.path })),
+        stripAudio,
+      }),
+    });
+    let data: CompressApiResult = {};
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error(res.ok ? 'Compress failed' : `Compress failed (HTTP ${res.status})`);
+    }
+    if (!res.ok) {
+      throw new Error(formatApiError(data, 'Compress failed', res.status));
+    }
+    return data;
+  }
+
+  async function compressSelected() {
+    if (!selectedAssets.length) {
+      setError('Select one or more images (JPEG/PNG/WebP/GIF) or videos (MP4/WebM) to compress.');
+      return;
+    }
+
+    const images = selectedImages.slice(0, MEDIA_COMPRESS_MAX_IMAGES);
+    const videos = selectedVideos.slice(0, MEDIA_COMPRESS_MAX_VIDEOS);
+    if (selectedVideos.length > MEDIA_COMPRESS_MAX_VIDEOS) {
+      setError(
+        `Select at most ${MEDIA_COMPRESS_MAX_VIDEOS} videos at a time (encoding is slow). Images can go up to ${MEDIA_COMPRESS_MAX_IMAGES}.`
+      );
+      return;
+    }
+
+    setError('');
+    setMessage('');
+    setCompressing(true);
+    setCompressProgress('Starting…');
+
+    const failures: string[] = [];
+    let created = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    try {
+      // Images in one batch; videos one-by-one to avoid request timeouts on long encodes.
+      if (images.length) {
+        const data = await postCompress(
+          images,
+          `Compressing ${images.length} image${images.length === 1 ? '' : 's'}…`
+        );
+        created += data.created || 0;
+        skipped += data.skipped || 0;
+        failed += data.failed || 0;
+        for (const r of data.results || []) {
+          if (!r.ok && !r.skipped) failures.push(`${r.sourcePath}: ${r.reason || 'failed'}`);
+        }
+      }
+
+      for (let i = 0; i < videos.length; i++) {
+        const video = videos[i];
+        const data = await postCompress(
+          [video],
+          `Compressing video ${i + 1}/${videos.length} (${video.original_name || video.path})…`
+        );
+        created += data.created || 0;
+        skipped += data.skipped || 0;
+        failed += data.failed || 0;
+        for (const r of data.results || []) {
+          if (!r.ok && !r.skipped) failures.push(`${r.sourcePath}: ${r.reason || 'failed'}`);
+        }
+      }
+
+      const summary = [
+        created ? `Created ${created}` : 'No new copies',
+        skipped ? `${skipped} skipped` : null,
+        failed ? `${failed} failed` : null,
+        'Originals unchanged',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      const detail =
+        failures.length > 0
+          ? ` · ${failures.slice(0, 3).join('; ')}${failures.length > 3 ? '…' : ''}`
+          : '';
+      setMessage(`${summary}${detail}`);
+      clearSelection();
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Compress failed');
+      // Still refresh if some batches succeeded before the failure.
+      await load().catch(() => undefined);
+    } finally {
+      setCompressing(false);
+      setCompressProgress('');
+    }
+  }
 
   async function onUpload(file: File | undefined) {
     if (!file) return;
@@ -302,10 +469,62 @@ export default function MediaPage() {
               <span className="admin-media-unused-count">{usage.unusedCount}</span>
             ) : null}
           </label>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            disabled={!selectableAssets.length || compressing}
+            onClick={selectAllCompressible}
+          >
+            Select compressible
+          </button>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            disabled={!selectedAssets.length || compressing}
+            onClick={clearSelection}
+          >
+            Clear selection
+          </button>
+          <label
+            className="admin-media-unused-filter"
+            title="For hero/background loops. Leave unchecked to keep soundtrack."
+          >
+            <input
+              type="checkbox"
+              checked={stripAudio}
+              onChange={(e) => setStripAudio(e.target.checked)}
+              disabled={compressing || !selectedVideos.length}
+            />
+            Strip video audio
+          </label>
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            disabled={!selectedAssets.length || compressing || uploading}
+            onClick={() => void compressSelected()}
+            title="Creates a smaller copy (WebP for images, H.264 MP4 for video). Originals and CMS references stay unchanged."
+          >
+            {compressing
+              ? compressProgress || 'Compressing…'
+              : selectedAssets.length
+                ? `Compress selected (${selectedImages.length} img · ${selectedVideos.length} vid)`
+                : 'Compress selected'}
+          </button>
         </div>
         <p className="admin-hint" style={{ marginTop: '0.65rem' }}>
           Max {formatMediaBytes(MEDIA_UPLOAD_MAX_BYTES)} · JPEG, PNG, WebP, GIF, SVG, MP4, WebM
         </p>
+        <p className="admin-hint" style={{ marginTop: '0.35rem' }}>
+          Compress adds a new library file and leaves the original unchanged. Images → WebP (sharp). Videos → H.264 MP4
+          (ffmpeg, needs ffmpeg on the server; up to {MEDIA_COMPRESS_MAX_VIDEOS} videos / {MEDIA_COMPRESS_MAX_IMAGES}{' '}
+          images per run). Verify quality, update references, then delete unused originals manually. SVG is not
+          compressible here.
+        </p>
+        {compressing && compressProgress ? (
+          <p className="admin-hint" style={{ marginTop: '0.35rem' }} role="status">
+            {compressProgress}
+          </p>
+        ) : null}
         {usage?.available ? (
           <p className="admin-media-unused-legend" role="note">
             <span className="admin-media-unused-dot" aria-hidden="true" />
@@ -380,16 +599,35 @@ export default function MediaPage() {
               gap: '0.9rem',
             }}
           >
-            {visibleAssets.map((asset) => (
+            {visibleAssets.map((asset) => {
+              const kind = mediaCompressUiKind(asset.mime, asset.path);
+              const compressible = kind != null;
+              const isSelected = !!selected[asset.path];
+              return (
               <div
                 key={asset.id ?? asset.path}
                 style={{
-                  border: '1px solid var(--admin-border, #e5e7eb)',
+                  border: isSelected ? '1px solid var(--admin-accent, #2563eb)' : '1px solid var(--admin-border, #e5e7eb)',
                   borderRadius: 8,
                   padding: '0.7rem',
-                  background: '#fff',
+                  background: isSelected ? 'color-mix(in srgb, var(--admin-accent, #2563eb) 6%, #fff)' : '#fff',
                 }}
               >
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.4rem', marginBottom: '0.45rem' }}>
+                  {compressible ? (
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        disabled={compressing}
+                        onChange={(e) => toggleSelected(asset.path, e.target.checked)}
+                      />
+                      Compress{kind === 'video' ? ' (video)' : ''}
+                    </label>
+                  ) : (
+                    <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>Not compressible</span>
+                  )}
+                </div>
                 {isImage(asset.mime, asset.path) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -462,7 +700,8 @@ export default function MediaPage() {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         ) : null}
       </div>

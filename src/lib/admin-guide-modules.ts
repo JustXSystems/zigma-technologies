@@ -351,6 +351,7 @@ export const GUIDE_MODULE_DETAILS: GuideModuleDetail[] = [
       'Files stored under public/assets/{images,svg,video}',
       'Library merges DB rows + disk scan (seeded static images appear automatically)',
       'Edit alt/tags; copy public URL; use in MediaPicker',
+      'Select JPEG/PNG/WebP/GIF or MP4/WebM → Compress selected: adds a smaller copy (WebP / H.264 MP4; original kept). Videos need ffmpeg on the server; optional “Strip video audio” for hero loops. Verify, then delete unused originals manually',
       'Note: visitor resumes are NOT in media library — blocked from direct access',
     ],
     publicRoutes: ['/assets/images/…', '/assets/svg/…', '/assets/video/…'],

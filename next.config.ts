@@ -46,6 +46,8 @@ const nextConfig: NextConfig = {
   ...(basePath ? { basePath } : {}),
   // CI packages .next/standalone into a release tarball for VPS apply (see scripts/package-release.sh).
   output: 'standalone',
+  // Media library WebP compress (src/lib/media-compress.ts) + Next image pipeline.
+  serverExternalPackages: ['sharp'],
   images: {
     remotePatterns: [],
     unoptimized: false,
