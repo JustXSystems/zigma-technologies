@@ -295,6 +295,7 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     --exclude '.env.*' \
     --exclude '.git/' \
     --exclude 'storage/' \
+    --exclude 'tools/ffmpeg/' \
     --exclude 'apps/' \
     --exclude 'src/' \
     --exclude 'coverage/' \
@@ -342,6 +343,18 @@ if [[ "$DO_EXTRACT" -eq 1 ]]; then
     public/assets/uploads/documents
 
   chmod +x scripts/*.sh 2>/dev/null || true
+
+  # Media library video compress needs ffmpeg/ffprobe (apt or static under tools/ffmpeg).
+  if [[ -f scripts/ensure-ffmpeg.sh ]]; then
+    log "Ensure ffmpeg/ffprobe for Media library video compress"
+    if APP_DIR="$APP_DIR" bash scripts/ensure-ffmpeg.sh; then
+      log "ffmpeg toolchain ready"
+    else
+      log "WARNING: ensure-ffmpeg failed — image compress still works; video compress will retry/auto-install on first use"
+    fi
+  else
+    log "WARNING: scripts/ensure-ffmpeg.sh missing from release"
+  fi
 
   # Remove stale Meridian from previous releases (old CLI + new npm scripts = "Unknown act action")
   if [[ "$SHIPPED_MERIDIAN" -eq 0 ]]; then

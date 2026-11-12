@@ -28,6 +28,20 @@ esac
 cd "$APP_DIR"
 [[ -f server.js ]] || { echo "ERROR: $APP_DIR/server.js missing" >&2; exit 1; }
 
+# Prefer app-local static ffmpeg (tools/ffmpeg) before system PATH.
+FFMPEG_TOOL_DIR="${ZIGMA_FFMPEG_DIR:-$APP_DIR/tools/ffmpeg}"
+if [[ -x "$FFMPEG_TOOL_DIR/ffmpeg" && -x "$FFMPEG_TOOL_DIR/ffprobe" ]]; then
+  export PATH="$FFMPEG_TOOL_DIR:$PATH"
+fi
+# Idempotent: install if still missing (apt or static). Do not fail PM2 start on miss.
+if [[ -f "$APP_DIR/scripts/ensure-ffmpeg.sh" ]]; then
+  APP_DIR="$APP_DIR" bash "$APP_DIR/scripts/ensure-ffmpeg.sh" >/tmp/zigma-ensure-ffmpeg.log 2>&1 \
+    || echo "==> WARNING: ensure-ffmpeg failed (see /tmp/zigma-ensure-ffmpeg.log) — video compress may be unavailable" >&2
+  if [[ -x "$FFMPEG_TOOL_DIR/ffmpeg" && -x "$FFMPEG_TOOL_DIR/ffprobe" ]]; then
+    export PATH="$FFMPEG_TOOL_DIR:$PATH"
+  fi
+fi
+
 free_listen_port() {
   local port="$1"
   echo "==> Freeing TCP :${port}"
@@ -50,6 +64,12 @@ free_listen_port() {
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 free_listen_port "$APP_PORT"
 
+# Embed PATH with tools/ffmpeg first so video compress finds bins without relying on login shell PATH.
+PM2_PATH="$FFMPEG_TOOL_DIR:${PATH}"
+# Escape only what would break a single-quoted JS string literal.
+PM2_PATH_JS="${PM2_PATH//\\/\\\\}"
+PM2_PATH_JS="${PM2_PATH_JS//\'/\\\'}"
+
 ECO="$(mktemp /tmp/zigma-pm2-XXXXXX.config.cjs)"
 cat >"$ECO" <<EOF
 module.exports = {
@@ -67,6 +87,8 @@ module.exports = {
       HOSTNAME: '127.0.0.1',
       ZIGMA_APP_DIR: '${APP_DIR}',
       MERIDIAN_SITE_ROOT: '${APP_DIR}',
+      ZIGMA_FFMPEG_DIR: '${FFMPEG_TOOL_DIR}',
+      PATH: '${PM2_PATH_JS}',
     },
   }],
 };

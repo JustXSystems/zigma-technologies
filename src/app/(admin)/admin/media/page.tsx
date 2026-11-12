@@ -516,9 +516,9 @@ export default function MediaPage() {
         </p>
         <p className="admin-hint" style={{ marginTop: '0.35rem' }}>
           Compress adds a new library file and leaves the original unchanged. Images → WebP (sharp). Videos → H.264 MP4
-          (ffmpeg, needs ffmpeg on the server; up to {MEDIA_COMPRESS_MAX_VIDEOS} videos / {MEDIA_COMPRESS_MAX_IMAGES}{' '}
-          images per run). Verify quality, update references, then delete unused originals manually. SVG is not
-          compressible here.
+          (ffmpeg is auto-installed on VPS deploy / first use via <code>scripts/ensure-ffmpeg.sh</code>; up to{' '}
+          {MEDIA_COMPRESS_MAX_VIDEOS} videos / {MEDIA_COMPRESS_MAX_IMAGES} images per run). Verify quality, update
+          references, then delete unused originals manually. SVG is not compressible here.
         </p>
         {compressing && compressProgress ? (
           <p className="admin-hint" style={{ marginTop: '0.35rem' }} role="status">

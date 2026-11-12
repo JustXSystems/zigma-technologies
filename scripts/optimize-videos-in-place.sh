@@ -36,8 +36,15 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+  if [[ -f "$SCRIPT_DIR/ensure-ffmpeg.sh" ]]; then
+    APP_DIR="${ZIGMA_APP_DIR:-${APP_DIR:-$SCRIPT_DIR/..}}" bash "$SCRIPT_DIR/ensure-ffmpeg.sh" || true
+    export PATH="${ZIGMA_APP_DIR:-${APP_DIR:-$SCRIPT_DIR/..}}/tools/ffmpeg:$PATH"
+  fi
+fi
 command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null \
-  || { echo "ffmpeg/ffprobe not found (apt install ffmpeg, or see the static-build note at the top)" >&2; exit 1; }
+  || { echo "ffmpeg/ffprobe not found (run: bash scripts/ensure-ffmpeg.sh)" >&2; exit 1; }
 [[ -d "$DIR" ]] || { echo "Not a directory: $DIR" >&2; exit 1; }
 
 BACKUP="$APP_DIR/storage/video-originals/$(date +%Y%m%d-%H%M%S)"

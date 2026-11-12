@@ -182,12 +182,12 @@ type RunResult = { code: number | null; stdout: string; stderr: string };
 function runCommand(
   command: string,
   args: string[],
-  opts: { timeoutMs: number; cwd?: string } = { timeoutMs: 30_000 }
+  opts: { timeoutMs: number; cwd?: string; env?: NodeJS.ProcessEnv } = { timeoutMs: 30_000 }
 ): Promise<RunResult> {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(command, args, {
       cwd: opts.cwd || process.cwd(),
-      env: process.env,
+      env: opts.env || process.env,
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -230,22 +230,97 @@ function runCommand(
   });
 }
 
-let ffmpegReady: Promise<boolean> | null = null;
+export type FfmpegBins = { ffmpeg: string; ffprobe: string };
 
-/** Cached probe — false when ffmpeg/ffprobe are missing from PATH. */
-export async function isFfmpegAvailable(): Promise<boolean> {
-  if (!ffmpegReady) {
-    ffmpegReady = (async () => {
-      try {
-        const ff = await runCommand('ffmpeg', ['-version'], { timeoutMs: 8_000 });
-        const probe = await runCommand('ffprobe', ['-version'], { timeoutMs: 8_000 });
-        return ff.code === 0 && probe.code === 0;
-      } catch {
-        return false;
-      }
+function appRootDir() {
+  return process.env.ZIGMA_APP_DIR || process.cwd();
+}
+
+function ffmpegToolDir() {
+  return process.env.ZIGMA_FFMPEG_DIR || path.join(appRootDir(), 'tools', 'ffmpeg');
+}
+
+async function binWorks(bin: string): Promise<boolean> {
+  if (!bin) return false;
+  try {
+    if (!(await fileExists(bin)) && bin.includes(path.sep)) return false;
+  } catch {
+    return false;
+  }
+  try {
+    const ran = await runCommand(bin, ['-version'], { timeoutMs: 8_000 });
+    return ran.code === 0;
+  } catch {
+    return false;
+  }
+}
+
+async function probeFfmpegBins(): Promise<FfmpegBins | null> {
+  const toolDir = ffmpegToolDir();
+  const local = {
+    ffmpeg: path.join(toolDir, process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'),
+    ffprobe: path.join(toolDir, process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'),
+  };
+  if ((await binWorks(local.ffmpeg)) && (await binWorks(local.ffprobe))) return local;
+
+  const envFf = process.env.FFMPEG_PATH || process.env.FFMPEG_BIN || '';
+  const envFp = process.env.FFPROBE_PATH || process.env.FFPROBE_BIN || '';
+  if (envFf && envFp && (await binWorks(envFf)) && (await binWorks(envFp))) {
+    return { ffmpeg: envFf, ffprobe: envFp };
+  }
+
+  if ((await binWorks('ffmpeg')) && (await binWorks('ffprobe'))) {
+    return { ffmpeg: 'ffmpeg', ffprobe: 'ffprobe' };
+  }
+  return null;
+}
+
+async function runEnsureFfmpegScript(): Promise<void> {
+  // Static/apt installer is Linux-oriented (VPS). On Windows, rely on PATH / winget.
+  if (process.platform === 'win32') return;
+
+  const root = appRootDir();
+  const script = path.join(root, 'scripts', 'ensure-ffmpeg.sh');
+  if (!(await fileExists(script))) return;
+
+  try {
+    await runCommand('bash', [script], {
+      timeoutMs: 10 * 60 * 1000,
+      cwd: root,
+      env: {
+        ...process.env,
+        APP_DIR: root,
+        ZIGMA_APP_DIR: root,
+        ZIGMA_FFMPEG_DIR: ffmpegToolDir(),
+      },
+    });
+  } catch (e) {
+    console.error('[media-compress] ensure-ffmpeg.sh failed', e);
+  }
+}
+
+let ffmpegBinsPromise: Promise<FfmpegBins | null> | null = null;
+
+/**
+ * Resolve ffmpeg/ffprobe, auto-running scripts/ensure-ffmpeg.sh once on Linux when missing
+ * (apt or static install under tools/ffmpeg).
+ */
+export async function resolveFfmpegBins(): Promise<FfmpegBins | null> {
+  if (!ffmpegBinsPromise) {
+    ffmpegBinsPromise = (async () => {
+      let bins = await probeFfmpegBins();
+      if (bins) return bins;
+      await runEnsureFfmpegScript();
+      bins = await probeFfmpegBins();
+      return bins;
     })();
   }
-  return ffmpegReady;
+  return ffmpegBinsPromise;
+}
+
+/** Cached probe — false when ffmpeg/ffprobe cannot be resolved/installed. */
+export async function isFfmpegAvailable(): Promise<boolean> {
+  return (await resolveFfmpegBins()) != null;
 }
 
 async function loadSharp() {
@@ -361,13 +436,14 @@ async function compressVideo(
   beforeBytes: number,
   opts: MediaCompressOptions
 ): Promise<MediaCompressResult> {
-  if (!(await isFfmpegAvailable())) {
+  const bins = await resolveFfmpegBins();
+  if (!bins) {
     return {
       sourcePath,
       kind: 'video',
       ok: false,
       reason:
-        'ffmpeg/ffprobe not found on this server. Install ffmpeg (VPS: apt/static build; Windows: winget install Gyan.FFmpeg), then retry.',
+        'ffmpeg/ffprobe not available. Deploy runs scripts/ensure-ffmpeg.sh automatically; on VPS you can also run: bash scripts/ensure-ffmpeg.sh (or sudo apt-get install -y ffmpeg). Windows: winget install Gyan.FFmpeg.',
     };
   }
 
@@ -420,7 +496,7 @@ async function compressVideo(
   args.push(tmpPath);
 
   try {
-    const ran = await runCommand('ffmpeg', args, { timeoutMs: VIDEO_TIMEOUT_MS });
+    const ran = await runCommand(bins.ffmpeg, args, { timeoutMs: VIDEO_TIMEOUT_MS });
     if (ran.code !== 0) {
       await unlink(tmpPath).catch(() => undefined);
       const detail = (ran.stderr || ran.stdout || `exit ${ran.code}`).trim().slice(0, 240);
@@ -509,7 +585,7 @@ async function compressVideo(
   // Best-effort height from ffprobe (non-fatal).
   try {
     const probe = await runCommand(
-      'ffprobe',
+      bins.ffprobe,
       ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', finalPath],
       { timeoutMs: 15_000 }
     );

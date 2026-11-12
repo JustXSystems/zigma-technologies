@@ -7,16 +7,16 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="fin unused mediaa in Media library">
-      <change afterPath="$PROJECT_DIR$/src/app/api/admin/media/compress/route.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/media-compress-shared.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/media-compress.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="media compression featureadded in Media library">
+      <change afterPath="$PROJECT_DIR$/scripts/ensure-ffmpeg.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/optimize-videos-in-place.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/optimize-videos-in-place.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/pm2-start-app.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/pm2-start-app.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/media-compress.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-compress.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -290,7 +290,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#51 Caalog products/services/project import / export for setup" />
     <MESSAGE value="#51 Caalog products/services/project video shrinking to loading issue" />
     <MESSAGE value="#52 Need to create this new page /projects101, this is the replacement for existing /projects." />
     <MESSAGE value="#52 Every hero section on every page now has its own &quot;Heading highlight (gradient word)&quot; setting in its edit popup" />
@@ -315,7 +314,8 @@
     <MESSAGE value="#52 prod502 issue slow loading" />
     <MESSAGE value="#52 /solar page added" />
     <MESSAGE value="fin unused mediaa in Media library" />
-    <option name="LAST_COMMIT_MESSAGE" value="fin unused mediaa in Media library" />
+    <MESSAGE value="media compression featureadded in Media library" />
+    <option name="LAST_COMMIT_MESSAGE" value="media compression featureadded in Media library" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

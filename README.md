@@ -703,6 +703,8 @@ Update system and install dependencies:
 ```bash
 apt update && apt upgrade -y
 apt install -y curl git nginx mysql-client
+# ffmpeg is also auto-installed on deploy via scripts/ensure-ffmpeg.sh (apt or static → tools/ffmpeg)
+# Optional explicit install: apt install -y ffmpeg
 
 # Install Node.js 20 LTS
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
