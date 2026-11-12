@@ -1067,6 +1067,65 @@
   margin-top: 0.4rem;
 }
 
+.admin-media-unused-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--admin-text, #1f2937);
+  user-select: none;
+  cursor: pointer;
+}
+
+.admin-media-unused-filter input:disabled {
+  cursor: not-allowed;
+}
+
+.admin-media-unused-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.1);
+}
+
+.admin-media-unused-legend {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.65rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--admin-muted);
+}
+
+.admin-media-unused-legend .admin-media-unused-dot {
+  margin-top: 0.35rem;
+  flex: none;
+}
+
+.admin-media-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-media-unused-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.18);
+  flex: none;
+}
+
 .admin-chip-group {
   display: flex;
   flex-direction: column;

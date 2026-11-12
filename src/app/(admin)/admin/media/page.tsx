@@ -21,6 +21,17 @@ type Asset = {
   created_at?: string | null;
   category?: string;
   source?: 'database' | 'filesystem' | 'legacy';
+  /** True when the scanner found no CMS/DB or runtime-default references. */
+  unused?: boolean;
+};
+
+type UsageSummary = {
+  unusedCount: number;
+  usedCount: number;
+  scannedAt: string;
+  dbRefCount: number;
+  codeRefCount: number;
+  available: boolean;
 };
 
 type ApiErrorBody = {
@@ -73,11 +84,13 @@ function formatApiError(data: ApiErrorBody, fallback: string, status?: number): 
 
 export default function MediaPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [query, setQuery] = useState('');
+  const [unusedOnly, setUnusedOnly] = useState(false);
   const [editing, setEditing] = useState<Asset | null>(null);
   const [editAlt, setEditAlt] = useState('');
   const [editTags, setEditTags] = useState('');
@@ -87,7 +100,7 @@ export default function MediaPage() {
     try {
       const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
       const res = await fetch(`/api/admin/media${qs}`);
-      let data: { error?: string; assets?: Asset[] } = {};
+      let data: { error?: string; assets?: Asset[]; usage?: UsageSummary } = {};
       try {
         data = await res.json();
       } catch {
@@ -95,6 +108,7 @@ export default function MediaPage() {
       }
       if (!res.ok) throw new Error(formatApiError(data, 'Failed to load media', res.status));
       setAssets(data.assets || []);
+      setUsage(data.usage || null);
     } finally {
       setLoading(false);
     }
@@ -108,6 +122,11 @@ export default function MediaPage() {
   }, []);
 
   const filteredHint = useMemo(() => (query.trim() ? `Showing matches for “${query.trim()}”` : ''), [query]);
+
+  const visibleAssets = useMemo(
+    () => (unusedOnly ? assets.filter((a) => a.unused) : assets),
+    [assets, unusedOnly]
+  );
 
   async function onUpload(file: File | undefined) {
     if (!file) return;
@@ -158,7 +177,10 @@ export default function MediaPage() {
   }
 
   async function remove(asset: Asset) {
-    if (!confirm(`Delete ${asset.path}?`)) return;
+    const warning = asset.unused
+      ? `Delete ${asset.path}?\n\nThis file is not referenced in the CMS or site defaults.\nDeletion is permanent and cannot be undone.`
+      : `Delete ${asset.path}?\n\nDeletion is permanent and cannot be undone.`;
+    if (!confirm(warning)) return;
     setError('');
     const qs = asset.id ? `id=${asset.id}` : `path=${encodeURIComponent(asset.path)}`;
     const res = await fetch(`/api/admin/media?${qs}`, { method: 'DELETE' });
@@ -268,10 +290,30 @@ export default function MediaPage() {
           <button type="button" className="admin-btn admin-btn-secondary" onClick={() => load(query).catch((e) => setError(e.message))}>
             Search
           </button>
+          <label className="admin-media-unused-filter">
+            <input
+              type="checkbox"
+              checked={unusedOnly}
+              onChange={(e) => setUnusedOnly(e.target.checked)}
+              disabled={!usage?.available}
+            />
+            Unused only
+            {usage?.available ? (
+              <span className="admin-media-unused-count">{usage.unusedCount}</span>
+            ) : null}
+          </label>
         </div>
         <p className="admin-hint" style={{ marginTop: '0.65rem' }}>
           Max {formatMediaBytes(MEDIA_UPLOAD_MAX_BYTES)} · JPEG, PNG, WebP, GIF, SVG, MP4, WebM
         </p>
+        {usage?.available ? (
+          <p className="admin-media-unused-legend" role="note">
+            <span className="admin-media-unused-dot" aria-hidden="true" />
+            Red dot beside Delete = not referenced in any CMS database field or site runtime default.
+            Review carefully — deleted files cannot be recovered.
+            {usage.unusedCount > 0 ? ` · ${usage.unusedCount} unused` : ' · none unused'}
+          </p>
+        ) : null}
         {filteredHint ? <p style={{ color: 'var(--admin-muted)', fontSize: '0.85rem' }}>{filteredHint}</p> : null}
       </div>
 
@@ -326,7 +368,11 @@ export default function MediaPage() {
         {loading ? <p style={{ color: 'var(--admin-muted)' }}>Loading…</p> : null}
         {!loading && assets.length === 0 ? (
           <p className="admin-empty">No files found under /assets/images, /assets/svg, or /assets/video.</p>
-        ) : (
+        ) : null}
+        {!loading && assets.length > 0 && visibleAssets.length === 0 ? (
+          <p className="admin-empty">No unused files in this view. Clear “Unused only” to see the full library.</p>
+        ) : null}
+        {!loading && visibleAssets.length > 0 ? (
           <div
             style={{
               display: 'grid',
@@ -334,7 +380,7 @@ export default function MediaPage() {
               gap: '0.9rem',
             }}
           >
-            {assets.map((asset) => (
+            {visibleAssets.map((asset) => (
               <div
                 key={asset.id ?? asset.path}
                 style={{
@@ -388,21 +434,37 @@ export default function MediaPage() {
                 {asset.alt ? (
                   <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '0.35rem' }}>{asset.alt}</div>
                 ) : null}
-                <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.55rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.55rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   <button type="button" className="admin-btn admin-btn-secondary" onClick={() => copyPath(asset.path)}>
                     Copy URL
                   </button>
                   <button type="button" className="admin-btn admin-btn-secondary" onClick={() => openEdit(asset)}>
                     Edit
                   </button>
-                  <button type="button" className="admin-btn admin-btn-secondary" onClick={() => remove(asset)}>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-secondary admin-media-delete-btn"
+                    onClick={() => remove(asset)}
+                    title={
+                      asset.unused
+                        ? 'Not referenced in the CMS or site defaults — deletion is permanent'
+                        : 'Delete permanently'
+                    }
+                  >
                     Delete
+                    {asset.unused ? (
+                      <span
+                        className="admin-media-unused-dot"
+                        aria-label="Not in use"
+                        title="Not referenced in the CMS or site defaults"
+                      />
+                    ) : null}
                   </button>
                 </div>
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       {editing ? (

@@ -7,26 +7,11 @@
     <option name="selectedModelId" value="auto" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 prod502 issue slow loading">
-      <change afterPath="$PROJECT_DIR$/tmp-solar/scope-css.mjs" afterDir="false" />
+    <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="#52 /solar page added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/HeroBackgroundMedia.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/HeroBackgroundMedia.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/admin/section-families.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/section-families.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroBackground.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/catalog/CatalogHeroCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/catalog/CatalogHeroCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/i18n/LocaleLanding.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/HomeSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/LifeSections.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/sections/SectionRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-public-page.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-public-page.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-section-defaults.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-section-defaults.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/cms-types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/cms-types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/nav-seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/nav-seed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/page-seed-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/page-seed-registry.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/seo.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/seo.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/proxy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/proxy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/media/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/media/route.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,23 +70,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.2952989625291973" />
-      <entry key="MS500" value="1.9966593190420074" />
-      <entry key="S2" value="4.395912158479496" />
-      <entry key="S5" value="7.76936267026069" />
-      <entry key="S10" value="10.186859799723601" />
-      <entry key="S30" value="12.525562535727257" />
-      <entry key="S60" value="13.233519258651034" />
-      <entry key="M2" value="13.614392689906463" />
-      <entry key="M5" value="16.513085176908923" />
-      <entry key="M10" value="35.912359006530565" />
-      <entry key="M15" value="59.95516513336047" />
-      <entry key="M30" value="134.86541821347518" />
-      <entry key="H1" value="294.85153392704365" />
-      <entry key="H2" value="530.5681464938964" />
-      <entry key="H4" value="821.6173446021288" />
-      <entry key="D1" value="2574.3955280140094" />
-      <entry key="W1" value="12952.728272160764" />
+      <entry key="MS100" value="1.0022906938496323" />
+      <entry key="MS500" value="1.3114898900502217" />
+      <entry key="S2" value="2.3535660462976935" />
+      <entry key="S5" value="3.434815778784741" />
+      <entry key="S10" value="4.087303227425179" />
+      <entry key="S30" value="4.771498625832432" />
+      <entry key="S60" value="6.07133070249754" />
+      <entry key="M2" value="9.088921990020284" />
+      <entry key="M5" value="15.258536778863268" />
+      <entry key="M10" value="33.336957110749566" />
+      <entry key="M15" value="56.20524316975467" />
+      <entry key="M30" value="129.64486094606434" />
+      <entry key="H1" value="288.46283015982164" />
+      <entry key="H2" value="525.2218393198037" />
+      <entry key="H4" value="818.5673811425977" />
+      <entry key="D1" value="2575.1746714285846" />
+      <entry key="W1" value="12954.692399138241" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -116,30 +101,30 @@
       <entry key="M10" value="0.0" />
       <entry key="M15" value="0.0" />
       <entry key="M30" value="0.0" />
-      <entry key="H1" value="5.674744015666108E-234" />
-      <entry key="H2" value="2.3821721213347456E-117" />
-      <entry key="H4" value="4.880750066755403E-59" />
-      <entry key="D1" value="1.9423256284197115E-10" />
-      <entry key="W1" value="0.06354827041078415" />
+      <entry key="H1" value="5.455613442658199E-234" />
+      <entry key="H2" value="2.3357254638883898E-117" />
+      <entry key="H4" value="4.8329343715442685E-59" />
+      <entry key="D1" value="1.9391411777890276E-10" />
+      <entry key="W1" value="0.0635333759929855" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.2425338115648497" />
-      <entry key="MS500" value="1.9799016587705778" />
-      <entry key="S2" value="4.385750955938575" />
-      <entry key="S5" value="7.761990581763212" />
-      <entry key="S10" value="10.18199530549848" />
-      <entry key="S30" value="12.523561071938353" />
-      <entry key="S60" value="13.232460987468693" />
-      <entry key="M2" value="13.613848086811025" />
-      <entry key="M5" value="16.512820632071772" />
-      <entry key="M10" value="35.912039414847534" />
-      <entry key="M15" value="59.95475933213039" />
-      <entry key="M30" value="134.8648917107801" />
-      <entry key="H1" value="294.8509856339415" />
-      <entry key="H2" value="530.5676920839473" />
-      <entry key="H4" value="821.6170130348726" />
-      <entry key="D1" value="2574.3952200613735" />
-      <entry key="W1" value="12952.791550924054" />
+      <entry key="MS100" value="0.9748676118200902" />
+      <entry key="MS500" value="1.303808199064493" />
+      <entry key="S2" value="2.349797362701106" />
+      <entry key="S5" value="3.432515966705583" />
+      <entry key="S10" value="4.0859112452783615" />
+      <entry key="S30" value="4.770945617465965" />
+      <entry key="S60" value="6.07095315058074" />
+      <entry key="M2" value="9.088613240518512" />
+      <entry key="M5" value="15.25831454529484" />
+      <entry key="M10" value="33.336676005441674" />
+      <entry key="M15" value="56.2048773063407" />
+      <entry key="M30" value="129.64436470556873" />
+      <entry key="H1" value="288.462298228684" />
+      <entry key="H2" value="525.2213913637798" />
+      <entry key="H4" value="818.5670516204515" />
+      <entry key="D1" value="2575.174363780281" />
+      <entry key="W1" value="12954.755663041627" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -150,12 +135,13 @@
   <component name="ProjectSessionTemplates">
     <option name="panelTemplate">
       <template>
-        <option name="ensembleEnabled" value="false" />
+        <option name="ensembleEnabled" value="true" />
+        <option name="ensembleTierId" value="balance" />
         <option name="modeId" value="Agent" />
         <option name="model">
           <model>
             <option name="modelType" value="builtin_id" />
-            <option name="modelValue" value="auto" />
+            <option name="modelValue" value="ensemble" />
           </model>
         </option>
         <option name="targetType" value="BACKGROUND" />
@@ -192,7 +178,7 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/iamsa/IdeaProjects/zigma-technologies/src/Main.java&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\iamsa\\AppData\\Roaming\\JetBrains\\IntelliJIdea2026.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2026.2.0.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;
   },
   &quot;keyToStringList&quot;: {
     &quot;DatabaseDriversLRU&quot;: [
@@ -299,7 +285,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="#49 Stats section Number font" />
     <MESSAGE value="#50 Blog page creations" />
     <MESSAGE value="#51 Caalog products/services/project import / export for setup" />
     <MESSAGE value="#51 Caalog products/services/project video shrinking to loading issue" />
@@ -324,7 +309,8 @@
     <MESSAGE value="#52 SEO Phases report done" />
     <MESSAGE value="#52 SEO SaaS integration done" />
     <MESSAGE value="#52 prod502 issue slow loading" />
-    <option name="LAST_COMMIT_MESSAGE" value="#52 prod502 issue slow loading" />
+    <MESSAGE value="#52 /solar page added" />
+    <option name="LAST_COMMIT_MESSAGE" value="#52 /solar page added" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

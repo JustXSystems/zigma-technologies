@@ -22,6 +22,11 @@ import {
   mediaKindFromMime,
   upsertMediaMetadata,
 } from '@/lib/media-library';
+import {
+  annotateMediaUsage,
+  collectAllMediaRefs,
+  summarizeMediaUsage,
+} from '@/lib/media-usage';
 import { baseName, seoFileName } from '@/lib/media-naming';
 import {
   MEDIA_UPLOAD_ACCEPT,
@@ -47,8 +52,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q') || '';
     const assets = await listMediaLibrary(q);
+
+    // Conservative unused scan: DB + runtime source defaults. Fail open (no unused marks)
+    // if the scanner errors so we never falsely encourage deletion.
+    let annotated = assets.map((asset) => ({ ...asset, unused: false as boolean }));
+    let usage = {
+      unusedCount: 0,
+      usedCount: assets.length,
+      scannedAt: new Date().toISOString(),
+      dbRefCount: 0,
+      codeRefCount: 0,
+      available: false as boolean,
+    };
+    try {
+      const { used, dbRefs, codeRefs } = await collectAllMediaRefs();
+      annotated = annotateMediaUsage(assets, used);
+      usage = { ...summarizeMediaUsage(annotated, dbRefs, codeRefs), available: true };
+    } catch (scanError) {
+      console.error('[media-usage] scan failed; omitting unused marks', scanError);
+    }
+
     return jsonOk({
-      assets,
+      assets: annotated,
+      usage,
       uploadRules: {
         maxBytes: MEDIA_UPLOAD_MAX_BYTES,
         maxLabel: formatMediaBytes(MEDIA_UPLOAD_MAX_BYTES),
