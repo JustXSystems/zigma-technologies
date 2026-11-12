@@ -8,15 +8,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1dff465-83f1-492c-823b-5df39bd32ae2" name="Changes" comment="media compression featureadded in Media library">
-      <change afterPath="$PROJECT_DIR$/scripts/ensure-ffmpeg.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/apply-release.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/apply-release.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/optimize-videos-in-place.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/optimize-videos-in-place.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/pm2-start-app.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/pm2-start-app.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/admin.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(admin)/admin/media/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/admin-guide-modules.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/media-compress.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/media-compress.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

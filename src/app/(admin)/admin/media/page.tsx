@@ -118,6 +118,7 @@ export default function MediaPage() {
   const [unusedOnly, setUnusedOnly] = useState(false);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<Asset | null>(null);
+  const [preview, setPreview] = useState<Asset | null>(null);
   const [editAlt, setEditAlt] = useState('');
   const [editTags, setEditTags] = useState('');
 
@@ -372,6 +373,23 @@ export default function MediaPage() {
     setEditTags(parseTags(asset.tags_json).join(', '));
   }
 
+  function openPreview(asset: Asset) {
+    setPreview(asset);
+  }
+
+  function closePreview() {
+    setPreview(null);
+  }
+
+  useEffect(() => {
+    if (!preview) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closePreview();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [preview]);
+
   async function saveEdit(e: React.FormEvent) {
     e.preventDefault();
     if (!editing) return;
@@ -406,8 +424,14 @@ export default function MediaPage() {
     await load();
   }
 
-  const isImage = (mime: string | null, path: string) =>
-    (mime && mime.startsWith('image/')) || /\.(png|jpe?g|webp|gif|svg)$/i.test(path);
+  const isImage = (mime: string | null | undefined, assetPath: string) =>
+    (mime != null && mime.startsWith('image/')) || /\.(png|jpe?g|webp|gif|svg)$/i.test(assetPath);
+
+  const isVideo = (mime: string | null | undefined, assetPath: string) =>
+    (mime != null && mime.startsWith('video/')) || /\.(mp4|webm|m4v)$/i.test(assetPath);
+
+  const canPreview = (mime: string | null | undefined, assetPath: string) =>
+    isImage(mime, assetPath) || isVideo(mime, assetPath);
 
   return (
     <div>
@@ -628,27 +652,33 @@ export default function MediaPage() {
                     <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>Not compressible</span>
                   )}
                 </div>
-                {isImage(asset.mime, asset.path) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={asset.path}
-                    alt={asset.alt || ''}
-                    style={{ width: '100%', height: 110, objectFit: 'cover', borderRadius: 6, background: '#f3f4f6' }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      height: 110,
-                      borderRadius: 6,
-                      background: '#f3f4f6',
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: '0.75rem',
-                      color: 'var(--admin-muted)',
-                    }}
+                {canPreview(asset.mime, asset.path) ? (
+                  <button
+                    type="button"
+                    className="admin-media-thumb-btn"
+                    onClick={() => openPreview(asset)}
+                    title={isVideo(asset.mime, asset.path) ? 'Play video preview' : 'Preview image'}
                   >
-                    {asset.mime || 'file'}
-                  </div>
+                    {isImage(asset.mime, asset.path) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={asset.path} alt={asset.alt || ''} className="admin-media-thumb" />
+                    ) : (
+                      <span className="admin-media-thumb admin-media-thumb--video">
+                        <video
+                          src={asset.path}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="admin-media-thumb-video"
+                        />
+                        <span className="admin-media-thumb-play" aria-hidden="true">
+                          ▶
+                        </span>
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <div className="admin-media-thumb admin-media-thumb--file">{asset.mime || 'file'}</div>
                 )}
                 {asset.original_name ? (
                   <div
@@ -673,6 +703,16 @@ export default function MediaPage() {
                   <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '0.35rem' }}>{asset.alt}</div>
                 ) : null}
                 <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.55rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {canPreview(asset.mime, asset.path) ? (
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary"
+                      onClick={() => openPreview(asset)}
+                      title={isVideo(asset.mime, asset.path) ? 'Play full preview' : 'Open full preview'}
+                    >
+                      {isVideo(asset.mime, asset.path) ? 'Play' : 'Preview'}
+                    </button>
+                  ) : null}
                   <button type="button" className="admin-btn admin-btn-secondary" onClick={() => copyPath(asset.path)}>
                     Copy URL
                   </button>
@@ -732,6 +772,66 @@ export default function MediaPage() {
               </button>
             </div>
           </form>
+        </div>
+      ) : null}
+
+      {preview ? (
+        <div className="admin-modal-backdrop" onClick={closePreview} role="presentation">
+          <div
+            className="admin-modal admin-modal--wide admin-media-preview-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={isVideo(preview.mime, preview.path) ? 'Video preview' : 'Image preview'}
+          >
+            <div className="admin-modal-header">
+              <div className="admin-modal-header-text">
+                <h2>{isVideo(preview.mime, preview.path) ? 'Play media' : 'Preview media'}</h2>
+                <p>
+                  {preview.original_name || preview.path}
+                  {preview.size_bytes != null ? ` · ${formatMediaBytes(preview.size_bytes)}` : ''}
+                </p>
+              </div>
+              <button type="button" className="admin-modal-close" onClick={closePreview} aria-label="Close preview">
+                ×
+              </button>
+            </div>
+            <div className="admin-modal-body admin-media-preview-body">
+              {isVideo(preview.mime, preview.path) ? (
+                <video
+                  key={preview.path}
+                  className="admin-media-preview-player"
+                  src={preview.path}
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="auto"
+                >
+                  Your browser cannot play this video.
+                </video>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={preview.path}
+                  className="admin-media-preview-image"
+                  src={preview.path}
+                  alt={preview.alt || preview.original_name || preview.path}
+                />
+              )}
+              <p className="admin-hint admin-media-preview-meta">
+                <code>{preview.path}</code>
+                {preview.alt ? ` · alt: ${preview.alt}` : ''}
+              </p>
+            </div>
+            <div className="admin-modal-footer">
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={() => copyPath(preview.path)}>
+                Copy URL
+              </button>
+              <button type="button" className="admin-btn admin-btn-primary" onClick={closePreview}>
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
