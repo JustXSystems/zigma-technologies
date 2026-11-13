@@ -146,6 +146,11 @@ export type SiteSettings = {
    * Percent 0–100 → --hero-scrim-strength (1 = full design default).
    */
   heroScrimStrength: string;
+  /**
+   * Top-of-page dark gradient behind the transparent header / menu (over bright hero video).
+   * Percent 0–100 → --header-scrim-strength. Hidden once the header scrolls solid.
+   */
+  headerScrimStrength: string;
   copyright: string;
   /** Footer credit: show/hide (true/false) */
   poweredByEnabled: string;
@@ -347,6 +352,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   eyebrowSizeLg: '1.44rem',
   eyebrowSizeMd: '1.15rem',
   heroScrimStrength: '100',
+  headerScrimStrength: '60',
   copyright: '© 2026 Zigma Technologies. All rights reserved.',
   poweredByEnabled: 'true',
   poweredByPrefix: 'Powered by',
@@ -482,6 +488,7 @@ export function mergeSiteSettings(raw: unknown): SiteSettings {
   merged.headingPageHero = sanitizeHeadingLevel(merged.headingPageHero, 'h3');
   merged.headingSection = sanitizeHeadingLevel(merged.headingSection, 'h3');
   merged.heroScrimStrength = String(sanitizeHeroScrimStrength(merged.heroScrimStrength, 100));
+  merged.headerScrimStrength = String(sanitizeHeroScrimStrength(merged.headerScrimStrength, 60));
   return merged;
 }
 
@@ -978,6 +985,7 @@ export function logoSizingCss(settings: SiteSettings): string {
   const eyebrowLg = sanitizeCssSize(settings.eyebrowSizeLg, DEFAULT_SITE_SETTINGS.eyebrowSizeLg);
   const eyebrowMd = sanitizeCssSize(settings.eyebrowSizeMd, DEFAULT_SITE_SETTINGS.eyebrowSizeMd);
   const heroScrim = sanitizeHeroScrimStrength(settings.heroScrimStrength, 100) / 100;
+  const headerScrim = sanitizeHeroScrimStrength(settings.headerScrimStrength, 60) / 100;
   const footer = resolveFooterLogoTokens(settings);
   const brandMax = sanitizeCssMaxWidth(settings.footerBrandMaxWidth, DEFAULT_SITE_SETTINGS.footerBrandMaxWidth);
   const brandMaxMobile = sanitizeCssMaxWidth(
@@ -990,7 +998,7 @@ export function logoSizingCss(settings: SiteSettings): string {
   const officeText = resolveFooterOfficeTextTokens(settings);
 
   return [
-    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--foot-office-label-font:${officeHeading.font};--foot-office-label-size:${officeHeading.size};--foot-office-label-color:${officeHeading.color};--foot-office-label-weight:${officeHeading.weight};--foot-office-label-letter-spacing:${officeHeading.letterSpacing};--foot-office-label-transform:${officeHeading.transform};--foot-office-meta-label-font:${officeMeta.font};--foot-office-meta-label-size:${officeMeta.size};--foot-office-meta-label-color:${officeMeta.color};--foot-office-meta-label-weight:${officeMeta.weight};--foot-office-meta-label-letter-spacing:${officeMeta.letterSpacing};--foot-office-meta-label-transform:${officeMeta.transform};--foot-office-text-font:${officeText.font};--foot-office-text-size:${officeText.size};--foot-office-text-size-mobile:${officeText.sizeMobile};--foot-office-meta-text-size:${officeText.metaSize};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};--hero-scrim-strength:${heroScrim};}`,
+    `:root{--logo-chip-h:${chip};--logo-chip-h-mobile:${chipMobile};--logo-word-font:${wordFont};--logo-word-size:${word};--logo-word-size-mobile:${wordMobile};--logo-word-weight:${wordWeight};--logo-word-style:${wordStyle};--logo-word-letter-spacing:${wordTracking};--logo-tagline-font:${tagFont};--logo-tagline-size:${tagSize};--logo-tagline-size-mobile:${tagSizeMobile};--logo-tagline-weight:${tagWeight};--logo-tagline-style:${tagStyle};--logo-tagline-letter-spacing:${tagTracking};--footer-logo-chip-h:${footer.chip};--footer-logo-chip-h-mobile:${footer.chipMobile};--footer-logo-word-font:${footer.wordFont};--footer-logo-word-size:${footer.word};--footer-logo-word-size-mobile:${footer.wordMobile};--footer-logo-word-weight:${footer.wordWeight};--footer-logo-word-style:${footer.wordStyle};--footer-logo-word-letter-spacing:${footer.wordTracking};--footer-logo-tagline-font:${footer.tagFont};--footer-logo-tagline-size:${footer.tag};--footer-logo-tagline-size-mobile:${footer.tagMobile};--footer-logo-tagline-weight:${footer.tagWeight};--footer-logo-tagline-style:${footer.tagStyle};--footer-logo-tagline-letter-spacing:${footer.tagTracking};--footer-brand-max-width:${brandMax};--footer-brand-max-width-mobile:${brandMaxMobile};--footer-brand-align:${brandAlign};--foot-office-label-font:${officeHeading.font};--foot-office-label-size:${officeHeading.size};--foot-office-label-color:${officeHeading.color};--foot-office-label-weight:${officeHeading.weight};--foot-office-label-letter-spacing:${officeHeading.letterSpacing};--foot-office-label-transform:${officeHeading.transform};--foot-office-meta-label-font:${officeMeta.font};--foot-office-meta-label-size:${officeMeta.size};--foot-office-meta-label-color:${officeMeta.color};--foot-office-meta-label-weight:${officeMeta.weight};--foot-office-meta-label-letter-spacing:${officeMeta.letterSpacing};--foot-office-meta-label-transform:${officeMeta.transform};--foot-office-text-font:${officeText.font};--foot-office-text-size:${officeText.size};--foot-office-text-size-mobile:${officeText.sizeMobile};--foot-office-meta-text-size:${officeText.metaSize};--text-eyebrow:${eyebrow};--text-eyebrow-lg:${eyebrowLg};--text-eyebrow-md:${eyebrowMd};--hero-scrim-strength:${heroScrim};--header-scrim-strength:${headerScrim};}`,
     /* Re-assert mobile sizes after globals.css chrome rules that set desktop vars on header/footer. */
     `@media (max-width:760px){header .logo,.logo,.page-shell .logo{font-size:var(--logo-word-size-mobile);}.logo-chip img{height:var(--logo-chip-h-mobile);}footer .footer-logo .logo-chip img,.footer-logo .logo-chip img{height:var(--footer-logo-chip-h-mobile);}footer .footer-logo .logo-word,.footer-logo .logo-word{font-size:var(--footer-logo-word-size-mobile);}footer .footer-logo .logo-word small,.footer-logo .logo-word small{font-size:var(--footer-logo-tagline-size-mobile);}.logo-word small,header .logo-word small,.page-shell .logo-word small{font-size:var(--logo-tagline-size-mobile);}footer .foot-brand{max-width:var(--footer-brand-max-width-mobile);}}`,
   ].join('');

@@ -233,9 +233,9 @@ const SECTIONS: SectionDef[] = [
   },
   {
     id: 'hero-overlays',
-    title: 'Hero overlays',
+    title: 'Hero & menu overlays',
     description:
-      'Default dark gradient strength for all page heroes. Each hero section can override this in its own editor (Dark gradient strength). Lower = more of the background video or photo shows through.',
+      'Dark gradients for page heroes and the top menu area. Raise Menu area gradient when a bright hero video washes out the nav; lower Hero gradient to show more of the background through the copy.',
     fields: [],
   },
   {
@@ -333,7 +333,7 @@ const SECTIONS: SectionDef[] = [
 /** Which screen shows each section, in display order (see `SITE_SETTINGS_GROUP_HOME`). */
 export const SITE_SETTINGS_GROUPS = {
   general: ['brand', 'contact', 'social-links', 'address', 'analytics'],
-  header: ['logo-sizes', 'nav-menu-style', 'header-cta', 'header-talk', 'floating-cta'],
+  header: ['logo-sizes', 'nav-menu-style', 'hero-overlays', 'header-cta', 'header-talk', 'floating-cta'],
   footer: ['footer-brand', 'footer-office', 'footer-legal'],
   seo: ['seo'],
   leads: ['crm'],
@@ -606,19 +606,29 @@ export default function SiteSettingsEditor({ group, intro }: Props) {
         );
       case 'hero-overlays': {
         const strength = sanitizeHeroScrimStrength(settings.heroScrimStrength, 100);
+        const headerStrength = sanitizeHeroScrimStrength(settings.headerScrimStrength, 60);
         return (
           <div className="admin-page-stack" style={{ maxWidth: 420 }}>
             <Range
-              label="Dark gradient strength"
+              label="Menu area gradient"
+              value={headerStrength}
+              min={0}
+              max={100}
+              unit="%"
+              hint="Darkens only the top strip behind the logo and nav so links stay readable over bright hero video. 0% = fully transparent; try 50–80% if the menu disappears on sharp slides. Fades away once the header scrolls solid."
+              onChange={(next) => patchSettings({ headerScrimStrength: String(next) })}
+            />
+            <Range
+              label="Hero dark gradient"
               value={strength}
               min={0}
               max={100}
               unit="%"
-              hint="100% = design default. Try 60–75% when a shared hero video should stay more visible behind the copy."
+              hint="100% = design default for hero copy overlays. Try 60–75% when a shared hero video should stay more visible behind the copy."
               onChange={(next) => patchSettings({ heroScrimStrength: String(next) })}
             />
             <p className="az-admin-hint" style={{ marginTop: 0 }}>
-              Applies on the next page load after Save. Open any page hero section to override this value for that page only.
+              Applies on the next page load after Save. Open any page hero section to override the hero gradient for that page only (menu gradient is always sitewide).
             </p>
           </div>
         );

@@ -8,6 +8,7 @@
 
   :root{
     --header-h:82px;
+    --header-scrim-strength:0.6;
     --hero-vh:100vh;
     --navy-950:#0A1628;
     --navy-900:#0F1F3D;
@@ -248,6 +249,22 @@
     padding:var(--header-pad, 1.2rem) 0;
     will-change:background, box-shadow;
   }
+  /* Soft top gradient so menu/logo stay readable over bright hero video (Admin → Header → Hero & menu overlays). */
+  header::before{
+    content:"";
+    position:absolute;left:0;right:0;top:0;
+    height:calc(100% + 2rem);
+    pointer-events:none;z-index:0;
+    background:linear-gradient(
+      180deg,
+      rgba(4,10,20,0.92) 0%,
+      rgba(4,10,20,0.62) 40%,
+      rgba(4,10,20,0.28) 70%,
+      transparent 100%
+    );
+    opacity:var(--header-scrim-strength, 0.6);
+    transition:opacity .35s ease;
+  }
   /* Never while the drawer is open: backdrop-filter makes the header the containing block of the fixed drawer */
   body:not(.nav-open) header.scrolled{backdrop-filter:blur(10px);}
   header.scrolled{
@@ -257,7 +274,10 @@
     /* Avoid contain:paint here — it clips mega-menu dropdowns and overflowing nav links. */
     overflow:visible;
   }
+  header.scrolled::before{opacity:0;}
+  .page-shell header::before{display:none;}
   .nav-wrap{
+    position:relative;z-index:1;
     display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
   }
   .nav-wrap > .logo{flex:0 0 auto;}

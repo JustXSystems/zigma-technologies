@@ -10,7 +10,7 @@ type Props = {
 };
 
 /**
- * Per-hero dark gradient / scrim strength. Empty inherits Admin → Site Settings → Hero overlays.
+ * Per-hero dark gradient / scrim strength. Empty inherits Admin → Header & Footer → Hero & menu overlays.
  */
 export default function HeroScrimStrengthPicker({
   value,
@@ -50,8 +50,8 @@ export default function HeroScrimStrengthPicker({
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem' }}>
         <small className="az-admin-hint" style={{ margin: 0 }}>
-          Lower = more of the background video or photo shows through. {overridden ? 'Overrides' : 'Uses'} Site Settings →
-          Hero overlays unless you set a value here.
+          Lower = more of the background video or photo shows through. {overridden ? 'Overrides' : 'Uses'} Header & Footer →
+          Hero & menu overlays (hero dark gradient) unless you set a value here.
         </small>
         {overridden ? (
           <button type="button" className="admin-btn admin-btn-secondary" onClick={() => onChange(undefined)}>
